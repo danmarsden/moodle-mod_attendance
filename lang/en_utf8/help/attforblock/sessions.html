@@ -1,0 +1,20 @@
+<p align="center"><b>Attendance module</b></p>
+<p align="center"> 
+  <?php
+	  	$temp = $module;
+		unset($module);
+		require_once($CFG->dirroot.'/mod/attforblock/version.php');
+	  	echo get_string('version').": $module->release ($module->version)";
+		unset($module);
+		$module = $temp;
+	?>
+</p>
+<p align="left">Attendance sessions are shown here. If no sessions appear, click 
+  on the &quot;Add&quot; tab to create new sessions. </p>
+<p align="left">Take attendance by clicking on the green icon under the &quot;actions&quot; 
+  menu (left side). </p>
+<p align="left">Edit each session by clicking on the middle &quot;edit session&quot; 
+  icon. After taking attendance you can edit the session by clicking on the description. 
+</p>
+<p align="left">Delete the session entirely by clicking on the delete icon on 
+  the right side.</p>

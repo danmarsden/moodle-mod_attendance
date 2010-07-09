@@ -1,0 +1,77 @@
+<?PHP // $Id: attforblock.php,v 1.1.2.2 2009/02/23 19:22:45 dlnsk Exp $ 
+      // attforblock.php - created with Moodle 1.6 development (2005101200)
+
+
+$string['modulename'] = 'Närvaro';
+$string['modulenameplural'] = 'Närvaro';
+$string['modulenamesimple'] = 'Närvaro';
+$string['Aacronym'] = 'F';
+$string['Afull'] = 'Frånvarande';
+$string['Eacronym'] = 'G';
+$string['Efull'] = 'Giltig frånvaro';
+$string['Lacronym'] = 'S';
+$string['Lfull'] = 'Sen';
+$string['Pacronym'] = 'N';
+$string['Pfull'] = 'Närvarande';
+$string['acronym'] = 'Akronym';
+$string['add'] = 'Lägg till ';
+$string['addmultiplesessions'] = 'Lägg till flerfaldiga sessioner';
+$string['addsession'] = 'Lägg till session';
+$string['alltaken'] = 'Allt har registrerats';
+$string['attendanceforthecourse'] = 'Närvaro för kurs';
+$string['attendancegrade'] = 'Närvaro - betyg';
+$string['attendancepercent'] = 'Närvaro i procent';
+$string['attendancereport'] = 'Närvarorapport';
+$string['attendancesuccess'] = 'Närvaron har framgångsrikt registrerats';
+$string['attendanceupdated'] = 'Närvaron har framgångsrikt uppdaterats';
+$string['changesession'] = 'Ändra session';
+$string['createmultiplesessions'] = 'Skapa flerfaldiga sessioner';
+$string['createonesession'] = 'Skapa en session för kursen';
+$string['defaults'] = 'Förinställda värden';
+$string['delete'] = 'Ta bort ';
+$string['deletesession'] = 'Ta bort session';
+$string['deletingsession'] = 'Tar bort session för kursen';
+$string['description'] = 'Beskrivning';
+$string['display'] = 'Visa';
+$string['downloadexcel'] = 'Ladda ner i Excel-format';
+$string['downloadtext'] = 'Ladda ner i textformat';
+$string['editsession'] = 'Redigera session';
+$string['errorinaddingsession'] = 'Ett fel uppstod när en session skulle läggas till';
+$string['erroringeneratingsessions'] = 'Ett fel uppstod när  sessioner skulle genereras ';
+$string['indetail'] = 'I detalj';
+$string['months'] = 'Månader';
+$string['myvariables'] = 'Mina variabler';
+$string['newdate'] = 'Nytt datum';
+$string['nodescription'] = 'Ingen beskrivning av den här sessionen';
+$string['noguest'] = 'Gäster kan inte se närvaro';
+$string['noofdaysabsent'] = 'Antal frånvarodagar';
+$string['noofdaysexcused'] = 'Antal dagar med giltig frånvaro';
+$string['noofdayslate'] = 'Antal dagar med sen ankomst';
+$string['noofdayspresent'] = 'Antal närvarodagar';
+$string['nosessiondayselected'] = 'Ingen session har valts';
+$string['nosessionexists'] = 'Det finns ingen session för den här kursen';
+$string['olddate'] = 'Gammalt datum';
+$string['remarks'] = 'Anmärkningar';
+$string['report'] = 'Rapport';
+$string['restoredefaults'] = 'Återställ standardinställningar';
+$string['session'] = 'Session';
+$string['sessionadded'] = 'Sessionen har framgångsrikt lagts till';
+$string['sessionalreadyexists'] = 'Det finns redan en session for detta datum';
+$string['sessiondate'] = 'Session - datum';
+$string['sessiondays'] = 'Session - dagar';
+$string['sessiondeleted'] = 'Sessionen har framgångsrikt tagits bort';
+$string['sessionenddate'] = 'Slutdatum för session';
+$string['sessionexist'] = 'Sessionen har inte lagt till  (den fanns redan)';
+$string['sessionscompleted'] = 'Sessionerna är fullgjorda';
+$string['sessionsgenerated'] = 'Sessioner har framgångsrikt genererats';
+$string['sessionstartdate'] = 'Startdatum för session';
+$string['sessionupdated'] = 'Sessionen har framgångsrikt uppdaterats';
+$string['settings'] = 'Inställningar';
+$string['status'] = 'Status';
+$string['studentid'] = 'Student/elev/deltagar/lärande ID';
+$string['takeattendance'] = 'Registrera närvaro';
+$string['update'] = 'Uppdatera';
+$string['variablesupdated'] = 'Variablerna har framgångsrikt uppdaterats';
+$string['weeks'] = 'Veckor';
+
+?>

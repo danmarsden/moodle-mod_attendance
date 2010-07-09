@@ -1,0 +1,16 @@
+<p align="center"><b>Asistencia</b></p>
+<p align="center"> 
+  <?php
+	  	$temp = $module;
+		unset($module);
+		require_once($CFG->dirroot.'/mod/attforblock/version.php');
+	  	echo get_string('version').": $module->release ($module->version)";
+		unset($module);
+		$module = $temp;
+	?>
+</p>
+<p align="left">Las sesiones de Asistencia se muestran aquí. Si no aparecen sesiones, utilice la pestaña &quot;Añadir&quot; para crear una nuevas sesiones. </p>Es importante tener en cuenta que el módulo funciona atendiendo a la fecha de inicio curso. Usted debe mantener la configuración de fecha de inicio del curso debidamente actualizada accediendo a "Configuración" en el Panel de Adminsitración del curso. La actividad Asistencia <strong>no mostrará</strong> las sesiones anteriores a la fecha de inicio del curso.
+<p align="left"><strong>Iniciar registro de asistencia:</strong> Inicie el registro de asistencias por medio del icono de color verde que hay bajo el menú &quot;acciones&quot; (parte izquierda). </p>
+<p align="left"><strong>Editar sesión:</strong> Edite cada sesión haciendo uso del icono central &quot;editar sesión&quot;. Una vez haya finalizado la toma de Asistencias, puede editar la sesión haciendo click en la descripción. 
+</p>
+<p align="left"><strong>Eliminar sesión:</strong> elimine por completo la sesión en el icono de la derecha.</p><br><strong>Eliminar/modificar varias sesiones simultáneamente:</strong> para poder eliminar o modificar la duración de varias sesiones simultáneamente debe seleccionarlas en la casilla que se encuentra al final de cada una de ellas, al final de la página encontrará las opciones <strong>"Con las seleccionadas"</strong>, una vez aquí, debe elegir la opción que desee.

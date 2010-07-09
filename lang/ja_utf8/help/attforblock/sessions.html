@@ -1,0 +1,14 @@
+<p> 
+  <?php
+	  	$temp = $module;
+		unset($module);
+		require_once($CFG->dirroot.'/mod/attforblock/version.php');
+	  	echo get_string('version').": $module->release ($module->version)";
+		unset($module);
+		$module = $temp;
+	?>
+</p>
+<p>ここに出欠セッションが表示されます。セッションが表示されない場合、新しいセッションを追加するため、「追加」タブをクリックしてください。</p>
+<p>「操作」メニューの下 (左側) にあるグリーンのアイコンをクリックすることで、出欠を取ることができます。 </p>
+<p>中央にある「セッションを編集する」アイコンをクリックすることで、それぞれのセッションを編集してください。出欠を取った後、説明をクリックすることで、あなたはセッションを編集することができます。</p>
+<p align="left">右側にあるアイコンをクリックすることで、セッションを削除することができます。</p>

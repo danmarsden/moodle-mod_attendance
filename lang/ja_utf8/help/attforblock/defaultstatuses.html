@@ -1,0 +1,26 @@
+<h1><?php print_string("defaults",'attforblock');?></h1>
+<table border="0" align="center" cellpadding="5" cellspacing="0">
+	<tr>
+	  <td align="center"><strong>#</strong></td>
+	  <td align="center"><strong><?php print_string('status','attforblock');?> </strong></td>
+	  <td align="center"><strong><?php print_string('acronym','attforblock');?></strong></td>
+	  <td><strong><?php print_string('description');?></strong></td>
+	  <td width="100" align="center"><strong><?php print_string('grade');?></strong></td>
+	</tr>
+	<?php
+	$vars = get_records('attendance_settings', 'courseid', 0);
+	$i=1;
+	foreach($vars as $settings)
+	{
+	?>
+		<tr>
+		  <td align="center"><?php echo $i++;?>.</td>
+		  <td align="center"><?php echo $settings->status;?></td>
+		  <td align="center"><?php echo $settings->acronym;?></td>
+		  <td align="left"><?php echo $settings->description;?></td>
+		  <td width="100" align="center"><?php echo $settings->grade;?></td>
+		</tr>
+	<?php
+	}
+	?>
+</table>

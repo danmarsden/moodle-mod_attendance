@@ -1,0 +1,11 @@
+US English is only slightly different from standard English.
+
+Only a few words are changed, like :
+
+  enrolment -> enrollment
+  colour    -> color
+
+Note that many help files and strings may be missing but this
+doesn't matter much.  Because the "parent language" of this 
+pack is "en", missing strings will be taken from there.
+So you should also copy en_utf8 language files.

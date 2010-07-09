@@ -1,0 +1,1237 @@
+2009-04-13 Monday 01:50  dlnsk
+
+	* lang/: en_utf8/attforblock.php, ru_utf8/attforblock.php: 
+	
+	two forgotten strings
+
+2009-04-13 Monday 01:48  dlnsk
+
+	* locallib.php: 
+	
+	array_intersect_key which require PHP 5.1.0 replaced to local
+	implementation
+
+2009-04-11 Saturday 12:21  dlnsk
+
+	* README.txt: 
+	
+	installation description fixed
+
+2009-04-08 Wednesday 01:23  dlnsk
+
+	* lang/ja_utf8/help/attforblock/hiddensessions.html: 
+	
+	file hiddensessions.html was initially added on branch
+	MOODLE_19_STABLE.
+
+2009-04-08 Wednesday 01:23  dlnsk
+
+	* lang/ja_utf8/: attforblock.php,
+	help/attforblock/createmultiplesessions.html,
+	help/attforblock/createonesession.html,
+	help/attforblock/defaultstatuses.html,
+	help/attforblock/display.html, help/attforblock/export.html,
+	help/attforblock/myvariables.html, help/attforblock/report.html,
+	help/attforblock/sessions.html, help/attforblock/studentview.html,
+	help/attforblock/hiddensessions.html: 
+	
+	Japanese language updated Thanks to Mitsuhiro Yoshida
+
+2009-03-12 Thursday 03:21  dlnsk
+
+	* lib.php: 
+	
+	bug fixed: notofication rise when module adding into course.
+	Updating gradebook is a reason. Now Attendance show up in gradebook
+	only after taking attendance.
+
+2009-03-12 Thursday 03:17  dlnsk
+
+	* export_form.php: 
+	
+	bug fixed: 'no groups' cause notification
+
+2009-03-10 Tuesday 20:19  dlnsk
+
+	* lang/cs_utf8/attforblock.php: 
+	
+	Czech Language. Thanks to Lukas Mizoch
+
+2009-03-10 Tuesday 20:19  dlnsk
+
+	* lang/cs_utf8/attforblock.php: 
+	
+	file attforblock.php was initially added on branch
+	MOODLE_19_STABLE.
+
+2009-03-01 Sunday 04:20  dlnsk
+
+	* lang/en_utf8/help/attforblock/hiddensessions.html: 
+	
+	file hiddensessions.html was initially added on branch
+	MOODLE_19_STABLE.
+
+2009-03-01 Sunday 04:20  dlnsk
+
+	* RELEASES.txt, backuplib.php, manage.php, restorelib.php,
+	version.php, lang/en_utf8/attforblock.php,
+	lang/en_utf8/help/attforblock/hiddensessions.html,
+	lang/ru_utf8/attforblock.php: 
+	
+	Format of backup changed Hidden sessions displayed Small fixes
+
+2009-03-01 Sunday 01:49  dlnsk
+
+	* report.php: 
+	
+	bug fix: statuses on Report page
+
+2009-02-27 Friday 21:08  dlnsk
+
+	* locallib.php: 
+	
+	bug fixed: devision by zero
+
+2009-02-25 Wednesday 20:07  dlnsk
+
+	* lang/es_utf8/: attforblock.php,
+	help/attforblock/createmultiplesessions.html,
+	help/attforblock/createonesession.html,
+	help/attforblock/display.html, help/attforblock/export.html,
+	help/attforblock/myvariables.html, help/attforblock/mods.html,
+	help/attforblock/report.html, help/attforblock/sessions.html,
+	help/attforblock/studentview.html,
+	help/attforblock/updateattendance.html: 
+	
+	Updated Thanks to Enrique Robredo.
+
+2009-02-25 Wednesday 19:30  dlnsk
+
+	* lang/es_utf8/help/attforblock/updateattendance.html: 
+	
+	file updateattendance.html was initially added on branch
+	MOODLE_19_STABLE.
+
+2009-02-25 Wednesday 19:30  dlnsk
+
+	* lang/es_utf8/help/attforblock/mods.html: 
+	
+	file mods.html was initially added on branch MOODLE_19_STABLE.
+
+2009-02-25 Wednesday 19:30  dlnsk
+
+	* lang/es_utf8/: attforblock.php,
+	help/attforblock/createmultiplesessions.html,
+	help/attforblock/createonesession.html,
+	help/attforblock/display.html, help/attforblock/export.html,
+	help/attforblock/myvariables.html, help/attforblock/mods.html,
+	help/attforblock/report.html, help/attforblock/sessions.html,
+	help/attforblock/studentview.html,
+	help/attforblock/updateattendance.html: 
+	
+	Updated Thanks to Enrique Robredo.
+
+2009-02-24 Tuesday 05:20  dlnsk
+
+	* RELEASES.txt: 
+	
+	date fixed
+
+2009-02-24 Tuesday 05:16  dlnsk
+
+	* RELEASES.txt: 
+	
+	date fixed
+
+2009-02-24 Tuesday 04:22  dlnsk
+
+	* README.txt, attendances.php, attsettings.php, backuplib.php,
+	export.php, index.php, RELEASES.txt, lib.php, locallib.php,
+	manage.php, mod_form.php, report.php, restorelib.php, sessions.php,
+	version.php, view.php, add_form.php, duration_form.php,
+	export_form.php, mod.html, update_form.php, db/access.php,
+	db/install.xml, db/upgrade.php, db/migrate2utf8.php,
+	db/migrate2utf8.xml, db/mysql.php, db/mysql.sql, db/postgres7.php,
+	db/postgres7.sql, lang/de/attforblock.php,
+	lang/en_utf8/attforblock.php,
+	lang/en_utf8/help/attforblock/createmultiplesessions.html,
+	lang/en_utf8/help/attforblock/sessions.html,
+	lang/es_utf8/attforblock.php,
+	lang/es_utf8/help/attforblock/createmultiplesessions.html,
+	lang/es_utf8/help/attforblock/changesession.html,
+	lang/es_utf8/help/attforblock/createonesession.html,
+	lang/es_utf8/help/attforblock/display.html,
+	lang/es_utf8/help/attforblock/export.html,
+	lang/es_utf8/help/attforblock/myvariables.html,
+	lang/es_utf8/help/attforblock/report.html,
+	lang/es_utf8/help/attforblock/sessions.html,
+	lang/es_utf8/help/attforblock/studentview.html,
+	lang/eu_utf8/attforblock.php,
+	lang/eu_utf8/help/attforblock/sessions.html,
+	lang/fr_utf8/attforblock.php, lang/it/attforblock.php,
+	lang/it/help/attforblock/sessions.html,
+	lang/ja_utf8/attforblock.php,
+	lang/ja_utf8/help/attforblock/sessions.html,
+	lang/ru_utf8/attforblock.php,
+	lang/ru_utf8/help/attforblock/sessions.html,
+	lang/sk_utf8/attforblock.php, lang/sv/attforblock.php,
+	lang/en_us_utf8/attforblock.php: 
+	
+	Release 2.1.0 Merged from HEAD
+
+2009-02-24 Tuesday 04:07  dlnsk
+
+	* README.txt, RELEASES.txt, version.php: 
+	
+	Release 2.1.0
+
+2009-02-24 Tuesday 04:07  dlnsk
+
+	* RELEASES.txt: 
+	
+	file RELEASES.txt was added on branch MOODLE_19_STABLE on
+	2009-02-23 19:22:41 +0000
+
+2009-02-18 Wednesday 04:55  dlnsk
+
+	* attendances.php, report.php: 
+	
+	deprecated function changed to actual
+
+2009-02-18 Wednesday 03:32  dlnsk
+
+	* locallib.php: 
+	
+	get_percent fixed old version renamed to get_percent_adaptive (not
+	used yet)
+
+2009-02-09 Monday 04:42  dlnsk
+
+	* version.php: 
+	
+	[no log message]
+
+2009-02-09 Monday 04:36  dlnsk
+
+	* manage.php: 
+	
+	better interaction with block
+
+2009-02-09 Monday 04:35  dlnsk
+
+	* mod_form.php: 
+	
+	groupmode added
+
+2009-02-09 Monday 04:35  dlnsk
+
+	* sessions.php: 
+	
+	small fix
+
+2009-02-09 Monday 04:34  dlnsk
+
+	* export_form.php: 
+	
+	cancel button removed
+
+2009-02-09 Monday 04:34  dlnsk
+
+	* export_form.php: 
+	
+	file export_form.php was added on branch MOODLE_19_STABLE on
+	2009-02-23 19:22:42 +0000
+
+2009-02-09 Monday 01:15  dlnsk
+
+	* lang/es_utf8/help/attforblock/changesession.html: 
+	
+	file changesession.html was added on branch MOODLE_19_STABLE on
+	2009-02-23 19:22:44 +0000
+
+2009-02-09 Monday 01:15  dlnsk
+
+	* lang/es_utf8/: attforblock.php,
+	help/attforblock/createmultiplesessions.html,
+	help/attforblock/createonesession.html,
+	help/attforblock/display.html, help/attforblock/export.html,
+	help/attforblock/myvariables.html, help/attforblock/report.html,
+	help/attforblock/sessions.html, help/attforblock/studentview.html,
+	help/attforblock/changesession.html: 
+	
+	Improved by Enrique Robredo
+
+2009-01-25 Sunday 02:43  dlnsk
+
+	* lang/en_utf8/help/attforblock/createmultiplesessions.html: 
+	
+	[no log message]
+
+2009-01-21 Wednesday 03:11  dlnsk
+
+	* attsettings.php: 
+	
+	perfomance improved
+
+2009-01-21 Wednesday 03:08  dlnsk
+
+	* attendances.php, manage.php, view.php, locallib.php, report.php,
+	version.php, db/access.php, lang/en_utf8/attforblock.php,
+	lang/ru_utf8/attforblock.php: 
+	
+	changeattendance capability added takeattendance and
+	changeattendance is fully separated improved interaction of
+	capabilities
+
+2009-01-14 Wednesday 17:13  dlnsk
+
+	* lang/en_utf8/attforblock.php: 
+	
+	Strings for reset
+
+2009-01-14 Wednesday 17:12  dlnsk
+
+	* update_form.php: 
+	
+	file update_form.php was added on branch MOODLE_19_STABLE on
+	2009-02-23 19:22:42 +0000
+
+2009-01-14 Wednesday 17:12  dlnsk
+
+	* attsettings.php, duration_form.php, lib.php, locallib.php,
+	manage.php, restorelib.php, update_form.php, view.php: 
+	
+	Bug fixes: duration, wrong link, adding status
+
+2009-01-14 Wednesday 17:12  dlnsk
+
+	* duration_form.php: 
+	
+	file duration_form.php was added on branch MOODLE_19_STABLE on
+	2009-02-23 19:22:42 +0000
+
+2009-01-13 Tuesday 02:43  dlnsk
+
+	* lang/: en_utf8/attforblock.php, ru_utf8/attforblock.php: 
+	
+	Added few strings
+
+2009-01-12 Monday 17:16  dlnsk
+
+	* attendances.php, attsettings.php, manage.php, version.php: 
+	
+	Small language fixes
+
+2009-01-12 Monday 06:47  dlnsk
+
+	* attendances.php, lib.php, sessions.php, db/install.xml,
+	db/upgrade.php, lang/en_utf8/attforblock.php: 
+	
+	Improved a little
+
+2009-01-12 Monday 06:45  dlnsk
+
+	* backuplib.php, restorelib.php: 
+	
+	Backup and restore much improved
+
+2008-12-03 Wednesday 03:42  dlnsk
+
+	* attendances.php, duration_form.php, sessions.php,
+	update_form.php: 
+	
+	Several undefined variables usage fixed
+
+2008-11-26 Wednesday 01:51  dlnsk
+
+	* db/migrate2utf8.php, db/migrate2utf8.xml, mod.html, db/mysql.php,
+	db/mysql.sql, db/postgres7.php, db/postgres7.sql: 
+	
+	Not need for Moodle 1.9
+
+2008-11-26 Wednesday 01:46  dlnsk
+
+	* lang/en_us_utf8/attforblock.php: 
+	
+	file attforblock.php was added on branch MOODLE_19_STABLE on
+	2009-02-23 19:22:46 +0000
+
+2008-11-26 Wednesday 01:46  dlnsk
+
+	* add_form.php: 
+	
+	file add_form.php was added on branch MOODLE_19_STABLE on
+	2009-02-23 19:22:41 +0000
+
+2008-11-26 Wednesday 01:44  dlnsk
+
+	* attendances.php, attsettings.php, backuplib.php, export.php,
+	index.php, lib.php, locallib.php, manage.php, mod_form.php,
+	report.php, restorelib.php, sessions.php, version.php, view.php,
+	db/access.php, db/install.xml, db/upgrade.php,
+	lang/de/attforblock.php, lang/en_utf8/attforblock.php,
+	lang/en_utf8/help/attforblock/sessions.html,
+	lang/es_utf8/attforblock.php,
+	lang/es_utf8/help/attforblock/sessions.html,
+	lang/eu_utf8/attforblock.php,
+	lang/eu_utf8/help/attforblock/sessions.html,
+	lang/fr_utf8/attforblock.php, lang/it/attforblock.php,
+	lang/it/help/attforblock/sessions.html,
+	lang/ja_utf8/attforblock.php,
+	lang/ja_utf8/help/attforblock/sessions.html,
+	lang/ru_utf8/attforblock.php,
+	lang/ru_utf8/help/attforblock/sessions.html,
+	lang/sk_utf8/attforblock.php, lang/sv/attforblock.php,
+	add_form.php, duration_form.php, export_form.php, update_form.php,
+	lang/en_us_utf8/attforblock.php: 
+	
+	Very much changes! New version with many session in one day, user
+	defined statuses etc.  Fully separated from block.
+
+2008-11-11 Tuesday 18:10  dlnsk
+
+	* README.txt, attendances.php, lib.php, manage.php, report.php,
+	sessions.php, version.php: 
+	
+	Merged from 1.9 branch
+
+2008-06-30 Monday 02:26  dlnsk
+
+	* lib.php: 
+	
+	workaround lost instance in course
+
+2008-06-27 Friday 09:37  dlnsk
+
+	* version.php: 
+	
+	[no log message]
+
+2008-06-26 Thursday 14:05  dlnsk
+
+	* lib.php: 
+	
+	Critical bug - error when adding new instance
+
+2008-06-21 Saturday 02:18  dlnsk
+
+	* README.txt: 
+	
+	[no log message]
+
+2008-06-21 Saturday 02:07  dlnsk
+
+	* README.txt, attendances.php, locallib.php, manage.php,
+	report.php, sessions.php, lang/de/attforblock.php,
+	lang/en_us_utf8/README, lang/en_utf8/attforblock.php,
+	lang/en_utf8/help/attforblock/createmultiplesessions.html,
+	lang/en_utf8/help/attforblock/createonesession.html,
+	lang/en_utf8/help/attforblock/defaultstatuses.html,
+	lang/en_utf8/help/attforblock/display.html,
+	lang/en_utf8/help/attforblock/export.html,
+	lang/en_utf8/help/attforblock/myvariables.html,
+	lang/en_utf8/help/attforblock/report.html,
+	lang/en_utf8/help/attforblock/sessions.html,
+	lang/en_utf8/help/attforblock/studentview.html,
+	lang/es_utf8/attforblock.php,
+	lang/es_utf8/help/attforblock/createmultiplesessions.html,
+	lang/es_utf8/help/attforblock/createonesession.html,
+	lang/es_utf8/help/attforblock/defaultstatuses.html,
+	lang/es_utf8/help/attforblock/display.html,
+	lang/es_utf8/help/attforblock/export.html,
+	lang/es_utf8/help/attforblock/myvariables.html,
+	lang/es_utf8/help/attforblock/report.html,
+	lang/es_utf8/help/attforblock/sessions.html,
+	lang/es_utf8/help/attforblock/studentview.html,
+	lang/eu_utf8/attforblock.php,
+	lang/eu_utf8/help/attforblock/defaultstatuses.html,
+	lang/eu_utf8/help/attforblock/sessions.html,
+	lang/fr_utf8/attforblock.php, lang/it/attforblock.php,
+	lang/it/help/attforblock/sessions.html,
+	lang/ja_utf8/attforblock.php,
+	lang/ja_utf8/help/attforblock/createmultiplesessions.html,
+	lang/ja_utf8/help/attforblock/createonesession.html,
+	lang/ja_utf8/help/attforblock/defaultstatuses.html,
+	lang/ja_utf8/help/attforblock/display.html,
+	lang/ja_utf8/help/attforblock/export.html,
+	lang/ja_utf8/help/attforblock/myvariables.html,
+	lang/ja_utf8/help/attforblock/report.html,
+	lang/ja_utf8/help/attforblock/sessions.html,
+	lang/ja_utf8/help/attforblock/studentview.html,
+	lang/ru_utf8/attforblock.php,
+	lang/ru_utf8/help/attforblock/sessions.html,
+	lang/sk_utf8/attforblock.php, lang/sv/attforblock.php: 
+	
+	giving help from module directory
+
+2008-06-21 Saturday 02:03  dlnsk
+
+	* lang/ru_utf8/help/attforblock/sessions.html: 
+	
+	file sessions.html was added on branch MOODLE_18_STABLE on
+	2008-06-20 18:08:05 +0000
+
+2008-06-21 Saturday 02:03  dlnsk
+
+	* lang/ja_utf8/help/attforblock/studentview.html: 
+	
+	file studentview.html was added on branch MOODLE_18_STABLE on
+	2008-06-20 18:08:04 +0000
+
+2008-06-21 Saturday 02:03  dlnsk
+
+	* lang/ru_utf8/attforblock.php: 
+	
+	file attforblock.php was added on branch MOODLE_18_STABLE on
+	2008-06-20 18:08:05 +0000
+
+2008-06-21 Saturday 02:03  dlnsk
+
+	* lang/: sk_utf8/attforblock.php, sv/attforblock.php: 
+	
+	file attforblock.php was added on branch MOODLE_18_STABLE on
+	2008-06-20 18:08:06 +0000
+
+2008-06-21 Saturday 02:03  dlnsk
+
+	* lang/ja_utf8/attforblock.php: 
+	
+	file attforblock.php was added on branch MOODLE_18_STABLE on
+	2008-06-20 18:08:03 +0000
+
+2008-06-21 Saturday 02:03  dlnsk
+
+	* lang/ja_utf8/help/attforblock/export.html: 
+	
+	file export.html was added on branch MOODLE_18_STABLE on 2008-06-20
+	18:08:04 +0000
+
+2008-06-21 Saturday 02:03  dlnsk
+
+	* lang/ja_utf8/help/attforblock/myvariables.html: 
+	
+	file myvariables.html was added on branch MOODLE_18_STABLE on
+	2008-06-20 18:08:04 +0000
+
+2008-06-21 Saturday 02:03  dlnsk
+
+	* lang/ja_utf8/help/attforblock/defaultstatuses.html: 
+	
+	file defaultstatuses.html was added on branch MOODLE_18_STABLE on
+	2008-06-20 18:08:03 +0000
+
+2008-06-21 Saturday 02:03  dlnsk
+
+	* lang/ja_utf8/help/attforblock/display.html: 
+	
+	file display.html was added on branch MOODLE_18_STABLE on
+	2008-06-20 18:08:03 +0000
+
+2008-06-21 Saturday 02:03  dlnsk
+
+	* lang/ja_utf8/help/attforblock/sessions.html: 
+	
+	file sessions.html was added on branch MOODLE_18_STABLE on
+	2008-06-20 18:08:04 +0000
+
+2008-06-21 Saturday 02:03  dlnsk
+
+	* lang/ja_utf8/help/attforblock/createmultiplesessions.html: 
+	
+	file createmultiplesessions.html was added on branch
+	MOODLE_18_STABLE on 2008-06-20 18:08:03 +0000
+
+2008-06-21 Saturday 02:03  dlnsk
+
+	* lang/ja_utf8/help/attforblock/createonesession.html: 
+	
+	file createonesession.html was added on branch MOODLE_18_STABLE on
+	2008-06-20 18:08:03 +0000
+
+2008-06-21 Saturday 02:03  dlnsk
+
+	* lang/ja_utf8/help/attforblock/report.html: 
+	
+	file report.html was added on branch MOODLE_18_STABLE on 2008-06-20
+	18:08:04 +0000
+
+2008-06-21 Saturday 02:03  dlnsk
+
+	* lang/es_utf8/help/attforblock/createonesession.html: 
+	
+	file createonesession.html was added on branch MOODLE_18_STABLE on
+	2008-06-20 18:08:00 +0000
+
+2008-06-21 Saturday 02:03  dlnsk
+
+	* lang/es_utf8/help/attforblock/sessions.html: 
+	
+	file sessions.html was added on branch MOODLE_18_STABLE on
+	2008-06-20 18:08:01 +0000
+
+2008-06-21 Saturday 02:03  dlnsk
+
+	* lang/: eu_utf8/help/attforblock/sessions.html,
+	it/help/attforblock/sessions.html: 
+	
+	file sessions.html was added on branch MOODLE_18_STABLE on
+	2008-06-20 18:08:02 +0000
+
+2008-06-21 Saturday 02:03  dlnsk
+
+	* lang/es_utf8/help/attforblock/export.html: 
+	
+	file export.html was added on branch MOODLE_18_STABLE on 2008-06-20
+	18:08:01 +0000
+
+2008-06-21 Saturday 02:03  dlnsk
+
+	* lang/es_utf8/help/attforblock/myvariables.html: 
+	
+	file myvariables.html was added on branch MOODLE_18_STABLE on
+	2008-06-20 18:08:01 +0000
+
+2008-06-21 Saturday 02:03  dlnsk
+
+	* lang/es_utf8/help/attforblock/report.html: 
+	
+	file report.html was added on branch MOODLE_18_STABLE on 2008-06-20
+	18:08:01 +0000
+
+2008-06-21 Saturday 02:03  dlnsk
+
+	* lang/es_utf8/help/attforblock/createmultiplesessions.html: 
+	
+	file createmultiplesessions.html was added on branch
+	MOODLE_18_STABLE on 2008-06-20 18:08:00 +0000
+
+2008-06-21 Saturday 02:03  dlnsk
+
+	* lang/es_utf8/help/attforblock/defaultstatuses.html: 
+	
+	file defaultstatuses.html was added on branch MOODLE_18_STABLE on
+	2008-06-20 18:08:00 +0000
+
+2008-06-21 Saturday 02:03  dlnsk
+
+	* lang/: eu_utf8/attforblock.php, fr_utf8/attforblock.php,
+	it/attforblock.php: 
+	
+	file attforblock.php was added on branch MOODLE_18_STABLE on
+	2008-06-20 18:08:02 +0000
+
+2008-06-21 Saturday 02:03  dlnsk
+
+	* lang/eu_utf8/help/attforblock/defaultstatuses.html: 
+	
+	file defaultstatuses.html was added on branch MOODLE_18_STABLE on
+	2008-06-20 18:08:02 +0000
+
+2008-06-21 Saturday 02:03  dlnsk
+
+	* lang/es_utf8/help/attforblock/studentview.html: 
+	
+	file studentview.html was added on branch MOODLE_18_STABLE on
+	2008-06-20 18:08:01 +0000
+
+2008-06-21 Saturday 02:03  dlnsk
+
+	* lang/es_utf8/help/attforblock/display.html: 
+	
+	file display.html was added on branch MOODLE_18_STABLE on
+	2008-06-20 18:08:01 +0000
+
+2008-06-21 Saturday 02:02  dlnsk
+
+	* lang/en_utf8/help/attforblock/export.html: 
+	
+	file export.html was added on branch MOODLE_18_STABLE on 2008-06-20
+	18:07:59 +0000
+
+2008-06-21 Saturday 02:02  dlnsk
+
+	* lang/es_utf8/attforblock.php: 
+	
+	file attforblock.php was added on branch MOODLE_18_STABLE on
+	2008-06-20 18:08:00 +0000
+
+2008-06-21 Saturday 02:02  dlnsk
+
+	* lang/en_utf8/help/attforblock/display.html: 
+	
+	file display.html was added on branch MOODLE_18_STABLE on
+	2008-06-20 18:07:58 +0000
+
+2008-06-21 Saturday 02:02  dlnsk
+
+	* lang/en_utf8/help/attforblock/defaultstatuses.html: 
+	
+	file defaultstatuses.html was added on branch MOODLE_18_STABLE on
+	2008-06-20 18:07:58 +0000
+
+2008-06-21 Saturday 02:02  dlnsk
+
+	* lang/en_utf8/help/attforblock/createonesession.html: 
+	
+	file createonesession.html was added on branch MOODLE_18_STABLE on
+	2008-06-20 18:07:58 +0000
+
+2008-06-21 Saturday 02:02  dlnsk
+
+	* lang/en_utf8/help/attforblock/studentview.html: 
+	
+	file studentview.html was added on branch MOODLE_18_STABLE on
+	2008-06-20 18:07:59 +0000
+
+2008-06-21 Saturday 02:02  dlnsk
+
+	* lang/en_utf8/help/attforblock/report.html: 
+	
+	file report.html was added on branch MOODLE_18_STABLE on 2008-06-20
+	18:07:59 +0000
+
+2008-06-21 Saturday 02:02  dlnsk
+
+	* lang/en_utf8/help/attforblock/myvariables.html: 
+	
+	file myvariables.html was added on branch MOODLE_18_STABLE on
+	2008-06-20 18:07:59 +0000
+
+2008-06-21 Saturday 02:02  dlnsk
+
+	* lang/en_utf8/help/attforblock/sessions.html: 
+	
+	file sessions.html was added on branch MOODLE_18_STABLE on
+	2008-06-20 18:07:59 +0000
+
+2008-06-21 Saturday 02:02  dlnsk
+
+	* lang/en_utf8/help/attforblock/createmultiplesessions.html: 
+	
+	file createmultiplesessions.html was added on branch
+	MOODLE_18_STABLE on 2008-06-20 18:07:58 +0000
+
+2008-06-21 Saturday 02:02  dlnsk
+
+	* lang/en_us_utf8/README: 
+	
+	file README was added on branch MOODLE_18_STABLE on 2008-06-20
+	18:07:58 +0000
+
+2008-06-21 Saturday 02:02  dlnsk
+
+	* lang/en_utf8/attforblock.php: 
+	
+	file attforblock.php was added on branch MOODLE_18_STABLE on
+	2008-06-20 18:07:58 +0000
+
+2008-06-21 Saturday 02:02  dlnsk
+
+	* lang/de/attforblock.php: 
+	
+	file attforblock.php was added on branch MOODLE_18_STABLE on
+	2008-06-20 18:07:57 +0000
+
+2008-06-21 Saturday 02:02  dlnsk
+
+	* attendances.php, attsettings.php, locallib.php, manage.php,
+	report.php, sessions.php, lang/de/attforblock.php,
+	lang/en_us_utf8/README, lang/en_utf8/attforblock.php,
+	lang/en_utf8/help/attforblock/createmultiplesessions.html,
+	lang/en_utf8/help/attforblock/createonesession.html,
+	lang/en_utf8/help/attforblock/defaultstatuses.html,
+	lang/en_utf8/help/attforblock/display.html,
+	lang/en_utf8/help/attforblock/export.html,
+	lang/en_utf8/help/attforblock/myvariables.html,
+	lang/en_utf8/help/attforblock/report.html,
+	lang/en_utf8/help/attforblock/sessions.html,
+	lang/en_utf8/help/attforblock/studentview.html,
+	lang/es_utf8/attforblock.php,
+	lang/es_utf8/help/attforblock/createmultiplesessions.html,
+	lang/es_utf8/help/attforblock/createonesession.html,
+	lang/es_utf8/help/attforblock/defaultstatuses.html,
+	lang/es_utf8/help/attforblock/display.html,
+	lang/es_utf8/help/attforblock/export.html,
+	lang/es_utf8/help/attforblock/myvariables.html,
+	lang/es_utf8/help/attforblock/report.html,
+	lang/es_utf8/help/attforblock/sessions.html,
+	lang/es_utf8/help/attforblock/studentview.html,
+	lang/eu_utf8/attforblock.php,
+	lang/eu_utf8/help/attforblock/defaultstatuses.html,
+	lang/eu_utf8/help/attforblock/sessions.html,
+	lang/fr_utf8/attforblock.php, lang/it/attforblock.php,
+	lang/it/help/attforblock/sessions.html,
+	lang/ja_utf8/attforblock.php,
+	lang/ja_utf8/help/attforblock/createmultiplesessions.html,
+	lang/ja_utf8/help/attforblock/createonesession.html,
+	lang/ja_utf8/help/attforblock/defaultstatuses.html,
+	lang/ja_utf8/help/attforblock/display.html,
+	lang/ja_utf8/help/attforblock/export.html,
+	lang/ja_utf8/help/attforblock/myvariables.html,
+	lang/ja_utf8/help/attforblock/report.html,
+	lang/ja_utf8/help/attforblock/sessions.html,
+	lang/ja_utf8/help/attforblock/studentview.html,
+	lang/ru_utf8/attforblock.php,
+	lang/ru_utf8/help/attforblock/sessions.html,
+	lang/sk_utf8/attforblock.php, lang/sv/attforblock.php: 
+	
+	Merged from 1.9 branch
+
+2008-06-21 Saturday 01:56  dlnsk
+
+	* attendances.php, attsettings.php, locallib.php, manage.php,
+	report.php, sessions.php: 
+	
+	giving help from module directory
+
+2008-06-21 Saturday 01:53  dlnsk
+
+	* lang/: en_utf8/help/attforblock/myvariables.html,
+	es_utf8/help/attforblock/myvariables.html,
+	ja_utf8/help/attforblock/myvariables.html: 
+	
+	file myvariables.html was initially added on branch
+	MOODLE_19_STABLE.
+
+2008-06-21 Saturday 01:53  dlnsk
+
+	* lang/: en_utf8/help/attforblock/report.html,
+	es_utf8/help/attforblock/report.html,
+	ja_utf8/help/attforblock/report.html: 
+	
+	file report.html was initially added on branch MOODLE_19_STABLE.
+
+2008-06-21 Saturday 01:53  dlnsk
+
+	* lang/: en_utf8/help/attforblock/sessions.html,
+	es_utf8/help/attforblock/sessions.html,
+	eu_utf8/help/attforblock/sessions.html,
+	it/help/attforblock/sessions.html,
+	ja_utf8/help/attforblock/sessions.html,
+	ru_utf8/help/attforblock/sessions.html: 
+	
+	file sessions.html was initially added on branch MOODLE_19_STABLE.
+
+2008-06-21 Saturday 01:53  dlnsk
+
+	* lang/: en_utf8/help/attforblock/studentview.html,
+	es_utf8/help/attforblock/studentview.html,
+	ja_utf8/help/attforblock/studentview.html: 
+	
+	file studentview.html was initially added on branch
+	MOODLE_19_STABLE.
+
+2008-06-21 Saturday 01:53  dlnsk
+
+	* lang/: en_utf8/help/attforblock/createonesession.html,
+	es_utf8/help/attforblock/createonesession.html,
+	ja_utf8/help/attforblock/createonesession.html: 
+	
+	file createonesession.html was initially added on branch
+	MOODLE_19_STABLE.
+
+2008-06-21 Saturday 01:53  dlnsk
+
+	* lang/: en_utf8/help/attforblock/createmultiplesessions.html,
+	es_utf8/help/attforblock/createmultiplesessions.html,
+	ja_utf8/help/attforblock/createmultiplesessions.html: 
+	
+	file createmultiplesessions.html was initially added on branch
+	MOODLE_19_STABLE.
+
+2008-06-21 Saturday 01:53  dlnsk
+
+	* lang/: en_utf8/help/attforblock/defaultstatuses.html,
+	es_utf8/help/attforblock/defaultstatuses.html,
+	eu_utf8/help/attforblock/defaultstatuses.html,
+	ja_utf8/help/attforblock/defaultstatuses.html: 
+	
+	file defaultstatuses.html was initially added on branch
+	MOODLE_19_STABLE.
+
+2008-06-21 Saturday 01:53  dlnsk
+
+	* lang/: en_utf8/help/attforblock/display.html,
+	es_utf8/help/attforblock/display.html,
+	ja_utf8/help/attforblock/display.html: 
+	
+	file display.html was initially added on branch MOODLE_19_STABLE.
+
+2008-06-21 Saturday 01:53  dlnsk
+
+	* lang/: en_utf8/help/attforblock/createmultiplesessions.html,
+	en_utf8/help/attforblock/createonesession.html,
+	en_utf8/help/attforblock/defaultstatuses.html,
+	en_utf8/help/attforblock/display.html,
+	en_utf8/help/attforblock/export.html,
+	en_utf8/help/attforblock/myvariables.html,
+	en_utf8/help/attforblock/report.html,
+	en_utf8/help/attforblock/sessions.html,
+	en_utf8/help/attforblock/studentview.html,
+	es_utf8/help/attforblock/createmultiplesessions.html,
+	es_utf8/help/attforblock/createonesession.html,
+	es_utf8/help/attforblock/defaultstatuses.html,
+	es_utf8/help/attforblock/display.html,
+	es_utf8/help/attforblock/export.html,
+	es_utf8/help/attforblock/myvariables.html,
+	es_utf8/help/attforblock/report.html,
+	es_utf8/help/attforblock/sessions.html,
+	es_utf8/help/attforblock/studentview.html,
+	eu_utf8/help/attforblock/defaultstatuses.html,
+	eu_utf8/help/attforblock/sessions.html,
+	it/help/attforblock/sessions.html,
+	ja_utf8/help/attforblock/createmultiplesessions.html,
+	ja_utf8/help/attforblock/createonesession.html,
+	ja_utf8/help/attforblock/defaultstatuses.html,
+	ja_utf8/help/attforblock/display.html,
+	ja_utf8/help/attforblock/export.html,
+	ja_utf8/help/attforblock/myvariables.html,
+	ja_utf8/help/attforblock/report.html,
+	ja_utf8/help/attforblock/sessions.html,
+	ja_utf8/help/attforblock/studentview.html,
+	ru_utf8/help/attforblock/sessions.html: 
+	
+	help and lang moved here from block
+
+2008-06-21 Saturday 01:53  dlnsk
+
+	* lang/: en_utf8/help/attforblock/export.html,
+	es_utf8/help/attforblock/export.html,
+	ja_utf8/help/attforblock/export.html: 
+	
+	file export.html was initially added on branch MOODLE_19_STABLE.
+
+2008-06-21 Saturday 01:37  dlnsk
+
+	* lang/: de/attforblock.php, en_utf8/attforblock.php,
+	es_utf8/attforblock.php, eu_utf8/attforblock.php,
+	fr_utf8/attforblock.php, it/attforblock.php,
+	ja_utf8/attforblock.php, ru_utf8/attforblock.php,
+	sk_utf8/attforblock.php, sv/attforblock.php: 
+	
+	file attforblock.php was initially added on branch
+	MOODLE_19_STABLE.
+
+2008-06-21 Saturday 01:37  dlnsk
+
+	* lang/en_us_utf8/README: 
+	
+	file README was initially added on branch MOODLE_19_STABLE.
+
+2008-06-21 Saturday 01:37  dlnsk
+
+	* lang/: de/attforblock.php, en_us_utf8/README,
+	en_utf8/attforblock.php, es_utf8/attforblock.php,
+	eu_utf8/attforblock.php, fr_utf8/attforblock.php,
+	it/attforblock.php, ja_utf8/attforblock.php,
+	ru_utf8/attforblock.php, sk_utf8/attforblock.php,
+	sv/attforblock.php: 
+	
+	help and lang moved here from block
+
+2008-06-21 Saturday 01:02  dlnsk
+
+	* README.txt, attendances.php, attsettings.php, backuplib.php,
+	lib.php, locallib.php, manage.php, restorelib.php, sessions.php,
+	version.php, view.php: 
+	
+	Merged from 1.9 branch
+
+2008-06-21 Saturday 00:50  dlnsk
+
+	* README.txt, attendances.php, attsettings.php, lib.php,
+	manage.php, sessions.php, version.php, view.php: 
+	
+	Now compatible with Gradebook of Moodle 1.9
+
+2008-05-14 Wednesday 03:10  dlnsk
+
+	* locallib.php, locallib.php: 
+	
+	Bug fixed in student's view
+
+2008-05-13 Tuesday 02:44  dlnsk
+
+	* backuplib.php, restorelib.php: 
+	
+	Backup/Restore support
+
+2008-05-13 Tuesday 02:36  dlnsk
+
+	* restorelib.php: 
+	
+	file restorelib.php was initially added on branch MOODLE_18_STABLE.
+
+2008-05-13 Tuesday 02:36  dlnsk
+
+	* backuplib.php, restorelib.php: 
+	
+	Backup/Restore support
+
+2008-05-13 Tuesday 02:36  dlnsk
+
+	* restorelib.php: 
+	
+	file restorelib.php was added on branch MOODLE_19_STABLE on
+	2008-05-12 18:44:48 +0000
+
+2008-05-13 Tuesday 02:36  dlnsk
+
+	* backuplib.php: 
+	
+	file backuplib.php was initially added on branch MOODLE_18_STABLE.
+
+2008-05-13 Tuesday 02:36  dlnsk
+
+	* backuplib.php: 
+	
+	file backuplib.php was added on branch MOODLE_19_STABLE on
+	2008-05-12 18:44:48 +0000
+
+2008-02-27 Wednesday 20:29  dlnsk
+
+	* attendances.php: 
+	
+	groups_get_all_groups should used in Moodle 1.9
+
+2008-02-27 Wednesday 20:24  dlnsk
+
+	* README.txt, attendances.php, export.php, locallib.php,
+	attsettings.php, report.php, settings.php, version.php,
+	db/upgrade.php: 
+	
+	Merged from HEAD
+
+2008-02-20 Wednesday 03:37  dlnsk
+
+	* README.txt: 
+	
+	v2.0.3
+
+2008-02-20 Wednesday 03:36  dlnsk
+
+	* README.txt: 
+	
+	[no log message]
+
+2008-02-20 Wednesday 03:22  dlnsk
+
+	* attendances.php, version.php, db/upgrade.php: 
+	
+	Merged from MOODLE_18_STABLE
+
+2008-02-20 Wednesday 03:10  dlnsk
+
+	* version.php, db/upgrade.php: 
+	
+	bug fixed If session have apostrophes in the description it can't
+	will be changed to "taken"
+
+2008-02-19 Tuesday 19:38  dlnsk
+
+	* attendances.php: 
+	
+	bug fixed If session have apostrophes in the description it can't
+	will be changed to "taken"
+
+2008-02-18 Monday 17:39  dlnsk
+
+	* attsettings.php: 
+	
+	links to attsettings.php fixed
+
+2008-02-18 Monday 17:39  dlnsk
+
+	* attsettings.php: 
+	
+	file attsettings.php was added on branch MOODLE_19_STABLE on
+	2008-02-27 11:24:24 +0000
+
+2008-02-18 Monday 17:37  dlnsk
+
+	* attsettings.php, locallib.php, settings.php: 
+	
+	settings.php now reserved for Moodle core file renamed to
+	attsettings.php
+
+2008-02-18 Monday 15:26  dlnsk
+
+	* README.txt, attendances.php, export.php, index.php, lib.php,
+	locallib.php, manage.php, mod.html, version.php, view.php,
+	mod_form.php, report.php, sessions.php, settings.php,
+	db/access.php, db/install.xml, db/upgrade.php: 
+	
+	merged from HEAD
+
+2008-02-18 Monday 14:48  dlnsk
+
+	* export.php: 
+	
+	file export.php was added on branch MOODLE_18_STABLE on 2008-02-18
+	06:26:08 +0000
+
+2008-02-18 Monday 14:48  dlnsk
+
+	* export.php: 
+	
+	percents added
+
+2008-02-03 Sunday 04:39  mudrd8mz
+
+	* export.php: 
+	
+	Fixed variable name.
+
+2007-12-04 Tuesday 20:23  dlnsk
+
+	* export.php: 
+	
+	Export bug fixed: invalid capability
+
+2007-11-28 Wednesday 16:47  dlnsk
+
+	* report.php: 
+	
+	Report didn't use course's start date
+
+2007-11-28 Wednesday 16:47  dlnsk
+
+	* report.php: 
+	
+	file report.php was added on branch MOODLE_18_STABLE on 2008-02-18
+	06:26:09 +0000
+
+2007-10-08 Monday 19:14  dlnsk
+
+	* attendances.php: 
+	
+	show group names in attendances instead of numerical codes
+
+2007-10-08 Monday 19:14  dlnsk
+
+	* attendances.php: 
+	
+	file attendances.php was added on branch MOODLE_18_STABLE on
+	2008-02-18 06:26:08 +0000
+
+2007-07-08 Sunday 02:50  dlnsk
+
+	* locallib.php, manage.php: 
+	
+	display default description
+
+2007-07-08 Sunday 02:50  dlnsk
+
+	* manage.php: 
+	
+	file manage.php was added on branch MOODLE_18_STABLE on 2008-02-18
+	06:26:08 +0000
+
+2007-07-08 Sunday 02:50  dlnsk
+
+	* locallib.php: 
+	
+	file locallib.php was added on branch MOODLE_18_STABLE on
+	2008-02-18 06:26:08 +0000
+
+2007-07-06 Friday 16:43  dlnsk
+
+	* sessions.php: 
+	
+	file sessions.php was added on branch MOODLE_18_STABLE on
+	2008-02-18 06:26:09 +0000
+
+2007-07-06 Friday 16:43  dlnsk
+
+	* settings.php: 
+	
+	file settings.php was added on branch MOODLE_18_STABLE on
+	2008-02-18 06:26:09 +0000
+
+2007-07-06 Friday 16:43  dlnsk
+
+	* README.txt, sessions.php, settings.php, version.php: 
+	
+	2.0.2 beta
+
+2007-07-05 Thursday 11:43  dlnsk
+
+	* index.php: 
+	
+	don't display table of instances, just redirect to manage.php
+
+2007-07-05 Thursday 11:41  dlnsk
+
+	* mod_form.php: 
+	
+	[no log message]
+
+2007-07-05 Thursday 11:41  dlnsk
+
+	* mod_form.php: 
+	
+	file mod_form.php was added on branch MOODLE_18_STABLE on
+	2008-02-18 06:26:09 +0000
+
+2007-07-05 Thursday 04:08  dlnsk
+
+	* lib.php, locallib.php, mod.html: 
+	
+	few bugs fixed
+
+2007-07-05 Thursday 01:33  dlnsk
+
+	* db/install.xml: 
+	
+	file install.xml was added on branch MOODLE_18_STABLE on 2008-02-18
+	06:26:09 +0000
+
+2007-07-05 Thursday 01:33  dlnsk
+
+	* db/upgrade.php: 
+	
+	file upgrade.php was added on branch MOODLE_18_STABLE on 2008-02-18
+	06:26:10 +0000
+
+2007-07-05 Thursday 01:32  dlnsk
+
+	* db/access.php: 
+	
+	file access.php was added on branch MOODLE_18_STABLE on 2008-02-18
+	06:26:09 +0000
+
+2007-07-05 Thursday 01:32  dlnsk
+
+	* index.php, lib.php, version.php, view.php, attendances.php,
+	export.php, locallib.php, manage.php, report.php, sessions.php,
+	settings.php, db/access.php, db/install.xml, db/upgrade.php: 
+	
+	version 2.0.1
+
+2006-06-13 Tuesday 09:27  dlnsk
+
+	* db/migrate2utf8.php: 
+	
+	function name changed
+
+2006-04-17 Monday 04:50  dlnsk
+
+	* db/migrate2utf8.php, db/migrate2utf8.xml, db/postgres7.php,
+	db/postgres7.sql, version.php: 
+	
+	index added to database migrating support added
+
+2006-02-01 Wednesday 20:00  dlnsk
+
+	* index.php, lib.php, version.php, view.php: 
+	
+	[no log message]
+
+2006-02-01 Wednesday 16:25  dlnsk
+
+	* README.txt, icon.gif, index.php, lib.php, mod.html, version.php,
+	view.php, db/mysql.php, db/mysql.sql, db/postgres7.php,
+	db/postgres7.sql: 
+	
+	Dmitry's version of attendance block.  Started from version 1.0.5
+

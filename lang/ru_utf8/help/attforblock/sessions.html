@@ -1,0 +1,12 @@
+<p align="center"><b>Модуль Посещаемость</b></p>
+
+<p align="center">
+	<?php
+	  	$temp = $module;
+		unset($module);
+		require_once($CFG->dirroot.'/mod/attforblock/version.php');
+	  	echo get_string('version').": $module->release ($module->version)";
+		unset($module);
+		$module = $temp;
+	?>
+</p>

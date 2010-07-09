@@ -1,0 +1,49 @@
+****************************************************************************
+****** WARNING: ATTENDANCE MODULE IS IN DEVELOPMENT. USE WITH CAUTION ******
+****************************************************************************
+
+--------------
+RELEASE NOTES
+--------------
+1.0 - 09 jan 2006 Dmitry Pupinin [moodle.org member]
++ basic functions
+
+1.0.1 - 23 jan 2006 Dmitry Pupinin [moodle.org member]
++ attendance displayed on user's quick and full report pages
+
+2.0   - 10 may 2007 - Dmitry Pupinin [moodle.org member]
+* code rewrited. General code moved from block to attforblock module.
+* this version only compatible with latest Moodle 1.8 (without grouping!)
+
+2.0.2 - 06 jul 2007 - Dmitry Pupinin [moodle.org member]
+* bug fixed: empty Gradebook
+* bug fixed: error if block instance added before module instance
+* bug fixed: wrong link on report tab when no session added
+* bug fixed: Activity report looks good
++ link from Activities block point directly to Attendances (because it can't be more than one)
+* bug fixed: Wrong link when adding a session for a date that had already been added
+* bug fixed: Error when settings updated
+* en_utf8 lang updated (thanks to A. T. Wyatt)
++ en_us_utf8 lang added (contain only differences from en_utf8)
+
+2.0.3 - 27 jan 2008 - Dmitry Pupinin [moodle.org member]
+* bug fixed: If session have apostrophes in the description it can't will be changed to "taken"
+             (you can't lost any data but upgrading strongly recommended)
++ french language added
+* bug fixed: functions for work with groups changed in Moodle 1.9
+
+2.0.4 - 19 jun 2008 - Dmitry Pupinin [moodle.org member]
++ compatibility with Gradebook of Moodle 1.9
+
+2.1.0 - 24 jan 2009 - Dmitry Pupinin [moodle.org member]
++ unlimited number of statuses
++ unlimited sessions in day
++ reset feature
+* permissions improved
+* backup/restore improved
+* export improved
+
+2.1.0 - 28 feb 2009 - Dmitry Pupinin [moodle.org member]
++ hidden sessions displayed
+* format of backup changed
+* bug fixes
