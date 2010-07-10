@@ -304,8 +304,6 @@ function print_user_attendaces($user, $cm,  $course = 0, $printing = null) {
 			  <?php
 	  		}
 	  		echo '</table>';
-		} else {
-			print_heading(get_string('noattforuser','attforblock'));
 		}
 	}
 	echo '</td></tr><tr><td>&nbsp;</td></tr></table></div>';
