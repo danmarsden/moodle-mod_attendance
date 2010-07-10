@@ -215,6 +215,19 @@ function xmldb_attforblock_upgrade($oldversion=0) {
         $result = $result && drop_field($table, $field);
         
     } 
+
+    if ($oldversion < 2010070900 and $result) {
+        $table = new XMLDBTable('attendance_sessions');
+
+        $field = new XMLDBField('groupid');
+        $field->setAttributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'courseid');
+        $result = $result && add_field($table, $field);
+
+        $index = new XMLDBIndex('groupid');
+        $index->setAttributes(XMLDB_INDEX_NOTUNIQUE, array('groupid'));
+        $result = $result && add_index($table, $index);
+    }
+
     return $result;
 }
 

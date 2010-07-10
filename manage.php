@@ -87,9 +87,9 @@ function print_sessions_list($course) {
 			$i = 0;
 			$table->width = '100%';
 			//$table->tablealign = 'center';
-			$table->head = array('#', get_string('date'), get_string('time'), get_string('duration', 'attforblock'), get_string('description','attforblock'), get_string('actions'), get_string('select'));
+			$table->head = array('#', get_string('sessiontypeshort', 'attforblock'), get_string('date'), get_string('time'), get_string('duration', 'attforblock'), get_string('description','attforblock'), get_string('actions'), get_string('select'));
 			$table->align = array('', '', '', 'right', 'left', 'center', 'center');
-			$table->size = array('1px', '1px', '1px', '1px', '*', '1px', '1px');
+			$table->size = array('1px', '', '1px', '1px', '1px', '*', '1px', '1px');
 
             $allowtake = has_capability('mod/attforblock:takeattendances', $context);
             $allowchange = has_capability('mod/attforblock:changeattendances', $context);
@@ -127,6 +127,8 @@ function print_sessions_list($course) {
 				}
 				
 				$table->data[$sessdata->id][] = $i;
+                $groups = groups_get_all_groups($course->id);
+				$table->data[$sessdata->id][] = $sessdata->groupid == 0 ? get_string('commonsession', 'attforblock') : $groups[$sessdata->groupid]->name;
 				$table->data[$sessdata->id][] = userdate($sessdata->sessdate, get_string('strftimedmyw', 'attforblock'));
 				$table->data[$sessdata->id][] = userdate($sessdata->sessdate, get_string('strftimehm', 'attforblock'));
                 $hours = floor($sessdata->duration / HOURSECS);
@@ -140,7 +142,6 @@ function print_sessions_list($course) {
 			}
         echo '<div align="center"><div class="generalbox boxwidthwide">';
         echo "<form method=\"post\" action=\"sessions.php?id={$cm->id}\">"; //&amp;sessionid={$sessdata->id}
-        echo '<div align="right">'.helpbutton ('sessions', get_string('help'), 'attforblock', true, true, '', true).'</div>';
 		print_table($table);
 		$hiddensess = count_records_select('attendance_sessions', "courseid = $course->id AND sessdate < $course->startdate");
         echo '<table width="100%"><tr><td valign="top">';
@@ -157,6 +158,7 @@ function print_sessions_list($course) {
         } else {
             echo get_string('youcantdo', 'attforblock'); //You can't do anything
         }
+        echo '<div align="right">'.helpbutton ('sessions', get_string('help'), 'attforblock', true, true, '', true).'</div>';
         echo '</div></td></tr></table>';
         echo '</form></div></div>';
 			

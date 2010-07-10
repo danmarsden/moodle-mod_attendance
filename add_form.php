@@ -6,7 +6,7 @@ class mod_attforblock_add_form extends moodleform {
 
     function definition() {
 
-        global $CFG;
+        global $CFG, $USER;
         $mform    =& $this->_form;
 
         $course        = $this->_customdata['course'];
@@ -19,6 +19,53 @@ class mod_attforblock_add_form extends moodleform {
 
         $mform->addElement('header', 'general', get_string('addsession','attforblock'));//fill in the data depending on page params
                                                     //later using set_data
+
+        $groupmode = groups_get_activity_groupmode($cm);
+        switch ($groupmode) {
+            case NOGROUPS:
+                $mform->addElement('static', 'sessiontypedescription', get_string('sessiontype', 'attforblock'),
+                                  get_string('commonsession', 'attforblock'));
+                $mform->setHelpButton('sessiontypedescription', array('sessiontypes', get_string('sessiontype','attforblock'), 'attforblock'));
+                $mform->addElement('hidden', 'sessiontype', COMMONSESSION);
+                break;
+            case SEPARATEGROUPS:
+                $mform->addElement('static', 'sessiontypedescription', get_string('sessiontype', 'attforblock'),
+                                  get_string('groupsession', 'attforblock'));
+                $mform->setHelpButton('sessiontypedescription', array('sessiontypes', get_string('sessiontype','attforblock'), 'attforblock'));
+                $mform->addElement('hidden', 'sessiontype', GROUPSESSION);
+                break;
+            case VISIBLEGROUPS:
+                $radio=array();
+                $radio[] = &MoodleQuickForm::createElement('radio', 'sessiontype', '', get_string('commonsession','attforblock'), COMMONSESSION);
+                $radio[] = &MoodleQuickForm::createElement('radio', 'sessiontype', '', get_string('groupsession','attforblock'), GROUPSESSION);
+                $mform->addGroup($radio, 'sessiontype', get_string('sessiontype','attforblock'), ' ', false);
+                $mform->setHelpButton('sessiontype', array('sessiontypes', get_string('sessiontypes','attforblock'), 'attforblock'));
+                $mform->setDefault('sessiontype', COMMONSESSION);
+                break;
+        }
+        if ($groupmode == SEPARATEGROUPS or $groupmode == VISIBLEGROUPS) {
+            if ($groupmode == SEPARATEGROUPS and !has_capability('moodle/site:accessallgroups', $modcontext))
+                $groups = groups_get_all_groups ($course->id, $USER->id);
+            else
+                $groups = groups_get_all_groups($course->id);
+            if ($groups) {
+                $selectgroups = array();
+                foreach ($groups as $group) {
+                    $selectgroups[$group->id] = $group->name;
+                }
+                $select = &$mform->addElement('select', 'groups', get_string('groups', 'group'), $selectgroups);
+                $select->setMultiple(true);
+                $mform->disabledIf('groups','sessiontype','neq',GROUPSESSION);
+            }
+            else {
+                $mform->updateElementAttr($radio, array('disabled'=>'disabled'));
+                $mform->addElement('static', 'groups', get_string('groups', 'group'),
+                                  get_string('nogroups', 'attforblock'));
+                if ($groupmode == SEPARATEGROUPS)
+                    return;
+            }
+        }
+        
         $mform->addElement('checkbox', 'addmultiply', '', get_string('createmultiplesessions','attforblock'));
 		$mform->setHelpButton('addmultiply', array('createmultiplesessions', get_string('createmultiplesessions','attforblock'), 'attforblock'));
 		
@@ -76,14 +123,14 @@ class mod_attforblock_add_form extends moodleform {
 
     }
 
-//    function validation($data, $files) {
-//        $errors = parent::validation($data, $files);
-//        if (($data['timeend']!=0) && ($data['timestart']!=0)
-//            && $data['timeend'] <= $data['timestart']) {
-//                $errors['timeend'] = get_string('timestartenderror', 'forum');
-//            }
-//        return $errors;
-//    }
+    function validation($data, $files) {
+        $errors = parent::validation($data, $files);
+
+        if ($data['sessiontype'] == GROUPSESSION and empty($data['groups'])) {
+            $errors['groups'] = get_string('errorgroupsnotselected','attforblock');
+        }
+        return $errors;
+    }
 
 }
 ?>

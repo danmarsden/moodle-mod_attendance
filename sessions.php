@@ -95,8 +95,16 @@
 								$rec->duration = $duration;
 								$rec->description = $fromform->sdescription;
 								$rec->timemodified = $now;
-								if(!insert_record('attendance_sessions', $rec))
-									error(get_string('erroringeneratingsessions','attforblock'), "sessions.php?id=$id&amp;action=add");
+                                if ($fromform->sessiontype === COMMONSESSION) {
+                                    if(!insert_record('attendance_sessions', $rec))
+                                        error(get_string('erroringeneratingsessions','attforblock'), "sessions.php?id=$id&amp;action=add");
+                                } else {
+                                    foreach ($fromform->groups as $groupid) {
+                                        $rec->groupid = $groupid;
+                                        if(!insert_record('attendance_sessions', $rec))
+                                            error(get_string('erroringeneratingsessions','attforblock'), "sessions.php?id=$id&amp;action=add");
+                                    }
+                                }
 							}
 							$sdate += ONE_DAY;
 						} else {
@@ -113,11 +121,21 @@
 				$rec->duration = $duration;
 				$rec->description = $fromform->sdescription;
 				$rec->timemodified = $now;
-				if(insert_record('attendance_sessions', $rec)) {
-					add_to_log($course->id, 'attendance', 'one session added', 'mod/attforblock/manage.php?id='.$id, $user->lastname.' '.$user->firstname);
-					notice(get_string('sessionadded','attforblock'));
-				} else
-					error(get_string('errorinaddingsession','attforblock'), "sessions.php?id=$id&amp;action=add");
+                if ($fromform->sessiontype == COMMONSESSION) {
+                    if(insert_record('attendance_sessions', $rec)) {
+                        add_to_log($course->id, 'attendance', 'one session added', 'mod/attforblock/manage.php?id='.$id, $user->lastname.' '.$user->firstname);
+                        notice(get_string('sessionadded','attforblock'));
+                    } else
+                        error(get_string('errorinaddingsession','attforblock'), "sessions.php?id=$id&amp;action=add");
+                } else {
+                    foreach ($fromform->groups as $groupid) {
+                        $rec->groupid = $groupid;
+                        if(!insert_record('attendance_sessions', $rec))
+                            error(get_string('errorinaddingsession','attforblock'), "sessions.php?id=$id&amp;action=add");
+                    }
+                    add_to_log($course->id, 'attendance', 'one session added', 'mod/attforblock/manage.php?id='.$id, $user->lastname.' '.$user->firstname);
+                    notice(get_string('sessionadded','attforblock'));
+                }
 	    	}
 	    }
 		$mform_add->display();
