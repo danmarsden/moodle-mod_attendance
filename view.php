@@ -78,10 +78,10 @@
 	if ($printing) {
 		if ($mode === 'thiscourse') {
     		print_header('', $course->fullname.' - '.get_string('attendancereport','attforblock'));
-			print_user_attendaces($user, $cm, $course, 'printing');
+			print_user_attendaces($user, $cm, $attforblock, $course, 'printing');
 		} else {
     		print_header('', get_string('attendancereport','attforblock'));
-			print_user_attendaces($user, $cm, 0, 'printing');
+			print_user_attendaces($user, $cm, $attforblock, 0, 'printing');
 		}
     	exit();
     }
@@ -108,9 +108,9 @@
     print_tabs(array($toprow), $currenttab);
     
 	if ($mode === 'thiscourse') {
-		print_user_attendaces($user, $cm, $course);
+		print_user_attendaces($user, $cm, $attforblock, $course);
 	} else {
-    	print_user_attendaces($user, $cm);
+    	print_user_attendaces($user, $cm, $attforblock);
 	}
 
 	print_footer($course);

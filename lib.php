@@ -187,7 +187,7 @@ function attforblock_user_complete($course, $user, $mod, $attforblock) {
 //        if (! $cm = get_coursemodule_from_instance("attforblock", $attforblock->id, $course->id)) {
 //            error("Course Module ID was incorrect");
 //        }
-		print_user_attendaces($user, $mod, $course);
+		print_user_attendaces($user, $mod, $attforblock, $course);
 	}
 
     //return true;

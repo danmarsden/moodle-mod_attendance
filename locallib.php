@@ -197,11 +197,9 @@ function print_row($left, $right) {
     echo "\n<tr><td nowrap=\"nowrap\" align=\"right\" valign=\"top\" class=\"cell c0\">$left</td><td align=\"left\" valign=\"top\" class=\"info c1\">$right</td></tr>\n";
 }
 
-function print_attendance_table($user,  $course) {
+function print_attendance_table($user,  $course, $attforblock) {
 
 	$complete = get_attendance($user->id, $course);
-	$percent = get_percent($user->id, $course).'&nbsp;%';
-	$grade = get_grade($user->id, $course);
 	
     echo '<table border="0" cellpadding="0" cellspacing="0" class="list">';
     print_row(get_string('sessionscompleted','attforblock').':', "<strong>$complete</strong>");
@@ -209,14 +207,19 @@ function print_attendance_table($user,  $course) {
 	foreach($statuses as $st) {
 		print_row($st->description.': ', '<strong>'.get_attendance($user->id, $course, $st->id).'</strong>');
 	}
-    print_row(get_string('attendancepercent','attforblock').':', "<strong>$percent</strong>");
-    print_row(get_string('attendancegrade','attforblock').':', "<strong>$grade</strong> / ".get_maxgrade($user->id, $course));
+
+    if ($attforblock->grade) {
+        $percent = get_percent($user->id, $course).'&nbsp;%';
+        $grade = get_grade($user->id, $course);
+        print_row(get_string('attendancepercent','attforblock').':', "<strong>$percent</strong>");
+        print_row(get_string('attendancegrade','attforblock').':', "<strong>$grade</strong> / ".get_maxgrade($user->id, $course));
+    }
     print_row('&nbsp;', '&nbsp;');
   	echo '</table>';
 	
 }
 
-function print_user_attendaces($user, $cm,  $course = 0, $printing = null) {
+function print_user_attendaces($user, $cm, $attforblock,  $course = 0, $printing = null) {
 	global $CFG, $COURSE, $mode;
 		
 	echo '<table class="userinfobox">';
@@ -240,7 +243,7 @@ function print_user_attendaces($user, $cm,  $course = 0, $printing = null) {
 		echo '<hr />';
 		$complete = get_attendance($user->id, $course);
 		if($complete) {
-			print_attendance_table($user,  $course);
+			print_attendance_table($user,  $course, $attforblock);
 		} else {
 			echo get_string('attendancenotstarted','attforblock');
 		}
@@ -261,7 +264,7 @@ function print_user_attendaces($user, $cm,  $course = 0, $printing = null) {
 			echo '<td align="right">';
 			$complete = get_attendance($user->id, $nextcourse);
 			if($complete) {
-				print_attendance_table($user,  $nextcourse);
+				print_attendance_table($user,  $nextcourse, $attforblock);
 			} else {
 				echo get_string('attendancenotstarted','attforblock');
 			}
