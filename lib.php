@@ -4,9 +4,6 @@
 
 $attforblock_CONSTANT = 7;     /// for example
 
-define('COMMONSESSION', 0);
-define('GROUPSESSION', 1);
-
 function attforblock_install() {
 	
 	$result = true;

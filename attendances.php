@@ -13,6 +13,7 @@
 
     $id 		= required_param('id', PARAM_INT);
 	$sessionid	= required_param('sessionid', PARAM_INT);
+    $grouptype  = required_param('grouptype', PARAM_INT);
     $group    	= optional_param('group', -1, PARAM_INT);              // Group to show
 	$sort 		= optional_param('sort','lastname', PARAM_ALPHA);
 
@@ -102,17 +103,22 @@
     $groupmode = groups_get_activity_groupmode($cm);
     $currentgroup = groups_get_activity_group($cm, true);
 
-    if ($currentgroup) {
-        $students = get_users_by_capability($context, 'moodle/legacy:student', '', "u.$sort ASC", '', '', $currentgroup, '', false);
+    if ($grouptype === 0) {
+        if ($currentgroup) {
+            $students = get_users_by_capability($context, 'moodle/legacy:student', '', "u.$sort ASC", '', '', $currentgroup, '', false);
+        } else {
+            $students = get_users_by_capability($context, 'moodle/legacy:student', '', "u.$sort ASC", '', '', '', '', false);
+        }
     } else {
-        $students = get_users_by_capability($context, 'moodle/legacy:student', '', "u.$sort ASC", '', '', '', '', false);
+        $students = get_users_by_capability($context, 'moodle/legacy:student', '', "u.$sort ASC", '', '', $grouptype, '', false);
     }
 
 	$sort = $sort == 'firstname' ? 'firstname' : 'lastname';
     /// Now we need a menu for separategroups as well!
-    if ($groupmode == VISIBLEGROUPS || 
-            ($groupmode && has_capability('moodle/site:accessallgroups', $context))) {
-        groups_print_activity_menu($cm, "attendances.php?id=$id&amp;sessionid=$sessionid&amp;sort=$sort");
+    if ($grouptype === 0 &&
+            ($groupmode == VISIBLEGROUPS ||
+            ($groupmode && has_capability('moodle/site:accessallgroups', $context)))) {
+        groups_print_activity_menu($cm, "attendances.php?id=$id&amp;sessionid=$sessionid&amp;grouptype=$grouptype&amp;sort=$sort");
     }
 	
 	$table->data[][] = '<b>'.get_string('sessiondate','attforblock').': '.userdate($sessdata->sessdate, get_string('strftimedate').', '.get_string('strftimehm', 'attforblock')).

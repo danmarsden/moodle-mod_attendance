@@ -5,6 +5,9 @@ require_once($CFG->libdir.'/gradelib.php');
 define('ONE_DAY', 86400);   // Seconds in one day
 define('ONE_WEEK', 604800);   // Seconds in one week
 
+define('COMMONSESSION', 0);
+define('GROUPSESSION', 1);
+
 function show_tabs($cm, $context, $currenttab='sessions')
 {
 	$toprow = array();

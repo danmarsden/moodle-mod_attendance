@@ -102,7 +102,7 @@ function print_sessions_list($course) {
 					if($sessdata->lasttaken > 0)	//attendance has taken
 					{
 						if ($allowchange) {
-                            $desc = "<a href=\"attendances.php?id=$cm->id&amp;sessionid={$sessdata->id}\">".
+                            $desc = "<a href=\"attendances.php?id=$cm->id&amp;sessionid={$sessdata->id}&amp;grouptype={$sessdata->groupid}\">".
                                     ($sessdata->description ? $sessdata->description : get_string('nodescription', 'attforblock')).
                                     '</a>';
                         } else {
@@ -112,7 +112,7 @@ function print_sessions_list($course) {
 						$desc = empty($sessdata->description) ? get_string('nodescription', 'attforblock') : $sessdata->description;
 						if ($allowtake) {
                             $title = get_string('takeattendance','attforblock');
-                            $actions = "<a title=\"$title\" href=\"attendances.php?id=$cm->id&amp;sessionid={$sessdata->id}\">".
+                            $actions = "<a title=\"$title\" href=\"attendances.php?id=$cm->id&amp;sessionid={$sessdata->id}&amp;grouptype={$sessdata->groupid}\">".
                                        "<img src=\"{$CFG->pixpath}/t/go.gif\" alt=\"$title\" /></a>&nbsp;";
                         }
 					}
