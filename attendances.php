@@ -179,6 +179,7 @@
         print_table($table);
         echo '<input type="hidden" name="id" value="'.$id.'">';
         echo '<input type="hidden" name="sessionid" value="'.$sessionid.'">';
+        echo '<input type="hidden" name="grouptype" value="'.$grouptype.'">';
         echo '<input type="hidden" name="formfrom" value="editsessvals">';
         echo '<center><input type="submit" name="esv" value="'.get_string('ok').'"></center>';
         echo '</form>';
