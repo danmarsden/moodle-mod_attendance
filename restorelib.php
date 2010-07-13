@@ -67,6 +67,11 @@
             //Now, build the attforblock_SESSIONS record structure
 
             $stat->courseid = $restore->course_id;
+            $stat->groupid = backup_todb($stat_info['#']['GROUPID']['0']['#']);
+            $group = restore_group_getid($restore, $stat->groupid);
+            if ($group) {
+                $stat->groupid = $group->new_id;
+            }
 //            $stat->creator = backup_todb($stat_info['#']['CREATOR']['0']['#']);
             $stat->sessdate = backup_todb($stat_info['#']['SESSDATE']['0']['#']);
             $stat->timemodified = backup_todb($stat_info['#']['TIMEMODIFIED']['0']['#']);

@@ -108,6 +108,7 @@
                 //Print contents
                 fwrite ($bf,full_tag('ID',6,false,$item->id));
                 fwrite ($bf,full_tag('COURSEID',6,false,$item->courseid));
+                fwrite ($bf,full_tag('GROUPID',6,false,$item->groupid));
                 fwrite ($bf,full_tag('SESSDATE',6,false,$item->sessdate));
                 fwrite ($bf,full_tag('DURATION',6,false,$item->duration));
                 fwrite ($bf,full_tag('TIMEMODIFIED',6,false,$item->timemodified));
