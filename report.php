@@ -135,6 +135,8 @@
 		} else {
 			$where = "courseid={$course->id} AND sessdate >= $course->startdate AND sessdate <= ".time();
 		}
+        if ($currentgroup)
+            $where .= " AND (groupid=0 OR groupid=".$currentgroup.")";
 		if ($students and
 		       ($course_sess = get_records_select('attendance_sessions', $where, 'sessdate ASC'))) {
 			
@@ -154,24 +156,28 @@
 			$table->size[] = '';
             $allowtake = has_capability('mod/attforblock:takeattendances', $context);
             $allowchange = has_capability('mod/attforblock:changeattendances', $context);
+            $groups = groups_get_all_groups($course->id);
 			foreach($course_sess as $sessdata) {
                 if (count_records('attendance_log', 'sessionid', $sessdata->id)) {
                     if ($allowchange) {
-                        $table->head[] = "<a href=\"attendances.php?id=$id&amp;sessionid={$sessdata->id}\">".
+                        $sessdate = "<a href=\"attendances.php?id=$id&amp;sessionid={$sessdata->id}&amp;grouptype={$sessdata->groupid}\">".
                                             userdate($sessdata->sessdate, get_string('strftimedm', 'attforblock').'<br />('.get_string('strftimehm', 'attforblock').')').
                                          '</a>';
                     } else {
-                        $table->head[] = userdate($sessdata->sessdate, get_string('strftimedm', 'attforblock').'<br />('.get_string('strftimehm', 'attforblock').')');
+                        $sessdate = userdate($sessdata->sessdate, get_string('strftimedm', 'attforblock').'<br />('.get_string('strftimehm', 'attforblock').')');
                     }
-
+                    $sesstype = $sessdata->groupid ? $groups[$sessdata->groupid]->name : get_string('commonsession', 'attforblock');
+                    $table->head[] = $sessdate.'<br />'.$sesstype;
                 } else {
                     if ($allowtake) {
-                        $table->head[] = "<a href=\"attendances.php?id=$id&amp;sessionid={$sessdata->id}\">".
+                        $sessdate = "<a href=\"attendances.php?id=$id&amp;sessionid={$sessdata->id}&amp;grouptype={$sessdata->groupid}\">".
                                             userdate($sessdata->sessdate, get_string('strftimedm', 'attforblock').'<br />('.get_string('strftimehm', 'attforblock').')').
                                          '</a>';
                     } else {
-                        $table->head[] = userdate($sessdata->sessdate, get_string('strftimedm', 'attforblock').'<br />('.get_string('strftimehm', 'attforblock').')');
+                        $sessdate = userdate($sessdata->sessdate, get_string('strftimedm', 'attforblock').'<br />('.get_string('strftimehm', 'attforblock').')');
                     }
+                    $sesstype = $sessdata->groupid ? $groups[$sessdata->groupid]->name : get_string('commonsession', 'attforblock');
+                    $table->head[] = $sessdate.'<br />'.$sesstype;
                 }
 				$table->align[] = 'center';
 				$table->size[] = '1px';
@@ -184,15 +190,19 @@
 			foreach($statuses as $st) {
 				$table->head[] = $st->acronym;
 			}
-			$table->head[] = get_string('grade');//.'&nbsp;/&nbsp;'.$maxgrade;
 
-			$table->align[] = 'right';
-			$table->size[] = '1px';
-			$table->head[] = '%';
+            if ($attforblock->grade) {
+                $table->head[] = get_string('grade');//.'&nbsp;/&nbsp;'.$maxgrade;
+
+                $table->align[] = 'right';
+                $table->size[] = '1px';
+                $table->head[] = '%';
+            }
 			
 			foreach($students as $student) {
 				$table->data[$student->id][] = print_user_picture($student->id, $course->id, $student->picture, 20, true, true);
 				$table->data[$student->id][] = "<a href=\"view.php?id=$id&amp;student={$student->id}\">".fullname($student).'</a>';
+                $studgroups = groups_get_all_groups($COURSE->id, $student->id);
 				foreach($course_sess as $sessdata) {
 					if ($att = get_record('attendance_log', 'sessionid', $sessdata->id, 'studentid', $student->id)) {
 						if (isset($statuses[$att->statusid])) {
@@ -201,14 +211,19 @@
 							$table->data[$student->id][] = '<font color="red"><b>'.$allstatuses[$att->statusid]->acronym.'</b></font>';
 						}
 					} else {
-						$table->data[$student->id][] = '-';
+                        if ($sessdata->groupid && !$studgroups[$sessdata->groupid])
+                            $table->data[$student->id][] = '';
+                        else
+                            $table->data[$student->id][] = '-';
 					}
 				}
 				foreach($statuses as $st) {
 					$table->data[$student->id][] = get_attendance($student->id, $course, $st->id);
 				}
-				$table->data[$student->id][] = get_grade($student->id, $course).'&nbsp;/&nbsp;'.get_maxgrade($student->id, $course);
-				$table->data[$student->id][] = get_percent($student->id, $course).'%';
+                if ($attforblock->grade) {
+                    $table->data[$student->id][] = get_grade($student->id, $course).'&nbsp;/&nbsp;'.get_maxgrade($student->id, $course);
+                    $table->data[$student->id][] = get_percent($student->id, $course).'%';
+                }
 			}
 			echo '<br />';
     		print_table($table);

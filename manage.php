@@ -94,6 +94,7 @@ function print_sessions_list($course) {
             $allowtake = has_capability('mod/attforblock:takeattendances', $context);
             $allowchange = has_capability('mod/attforblock:changeattendances', $context);
             $allowmanage = has_capability('mod/attforblock:manageattendances', $context);
+            $groups = groups_get_all_groups($course->id);
 			foreach($qry as $key=>$sessdata)
 			{
 				$i++;
@@ -127,8 +128,7 @@ function print_sessions_list($course) {
 				}
 				
 				$table->data[$sessdata->id][] = $i;
-                $groups = groups_get_all_groups($course->id);
-				$table->data[$sessdata->id][] = $sessdata->groupid == 0 ? get_string('commonsession', 'attforblock') : $groups[$sessdata->groupid]->name;
+				$table->data[$sessdata->id][] = $sessdata->groupid ? $groups[$sessdata->groupid]->name : get_string('commonsession', 'attforblock');
 				$table->data[$sessdata->id][] = userdate($sessdata->sessdate, get_string('strftimedmyw', 'attforblock'));
 				$table->data[$sessdata->id][] = userdate($sessdata->sessdate, get_string('strftimehm', 'attforblock'));
                 $hours = floor($sessdata->duration / HOURSECS);
