@@ -11,6 +11,8 @@
 	$studentid			= optional_param('student', 0, PARAM_INT);
 	$printing			= optional_param('printing');
     $mode 				= optional_param('mode', 'thiscourse');
+    $view       = optional_param('view', NULL, PARAM_ALPHA);        // which page to show
+	$current	= optional_param('current', 0, PARAM_INT);
 	
     if ($id) {
         if (! $cm = get_record("course_modules", "id", $id)) {
@@ -57,6 +59,11 @@
         error("No such user in this course");
     }
 	
+    if ($view)
+        set_current_view($course->id, $_GET['view']);
+    else
+	    $view = get_current_view($course->id, 'months');
+
     require_capability('mod/attforblock:view', $context);
     
 	$student = false;

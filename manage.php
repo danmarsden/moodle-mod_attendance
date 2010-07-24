@@ -6,8 +6,10 @@
     require_once('../../config.php');
     require_once('locallib.php');
 
-    $id   = required_param('id', PARAM_INT);   // Course Module ID, or
-	$from = optional_param('from', PARAM_ACTION);
+    $id         = required_param('id', PARAM_INT);   // Course Module ID, or
+	$from       = optional_param('from', PARAM_ACTION);
+    $view       = optional_param('view', NULL, PARAM_ALPHA);        // which page to show
+	$current	= optional_param('current', 0, PARAM_INT);
 
     if (! $cm = get_record('course_modules', 'id', $id)) {
         error('Course Module ID was incorrect');
@@ -30,6 +32,11 @@
     if (!$context = get_context_instance(CONTEXT_MODULE, $cm->id)) {
         print_error('badcontext');
     }
+
+    if ($view)
+        set_current_view($course->id, $_GET['view']);
+    else
+	    $view = get_current_view($course->id);
     
     if (!has_capability('mod/attforblock:manageattendances', $context) AND
             !has_capability('mod/attforblock:takeattendances', $context) AND
@@ -78,12 +85,26 @@
 	
 	
 function print_sessions_list($course) {
-	global $CFG, $context, $cm;
+	global $CFG, $context, $cm, $current, $view, $id;
 	
 			$strhours = get_string('hours');
 			$strmins = get_string('min');
 				
-			$qry = get_records_select('attendance_sessions', "courseid = $course->id AND sessdate >= $course->startdate", 'sessdate asc');
+            if ($current == 0)
+                $current = get_current_date($course->id);
+            else
+                set_current_date ($course->id, $current);
+
+            list($startdate, $enddate) =
+                    print_filter_controls("manage.php", $id);
+
+            if ($startdate && $enddate) {
+                $where = "courseid={$course->id} AND sessdate >= $course->startdate AND sessdate >= $startdate AND sessdate < $enddate";
+            } else {
+                $where = "courseid={$course->id} AND sessdate >= $course->startdate";
+            }
+
+            $qry = get_records_select('attendance_sessions', $where/*"courseid = $course->id AND sessdate >= $course->startdate"*/, 'sessdate asc');
 			$i = 0;
 			$table->width = '100%';
 			//$table->tablealign = 'center';
@@ -140,7 +161,7 @@ function print_sessions_list($course) {
 				$table->data[$sessdata->id][] = '<input type="checkbox" name="sessid['.$sessdata->id.']" />';
 				unset($desc, $actions);
 			}
-        echo '<div align="center"><div class="generalbox boxwidthwide">';
+        echo '<div align="center"><div class="generalbox attwidth">';
         echo "<form method=\"post\" action=\"sessions.php?id={$cm->id}\">"; //&amp;sessionid={$sessdata->id}
 		print_table($table);
 		$hiddensess = count_records_select('attendance_sessions', "courseid = $course->id AND sessdate < $course->startdate");

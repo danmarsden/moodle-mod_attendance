@@ -184,13 +184,28 @@ function set_current_view($courseid, $view) {
     return $SESSION->currentattview[$courseid] = $view;
 }
 
-function get_current_view($courseid) {
+function get_current_view($courseid, $defaultview='weeks') {
     global $SESSION;
 
     if (isset($SESSION->currentattview[$courseid]))
         return $SESSION->currentattview[$courseid];
     else
-        return 'all';
+        return $defaultview;
+}
+
+function set_current_date($courseid, $date) {
+    global $SESSION;
+
+    return $SESSION->currentattdate[$courseid] = $date;
+}
+
+function get_current_date($courseid) {
+    global $SESSION;
+
+    if (isset($SESSION->currentattdate[$courseid]))
+        return $SESSION->currentattdate[$courseid];
+    else
+        return time();
 }
 
 function print_row($left, $right) {
@@ -220,7 +235,7 @@ function print_attendance_table($user,  $course, $attforblock) {
 }
 
 function print_user_attendaces($user, $cm, $attforblock,  $course = 0, $printing = null) {
-	global $CFG, $COURSE, $mode;
+	global $CFG, $COURSE, $mode, $current, $view, $id;
 		
 	echo '<table class="userinfobox">';
     if (!$printing) {
@@ -248,7 +263,7 @@ function print_user_attendaces($user, $cm, $attforblock,  $course = 0, $printing
 			echo get_string('attendancenotstarted','attforblock');
 		}
 	} else {
-		$stqry = "SELECT ats.id,ats.courseid 
+        $stqry = "SELECT ats.id,ats.courseid
 					FROM {$CFG->prefix}attendance_log al 
 					JOIN {$CFG->prefix}attendance_sessions ats 
 					  ON al.sessionid = ats.id
@@ -275,44 +290,158 @@ function print_user_attendaces($user, $cm, $attforblock,  $course = 0, $printing
 
 	
 	if ($course) {
+        if ($current == 0)
+            $current = get_current_date($course->id);
+        else
+            set_current_date ($course->id, $current);
+
+        list($startdate, $enddate) =
+                print_filter_controls("view.php", $id);
+
+        if ($startdate && $enddate) {
+            $where = "ats.courseid={$course->id} AND al.studentid = {$user->id} AND ats.sessdate >= $startdate AND ats.sessdate < $enddate";
+        } else {
+            $where = "ats.courseid={$course->id} AND al.studentid = {$user->id}";
+        }
+
 		$stqry = "SELECT ats.sessdate,ats.description,al.statusid,al.remarks 
 					FROM {$CFG->prefix}attendance_log al 
 					JOIN {$CFG->prefix}attendance_sessions ats 
-					  ON al.sessionid = ats.id
-				   WHERE ats.courseid = {$course->id} AND al.studentid = {$user->id} 
-				ORDER BY ats.sessdate asc";
+					  ON al.sessionid = ats.id";
+        $stqry .= " WHERE " . $where;
+        $stqry .= " ORDER BY ats.sessdate asc";
+        
 		if ($sessions = get_records_sql($stqry)) {
 	     	$statuses = get_statuses($course->id);
-	     	?>
-			<div id="mod-assignment-submissions">
-			<table align="left" cellpadding="3" cellspacing="0" class="submissions">
-			  <tr>
-				<th>#</th>
-				<th align="center"><?php print_string('date')?></th>
-				<th align="center"><?php print_string('time')?></th>
-				<th align="center"><?php print_string('description','attforblock')?></th>
-				<th align="center"><?php print_string('status','attforblock')?></th>
-				<th align="center"><?php print_string('remarks','attforblock')?></th>
-			  </tr>
-			  <?php 
-		  	$i = 1;
-			foreach($sessions as $key=>$session)
+
+            $i = 0;
+			$table->head = array('#', get_string('date'), get_string('time'), get_string('description','attforblock'), get_string('status','attforblock'), get_string('remarks','attforblock'));
+			$table->align = array('', '', 'left', 'left', 'center', 'left');
+			$table->size = array('1px', '1px', '1px', '*', '1px', '1px');
+            $table->class = 'generaltable attwidth';
+			foreach($sessions as $key=>$sessdata)
 			{
-			  ?>
-			  <tr>
-				<td align="center"><?php echo $i++;?></td>
-				<td><?php echo userdate($session->sessdate, get_string('strftimedmyw', 'attforblock')); //userdate($students->sessdate,'%d.%m.%y&nbsp;(%a)', 99, false);?></td>
-				<td><?php echo userdate($session->sessdate, get_string('strftimehm', 'attforblock')); ?></td>
-				<td><?php echo empty($session->description) ? get_string('nodescription', 'attforblock') : $session->description;  ?></td>
-				<td><?php echo $statuses[$session->statusid]->description ?></td>
-				<td><?php echo $session->remarks;?></td>
-			  </tr>
-			  <?php
-	  		}
-	  		echo '</table>';
+                $i++;
+                $table->data[$sessdata->id][] = $i;
+                $table->data[$sessdata->id][] = userdate($sessdata->sessdate, get_string('strftimedmyw', 'attforblock'));
+				$table->data[$sessdata->id][] = userdate($sessdata->sessdate, get_string('strftimehm', 'attforblock'));
+                $table->data[$sessdata->id][] = empty($sessdata->description) ? get_string('nodescription', 'attforblock') : $sessdata->description;
+                $table->data[$sessdata->id][] = $statuses[$sessdata->statusid]->description;
+                $table->data[$sessdata->id][] = $sessdata->remarks;
+            }
+            print_table($table);
 		}
 	}
 	echo '</td></tr><tr><td>&nbsp;</td></tr></table></div>';
+}
+
+function print_filter_controls($url, $id, $sort=NULL, $printgroupselector=false) {
+
+    global $current, $view, $cm;
+
+    list(,,,$mday, $wday, $month, $year) = array_values(usergetdate($current));
+    $currentdatecontrols = '';
+    switch ($view) {
+        case 'days':
+            $format = get_string('strftimedm', 'attforblock');
+            $startdate = make_timestamp($year, $month, $mday);
+            $enddate = make_timestamp($year, $month, $mday + 1);
+            $prevcur = make_timestamp($year, $month, $mday - 1);
+            $nextcur = make_timestamp($year, $month, $mday + 1);
+            $curdatetxt =  userdate($startdate, $format);
+            break;
+        case 'weeks':
+            $format = get_string('strftimedm', 'attforblock');
+            $startdate = make_timestamp($year, $month, $mday - $wday + 1);
+            $enddate = make_timestamp($year, $month, $mday + 7 - $wday);
+            $prevcur = $startdate - WEEKSECS;
+            $nextcur = $startdate + WEEKSECS;
+            $curdatetxt = userdate($startdate, $format)." - ".userdate($enddate, $format);
+            break;
+        case 'months':
+            $format = '%B';
+            $startdate = make_timestamp($year, $month);
+            $enddate = make_timestamp($year, $month + 1);
+            $prevcur = make_timestamp($year, $month - 1);
+            $nextcur = make_timestamp($year, $month + 1);
+            $curdatetxt = userdate($startdate, $format);
+            break;
+        case 'alltaken':
+            $startdate = 1;
+            $enddate = $current;
+            break;
+        case 'all':
+            $startdate = 0;
+            $enddate = 0;
+            break;
+    }
+
+    $link = $url . "?id=$id" . ($sort ? "&amp;sort=$sort" : "");
+
+    if ($printgroupselector) {
+        $groupmode = groups_get_activity_groupmode($cm);
+        $currentgroup = groups_get_activity_group($cm, true);
+        $groupselector = '';
+        $context = get_context_instance(CONTEXT_MODULE, $cm->id);
+        if ($groupmode == VISIBLEGROUPS ||
+                ($groupmode && has_capability('moodle/site:accessallgroups', $context))) {
+            $groupselector = groups_print_activity_menu($cm, $link, true);
+        }
+    }
+
+    $views['all'] = get_string('all','attforblock');
+    $views['alltaken'] = get_string('alltaken','attforblock');
+    $views['months'] = get_string('months','attforblock');
+    $views['weeks'] = get_string('weeks','attforblock');
+    $views['days'] = get_string('days','attforblock');
+    $viewcontrols = '<nobr>';
+    foreach ($views as $key => $sview) {
+        if ($key != $view)
+            $viewcontrols .= "<span class=\"attbtn\"><a href=\"{$link}&amp;view={$key}\">$sview</a></span>";
+        else
+            $viewcontrols .= "<span class=\"attcurbtn\">$sview</span>";
+    }
+    $viewcontrols .= '</nobr>';
+
+    echo "<div class=\"attfiltercontrols attwidth\">";
+    echo "<table width=\"100%\"><tr>";
+    echo "<td width=\"45%\">$groupselector</td>";
+
+    if ($curdatetxt) {
+        $curdatecontrols = "<a href=\"{$link}&amp;current=$prevcur\"><span class=\"arrow \">◄</span></a>";
+        $curdatecontrols .= "<form id =\"currentdate\" action=\"$url\" method=\"get\" style=\"display:inline;\">";
+        $curdatecontrols .= " <button title=\"" . get_string('calshow','attforblock') . "\" id=\"show\" type=\"button\">$curdatetxt</button> ";
+        $curdatecontrols .= "<input type=\"hidden\" name=\"id\" value=\"$id\" />";
+        if ($sort)
+            $curdatecontrols .= "<input type=\"hidden\" name=\"sort\" value=\"$sort\" />";
+        $curdatecontrols .= "<input type=\"hidden\" id=\"current\" name=\"current\" value=\"\" />";
+        $curdatecontrols .= "</form>";
+        $curdatecontrols .= "<a href=\"{$link}&amp;current=$nextcur\"><span class=\"arrow \">►</span></a>";
+        plug_yui_calendar($current);
+    }
+    echo "<td width=\"20%\" align=\"center\">$curdatecontrols</td>";
+    echo "<td width=\"35%\" align=\"right\">$viewcontrols</td></tr></table>";
+
+    echo "</div>";
+
+    return array($startdate, $enddate, $currentgroup);
+}
+
+function plug_yui_calendar($current) {
+    global $CFG;
+    
+    require_js(array('yui_dom-event', 'yui_dragdrop', 'yui_element', 'yui_button', 'yui_container', 'yui_calendar'));
+
+    echo "<script type=\"text/javascript\">\n";
+    echo "var cal_close = \"" . get_string('calclose','attforblock') . "\";";
+    echo "var cal_today = \"" . get_string('caltoday','attforblock') . "\";";
+    echo "var cal_months = [" . get_string('calmonths','attforblock') . "];";
+    echo "var cal_week_days = [" . get_string('calweekdays','attforblock') . "];";
+    echo "var cal_start_weekday = " . $CFG->calendar_startwday . ";";
+    echo "var cal_cur_date = " . $current . ";";
+    echo "</script>\n";
+
+    require_js($CFG->wwwroot . '/mod/attforblock/calendar.js');
 }
 	
 ?>

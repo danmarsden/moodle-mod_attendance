@@ -95,7 +95,7 @@
 								$rec->duration = $duration;
 								$rec->description = $fromform->sdescription;
 								$rec->timemodified = $now;
-                                if ($fromform->sessiontype === COMMONSESSION) {
+                                if ($fromform->sessiontype == COMMONSESSION) {
                                     if(!insert_record('attendance_sessions', $rec))
                                         error(get_string('erroringeneratingsessions','attforblock'), "sessions.php?id=$id&amp;action=add");
                                 } else {

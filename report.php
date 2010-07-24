@@ -12,7 +12,7 @@
 
     $id           		= required_param('id', PARAM_INT);
     $group        		= optional_param('group', -1, PARAM_INT);              // Group to show
-    $view         		= optional_param('view', 'weeks', PARAM_ALPHA);        // which page to show
+    $view         		= optional_param('view', NULL, PARAM_ALPHA);        // which page to show
 	$current			= optional_param('current', 0, PARAM_INT);
     $sort         		= optional_param('sort', 'lastname', PARAM_ALPHA);
 	
@@ -37,6 +37,12 @@
     if (!$context = get_context_instance(CONTEXT_MODULE, $cm->id)) {
         print_error('badcontext');
     }
+
+    if ($view)
+        set_current_view($course->id, $_GET['view']);
+    else
+	    $view = get_current_view($course->id);
+
     
     require_capability('mod/attforblock:viewreports', $context);
 
@@ -56,87 +62,32 @@
 	
 	if(!count_records('attendance_sessions', 'courseid', $course->id)) {	// no session exists for this course
 		redirect("sessions.php?id=$cm->id&amp;action=add");			
-	} else {	// display attendance report
-        /// find out current groups mode
-        $groupmode = groups_get_activity_groupmode($cm);
-        $currentgroup = groups_get_activity_group($cm, true);
-        if ($groupmode == VISIBLEGROUPS ||
-                ($groupmode && has_capability('moodle/site:accessallgroups', $context))) {
-            groups_print_activity_menu($cm, "report.php?id=$id&amp;sort=$sort");
-        }
+	} else {
+        if ($current == 0)
+            $current = get_current_date($course->id);
+        else
+            set_current_date ($course->id, $current);
 
-		echo '<div align="right">'.helpbutton ('report', get_string('help'), 'attforblock', true, true, '', true).'</div>';
+        list($startdate, $enddate, $currentgroup) =
+                print_filter_controls("report.php", $id, $sort, true);
+
+		if ($startdate && $enddate) {
+			$where = "courseid={$course->id} AND sessdate >= $course->startdate AND sessdate >= $startdate AND sessdate < $enddate";
+		} else {
+			$where = "courseid={$course->id} AND sessdate >= $course->startdate";
+		}
 
         if ($currentgroup) {
+            $where .= " AND (groupid=0 OR groupid=".$currentgroup.")";
         	$students = get_users_by_capability($context, 'moodle/legacy:student', '', "u.$sort ASC", '', '', $currentgroup, '', false);
         } else {
         	$students = get_users_by_capability($context, 'moodle/legacy:student', '', "u.$sort ASC", '', '', '', '', false);
         }
-    
-        // display date interval selector
-        $rec = get_record_sql("SELECT MIN(sessdate) AS min, MAX(sessdate) AS max 
-        						 FROM {$CFG->prefix}attendance_sessions 
-        						WHERE courseid=$course->id AND sessdate >= $course->startdate");
-        $firstdate = $rec->min;
-        $lastdate = $rec->max;
-        $now = time();
-        $current = $current == 0 ? $now : $current;
-        list(,,,$wday, $syear, $smonth, $sday) = array_values(usergetdate($firstdate));
-		$wday = $wday == 0 ? 7 : $wday; //////////////////////////////////////////////////// Нужна проверка настройки календаря
-		$startdate = make_timestamp($syear, $smonth, $sday-$wday+1); //GMT timestamp but for local midnight of monday
-        
-		$options['all'] = get_string('alltaken','attforblock');
-		$options['weeks'] = get_string('weeks','attforblock');
-		$options['months'] = get_string('months','attforblock');
-		echo '<center>'.helpbutton ('display', get_string('display','attforblock'), 'attforblock', true, false, '', true).get_string('display','attforblock').': ';
-		if (isset($_GET['view'])) //{
-	        set_current_view($course->id, $_GET['view']);
-	    $view = get_current_view($course->id);
-		popup_form("report.php?id=$id&amp;sort=$sort&amp;view=", $options, 'viewmenu', $view, '');
-		
-		$out = '';
-		$list = array();
-		if ($view === 'weeks') {
-			$format = get_string('strftimedm', 'attforblock');
-			for ($i = 0, $monday = $startdate; $monday <= $lastdate; $i++, $monday += ONE_WEEK) {
-				if (count_records_select('attendance_sessions', "courseid={$course->id} AND sessdate >= ".$monday." AND sessdate < ".($monday + ONE_WEEK))) {
-					$list[] = $monday;
-				}
-			}
-		} elseif ($view === 'months') {
-			$startdate = make_timestamp($syear, $smonth, 1);
-			$format = '%B';
-			for ($i = 0, $month = $startdate; $month <= $lastdate; $i++, $month = make_timestamp($syear, $smonth+$i, 1)) {
-				if (count_records_select('attendance_sessions', "courseid={$course->id} AND sessdate >= ".$month." AND sessdate < ".make_timestamp($syear, $smonth+$i+1, 1))) {
-					$list[] = $month;
-				}
-			}
-		}
-		$found = false;
-		for ($i = count($list)-1; $i >= 0; $i--) {
-			if ($list[$i] <= $current && !$found) {
-				$found = true;
-				$current = $list[$i];
-				$out = '<b>'.userdate($list[$i], $format).'</b> / '.$out;
-			} else {
-				$out = "\n<a href=\"report.php?id=$id&amp;current={$list[$i]}&amp;sort=$sort\">".userdate($list[$i], $format)."</a> / ".$out;
-			}
-		}
-		echo substr($out, 0, -2)."</center>\n";
 
         $statuses = get_statuses($course->id);
         $allstatuses = get_statuses($course->id, false);
-		
-		if ($view === 'weeks') {
-			$where = "courseid={$course->id} AND sessdate >= $course->startdate AND sessdate >= $current AND sessdate < ".($current + ONE_WEEK);
-		} elseif ($view === 'months') {
-			list(,,,, $syear, $smonth, $sday) = array_values(usergetdate($current));
-			$where = "courseid={$course->id} AND sessdate >= $course->startdate AND sessdate >= $current AND sessdate < ".make_timestamp($syear, $smonth+1, 1);
-		} else {
-			$where = "courseid={$course->id} AND sessdate >= $course->startdate AND sessdate <= ".time();
-		}
-        if ($currentgroup)
-            $where .= " AND (groupid=0 OR groupid=".$currentgroup.")";
+
+
 		if ($students and
 		       ($course_sess = get_records_select('attendance_sessions', $where, 'sessdate ASC'))) {
 			
@@ -154,6 +105,7 @@
 		    $table->head[] = $fullnamehead;
 			$table->align[] = 'left';
 			$table->size[] = '';
+            $table->class = 'generaltable attwidth';
             $allowtake = has_capability('mod/attforblock:takeattendances', $context);
             $allowchange = has_capability('mod/attforblock:changeattendances', $context);
             $groups = groups_get_all_groups($course->id);
@@ -225,7 +177,6 @@
                     $table->data[$student->id][] = get_percent($student->id, $course).'%';
                 }
 			}
-			echo '<br />';
     		print_table($table);
 		} else {
 			print_heading(get_string('nothingtodisplay'), 'center');
