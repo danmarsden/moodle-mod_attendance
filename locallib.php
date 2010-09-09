@@ -339,31 +339,36 @@ function print_filter_controls($url, $id, $sort=NULL, $printgroupselector=false)
 
     global $current, $view, $cm;
 
-    list(,,,$mday, $wday, $month, $year) = array_values(usergetdate($current));
+    $date = usergetdate($current);
+    $mday = $date['mday'];
+    $wday = $date['wday'];
+    $mon = $date['mon'];
+    $year = $date['year'];
+
     $currentdatecontrols = '';
     switch ($view) {
         case 'days':
             $format = get_string('strftimedm', 'attforblock');
-            $startdate = make_timestamp($year, $month, $mday);
-            $enddate = make_timestamp($year, $month, $mday + 1);
-            $prevcur = make_timestamp($year, $month, $mday - 1);
-            $nextcur = make_timestamp($year, $month, $mday + 1);
+            $startdate = make_timestamp($year, $mon, $mday);
+            $enddate = make_timestamp($year, $mon, $mday + 1);
+            $prevcur = make_timestamp($year, $mon, $mday - 1);
+            $nextcur = make_timestamp($year, $mon, $mday + 1);
             $curdatetxt =  userdate($startdate, $format);
             break;
         case 'weeks':
             $format = get_string('strftimedm', 'attforblock');
-            $startdate = make_timestamp($year, $month, $mday - $wday + 1);
-            $enddate = make_timestamp($year, $month, $mday + 7 - $wday);
+            $startdate = make_timestamp($year, $mon, $mday - $wday + 1);
+            $enddate = make_timestamp($year, $mon, $mday + 7 - $wday);
             $prevcur = $startdate - WEEKSECS;
             $nextcur = $startdate + WEEKSECS;
             $curdatetxt = userdate($startdate, $format)." - ".userdate($enddate, $format);
             break;
         case 'months':
             $format = '%B';
-            $startdate = make_timestamp($year, $month);
-            $enddate = make_timestamp($year, $month + 1);
-            $prevcur = make_timestamp($year, $month - 1);
-            $nextcur = make_timestamp($year, $month + 1);
+            $startdate = make_timestamp($year, $mon);
+            $enddate = make_timestamp($year, $mon + 1);
+            $prevcur = make_timestamp($year, $mon - 1);
+            $nextcur = make_timestamp($year, $mon + 1);
             $curdatetxt = userdate($startdate, $format);
             break;
         case 'alltaken':
