@@ -51,10 +51,18 @@
                   FROM {$CFG->prefix}attendance_sessions
                  WHERE $today BETWEEN sessdate AND (sessdate + duration)
                    AND courseid = $course->id";
-        if($att = get_record_sql($sql)) {
-            if ((!$att->lasttaken and has_capability('mod/attforblock:takeattendances', $context)) or
-                ($att->lasttaken and has_capability('mod/attforblock:changeattendances', $context))) {
-                redirect('attendances.php?id='.$id.'&amp;sessionid='.$att->id.'&amp;grouptype='.$att->groupid);
+        if($atts = get_records_sql($sql)) {
+            $size = count($atts);
+            if ($size == 1) {
+                $att = reset($atts);
+                if ((!$att->lasttaken and has_capability('mod/attforblock:takeattendances', $context)) or
+                    ($att->lasttaken and has_capability('mod/attforblock:changeattendances', $context))) {
+                    redirect('attendances.php?id='.$id.'&amp;sessionid='.$att->id.'&amp;grouptype='.$att->groupid);
+                }
+            } elseif ($size > 1) {
+                $current = $today;
+                //temporally set $view for single access to page from block
+                $view = 'days';
             }
         }
 	}
