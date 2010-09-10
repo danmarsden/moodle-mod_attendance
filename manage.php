@@ -47,14 +47,14 @@
     //if teacher is coming from block, then check for a session exists for today
 	if($from === 'block') {
 		$today = time(); // because we compare with database, we don't need to use usertime()
-        $sql = "SELECT id, lasttaken
+        $sql = "SELECT id, groupid, lasttaken
                   FROM {$CFG->prefix}attendance_sessions
                  WHERE $today BETWEEN sessdate AND (sessdate + duration)
                    AND courseid = $course->id";
         if($att = get_record_sql($sql)) {
             if ((!$att->lasttaken and has_capability('mod/attforblock:takeattendances', $context)) or
                 ($att->lasttaken and has_capability('mod/attforblock:changeattendances', $context))) {
-                redirect('attendances.php?id='.$id.'&amp;sessionid='.$att->id);
+                redirect('attendances.php?id='.$id.'&amp;sessionid='.$att->id.'&amp;grouptype='.$att->groupid);
             }
         }
 	}
