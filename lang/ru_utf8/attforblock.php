@@ -39,6 +39,7 @@ $string['calweekdays'] = ' \"Вс\", \"Пн\", \"Вт\", \"Ср\", \"Чт\", \"�
 $string['changeduration'] = 'Изменить продолжительность';
 $string['changesession'] = 'Изменить занятие';
 $string['commonsession'] = 'Общее';
+$string['commonsessions'] = 'Общие';
 $string['countofselected'] = 'Выбрано занятий';
 $string['createmultiplesessions'] = 'Создать несколько занятий';
 $string['createonesession'] = 'Создать одно занятие для курса';

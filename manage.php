@@ -103,13 +103,17 @@ function print_sessions_list($course) {
             else
                 set_current_date ($course->id, $current);
 
-            list($startdate, $enddate) =
-                    print_filter_controls("manage.php", $id);
+            list($startdate, $enddate, $currentgroup) =
+                    print_filter_controls("manage.php", $id, NULL, SESSION_TYPE_SELECTOR);
 
             if ($startdate && $enddate) {
                 $where = "courseid={$course->id} AND sessdate >= $course->startdate AND sessdate >= $startdate AND sessdate < $enddate";
             } else {
                 $where = "courseid={$course->id} AND sessdate >= $course->startdate";
+            }
+
+            if ($currentgroup > -1) {
+                $where .= " AND groupid=$currentgroup";
             }
 
             $qry = get_records_select('attendance_sessions', $where/*"courseid = $course->id AND sessdate >= $course->startdate"*/, 'sessdate asc');

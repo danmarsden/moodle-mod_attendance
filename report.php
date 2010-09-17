@@ -69,7 +69,7 @@
             set_current_date ($course->id, $current);
 
         list($startdate, $enddate, $currentgroup) =
-                print_filter_controls("report.php", $id, $sort, true);
+                print_filter_controls("report.php", $id, $sort, GROUP_SELECTOR);
 
 		if ($startdate && $enddate) {
 			$where = "courseid={$course->id} AND sessdate >= $course->startdate AND sessdate >= $startdate AND sessdate < $enddate";

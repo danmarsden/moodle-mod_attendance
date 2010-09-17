@@ -8,6 +8,10 @@ define('ONE_WEEK', 604800);   // Seconds in one week
 define('COMMONSESSION', 0);
 define('GROUPSESSION', 1);
 
+define('WITHOUT_SELECTOR', 0);
+define('GROUP_SELECTOR', 1);
+define('SESSION_TYPE_SELECTOR', 2);
+
 function show_tabs($cm, $context, $currenttab='sessions')
 {
 	$toprow = array();
@@ -335,9 +339,9 @@ function print_user_attendaces($user, $cm, $attforblock,  $course = 0, $printing
 	echo '</td></tr><tr><td>&nbsp;</td></tr></table></div>';
 }
 
-function print_filter_controls($url, $id, $sort=NULL, $printgroupselector=false) {
+function print_filter_controls($url, $id, $sort=NULL, $printselector=WITHOUT_SELECTOR) {
 
-    global $current, $view, $cm;
+    global $SESSION, $current, $view, $cm;
 
     $date = usergetdate($current);
     $mday = $date['mday'];
@@ -383,7 +387,7 @@ function print_filter_controls($url, $id, $sort=NULL, $printgroupselector=false)
 
     $link = $url . "?id=$id" . ($sort ? "&amp;sort=$sort" : "");
 
-    if ($printgroupselector) {
+    if ($printselector === GROUP_SELECTOR) {
         $groupmode = groups_get_activity_groupmode($cm);
         $currentgroup = groups_get_activity_group($cm, true);
         $groupselector = '';
@@ -392,7 +396,83 @@ function print_filter_controls($url, $id, $sort=NULL, $printgroupselector=false)
                 ($groupmode && has_capability('moodle/site:accessallgroups', $context))) {
             $groupselector = groups_print_activity_menu($cm, $link, true);
         }
+    } elseif ($printselector === SESSION_TYPE_SELECTOR and $groupmode = groups_get_activity_groupmode($cm)) {
+        $context = get_context_instance(CONTEXT_MODULE, $cm->id);
+        if ($groupmode == VISIBLEGROUPS or has_capability('moodle/site:accessallgroups', $context)) {
+            $allowedgroups = groups_get_all_groups($cm->course, 0, $cm->groupingid); // any group in grouping (all if groupings not used)
+            // detect changes related to groups and fix active group
+            if (!empty($SESSION->activegroup[$cm->course][VISIBLEGROUPS][$cm->groupingid])) {
+                if (!array_key_exists($SESSION->activegroup[$cm->course][VISIBLEGROUPS][$cm->groupingid], $allowedgroups)) {
+                    // active group does not exist anymore
+                    unset($SESSION->activegroup[$cm->course][VISIBLEGROUPS][$cm->groupingid]);
+                }
+            }
+            if (!empty($SESSION->activegroup[$cm->course]['aag'][$cm->groupingid])) {
+                if (!array_key_exists($SESSION->activegroup[$cm->course]['aag'][$cm->groupingid], $allowedgroups)) {
+                    // active group does not exist anymore
+                    unset($SESSION->activegroup[$cm->course]['aag'][$cm->groupingid]);
+                }
+            }
+
+        } else {
+            $allowedgroups = groups_get_all_groups($cm->course, $USER->id, $cm->groupingid); // only assigned groups
+            // detect changes related to groups and fix active group
+            if (isset($SESSION->activegroup[$cm->course][SEPARATEGROUPS][$cm->groupingid])) {
+                if ($SESSION->activegroup[$cm->course][SEPARATEGROUPS][$cm->groupingid] == 0) {
+                    if ($allowedgroups) {
+                        // somebody must have assigned at least one group, we can select it now - yay!
+                        unset($SESSION->activegroup[$cm->course][SEPARATEGROUPS][$cm->groupingid]);
+                    }
+                } else {
+                    if (!array_key_exists($SESSION->activegroup[$cm->course][SEPARATEGROUPS][$cm->groupingid], $allowedgroups)) {
+                        // active group not allowed or does not exist anymore
+                        unset($SESSION->activegroup[$cm->course][SEPARATEGROUPS][$cm->groupingid]);
+                    }
+                }
+            }
+        }
+
+        $group = optional_param('group', -2, PARAM_INT);
+        if ($group > -2) {
+            if (!array_key_exists('attsessiontype', $SESSION)) {
+                $SESSION->attsessiontype = array();
+            }
+            $SESSION->attsessiontype[$cm->course] = $group;
+        }
+        if ($group == -1) {
+            $currentgroup = $group;
+            unset($SESSION->activegroup[$cm->course][VISIBLEGROUPS][$cm->groupingid]);
+            unset($SESSION->activegroup[$cm->course]['aag'][$cm->groupingid]);
+            unset($SESSION->activegroup[$cm->course][SEPARATEGROUPS][$cm->groupingid]);
+        } else {
+            $currentgroup = groups_get_activity_group($cm, true);
+            if ($currentgroup == 0 and $SESSION->attsessiontype[$cm->course] == -1) {
+                $currentgroup = -1;
+            }
+        }
+
+        $selector = array();
+        if ($allowedgroups or $groupmode == VISIBLEGROUPS or
+                has_capability('moodle/site:accessallgroups', $context)) {
+            $selector[-1] = get_string('all', 'attforblock');
+        }
+        if ($groupmode == VISIBLEGROUPS) {
+            $selector[0] = get_string('commonsessions', 'attforblock');
+        }
+
+        if ($allowedgroups) {
+            foreach ($allowedgroups as $group) {
+                $selector[$group->id] = format_string($group->name);
+            }
+        }
+
+        if (count($selector) > 1) {
+            $sessiontypeselector = popup_form($url.'?id='.$cm->id.'&amp;group=', $selector, 'selectgroup', $currentgroup, '', '', '', true, 'self', get_string('sessions', 'attforblock'));
+        }
+
+        $sessiontypeselector = '<div class="groupselector">'.$sessiontypeselector.'</div>';
     }
+
 
     $views['all'] = get_string('all','attforblock');
     $views['alltaken'] = get_string('alltaken','attforblock');
@@ -410,7 +490,11 @@ function print_filter_controls($url, $id, $sort=NULL, $printgroupselector=false)
 
     echo "<div class=\"attfiltercontrols attwidth\">";
     echo "<table width=\"100%\"><tr>";
-    echo "<td width=\"45%\">$groupselector</td>";
+    if ($printselector === GROUP_SELECTOR) {
+        echo "<td width=\"45%\">$groupselector</td>";
+    } elseif ($printselector === SESSION_TYPE_SELECTOR) {
+        echo "<td width=\"45%\">$sessiontypeselector</td>";
+    }
 
     if ($curdatetxt) {
         $curdatecontrols = "<a href=\"{$link}&amp;current=$prevcur\"><span class=\"arrow \">◄</span></a>";

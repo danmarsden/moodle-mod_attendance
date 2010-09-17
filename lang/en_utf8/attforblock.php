@@ -40,6 +40,7 @@ $string['calweekdays'] = ' \"Su\", \"Mo\", \"Tu\", \"We\", \"Th\", \"Fr\", \"Sa\
 $string['changeduration'] = 'Change duration';
 $string['changesession'] = 'Change session';
 $string['commonsession'] = 'Common';
+$string['commonsessions'] = 'Common';
 $string['countofselected'] = 'Count of selected';
 $string['createmultiplesessions'] = 'Create multiple sessions';
 $string['createonesession'] = 'Create one session for the course';
