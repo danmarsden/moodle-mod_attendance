@@ -5,7 +5,7 @@
 --------
 ABOUT
 --------
-This is version 2.1.x of the "Attendance" module (attforblock). It is still IN DEVELOPMENT 
+This is version 2.2.x of the "Attendance" module (attforblock). It is still IN DEVELOPMENT
 and should not be considered a stable release unless otherwise noted. 
 It has been tested on Moodle 1.9+, MySQL and PHP 5.2+.
 

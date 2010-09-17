@@ -1,0 +1,16 @@
+<p align="center"><b>Attendance module</b></p>
+<p align="center">
+  <?php
+	  	$temp = $module;
+		unset($module);
+		require_once($CFG->dirroot.'/mod/attforblock/version.php');
+	  	echo get_string('version').": $module->release ($module->version)";
+		unset($module);
+		$module = $temp;
+	?>
+</p>
+<p align="left">There are two types of sessions: common and groups.
+    Ability to add different types depends on activity group mode. </p>
+<p align="left">In group mode &quot;No groups&quot; you can add only common sessions. </p>
+<p align="left">In group mode &quot;Visible groups&quot; you can add common and group sessions. </p>
+<p align="left">In group mode &quot;Separate groups&quot; you can add only group sessions. </p>

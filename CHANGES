@@ -1,3 +1,15 @@
+2010-07-10 - 2010-09-17  andreev.artem
+
+    Implemented ability to add two types of sessions: common and group
+
+    Some interface improvements (sessions filtering by different criteries)
+    for manage.php, report.php, view.php
+
+    Don't display grade and percent when module grade option is "No grade"
+
+    For redirecting from the block is taken into account the situation
+    when the current time are a few sessions
+
 2009-04-13 Monday 01:50  dlnsk
 
 	* lang/: en_utf8/attforblock.php, ru_utf8/attforblock.php: 

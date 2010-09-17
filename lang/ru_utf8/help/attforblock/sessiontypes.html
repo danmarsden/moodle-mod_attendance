@@ -1,0 +1,16 @@
+<p align="center"><b>Модуль Посещаемость</b></p>
+<p align="center">
+  <?php
+	  	$temp = $module;
+		unset($module);
+		require_once($CFG->dirroot.'/mod/attforblock/version.php');
+	  	echo get_string('version').": $module->release ($module->version)";
+		unset($module);
+		$module = $temp;
+	?>
+</p>
+<p align="left">Существует 2 типа занятий: общие и групповые.
+    Возможность добавлять события различных типов зависит от группового режима элемента курса. </p>
+<p align="left">В групповом режиме &quot;Нет групп&quot; можно добавлять только общие события. </p>
+<p align="left">В групповом режиме &quot;Доступные группы&quot; можно добавлять и общие и групповые события. </p>
+<p align="left">В групповом режиме &quot;Отдельные группы&quot; можно добавлять только групповые события. </p>
