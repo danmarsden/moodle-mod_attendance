@@ -435,8 +435,10 @@ function print_filter_controls($url, $id, $sort=NULL, $printselector=WITHOUT_SEL
         $group = optional_param('group', -2, PARAM_INT);
         if ($group > -2) {
             $SESSION->attsessiontype[$cm->course] = $group;
-        } elseif (!array_key_exists('attsessiontype', $SESSION)) {
-            $SESSION->attsessiontype = array();
+        } elseif (!array_key_exists($cm->course, $SESSION->attsessiontype)) {
+			if (!array_key_exists('attsessiontype', $SESSION)) {
+				$SESSION->attsessiontype = array();
+			}
             $SESSION->attsessiontype[$cm->course] = -1;
         }
         
