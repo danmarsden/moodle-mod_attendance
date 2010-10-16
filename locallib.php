@@ -308,7 +308,7 @@ function print_user_attendaces($user, $cm, $attforblock,  $course = 0, $printing
             $where = "ats.courseid={$course->id} AND al.studentid = {$user->id}";
         }
 
-		$stqry = "SELECT ats.sessdate,ats.description,al.statusid,al.remarks 
+		$stqry = "SELECT ats.id,ats.sessdate,ats.description,al.statusid,al.remarks
 					FROM {$CFG->prefix}attendance_log al 
 					JOIN {$CFG->prefix}attendance_sessions ats 
 					  ON al.sessionid = ats.id";
