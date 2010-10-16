@@ -104,7 +104,7 @@ function print_sessions_list($course) {
                 set_current_date ($course->id, $current);
 
             list($startdate, $enddate, $currentgroup) =
-                    print_filter_controls("manage.php", $id, NULL, SESSION_TYPE_SELECTOR);
+                    print_filter_controls("manage.php", $id, 0, NULL, SESSION_TYPE_SELECTOR);
 
             if ($startdate && $enddate) {
                 $where = "courseid={$course->id} AND sessdate >= $course->startdate AND sessdate >= $startdate AND sessdate < $enddate";

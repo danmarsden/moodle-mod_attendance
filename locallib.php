@@ -239,7 +239,7 @@ function print_attendance_table($user,  $course, $attforblock) {
 }
 
 function print_user_attendaces($user, $cm, $attforblock,  $course = 0, $printing = null) {
-	global $CFG, $COURSE, $mode, $current, $view, $id;
+	global $CFG, $COURSE, $mode, $current, $view, $id, $studentid;
 		
 	echo '<table class="userinfobox">';
     if (!$printing) {
@@ -300,7 +300,7 @@ function print_user_attendaces($user, $cm, $attforblock,  $course = 0, $printing
             set_current_date ($course->id, $current);
 
         list($startdate, $enddate) =
-                print_filter_controls("view.php", $id);
+                print_filter_controls("view.php", $id, $studentid);
 
         if ($startdate && $enddate) {
             $where = "ats.courseid={$course->id} AND al.studentid = {$user->id} AND ats.sessdate >= $startdate AND ats.sessdate < $enddate";
@@ -339,7 +339,7 @@ function print_user_attendaces($user, $cm, $attforblock,  $course = 0, $printing
 	echo '</td></tr><tr><td>&nbsp;</td></tr></table></div>';
 }
 
-function print_filter_controls($url, $id, $sort=NULL, $printselector=WITHOUT_SELECTOR) {
+function print_filter_controls($url, $id, $studentid=0, $sort=NULL, $printselector=WITHOUT_SELECTOR) {
 
     global $SESSION, $current, $view, $cm;
 
@@ -385,7 +385,7 @@ function print_filter_controls($url, $id, $sort=NULL, $printselector=WITHOUT_SEL
             break;
     }
 
-    $link = $url . "?id=$id" . ($sort ? "&amp;sort=$sort" : "");
+    $link = $url . "?id=$id" . ($sort ? "&amp;sort=$sort" : "") . ($studentid ? "&amp;student=$studentid" : "");
 
     if ($printselector === GROUP_SELECTOR) {
         $groupmode = groups_get_activity_groupmode($cm);
@@ -506,6 +506,8 @@ function print_filter_controls($url, $id, $sort=NULL, $printselector=WITHOUT_SEL
         $curdatecontrols .= "<input type=\"hidden\" name=\"id\" value=\"$id\" />";
         if ($sort)
             $curdatecontrols .= "<input type=\"hidden\" name=\"sort\" value=\"$sort\" />";
+        if ($studentid)
+            $curdatecontrols .= "<input type=\"hidden\" name=\"student\" value=\"$studentid\" />";
         $curdatecontrols .= "<input type=\"hidden\" id=\"current\" name=\"current\" value=\"\" />";
         $curdatecontrols .= "</form>";
         $curdatecontrols .= "<a href=\"{$link}&amp;current=$nextcur\"><span class=\"arrow \">►</span></a>";
