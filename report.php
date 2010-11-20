@@ -166,7 +166,7 @@
                         if ($sessdata->groupid && !$studgroups[$sessdata->groupid])
                             $table->data[$student->id][] = '';
                         else
-                            $table->data[$student->id][] = '-';
+                            $table->data[$student->id][] = '?';
 					}
 				}
 				foreach($statuses as $st) {
