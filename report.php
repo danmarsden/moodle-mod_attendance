@@ -163,7 +163,7 @@
 							$table->data[$student->id][] = '<font color="red"><b>'.$allstatuses[$att->statusid]->acronym.'</b></font>';
 						}
 					} else {
-                        if ($sessdata->groupid && !$studgroups[$sessdata->groupid])
+                        if ($sessdata->groupid && !array_key_exists($sessdata->groupid, $studgroups))
                             $table->data[$student->id][] = '';
                         else
                             $table->data[$student->id][] = '?';

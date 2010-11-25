@@ -95,84 +95,86 @@
 function print_sessions_list($course) {
 	global $CFG, $context, $cm, $current, $view, $id;
 	
-			$strhours = get_string('hours');
-			$strmins = get_string('min');
-				
-            if ($current == 0)
-                $current = get_current_date($course->id);
-            else
-                set_current_date ($course->id, $current);
+        $strhours = get_string('hours');
+        $strmins = get_string('min');
 
-            list($startdate, $enddate, $currentgroup) =
-                    print_filter_controls("manage.php", $id, 0, NULL, SESSION_TYPE_SELECTOR);
+        if ($current == 0)
+            $current = get_current_date($course->id);
+        else
+            set_current_date ($course->id, $current);
 
-            if ($startdate && $enddate) {
-                $where = "courseid={$course->id} AND sessdate >= $course->startdate AND sessdate >= $startdate AND sessdate < $enddate";
-            } else {
-                $where = "courseid={$course->id} AND sessdate >= $course->startdate";
-            }
+        list($startdate, $enddate, $currentgroup) =
+                print_filter_controls("manage.php", $id, 0, NULL, SESSION_TYPE_SELECTOR);
 
-            if ($currentgroup > -1) {
-                $where .= " AND groupid=$currentgroup";
-            }
+        if ($startdate && $enddate) {
+            $where = "courseid={$course->id} AND sessdate >= $course->startdate AND sessdate >= $startdate AND sessdate < $enddate";
+        } else {
+            $where = "courseid={$course->id} AND sessdate >= $course->startdate";
+        }
 
-            $qry = get_records_select('attendance_sessions', $where/*"courseid = $course->id AND sessdate >= $course->startdate"*/, 'sessdate asc');
-			$i = 0;
-			$table->width = '100%';
-			//$table->tablealign = 'center';
-			$table->head = array('#', get_string('sessiontypeshort', 'attforblock'), get_string('date'), get_string('time'), get_string('duration', 'attforblock'), get_string('description','attforblock'), get_string('actions'), get_string('select'));
-			$table->align = array('', '', '', 'right', 'left', 'center', 'center');
-			$table->size = array('1px', '', '1px', '1px', '1px', '*', '1px', '1px');
+        if ($currentgroup > -1) {
+            $where .= " AND groupid=$currentgroup";
+        }
 
-            $allowtake = has_capability('mod/attforblock:takeattendances', $context);
-            $allowchange = has_capability('mod/attforblock:changeattendances', $context);
-            $allowmanage = has_capability('mod/attforblock:manageattendances', $context);
-            $groups = groups_get_all_groups($course->id);
-			foreach($qry as $key=>$sessdata)
-			{
-				$i++;
-				$actions = '';
+        $qry = get_records_select('attendance_sessions', $where, 'sessdate asc');
+        $i = 0;
+        $table->width = '100%';
+        //$table->tablealign = 'center';
+        $table->head = array('#', get_string('sessiontypeshort', 'attforblock'), get_string('date'), get_string('time'), get_string('duration', 'attforblock'), get_string('description','attforblock'), get_string('actions'), get_string('select'));
+        $table->align = array('', '', '', 'right', 'left', 'center', 'center');
+        $table->size = array('1px', '', '1px', '1px', '1px', '*', '1px', '1px');
+
+        $allowtake = has_capability('mod/attforblock:takeattendances', $context);
+        $allowchange = has_capability('mod/attforblock:changeattendances', $context);
+        $allowmanage = has_capability('mod/attforblock:manageattendances', $context);
+        $groups = groups_get_all_groups($course->id);
+        if ($qry) {
+            foreach($qry as $key=>$sessdata)
+            {
+                $i++;
+                $actions = '';
 //				if ($allowtake) {
-					if($sessdata->lasttaken > 0)	//attendance has taken
-					{
-						if ($allowchange) {
+                    if($sessdata->lasttaken > 0)	//attendance has taken
+                    {
+                        if ($allowchange) {
                             $desc = "<a href=\"attendances.php?id=$cm->id&amp;sessionid={$sessdata->id}&amp;grouptype={$sessdata->groupid}\">".
                                     ($sessdata->description ? $sessdata->description : get_string('nodescription', 'attforblock')).
                                     '</a>';
                         } else {
                             $desc = '<i>'.(empty($sessdata->description) ? get_string('nodescription', 'attforblock') : $sessdata->description).'</i>';
                         }
-					} else {
-						$desc = empty($sessdata->description) ? get_string('nodescription', 'attforblock') : $sessdata->description;
-						if ($allowtake) {
+                    } else {
+                        $desc = empty($sessdata->description) ? get_string('nodescription', 'attforblock') : $sessdata->description;
+                        if ($allowtake) {
                             $title = get_string('takeattendance','attforblock');
                             $actions = "<a title=\"$title\" href=\"attendances.php?id=$cm->id&amp;sessionid={$sessdata->id}&amp;grouptype={$sessdata->groupid}\">".
                                        "<img src=\"{$CFG->pixpath}/t/go.gif\" alt=\"$title\" /></a>&nbsp;";
                         }
-					}
+                    }
 //				}
-				if($allowmanage) {
-					$title = get_string('editsession','attforblock');
-					$actions .= "<a title=\"$title\" href=\"sessions.php?id=$cm->id&amp;sessionid={$sessdata->id}&amp;action=update\">".
-								"<img src=\"{$CFG->pixpath}/t/edit.gif\" alt=\"$title\" /></a>&nbsp;";
-					$title = get_string('deletesession','attforblock');
-					$actions .= "<a title=\"$title\" href=\"sessions.php?id=$cm->id&amp;sessionid={$sessdata->id}&amp;action=delete\">".
-								"<img src=\"{$CFG->pixpath}/t/delete.gif\" alt=\"$title\" /></a>&nbsp;";
-				}
-				
-				$table->data[$sessdata->id][] = $i;
-				$table->data[$sessdata->id][] = $sessdata->groupid ? $groups[$sessdata->groupid]->name : get_string('commonsession', 'attforblock');
-				$table->data[$sessdata->id][] = userdate($sessdata->sessdate, get_string('strftimedmyw', 'attforblock'));
-				$table->data[$sessdata->id][] = userdate($sessdata->sessdate, get_string('strftimehm', 'attforblock'));
+                if($allowmanage) {
+                    $title = get_string('editsession','attforblock');
+                    $actions .= "<a title=\"$title\" href=\"sessions.php?id=$cm->id&amp;sessionid={$sessdata->id}&amp;action=update\">".
+                                "<img src=\"{$CFG->pixpath}/t/edit.gif\" alt=\"$title\" /></a>&nbsp;";
+                    $title = get_string('deletesession','attforblock');
+                    $actions .= "<a title=\"$title\" href=\"sessions.php?id=$cm->id&amp;sessionid={$sessdata->id}&amp;action=delete\">".
+                                "<img src=\"{$CFG->pixpath}/t/delete.gif\" alt=\"$title\" /></a>&nbsp;";
+                }
+
+                $table->data[$sessdata->id][] = $i;
+                $table->data[$sessdata->id][] = $sessdata->groupid ? $groups[$sessdata->groupid]->name : get_string('commonsession', 'attforblock');
+                $table->data[$sessdata->id][] = userdate($sessdata->sessdate, get_string('strftimedmyw', 'attforblock'));
+                $table->data[$sessdata->id][] = userdate($sessdata->sessdate, get_string('strftimehm', 'attforblock'));
                 $hours = floor($sessdata->duration / HOURSECS);
                 $mins = floor(($sessdata->duration - $hours * HOURSECS) / MINSECS);
                 $mins = $mins < 10 ? "0$mins" : "$mins";
-				$table->data[$sessdata->id][] = $hours ? "{$hours}&nbsp;{$strhours}&nbsp;{$mins}&nbsp;{$strmins}" : "{$mins}&nbsp;{$strmins}";
-				$table->data[$sessdata->id][] = $desc;
-				$table->data[$sessdata->id][] = $actions;
-				$table->data[$sessdata->id][] = '<input type="checkbox" name="sessid['.$sessdata->id.']" />';
-				unset($desc, $actions);
-			}
+                $table->data[$sessdata->id][] = $hours ? "{$hours}&nbsp;{$strhours}&nbsp;{$mins}&nbsp;{$strmins}" : "{$mins}&nbsp;{$strmins}";
+                $table->data[$sessdata->id][] = $desc;
+                $table->data[$sessdata->id][] = $actions;
+                $table->data[$sessdata->id][] = '<input type="checkbox" name="sessid['.$sessdata->id.']" />';
+                unset($desc, $actions);
+            }
+        }
         echo '<div align="center"><div class="generalbox attwidth">';
         echo "<form method=\"post\" action=\"sessions.php?id={$cm->id}\">"; //&amp;sessionid={$sessdata->id}
 		print_table($table);

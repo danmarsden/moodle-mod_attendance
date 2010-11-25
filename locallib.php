@@ -341,7 +341,7 @@ function print_user_attendaces($user, $cm, $attforblock,  $course = 0, $printing
 
 function print_filter_controls($url, $id, $studentid=0, $sort=NULL, $printselector=WITHOUT_SELECTOR) {
 
-    global $SESSION, $current, $view, $cm;
+    global $CFG, $SESSION, $current, $view, $cm;
 
     $date = usergetdate($current);
     $mday = $date['mday'];
@@ -349,7 +349,8 @@ function print_filter_controls($url, $id, $studentid=0, $sort=NULL, $printselect
     $mon = $date['mon'];
     $year = $date['year'];
 
-    $currentdatecontrols = '';
+    $curdatecontrols = '';
+    $curdatetxt = '';
     switch ($view) {
         case 'days':
             $format = get_string('strftimedm', 'attforblock');
@@ -387,6 +388,7 @@ function print_filter_controls($url, $id, $studentid=0, $sort=NULL, $printselect
 
     $link = $url . "?id=$id" . ($sort ? "&amp;sort=$sort" : "") . ($studentid ? "&amp;student=$studentid" : "");
 
+    $currentgroup = -1;
     if ($printselector === GROUP_SELECTOR) {
         $groupmode = groups_get_activity_groupmode($cm);
         $currentgroup = groups_get_activity_group($cm, true);
@@ -394,7 +396,7 @@ function print_filter_controls($url, $id, $studentid=0, $sort=NULL, $printselect
         $context = get_context_instance(CONTEXT_MODULE, $cm->id);
         if ($groupmode == VISIBLEGROUPS ||
                 ($groupmode && has_capability('moodle/site:accessallgroups', $context))) {
-            $groupselector = groups_print_activity_menu($cm, $link, true);
+            $groupselector = groups_print_activity_menu($cm, $CFG->wwwroot . '/mod/attforblock/' . $link, true);
         }
     } elseif ($printselector === SESSION_TYPE_SELECTOR and $groupmode = groups_get_activity_groupmode($cm)) {
         $context = get_context_instance(CONTEXT_MODULE, $cm->id);
@@ -433,12 +435,12 @@ function print_filter_controls($url, $id, $studentid=0, $sort=NULL, $printselect
         }
 
         $group = optional_param('group', -2, PARAM_INT);
+        if (!array_key_exists('attsessiontype', $SESSION)) {
+            $SESSION->attsessiontype = array();
+        }
         if ($group > -2) {
             $SESSION->attsessiontype[$cm->course] = $group;
         } elseif (!array_key_exists($cm->course, $SESSION->attsessiontype)) {
-			if (!array_key_exists('attsessiontype', $SESSION)) {
-				$SESSION->attsessiontype = array();
-			}
             $SESSION->attsessiontype[$cm->course] = -1;
         }
         
