@@ -299,8 +299,9 @@ function print_user_attendaces($user, $cm, $attforblock,  $course = 0, $printing
         else
             set_current_date ($course->id, $current);
 
-        list($startdate, $enddate) =
-                print_filter_controls("view.php", $id, $studentid);
+        $ret = print_filter_controls("view.php", $id, $studentid);
+        $startdate = $ret['startdate'];
+        $enddate = $ret['enddate'];
 
         if ($startdate && $enddate) {
             $where = "ats.courseid={$course->id} AND al.studentid = {$user->id} AND ats.sessdate >= $startdate AND ats.sessdate < $enddate";
@@ -363,7 +364,7 @@ function print_filter_controls($url, $id, $studentid=0, $sort=NULL, $printselect
         case 'weeks':
             $format = get_string('strftimedm', 'attforblock');
             $startdate = make_timestamp($year, $mon, $mday - $wday + 1);
-            $enddate = make_timestamp($year, $mon, $mday + 7 - $wday);
+            $enddate = make_timestamp($year, $mon, $mday + 7 - $wday + 1) - 1;
             $prevcur = $startdate - WEEKSECS;
             $nextcur = $startdate + WEEKSECS;
             $curdatetxt = userdate($startdate, $format)." - ".userdate($enddate, $format);
@@ -378,7 +379,7 @@ function print_filter_controls($url, $id, $studentid=0, $sort=NULL, $printselect
             break;
         case 'alltaken':
             $startdate = 1;
-            $enddate = $current;
+            $enddate = time();
             break;
         case 'all':
             $startdate = 0;
@@ -520,7 +521,7 @@ function print_filter_controls($url, $id, $studentid=0, $sort=NULL, $printselect
 
     echo "</div>";
 
-    return array($startdate, $enddate, $currentgroup);
+    return array('startdate' => $startdate, 'enddate' => $enddate, 'currentgroup' => $currentgroup);
 }
 
 function plug_yui_calendar($current) {
