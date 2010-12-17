@@ -168,7 +168,11 @@
                         if ($sessdata->groupid && !array_key_exists($sessdata->groupid, $studgroups))
                             $table->data[$student->id][] = '';
                         else
-                            $table->data[$student->id][] = '?';
+                            if($sessdata->lasttaken > 0) {
+                                $table->data[$student->id][] = '–';
+                            } else {
+                                $table->data[$student->id][] = '?';
+                            }
 					}
 				}
 				foreach($statuses as $st) {
