@@ -20,7 +20,11 @@ class mod_attforblock_mod_form extends moodleform_mod {
 
         $mform->addElement('modgrade', 'grade', get_string('grade'));
         $mform->setDefault('grade', 100);
+
+        $mform->addElement('select', 'displaymode', get_string('displaymode','attforblock'), array (get_string('sortedlist','attforblock'), get_string('sortedgrid','attforblock')));
         
+        $mform->addElement('select', 'gridcolumns', get_string('gridcolumns','attforblock'), array ('1','2','3','4','5','6','7','8','9','10'));
+
         $this->standard_coursemodule_elements(true);
 
 //-------------------------------------------------------------------------------

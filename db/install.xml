@@ -10,6 +10,8 @@
         <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="id" NEXT="name"/>
         <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" ENUM="false" PREVIOUS="course" NEXT="grade"/>
         <FIELD NAME="grade" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" DEFAULT="100" SEQUENCE="false" ENUM="false" COMMENT="This is maximum grade for instance" PREVIOUS="name"/>
+        <FIELD NAME="displaymode" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" ENUM="false" COMMENT="Default display mode" PREVIOUS="grade"/>
+        <FIELD NAME="gridcolumns" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" DEFAULT="4" SEQUENCE="false" ENUM="false" COMMENT="Default columns number for grid view" PREVIOUS="displaymode"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="Primary key for attforblock"/>

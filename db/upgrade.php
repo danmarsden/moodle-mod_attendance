@@ -228,6 +228,18 @@ function xmldb_attforblock_upgrade($oldversion=0) {
         $result = $result && add_index($table, $index);
     }
 
+    if ($oldversion < 2010122900 and $result) {
+        $table = new XMLDBTable('attforblock');
+
+        $field = new XMLDBField('displaymode');
+        $field->setAttributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'grade');
+        $result = $result && add_field($table, $field);
+
+        $field = new XMLDBField('gridcolumns');
+        $field->setAttributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '4', 'displaymode');
+        $result = $result && add_field($table, $field);
+    }
+
     return $result;
 }
 

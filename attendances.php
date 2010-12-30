@@ -103,6 +103,18 @@
     $groupmode = groups_get_activity_groupmode($cm);
     $currentgroup = groups_get_activity_group($cm, true);
 
+    // get the viewmode & grid columns (default is set in module settings)
+    $attforblockrecord = get_record('attforblock', 'course', $course->id);
+    $view       = optional_param('view', $attforblockrecord->displaymode, PARAM_INT);
+    $gridcols   = optional_param('gridcols', $attforblockrecord->gridcolumns, PARAM_INT);
+    echo '<center>';
+    $options = array (get_string('sortedlist','attforblock'), get_string('sortedgrid','attforblock'));
+    $data = "attendances.php?id=$id&amp;sessionid=$sessionid&grouptype=$grouptype";
+    if ($group!=-1) {
+        $data = $data . "&group=$group";
+    }
+    popup_form("$data&view=", $options, 'viewmenu', $view, '');
+    echo '</center>';
     if ($grouptype === 0) {
         if ($currentgroup) {
             $students = get_users_by_capability($context, 'moodle/legacy:student', '', "u.$sort ASC", '', '', $currentgroup, '', false);
@@ -128,10 +140,19 @@
     $statuses = get_statuses($course->id);
 	$i = 3;
   	foreach($statuses as $st) {
+                switch($view) {
+                    case 0:
 		$tabhead[] = "<a href=\"javascript:select_all_in('TD', 'cell c{$i}', null);\"><u>$st->acronym</u></a>";
+                        break;
+                    case 1:
+                $tabhead[] = "<a href=\"javascript:select_all_in('INPUT', '". $st->acronym . "', null);\"><u>$st->acronym</u></a>";
+                        break;
+                }
 		$i++;
 	}
+        if ($view == 0) {
 	$tabhead[] = get_string('remarks','attforblock');
+        }
 	
 	$firstname = "<a href=\"attendances.php?id=$id&amp;sessionid=$sessionid&amp;sort=firstname\">".get_string('firstname').'</a>';
 	$lastname  = "<a href=\"attendances.php?id=$id&amp;sessionid=$sessionid&amp;sort=lastname\">".get_string('lastname').'</a>';
@@ -143,6 +164,9 @@
 	
 	if ($students) {
         unset($table);
+
+        switch($view) {
+        case 0:     // sorted list
         $table->width = '0%';
         $table->head[] = '#';
         $table->align[] = 'center';
@@ -173,6 +197,38 @@
                  @$table->data[$student->id][] = '<input name="student'.$student->id.'" type="radio" value="'.$st->id.'" '.($st->id == $att->statusid ? 'checked' : '').'>';
             }
             $table->data[$student->id][] = '<input type="text" name="remarks'.$student->id.'" size="" value="'.($att ? $att->remarks : '').'">';
+        }
+            break;
+        case 1:     // sorted grid
+            $table->width = '0%';
+
+            $data = '';
+            foreach ($tabhead as $hd) {
+                $data = $data . $hd . '&nbsp';
+            }
+            print_heading($data,'center');
+            
+            $i = 0;
+            // sanity check
+            $gridcols = $gridcols < 0 ? 0 : $gridcols;
+            for ($i=0; $i<=$gridcols; $i++) {
+                $table->head[] = '&nbsp;';
+                $table->align[] = 'center';
+                $table->size[] = '110px';
+            }
+
+            $i = 0;
+            foreach($students as $student) {
+                $i++;
+                $att = get_record('attendance_log', 'sessionid', $sessionid, 'studentid', $student->id);
+
+                $data = "<span class='userinfobox' style='font-size:80%;border:none'>" . print_user_picture($student, $course->id, $student->picture, true, true, '', fullname($student)) . "<br/>" . fullname($student) . "<br/></span>";//, $returnstring=false, $link=true, $target='');
+                foreach($statuses as $st) {
+                     $data = $data . '<input name="student'.$student->id.'" type="radio" class="' . $st->acronym . '" value="'.$st->id.'" '.($st->id == $att->statusid ? 'checked' : '').'>' . $st->acronym;
+                }
+                $table->data[($i-1) / ($gridcols+1)][] = $data;
+            }
+            break;
         }
 
         echo '<form name="takeattendance" method="post" action="attendances.php">';

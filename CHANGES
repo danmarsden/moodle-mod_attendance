@@ -1,3 +1,12 @@
+2010-12-29 - 2010-12-30  lrlopez
+
+        * db/install.xml:
+        * db/upgrade.php:
+        Implemented display modes (list and grid)
+
+        * lang/: en_utf8/attforblock.php, es_utf8/attforblock.php:
+        Added new strings for the new display modes
+
 2010-07-10 - 2010-09-17  andreev.artem
 
     Implemented ability to add two types of sessions: common and group
