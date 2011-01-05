@@ -38,7 +38,7 @@
         print_error('badcontext');
     }
     
-    $statlist = implode(',', array_keys( (array)get_statuses($course->id) ));
+    $statlist = implode(',', array_keys( (array)get_statuses($attforblock->id) ));
     if ($form = data_submitted()) {
     	$students = array();			// stores students ids
 		$formarr = (array)$form;
@@ -105,15 +105,28 @@
 
     // get the viewmode & grid columns (default is set in module settings)
     $attforblockrecord = get_record('attforblock', 'course', $course->id);
-    $view       = optional_param('view', $attforblockrecord->displaymode, PARAM_INT);
-    $gridcols   = optional_param('gridcols', $attforblockrecord->gridcolumns, PARAM_INT);
+    $view       = optional_param('view', get_user_preferences("attforblock_viewmode",0), PARAM_INT);
+    $gridcols   = optional_param('gridcols', get_user_preferences("attforblock_gridcolumns",5), PARAM_INT);
     echo '<center>';
-    $options = array (get_string('sortedlist','attforblock'), get_string('sortedgrid','attforblock'));
-    $data = "attendances.php?id=$id&amp;sessionid=$sessionid&grouptype=$grouptype";
+    $options = array (0 => get_string('sortedlist','attforblock'), 1 => get_string('sortedgrid','attforblock'));
+    $data = "attendances.php?id=$id&sessionid=$sessionid&grouptype=$grouptype&gridcols=$gridcols";
     if ($group!=-1) {
         $data = $data . "&group=$group";
     }
     popup_form("$data&view=", $options, 'viewmenu', $view, '');
+    if ($view==1) {
+        set_user_preference("attforblock_viewmode", $view);
+        set_user_preference("attforblock_gridcolumns", $gridcols);
+        $options = array (1 => '1 '.get_string('column','attforblock'),'2 '.get_string('columns','attforblock'),'3 '.get_string('columns','attforblock'),
+                               '4 '.get_string('columns','attforblock'),'5 '.get_string('columns','attforblock'),'6 '.get_string('columns','attforblock'),
+                               '7 '.get_string('columns','attforblock'),'8 '.get_string('columns','attforblock'),'9 '.get_string('columns','attforblock'),
+                               '10 '.get_string('columns','attforblock'));
+        $data = "attendances.php?id=$id&sessionid=$sessionid&grouptype=$grouptype&view=$view";
+        if ($group!=-1) {
+            $data = $data . "&group=$group";
+        }
+        popup_form("$data&gridcols=", $options, 'colsmenu', $gridcols, '');
+    }
     echo '</center>';
     if ($grouptype === 0) {
         if ($currentgroup) {
@@ -137,7 +150,7 @@
 							', "'.($sessdata->description ? $sessdata->description : get_string('nodescription', 'attforblock')).'"</b>';
 	print_table($table);
 	
-    $statuses = get_statuses($course->id);
+    $statuses = get_statuses($attforblock->id);
 	$i = 3;
   	foreach($statuses as $st) {
                 switch($view) {
@@ -210,8 +223,8 @@
             
             $i = 0;
             // sanity check
-            $gridcols = $gridcols < 0 ? 0 : $gridcols;
-            for ($i=0; $i<=$gridcols; $i++) {
+            $gridcols = $gridcols < 1 ? 1 : $gridcols;
+            for ($i=0; $i<$gridcols; $i++) {
                 $table->head[] = '&nbsp;';
                 $table->align[] = 'center';
                 $table->size[] = '110px';
@@ -226,7 +239,7 @@
                 foreach($statuses as $st) {
                      $data = $data . '<input name="student'.$student->id.'" type="radio" class="' . $st->acronym . '" value="'.$st->id.'" '.($st->id == $att->statusid ? 'checked' : '').'>' . $st->acronym;
                 }
-                $table->data[($i-1) / ($gridcols+1)][] = $data;
+                $table->data[($i-1) / ($gridcols)][] = $data;
             }
             break;
         }
@@ -237,7 +250,7 @@
         echo '<input type="hidden" name="sessionid" value="'.$sessionid.'">';
         echo '<input type="hidden" name="grouptype" value="'.$grouptype.'">';
         echo '<input type="hidden" name="formfrom" value="editsessvals">';
-        echo '<center><input type="submit" name="esv" value="'.get_string('ok').'"></center>';
+        echo '<center><input type="submit" name="esv" value="'.get_string('save','attforblock').'"></center>';
         echo '</form>';
     } else {
 		print_heading(get_string('nothingtodisplay'), 'center');

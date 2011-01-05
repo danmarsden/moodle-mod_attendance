@@ -228,18 +228,33 @@ function xmldb_attforblock_upgrade($oldversion=0) {
         $result = $result && add_index($table, $index);
     }
 
-    if ($oldversion < 2010122900 and $result) {
-        $table = new XMLDBTable('attforblock');
+    if ($oldversion < 2010123003 and $result) {
 
-        $field = new XMLDBField('displaymode');
-        $field->setAttributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'grade');
+        $table = new XMLDBTable('attendance_sessions');
+
+        $field = new XMLDBField('attendanceid');
+        $field->setAttributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'groupid');
         $result = $result && add_field($table, $field);
 
-        $field = new XMLDBField('gridcolumns');
-        $field->setAttributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '4', 'displaymode');
+        $index = new XMLDBIndex('attendanceid');
+        $index->setAttributes(XMLDB_INDEX_NOTUNIQUE, array('attendanceid'));
+        $result = $result && add_index($table, $index);
+
+        $sql = "UPDATE {$CFG->prefix}attendance_sessions AS ses,{$CFG->prefix}attforblock AS att SET ses.attendanceid=att.id WHERE att.course=ses.courseid";
+        $result = $result && execute_sql($sql);
+
+        $table = new XMLDBTable('attendance_statuses');
+
+        $field = new XMLDBField('attendanceid');
+        $field->setAttributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'courseid');
         $result = $result && add_field($table, $field);
+        $index = new XMLDBIndex('attendanceid');
+        $index->setAttributes(XMLDB_INDEX_NOTUNIQUE, array('attendanceid'));
+        $result = $result && add_index($table, $index);
+
+        $sql = "UPDATE {$CFG->prefix}attendance_statuses AS sta,{$CFG->prefix}attforblock AS att SET sta.attendanceid=att.id WHERE att.course=sta.courseid";
+        $result = $result && execute_sql($sql);
     }
-
     return $result;
 }
 

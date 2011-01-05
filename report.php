@@ -60,7 +60,7 @@
     
 	$sort = $sort == 'firstname' ? 'firstname' : 'lastname';
 	
-	if(!count_records('attendance_sessions', 'courseid', $course->id)) {	// no session exists for this course
+	if(!count_records_select('attendance_sessions', "courseid = {$course->id} AND attendanceid = {$attforblock->id}")) {	// no session exists for this course
 		redirect("sessions.php?id=$cm->id&amp;action=add");			
 	} else {
         if ($current == 0)
@@ -74,9 +74,9 @@
         $currentgroup = $ret['currentgroup'];
 
 		if ($startdate && $enddate) {
-			$where = "courseid={$course->id} AND sessdate >= $course->startdate AND sessdate >= $startdate AND sessdate < $enddate";
+			$where = "courseid={$course->id} AND attendanceid = {$attforblock->id} AND sessdate >= $course->startdate AND sessdate >= $startdate AND sessdate < $enddate";
 		} else {
-			$where = "courseid={$course->id} AND sessdate >= $course->startdate";
+			$where = "courseid={$course->id} AND attendanceid = {$attforblock->id} AND sessdate >= $course->startdate";
 		}
 
         if ($currentgroup) {
@@ -86,8 +86,8 @@
         	$students = get_users_by_capability($context, 'moodle/legacy:student', '', "u.$sort ASC", '', '', '', '', false);
         }
 
-        $statuses = get_statuses($course->id);
-        $allstatuses = get_statuses($course->id, false);
+        $statuses = get_statuses($attforblock->id);
+        $allstatuses = get_statuses($attforblock->id, false);
 
 
 		if ($students and
@@ -176,11 +176,11 @@
 					}
 				}
 				foreach($statuses as $st) {
-					$table->data[$student->id][] = get_attendance($student->id, $course, $st->id);
+					$table->data[$student->id][] = get_attendance($student->id, $course, $attforblock, $st->id);
 				}
                 if ($attforblock->grade) {
-                    $table->data[$student->id][] = get_grade($student->id, $course).'&nbsp;/&nbsp;'.get_maxgrade($student->id, $course);
-                    $table->data[$student->id][] = get_percent($student->id, $course).'%';
+                    $table->data[$student->id][] = get_grade($student->id, $course, $attforblock).'&nbsp;/&nbsp;'.get_maxgrade($student->id, $course, $attforblock);
+                    $table->data[$student->id][] = get_percent($student->id, $course, $attforblock).'%';
                 }
 			}
     		print_table($table);

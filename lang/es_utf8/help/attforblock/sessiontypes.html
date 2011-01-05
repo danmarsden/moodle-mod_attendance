@@ -1,0 +1,17 @@
+<p align="center"><b>Asistencia</b></p>
+<p align="center">
+  <?php
+	  	$temp = $module;
+		unset($module);
+		require_once($CFG->dirroot.'/mod/attforblock/version.php');
+	  	echo get_string('version').": $module->release ($module->version)";
+		unset($module);
+		$module = $temp;
+	?>
+</p>
+<p align="left">Hay dos tipos de sesiones: comunes y grupales.
+    La posibilidad de elegir una u otra dependerá del modo de grupo con que fue creada la actividad. </p>
+<p align="left">Modo de grupo &quot;No hay grupos&quot; únicamente se pueden elegir sesiones comunes. </p>
+<p align="left">Modo de grupo &quot;Grupos visible&quot; es posible elegir sesiones grupales o comunes. </p>
+<p align="left">Modo de grupo &quot;Grupos Separados&quot; únicamente es posible elegir sesiones grupales. </p>
+<p align="left">En caso de que fuese necesario, es posible seleccionar varios grupos simultáneos o alternos utilizando la tecla ctrl </p>

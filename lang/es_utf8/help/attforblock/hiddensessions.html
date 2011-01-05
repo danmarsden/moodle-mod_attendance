@@ -1,0 +1,15 @@
+<p align="center"><b>Asistencia</b></p>
+<p align="left"><strong>Ocultar sesiones</strong></p>
+<p align="center">
+  <?php
+	  	$temp = $module;
+		unset($module);
+		require_once($CFG->dirroot.'/mod/attforblock/version.php');
+	  	echo get_string('version').": $module->release ($module->version)";
+		unset($module);
+		$module = $temp;
+	?>
+</p>
+<p align="left">Las sesiones se ocultan cuando la fecha de comienzo de un curso es anterior que la actual. Modifique la fecha de inicio del curso y las sesiones ocultas se mostrarán.</p>
+<p align="left">Se puede utilizar esta opción para ocultar sesiones antiguas en lugar de eliminarlas. 
+Tenga en cuenta que únicamente las sesiones visibles son las que se tendrán en cuenta en el Libro de Calificaciones.</p>

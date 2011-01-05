@@ -1,7 +1,29 @@
-2010-12-29 - 2010-12-30  lrlopez
+2010-12-30 - 2011-01-04  lrlopez
 
-        * db/install.xml:
-        * db/upgrade.php:
+        * lang/: es_utf8/attforblock.php:
+
+        Updated and fixed Spanish translation (Enrique Robredo)
+
+        * styles.php:
+
+        Fixed yui-calendar CSS modifying global CSS behaviour.
+
+        * manage.php:
+
+        Added an option for choosing between show session duration or show end
+        time in session list.
+
+        * db/: install.xml: upgrade.php: version.php:
+        * attsettings.php: lib.php: locallib.php: manage.php: report.php:
+
+        Added support to allow more than one attendance in the same course.
+
+        * sessions.php:
+
+        Fixed DST bug (adding multiple sessions could generate invalid start
+        times if any DST change occur in-between)
+
+        * attendances.php:
         Implemented display modes (list and grid)
 
         * lang/: en_utf8/attforblock.php, es_utf8/attforblock.php:

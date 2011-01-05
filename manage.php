@@ -10,7 +10,7 @@
 	$from       = optional_param('from', PARAM_ACTION);
     $view       = optional_param('view', NULL, PARAM_ALPHA);        // which page to show
 	$current	= optional_param('current', 0, PARAM_INT);
-
+    $showendtime       = optional_param('showendtime', get_user_preferences("attforblock_showendtime",0), PARAM_INT);
     if (! $cm = get_record('course_modules', 'id', $id)) {
         error('Course Module ID was incorrect');
     }
@@ -43,14 +43,16 @@
             !has_capability('mod/attforblock:changeattendances', $context)) {
         redirect("view.php?id=$cm->id");
     }
-    
+
+    set_user_preference("attforblock_showendtime",$showendtime);
+
     //if teacher is coming from block, then check for a session exists for today
 	if($from === 'block') {
 		$today = time(); // because we compare with database, we don't need to use usertime()
         $sql = "SELECT id, groupid, lasttaken
                   FROM {$CFG->prefix}attendance_sessions
                  WHERE $today BETWEEN sessdate AND (sessdate + duration)
-                   AND courseid = $course->id";
+                   AND courseid = $course->id AND attendanceid = $attforblock->id";
         if($atts = get_records_sql($sql)) {
             $size = count($atts);
             if ($size == 1) {
@@ -76,23 +78,23 @@
     
 	print_heading(get_string('attendanceforthecourse','attforblock').' :: ' .$course->fullname);
 	
-	if(!count_records_select('attendance_sessions', "courseid = $course->id AND sessdate >= $course->startdate")) {	// no session exists for this course
+	if(!count_records_select('attendance_sessions', "courseid = $course->id AND attendanceid = $attforblock->id AND sessdate >= $course->startdate")) {	// no session exists for this course
 		show_tabs($cm, $context);
 		print_heading(get_string('nosessionexists','attforblock'));	
-		$hiddensess = count_records_select('attendance_sessions', "courseid = $course->id AND sessdate < $course->startdate");
+		$hiddensess = count_records_select('attendance_sessions', "courseid = $course->id AND attendanceid = $attforblock->id AND sessdate < $course->startdate");
         echo '<div align="left">'.helpbutton('hiddensessions', '', 'attforblock', true, true, '', true);
         echo get_string('hiddensessions', 'attforblock').': '.$hiddensess.'</div>';
 	} else {	//sessions generated , display them
 		add_to_log($course->id, 'attendance', 'manage attendances', 'mod/attforblock/manage.php?course='.$course->id, $user->lastname.' '.$user->firstname);
 		show_tabs($cm, $context);
-		print_sessions_list($course);
+		print_sessions_list($course, $attforblock);
 	}
 //	require_once('lib.php');
 //	$t = attforblock_get_user_grades($attforblock); ////////////////////////////////////////////
 	print_footer($course);
 	
 	
-function print_sessions_list($course) {
+function print_sessions_list($course, $attforblock) {
 	global $CFG, $context, $cm, $current, $view, $id;
 	
         $strhours = get_string('hours');
@@ -109,9 +111,9 @@ function print_sessions_list($course) {
         $currentgroup = $ret['currentgroup'];
 
         if ($startdate && $enddate) {
-            $where = "courseid={$course->id} AND sessdate >= $course->startdate AND sessdate >= $startdate AND sessdate < $enddate";
+            $where = "courseid={$course->id} AND attendanceid = $attforblock->id AND sessdate >= $course->startdate AND sessdate >= $startdate AND sessdate < $enddate";
         } else {
-            $where = "courseid={$course->id} AND sessdate >= $course->startdate";
+            $where = "courseid={$course->id} AND attendanceid = $attforblock->id AND sessdate >= $course->startdate";
         }
 
         if ($currentgroup > -1) {
@@ -122,7 +124,7 @@ function print_sessions_list($course) {
         $i = 0;
         $table->width = '100%';
         //$table->tablealign = 'center';
-        $table->head = array('#', get_string('sessiontypeshort', 'attforblock'), get_string('date'), get_string('time'), get_string('duration', 'attforblock'), get_string('description','attforblock'), get_string('actions'), get_string('select'));
+        $table->head = array('#', get_string('sessiontypeshort', 'attforblock'), get_string('date'), get_string('from'), ($showendtime=='0') ? get_string('duration', 'attforblock') : get_string('to'), get_string('description','attforblock'), get_string('actions'), get_string('select'));
         $table->align = array('', '', '', 'right', 'left', 'center', 'center');
         $table->size = array('1px', '', '1px', '1px', '1px', '*', '1px', '1px');
 
@@ -170,17 +172,18 @@ function print_sessions_list($course) {
                 $hours = floor($sessdata->duration / HOURSECS);
                 $mins = floor(($sessdata->duration - $hours * HOURSECS) / MINSECS);
                 $mins = $mins < 10 ? "0$mins" : "$mins";
-                $table->data[$sessdata->id][] = $hours ? "{$hours}&nbsp;{$strhours}&nbsp;{$mins}&nbsp;{$strmins}" : "{$mins}&nbsp;{$strmins}";
+                $table->data[$sessdata->id][] =  ($showendtime=='0') ? ($hours ? "{$hours}&nbsp;{$strhours}&nbsp;{$mins}&nbsp;{$strmins}" : "{$mins}&nbsp;{$strmins}") : userdate($sessdata->sessdate+$sessdata->duration, get_string('strftimehm', 'attforblock'));;
                 $table->data[$sessdata->id][] = $desc;
                 $table->data[$sessdata->id][] = $actions;
                 $table->data[$sessdata->id][] = '<input type="checkbox" name="sessid['.$sessdata->id.']" />';
                 unset($desc, $actions);
             }
         }
+        
         echo '<div align="center"><div class="generalbox attwidth">';
         echo "<form method=\"post\" action=\"sessions.php?id={$cm->id}\">"; //&amp;sessionid={$sessdata->id}
 		print_table($table);
-		$hiddensess = count_records_select('attendance_sessions', "courseid = $course->id AND sessdate < $course->startdate");
+		$hiddensess = count_records_select('attendance_sessions', "courseid = $course->id AND attendanceid = $attforblock->id AND sessdate < $course->startdate");
         echo '<table width="100%"><tr><td valign="top">';
         echo '<div align="left">'.helpbutton('hiddensessions', '', 'attforblock', true, true, '', true);
         echo get_string('hiddensessions', 'attforblock').': '.$hiddensess.'</div></td>';

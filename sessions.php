@@ -60,6 +60,7 @@
 			
 	    	if (isset($fromform->addmultiply)) {
 		    	$startdate = $fromform->sessiondate;// + $fromform->stime['hour']*3600 + $fromform->stime['minute']*60;
+                        $starttime = $startdate - usergetmidnight($startdate);
 				$enddate = $fromform->sessionenddate + ONE_DAY; // because enddate in 0:0am
 				
 				//get number of days
@@ -91,7 +92,8 @@
 //									continue;
 //								}
 								$rec->courseid = $course->id;
-								$rec->sessdate = $sdate;
+                                                                $rec->attendanceid = $attforblock->id;
+								$rec->sessdate =  usergetmidnight($sdate) + $starttime;
 								$rec->duration = $duration;
 								$rec->description = $fromform->sdescription;
 								$rec->timemodified = $now;
@@ -117,6 +119,7 @@
 	    	} else {
 				// insert one session
 				$rec->courseid = $course->id;
+                                $rec->attendanceid = $attforblock->id;
 				$rec->sessdate = $fromform->sessiondate;
 				$rec->duration = $duration;
 				$rec->description = $fromform->sdescription;
