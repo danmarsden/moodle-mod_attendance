@@ -390,6 +390,7 @@ function print_filter_controls($url, $id, $studentid=0, $sort=NULL, $printselect
     $link = $url . "?id=$id" . ($sort ? "&amp;sort=$sort" : "") . ($studentid ? "&amp;student=$studentid" : "");
 
     $currentgroup = -1;
+    $sessiontypeselector = '';
     if ($printselector === GROUP_SELECTOR) {
         $groupmode = groups_get_activity_groupmode($cm);
         $currentgroup = groups_get_activity_group($cm, true);
