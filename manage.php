@@ -95,7 +95,7 @@
 	
 	
 function print_sessions_list($course, $attforblock) {
-	global $CFG, $context, $cm, $current, $view, $id;
+	global $CFG, $context, $cm, $current, $view, $id, $showendtime;
 	
         $strhours = get_string('hours');
         $strmins = get_string('min');

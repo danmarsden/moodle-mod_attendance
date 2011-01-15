@@ -1,3 +1,14 @@
+2011-01-15  lrlopez
+
+        * db/install.xml:
+
+        Bugs fixed.
+
+        * attendances.php: locallib.php: manage.php:
+
+        Fixed some minor bugs and code readibility issues. Now, in grid view
+        mode, statuses are always next to their radio buttons.
+
 2010-12-30 - 2011-01-04  lrlopez
 
         * lang/: es_utf8/attforblock.php:

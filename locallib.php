@@ -12,6 +12,9 @@ define('WITHOUT_SELECTOR', 0);
 define('GROUP_SELECTOR', 1);
 define('SESSION_TYPE_SELECTOR', 2);
 
+define('SORTEDLISTVIEW', 0);
+define('SORTEDGRIDVIEW', 1);
+
 function show_tabs($cm, $context, $currenttab='sessions')
 {
 	$toprow = array();

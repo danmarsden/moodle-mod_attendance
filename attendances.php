@@ -58,7 +58,7 @@
 				$i++;
 			}
 		}
-		$attforblockrecord = get_record('attforblock', 'course', $course->id);
+		$attforblockrecord = get_record('attforblock', 'id', $cm->instance);//'course', $course->id);
 
 		foreach($students as $student) {
 			if ($log = get_record('attendance_log', 'sessionid', $sessionid, 'studentid', $student->studentid)) {
@@ -104,17 +104,17 @@
     $currentgroup = groups_get_activity_group($cm, true);
 
     // get the viewmode & grid columns (default is set in module settings)
-    $attforblockrecord = get_record('attforblock', 'course', $course->id);
-    $view       = optional_param('view', get_user_preferences("attforblock_viewmode",0), PARAM_INT);
+    $attforblockrecord = get_record('attforblock', 'id', $cm->instance);//'course', $course->id);'course', $course->id);
+    $view       = optional_param('view', get_user_preferences("attforblock_viewmode", SORTEDLISTVIEW), PARAM_INT);
     $gridcols   = optional_param('gridcols', get_user_preferences("attforblock_gridcolumns",5), PARAM_INT);
     echo '<center>';
-    $options = array (0 => get_string('sortedlist','attforblock'), 1 => get_string('sortedgrid','attforblock'));
+    $options = array (SORTEDLISTVIEW => get_string('sortedlist','attforblock'), SORTEDGRIDVIEW => get_string('sortedgrid','attforblock'));
     $data = "attendances.php?id=$id&sessionid=$sessionid&grouptype=$grouptype&gridcols=$gridcols";
     if ($group!=-1) {
         $data = $data . "&group=$group";
     }
     popup_form("$data&view=", $options, 'viewmenu', $view, '');
-    if ($view==1) {
+    if ($view == SORTEDGRIDVIEW) {
         set_user_preference("attforblock_viewmode", $view);
         set_user_preference("attforblock_gridcolumns", $gridcols);
         $options = array (1 => '1 '.get_string('column','attforblock'),'2 '.get_string('columns','attforblock'),'3 '.get_string('columns','attforblock'),
@@ -154,10 +154,10 @@
 	$i = 3;
   	foreach($statuses as $st) {
                 switch($view) {
-                    case 0:
+                    case SORTEDLISTVIEW:
 		$tabhead[] = "<a href=\"javascript:select_all_in('TD', 'cell c{$i}', null);\"><u>$st->acronym</u></a>";
                         break;
-                    case 1:
+                    case SORTEDGRIDVIEW:
                 $tabhead[] = "<a href=\"javascript:select_all_in('INPUT', '". $st->acronym . "', null);\"><u>$st->acronym</u></a>";
                         break;
                 }
@@ -179,7 +179,7 @@
         unset($table);
 
         switch($view) {
-        case 0:     // sorted list
+        case SORTEDLISTVIEW:     // sorted list
         $table->width = '0%';
         $table->head[] = '#';
         $table->align[] = 'center';
@@ -212,7 +212,7 @@
             $table->data[$student->id][] = '<input type="text" name="remarks'.$student->id.'" size="" value="'.($att ? $att->remarks : '').'">';
         }
             break;
-        case 1:     // sorted grid
+        case SORTEDGRIDVIEW:     // sorted grid
             $table->width = '0%';
 
             $data = '';
@@ -237,7 +237,7 @@
 
                 $data = "<span class='userinfobox' style='font-size:80%;border:none'>" . print_user_picture($student, $course->id, $student->picture, true, true, '', fullname($student)) . "<br/>" . fullname($student) . "<br/></span>";//, $returnstring=false, $link=true, $target='');
                 foreach($statuses as $st) {
-                     $data = $data . '<input name="student'.$student->id.'" type="radio" class="' . $st->acronym . '" value="'.$st->id.'" '.($st->id == $att->statusid ? 'checked' : '').'>' . $st->acronym;
+                     $data = $data . '<nobr><input name="student'.$student->id.'" type="radio" class="' . $st->acronym . '" value="'.$st->id.'" '.($st->id == $att->statusid ? 'checked' : '').'>' . $st->acronym . "</nobr> ";
                 }
                 $table->data[($i-1) / ($gridcols)][] = $data;
             }
