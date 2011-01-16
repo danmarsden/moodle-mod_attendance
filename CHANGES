@@ -1,3 +1,10 @@
+2011-01-16  lrlopez
+
+        * export.php: export_form.php:
+        * lang/: en_utf8/attforblock.php: es_utf8/attforblock.php:
+        Added "Start of period" into export tab and two new strings for
+        the new fields on the form.
+
 2011-01-15  lrlopez
 
         * db/install.xml:

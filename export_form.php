@@ -59,9 +59,14 @@ class mod_attforblock_export_form extends moodleform {
 //		$durtime[] =& MoodleQuickForm::createElement('select', 'minutes', get_string('minute', 'form'), $minutes, false, true);
 //        $mform->addGroup($durtime, 'durtime', get_string('duration','attforblock'), array(' '), true);
         
+        $mform->addElement('checkbox', 'includeallsessions', get_string('includeall','attforblock'), get_string('yes'));
+        $mform->setDefault('includeallsessions', true);
         $mform->addElement('checkbox', 'includenottaken', get_string('includenottaken','attforblock'), get_string('yes'));
+        $mform->addElement('date_selector', 'sessionstartdate', get_string('startofperiod','attforblock'));
+        $mform->setDefault('sessionstartdate', $course->startdate);
+        $mform->disabledIf('sessionstartdate', 'includeallsessions', 'checked');
         $mform->addElement('date_selector', 'sessionenddate', get_string('endofperiod','attforblock'));
-		$mform->disabledIf('sessionenddate', 'includenottaken', 'notchecked');
+	$mform->disabledIf('sessionenddate', 'includeallsessions', 'checked');
         
         $mform->addElement('select', 'format', get_string('format'), 
         					array('excel' => get_string('downloadexcel','attforblock'),

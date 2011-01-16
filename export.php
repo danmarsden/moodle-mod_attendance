@@ -56,11 +56,13 @@
 			$data->tabhead[] = get_string('lastname');
 			$data->tabhead[] = get_string('firstname');
 			
-			$select = "courseid = {$course->id} AND attendanceid = {$attforblock->id} AND sessdate >= {$course->startdate}";
-			if (isset($fromform->includenottaken)) {
-				$select .= " AND sessdate <= {$fromform->sessionenddate}";
-			} else {
-				$select .= " AND lasttaken != 0";
+			$select = "courseid = {$course->id} AND attendanceid = {$attforblock->id} ";
+                        if (!isset($fromform->includeallsessions)) {
+                            $finalenddate = $fromform->sessionenddate + 86400;  // take into account the whole day
+                            $select .= "AND sessdate >= {$fromform->sessionstartdate} AND sessdate < {$finalenddate} ";
+                        }
+			if (!isset($fromform->includenottaken)) {
+                            $select .= " AND lasttaken != 0";
 			}
 	
 			if ($sessions = get_records_select('attendance_sessions', $select, 'sessdate ASC')) {
