@@ -2,6 +2,18 @@
 
         * attendances.php: styles.php:
 
+        Implemented copy attendance data from same-day sessions.
+        Fixed fast session dropdown list end time inaccuracy.
+        Enhanced session dropdown list.
+
+        * lang/: en_utf8/attforblock.php, es_utf8/attforblock.php:
+
+        Added new strings for the copy dropdown menus.
+
+2011-01-18  lrlopez
+
+        * attendances.php: styles.php:
+
         Implemented fast session switching for same-day sessions.
         Fixed some XHTML compliance tags (more coming)
 

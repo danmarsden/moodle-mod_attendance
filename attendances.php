@@ -16,6 +16,7 @@
     $grouptype  = required_param('grouptype', PARAM_INT);
     $group    	= optional_param('group', -1, PARAM_INT);              // Group to show
 	$sort 		= optional_param('sort','lastname', PARAM_ALPHA);
+    $copyfrom  	= optional_param('copyfrom', -1, PARAM_INT);
 
     if (! $cm = get_record('course_modules', 'id', $id)) {
         error('Course Module ID was incorrect');
@@ -109,25 +110,29 @@
     $gridcols   = optional_param('gridcols', get_user_preferences("attforblock_gridcolumns",5), PARAM_INT);
     echo '<table class="controls" cellspacing="0"><tr>'; //echo '<center>';
     $options = array (SORTEDLISTVIEW => get_string('sortedlist','attforblock'), SORTEDGRIDVIEW => get_string('sortedgrid','attforblock'));
-    $data = "attendances.php?id=$id&grouptype=$grouptype&gridcols=$gridcols";
+    $dataurl = "attendances.php?id=$id&grouptype=$grouptype&gridcols=$gridcols";
     if ($group!=-1) {
-        $data = $data . "&group=$group";
+        $dataurl = $dataurl . "&group=$group";
     }
     $today = usergetmidnight($sessdata->sessdate);
     $select = "sessdate>={$today} AND sessdate<{$today}+86400 AND attendanceid={$cm->instance}";
-    $sessions = get_records_select('attendance_sessions', $select, 'sessdate ASC');
+    $todaysessions = get_records_select('attendance_sessions', $select, 'sessdate ASC');
     $optionssesions = array();
-    if (count($sessions)>1) {
+    if (count($todaysessions)>1) {
         echo '<td class="right"><label for="fastsessionmenu_jump">'. get_string('jumpto','attforblock') . "&nbsp;</label>";
-        foreach($sessions as $sessdatarow) {
-            $optionssessions[$sessdatarow->id] = userdate($sessdatarow->sessdate, get_string('strftimehm', 'attforblock')) . "-" . userdate($sessdatarow->sessdate+$sessdata->duration, get_string('strftimehm', 'attforblock'));
+        foreach($todaysessions as $sessdatarow) {
+            $descr = userdate($sessdatarow->sessdate, get_string('strftimehm', 'attforblock')) . "-" . userdate($sessdatarow->sessdate+$sessdatarow->duration, get_string('strftimehm', 'attforblock'));
+            if ($sessdatarow->description) {
+                $descr = $sessdatarow->description . ' ('.$descr.')';
+            }
+            $optionssessions[$sessdatarow->id] = $descr;
         }
-        popup_form("$data&sessionid=", $optionssessions, 'fastsessionmenu', $sessionid, '');
+        popup_form("$dataurl&sessionid=", $optionssessions, 'fastsessionmenu', $sessionid, '');
         echo "<td/><tr/><tr>";
     }
-    $data .= "&sessionid=$sessionid";
+    $dataurl .= "&sessionid=$sessionid";
     echo '<td class="right"><label for="viewmenu_jump">'. get_string('viewmode','attforblock') . "&nbsp;</label>";
-    popup_form("$data&view=", $options, 'viewmenu', $view, '');
+    popup_form("$dataurl&view=", $options, 'viewmenu', $view, '');
     if ($view == SORTEDGRIDVIEW) {
         set_user_preference("attforblock_viewmode", $view);
         set_user_preference("attforblock_gridcolumns", $gridcols);
@@ -135,11 +140,8 @@
                                '4 '.get_string('columns','attforblock'),'5 '.get_string('columns','attforblock'),'6 '.get_string('columns','attforblock'),
                                '7 '.get_string('columns','attforblock'),'8 '.get_string('columns','attforblock'),'9 '.get_string('columns','attforblock'),
                                '10 '.get_string('columns','attforblock'));
-        $data = "attendances.php?id=$id&sessionid=$sessionid&grouptype=$grouptype&view=$view";
-        if ($group!=-1) {
-            $data = $data . "&group=$group";
-        }
-        popup_form("$data&gridcols=", $options, 'colsmenu', $gridcols, '');
+        $dataurl .= "&view=$view";
+        popup_form("$dataurl&gridcols=", $options, 'colsmenu', $gridcols, '');
     }
     echo '</td></tr></table>';//</center>';
     if ($grouptype === 0) {
@@ -163,7 +165,7 @@
 	$table->data[][] = '<b>'.get_string('sessiondate','attforblock').': '.userdate($sessdata->sessdate, get_string('strftimedate').', '.get_string('strftimehm', 'attforblock')).
 							', "'.($sessdata->description ? $sessdata->description : get_string('nodescription', 'attforblock')).'"</b>';
 	print_table($table);
-	
+
     $statuses = get_statuses($attforblock->id);
 	$i = 3;
   	foreach($statuses as $st) {
@@ -177,7 +179,7 @@
                 }
 		$i++;
 	}
-        if ($view == SORTEDLISTVIEW) {
+    if ($view == SORTEDLISTVIEW) {
 	$tabhead[] = get_string('remarks','attforblock');
         }
 	
@@ -247,11 +249,12 @@
             $i = 0;
             foreach($students as $student) {
                 $i++;
-                $att = get_record('attendance_log', 'sessionid', $sessionid, 'studentid', $student->id);
-
+                $copyid = ($copyfrom == "-1") ? $sessionid : $copyfrom;
+                $att = get_record('attendance_log', 'sessionid', $copyid, 'studentid', $student->id);
+                $currentstatusid = $att===false ? -1 : $att->statusid;
                 $data = "<span class='userinfobox' style='font-size:80%;border:none'>" . print_user_picture($student, $course->id, $student->picture, true, true, '', fullname($student)) . "<br/>" . fullname($student) . "<br/></span>";//, $returnstring=false, $link=true, $target='');
                 foreach($statuses as $st) {
-                     $data = $data . '<nobr><input name="student'.$student->id.'" type="radio" class="' . $st->acronym . '" value="'.$st->id.'" '.($st->id == $att->statusid ? 'checked' : '').'>' . $st->acronym . "</nobr> ";
+                     $data = $data . '<nobr><input name="student'.$student->id.'" type="radio" class="' . $st->acronym . '" value="'.$st->id.'" '.($st->id == $currentstatusid ? 'checked' : '').'>' . $st->acronym . "</nobr> ";
                 }
                 $table->data[($i-1) / ($gridcols)][] = $data;
             }
@@ -266,7 +269,15 @@
         echo '<input type="hidden" name="formfrom" value="editsessvals">';
         echo '<center><input type="submit" name="esv" value="'.get_string('save','attforblock').'"></center>';
         echo '</form>';
-    } else {
+
+        if (count($todaysessions)>1) {
+            echo '<br/><table class="controls" cellspacing="0"><tr><td class="center">';
+            echo '<label for="copysessionmenu_jump">'. get_string('copyfrom','attforblock') . "&nbsp;</label>";
+            popup_form("$dataurl&copyfrom=", $optionssessions, 'copysessionmenu', $sessionid, '');
+            echo '</td></tr></table>';
+        }
+
+        } else {
 		print_heading(get_string('nothingtodisplay'), 'center');
 	}
 	 

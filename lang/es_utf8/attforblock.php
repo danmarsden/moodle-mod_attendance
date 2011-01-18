@@ -44,6 +44,7 @@ $string['columns'] = 'columnas';
 $string['commonsession'] = 'Común';
 $string['commonsessions'] = 'Comunes';
 $string['countofselected'] = 'Recuento de selección';
+$string['copyfrom'] = 'Copiar asistencia desde';
 $string['createmultiplesessions'] = 'Crear varias sesiones';
 $string['createonesession'] = 'Crear una sesión para el curso';
 $string['days'] = 'Hoy';

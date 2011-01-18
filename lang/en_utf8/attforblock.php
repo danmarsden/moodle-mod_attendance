@@ -44,6 +44,7 @@ $string['columns'] = 'columns';
 $string['commonsession'] = 'Common';
 $string['commonsessions'] = 'Common';
 $string['countofselected'] = 'Count of selected';
+$string['copyfrom'] = 'Copy attendance data from';
 $string['createmultiplesessions'] = 'Create multiple sessions';
 $string['createonesession'] = 'Create one session for the course';
 $string['days'] = 'Day';

@@ -28,10 +28,7 @@
 
 body#mod-attforblock-attendances table.controls {
     width: 100%;
-}
-
-body#mod-attforblock-attendances table.controls {
-    width: 100%;
+    text-align: center;
 }
 
 body#mod-attforblock-attendances table.controls tr {
