@@ -107,12 +107,26 @@
     $attforblockrecord = get_record('attforblock', 'id', $cm->instance);//'course', $course->id);'course', $course->id);
     $view       = optional_param('view', get_user_preferences("attforblock_viewmode", SORTEDLISTVIEW), PARAM_INT);
     $gridcols   = optional_param('gridcols', get_user_preferences("attforblock_gridcolumns",5), PARAM_INT);
-    echo '<center>';
+    echo '<table class="controls" cellspacing="0"><tr>'; //echo '<center>';
     $options = array (SORTEDLISTVIEW => get_string('sortedlist','attforblock'), SORTEDGRIDVIEW => get_string('sortedgrid','attforblock'));
-    $data = "attendances.php?id=$id&sessionid=$sessionid&grouptype=$grouptype&gridcols=$gridcols";
+    $data = "attendances.php?id=$id&grouptype=$grouptype&gridcols=$gridcols";
     if ($group!=-1) {
         $data = $data . "&group=$group";
     }
+    $today = usergetmidnight($sessdata->sessdate);
+    $select = "sessdate>={$today} AND sessdate<{$today}+86400 AND attendanceid={$cm->instance}";
+    $sessions = get_records_select('attendance_sessions', $select, 'sessdate ASC');
+    $optionssesions = array();
+    if (count($sessions)>1) {
+        echo '<td class="right"><label for="fastsessionmenu_jump">'. get_string('jumpto','attforblock') . "&nbsp;</label>";
+        foreach($sessions as $sessdatarow) {
+            $optionssessions[$sessdatarow->id] = userdate($sessdatarow->sessdate, get_string('strftimehm', 'attforblock')) . "-" . userdate($sessdatarow->sessdate+$sessdata->duration, get_string('strftimehm', 'attforblock'));
+        }
+        popup_form("$data&sessionid=", $optionssessions, 'fastsessionmenu', $sessionid, '');
+        echo "<td/><tr/><tr>";
+    }
+    $data .= "&sessionid=$sessionid";
+    echo '<td class="right"><label for="viewmenu_jump">'. get_string('viewmode','attforblock') . "&nbsp;</label>";
     popup_form("$data&view=", $options, 'viewmenu', $view, '');
     if ($view == SORTEDGRIDVIEW) {
         set_user_preference("attforblock_viewmode", $view);
@@ -127,7 +141,7 @@
         }
         popup_form("$data&gridcols=", $options, 'colsmenu', $gridcols, '');
     }
-    echo '</center>';
+    echo '</td></tr></table>';//</center>';
     if ($grouptype === 0) {
         if ($currentgroup) {
             $students = get_users_by_capability($context, 'moodle/legacy:student', '', "u.$sort ASC", '', '', $currentgroup, '', false);
@@ -163,7 +177,7 @@
                 }
 		$i++;
 	}
-        if ($view == 0) {
+        if ($view == SORTEDLISTVIEW) {
 	$tabhead[] = get_string('remarks','attforblock');
         }
 	
