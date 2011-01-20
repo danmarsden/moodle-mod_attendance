@@ -106,8 +106,21 @@
 
     // get the viewmode & grid columns (default is set in module settings)
     $attforblockrecord = get_record('attforblock', 'id', $cm->instance);//'course', $course->id);'course', $course->id);
-    $view       = optional_param('view', get_user_preferences("attforblock_viewmode", SORTEDLISTVIEW), PARAM_INT);
-    $gridcols   = optional_param('gridcols', get_user_preferences("attforblock_gridcolumns",5), PARAM_INT);
+    $view       = optional_param('view', -1, PARAM_INT);
+    if ($view != -1) {
+        set_user_preference("attforblock_viewmode", $view);
+    }
+    else {
+        $view = get_user_preferences("attforblock_viewmode", SORTEDLISTVIEW);
+    }
+    $gridcols   = optional_param('gridcols', -1, PARAM_INT);
+    if ($gridcols != -1) {
+        set_user_preference("attforblock_gridcolumns", $gridcols);
+    }
+    else {
+        $gridcols = get_user_preferences("attforblock_gridcolumns",5);
+    }
+
     echo '<table class="controls" cellspacing="0"><tr>'; //echo '<center>';
     $options = array (SORTEDLISTVIEW => get_string('sortedlist','attforblock'), SORTEDGRIDVIEW => get_string('sortedgrid','attforblock'));
     $dataurl = "attendances.php?id=$id&grouptype=$grouptype&gridcols=$gridcols";
