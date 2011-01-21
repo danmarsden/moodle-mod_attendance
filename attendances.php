@@ -104,7 +104,7 @@
     $groupmode = groups_get_activity_groupmode($cm);
     $currentgroup = groups_get_activity_group($cm, true);
 
-    // get the viewmode & grid columns (default is set in module settings)
+    // get the viewmode & grid columns
     $attforblockrecord = get_record('attforblock', 'id', $cm->instance);//'course', $course->id);'course', $course->id);
     $view       = optional_param('view', -1, PARAM_INT);
     if ($view != -1) {
@@ -147,8 +147,6 @@
     echo '<td class="right"><label for="viewmenu_jump">'. get_string('viewmode','attforblock') . "&nbsp;</label>";
     popup_form("$dataurl&view=", $options, 'viewmenu', $view, '');
     if ($view == SORTEDGRIDVIEW) {
-        set_user_preference("attforblock_viewmode", $view);
-        set_user_preference("attforblock_gridcolumns", $gridcols);
         $options = array (1 => '1 '.get_string('column','attforblock'),'2 '.get_string('columns','attforblock'),'3 '.get_string('columns','attforblock'),
                                '4 '.get_string('columns','attforblock'),'5 '.get_string('columns','attforblock'),'6 '.get_string('columns','attforblock'),
                                '7 '.get_string('columns','attforblock'),'8 '.get_string('columns','attforblock'),'9 '.get_string('columns','attforblock'),
