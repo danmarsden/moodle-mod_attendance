@@ -165,12 +165,15 @@
 							$table->data[$student->id][] = '<font color="red"><b>'.$allstatuses[$att->statusid]->acronym.'</b></font>';
 						}
 					} else {
-                        if ($sessdata->groupid && !array_key_exists($sessdata->groupid, $studgroups))
+                        if (!$studgroups || $sessdata->groupid && !array_key_exists($sessdata->groupid, $studgroups))
+                            // student is not memeber of any group OR it is session of other group
                             $table->data[$student->id][] = '';
                         else
                             if($sessdata->lasttaken > 0) {
+                                // student began to study in the group later this session
                                 $table->data[$student->id][] = '–';
                             } else {
+                                // no attendance data for session
                                 $table->data[$student->id][] = '?';
                             }
 					}
