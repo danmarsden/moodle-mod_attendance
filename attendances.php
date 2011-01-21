@@ -234,7 +234,10 @@
 			$table->data[$student->id][] = "<a href=\"view.php?id=$id&amp;student={$student->id}\">".((!$att && $update) ? '<font color="red"><b>' : '').fullname($student).((!$att && $update) ? '</b></font>' : '').'</a>';
 
             foreach($statuses as $st) {
-                 @$table->data[$student->id][] = '<input name="student'.$student->id.'" type="radio" value="'.$st->id.'" '.($st->id == $att->statusid ? 'checked' : '').'>';
+                $copyid = ($copyfrom == "-1") ? $sessionid : $copyfrom;
+                $att = get_record('attendance_log', 'sessionid', $copyid, 'studentid', $student->id);
+                $currentstatusid = $att===false ? -1 : $att->statusid;
+                 @$table->data[$student->id][] = '<input name="student'.$student->id.'" type="radio" value="'.$st->id.'" '.($st->id == $currentstatusid ? 'checked' : '').'>';
             }
             $table->data[$student->id][] = '<input type="text" name="remarks'.$student->id.'" size="" value="'.($att ? $att->remarks : '').'">';
         }
