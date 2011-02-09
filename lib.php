@@ -33,27 +33,27 @@ function attforblock_add_instance($attforblock) {
     
     $attforblock->timemodified = time();
 
-    if ($att = $DB->get_record('attforblock', array('course'=> $attforblock->course))) {
-    	$modnum = $DB->get_field('modules', 'id', array('name'=> 'attforblock'));
-    	if (!$DB->get_record('course_modules', array('course'=> $attforblock->course, 'module'=> $modnum))) {
-    		$DB->delete_records('attforblock', array('course'=> $attforblock->course));
-    		$attforblock->id = $DB->insert_record('attforblock', $attforblock);
-    	} else {
+    /*if ($att = get_record('attforblock', 'course', $attforblock->course)) {
+    	$modnum = get_field('modules', 'id', 'name', 'attforblock');
+    	if (!get_record('course_modules', 'course', $attforblock->course, 'module', $modnum)) {
+    		delete_records('attforblock', 'course', $attforblock->course);
+    		$attforblock->id = insert_record('attforblock', $attforblock);
+    	/*} else {
     		return false;
     	}
-    } else {
-    	$attforblock->id = $DB->insert_record('attforblock', $attforblock);
-    }
+    } else {*/
+    	$attforblock->id = insert_record('attforblock', $attforblock);
+    //}
 
     //Copy statuses for new instance from defaults
-    if (!$DB->get_records('attendance_statuses', array('courseid'=> $attforblock->course))) {
+    //if (!$DB->get_records('attendance_statuses', array('courseid'=> $attforblock->course))) {
 	    $statuses = $DB->get_records('attendance_statuses', array('courseid'=> 0), 'id');
 		foreach($statuses as $stat) {
 			$rec = $stat;
 			$rec->courseid = $attforblock->course;
 			$DB->insert_record('attendance_statuses', $rec);
 		}
-    }
+    //}
 						
 //    attforblock_grade_item_update($attforblock);
 //	attforblock_update_grades($attforblock);
@@ -177,11 +177,11 @@ function attforblock_user_outline($course, $user, $mod, $attforblock) {
 	require_once('locallib.php');
 	
   	if (isstudent($course->id, $user->id)) {
-	  	if ($sescount = get_attendance($user->id,$course)) {
+	  	if ($sescount = get_attendance($user->id,$course, $attforblock)) {
 	  		$strgrade = get_string('grade');
-	  		$maxgrade = get_maxgrade($user->id, $course);
-	  		$usergrade = get_grade($user->id, $course);
-	  		$percent = get_percent($user->id,$course);
+	  		$maxgrade = get_maxgrade($user->id, $course,$attforblock);
+	  		$usergrade = get_grade($user->id, $course,$attforblock);
+	  		$percent = get_percent($user->id,$course, $attforblock);
 	  		$result->info = "$strgrade: $usergrade / $maxgrade ($percent%)";
 	  	}
   	}
@@ -241,13 +241,13 @@ function attforblock_get_user_grades($attforblock, $userid=0) {
     if ($userid) {
     	$result = array();
     	$result[$userid]->userid = $userid;
-    	$result[$userid]->rawgrade = $attforblock->grade * get_percent($userid, $course) / 100;
+    	$result[$userid]->rawgrade = $attforblock->grade * get_percent($userid, $course, $attforblock) / 100;
     } else {
     	if ($students = get_course_students($course->id)) {
     		$result = array();
     		foreach ($students as $student) {
 		    	$result[$student->id]->userid = $student->id;
-		    	$result[$student->id]->rawgrade = $attforblock->grade * get_percent($student->id, $course) / 100;
+		    	$result[$student->id]->rawgrade = $attforblock->grade * get_percent($student->id, $course, $attforblock) / 100;
     		}
     	}
     }
@@ -325,7 +325,7 @@ function attforblock_grade_item_update($attforblock, $grades=NULL) {
     }else{
         // MDL-14303
         $cm = get_coursemodule_from_instance('attforblock', $attforblock->id);
-        $params = array('itemname'=>$attforblock->name, 'idnumber'=>$cm->id);
+        $params = array('itemname'=>$attforblock->name/*, 'idnumber'=>$attforblock->id*/);
     }
     
     if ($attforblock->grade > 0) {

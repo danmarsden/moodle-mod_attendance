@@ -1,3 +1,75 @@
+2011-01-18  lrlopez
+
+        * attendances.php: styles.php:
+
+        Implemented copy attendance data from same-day sessions.
+        Fixed fast session dropdown list end time inaccuracy.
+        Enhanced session dropdown list.
+
+        * lang/: en_utf8/attforblock.php, es_utf8/attforblock.php:
+
+        Added new strings for the copy dropdown menus.
+
+2011-01-18  lrlopez
+
+        * attendances.php: styles.php:
+
+        Implemented fast session switching for same-day sessions.
+        Fixed some XHTML compliance tags (more coming)
+
+        * lang/: en_utf8/attforblock.php, es_utf8/attforblock.php:
+
+        Added new strings for the dropdown menus.
+
+2011-01-16  lrlopez
+
+        * export.php: export_form.php:
+        * lang/: en_utf8/attforblock.php: es_utf8/attforblock.php:
+        Added "Start of period" into export tab and two new strings for
+        the new fields on the form.
+
+2011-01-15  lrlopez
+
+        * db/install.xml:
+
+        Bugs fixed.
+
+        * attendances.php: locallib.php: manage.php:
+
+        Fixed some minor bugs and code readibility issues. Now, in grid view
+        mode, statuses are always next to their radio buttons.
+
+2010-12-30 - 2011-01-04  lrlopez
+
+        * lang/: es_utf8/attforblock.php:
+
+        Updated and fixed Spanish translation (Enrique Robredo)
+
+        * styles.php:
+
+        Fixed yui-calendar CSS modifying global CSS behaviour.
+
+        * manage.php:
+
+        Added an option for choosing between show session duration or show end
+        time in session list.
+
+        * db/: install.xml: upgrade.php: version.php:
+        * attsettings.php: lib.php: locallib.php: manage.php: report.php:
+
+        Added support to allow more than one attendance in the same course.
+
+        * sessions.php:
+
+        Fixed DST bug (adding multiple sessions could generate invalid start
+        times if any DST change occur in-between)
+
+        * attendances.php:
+        Implemented display modes (list and grid)
+
+        * lang/: en_utf8/attforblock.php, es_utf8/attforblock.php:
+        Added new strings for the new display modes
+
 2010-07-10 - 2010-09-17  andreev.artem
 
     Implemented ability to add two types of sessions: common and group

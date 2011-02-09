@@ -20,7 +20,10 @@
 	        error("Course module is incorrect");
 	    }
     }
-    $attforblockrecord = $DB->get_record('attforblock',array('course'=>$course->id));
+    //$attforblockrecord = get_record('attforblock','course',$course->id);
+    if (! $attforblockrecord = $DB->get_record('attforblock', array('id'=> $cm->instance))) {
+        error("Course module is incorrect");
+    }
 
 
     require_login($course->id);
@@ -45,7 +48,7 @@
     if (!empty($action)) {
 	    switch ($action) {
 	    	case 'delete':
-		    	if (!$rec = $DB->get_record('attendance_statuses', array('courseid'=> $course->id, 'id'=> $stid))) {
+		    	if (!$rec = $DB->get_record('attendance_statuses', array('attendanceid'=> $$attforblockrecord->id, 'id'=> $stid))) {
 			  		print_error('notfoundstatus', 'attforblock', "attsettings.php?id=$id");
 			  	}
 		    	if ($DB->count_records('attendance_log', array('statusid'=> $stid))) {
@@ -84,6 +87,7 @@
 	    		if (!empty($newacronym) && !empty($newdescription)) {
 					unset($rec);
 	    			$rec->courseid = $course->id;
+                                        $rec->attendanceid = $attforblock->id;
 					$rec->acronym = $newacronym;
 					$rec->description = $newdescription;
 					$rec->grade = $newgrade;
@@ -113,7 +117,7 @@
 						 get_string('action'));
 	$table->align = array('center', 'center', 'center', 'center', 'center', 'center');
 	//$table->size = array('1px', '1px', '*', '1px', '1px', '1px');
-    $statuses = get_statuses($course->id, false);
+    $statuses = get_statuses($attforblockrecord->id, false);
     $deltitle = get_string('delete');
 	foreach($statuses as $st)
 	{

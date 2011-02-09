@@ -75,7 +75,7 @@
 			
 			$i = 0;
 		    $data->table = array();
-			$statuses = get_statuses($course->id);
+			$statuses = get_statuses($attforblock->id);
 			foreach($students as $student) {
 				if (isset($fromform->ident['id'])) {
 					$data->table[$i][] = $student->id;
@@ -92,7 +92,7 @@
 						$data->table[$i][] = '-';
 					}
 				}
-				$data->table[$i][] = get_percent($student->id, $course).'%';
+				$data->table[$i][] = get_percent($student->id, $course, $attforblock).'%';
 				$i++;
 			}
 			

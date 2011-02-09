@@ -236,7 +236,34 @@ function xmldb_attforblock_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2010070900, 'attforblock');
     }
 
-    return true;
+    if ($oldversion < 2010123003) {
+
+        $table = new xmldb_table('attendance_sessions');
+
+        $field = new xmldb_field('attendanceid');
+        $field->setAttributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'groupid');
+        $dbman->add_field($table, $field);
+
+        $index = new xmldb_table('attendanceid');
+        $index->setAttributes(XMLDB_INDEX_NOTUNIQUE, array('attendanceid'));
+        $dbman->add_index($table, $index);
+
+        $sql = "UPDATE {attendance_sessions} AS ses,{attforblock} AS att SET ses.attendanceid=att.id WHERE att.course=ses.courseid";
+        $dbman->execute($sql);
+
+        $table = new xmldb_table('attendance_statuses');
+
+        $field = new xmldb_field('attendanceid');
+        $field->setAttributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'courseid');
+        $dbman->add_field($table, $field);
+        $index = new xmldb_index('attendanceid');
+        $index->setAttributes(XMLDB_INDEX_NOTUNIQUE, array('attendanceid'));
+        $dbman->add_index($table, $index);
+
+        $sql = "UPDATE {attendance_statuses} AS sta,{attforblock} AS att SET sta.attendanceid=att.id WHERE att.course=sta.courseid";
+        execute($sql);
+    }
+    return $result;
 }
 
 ?>

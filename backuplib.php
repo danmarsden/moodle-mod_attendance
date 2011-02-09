@@ -100,7 +100,7 @@
 
         $status = true;
 
-        $datas = $DB->get_records('attendance_sessions', array('courseid'=> $attforblock->course));
+        $datas = $DB->get_records('attendance_sessions', array('attendanceid'=> $attforblock->id));
         if ($datas) {
             //Write start tag
             $status =fwrite ($bf,start_tag('SESSIONS',4,true));
@@ -139,7 +139,7 @@
 
         $status = true;
 
-        $datas = $DB->get_records('attendance_statuses', array('courseid'=> $attforblock->course));
+        $datas = $DB->get_records('attendance_statuses', array('courseid'=> $attforblock->course, 'attendanceid' => $attforblock->id));
         //If there is levels
         if ($datas) {
             //Write start tag
@@ -173,7 +173,7 @@
 
         $status = true;
 
-        $sessions = $DB->get_records_menu('attendance_sessions', array('courseid'=> $attforblock->course));
+        $sessions = $DB->get_records_menu('attendance_sessions', array('courseid'=> $attforblock->course, 'attendanceid' => $attforblock->id));
         $sesslist = implode(',', array_keys($sessions));
         $datas = $DB->get_records_list('attendance_log', array('sessionid'=> $sesslist));
         //If there is levels

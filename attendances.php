@@ -16,6 +16,7 @@
     $grouptype  = required_param('grouptype', PARAM_INT);
     $group    	= optional_param('group', -1, PARAM_INT);              // Group to show
 	$sort 		= optional_param('sort','lastname', PARAM_ALPHA);
+    $copyfrom  	= optional_param('copyfrom', -1, PARAM_INT);
 
     if (! $cm = $DB->get_record('course_modules', array('id'=>$id))) {
         error('Course Module ID was incorrect');
@@ -38,7 +39,7 @@
         print_error('badcontext');
     }
     
-    $statlist = implode(',', array_keys( (array)get_statuses($course->id) ));
+    $statlist = implode(',', array_keys( (array)get_statuses($attforblock->id) ));
     if ($form = data_submitted()) {
     	$students = array();			// stores students ids
 		$formarr = (array)$form;
@@ -103,6 +104,58 @@
     $groupmode = groups_get_activity_groupmode($cm);
     $currentgroup = groups_get_activity_group($cm, true);
 
+    // get the viewmode & grid columns
+    $attforblockrecord = get_record('attforblock', 'id', $cm->instance);//'course', $course->id);'course', $course->id);
+    $view       = optional_param('view', -1, PARAM_INT);
+    if ($view != -1) {
+        set_user_preference("attforblock_viewmode", $view);
+    }
+    else {
+        $view = get_user_preferences("attforblock_viewmode", SORTEDLISTVIEW);
+    }
+    $gridcols   = optional_param('gridcols', -1, PARAM_INT);
+    if ($gridcols != -1) {
+        set_user_preference("attforblock_gridcolumns", $gridcols);
+    }
+    else {
+        $gridcols = get_user_preferences("attforblock_gridcolumns",5);
+    }
+
+    echo '<table class="controls" cellspacing="0"><tr>'; //echo '<center>';
+    $options = array (SORTEDLISTVIEW => get_string('sortedlist','attforblock'), SORTEDGRIDVIEW => get_string('sortedgrid','attforblock'));
+    $dataurl = "attendances.php?id=$id&grouptype=$grouptype&gridcols=$gridcols";
+    if ($group!=-1) {
+        $dataurl = $dataurl . "&group=$group";
+    }
+    $today = usergetmidnight($sessdata->sessdate);
+    $select = "sessdate>=? AND sessdate<? AND attendanceid=?";
+    $tomorrow = $today + 86400;
+    $todaysessions = $DB->get_records_select('attendance_sessions', $select, array($today, $tomorrow, $cm->instance), 'sessdate ASC');
+    $optionssesions = array();
+    if (count($todaysessions)>1) {
+        echo '<td class="right"><label for="fastsessionmenu_jump">'. get_string('jumpto','attforblock') . "&nbsp;</label>";
+        foreach($todaysessions as $sessdatarow) {
+            $descr = userdate($sessdatarow->sessdate, get_string('strftimehm', 'attforblock')) . "-" . userdate($sessdatarow->sessdate+$sessdatarow->duration, get_string('strftimehm', 'attforblock'));
+            if ($sessdatarow->description) {
+                $descr = $sessdatarow->description . ' ('.$descr.')';
+            }
+            $optionssessions[$sessdatarow->id] = $descr;
+        }
+        popup_form("$dataurl&sessionid=", $optionssessions, 'fastsessionmenu', $sessionid, '');
+        echo "<td/><tr/><tr>";
+    }
+    $dataurl .= "&sessionid=$sessionid";
+    echo '<td class="right"><label for="viewmenu_jump">'. get_string('viewmode','attforblock') . "&nbsp;</label>";
+    popup_form("$dataurl&view=", $options, 'viewmenu', $view, '');
+    if ($view == SORTEDGRIDVIEW) {
+        $options = array (1 => '1 '.get_string('column','attforblock'),'2 '.get_string('columns','attforblock'),'3 '.get_string('columns','attforblock'),
+                               '4 '.get_string('columns','attforblock'),'5 '.get_string('columns','attforblock'),'6 '.get_string('columns','attforblock'),
+                               '7 '.get_string('columns','attforblock'),'8 '.get_string('columns','attforblock'),'9 '.get_string('columns','attforblock'),
+                               '10 '.get_string('columns','attforblock'));
+        $dataurl .= "&view=$view";
+        popup_form("$dataurl&gridcols=", $options, 'colsmenu', $gridcols, '');
+    }
+    echo '</td></tr></table>';//</center>';
     if ($grouptype === 0) {
         if ($currentgroup) {
             $students = get_users_by_capability($context, 'moodle/legacy:student', '', "u.$sort ASC", '', '', $currentgroup, '', false);
@@ -124,14 +177,23 @@
 	$table->data[][] = '<b>'.get_string('sessiondate','attforblock').': '.userdate($sessdata->sessdate, get_string('strftimedate').', '.get_string('strftimehm', 'attforblock')).
 							', "'.($sessdata->description ? $sessdata->description : get_string('nodescription', 'attforblock')).'"</b>';
 	print_table($table);
-	
-    $statuses = get_statuses($course->id);
+
+    $statuses = get_statuses($attforblock->id);
 	$i = 3;
   	foreach($statuses as $st) {
+                switch($view) {
+                    case SORTEDLISTVIEW:
 		$tabhead[] = "<a href=\"javascript:select_all_in('TD', 'cell c{$i}', null);\"><u>$st->acronym</u></a>";
+                        break;
+                    case SORTEDGRIDVIEW:
+                $tabhead[] = "<a href=\"javascript:select_all_in('INPUT', '". $st->acronym . "', null);\"><u>$st->acronym</u></a>";
+                        break;
+                }
 		$i++;
 	}
+    if ($view == SORTEDLISTVIEW) {
 	$tabhead[] = get_string('remarks','attforblock');
+        }
 	
 	$firstname = "<a href=\"attendances.php?id=$id&amp;sessionid=$sessionid&amp;sort=firstname\">".get_string('firstname').'</a>';
 	$lastname  = "<a href=\"attendances.php?id=$id&amp;sessionid=$sessionid&amp;sort=lastname\">".get_string('lastname').'</a>';
@@ -143,6 +205,9 @@
 	
 	if ($students) {
         unset($table);
+
+        switch($view) {
+        case SORTEDLISTVIEW:     // sorted list
         $table->width = '0%';
         $table->head[] = '#';
         $table->align[] = 'center';
@@ -170,9 +235,45 @@
 			$table->data[$student->id][] = "<a href=\"view.php?id=$id&amp;student={$student->id}\">".((!$att && $update) ? '<font color="red"><b>' : '').fullname($student).((!$att && $update) ? '</b></font>' : '').'</a>';
 
             foreach($statuses as $st) {
-                 @$table->data[$student->id][] = '<input name="student'.$student->id.'" type="radio" value="'.$st->id.'" '.($st->id == $att->statusid ? 'checked' : '').'>';
+                $copyid = ($copyfrom == "-1") ? $sessionid : $copyfrom;
+                $att = $DB->get_record('attendance_log', array('sessionid'=> $copyid, 'studentid'=> $student->id));
+                $currentstatusid = $att===false ? -1 : $att->statusid;
+                 @$table->data[$student->id][] = '<input name="student'.$student->id.'" type="radio" value="'.$st->id.'" '.($st->id == $currentstatusid ? 'checked' : '').'>';
             }
             $table->data[$student->id][] = '<input type="text" name="remarks'.$student->id.'" size="" value="'.($att ? $att->remarks : '').'">';
+        }
+            break;
+        case SORTEDGRIDVIEW:     // sorted grid
+            $table->width = '0%';
+
+            $data = '';
+            foreach ($tabhead as $hd) {
+                $data = $data . $hd . '&nbsp';
+            }
+            print_heading($data,'center');
+            
+            $i = 0;
+            // sanity check
+            $gridcols = $gridcols < 1 ? 1 : $gridcols;
+            for ($i=0; $i<$gridcols; $i++) {
+                $table->head[] = '&nbsp;';
+                $table->align[] = 'center';
+                $table->size[] = '110px';
+            }
+
+            $i = 0;
+            foreach($students as $student) {
+                $i++;
+                $copyid = ($copyfrom == "-1") ? $sessionid : $copyfrom;
+                $att = $DB->get_record('attendance_log', array('sessionid'=> $copyid, 'studentid'=> $student->id));
+                $currentstatusid = $att===false ? -1 : $att->statusid;
+                $data = "<span class='userinfobox' style='font-size:80%;border:none'>" . print_user_picture($student, $course->id, $student->picture, true, true, '', fullname($student)) . "<br/>" . fullname($student) . "<br/></span>";//, $returnstring=false, $link=true, $target='');
+                foreach($statuses as $st) {
+                     $data = $data . '<nobr><input name="student'.$student->id.'" type="radio" class="' . $st->acronym . '" value="'.$st->id.'" '.($st->id == $currentstatusid ? 'checked' : '').'>' . $st->acronym . "</nobr> ";
+                }
+                $table->data[($i-1) / ($gridcols)][] = $data;
+            }
+            break;
         }
 
         echo '<form name="takeattendance" method="post" action="attendances.php">';
@@ -181,9 +282,17 @@
         echo '<input type="hidden" name="sessionid" value="'.$sessionid.'">';
         echo '<input type="hidden" name="grouptype" value="'.$grouptype.'">';
         echo '<input type="hidden" name="formfrom" value="editsessvals">';
-        echo '<center><input type="submit" name="esv" value="'.get_string('ok').'"></center>';
+        echo '<center><input type="submit" name="esv" value="'.get_string('save','attforblock').'"></center>';
         echo '</form>';
-    } else {
+
+        if (count($todaysessions)>1) {
+            echo '<br/><table class="controls" cellspacing="0"><tr><td class="center">';
+            echo '<label for="copysessionmenu_jump">'. get_string('copyfrom','attforblock') . "&nbsp;</label>";
+            popup_form("$dataurl&copyfrom=", $optionssessions, 'copysessionmenu', $sessionid, '');
+            echo '</td></tr></table>';
+        }
+
+        } else {
 		print_heading(get_string('nothingtodisplay'), 'center');
 	}
 	 

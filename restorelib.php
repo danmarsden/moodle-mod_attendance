@@ -13,9 +13,9 @@
             //Now get completed xmlized object   
             $info = $data->info;
 
-            if ($DB->count_records('attforblock', array('course'=> $restore->course_id))) {
+            /*if (count_records('attforblock', 'course', $restore->course_id)) {
                 return false;
-            }
+            }*/
 
             //Now, build the attforblock record structure
             $attforblock->course = $restore->course_id;
@@ -67,6 +67,7 @@
             //Now, build the attforblock_SESSIONS record structure
 
             $stat->courseid = $restore->course_id;
+            $stat->attendanceid = $new_attforblock_id;
             $stat->groupid = backup_todb($stat_info['#']['GROUPID']['0']['#']);
             $group = restore_group_getid($restore, $stat->groupid);
             if ($group) {
@@ -117,6 +118,7 @@
                 //Now, build the attforblock_STATUS record structure
 
                 $stat->courseid  = $restore->course_id;
+                $stat->attendanceid = $new_attforblock_id;
                 $stat->acronym = backup_todb($stat_info['#']['ACRONYM']['0']['#']);
                 $stat->description = backup_todb($stat_info['#']['DESCRIPTION']['0']['#']);
                 $stat->grade = backup_todb($stat_info['#']['GRADE']['0']['#']);
@@ -139,6 +141,7 @@
                 //Now, build the attforblock_STATUS record structure
 
                 $stat->courseid  = $restore->course_id;
+                $stat->attendanceid = $new_attforblock_id;
                 $stat->acronym = backup_todb($stat_info['#']['ACRONYM']['0']['#']);
                 $stat->description = backup_todb($stat_info['#']['DESCRIPTION']['0']['#']);
                 $stat->grade = backup_todb($stat_info['#']['GRADE']['0']['#']);
@@ -159,6 +162,7 @@
             foreach($stats as $stat) {
 //                $stat = $stats[$i];
                 $stat->courseid = $restore->course_id;
+                $stat->attendanceid = $new_attforblock_id;
                 $newid = $DB->insert_record('attendance_statuses', $stat);
                 $oldidarray[$old_attforblock_id]['attendance_statuses'][$oldstats[$i++]] = $newid;
 //                $i++;
@@ -182,9 +186,9 @@
             @$logs = $info['MOD']['#']['ATTFORBLOCK_LOG']['0']['#']['ROWS'];
         }
 
-        $stats = $DB->get_records_menu('attendance_statuses', array('courseid'=> $restore->course_id));
+        $stats = $DB->get_records_menu('attendance_statuses', array('attendanceid'=> $new_attforblock_id));
         $statslist = implode(',', array_keys($stats));
-        $sessions = $DB->get_records('attendance_sessions', 'courseid', $restore->course_id);
+        $sessions = $DB->get_records('attendance_sessions', array('attendanceid'=> $new_attforblock_id));
 
         //Iterate over logs
         for($i = 0; $i < sizeof($logs); $i++) {

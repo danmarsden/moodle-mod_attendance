@@ -26,6 +26,25 @@
     width:90%;
 }
 
+body#mod-attforblock-attendances table.controls {
+    width: 100%;
+    text-align: center;
+}
+
+body#mod-attforblock-attendances table.controls tr {
+    vertical-align: top;
+}
+
+body#mod-attforblock-attendances table.controls td.right, body#mod-attforblock-attendances table.controls td.left {
+    padding-bottom: 4px;
+    padding-left: 4px;
+    padding-right: 4px;
+    padding-top: 4px;
+}
+
+body#mod-attforblock-attendances table.controls .right {
+    text-align: right;
+}
 /* for IE7*/
 .attfiltercontrols td {
     padding:6px;
