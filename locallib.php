@@ -48,10 +48,12 @@ function show_tabs($cm, $context, $currenttab='sessions')
 
 function get_statuses($courseid, $onlyvisible = true)
 {
-  	if ($onlyvisible) {
-  		$result = get_records_select('attendance_statuses', "courseid = $courseid AND visible = 1 AND deleted = 0", 'grade DESC');
+    global $DB;
+
+        if ($onlyvisible) {
+  		$result = $DB->get_records_select('attendance_statuses', "courseid = ? AND visible = 1 AND deleted = 0", array( $courseid ), 'grade DESC');
   	} else {
-  		$result = get_records_select('attendance_statuses', "courseid = $courseid AND deleted = 0", 'grade DESC');  		
+  		$result = $DB->get_records_select('attendance_statuses', "courseid = ? AND deleted = 0", array( $courseid ), 'grade DESC');
 //  		$result = get_records('attendance_statuses', 'courseid', $courseid, 'grade DESC');
   	}
     return $result;
@@ -61,10 +63,10 @@ function get_statuses($courseid, $onlyvisible = true)
 
 function get_attendance($userid, $course, $statusid=0)
 {
-	global $CFG;
+	global $CFG, $DB;
 	$qry = "SELECT count(*) as cnt 
-		  	  FROM {$CFG->prefix}attendance_log al 
-			  JOIN {$CFG->prefix}attendance_sessions ats 
+		  	  FROM {attendance_log} al
+			  JOIN {attendance_sessions} ats
 			    ON al.sessionid = ats.id
 			 WHERE ats.courseid = $course->id 
 			  	AND ats.sessdate >= $course->startdate
@@ -73,22 +75,22 @@ function get_attendance($userid, $course, $statusid=0)
 		$qry .= " AND al.statusid = $statusid";
 	}
 	
-	return count_records_sql($qry);
+	return $DB->count_records_sql($qry);
 }
 
 function get_grade($userid, $course)
 {
-	global $CFG;
-	$logs = get_records_sql("SELECT l.id, l.statusid, l.statusset
-							FROM {$CFG->prefix}attendance_log l
-							JOIN {$CFG->prefix}attendance_sessions s
+	global $CFG, $DB;
+	$logs = $DB->get_records_sql("SELECT l.id, l.statusid, l.statusset
+							FROM {attendance_log} l
+							JOIN {attendance_sessions} s
 							  ON l.sessionid = s.id
-						   WHERE l.studentid = $userid
-						     AND s.courseid  = $course->id
-						     AND s.sessdate >= $course->startdate");
+						   WHERE l.studentid = :usid
+						     AND s.courseid  = :cid
+						     AND s.sessdate >= :cstartdate", array('usid' => $userid, 'cid' => $course->id, 'cstartdate' => $course->startdate ));
 	$result = 0;
 	if ($logs) {
-		$stat_grades = records_to_menu(get_records('attendance_statuses', 'courseid', $course->id), 'id', 'grade');
+		$stat_grades = $DB->records_to_menu($DB->get_records('attendance_statuses', array('courseid'=> $course->id)), 'id', 'grade');
 		foreach ($logs as $log) {
 			$result += $stat_grades[$log->statusid];
 		}
@@ -110,17 +112,18 @@ function local_array_intersect_key($array1, $array2) {
 
 function get_maxgrade($userid, $course)
 {
-	global $CFG;
-	$logs = get_records_sql("SELECT l.id, l.statusid, l.statusset
-							FROM {$CFG->prefix}attendance_log l
-							JOIN {$CFG->prefix}attendance_sessions s
+	global $CFG, $DB;
+	$logs = $DB->get_records_sql("SELECT l.id, l.statusid, l.statusset
+							FROM {attendance_log} l
+							JOIN {attendance_sessions} s
 							  ON l.sessionid = s.id
-						   WHERE l.studentid = $userid
-						     AND s.courseid  = $course->id
-						     AND s.sessdate >= $course->startdate");
+						   WHERE l.studentid = :usid
+						     AND s.courseid  = :cid
+						     AND s.sessdate >= :cstartdate", array('usid' => $userid, 'cid' => $course->id, 'cstartdate' => $course->startdate ));
+
 	$maxgrade = 0;
 	if ($logs) {
-		$stat_grades = records_to_menu(get_records('attendance_statuses', 'courseid', $course->id), 'id', 'grade');
+		$stat_grades = $DB->records_to_menu($DB->get_records('attendance_statuses', array('courseid'=> $course->id)), 'id', 'grade');
 		foreach ($logs as $log) {
 			$ids = array_flip(explode(',', $log->statusset));
 //			$grades = array_intersect_key($stat_grades, $ids); // require PHP 5.1.0 and higher
@@ -134,17 +137,17 @@ function get_maxgrade($userid, $course)
 
 function get_percent_adaptive($userid, $course) // NOT USED
 {
-	global $CFG;
-	$logs = get_records_sql("SELECT l.id, l.statusid, l.statusset
-							FROM {$CFG->prefix}attendance_log l
-							JOIN {$CFG->prefix}attendance_sessions s
+	global $CFG, $DB;
+	$logs = $DB->get_records_sql("SELECT l.id, l.statusid, l.statusset
+							FROM {attendance_log} l
+							JOIN {attendance_sessions} s
 							  ON l.sessionid = s.id
-						   WHERE l.studentid = $userid
-						     AND s.courseid  = $course->id
-						     AND s.sessdate >= $course->startdate");
+						   WHERE l.studentid = :usid
+						     AND s.courseid  = :cid
+						     AND s.sessdate >= :cstartdate", array('usid' => $userid, 'cid' => $course->id, 'cstartdate' => $course->startdate ));
 	$result = 0;
 	if ($logs) {
-		$stat_grades = records_to_menu(get_records('attendance_statuses', 'courseid', $course->id), 'id', 'grade');
+		$stat_grades = $DB->records_to_menu($DB->get_records('attendance_statuses', array('courseid'=> $course->id)), 'id', 'grade');
 		
 		$percent = 0;
 		foreach ($logs as $log) {
@@ -239,7 +242,7 @@ function print_attendance_table($user,  $course, $attforblock) {
 }
 
 function print_user_attendaces($user, $cm, $attforblock,  $course = 0, $printing = null) {
-	global $CFG, $COURSE, $mode, $current, $view, $id, $studentid;
+	global $CFG, $COURSE, $mode, $current, $view, $id, $studentid, $DB;
 		
 	echo '<table class="userinfobox">';
     if (!$printing) {
@@ -268,17 +271,17 @@ function print_user_attendaces($user, $cm, $attforblock,  $course = 0, $printing
 		}
 	} else {
         $stqry = "SELECT ats.id,ats.courseid
-					FROM {$CFG->prefix}attendance_log al 
-					JOIN {$CFG->prefix}attendance_sessions ats 
+					FROM {attendance_log} al
+					JOIN {attendance_sessions} ats
 					  ON al.sessionid = ats.id
 				   WHERE al.studentid = {$user->id}
 				GROUP BY ats.courseid
 				ORDER BY ats.courseid asc";
-		$recs = get_records_sql_menu($stqry);
+		$recs = $DB->get_records_sql_menu($stqry);
 		foreach ($recs as $id => $courseid) {
 			echo '<hr />';
 			echo '<table border="0" cellpadding="0" cellspacing="0" width="100%" class="list1">';
-			$nextcourse = get_record('course', 'id', $courseid);
+			$nextcourse = $DB->get_record('course', array('id'=> $courseid));
 			echo '<tr><td valign="top"><strong>'.$nextcourse->fullname.'</strong></td>';
 			echo '<td align="right">';
 			$complete = get_attendance($user->id, $nextcourse);
@@ -304,19 +307,19 @@ function print_user_attendaces($user, $cm, $attforblock,  $course = 0, $printing
         $enddate = $ret['enddate'];
 
         if ($startdate && $enddate) {
-            $where = "ats.courseid={$course->id} AND al.studentid = {$user->id} AND ats.sessdate >= $startdate AND ats.sessdate < $enddate";
+            $where = "ats.courseid=:cid AND al.studentid = :uid AND ats.sessdate >= :sdate AND ats.sessdate < :edate";
         } else {
-            $where = "ats.courseid={$course->id} AND al.studentid = {$user->id}";
+            $where = "ats.courseid=:cid AND al.studentid = :uid";
         }
 
 		$stqry = "SELECT ats.id,ats.sessdate,ats.description,al.statusid,al.remarks
-					FROM {$CFG->prefix}attendance_log al 
-					JOIN {$CFG->prefix}attendance_sessions ats 
+					FROM {attendance_log} al
+					JOIN {attendance_sessions} ats
 					  ON al.sessionid = ats.id";
         $stqry .= " WHERE " . $where;
         $stqry .= " ORDER BY ats.sessdate asc";
         
-		if ($sessions = get_records_sql($stqry)) {
+		if ($sessions = $DB->get_records_sql($stqry, array('cid' => $course->id, 'uid'=> $user->id, 'sdate'=> $startdate, 'edate'=> $enddate))) {
 	     	$statuses = get_statuses($course->id);
 
             $i = 0;

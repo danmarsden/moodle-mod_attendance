@@ -5,7 +5,7 @@
     require_once('../../config.php');    
 	require_once($CFG->libdir.'/blocklib.php');
 	require_once('locallib.php');	
-	
+
     define('USER_SMALL_CLASS', 20);   // Below this is considered small
     define('USER_LARGE_CLASS', 200);  // Above this is considered large
     define('DEFAULT_PAGE_SIZE', 20);
@@ -17,20 +17,20 @@
     $sort         		= optional_param('sort', 'lastname', PARAM_ALPHA);
 	
     if ($id) {
-        if (! $cm = get_record('course_modules', 'id', $id)) {
+        if (! $cm = $DB->get_record('course_modules', array('id'=> $id))) {
             error('Course Module ID was incorrect');
         }
-        if (! $course = get_record('course', 'id', $cm->course)) {
+        if (! $course = $DB->get_record('course', array('id'=> $cm->course))) {
             error('Course is misconfigured');
         }
-	    if (! $attforblock = get_record('attforblock', 'id', $cm->instance)) {
+	    if (! $attforblock = $DB->get_record('attforblock', array('id'=> $cm->instance))) {
 	        error("Course module is incorrect");
 	    }
     }
 
     require_login($course->id);
 
-    if (! $user = get_record('user', 'id', $USER->id) ) {
+    if (! $user = $DB->get_record('user', array('id'=> $USER->id) )) {
         error("No such user in this course");
     }
     
@@ -60,7 +60,7 @@
     
 	$sort = $sort == 'firstname' ? 'firstname' : 'lastname';
 	
-	if(!count_records('attendance_sessions', 'courseid', $course->id)) {	// no session exists for this course
+	if(!$DB->count_records('attendance_sessions', array('courseid'=> $course->id))) {	// no session exists for this course
 		redirect("sessions.php?id=$cm->id&amp;action=add");			
 	} else {
         if ($current == 0)
@@ -74,13 +74,13 @@
         $currentgroup = $ret['currentgroup'];
 
 		if ($startdate && $enddate) {
-			$where = "courseid={$course->id} AND sessdate >= $course->startdate AND sessdate >= $startdate AND sessdate < $enddate";
+			$where = "courseid=:cid AND sessdate >= :sdate AND sessdate >= :sdate2 AND sessdate < :edate";
 		} else {
-			$where = "courseid={$course->id} AND sessdate >= $course->startdate";
+			$where = "courseid=:cid AND sessdate >= :sdate";
 		}
 
         if ($currentgroup) {
-            $where .= " AND (groupid=0 OR groupid=".$currentgroup.")";
+            $where .= " AND (groupid=0 OR groupid=:cgroup)";
         	$students = get_users_by_capability($context, 'moodle/legacy:student', '', "u.$sort ASC", '', '', $currentgroup, '', false);
         } else {
         	$students = get_users_by_capability($context, 'moodle/legacy:student', '', "u.$sort ASC", '', '', '', '', false);
@@ -91,7 +91,7 @@
 
 
 		if ($students and
-		       ($course_sess = get_records_select('attendance_sessions', $where, 'sessdate ASC'))) {
+		       ($course_sess = $DB->get_records_select('attendance_sessions', $where, array('cid' => $course->id, 'sdate' => $course->startdate,'sdate2' => $startdate, 'edate'=> $enddate, 'cgroup'=> $currentgroup), 'sessdate ASC'))) {
 			
 		    $firstname = "<a href=\"report.php?id=$id&amp;sort=firstname\">".get_string('firstname').'</a>';
 			$lastname  = "<a href=\"report.php?id=$id&amp;sort=lastname\">".get_string('lastname').'</a>';
@@ -112,7 +112,7 @@
             $allowchange = has_capability('mod/attforblock:changeattendances', $context);
             $groups = groups_get_all_groups($course->id);
 			foreach($course_sess as $sessdata) {
-                if (count_records('attendance_log', 'sessionid', $sessdata->id)) {
+                if ($DB->count_records('attendance_log', array('sessionid'=> $sessdata->id))) {
                     if ($allowchange) {
                         $sessdate = "<a href=\"attendances.php?id=$id&amp;sessionid={$sessdata->id}&amp;grouptype={$sessdata->groupid}\">".
                                             userdate($sessdata->sessdate, get_string('strftimedm', 'attforblock').'<br />('.get_string('strftimehm', 'attforblock').')').
@@ -158,7 +158,7 @@
 				$table->data[$student->id][] = "<a href=\"view.php?id=$id&amp;student={$student->id}\">".fullname($student).'</a>';
                 $studgroups = groups_get_all_groups($COURSE->id, $student->id);
 				foreach($course_sess as $sessdata) {
-					if ($att = get_record('attendance_log', 'sessionid', $sessdata->id, 'studentid', $student->id)) {
+					if ($att = $DB->get_record('attendance_log', array('sessionid'=> $sessdata->id, 'studentid'=> $student->id))) {
 						if (isset($statuses[$att->statusid])) {
 							$table->data[$student->id][] = $statuses[$att->statusid]->acronym;
 						} else {

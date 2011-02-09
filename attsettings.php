@@ -3,29 +3,29 @@
     require_once('../../config.php'); 
 	require_once('locallib.php');	
 	require_once('lib.php');
-	
+
     $id           		= required_param('id', PARAM_INT);
 	$submitsettings		= optional_param('submitsettings');
 	$action				= optional_param('action', '', PARAM_MULTILANG);
 	$stid					= optional_param('st', 0, PARAM_INT);
 	
     if ($id) {
-        if (! $cm = get_record('course_modules', 'id', $id)) {
+        if (! $cm = $DB->get_record('course_modules', array('id'=> $id))) {
             error('Course Module ID was incorrect');
         }
-        if (! $course = get_record('course', 'id', $cm->course)) {
+        if (! $course = $DB->get_record('course', array('id'=> $cm->course))) {
             error('Course is misconfigured');
         }
-	    if (! $attforblock = get_record('attforblock', 'id', $cm->instance)) {
+	    if (! $attforblock = $DB->get_record('attforblock', array('id'=> $cm->instance))) {
 	        error("Course module is incorrect");
 	    }
     }
-    $attforblockrecord = get_record('attforblock','course',$course->id);
+    $attforblockrecord = $DB->get_record('attforblock',array('course'=>$course->id));
 
 
     require_login($course->id);
 
-    if (! $user = get_record('user', 'id', $USER->id) ) {
+    if (! $user = $DB->get_record('user', array('id'=> $USER->id) )) {
         error("No such user in this course");
     }
     
@@ -45,16 +45,16 @@
     if (!empty($action)) {
 	    switch ($action) {
 	    	case 'delete':
-		    	if (!$rec = get_record('attendance_statuses', 'courseid', $course->id, 'id', $stid)) {
+		    	if (!$rec = $DB->get_record('attendance_statuses', array('courseid'=> $course->id, 'id'=> $stid))) {
 			  		print_error('notfoundstatus', 'attforblock', "attsettings.php?id=$id");
 			  	}
-		    	if (count_records('attendance_log', 'statusid', $stid)) {
+		    	if ($DB->count_records('attendance_log', array('statusid'=> $stid))) {
 			  		print_error('cantdeletestatus', 'attforblock', "attsettings.php?id=$id");
 		    	}
 				
 		    	$confirm = optional_param('confirm');
 		    	if (isset($confirm)) {
-		    		set_field('attendance_statuses', 'deleted', 1, 'id', $rec->id);
+		    		$DB->set_field('attendance_statuses', 'deleted', 1, array('id' => $rec->id));
 //		    		delete_records('attendance_statuses', 'id', $rec->id);
 					redirect('attsettings.php?id='.$id, get_string('statusdeleted','attforblock'), 3);
 		    	}
@@ -66,13 +66,13 @@
 			                     "attsettings.php?id=$id&amp;st=$stid&amp;action=delete&amp;confirm=1", $_SERVER['HTTP_REFERER']);
 				exit;
 	    	case 'show':
-	    		set_field('attendance_statuses', 'visible', 1, 'id', $stid);
+	    		$DB->set_field('attendance_statuses', 'visible', 1, array('id' => $stid));
 	    		break;
 	    	case 'hide':
 	    		$students = get_users_by_capability($context, 'moodle/legacy:student', '', '', '', '', '', '', false);
 	    		$studlist = implode(',', array_keys($students));
-	    		if (!count_records_select('attendance_log', "studentid IN ($studlist) AND statusid = $stid")) {
-	    			set_field('attendance_statuses', 'visible', 0, 'id', $stid);
+	    		if (!$DB->count_records_select('attendance_log', "studentid IN (?) AND statusid = ?", array( $studlist, $stid) )) {
+	    			$DB->set_field('attendance_statuses', 'visible', 0, array('id' => $stid));
 	    		} else {
 	    			print_error('canthidestatus', 'attforblock', "attsettings.php?id=$id");
 	    		}
@@ -87,7 +87,7 @@
 					$rec->acronym = $newacronym;
 					$rec->description = $newdescription;
 					$rec->grade = $newgrade;
-					insert_record('attendance_statuses', $rec);
+					$DB->insert_record('attendance_statuses', $rec);
 					add_to_log($course->id, 'attendance', 'setting added', 'mod/attforblock/attsettings.php?course='.$course->id, $user->lastname.' '.$user->firstname);
 	    		} else {
 	    			print_error('cantaddstatus', 'attforblock', "attsettings.php?id=$id");
@@ -126,7 +126,7 @@
 		$action = $st->visible ? 'hide' : 'show';
 		$titlevis = get_string($action);
 		$deleteact = '';
-		if (!count_records('attendance_log', 'statusid', $st->id)) {
+		if (!$DB->count_records('attendance_log', array('statusid'=> $st->id))) {
 			$deleteact = "<a title=\"$deltitle\" href=\"attsettings.php?id=$cm->id&amp;st={$st->id}&amp;action=delete\">".
 						 "<img src=\"{$CFG->pixpath}/t/delete.gif\" alt=\"$deltitle\" /></a>&nbsp;";
 		}
@@ -156,18 +156,18 @@
 	
 function config_save()
 {
-	global $course, $user, $attforblockrecord;
+	global $course, $user, $attforblockrecord, $DB;
 	
 	$acronym 		= required_param('acronym');
 	$description	= required_param('description');
 	$grade			= required_param('grade',PARAM_INT);
 	
 	foreach ($acronym as $id => $v) {
-		$rec = get_record('attendance_statuses', 'id', $id);
+		$rec = $DB->get_record('attendance_statuses', array('id'=> $id));
 		$rec->acronym = $acronym[$id];
 		$rec->description = $description[$id];
 		$rec->grade = $grade[$id];
-		update_record('attendance_statuses', $rec);
+		$DB->update_record('attendance_statuses', $rec);
 		add_to_log($course->id, 'attendance', 'settings updated', 'mod/attforblock/attsettings.php?course='.$course->id, $user->lastname.' '.$user->firstname);
 	}
 	attforblock_update_grades($attforblockrecord);	

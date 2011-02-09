@@ -2,7 +2,7 @@
 
     function attforblock_restore_mods($mod,$restore) {
 
-        global $CFG, $oldidarray;
+        global $CFG, $oldidarray, $DB;
 
         $status = true;
 
@@ -13,7 +13,7 @@
             //Now get completed xmlized object   
             $info = $data->info;
 
-            if (count_records('attforblock', 'course', $restore->course_id)) {
+            if ($DB->count_records('attforblock', array('course'=> $restore->course_id))) {
                 return false;
             }
 
@@ -28,7 +28,7 @@
             }
 
             //The structure is equal to the db, so insert the attforblock
-            $newid = insert_record ('attforblock', $attforblock);
+            $newid = $DB->insert_record ('attforblock', $attforblock);
             if ($newid) {
                 //We have the newid, update backup_ids
                 backup_putid($restore->backup_unique_code, $mod->modtype, $mod->id, $newid);
@@ -53,7 +53,7 @@
     
     function attforblock_restore_attendance_sessions ($old_attforblock_id, $new_attforblock_id, $info, $restore) {
 
-        global $CFG, $oldidarray;
+        global $CFG, $oldidarray, $DB;
 
         $status = true;
 
@@ -94,7 +94,7 @@
                 $stat->lasttakenby = 0;
             }
 
-            $newid = insert_record ('attendance_sessions', $stat);
+            $newid = $DB->insert_record ('attendance_sessions', $stat);
             $oldidarray[$old_attforblock_id]['attendance_sessions'][backup_todb($stat_info['#']['ID']['0']['#'])] = $newid;
         }
         
@@ -105,7 +105,7 @@
     
     function attforblock_restore_attendance_statuses ($old_attforblock_id, $new_attforblock_id,$info,$restore) {
 
-        global $CFG, $oldidarray;
+        global $CFG, $oldidarray, $DB;
 
         $status = true;
 
@@ -128,7 +128,7 @@
                     continue;
                 }
 
-                $newid = insert_record ('attendance_statuses', $stat);
+                $newid = $DB->insert_record ('attendance_statuses', $stat);
                 $oldidarray[$old_attforblock_id]['attendance_statuses'][backup_todb($stat_info['#']['ID']['0']['#'])] = $newid;
             }
 
@@ -145,7 +145,7 @@
                 $stat->visible = 1;
                 $stat->deleted = 0;
 
-                $newid = insert_record ('attendance_statuses', $stat);
+                $newid = $DB->insert_record ('attendance_statuses', $stat);
                 $oldidarray[$old_attforblock_id]['attendance_statuses'][backup_todb($stat_info['#']['STATUS']['0']['#'])] = $newid;
 
             }
@@ -153,13 +153,13 @@
         } else {
             // ATTFORBLOCK_SETTINGS tag don't exists
             // so course used default statuses (can be only in old version)
-            $stats = get_records('attendance_statuses', 'courseid', 0, 'id ASC');
+            $stats = $DB->get_records('attendance_statuses', array('courseid'=> 0), 'id ASC');
             $oldstats = array('P', 'A', 'L', 'E');
             $i = 0;
             foreach($stats as $stat) {
 //                $stat = $stats[$i];
                 $stat->courseid = $restore->course_id;
-                $newid = insert_record('attendance_statuses', $stat);
+                $newid = $DB->insert_record('attendance_statuses', $stat);
                 $oldidarray[$old_attforblock_id]['attendance_statuses'][$oldstats[$i++]] = $newid;
 //                $i++;
             }
@@ -171,7 +171,7 @@
     
     function attforblock_restore_attendance_log ($old_attforblock_id, $new_attforblock_id,$info,$restore) {
 
-        global $CFG, $oldidarray;
+        global $CFG, $oldidarray, $DB;
 
         $status = true;
 
@@ -182,9 +182,9 @@
             @$logs = $info['MOD']['#']['ATTFORBLOCK_LOG']['0']['#']['ROWS'];
         }
 
-        $stats = get_records_menu('attendance_statuses', 'courseid', $restore->course_id);
+        $stats = $DB->get_records_menu('attendance_statuses', array('courseid'=> $restore->course_id));
         $statslist = implode(',', array_keys($stats));
-        $sessions = get_records('attendance_sessions', 'courseid', $restore->course_id);
+        $sessions = $DB->get_records('attendance_sessions', 'courseid', $restore->course_id);
 
         //Iterate over logs
         for($i = 0; $i < sizeof($logs); $i++) {
@@ -230,7 +230,7 @@
 //                $log->takenby      = backup_todb($log_info['#']['TAKENBY']['0']['#']);
             }
 
-            $newid = insert_record ('attendance_log', $log);
+            $newid = $DB->insert_record ('attendance_log', $log);
             $oldidarray[$old_attforblock_id]['attendance_log'][backup_todb($log_info['#']['ID']['0']['#'])] = $newid;
 
 

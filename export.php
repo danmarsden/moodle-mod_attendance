@@ -11,15 +11,15 @@
     $id 	= required_param('id', PARAM_INT);
 //	$format	= optional_param('format', '', PARAM_ACTION);
 	
-    if (! $cm = get_record("course_modules", "id", $id)) {
+    if (! $cm = $DB->get_record("course_modules", array("id"=> $id))) {
         error("Course Module ID was incorrect");
     }
 
-    if (! $course = get_record("course", "id", $cm->course)) {
+    if (! $course = $DB->get_record("course", array("id"=> $cm->course))) {
         error("Course is misconfigured");
     }
     
-    if (! $attforblock = get_record('attforblock', 'id', $cm->instance)) {
+    if (! $attforblock = $DB->get_record('attforblock', array('id'=> $cm->instance))) {
         error("Course module is incorrect");
     }
     
@@ -56,14 +56,15 @@
 			$data->tabhead[] = get_string('lastname');
 			$data->tabhead[] = get_string('firstname');
 			
-			$select = "courseid = {$course->id} AND sessdate >= {$course->startdate}";
+			$select = "courseid = :cid AND sessdate >= :cstartdate";
 			if (isset($fromform->includenottaken)) {
-				$select .= " AND sessdate <= {$fromform->sessionenddate}";
+				$select .= " AND sessdate <= :cenddate";
 			} else {
 				$select .= " AND lasttaken != 0";
 			}
 	
-			if ($sessions = get_records_select('attendance_sessions', $select, 'sessdate ASC')) {
+			if ($sessions = $DB->get_records_select('attendance_sessions', $select,
+                                array('cid' => $course->id, 'cstartdate' => $course->startdate, 'cenddate' => $fromform->sessionenddate ), 'sessdate ASC')) {
 				foreach($sessions as $sess) {
 					$data->tabhead[] = userdate($sess->sessdate, get_string('strftimedmyhm', 'attforblock'));
 				}
@@ -85,7 +86,7 @@
 				$data->table[$i][] = $student->lastname;
 				$data->table[$i][] = $student->firstname;
 				foreach ($sessions as $sess) {
-					if ($rec = get_record('attendance_log', 'sessionid', $sess->id, 'studentid', $student->id)) {
+					if ($rec = $DB->get_record('attendance_log', array('sessionid'=> $sess->id, 'studentid'=> $student->id))) {
 						$data->table[$i][] = $statuses[$rec->statusid]->acronym;
 					} else {
 						$data->table[$i][] = '-';

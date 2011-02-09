@@ -7,7 +7,7 @@
 	require_once('add_form.php');
 	require_once('update_form.php');
 	require_once('duration_form.php');
-	
+
     if (!function_exists('grade_update')) { //workaround for buggy PHP versions
         require_once($CFG->libdir.'/gradelib.php');
     }
@@ -16,20 +16,20 @@
     $action = required_param('action', PARAM_ACTION);
     
     if ($id) {
-        if (! $cm = get_record('course_modules', 'id', $id)) {
+        if (! $cm = $DB->get_record('course_modules', array('id'=> $id))) {
             error('Course Module ID was incorrect');
         }
-        if (! $course = get_record('course', 'id', $cm->course)) {
+        if (! $course = $DB->get_record('course', array('id'=> $cm->course))) {
             error('Course is misconfigured');
         }
-	    if (! $attforblock = get_record('attforblock', 'id', $cm->instance)) {
+	    if (! $attforblock = $DB->get_record('attforblock', array('id'=> $cm->instance))) {
 	        error("Course module is incorrect");
 	    }
     }
 
     require_login($course->id);
 
-    if (! $user = get_record('user', 'id', $USER->id) ) {
+    if (! $user = $DB->get_record('user', array('id'=> $USER->id) )) {
         error("No such user in this course");
     }
     
@@ -96,7 +96,7 @@
 								$rec->description = $fromform->sdescription;
 								$rec->timemodified = $now;
                                 if ($fromform->sessiontype == COMMONSESSION) {
-                                    if(!insert_record('attendance_sessions', $rec))
+                                    if(!$DB->insert_record('attendance_sessions', $rec))
                                         error(get_string('erroringeneratingsessions','attforblock'), "sessions.php?id=$id&amp;action=add");
                                 } else {
                                     foreach ($fromform->groups as $groupid) {
@@ -156,7 +156,7 @@
 	    	redirect('manage.php?id='.$id);
 	    }
 	    if ($fromform = $mform_update->get_data()) {
-		    if (!$att = get_record('attendance_sessions', 'id', $sessionid) ) {
+		    if (!$att = $DB->get_record('attendance_sessions', array('id'=> $sessionid) )) {
 		        error('No such session in this course');
 		    }
 		
@@ -174,7 +174,7 @@
 				$att->duration = $fromform->durtime['hours']*HOURSECS + $fromform->durtime['minutes']*MINSECS;
 				$att->description = $fromform->sdescription;
 				$att->timemodified = time();
-				update_record('attendance_sessions', $att);
+				$DB->update_record('attendance_sessions', $att);
 				add_to_log($course->id, 'attendance', 'Session updated', 'mod/attforblock/manage.php?id='.$id, $user->lastname.' '.$user->firstname);
 				//notice(get_string('sessionupdated','attforblock'), 'manage.php?id='.$id);
 				redirect('manage.php?id='.$id, get_string('sessionupdated','attforblock'), 3);
@@ -193,15 +193,15 @@
 		$sessionid	 = required_param('sessionid');
 		$confirm = optional_param('confirm');
 
-	    if (!$att = get_record('attendance_sessions', 'id', $sessionid) ) {
+	    if (!$att = $DB->get_record('attendance_sessions', array('id'=> $sessionid) )) {
 	        error('No such session in this course');
 	    }
 	    
 		if (isset($confirm)) {
-			delete_records('attendance_log', 'sessionid', $sessionid);
-			delete_records('attendance_sessions', 'id', $sessionid);
+			$DB->delete_records('attendance_log', array('sessionid'=> $sessionid));
+			$DB->delete_records('attendance_sessions', array('id'=> $sessionid));
 			add_to_log($course->id, 'attendance', 'Session deleted', 'mod/attforblock/manage.php?id='.$id, $user->lastname.' '.$user->firstname);
-			$attforblockrecord = get_record('attforblock', 'course', $course->id);
+			$attforblockrecord = $DB->get_record('attforblock', array('course'=> $course->id));
             attforblock_update_grades($attforblockrecord);
 			redirect('manage.php?id='.$id, get_string('sessiondeleted','attforblock'), 3);
 		}
@@ -219,18 +219,18 @@
 		if (isset($confirm)) {
 			$sessionid = required_param('sessionid');
 			$ids = implode(',', explode('_', $sessionid));
-			delete_records_select('attendance_log', "sessionid IN ($ids)");
-			delete_records_select('attendance_sessions', "id IN ($ids)");
+			$DB->delete_records_select('attendance_log', "sessionid IN ($ids)");
+			$DB->delete_records_select('attendance_sessions', "id IN ($ids)");
 			add_to_log($course->id, 'attendance', 'Several sessions deleted', 'mod/attforblock/manage.php?id='.$id, $user->lastname.' '.$user->firstname);
 			
-			$attforblockrecord = get_record('attforblock','course',$course->id);
+			$attforblockrecord = $DB->get_record('attforblock',array('course'=> $course->id));
 			attforblock_update_grades($attforblockrecord);
 			redirect('manage.php?id='.$id, get_string('sessiondeleted','attforblock'), 3);
 		}
 		
 		$fromform = data_submitted();
 		$slist = implode(',', array_keys($fromform->sessid));
-		$sessions = get_records_list('attendance_sessions', 'id', $slist, 'sessdate');
+		$sessions = $DB->get_records_list('attendance_sessions', array('id'=> $slist), 'sessdate');
 		
 		print_heading(get_string('deletingsession','attforblock').' :: ' .$course->fullname);
 		$message = '<br />';
@@ -262,13 +262,13 @@
 	    if ($fromform = $mform_duration->get_data()) {
 	    	$now = time();
 	    	$slist = implode(',', explode('_', $fromform->ids));
-		    if (!$sessions = get_records_list('attendance_sessions', 'id', $slist) ) {
+		    if (!$sessions = $DB->get_records_list('attendance_sessions', array('id'=> $slist) )) {
 		        error('No such session in this course');
 		    }
 			foreach ($sessions as $sess) {
 				$sess->duration = $fromform->durtime['hours']*HOURSECS + $fromform->durtime['minutes']*MINSECS;
 				$sess->timemodified = $now;
-				update_record('attendance_sessions', $sess);
+				$DB->update_record('attendance_sessions', $sess);
 			}
 			add_to_log($course->id, 'attendance', 'Session updated', 'mod/attforblock/manage.php?id='.$id, $user->lastname.' '.$user->firstname);
 			redirect('manage.php?id='.$id, get_string('sessionupdated','attforblock'), 3);

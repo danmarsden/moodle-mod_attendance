@@ -16,11 +16,14 @@
     
 
     function attforblock_check_backup_mods_instances($course, $instance, $backup_unique_code) {
+
+        global $DB;
+        
         //First the course data
         $info[$instance->id.'0'][0] = '<b>'.$instance->name.'</b>';
         $info[$instance->id.'0'][1] = '';
 
-        $sessions = get_records_menu('attendance_sessions', 'courseid', $course);
+        $sessions = $DB->get_records_menu('attendance_sessions', array('courseid'=> $course));
         $info[$instance->id.'1'][0] = get_string('sessions', 'attforblock');
         $info[$instance->id.'1'][1] = count($sessions);
 
@@ -28,7 +31,7 @@
         if (!empty($instance->userdata)) {
             $info[$instance->id.'2'][0] = get_string('attrecords', 'attforblock');
             $sesslist = implode(',', array_keys($sessions));
-            if ($datas = get_records_list('attendance_log', 'sessionid', $sesslist)) {
+            if ($datas = $DB->get_records_list('attendance_log', array('sessionid'=> $sesslist))) {
                 $info[$instance->id.'2'][1] = count($datas);
             } else {
                 $info[$instance->id.'2'][1] = 0;
@@ -40,12 +43,12 @@
 
     function attforblock_backup_mods($bf, $preferences) {
 
-        global $CFG;
+        global $CFG, $DB;
 
         $status = true;
 
         //Iterate over attforblock table
-        $attforblocks = get_records ('attforblock', 'course', $preferences->backup_course, 'id');
+        $attforblocks = $DB->get_records ('attforblock', 'course', array($preferences->backup_course=> 'id'));
         if ($attforblocks) {
             foreach ($attforblocks as $attforblock) {
                 if (backup_mod_selected($preferences, 'attforblock', $attforblock->id)) {
@@ -61,10 +64,10 @@
 
     function attforblock_backup_one_mod($bf, $preferences, $attforblock) {
 
-        global $CFG;
+        global $CFG, $DB;
     
         if (is_numeric($attforblock)) {
-            $attforblock = get_record('attforblock', 'id', $attforblock);
+            $attforblock = $DB->get_record('attforblock', array('id'=> $attforblock));
         }
     
         $status = true;
@@ -93,11 +96,11 @@
     
     function attforblock_backup_attendance_sessions ($bf,$preferences,$attforblock) {
 
-        global $CFG;
+        global $CFG, $DB;
 
         $status = true;
 
-        $datas = get_records('attendance_sessions', 'courseid', $attforblock->course);
+        $datas = $DB->get_records('attendance_sessions', array('courseid'=> $attforblock->course));
         if ($datas) {
             //Write start tag
             $status =fwrite ($bf,start_tag('SESSIONS',4,true));
@@ -132,11 +135,11 @@
     
     function attforblock_backup_attendance_statuses ($bf,$preferences,$attforblock) {
 
-        global $CFG;
+        global $CFG, $DB;
 
         $status = true;
 
-        $datas = get_records('attendance_statuses', 'courseid', $attforblock->course);
+        $datas = $DB->get_records('attendance_statuses', array('courseid'=> $attforblock->course));
         //If there is levels
         if ($datas) {
             //Write start tag
@@ -166,13 +169,13 @@
     
     function attforblock_backup_attendance_log ($bf,$preferences,$attforblock) {
 
-        global $CFG;
+        global $CFG, $DB;
 
         $status = true;
 
-        $sessions = get_records_menu('attendance_sessions', 'courseid', $attforblock->course);
+        $sessions = $DB->get_records_menu('attendance_sessions', array('courseid'=> $attforblock->course));
         $sesslist = implode(',', array_keys($sessions));
-        $datas = get_records_list('attendance_log', 'sessionid', $sesslist);
+        $datas = $DB->get_records_list('attendance_log', array('sessionid'=> $sesslist));
         //If there is levels
         if ($datas) {
             //Write start tag

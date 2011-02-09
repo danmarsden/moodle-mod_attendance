@@ -6,7 +6,7 @@ class mod_attforblock_update_form extends moodleform {
 
     function definition() {
 
-        global $CFG;
+        global $CFG, $DB;
         $mform    =& $this->_form;
 
         $course        = $this->_customdata['course'];
@@ -16,7 +16,7 @@ class mod_attforblock_update_form extends moodleform {
         $sessionid     = $this->_customdata['sessionid'];
 
 
-        if (!$att = get_record('attendance_sessions', 'id', $sessionid) ) {
+        if (!$att = $DB->get_record('attendance_sessions', array('id'=> $sessionid) )) {
 	        error('No such session in this course');
 	    }
         $mform->addElement('header', 'general', get_string('changesession','attforblock'));

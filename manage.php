@@ -11,21 +11,21 @@
     $view       = optional_param('view', NULL, PARAM_ALPHA);        // which page to show
 	$current	= optional_param('current', 0, PARAM_INT);
 
-    if (! $cm = get_record('course_modules', 'id', $id)) {
+    if (! $cm = $DB->get_record('course_modules', array('id'=> $id))) {
         error('Course Module ID was incorrect');
     }
 
-    if (! $course = get_record('course', 'id', $cm->course)) {
+    if (! $course = $DB->get_record('course', array('id'=> $cm->course))) {
         error("Course is misconfigured");
     }
 
-    if (! $attforblock = get_record('attforblock', 'id', $cm->instance)) {
+    if (! $attforblock = $DB->get_record('attforblock', array('id'=> $cm->instance))) {
         error("Course module is incorrect");
     }
     
     require_login($course->id);
 
-    if (! $user = get_record('user', 'id', $USER->id) ) {
+    if (! $user = $DB->get_record('user', array('id'=> $USER->id) )) {
         error("No such user in this course");
     }
     
@@ -48,10 +48,10 @@
 	if($from === 'block') {
 		$today = time(); // because we compare with database, we don't need to use usertime()
         $sql = "SELECT id, groupid, lasttaken
-                  FROM {$CFG->prefix}attendance_sessions
-                 WHERE $today BETWEEN sessdate AND (sessdate + duration)
+                  FROM {attendance_sessions}
+                 WHERE ? BETWEEN sessdate AND (sessdate + duration)
                    AND courseid = $course->id";
-        if($atts = get_records_sql($sql)) {
+        if($atts = $DB->get_records_sql($sql, array($today))) {
             $size = count($atts);
             if ($size == 1) {
                 $att = reset($atts);
@@ -76,11 +76,11 @@
     
 	print_heading(get_string('attendanceforthecourse','attforblock').' :: ' .$course->fullname);
 	
-	if(!count_records_select('attendance_sessions', "courseid = $course->id AND sessdate >= $course->startdate")) {	// no session exists for this course
+	if(!$DB->count_records_select('attendance_sessions', "courseid = ? AND sessdate >= ?", array($course->id, $course->startdate))) {	// no session exists for this course
 		show_tabs($cm, $context);
 		print_heading(get_string('nosessionexists','attforblock'));	
-		$hiddensess = count_records_select('attendance_sessions', "courseid = $course->id AND sessdate < $course->startdate");
-        echo '<div align="left">'.helpbutton('hiddensessions', '', 'attforblock', true, true, '', true);
+		$hiddensess = $DB->count_records_select('attendance_sessions', "courseid = ? AND sessdate < ?", array($course->id, $course->startdate));
+        echo '<div align="left">'.helpbutton('hiddensessions', '--', 'attforblock', true, true, '', true); //TODO: fix '--'
         echo get_string('hiddensessions', 'attforblock').': '.$hiddensess.'</div>';
 	} else {	//sessions generated , display them
 		add_to_log($course->id, 'attendance', 'manage attendances', 'mod/attforblock/manage.php?course='.$course->id, $user->lastname.' '.$user->firstname);
@@ -93,7 +93,7 @@
 	
 	
 function print_sessions_list($course) {
-	global $CFG, $context, $cm, $current, $view, $id;
+	global $CFG, $context, $cm, $current, $view, $id, $DB;
 	
         $strhours = get_string('hours');
         $strmins = get_string('min');
@@ -109,16 +109,16 @@ function print_sessions_list($course) {
         $currentgroup = $ret['currentgroup'];
 
         if ($startdate && $enddate) {
-            $where = "courseid={$course->id} AND sessdate >= $course->startdate AND sessdate >= $startdate AND sessdate < $enddate";
+            $where = "courseid=:cid AND sessdate >= :sdate AND sessdate >= :sdate2 AND sessdate < :edate";
         } else {
-            $where = "courseid={$course->id} AND sessdate >= $course->startdate";
+            $where = "courseid=:cid AND sessdate >= :sdate";
         }
 
         if ($currentgroup > -1) {
-            $where .= " AND groupid=$currentgroup";
+            $where .= " AND groupid=:cgroup";
         }
 
-        $qry = get_records_select('attendance_sessions', $where, 'sessdate asc');
+        $qry = $DB->get_records_select('attendance_sessions', $where, array('cid' => $course->id, 'sdate' => $course->startdate,'sdate2' => $startdate, 'edate'=> $enddate, 'cgroup'=> $currentgroup), 'sessdate asc');
         $i = 0;
         $table->width = '100%';
         //$table->tablealign = 'center';
@@ -180,9 +180,9 @@ function print_sessions_list($course) {
         echo '<div align="center"><div class="generalbox attwidth">';
         echo "<form method=\"post\" action=\"sessions.php?id={$cm->id}\">"; //&amp;sessionid={$sessdata->id}
 		print_table($table);
-		$hiddensess = count_records_select('attendance_sessions', "courseid = $course->id AND sessdate < $course->startdate");
+		$hiddensess = $DB->count_records_select('attendance_sessions', "courseid = ? AND sessdate < ?", array($course->id,$course->startdate));
         echo '<table width="100%"><tr><td valign="top">';
-        echo '<div align="left">'.helpbutton('hiddensessions', '', 'attforblock', true, true, '', true);
+        echo '<div align="left">'.helpbutton('hiddensessions', '--', 'attforblock', true, true, '', true); //TODO: Change '--'
         echo get_string('hiddensessions', 'attforblock').': '.$hiddensess.'</div></td>';
         echo '<td><div align="right"><a href="javascript:checkall();">'.get_string('selectall').'</a> /'.
              ' <a href="javascript:checknone();">'.get_string('deselectall').'</a><br /><br />';

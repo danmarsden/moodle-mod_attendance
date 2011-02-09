@@ -89,6 +89,7 @@ $string['nosessionexists'] = 'No existen Sesiones para este curso';
 $string['notfound'] = 'No se ha encontrado ninguna actividad Asistencia en este curso';
 $string['olddate'] = 'Fecha Anterior';
 $string['period'] = 'Frecuencia';
+$string['pluginname'] = 'Asistencia';
 $string['remarks'] = 'Observaciones';
 $string['report'] = 'Informe';
 $string['resetdescription'] = 'Recuerde que eliminando los datos de la asistencia provocará el borrado de información en la base de datos. Usted puede ocultar sesiones anteriores cambiando la fecha de inicio del curso en la zona de administración.';

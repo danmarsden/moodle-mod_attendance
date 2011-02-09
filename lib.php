@@ -5,7 +5,9 @@
 $attforblock_CONSTANT = 7;     /// for example
 
 function attforblock_install() {
-	
+
+        global $DB;
+        
 	$result = true;
 	$arr = array('P' => 2, 'A' => 0, 'L' => 1, 'E' => 1);
 	foreach ($arr as $k => $v) {
@@ -16,7 +18,7 @@ function attforblock_install() {
 		$rec->grade = $v;
 		$rec->visible = 1;
 		$rec->deleted = 0;
-		$result = $result && insert_record('attendance_statuses', $rec);
+		$result = $result && $DB->insert_record('attendance_statuses', $rec);
 	}
 	return $result;
 }
@@ -27,27 +29,29 @@ function attforblock_add_instance($attforblock) {
 /// will create a new instance and return the id number 
 /// of the new instance.
 
+    global $DB;
+    
     $attforblock->timemodified = time();
 
-    if ($att = get_record('attforblock', 'course', $attforblock->course)) {
-    	$modnum = get_field('modules', 'id', 'name', 'attforblock');
-    	if (!get_record('course_modules', 'course', $attforblock->course, 'module', $modnum)) {
-    		delete_records('attforblock', 'course', $attforblock->course);
-    		$attforblock->id = insert_record('attforblock', $attforblock);
+    if ($att = $DB->get_record('attforblock', array('course'=> $attforblock->course))) {
+    	$modnum = $DB->get_field('modules', 'id', array('name'=> 'attforblock'));
+    	if (!$DB->get_record('course_modules', array('course'=> $attforblock->course, 'module'=> $modnum))) {
+    		$DB->delete_records('attforblock', array('course'=> $attforblock->course));
+    		$attforblock->id = $DB->insert_record('attforblock', $attforblock);
     	} else {
     		return false;
     	}
     } else {
-    	$attforblock->id = insert_record('attforblock', $attforblock);
+    	$attforblock->id = $DB->insert_record('attforblock', $attforblock);
     }
 
     //Copy statuses for new instance from defaults
-    if (!get_records('attendance_statuses', 'courseid', $attforblock->course)) {
-	    $statuses = get_records('attendance_statuses', 'courseid', 0, 'id');
+    if (!$DB->get_records('attendance_statuses', array('courseid'=> $attforblock->course))) {
+	    $statuses = $DB->get_records('attendance_statuses', array('courseid'=> 0), 'id');
 		foreach($statuses as $stat) {
 			$rec = $stat;
 			$rec->courseid = $attforblock->course;
-			insert_record('attendance_statuses', $rec);
+			$DB->insert_record('attendance_statuses', $rec);
 		}
     }
 						
@@ -62,10 +66,12 @@ function attforblock_update_instance($attforblock) {
 /// (defined by the form in mod.html) this function 
 /// will update an existing instance with new data.
 
+    global $DB;
+    
     $attforblock->timemodified = time();
     $attforblock->id = $attforblock->instance;
 
-    if (! update_record('attforblock', $attforblock)) {
+    if (! $DB->update_record('attforblock', $attforblock)) {
         return false;
     }
 
@@ -80,11 +86,13 @@ function attforblock_delete_instance($id) {
 /// this function will permanently delete the instance 
 /// and any data that depends on it.  
 
-    if (! $attforblock = get_record('attforblock', 'id', $id)) {
+    global $DB;
+    
+    if (! $attforblock = $DB->get_record('attforblock', array('id'=> $id))) {
         return false;
     }
     
-    $result = delete_records('attforblock', 'id', $id);
+    $result = $DB->delete_records('attforblock', array('id'=> $id));
 
     attforblock_grade_item_delete($attforblock);
 
@@ -92,13 +100,15 @@ function attforblock_delete_instance($id) {
 }
 
 function attforblock_delete_course($course, $feedback=true){
-	
-	if ($sess = get_records('attendance_sessions', 'courseid', $course->id, '', 'id')) {
+
+        global $DB;
+        
+	if ($sess = $DB->get_records('attendance_sessions', array('courseid'=> $course->id), '', 'id')) {
         $slist = implode(',', array_keys($sess));
-        delete_records_select('attendance_log', "sessionid IN ($slist)");
-        delete_records('attendance_sessions', 'courseid', $course->id);
+        $DB->delete_records_select('attendance_log', "sessionid IN ($slist)");
+        $DB->delete_records('attendance_sessions', array('courseid'=> $course->id));
     }
-	delete_records('attendance_statuses', 'courseid', $course->id);
+	$DB->delete_records('attendance_statuses', array('courseid'=> $course->id));
 	
     //Inform about changes performed if feedback is enabled
 //    if ($feedback) {
@@ -135,23 +145,25 @@ function attforblock_reset_course_form_defaults($course) {
 }
 
 function attforblock_reset_userdata($data) {
+    global $DB;
+
     if (!empty($data->reset_attendance_log)) {
-		$sess = get_records('attendance_sessions', 'courseid', $data->courseid, '', 'id');
+		$sess = $DB->get_records('attendance_sessions', array('courseid'=> $data->courseid), '', 'id');
 		$slist = implode(',', array_keys($sess));
-    	delete_records_select('attendance_log', "sessionid IN ($slist)");
-        set_field('attendance_sessions', 'lasttaken', 0, 'courseid', $data->courseid);
+    	$DB->delete_records_select('attendance_log', "sessionid IN ($slist)");
+        $DB->set_field('attendance_sessions', 'lasttaken', 0, array('courseid' => $data->courseid));
     }
     if (!empty($data->reset_attendance_statuses)) {
-    	delete_records('attendance_statuses', 'courseid', $data->courseid);
-	    $statuses = get_records('attendance_statuses', 'courseid', 0, 'id');
+    	$DB->delete_records('attendance_statuses', array('courseid'=> $data->courseid));
+	    $statuses = $DB->get_records('attendance_statuses', array('courseid'=> 0), 'id');
 		foreach($statuses as $stat) {
 			$rec = $stat;
 			$rec->courseid = $data->courseid;
-			insert_record('attendance_statuses', $rec);
+			$DB->insert_record('attendance_statuses', $rec);
 		}
     }
     if (!empty($data->reset_attendance_sessions)) {
-    	delete_records('attendance_sessions', 'courseid', $data->courseid);
+    	$DB->delete_records('attendance_sessions', array('courseid'=> $data->courseid));
     }
 }
 
@@ -217,11 +229,11 @@ function attforblock_cron () {
  * @return array array of grades, false if none
  */
 function attforblock_get_user_grades($attforblock, $userid=0) {
-    global $CFG;
+    global $CFG, $DB;
     
 	require_once('locallib.php');
 	
-    if (! $course = get_record('course', 'id', $attforblock->course)) {
+    if (! $course = $DB->get_record('course', array('id'=> $attforblock->course))) {
         error("Course is misconfigured");
     }
 
@@ -250,7 +262,7 @@ function attforblock_get_user_grades($attforblock, $userid=0) {
  * @param int $userid specific user only, 0 mean all
  */
 function attforblock_update_grades($attforblock=null, $userid=0, $nullifnone=true) {
-    global $CFG;
+    global $CFG, $DB;
     if (!function_exists('grade_update')) { //workaround for buggy PHP versions
         require_once($CFG->libdir.'/gradelib.php');
     }
@@ -269,17 +281,17 @@ function attforblock_update_grades($attforblock=null, $userid=0, $nullifnone=tru
 
     } else {
         $sql = "SELECT a.*, cm.idnumber as cmidnumber, a.course as courseid
-                  FROM {$CFG->prefix}attforblock a, {$CFG->prefix}course_modules cm, {$CFG->prefix}modules m
+                  FROM {attforblock} a, {course_modules} cm, {modules} m
                  WHERE m.name='attforblock' AND m.id=cm.module AND cm.instance=a.id";
-        if ($rs = get_recordset_sql($sql)) {
-            while ($attforblock = rs_fetch_next_record($rs)) {
+        if ($rs = $DB->get_records_sql($sql)) {
+            foreach ($rs as $attforblock) {
 //                if ($attforblock->grade != 0) {
                     attforblock_update_grades($attforblock);
 //                } else {
 //                    attforblock_grade_item_update($attforblock);
 //                }
             }
-            rs_close($rs);
+            $rs->close($rs);
         }
     }
 }
@@ -292,7 +304,7 @@ function attforblock_update_grades($attforblock=null, $userid=0, $nullifnone=tru
  * @return int 0 if ok, error code otherwise
  */
 function attforblock_grade_item_update($attforblock, $grades=NULL) {
-    global $CFG;
+    global $CFG, $DB;
     
 	require_once('locallib.php');
 	
@@ -303,7 +315,7 @@ function attforblock_grade_item_update($attforblock, $grades=NULL) {
     if (!isset($attforblock->courseid)) {
         $attforblock->courseid = $attforblock->course;
     }
-    if (! $course = get_record('course', 'id', $attforblock->course)) {
+    if (! $course = $DB->get_record('course', array('id'=> $attforblock->course))) {
         error("Course is misconfigured");
     }
     //$attforblock->grade = get_maxgrade($course);

@@ -19,7 +19,9 @@
 
 function xmldb_attforblock_upgrade($oldversion=0) {
 
-    global $CFG, $THEME, $db;
+    global $CFG, $THEME, $DB;
+    $dbman = $DB->get_manager(); /// loads ddl manager and xmldb classes
+
 
     $result = true;
 
@@ -28,157 +30,160 @@ function xmldb_attforblock_upgrade($oldversion=0) {
 /// this comment lines once this file start handling proper
 /// upgrade code.
 
-	if ($result && $oldversion < 2008021904) { //New version in version.php
+	if ($oldversion < 2008021904) { //New version in version.php
 		global $USER;
-		if ($sessions = get_records('attendance_sessions', 'takenby', 0)) {
+		if ($sessions = $DB->get_records('attendance_sessions', array('takenby'=> 0))) {
 			foreach ($sessions as $sess) {
-				if (count_records('attendance_log', 'attsid', $sess->id) > 0) {
+				if ($DB->count_records('attendance_log', array('attsid'=> $sess->id)) > 0) {
 					$sess->takenby = $USER->id;
 					$sess->timetaken = $sess->timemodified ? $sess->timemodified : time();
 					$sess->description = addslashes($sess->description);
-					$result = update_record('attendance_sessions', $sess) and $result;
+					$result = $DB->update_record('attendance_sessions', $sess) and $result;
 				}
 			}
 		}
+                upgrade_mod_savepoint(true, 2008021904, 'attforblock');
 	}
 
-    if ($oldversion < 2008102401 and $result) {
+    if ($oldversion < 2008102401) {
     	
-        $table = new XMLDBTable('attforblock');
+        $table = new xmldb_table('attforblock');
         
-        $field = new XMLDBField('grade');
-        $field->setAttributes(XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, null, '100', 'name');
-        $result = $result && add_field($table, $field);
+        $field = new xmldb_field('grade');
+        $field->set_attributes(XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '100', 'name');
+        $dbman->add_field($table, $field);
     	
         
-        $table = new XMLDBTable('attendance_sessions');
+        $table = new xmldb_table('attendance_sessions');
         
-        $field = new XMLDBField('courseid');
-        $field->setAttributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'id');
-        $result = $result && change_field_unsigned($table, $field);
+        $field = new xmldb_field('courseid');
+        $field->set_attributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'id');
+        $dbman->change_field_unsigned($table, $field);
     	
-//        $field = new XMLDBField('creator');
-//        $field->setAttributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'courseid');
-//        $result = $result && change_field_unsigned($table, $field);
+//        $field = new xmldb_field('creator');
+//        $field->set_attributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'courseid');
+//        change_field_unsigned($table, $field);
     	
-        $field = new XMLDBField('sessdate');
-        $field->setAttributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'creator');
-        $result = $result && change_field_unsigned($table, $field);
+        $field = new xmldb_field('sessdate');
+        $field->set_attributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'creator');
+        $dbman->change_field_unsigned($table, $field);
     	
-        $field = new XMLDBField('duration');
-        $field->setAttributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'sessdate');
-        $result = $result && add_field($table, $field);
+        $field = new xmldb_field('duration');
+        $field->set_attributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'sessdate');
+        $dbman->add_field($table, $field);
         
-        $field = new XMLDBField('timetaken');
-        $field->setAttributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'takenby');
-        $result = $result && change_field_unsigned($table, $field);
-    	$result = $result && rename_field($table, $field, 'lasttaken');
+        $field = new xmldb_field('timetaken');
+        $field->set_attributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'takenby');
+        $dbman->change_field_unsigned($table, $field);
+    	$dbman->rename_field($table, $field, 'lasttaken');
 
-        $field = new XMLDBField('takenby');
-        $field->setAttributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'lasttaken');
-        $result = $result && change_field_unsigned($table, $field);
-        $result = $result && rename_field($table, $field, 'lasttakenby');
+        $field = new xmldb_field('takenby');
+        $field->set_attributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'lasttaken');
+        $dbman->change_field_unsigned($table, $field);
+        $dbman->rename_field($table, $field, 'lasttakenby');
     	
-        $field = new XMLDBField('timemodified');
-        $field->setAttributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, null, null, null, null, null, 'lasttaken');
-        $result = $result && change_field_unsigned($table, $field);
+        $field = new xmldb_field('timemodified');
+        $field->set_attributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, null, null, null, 'lasttaken');
+        $dbman->change_field_unsigned($table, $field);
     	
         
-    	$table = new XMLDBTable('attendance_log');
+    	$table = new xmldb_table('attendance_log');
         
-        $field = new XMLDBField('attsid');
-		$field->setAttributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'id');
-    	$result = $result && change_field_unsigned($table, $field);
+        $field = new xmldb_field('attsid');
+		$field->set_attributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'id');
+    	$dbman->change_field_unsigned($table, $field);
     	
-        $field = new XMLDBField('studentid');
-        $field->setAttributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'attsid');
-    	$result = $result && change_field_unsigned($table, $field);
+        $field = new xmldb_field('studentid');
+        $field->set_attributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'attsid');
+    	$dbman->change_field_unsigned($table, $field);
     	
-    	$field = new XMLDBField('statusid');
-        $field->setAttributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'status');
-    	$result = $result && add_field($table, $field);
+    	$field = new xmldb_field('statusid');
+        $field->set_attributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'status');
+    	$dbman->add_field($table, $field);
     	
-        $field = new XMLDBField('statusset');
-        $field->setAttributes(XMLDB_TYPE_CHAR, '100', null, null, null, null, null, null, 'statusid');
-        $result = $result && add_field($table, $field);
+        $field = new xmldb_field('statusset');
+        $field->set_attributes(XMLDB_TYPE_CHAR, '100', null, null, null, null, 'statusid');
+        $dbman->add_field($table, $field);
     	
-        $field = new XMLDBField('timetaken');
-        $field->setAttributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'statusid');
-    	$result = $result && add_field($table, $field);
+        $field = new xmldb_field('timetaken');
+        $field->set_attributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'statusid');
+    	$dbman->add_field($table, $field);
     	
-        $field = new XMLDBField('takenby');
-        $field->setAttributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'timetaken');
-    	$result = $result && add_field($table, $field);
+        $field = new xmldb_field('takenby');
+        $field->set_attributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'timetaken');
+    	$dbman->add_field($table, $field);
     	
         //Indexes
-        $index = new XMLDBIndex('statusid');
-        $index->setAttributes(XMLDB_INDEX_NOTUNIQUE, array('statusid'));
-    	$result = $result && add_index($table, $index);
+        $index = new xmldb_index('statusid');
+        $index->set_attributes(XMLDB_INDEX_NOTUNIQUE, array('statusid'));
+    	$dbman->add_index($table, $index);
     	
-        $index = new XMLDBIndex('attsid');
-        $index->setAttributes(XMLDB_INDEX_NOTUNIQUE, array('attsid'));
-        $result = $result && drop_index($table, $index);
+        $index = new xmldb_index('attsid');
+        $index->set_attributes(XMLDB_INDEX_NOTUNIQUE, array('attsid'));
+        $dbman->drop_index($table, $index);
     	
-        $field = new XMLDBField('attsid'); //Rename field
-        $field->setAttributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'id');
-        $result = $result && rename_field($table, $field, 'sessionid');
+        $field = new xmldb_field('attsid'); //Rename field
+        $field->set_attributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'id');
+        $dbman->rename_field($table, $field, 'sessionid');
         
-        $index = new XMLDBIndex('sessionid');
-        $index->setAttributes(XMLDB_INDEX_NOTUNIQUE, array('sessionid'));
-        $result = $result && add_index($table, $index);
+        $index = new xmldb_index('sessionid');
+        $index->set_attributes(XMLDB_INDEX_NOTUNIQUE, array('sessionid'));
+        $dbman->add_index($table, $index);
         
     	
-    	$table = new XMLDBTable('attendance_settings');
+    	$table = new xmldb_table('attendance_settings');
         
-        $field = new XMLDBField('courseid');
-        $field->setAttributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'id');
-        $result = $result && change_field_unsigned($table, $field);
+        $field = new xmldb_field('courseid');
+        $field->set_attributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'id');
+        $dbman->change_field_unsigned($table, $field);
     	
-        $field = new XMLDBField('visible');
-        $field->setAttributes(XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '1', 'grade');
-        $result = $result && add_field($table, $field);
+        $field = new xmldb_field('visible');
+        $field->set_attributes(XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '1', 'grade');
+        $dbman->add_field($table, $field);
         
-        $field = new XMLDBField('deleted');
-        $field->setAttributes(XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'visible');
-        $result = $result && add_field($table, $field);
+        $field = new xmldb_field('deleted');
+        $field->set_attributes(XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'visible');
+        $dbman->add_field($table, $field);
         
         //Indexes
-        $index = new XMLDBIndex('visible');
-        $index->setAttributes(XMLDB_INDEX_NOTUNIQUE, array('visible'));
-        $result = $result && add_index($table, $index);
+        $index = new xmldb_index('visible');
+        $index->set_attributes(XMLDB_INDEX_NOTUNIQUE, array('visible'));
+        $dbman->add_index($table, $index);
         
-        $index = new XMLDBIndex('deleted');
-        $index->setAttributes(XMLDB_INDEX_NOTUNIQUE, array('deleted'));
-        $result = $result && add_index($table, $index);
+        $index = new xmldb_index('deleted');
+        $index->set_attributes(XMLDB_INDEX_NOTUNIQUE, array('deleted'));
+        $dbman->add_index($table, $index);
         
-    	$result = $result && rename_table($table, 'attendance_statuses');
+    	$dbman->rename_table($table, 'attendance_statuses');
+
+        upgrade_mod_savepoint(true, 2008102401, 'attforblock');
     }
     
-    if ($oldversion < 2008102406 and $result) {
+    if ($oldversion < 2008102406) {
     	
-	    if ($courses = get_records_sql("SELECT courseid FROM {$CFG->prefix}attendance_sessions GROUP BY courseid")) {
+	    if ($courses = $DB->get_records_sql("SELECT courseid FROM {attendance_sessions} GROUP BY courseid")) {
 	    		foreach ($courses as $c) {
 	    			//Adding own status for course (now it must have own)
-	    			if (!count_records('attendance_statuses', 'courseid', $c->courseid)) {
-	    				$statuses = get_records('attendance_statuses', 'courseid', 0);
+	    			if (!$DB->count_records('attendance_statuses', array( 'courseid'=> $c->courseid))) {
+	    				$statuses = $DB->get_records('attendance_statuses', array('courseid'=> 0));
 						foreach($statuses as $stat) {
 							$rec = $stat;
 							$rec->courseid = $c->courseid;
-							insert_record('attendance_statuses', $rec);
+							$DB->insert_record('attendance_statuses', $rec);
 						}
 	    			}
-	    			$statuses = get_records('attendance_statuses', 'courseid', $c->courseid);
+	    			$statuses = $DB->get_records('attendance_statuses', array('courseid'=> $c->courseid));
 	    			$statlist = implode(',', array_keys($statuses));
-	    			$sess = get_records_select_menu('attendance_sessions', "courseid = $c->courseid AND lasttakenby > 0");
+	    			$sess = $DB->get_records_select_menu('attendance_sessions', "courseid = ? AND lasttakenby > 0", array($c->courseid));
 	    			$sesslist = implode(',', array_keys($sess));
 					foreach($statuses as $stat) {
-						execute_sql("UPDATE {$CFG->prefix}attendance_log 
+						execute("UPDATE {attendance_log}
 										SET statusid = {$stat->id}, statusset = '$statlist'
 									  WHERE sessionid IN ($sesslist) AND status = '$stat->status'");
 					}
-	    			$sessions = get_records_list('attendance_sessions', 'id', $sesslist);
+	    			$sessions = $DB->get_records_list('attendance_sessions',  array('id'=> $sesslist));
 					foreach($sessions as $sess) {
-						execute_sql("UPDATE {$CFG->prefix}attendance_log 
+						execute("UPDATE {attendance_log}
 										SET timetaken = {$sess->lasttaken}, 
 											takenby = {$sess->lasttakenby}
 									  WHERE sessionid = {$sess->id}");
@@ -186,49 +191,52 @@ function xmldb_attforblock_upgrade($oldversion=0) {
 	    			
 	    		}
 	    	}
+                upgrade_mod_savepoint(true, 2008102406, 'attforblock');
     	    	
      }
      
-    if ($oldversion < 2008102409 and $result) {
-        $table = new XMLDBTable('attendance_statuses');
+    if ($oldversion < 2008102409) {
+        $table = new xmldb_table('attendance_statuses');
         
-        $field = new XMLDBField('status');
-        $result = $result && drop_field($table, $field);
+        $field = new xmldb_field('status');
+        $dbman->drop_field($table, $field);
         
-        $index = new XMLDBIndex('status');
-        $index->setAttributes(XMLDB_INDEX_NOTUNIQUE, array('status'));
-        $result = $result && drop_index($table, $index);
+        $index = new xmldb_index('status');
+        $index->set_attributes(XMLDB_INDEX_NOTUNIQUE, array('status'));
+        $dbman->drop_index($table, $index);
 
         
-        $table = new XMLDBTable('attendance_log');
+        $table = new xmldb_table('attendance_log');
         
-        $field = new XMLDBField('status');
-        $result = $result && drop_field($table, $field);
+        $field = new xmldb_field('status');
+        $dbman->drop_field($table, $field);
         
-        $index = new XMLDBIndex('status');
-        $index->setAttributes(XMLDB_INDEX_NOTUNIQUE, array('status'));
-        $result = $result && drop_index($table, $index);
+        $index = new xmldb_index('status');
+        $index->set_attributes(XMLDB_INDEX_NOTUNIQUE, array('status'));
+        $dbman->drop_index($table, $index);
         
-        $table = new XMLDBTable('attendance_sessions');
+        $table = new xmldb_table('attendance_sessions');
 
-        $field = new XMLDBField('creator');
-        $result = $result && drop_field($table, $field);
+        $field = new xmldb_field('creator');
+        $dbman->drop_field($table, $field);
+        upgrade_mod_savepoint(true, 2008102409, 'attforblock');
         
     } 
 
-    if ($oldversion < 2010070900 and $result) {
-        $table = new XMLDBTable('attendance_sessions');
+    if ($oldversion < 2010070900) {
+        $table = new xmldb_table('attendance_sessions');
 
-        $field = new XMLDBField('groupid');
-        $field->setAttributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'courseid');
-        $result = $result && add_field($table, $field);
+        $field = new xmldb_field('groupid');
+        $field->set_attributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'courseid');
+        $dbman->add_field($table, $field);
 
-        $index = new XMLDBIndex('groupid');
-        $index->setAttributes(XMLDB_INDEX_NOTUNIQUE, array('groupid'));
-        $result = $result && add_index($table, $index);
+        $index = new xmldb_index('groupid');
+        $index->set_attributes(XMLDB_INDEX_NOTUNIQUE, array('groupid'));
+        $dbman->add_index($table, $index);
+        upgrade_mod_savepoint(true, 2010070900, 'attforblock');
     }
 
-    return $result;
+    return true;
 }
 
 ?>

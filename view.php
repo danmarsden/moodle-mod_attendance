@@ -9,21 +9,21 @@
     $id   = optional_param('id', -1, PARAM_INT);   // Course Module ID, or
 //    $a    = optional_param('a', -1, PARAM_INT);    // attforblock ID
 	$studentid			= optional_param('student', 0, PARAM_INT);
-	$printing			= optional_param('printing');
-    $mode 				= optional_param('mode', 'thiscourse');
+	$printing			= optional_param('printing', 0, PARAM_INT);
+    $mode 				= optional_param('mode', 'thiscourse', PARAM_ALPHA);
     $view       = optional_param('view', NULL, PARAM_ALPHA);        // which page to show
 	$current	= optional_param('current', 0, PARAM_INT);
 	
     if ($id) {
-        if (! $cm = get_record("course_modules", "id", $id)) {
+        if (! $cm = $DB->get_record("course_modules", array("id"=> $id))) {
             error("Course Module ID was incorrect");
         }
     
-        if (! $course = get_record("course", "id", $cm->course)) {
+        if (! $course = $DB->get_record("course", array("id"=> $cm->course))) {
             error("Course is misconfigured");
         }
     
-        if (! $attforblock = get_record("attforblock", "id", $cm->instance)) {
+        if (! $attforblock = $DB->get_record("attforblock", array("id"=> $cm->instance))) {
             error("Course module is incorrect");
         }
 
@@ -55,7 +55,7 @@
         redirect("report.php?id=$cm->id");
     }
     
-    if (! $user = get_record('user', 'id', $USER->id) ) {
+    if (! $user = $DB->get_record('user', array('id'=> $USER->id) )) {
         error("No such user in this course");
     }
 	
@@ -69,7 +69,7 @@
 	$student = false;
     if ($studentid) {
     	if ($studentid == $USER->id or has_capability('mod/attforblock:viewreports', $context)) {
-		    if (!$student = get_record('user', 'id', $studentid) ) {
+		    if (!$student = $DB->get_record('user', array('id'=> $studentid) )) {
 		        error("No such user in this course");
 		    }
     	}

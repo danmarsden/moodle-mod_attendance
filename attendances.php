@@ -6,7 +6,7 @@
 	require_once($CFG->libdir.'/blocklib.php');
 	require_once('locallib.php');
 	require_once('lib.php');	
-	
+
     if (!function_exists('grade_update')) { //workaround for buggy PHP versions
         require_once($CFG->libdir.'/gradelib.php');
     }
@@ -17,20 +17,20 @@
     $group    	= optional_param('group', -1, PARAM_INT);              // Group to show
 	$sort 		= optional_param('sort','lastname', PARAM_ALPHA);
 
-    if (! $cm = get_record('course_modules', 'id', $id)) {
+    if (! $cm = $DB->get_record('course_modules', array('id'=>$id))) {
         error('Course Module ID was incorrect');
     }
     
-    if (! $course = get_record('course', 'id', $cm->course)) {
+    if (! $course = $DB->get_record('course', array('id'=> $cm->course))) {
         error('Course is misconfigured');
     }
     
     require_login($course->id);
 
-    if (! $attforblock = get_record('attforblock', 'id', $cm->instance)) {
+    if (! $attforblock = $DB->get_record('attforblock', array('id'=> $cm->instance))) {
         error("Course module is incorrect");
     }
-    if (! $user = get_record('user', 'id', $USER->id) ) {
+    if (! $user = $DB->get_record('user', array('id'=> $USER->id) )) {
         error("No such user in this course");
     }
     
@@ -58,18 +58,18 @@
 				$i++;
 			}
 		}
-		$attforblockrecord = get_record('attforblock', 'course', $course->id);
+		$attforblockrecord = $DB->get_record('attforblock', array('course' => $course->id));
 
 		foreach($students as $student) {
-			if ($log = get_record('attendance_log', 'sessionid', $sessionid, 'studentid', $student->studentid)) {
+			if ($log = $DB->get_record('attendance_log', array('sessionid' => $sessionid, 'studentid'=> $student->studentid))) {
 				$student->id = $log->id; // this is id of log
-				update_record('attendance_log', $student);
+				$DB->update_record('attendance_log', $student);
 			} else {
-				insert_record('attendance_log', $student);
+				$DB->insert_record('attendance_log', $student);
 			}
 		}
-		set_field('attendance_sessions', 'lasttaken', $now, 'id', $sessionid);
-		set_field('attendance_sessions', 'lasttakenby', $USER->id, 'id', $sessionid);
+		$DB->set_field('attendance_sessions', 'lasttaken', $now, array('id' => $sessionid));
+		$DB->set_field('attendance_sessions', 'lasttakenby', $USER->id, array('id' => $sessionid));
 		
 		attforblock_update_grades($attforblockrecord);
 		add_to_log($course->id, 'attendance', 'updated', 'mod/attforblock/report.php?id='.$id, $user->lastname.' '.$user->firstname);
@@ -85,11 +85,11 @@
                  $navigation, "", "", true, "&nbsp;", navmenu($course));
 
 //check for hack
-    if (!$sessdata = get_record('attendance_sessions', 'id', $sessionid)) {
+    if (!$sessdata = $DB->get_record('attendance_sessions', array('id'=> $sessionid))) {
 		error("Required Information is missing", "manage.php?id=".$id);
     }
 	$help = helpbutton ('updateattendance', get_string('help'), 'attforblock', true, false, '', true);
-	$update = count_records('attendance_log', 'sessionid', $sessionid);
+	$update = $DB->count_records('attendance_log', array('sessionid'=> $sessionid));
 	
 	if ($update) {
         require_capability('mod/attforblock:changeattendances', $context);
@@ -164,7 +164,7 @@
         $i = 0;
         foreach($students as $student) {
             $i++;
-            $att = get_record('attendance_log', 'sessionid', $sessionid, 'studentid', $student->id);
+            $att = $DB->get_record('attendance_log', array('sessionid'=> $sessionid, 'studentid'=> $student->id));
             $table->data[$student->id][] = (!$att && $update) ? "<font color=\"red\"><b>$i</b></font>" : $i; 
             $table->data[$student->id][] = print_user_picture($student->id, $course->id, $student->picture, 20, true, true);//, $returnstring=false, $link=true, $target=''); 
 			$table->data[$student->id][] = "<a href=\"view.php?id=$id&amp;student={$student->id}\">".((!$att && $update) ? '<font color="red"><b>' : '').fullname($student).((!$att && $update) ? '</b></font>' : '').'</a>';
