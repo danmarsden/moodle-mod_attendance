@@ -24,6 +24,7 @@ $string['attendancepercent'] = 'Attendance percent';
 $string['attendancereport'] = 'Attendance report';
 $string['attendancesuccess'] = 'Attendance has been successfully taken';
 $string['attendanceupdated'] = 'Attendance successfully updated';
+$string['attforblock:canbelisted'] = 'Appears in the roster';
 $string['attforblock:changepreferences'] = 'Changing Preferences';
 $string['attforblock:changeattendances'] = 'Changing Attendances';
 $string['attforblock:export'] = 'Export Reports';

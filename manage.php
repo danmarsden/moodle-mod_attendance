@@ -7,9 +7,9 @@
     require_once('locallib.php');
 
     $id         = required_param('id', PARAM_INT);   // Course Module ID, or
-	$from       = optional_param('from', PARAM_ACTION);
+    $from       = optional_param('from', '', PARAM_ACTION);
     $view       = optional_param('view', NULL, PARAM_ALPHA);        // which page to show
-	$current	= optional_param('current', 0, PARAM_INT);
+    $current	= optional_param('current', 0, PARAM_INT);
     $showendtime       = optional_param('showendtime', get_user_preferences("attforblock_showendtime",0), PARAM_INT);
     if (! $cm = $DB->get_record('course_modules', array('id'=> $id))) {
         error('Course Module ID was incorrect');
@@ -70,13 +70,18 @@
 	}
 	
 /// Print headers
-    $navlinks[] = array('name' => $attforblock->name, 'link' => null, 'type' => 'activity');
-    $navigation = build_navigation($navlinks);
-    print_header("$course->shortname: ".$attforblock->name, $course->fullname,
-                 $navigation, "", "", true, update_module_button($cm->id, $course->id, get_string('modulename', 'attforblock')), 
-                 navmenu($course));
-    
-	print_heading(get_string('attendanceforthecourse','attforblock').' :: ' .$course->fullname);
+
+    $url = new moodle_url('/mod/attforblock/manage.php', array('id'=> $id, 'from'=> $from, 'view' => $view, 'current' => $current, 'showendtime' => $showendtime));
+    $PAGE->set_url($url);
+    $PAGE->set_title($course->shortname. ": ".$attforblock->name);
+    $PAGE->set_heading($course->fullname);
+    $PAGE->set_focuscontrol('');
+    $PAGE->set_cacheable(true);
+    $PAGE->set_button($OUTPUT->update_module_button($cm->id,'attforblock'));
+    $PAGE->navbar->add($attforblock->name);
+
+    echo $OUTPUT->header();
+    echo $OUTPUT->heading(get_string('attendanceforthecourse','attforblock').' :: ' .$course->fullname);
 	
 	if(!$DB->count_records_select('attendance_sessions', "courseid = ? AND attendanceid = ? AND sessdate >= ?", array($course->id, $attforblock->id, $course->startdate))) {	// no session exists for this course
 		show_tabs($cm, $context);
@@ -91,11 +96,11 @@
 	}
 //	require_once('lib.php');
 //	$t = attforblock_get_user_grades($attforblock); ////////////////////////////////////////////
-	print_footer($course);
+	$OUTPUT->footer();//print_footer($course);
 	
 	
 function print_sessions_list($course, $attforblock) {
-	global $CFG, $context, $cm, $current, $view, $id, $showendtime, $DB;
+	global $CFG, $context, $cm, $current, $view, $id, $showendtime, $DB, $OUTPUT;
 	
         $strhours = get_string('hours');
         $strmins = get_string('min');
@@ -122,6 +127,7 @@ function print_sessions_list($course, $attforblock) {
 
         $qry = $DB->get_records_select('attendance_sessions', $where, array('cid' => $course->id, 'aid' => $attforblock->id, 'sdate' => $course->startdate,'sdate2' => $startdate, 'edate'=> $enddate, 'cgroup'=> $currentgroup), 'sessdate asc');
         $i = 0;
+        $table = new html_table();
         $table->width = '100%';
         //$table->tablealign = 'center';
         $table->head = array('#', get_string('sessiontypeshort', 'attforblock'), get_string('date'), get_string('from'), ($showendtime=='0') ? get_string('duration', 'attforblock') : get_string('to'), get_string('description','attforblock'), get_string('actions'), get_string('select'));
@@ -152,17 +158,17 @@ function print_sessions_list($course, $attforblock) {
                         if ($allowtake) {
                             $title = get_string('takeattendance','attforblock');
                             $actions = "<a title=\"$title\" href=\"attendances.php?id=$cm->id&amp;sessionid={$sessdata->id}&amp;grouptype={$sessdata->groupid}\">".
-                                       "<img src=\"{$CFG->pixpath}/t/go.gif\" alt=\"$title\" /></a>&nbsp;";
+                                       "<img src=\"" . $OUTPUT->pix_url('t/go') . "\" alt=\"$title\" /></a>&nbsp;";
                         }
                     }
 //				}
                 if($allowmanage) {
                     $title = get_string('editsession','attforblock');
                     $actions .= "<a title=\"$title\" href=\"sessions.php?id=$cm->id&amp;sessionid={$sessdata->id}&amp;action=update\">".
-                                "<img src=\"{$CFG->pixpath}/t/edit.gif\" alt=\"$title\" /></a>&nbsp;";
+                                "<img src=\"" . $OUTPUT->pix_url('t/edit') . "\" alt=\"$title\" /></a>&nbsp;";
                     $title = get_string('deletesession','attforblock');
                     $actions .= "<a title=\"$title\" href=\"sessions.php?id=$cm->id&amp;sessionid={$sessdata->id}&amp;action=delete\">".
-                                "<img src=\"{$CFG->pixpath}/t/delete.gif\" alt=\"$title\" /></a>&nbsp;";
+                                "<img src=\"" . $OUTPUT->pix_url('t/delete') . "\" alt=\"$title\" /></a>&nbsp;";
                 }
 
                 $table->data[$sessdata->id][] = $i;
@@ -182,7 +188,7 @@ function print_sessions_list($course, $attforblock) {
         
         echo '<div align="center"><div class="generalbox attwidth">';
         echo "<form method=\"post\" action=\"sessions.php?id={$cm->id}\">"; //&amp;sessionid={$sessdata->id}
-		print_table($table);
+		print_table($table);//echo $OUTPUT->table($table);
 		$hiddensess = $DB->count_records_select('attendance_sessions', "courseid = ? AND attendanceid = ? AND sessdate < ?", array($course->id, $attforblock->id, $course->startdate));
         echo '<table width="100%"><tr><td valign="top">';
         echo '<div align="left">'.helpbutton('hiddensessions', '--', 'attforblock', true, true, '', true); //TODO: Change '--'

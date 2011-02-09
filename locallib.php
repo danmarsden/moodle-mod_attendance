@@ -54,9 +54,9 @@ function get_statuses($attendanceid, $onlyvisible = true)
     global $DB;
 
   	if ($onlyvisible) {
-  		$result = get_records_select('attendance_statuses', "attendanceid = $attendanceid AND visible = 1 AND deleted = 0", 'grade DESC');
+  		$result = $DB->get_records_select('attendance_statuses', "attendanceid = :aid AND visible = 1 AND deleted = 0", array('aid' => $attendanceid), 'grade DESC');
   	} else {
-  		$result = get_records_select('attendance_statuses', "attendanceid = $attendanceid AND deleted = 0", 'grade DESC');
+  		$result = $DB->get_records_select('attendance_statuses', "attendanceid = :aid AND deleted = 0",  array('aid' => $attendanceid), 'grade DESC');
 //  		$result = get_records('attendance_statuses', 'courseid', $courseid, 'grade DESC');
   	}
     return $result;
@@ -128,7 +128,7 @@ function get_maxgrade($userid, $course, $attendance)
 
 	$maxgrade = 0;
 	if ($logs) {
-		$stat_grades = records_to_menu(get_records('attendance_statuses', array('attendanceid'=> $attendance->id)), 'id', 'grade');
+		$stat_grades = $DB->records_to_menu($DB->get_records('attendance_statuses', array('attendanceid'=> $attendance->id)), 'id', 'grade');
 		foreach ($logs as $log) {
 			$ids = array_flip(explode(',', $log->statusset));
 //			$grades = array_intersect_key($stat_grades, $ids); // require PHP 5.1.0 and higher
@@ -283,7 +283,7 @@ function print_user_attendaces($user, $cm, $attforblock,  $course = 0, $printing
 				   WHERE al.studentid = ?
 				GROUP BY cid
 				ORDER BY cid,aid asc";
-		$recs = get_records_sql($stqry, array($user->id));
+		$recs = $DB->get_records_sql($stqry, array($user->id));
 		foreach ($recs as $rec) {
 			echo '<hr />';
 			echo '<table border="0" cellpadding="0" cellspacing="0" width="100%" class="list1">';
@@ -537,7 +537,7 @@ function print_filter_controls($url, $id, $studentid=0, $sort=NULL, $printselect
 
 function plug_yui_calendar($current) {
     global $CFG;
-    
+
     require_js(array('yui_dom-event', 'yui_dragdrop', 'yui_element', 'yui_button', 'yui_container', 'yui_calendar'));
 
     echo "<script type=\"text/javascript\">\n";

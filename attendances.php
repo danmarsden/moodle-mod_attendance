@@ -59,7 +59,7 @@
 				$i++;
 			}
 		}
-		$attforblockrecord = $DB->get_record('attforblock', array('course' => $course->id));
+		$attforblockrecord = $DB->get_record('attforblock', array('attendanceid' => $attforblock->id));
 
 		foreach($students as $student) {
 			if ($log = $DB->get_record('attendance_log', array('sessionid' => $sessionid, 'studentid'=> $student->studentid))) {
@@ -79,11 +79,22 @@
     }
     
 /// Print headers
-    $navlinks[] = array('name' => $attforblock->name, 'link' => "view.php?id=$id", 'type' => 'activity');
+    $url = new moodle_url('/mod/attforblock/manage.php', array('id'=> $id, 'sessionid'=> $sessionid, 'grouptype' => $grouptype, 'group' => $group, 'sort' => $sort, 'copyfrom' => $copyfrom));
+    $PAGE->set_url($url);
+    $PAGE->set_title($course->shortname. ": ".$attforblock->name . ' - ' .get_string('update','attforblock'));
+    $PAGE->set_heading($course->fullname);
+    $PAGE->set_focuscontrol('');
+    $PAGE->set_cacheable(true);
+    $PAGE->set_button($OUTPUT->update_module_button($cm->id,'attforblock'));
+    $PAGE->navbar->add($attforblock->name);
+
+    echo $OUTPUT->header();
+
+    /*$navlinks[] = array('name' => $attforblock->name, 'link' => "view.php?id=$id", 'type' => 'activity');
     $navlinks[] = array('name' => get_string('update', 'attforblock'), 'link' => null, 'type' => 'activityinstance');
     $navigation = build_navigation($navlinks);
     print_header("$course->shortname: ".$attforblock->name.' - ' .get_string('update','attforblock'), $course->fullname,
-                 $navigation, "", "", true, "&nbsp;", navmenu($course));
+                 $navigation, "", "", true, "&nbsp;", navmenu($course));*/
 
 //check for hack
     if (!$sessdata = $DB->get_record('attendance_sessions', array('id'=> $sessionid))) {
@@ -97,7 +108,7 @@
 		print_heading(get_string('update','attforblock').' ' .get_string('attendanceforthecourse','attforblock').' :: ' .$course->fullname.$help);
 	} else {
         require_capability('mod/attforblock:takeattendances', $context);
-		print_heading(get_string('attendanceforthecourse','attforblock').' :: ' .$course->fullname.$help);
+		echo $OUTPUT->heading(get_string('attendanceforthecourse','attforblock').' :: ' .$course->fullname.$help);
 	}
 
     /// find out current groups mode
@@ -105,7 +116,7 @@
     $currentgroup = groups_get_activity_group($cm, true);
 
     // get the viewmode & grid columns
-    $attforblockrecord = get_record('attforblock', 'id', $cm->instance);//'course', $course->id);'course', $course->id);
+    $attforblockrecord = $DB->get_record('attforblock', array('id'=> $cm->instance));//'course', $course->id);'course', $course->id);
     $view       = optional_param('view', -1, PARAM_INT);
     if ($view != -1) {
         set_user_preference("attforblock_viewmode", $view);
@@ -123,7 +134,7 @@
 
     echo '<table class="controls" cellspacing="0"><tr>'; //echo '<center>';
     $options = array (SORTEDLISTVIEW => get_string('sortedlist','attforblock'), SORTEDGRIDVIEW => get_string('sortedgrid','attforblock'));
-    $dataurl = "attendances.php?id=$id&grouptype=$grouptype&gridcols=$gridcols";
+    $dataurl = "/mod/attforblock/attendances.php?id=$id&grouptype=$grouptype&gridcols=$gridcols";
     if ($group!=-1) {
         $dataurl = $dataurl . "&group=$group";
     }
@@ -141,29 +152,32 @@
             }
             $optionssessions[$sessdatarow->id] = $descr;
         }
-        popup_form("$dataurl&sessionid=", $optionssessions, 'fastsessionmenu', $sessionid, '');
+        //popup_form("$dataurl&sessionid=", $optionssessions, 'fastsessionmenu', $sessionid, '');
+        echo $OUTPUT->single_select(new moodle_url('/mod/attforblock/attendances.php', array('id'=> $id, 'grouptype' => $grouptype, 'group' => $group, 'sort' => $sort)),'sessionid',$optionssessions, $sessionid);
         echo "<td/><tr/><tr>";
     }
     $dataurl .= "&sessionid=$sessionid";
     echo '<td class="right"><label for="viewmenu_jump">'. get_string('viewmode','attforblock') . "&nbsp;</label>";
-    popup_form("$dataurl&view=", $options, 'viewmenu', $view, '');
+    //popup_form("$dataurl&view=", $options, 'viewmenu', $view, '');
+    echo $OUTPUT->single_select(new moodle_url('/mod/attforblock/attendances.php', array('id'=> $id, 'sessionid'=>$sessionid, 'grouptype' => $grouptype, 'group' => $group, 'sort' => $sort)),'view',$options, $view);
     if ($view == SORTEDGRIDVIEW) {
         $options = array (1 => '1 '.get_string('column','attforblock'),'2 '.get_string('columns','attforblock'),'3 '.get_string('columns','attforblock'),
                                '4 '.get_string('columns','attforblock'),'5 '.get_string('columns','attforblock'),'6 '.get_string('columns','attforblock'),
                                '7 '.get_string('columns','attforblock'),'8 '.get_string('columns','attforblock'),'9 '.get_string('columns','attforblock'),
                                '10 '.get_string('columns','attforblock'));
         $dataurl .= "&view=$view";
-        popup_form("$dataurl&gridcols=", $options, 'colsmenu', $gridcols, '');
+        //popup_form("$dataurl&gridcols=", $options, 'colsmenu', $gridcols, '');
+        echo $OUTPUT->single_select(new moodle_url('/mod/attforblock/attendances.php', array('id'=> $id, 'sessionid'=>$sessionid, 'view'=>$view, 'grouptype' => $grouptype, 'group' => $group, 'sort' => $sort)),'gridcols',$options, $gridcols);
     }
     echo '</td></tr></table>';//</center>';
     if ($grouptype === 0) {
         if ($currentgroup) {
-            $students = get_users_by_capability($context, 'moodle/legacy:student', '', "u.$sort ASC", '', '', $currentgroup, '', false);
+            $students = get_users_by_capability($context, 'mod/attforblock:canbelisted', '', "u.$sort ASC", '', '', $currentgroup, '', false);
         } else {
-            $students = get_users_by_capability($context, 'moodle/legacy:student', '', "u.$sort ASC", '', '', '', '', false);
+            $students = get_users_by_capability($context, 'mod/attforblock:canbelisted', '', "u.$sort ASC", '', '', '', '', false);
         }
     } else {
-        $students = get_users_by_capability($context, 'moodle/legacy:student', '', "u.$sort ASC", '', '', $grouptype, '', false);
+        $students = get_users_by_capability($context, 'mod/attforblock:canbelisted', '', "u.$sort ASC", '', '', $grouptype, '', false);
     }
 
 	$sort = $sort == 'firstname' ? 'firstname' : 'lastname';
@@ -180,6 +194,7 @@
 
     $statuses = get_statuses($attforblock->id);
 	$i = 3;
+        $tabhead = array();
   	foreach($statuses as $st) {
                 switch($view) {
                     case SORTEDLISTVIEW:
@@ -269,7 +284,7 @@
                 $currentstatusid = $att===false ? -1 : $att->statusid;
                 $data = "<span class='userinfobox' style='font-size:80%;border:none'>" . print_user_picture($student, $course->id, $student->picture, true, true, '', fullname($student)) . "<br/>" . fullname($student) . "<br/></span>";//, $returnstring=false, $link=true, $target='');
                 foreach($statuses as $st) {
-                     $data = $data . '<nobr><input name="student'.$student->id.'" type="radio" class="' . $st->acronym . '" value="'.$st->id.'" '.($st->id == $currentstatusid ? 'checked' : '').'>' . $st->acronym . "</nobr> ";
+                     $data = $data . '<nobr><input name="student'.$student->id.'" type="radio" class="' . $st->acronym . '" value="'.$st->id.'" '.($st->id == $currentstatusid ? 'checked' : '').'>&nbsp;' . $st->acronym . "</nobr> ";
                 }
                 $table->data[($i-1) / ($gridcols)][] = $data;
             }
@@ -288,7 +303,8 @@
         if (count($todaysessions)>1) {
             echo '<br/><table class="controls" cellspacing="0"><tr><td class="center">';
             echo '<label for="copysessionmenu_jump">'. get_string('copyfrom','attforblock') . "&nbsp;</label>";
-            popup_form("$dataurl&copyfrom=", $optionssessions, 'copysessionmenu', $sessionid, '');
+            //popup_form("$dataurl&copyfrom=", $optionssessions, 'copysessionmenu', $sessionid, '');
+            echo $OUTPUT->single_select(new moodle_url('/mod/attforblock/attendances.php', array('id'=> $id, 'sessionid'=>$sessionid, 'grouptype' => $grouptype, 'group' => $group, 'sort' => $sort)),'copyfrom',$optionssessions, $sessionid);
             echo '</td></tr></table>';
         }
 
@@ -301,6 +317,6 @@
 		echo $st->acronym.' - '.$st->description.'<br />';
 	}
 
-    print_footer($course);
+    $OUTPUT->footer($course);
     
 ?>

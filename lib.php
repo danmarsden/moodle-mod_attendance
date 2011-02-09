@@ -33,17 +33,7 @@ function attforblock_add_instance($attforblock) {
     
     $attforblock->timemodified = time();
 
-    /*if ($att = get_record('attforblock', 'course', $attforblock->course)) {
-    	$modnum = get_field('modules', 'id', 'name', 'attforblock');
-    	if (!get_record('course_modules', 'course', $attforblock->course, 'module', $modnum)) {
-    		delete_records('attforblock', 'course', $attforblock->course);
-    		$attforblock->id = insert_record('attforblock', $attforblock);
-    	/*} else {
-    		return false;
-    	}
-    } else {*/
-    	$attforblock->id = insert_record('attforblock', $attforblock);
-    //}
+    $attforblock->id = $DB->insert_record('attforblock', $attforblock);
 
     //Copy statuses for new instance from defaults
     //if (!$DB->get_records('attendance_statuses', array('courseid'=> $attforblock->course))) {

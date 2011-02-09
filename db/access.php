@@ -40,8 +40,7 @@ $mod_attforblock_capabilities = array(
         'legacy' => array(
             'student' => CAP_ALLOW,
             'teacher' => CAP_ALLOW,
-            'editingteacher' => CAP_ALLOW,
-            'admin' => CAP_ALLOW
+            'editingteacher' => CAP_ALLOW
         )
     ),
 
@@ -53,8 +52,7 @@ $mod_attforblock_capabilities = array(
         'contextlevel' => CONTEXT_MODULE,
         'legacy' => array(
             'teacher' => CAP_ALLOW,
-            'editingteacher' => CAP_ALLOW,
-            'admin' => CAP_ALLOW
+            'editingteacher' => CAP_ALLOW
         )
     ),
 
@@ -66,8 +64,7 @@ $mod_attforblock_capabilities = array(
         'contextlevel' => CONTEXT_MODULE,
         'legacy' => array(
             'teacher' => CAP_ALLOW,
-            'editingteacher' => CAP_ALLOW,
-            'admin' => CAP_ALLOW
+            'editingteacher' => CAP_ALLOW
         )
     ),
 
@@ -79,8 +76,7 @@ $mod_attforblock_capabilities = array(
         'contextlevel' => CONTEXT_MODULE,
         'legacy' => array(
             'teacher' => CAP_ALLOW,
-            'editingteacher' => CAP_ALLOW,
-            'admin' => CAP_ALLOW
+            'editingteacher' => CAP_ALLOW
         )
     ),
 
@@ -91,8 +87,7 @@ $mod_attforblock_capabilities = array(
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
         'legacy' => array(
-            'editingteacher' => CAP_ALLOW,
-            'admin' => CAP_ALLOW
+            'editingteacher' => CAP_ALLOW
         )
     ),
 
@@ -103,8 +98,7 @@ $mod_attforblock_capabilities = array(
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
         'legacy' => array(
-            'editingteacher' => CAP_ALLOW,
-            'admin' => CAP_ALLOW
+            'editingteacher' => CAP_ALLOW
         )
     ),
 
@@ -115,8 +109,19 @@ $mod_attforblock_capabilities = array(
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
         'legacy' => array(
-            'editingteacher' => CAP_ALLOW,
-            'admin' => CAP_ALLOW
+            'editingteacher' => CAP_ALLOW
+        )
+    ),
+
+
+    'mod/attforblock:canbelisted' => array(
+
+        'riskbitmask' => RISK_PERSONAL,
+
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_MODULE,
+        'legacy' => array(
+            'student' => CAP_ALLOW
         )
     )
 );
