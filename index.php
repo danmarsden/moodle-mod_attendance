@@ -1,4 +1,4 @@
-<?PHP // $Id: index.php,v 1.4.2.1 2009/02/23 19:22:40 dlnsk Exp $
+<?PHP
 
 /// This page lists all the instances of attforblock in a particular course
 /// Replace attforblock with the name of your module

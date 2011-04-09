@@ -2,11 +2,9 @@
 
 /// Library of functions and constants for module attforblock
 
-$attforblock_CONSTANT = 7;     /// for example
-
 function attforblock_install() {
 
-        global $DB;
+    global $DB;
         
 	$result = true;
 	$arr = array('P' => 2, 'A' => 0, 'L' => 1, 'E' => 1);
