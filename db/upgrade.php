@@ -228,11 +228,16 @@ function xmldb_attforblock_upgrade($oldversion=0) {
 
         $field = new xmldb_field('groupid');
         $field->set_attributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'courseid');
-        $dbman->add_field($table, $field);
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
 
         $index = new xmldb_index('groupid');
         $index->set_attributes(XMLDB_INDEX_NOTUNIQUE, array('groupid'));
-        $dbman->add_index($table, $index);
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+        
         upgrade_mod_savepoint(true, 2010070900, 'attforblock');
     }
 
@@ -242,26 +247,36 @@ function xmldb_attforblock_upgrade($oldversion=0) {
 
         $field = new xmldb_field('attendanceid');
         $field->set_attributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'groupid');
-        $dbman->add_field($table, $field);
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
 
-        $index = new xmldb_table('attendanceid');
+        $index = new xmldb_index('attendanceid');
         $index->set_attributes(XMLDB_INDEX_NOTUNIQUE, array('attendanceid'));
-        $dbman->add_index($table, $index);
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
 
         $sql = "UPDATE {attendance_sessions} AS ses,{attforblock} AS att SET ses.attendanceid=att.id WHERE att.course=ses.courseid";
-        $dbman->execute($sql);
+        $DB->execute($sql);
 
         $table = new xmldb_table('attendance_statuses');
 
         $field = new xmldb_field('attendanceid');
         $field->set_attributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'courseid');
-        $dbman->add_field($table, $field);
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
         $index = new xmldb_index('attendanceid');
         $index->set_attributes(XMLDB_INDEX_NOTUNIQUE, array('attendanceid'));
-        $dbman->add_index($table, $index);
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
 
         $sql = "UPDATE {attendance_statuses} AS sta,{attforblock} AS att SET sta.attendanceid=att.id WHERE att.course=sta.courseid";
-        execute($sql);
+        $DB->execute($sql);
+
+        upgrade_mod_savepoint(true, 2010123003, 'attforblock');
     }
     return $result;
 }

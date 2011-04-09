@@ -31,13 +31,13 @@
 // For the core capabilities, the variable is $moodle_capabilities.
 
 
-$mod_attforblock_capabilities = array(
+$capabilities = array(
 
     'mod/attforblock:view' => array(
 
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
-        'legacy' => array(
+        'archetypes' => array(
             'student' => CAP_ALLOW,
             'teacher' => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW
@@ -50,7 +50,7 @@ $mod_attforblock_capabilities = array(
 
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
-        'legacy' => array(
+        'archetypes' => array(
             'teacher' => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW
         )
@@ -62,7 +62,7 @@ $mod_attforblock_capabilities = array(
     	
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
-        'legacy' => array(
+        'archetypes' => array(
             'teacher' => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW
         )
@@ -74,7 +74,7 @@ $mod_attforblock_capabilities = array(
     	
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
-        'legacy' => array(
+        'archetypes' => array(
             'teacher' => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW
         )
@@ -86,7 +86,7 @@ $mod_attforblock_capabilities = array(
 
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
-        'legacy' => array(
+        'archetypes' => array(
             'editingteacher' => CAP_ALLOW
         )
     ),
@@ -97,7 +97,7 @@ $mod_attforblock_capabilities = array(
 
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
-        'legacy' => array(
+        'archetypes' => array(
             'editingteacher' => CAP_ALLOW
         )
     ),
@@ -108,7 +108,7 @@ $mod_attforblock_capabilities = array(
 
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
-        'legacy' => array(
+        'archetypes' => array(
             'editingteacher' => CAP_ALLOW
         )
     ),
@@ -120,7 +120,7 @@ $mod_attforblock_capabilities = array(
 
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
-        'legacy' => array(
+        'archetypes' => array(
             'student' => CAP_ALLOW
         )
     )
