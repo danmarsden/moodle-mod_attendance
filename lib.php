@@ -1,6 +1,30 @@
-<?PHP  // $Id: lib.php,v 1.4.2.5 2009/03/11 18:21:08 dlnsk Exp $
+<?PHP
 
 /// Library of functions and constants for module attforblock
+
+/**
+ * Returns the information if the module supports a feature
+ *
+ * @see plugin_supports() in lib/moodlelib.php
+ * @param string $feature FEATURE_xx constant for requested feature
+ * @return mixed true if the feature is supported, null if unknown
+ */
+function attforblock_supports($feature) {
+    switch($feature) {
+        case FEATURE_GRADE_HAS_GRADE:   return true;
+        case FEATURE_GROUPS:            return true;
+        // Artem Andreev: AFAIK it's not tested
+        case FEATURE_GROUPINGS:         return false;
+        // Artem Andreev: AFAIK it's not tested
+        case FEATURE_GROUPMEMBERSONLY:  return false;
+        case FEATURE_MOD_INTRO:         return false;
+        case FEATURE_BACKUP_MOODLE2:    return true;
+        // Artem Andreev: AFAIK it's not tested
+        case FEATURE_COMPLETION_TRACKS_VIEWS:
+                                        return false;
+        default:                        return null;
+    }
+}
 
 function attforblock_install() {
 
