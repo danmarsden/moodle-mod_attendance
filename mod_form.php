@@ -1,4 +1,9 @@
 <?php
+
+if (!defined('MOODLE_INTERNAL')) {
+    die('Direct access to this script is forbidden.');    ///  It must be included from a Moodle page
+}
+
 require_once ($CFG->dirroot.'/course/moodleform_mod.php');
 
 class mod_attforblock_mod_form extends moodleform_mod {
@@ -20,7 +25,9 @@ class mod_attforblock_mod_form extends moodleform_mod {
 
         $mform->addElement('modgrade', 'grade', get_string('grade'));
         $mform->setDefault('grade', 100);
-        
+
+//-------------------------------------------------------------------------------
+
         $this->standard_coursemodule_elements(true);
 
 //-------------------------------------------------------------------------------
