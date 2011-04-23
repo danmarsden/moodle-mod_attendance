@@ -1,4 +1,4 @@
-<?PHP // $Id: version.php,v 1.5.2.5 2009/02/28 19:20:15 dlnsk Exp $
+<?PHP
 
 /////////////////////////////////////////////////////////////////////////////////
 ///  Code fragment to define the version of attforblock
@@ -6,6 +6,6 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 $module->version  = 2011020901;  // The current module version (Date: YYYYMMDDXX)
-$module->release = '2.2.5';
+$module->release = '2.3.0';
 $module->cron     = 0;           // Period for cron to check this module (secs)
 ?>
