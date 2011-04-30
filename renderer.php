@@ -47,20 +47,68 @@ class mod_attforblock_renderer extends plugin_renderer_base {
 
         $filtertable->data[0][] = '';
 
-        $curdatecontrols = '';
-        if ($fcontrols->curdatetxt) {
-            $curdatecontrols = html_writer::link($fcontrols->url(array('curdate' => $fcontrols->prevcur)), $this->output->larrow());
-            $curdatecontrols .= $fcontrols->curdatetxt;
-            $curdatecontrols .= html_writer::link($fcontrols->url(array('curdate' => $fcontrols->nextcur)), $this->output->rarrow());
-            //plug_yui_calendar($current);
-        }
-        $filtertable->data[0][] = $curdatecontrols;
+        $filtertable->data[0][] = $this->render_curdate_controls($fcontrols);
 
-        $views[attforblock::VIEW_ALL] = get_string('all', 'attforblock');
-        $views[attforblock::VIEW_ALLTAKEN] = get_string('alltaken', 'attforblock');
-        $views[attforblock::VIEW_MONTHS] = get_string('months', 'attforblock');
-        $views[attforblock::VIEW_WEEKS] = get_string('weeks', 'attforblock');
-        $views[attforblock::VIEW_DAYS] = get_string('days', 'attforblock');
+        $filtertable->data[0][] = $this->render_view_controls($fcontrols);
+
+        $o = html_writer::table($filtertable);
+        $o = $this->output->container($o, 'attfiltercontrols attwidth');
+
+        return $o;
+    }
+
+    private function render_curdate_controls(attforblock_filter_controls $fcontrols) {
+        global $CFG;
+
+        $curdate_controls = '';
+        if ($fcontrols->curdatetxt) {
+            $this->page->requires->strings_for_js(array('calclose', 'caltoday'), 'attforblock');
+            $jsvals = array(
+                    'cal_months'    => explode(',', get_string('calmonths','attforblock')),
+                    'cal_week_days' => explode(',', get_string('calweekdays','attforblock')),
+                    'cal_start_weekday' => $CFG->calendar_startwday,
+                    'cal_cur_date'  => $fcontrols->curdate);
+            $curdate_controls = html_writer::script(js_writer::set_variable('M.attforblock', $jsvals));
+
+            $this->page->requires->yui2_lib('container');
+            $this->page->requires->yui2_lib('calendar');
+            $this->page->requires->js('/mod/attforblock/calendar.js');
+
+            $curdate_controls .= html_writer::link($fcontrols->url(array('curdate' => $fcontrols->prevcur)), $this->output->larrow());
+            $params = array(
+                    'title' => get_string('calshow', 'attforblock'),
+                    'id'    => 'show',
+                    'type'  => 'button');
+            $button_form = html_writer::tag('button', $fcontrols->curdatetxt, $params);
+            foreach ($fcontrols->url_params(array('curdate' => '')) as $name => $value) {
+                $params = array(
+                        'type'  => 'hidden',
+                        'id'    => $name,
+                        'name'  => $name,
+                        'value' => $value);
+                $button_form .= html_writer::empty_tag('input', $params);
+            }
+            $params = array(
+                    'id'        => 'currentdate',
+                    'action'    => $fcontrols->url_path(),
+                    'method'    => 'post'
+            );
+            
+            $button_form = html_writer::tag('form', $button_form, $params);
+            $curdate_controls .= $button_form;
+
+            $curdate_controls .= html_writer::link($fcontrols->url(array('curdate' => $fcontrols->nextcur)), $this->output->rarrow());
+        }
+
+        return $curdate_controls;
+    }
+
+    private function render_view_controls(attforblock_filter_controls $fcontrols) {
+        $views[attforblock_view_params::VIEW_ALL] = get_string('all', 'attforblock');
+        $views[attforblock_view_params::VIEW_ALLTAKEN] = get_string('alltaken', 'attforblock');
+        $views[attforblock_view_params::VIEW_MONTHS] = get_string('months', 'attforblock');
+        $views[attforblock_view_params::VIEW_WEEKS] = get_string('weeks', 'attforblock');
+        $views[attforblock_view_params::VIEW_DAYS] = get_string('days', 'attforblock');
         $viewcontrols = '';
         foreach ($views as $key => $sview) {
             if ($key != $fcontrols->view) {
@@ -70,14 +118,10 @@ class mod_attforblock_renderer extends plugin_renderer_base {
             else
                 $viewcontrols .= html_writer::tag('span', $sview, array('class' => 'attcurbtn'));
         }
-        $filtertable->data[0][] = html_writer::tag('nobr', $viewcontrols);
 
-        $o = html_writer::table($filtertable);
-        $o = $this->output->container($o, 'attfiltercontrols attwidth');
-
-        return $o;
+        return html_writer::tag('nobr', $viewcontrols);
     }
-
+    
     /**
      * Renders attendance sessions managing table
      *
@@ -85,6 +129,16 @@ class mod_attforblock_renderer extends plugin_renderer_base {
      * @return string html code
      */
     protected function render_attforblock_sessions_manage_data(attforblock_sessions_manage_data $sessdata) {
+
+        $o = $this->render_sess_manage_table($sessdata) . $this->render_sess_control_table($sessdata);
+        $o = html_writer::tag('form', $o, array('method' => 'post', 'action' => $sessdata->url_sessions()->out()));
+        $o = $this->output->container($o, 'generalbox attwidth');
+        $o = $this->output->container($o, 'attsessions_manage_table');
+
+        return $o;
+    }
+
+    private function render_sess_manage_table(attforblock_sessions_manage_data $sessdata) {
         $sesstable = new html_table();
         $sesstable->width = '100%';
         $sesstable->head = array(
@@ -149,6 +203,10 @@ class mod_attforblock_renderer extends plugin_renderer_base {
             $sesstable->data[$sess->id][] = html_writer::checkbox('sessid', $sess->id, false);
         }
 
+        return html_writer::table($sesstable);
+    }
+
+    private function render_sess_control_table(attforblock_sessions_manage_data $sessdata) {
         $controltable = new html_table();
         $controltable->attributes['class'] = ' ';
         $controltable->width = '100%';
@@ -156,7 +214,7 @@ class mod_attforblock_renderer extends plugin_renderer_base {
 
         $controltable->data[0][] = $this->output->help_icon('hiddensessions', 'attforblock',
                 get_string('hiddensessions', 'attforblock').': '.$sessdata->hiddensessionscount);
-        
+
         $controls = html_writer::link('javascript:checkall();', get_string('selectall')).' / '.
                 html_writer::link('javascript:checknone();', get_string('deselectall')).
                 html_writer::empty_tag('br');
@@ -174,12 +232,8 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         }
         $controltable->data[0][] = $controls;
 
-        $o = html_writer::table($sesstable) . html_writer::table($controltable);
-        $o = html_writer::tag('form', $o, array('method' => 'post', 'action' => $sessdata->url_sessions()->out()));
-        $o = $this->output->container($o, 'generalbox attwidth');
-        $o = $this->output->container($o, 'attsessions_manage_table');
-
-        return $o;
+        return html_writer::table($controltable);
     }
+
 }
 ?>

@@ -34,7 +34,7 @@ YAHOO.util.Event.onDOMReady(function(){
             dialog = new YAHOO.widget.Dialog("container", {
                 visible:false,
                 context:["show", "tl", "bl"],
-                buttons:[{text: cal_today, handler: resetHandler, isDefault:true}, {text: cal_close, handler: closeHandler}],
+                buttons:[{text: M.str.attforblock.caltoday, handler: resetHandler, isDefault:true}, {text: M.str.attforblock.calclose, handler: closeHandler}],
                 draggable:false,
                 close:false
             });
@@ -60,16 +60,16 @@ YAHOO.util.Event.onDOMReady(function(){
                 hide_blank_weeks:true  // Enable, to demonstrate how we handle changing height, using changeContent
             });
 
-            calendar.cfg.setProperty("start_weekday", cal_start_weekday);
-            calendar.cfg.setProperty("MONTHS_LONG", cal_months);
-            calendar.cfg.setProperty("WEEKDAYS_SHORT", cal_week_days);
-            calendar.select(new Date(cal_cur_date*1000));
+            calendar.cfg.setProperty("start_weekday", M.attforblock.cal_start_weekday);
+            calendar.cfg.setProperty("MONTHS_LONG", M.attforblock.cal_months);
+            calendar.cfg.setProperty("WEEKDAYS_SHORT", M.attforblock.cal_week_days);
+            calendar.select(new Date(M.attforblock.cal_cur_date*1000));
             calendar.render();
 
             calendar.selectEvent.subscribe(function() {
                 if (calendar.getSelectedDates().length > 0) {
 
-                    Dom.get("current").value = calendar.getSelectedDates()[0] / 1000;
+                    Dom.get("curdate").value = calendar.getSelectedDates()[0] / 1000;
 
                     Dom.get("currentdate").submit();
                 }

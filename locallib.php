@@ -76,10 +76,7 @@ class attforblock_permissions {
     }
 }
 
-class attforblock {
-    const SESSION_COMMON        = 1;
-    const SESSION_GROUP         = 2;
-
+class attforblock_view_params {
     const VIEW_DAYS             = 1;
     const VIEW_WEEKS            = 2;
     const VIEW_MONTHS           = 3;
@@ -93,34 +90,15 @@ class attforblock {
     const SORTED_LIST           = 1;
     const SORTED_GRID           = 2;
 
-    const DEFAULT_VIEW          = attforblock::VIEW_WEEKS;
-    const DEFAULT_CURDATE       = 0;
-    const DEFAULT_VIEW_TAKE     = attforblock::SORTED_LIST;
+    const DEFAULT_VIEW          = self::VIEW_WEEKS;
+    const DEFAULT_VIEW_TAKE     = self::SORTED_LIST;
     const DEFAULT_SHOWENDTIME   = 0;
 
-    /** @var stdclass course module record */
-    public $cm;
-
-    /** @var stdclass course record */
-    public $course;
-
-    /** @var stdclass context object */
-    public $context;
-
-    /** @var int attendance instance identifier */
-    public $id;
-
-    /** @var string attendance activity name */
-    public $name;
-
-    /** @var float number (10, 5) unsigned, the maximum grade for attendance */
-    public $grade;
-
     /** @var int current view mode */
-    public $view = self::DEFAULT_VIEW;
+    public $view;
 
     /** @var int $view and $curdate specify displaed date range */
-    public $curdate = self::DEFAULT_CURDATE;
+    public $curdate;
 
     /** @var int start date of displayed date range */
     public $startdate;
@@ -129,65 +107,68 @@ class attforblock {
     public $enddate;
 
     /** @var int view mode of taking attendance page*/
-    public $view_take = self::DEFAULT_VIEW_TAKE;
+    public $view_take;
 
     /** @var int whether sessions end time will be displayed on manage.php */
-    public $showendtime = self::DEFAULT_SHOWENDTIME;
+    public $show_endtime;
 
-    /** @var attforblock_permissions permission of current user for attendance instance*/
-    public $perm;
-    /**
-     * Initializes the attendance API instance using the data from DB
-     *
-     * Makes deep copy of all passed records properties. Replaces integer $course attribute
-     * with a full database record (course should not be stored in instances table anyway).
-     *
-     * @param stdClass $dbrecord Attandance instance data from {attforblock} table
-     * @param stdClass $cm       Course module record as returned by {@link get_coursemodule_from_id()}
-     * @param stdClass $course   Course record from {course} table
-     * @param stdClass $context  The context of the workshop instance
-     */
-    public function __construct(stdclass $dbrecord, stdclass $cm, stdclass $course, stdclass $context=null) {
-        foreach ($dbrecord as $field => $value) {
-            if (property_exists('attforblock', $field)) {
-                $this->{$field} = $value;
-            }
-            else {
-                throw new coding_exception('The attendance table has field for which there is no property in the attforblock class');
-            }
-        }
-        $this->cm           = $cm;
-        $this->course       = $course;
-        if (is_null($context)) {
-            $this->context = get_context_instance(CONTEXT_MODULE, $this->cm->id);
-        } else {
-            $this->context = $context;
-        }
+    public $students_sort;
 
-        $this->perm = new attforblock_permissions($this->context);
+    public $student_id;
+
+    private $courseid;
+
+    public function init_defaults($courseid) {
+        $this->view = self::DEFAULT_VIEW;
+        $this->curdate = time();
+        $this->view_take = self::DEFAULT_VIEW_TAKE;
+        $this->show_endtime = self::DEFAULT_SHOWENDTIME;
+
+        $this->courseid = $courseid;
     }
 
-    public function init_view_params($view=NULL, $curdate=NULL, $view_take=NULL, $showendtime=NULL) {
+    public function init(attforblock_view_params $view_params) {
+        $this->init_view($view_params->view);
+
+        $this->init_curdate($view_params->curdate);
+
+        $this->init_view_take($view_params->view_take);
+
+        $this->init_show_endtime($view_params->show_endtime);
+
+        $this->students_sort = $view_params->students_sort;
+
+        $this->student_id = $view_params->student_id;
+
+        $this->init_start_end_date();
+    }
+
+    private function init_view($view) {
         global $SESSION;
 
         if (isset($view)) {
-            $SESSION->attcurrentattview[$this->course->id] = $view;
+            $SESSION->attcurrentattview[$this->courseid] = $view;
             $this->view = $view;
         }
-        elseif (isset($SESSION->attcurrentattview[$this->course->id])) {
-            $this->view = $SESSION->attcurrentattview[$this->course->id];
+        elseif (isset($SESSION->attcurrentattview[$this->courseid])) {
+            $this->view = $SESSION->attcurrentattview[$this->courseid];
         }
+    }
+
+    private function init_curdate($curdate) {
+        global $SESSION;
 
         if ($curdate) {
-            $SESSION->attcurrentattdate[$this->course->id] = $curdate;
+            $SESSION->attcurrentattdate[$this->courseid] = $curdate;
             $this->curdate = $curdate;
         }
-        elseif (isset($SESSION->attcurrentattdate[$this->course->id])) {
-            $this->curdate = $SESSION->attcurrentattdate[$this->course->id];
+        elseif (isset($SESSION->attcurrentattdate[$this->courseid])) {
+            $this->curdate = $SESSION->attcurrentattdate[$this->courseid];
         }
-        else {
-            $this->curdate = time();
-        }
+    }
+
+    private function init_view_take($view_take) {
+        global $SESSION;
 
         if (isset($view_take)) {
             set_user_preference("attforblock_view_take", $view_take);
@@ -196,16 +177,18 @@ class attforblock {
         else {
             $this->view_take = get_user_preferences("attforblock_view_take", $this->view_take);
         }
+    }
 
-        if (isset($showendtime)) {
-            set_user_preference("attforblock_showendtime", $showendtime);
-            $this->showendtime = $showendtime;
+    private function init_show_endtime($show_endtime) {
+        global $SESSION;
+
+        if (isset($show_endtime)) {
+            set_user_preference("attforblock_showendtime", $show_endtime);
+            $this->show_endtime = $show_endtime;
         }
         else {
-            $this->showendtime = get_user_preferences("attforblock_showendtime", $this->showendtime);
+            $this->show_endtime = get_user_preferences("attforblock_showendtime", $this->show_endtime);
         }
-
-        $this->init_start_end_date();
     }
 
     private function init_start_end_date() {
@@ -237,6 +220,68 @@ class attforblock {
                 $this->enddate = 0;
                 break;
         }
+    }
+}
+
+class attforblock {
+    const SESSION_COMMON        = 1;
+    const SESSION_GROUP         = 2;
+
+    /** @var stdclass course module record */
+    public $cm;
+
+    /** @var stdclass course record */
+    public $course;
+
+    /** @var stdclass context object */
+    public $context;
+
+    /** @var int attendance instance identifier */
+    public $id;
+
+    /** @var string attendance activity name */
+    public $name;
+
+    /** @var float number (10, 5) unsigned, the maximum grade for attendance */
+    public $grade;
+
+    /** @var attforblock_view_params view parameters current attendance instance*/
+    public $view_params;
+
+    /** @var attforblock_permissions permission of current user for attendance instance*/
+    public $perm;
+    /**
+     * Initializes the attendance API instance using the data from DB
+     *
+     * Makes deep copy of all passed records properties. Replaces integer $course attribute
+     * with a full database record (course should not be stored in instances table anyway).
+     *
+     * @param stdClass $dbrecord Attandance instance data from {attforblock} table
+     * @param stdClass $cm       Course module record as returned by {@link get_coursemodule_from_id()}
+     * @param stdClass $course   Course record from {course} table
+     * @param stdClass $context  The context of the workshop instance
+     */
+    public function __construct(stdclass $dbrecord, stdclass $cm, stdclass $course, stdclass $context=null) {
+        foreach ($dbrecord as $field => $value) {
+            if (property_exists('attforblock', $field)) {
+                $this->{$field} = $value;
+            }
+            else {
+                throw new coding_exception('The attendance table has field for which there is no property in the attforblock class');
+            }
+        }
+        $this->cm           = $cm;
+        $this->course       = $course;
+        if (is_null($context)) {
+            $this->context = get_context_instance(CONTEXT_MODULE, $this->cm->id);
+        } else {
+            $this->context = $context;
+        }
+
+        $this->view_params = new attforblock_view_params();
+        $this->view_params->init_defaults($this->course->id);
+
+        $this->perm = new attforblock_permissions($this->context);
     }
 
     /**
@@ -403,49 +448,74 @@ class attforblock_filter_controls implements renderable {
     /** @var int current view mode */
     public $view;
 
+    public $curdate;
+
     public $prevcur;
     public $nextcur;
     public $curdatetxt;
 
+    private $url_path;
+    private $url_params;
+
     private $att;
 
     public function __construct(attforblock $att) {
-        $this->view = $att->view;
+        global $PAGE;
 
-        $date = usergetdate($att->curdate);
+        $this->view = $att->view_params->view;
+
+        $this->curdate = $att->view_params->curdate;
+
+        $date = usergetdate($att->view_params->curdate);
         $mday = $date['mday'];
         $wday = $date['wday'];
         $mon = $date['mon'];
         $year = $date['year'];
 
         switch ($this->view) {
-            case attforblock::VIEW_DAYS:
+            case attforblock_view_params::VIEW_DAYS:
                 $format = get_string('strftimedm', 'attforblock');
                 $this->prevcur = make_timestamp($year, $mon, $mday - 1);
                 $this->nextcur = make_timestamp($year, $mon, $mday + 1);
-                $this->curdatetxt =  userdate($att->startdate, $format);
+                $this->curdatetxt =  userdate($att->view_params->startdate, $format);
                 break;
-            case attforblock::VIEW_WEEKS:
+            case attforblock_view_params::VIEW_WEEKS:
                 $format = get_string('strftimedm', 'attforblock');
-                $this->prevcur = $att->startdate - WEEKSECS;
-                $this->nextcur = $att->startdate + WEEKSECS;
-                $this->curdatetxt = userdate($att->startdate, $format)." - ".userdate($att->enddate, $format);
+                $this->prevcur = $att->view_params->startdate - WEEKSECS;
+                $this->nextcur = $att->view_params->startdate + WEEKSECS;
+                $this->curdatetxt = userdate($att->view_params->startdate, $format)." - ".userdate($att->view_params->enddate, $format);
                 break;
-            case attforblock::VIEW_MONTHS:
+            case attforblock_view_params::VIEW_MONTHS:
                 $format = '%B';
                 $this->prevcur = make_timestamp($year, $mon - 1);
                 $this->nextcur = make_timestamp($year, $mon + 1);
-                $this->curdatetxt = userdate($att->startdate, $format);
+                $this->curdatetxt = userdate($att->view_params->startdate, $format);
                 break;
         }
+
+        $this->url_path = $PAGE->url->out_omit_querystring();
+        $params = array('id' => $att->cm->id);
+        if (isset($att->view_params->students_sort)) $params['sort'] = $att->view_params->students_sort;
+        if (isset($att->view_params->student_id)) $params['studentid'] = $att->view_params->student_id;
+        $this->url_params = $params;
 
         $this->att = $att;
     }
 
-    public function url($params=NULL) {
-        global $PAGE;
-        
-        return new moodle_url($PAGE->url, $params);
+    public function url($params=array()) {
+        $params = array_merge($this->url_params, $params);
+
+        return new moodle_url($this->url_path, $params);
+    }
+
+    public function url_path() {
+        return $this->url_path;
+    }
+
+    public function url_params($params=array()) {
+        $params = array_merge($this->url_params, $params);
+
+        return $params;
     }
 }
 
@@ -488,10 +558,10 @@ class attforblock_sessions_manage_data implements renderable {
 
         $this->perm = $att->perm;
 
-        $this->showendtime = $att->showendtime;
+        $this->showendtime = $att->view_params->show_endtime;
 
-        $this->startdate = $att->startdate;
-        $this->enddate = $att->enddate;
+        $this->startdate = $att->view_params->startdate;
+        $this->enddate = $att->view_params->enddate;
 
         if ($this->startdate && $this->enddate) {
             $where = "courseid=:cid AND attendanceid = :aid AND sessdate >= :csdate AND sessdate >= :sdate AND sessdate < :edate";

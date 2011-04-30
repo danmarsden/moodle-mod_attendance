@@ -22,6 +22,10 @@
     margin-left:auto;
 }
 
+.path-mod-attforblock .attfiltercontrols #currentdate{
+    display: inline;
+}
+
 .path-mod-attforblock .attwidth {
     width:90%;
     margin: auto;
