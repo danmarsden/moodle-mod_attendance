@@ -26,13 +26,10 @@ $att            = $DB->get_record('attforblock', array('id' => $cm->instance), '
 
 require_login($course, true, $cm);
 
-$canmanage = !has_capability('mod/attforblock:manageattendances', $PAGE->context);
-$cantake = !has_capability('mod/attforblock:takeattendances', $PAGE->context);
-$canchange = !has_capability('mod/attforblock:changeattendances', $PAGE->context);
-if ($canmanage && $cantake && $canchange)
+$att = new attforblock($att, $cm, $course, $PAGE->context);
+if (!$att->perm->can_manage() && !$att->perm->can_take() && !$att->perm->can_change())
     redirect("view.php?id=$cm->id");
 
-$att = new attforblock($att, $cm, $course, $PAGE->context);
 $att->view_params->init($view_params);
 
 // if teacher is coming from block, then check for a session exists for today
