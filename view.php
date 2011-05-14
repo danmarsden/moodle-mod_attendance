@@ -12,23 +12,16 @@
 require_once(dirname(__FILE__).'/../../config.php');
 require_once(dirname(__FILE__).'/locallib.php');
 
-$id         = optional_param('id', 0, PARAM_INT);   // Course Module ID, or
-$a          = optional_param('a', 0, PARAM_INT);    // attforblock instance ID
+$id         = required_param('id', PARAM_INT);   // Course Module ID, or
 $studentid	= optional_param('student', 0, PARAM_INT);
 $printing	= optional_param('printing', 0, PARAM_INT);
 $mode 		= optional_param('mode', 'thiscourse', PARAM_ALPHA);
 $view       = optional_param('view', NULL, PARAM_INT);        // which page to show
 $current	= optional_param('current', 0, PARAM_INT);
 
-if ($id) {
-    $cm             = get_coursemodule_from_id('attforblock', $id, 0, false, MUST_EXIST);
-    $course         = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
-    $attforblock    = $DB->get_record('attforblock', array('id' => $cm->instance), '*', MUST_EXIST);
-} else {
-    $attforblock    = $DB->get_record('attforblock', array('id' => $a), '*', MUST_EXIST);
-    $course         = $DB->get_record('course', array('id' => $workshop->course), '*', MUST_EXIST);
-    $cm             = get_coursemodule_from_instance('attforblock', $attforblock->id, $course->id, false, MUST_EXIST);
-}
+$cm             = get_coursemodule_from_id('attforblock', $id, 0, false, MUST_EXIST);
+$course         = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
+$attforblock    = $DB->get_record('attforblock', array('id' => $cm->instance), '*', MUST_EXIST);
 
 require_login($course, true, $cm);
 

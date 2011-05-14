@@ -11,10 +11,7 @@ class mod_attforblock_add_form extends moodleform {
 
         $course        = $this->_customdata['course'];
         $cm            = $this->_customdata['cm'];
-//        $coursecontext = $this->_customdata['coursecontext'];
         $modcontext    = $this->_customdata['modcontext'];
-//        $forum         = $this->_customdata['forum'];
-//        $post          = $this->_customdata['post']; // hack alert
 
 
         $mform->addElement('header', 'general', get_string('addsession','attforblock'));//fill in the data depending on page params
@@ -26,21 +23,21 @@ class mod_attforblock_add_form extends moodleform {
                 $mform->addElement('static', 'sessiontypedescription', get_string('sessiontype', 'attforblock'),
                                   get_string('commonsession', 'attforblock'));
                 $mform->setHelpButton('sessiontypedescription', array('sessiontypes', get_string('sessiontype','attforblock'), 'attforblock'));
-                $mform->addElement('hidden', 'sessiontype', COMMONSESSION);
+                $mform->addElement('hidden', 'sessiontype', attforblock::SESSION_COMMON);
                 break;
             case SEPARATEGROUPS:
                 $mform->addElement('static', 'sessiontypedescription', get_string('sessiontype', 'attforblock'),
                                   get_string('groupsession', 'attforblock'));
                 $mform->setHelpButton('sessiontypedescription', array('sessiontypes', get_string('sessiontype','attforblock'), 'attforblock'));
-                $mform->addElement('hidden', 'sessiontype', GROUPSESSION);
+                $mform->addElement('hidden', 'sessiontype', attforblock::SESSION_GROUP);
                 break;
             case VISIBLEGROUPS:
                 $radio=array();
-                $radio[] = &MoodleQuickForm::createElement('radio', 'sessiontype', '', get_string('commonsession','attforblock'), COMMONSESSION);
-                $radio[] = &MoodleQuickForm::createElement('radio', 'sessiontype', '', get_string('groupsession','attforblock'), GROUPSESSION);
+                $radio[] = &MoodleQuickForm::createElement('radio', 'sessiontype', '', get_string('commonsession','attforblock'), attforblock::SESSION_COMMON);
+                $radio[] = &MoodleQuickForm::createElement('radio', 'sessiontype', '', get_string('groupsession','attforblock'), attforblock::SESSION_GROUP);
                 $mform->addGroup($radio, 'sessiontype', get_string('sessiontype','attforblock'), ' ', false);
-                $mform->setHelpButton('sessiontype', array('sessiontypes', get_string('sessiontypes','attforblock'), 'attforblock'));
-                $mform->setDefault('sessiontype', COMMONSESSION);
+                $mform->addHelpButton('sessiontype', 'sessiontype', 'attforblock');
+                $mform->setDefault('sessiontype', attforblock::SESSION_COMMON);
                 break;
         }
         if ($groupmode == SEPARATEGROUPS or $groupmode == VISIBLEGROUPS) {
@@ -55,7 +52,7 @@ class mod_attforblock_add_form extends moodleform {
                 }
                 $select = &$mform->addElement('select', 'groups', get_string('groups', 'group'), $selectgroups);
                 $select->setMultiple(true);
-                $mform->disabledIf('groups','sessiontype','neq',GROUPSESSION);
+                $mform->disabledIf('groups','sessiontype','neq', attforblock::SESSION_GROUP);
             }
             else {
                 $mform->updateElementAttr($radio, array('disabled'=>'disabled'));
@@ -67,7 +64,7 @@ class mod_attforblock_add_form extends moodleform {
         }
         
         $mform->addElement('checkbox', 'addmultiply', '', get_string('createmultiplesessions','attforblock'));
-		$mform->setHelpButton('addmultiply', array('createmultiplesessions', get_string('createmultiplesessions','attforblock'), 'attforblock'));
+		$mform->addHelpButton('addmultiply', 'createmultiplesessions', 'attforblock');
 		
 //        $mform->addElement('date_selector', 'sessiondate', get_string('sessiondate','attforblock'));
         $mform->addElement('date_time_selector', 'sessiondate', get_string('sessiondate','attforblock'));
@@ -109,24 +106,19 @@ class mod_attforblock_add_form extends moodleform {
         $mform->addGroup($periodgroup, 'periodgroup', get_string('period','attforblock'), array(' '), false);
 		$mform->disabledIf('periodgroup', 'addmultiply', 'notchecked');
         
-        $mform->addElement('text', 'sdescription', get_string('description', 'attforblock'), 'size="48"');
-        $mform->setType('sdescription', PARAM_TEXT);
-        $mform->addRule('sdescription', get_string('maximumchars', '', 100), 'maxlength', 100, 'client'); 
+        $mform->addElement('editor', 'sdescription', get_string('description', 'attforblock'), null, array('maxfiles'=>EDITOR_UNLIMITED_FILES, 'noclean'=>true, 'context'=>$modcontext));
+        $mform->setType('sdescription', PARAM_RAW);
 		
 //-------------------------------------------------------------------------------
         // buttons
         $submit_string = get_string('addsession', 'attforblock');
         $this->add_action_buttons(false, $submit_string);
-
-        $mform->addElement('hidden', 'id', $cm->id);
-        $mform->addElement('hidden', 'action', 'add');
-
     }
 
     function validation($data, $files) {
         $errors = parent::validation($data, $files);
 
-        if ($data['sessiontype'] == GROUPSESSION and empty($data['groups'])) {
+        if ($data['sessiontype'] == attforblock::SESSION_GROUP and empty($data['groups'])) {
             $errors['groups'] = get_string('errorgroupsnotselected','attforblock');
         }
         return $errors;

@@ -12,9 +12,9 @@
 require_once(dirname(__FILE__).'/../../config.php');
 require_once(dirname(__FILE__).'/locallib.php');
 
-$view_params = new attforblock_view_params();
+$view_params = new att_manage_page_params();
 
-$id                     = optional_param('id', 0, PARAM_INT);   // Course Module ID, or
+$id                     = required_param('id', PARAM_INT);
 $from                   = optional_param('from', NULL, PARAM_ACTION);
 $view_params ->view     = optional_param('view', NULL, PARAM_INT);        // which page to show
 $view_params ->curdate  = optional_param('curdate', NULL, PARAM_INT);
@@ -26,11 +26,11 @@ $att            = $DB->get_record('attforblock', array('id' => $cm->instance), '
 
 require_login($course, true, $cm);
 
-$att = new attforblock($att, $cm, $course, $PAGE->context);
+$att = new attforblock($att, $cm, $course, $PAGE->context, att_manage_page_params::create_default());
 if (!$att->perm->can_manage() && !$att->perm->can_take() && !$att->perm->can_change())
     redirect("view.php?id=$cm->id");
 
-$att->view_params->init($view_params);
+$att->pageparams->init($view_params, $course->id);
 
 // if teacher is coming from block, then check for a session exists for today
 if ($from === 'block') {
@@ -52,7 +52,6 @@ if ($from === 'block') {
 $PAGE->set_url($att->url_manage());
 $PAGE->set_title($course->shortname. ": ".$att->name);
 $PAGE->set_heading($course->fullname);
-$PAGE->set_focuscontrol('');
 $PAGE->set_cacheable(true);
 $PAGE->set_button($OUTPUT->update_module_button($cm->id, 'attforblock'));
 $PAGE->navbar->add($att->name);

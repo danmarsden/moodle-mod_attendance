@@ -22,56 +22,60 @@ class attforblock_permissions {
 
     public function can_view() {
         if (is_null($this->canview))
-            $this->canview = has_capability ('mod/attforblock:view', $this->context);
+            $this->canview = has_capability('mod/attforblock:view', $this->context);
 
         return $this->canview;
     }
 
     public function can_viewreports() {
         if (is_null($this->canviewreports))
-            $this->canviewreports = has_capability ('mod/attforblock:viewreports', $this->context);
+            $this->canviewreports = has_capability('mod/attforblock:viewreports', $this->context);
 
         return $this->canviewreports;
     }
 
     public function can_take() {
         if (is_null($this->cantake))
-            $this->cantake = has_capability ('mod/attforblock:takeattendances', $this->context);
+            $this->cantake = has_capability('mod/attforblock:takeattendances', $this->context);
 
         return $this->cantake;
     }
 
     public function can_change() {
         if (is_null($this->canchange))
-            $this->canchange = has_capability ('mod/attforblock:changeattendances', $this->context);
+            $this->canchange = has_capability('mod/attforblock:changeattendances', $this->context);
 
         return $this->canchange;
     }
 
     public function can_manage() {
         if (is_null($this->canmanage))
-            $this->canmanage = has_capability ('mod/attforblock:manageattendances', $this->context);
+            $this->canmanage = has_capability('mod/attforblock:manageattendances', $this->context);
 
         return $this->canmanage;
     }
 
+    public function require_manage_capability() {
+        require_capability('mod/attforblock:manageattendances', $this->context);
+    }
+
     public function can_change_preferences() {
         if (is_null($this->canchangepreferences))
-            $this->canchangepreferences = has_capability ('mod/attforblock:changepreferences', $this->context);
+            $this->canchangepreferences = has_capability('mod/attforblock:changepreferences', $this->context);
 
         return $this->canchangepreferences;
     }
 
     public function can_export() {
         if (is_null($this->canexport))
-            $this->canexport = has_capability ('mod/attforblock:export', $this->context);
+            $this->canexport = has_capability('mod/attforblock:export', $this->context);
 
         return $this->canexport;
     }
 
     public function can_be_listed() {
         if (is_null($this->canbelisted))
-            $this->canbelisted = has_capability ('mod/attforblock:canbelisted', $this->context);
+            $this->canbelisted = has_capability('mod/attforblock:canbelisted', $this->context);
 
         return $this->canbelisted;
     }
@@ -84,7 +88,7 @@ class attforblock_permissions {
     }
 }
 
-class attforblock_view_params {
+class att_manage_page_params {
     const VIEW_DAYS             = 1;
     const VIEW_WEEKS            = 2;
     const VIEW_MONTHS           = 3;
@@ -95,11 +99,7 @@ class attforblock_view_params {
     const SELECTOR_GROUP        = 2;
     const SELECTOR_SESS_TYPE    = 3;
 
-    const SORTED_LIST           = 1;
-    const SORTED_GRID           = 2;
-
     const DEFAULT_VIEW          = self::VIEW_WEEKS;
-    const DEFAULT_VIEW_TAKE     = self::SORTED_LIST;
     const DEFAULT_SHOWENDTIME   = 0;
 
     /** @var int current view mode */
@@ -114,39 +114,37 @@ class attforblock_view_params {
     /** @var int end date of displayed date range */
     public $enddate;
 
-    /** @var int view mode of taking attendance page*/
-    public $view_take;
-
     /** @var int whether sessions end time will be displayed on manage.php */
-    public $show_endtime;
+    public $showendtime;
 
-    public $students_sort;
+    public $studentssort;
 
-    public $student_id;
+    public $studentid;
 
     private $courseid;
 
-    public function init_defaults($courseid) {
-        $this->view = self::DEFAULT_VIEW;
-        $this->curdate = time();
-        $this->view_take = self::DEFAULT_VIEW_TAKE;
-        $this->show_endtime = self::DEFAULT_SHOWENDTIME;
+    public static function create_default() {
+        $instance = new att_manage_page_params();
 
-        $this->courseid = $courseid;
+        $instance->view = self::DEFAULT_VIEW;
+        $instance->curdate = time();
+        $instance->showendtime = self::DEFAULT_SHOWENDTIME;
+
+        return $instance;
     }
 
-    public function init(attforblock_view_params $view_params) {
+    public function init(att_manage_page_params $view_params, $courseid) {
+        $this->courseid = $courseid;
+
         $this->init_view($view_params->view);
 
         $this->init_curdate($view_params->curdate);
 
-        $this->init_view_take($view_params->view_take);
+        $this->init_show_endtime($view_params->showendtime);
 
-        $this->init_show_endtime($view_params->show_endtime);
+        $this->studentssort = $view_params->studentssort;
 
-        $this->students_sort = $view_params->students_sort;
-
-        $this->student_id = $view_params->student_id;
+        $this->studentid = $view_params->studentid;
 
         $this->init_start_end_date();
     }
@@ -175,27 +173,15 @@ class attforblock_view_params {
         }
     }
 
-    private function init_view_take($view_take) {
-        global $SESSION;
-
-        if (isset($view_take)) {
-            set_user_preference("attforblock_view_take", $view_take);
-            $this->view_take = $view_take;
-        }
-        else {
-            $this->view_take = get_user_preferences("attforblock_view_take", $this->view_take);
-        }
-    }
-
     private function init_show_endtime($show_endtime) {
         global $SESSION;
 
         if (isset($show_endtime)) {
             set_user_preference("attforblock_showendtime", $show_endtime);
-            $this->show_endtime = $show_endtime;
+            $this->showendtime = $show_endtime;
         }
         else {
-            $this->show_endtime = get_user_preferences("attforblock_showendtime", $this->show_endtime);
+            $this->showendtime = get_user_preferences("attforblock_showendtime", $this->showendtime);
         }
     }
 
@@ -231,6 +217,51 @@ class attforblock_view_params {
     }
 }
 
+class att_sessions_page_params {
+    const ACTION_ADD              = 1;
+    const ACTION_UPDATE           = 2;
+    const ACTION_DELETE           = 3;
+    const ACTION_DELETE_SELECTED  = 4;
+    const ACTION_CHANGE_DURATION  = 5;
+
+    /** @var int view mode of taking attendance page*/
+    public $action;
+}
+
+class att_take_page_params {
+    const SORTED_LIST           = 1;
+    const SORTED_GRID           = 2;
+
+    const DEFAULT_VIEW_MODE     = self::SORTED_LIST;
+
+    /** @var int view mode of taking attendance page*/
+    public $view_mode;
+
+    public static function create_default() {
+        $instance = new att_take_page_params();
+
+        $instance->view_mode = self::DEFAULT_VIEW_MODE;
+
+        return $instance;
+    }
+
+    public function init(att_manage_page_params $view_params, $courseid) {
+        $this->init_view_mode($view_params->view_mode);
+    }
+
+    private function init_view_mode($view_mode) {
+        global $SESSION;
+
+        if (isset($view_mode)) {
+            set_user_preference("attforblock_take_view_mode", $view_mode);
+            $this->view_mode = $view_mode;
+        }
+        else {
+            $this->view_mode = get_user_preferences("attforblock_take_view_mode", $this->view_mode);
+        }
+    }
+}
+
 class attforblock {
     const SESSION_COMMON        = 0;
     const SESSION_GROUP         = 1;
@@ -257,8 +288,8 @@ class attforblock {
     /** @var float number (10, 5) unsigned, the maximum grade for attendance */
     public $grade;
 
-    /** @var attforblock_view_params view parameters current attendance instance*/
-    public $view_params;
+    /** current page parameters */
+    public $pageparams;
 
     /** @var attforblock_permissions permission of current user for attendance instance*/
     public $perm;
@@ -280,7 +311,7 @@ class attforblock {
      * @param stdClass $course   Course record from {course} table
      * @param stdClass $context  The context of the workshop instance
      */
-    public function __construct(stdclass $dbrecord, stdclass $cm, stdclass $course, stdclass $context=null) {
+    public function __construct(stdclass $dbrecord, stdclass $cm, stdclass $course, stdclass $context=NULL, $view_params=NULL) {
         foreach ($dbrecord as $field => $value) {
             if (property_exists('attforblock', $field)) {
                 $this->{$field} = $value;
@@ -297,8 +328,7 @@ class attforblock {
             $this->context = $context;
         }
 
-        $this->view_params = new attforblock_view_params();
-        $this->view_params->init_defaults($this->course->id);
+        $this->pageparams = $view_params;
 
         $this->perm = new attforblock_permissions($this->context);
     }
@@ -357,8 +387,8 @@ class attforblock {
     /**
      * @return moodle_url of sessions.php for attendance instance
      */
-    public function url_sessions() {
-        $params = array('id' => $this->cm->id);
+    public function url_sessions($params=array()) {
+        $params = array_merge(array('id' => $this->cm->id), $params);
         return new moodle_url('/mod/attforblock/sessions.php', $params);
     }
 
@@ -492,6 +522,38 @@ class attforblock {
             $this->calc_groupmode_sessgroupslist_currentgroup();
 
         return $this->currentgroup;
+    }
+
+    public function add_session_from_form_data($formdata) {
+        global $DB;
+        
+        $duration = $formdata->durtime['hours']*HOURSECS + $formdata->durtime['minutes']*MINSECS;
+
+        $rec->courseid = $this->course->id;
+        $rec->attendanceid = $this->id;
+        $rec->sessdate = $formdata->sessiondate;
+        $rec->duration = $duration;
+        $rec->description = $formdata->sdescription['text'];
+        $rec->timemodified = time();
+        
+        if ($formdata->sessiontype == self::SESSION_COMMON) {
+            $rec->id = $DB->insert_record('attendance_sessions', $rec);
+            $description = file_save_draft_area_files($formdata->sdescription['itemid'],
+                        $this->context->id, 'mod_attforblock', 'session', $rec->id,
+                        array('subdirs' => false, 'maxfiles' => -1, 'maxbytes' => 0), $formdata->sdescription['text']);
+            $DB->set_field('attendance_sessions', 'description', $description, array('id' => $rec->id));
+        } else {
+            foreach ($formdata->groups as $groupid) {
+                $rec->groupid = $groupid;
+                $rec->id = $DB->insert_record('attendance_sessions', $rec);
+                $description = file_save_draft_area_files($formdata->sdescription['itemid'],
+                            $this->context->id, 'mod_attforblock', 'session', $rec->id,
+                            array('subdirs' => false, 'maxfiles' => -1, 'maxbytes' => 0), $formdata->sdescription['text']);
+                $DB->set_field('attendance_sessions', 'description', $description, array('id' => $rec->id));
+            }
+        }
+        // TODO: log
+        //add_to_log($course->id, 'attendance', 'one session added', 'mod/attforblock/manage.php?id='.$id, $user->lastname.' '.$user->firstname);
     }
 }
 

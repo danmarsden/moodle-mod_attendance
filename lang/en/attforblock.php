@@ -48,6 +48,13 @@ $string['commonsessions'] = 'Common';
 $string['countofselected'] = 'Count of selected';
 $string['copyfrom'] = 'Copy attendance data from';
 $string['createmultiplesessions'] = 'Create multiple sessions';
+$string['createmultiplesessions_help'] = 'This function allows you to create multiple sessions in one simple step.
+
+  * <strong>Session Start Date</strong>: Select the start date of your course (the first day of class)
+  * <strong>Session End Date</strong>: Select the last day of class (the last day you want to take attendance).
+  * <strong>Session Days</strong>: Select the days of the week when your class will meet (for example, Monday/Wednesday/Friday).
+  * <strong>Frequency</strong>: This allows for a frequency setting. If your class will meet every week, select 1; if it will meet every other week, select 2; every 3rd week, select 3, etc.
+';
 $string['createonesession'] = 'Create one session for the course';
 $string['days'] = 'Day';
 $string['defaults'] = 'Defaults';
@@ -124,6 +131,12 @@ $string['sessionscompleted'] = 'Sessions completed';
 $string['sessionsgenerated'] = 'Sessions successfully generated';
 $string['sessionstartdate'] = 'Session start date';
 $string['sessiontype'] = 'Session type';
+$string['sessiontype_help'] = 'There are two types of sessions: common and groups. Ability to add different types depends on activity group mode.
+
+* In group mode "No groups" you can add only common sessions.
+* In group mode "Visible groups" you can add common and group sessions.
+* In group mode "Separate groups" you can add only group sessions.
+';
 $string['sessiontypeshort'] = 'Type';
 $string['sessionupdated'] = 'Session successfully updated';
 $string['settings'] = 'Settings';

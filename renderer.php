@@ -58,7 +58,7 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         return $o;
     }
 
-    private function render_sess_group_selector(attforblock_filter_controls $fcontrols) {
+    protected function render_sess_group_selector(attforblock_filter_controls $fcontrols) {
         if ($fcontrols->get_group_mode() == NOGROUPS)
             return '';
         
@@ -68,100 +68,9 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         $output = $this->output->render($select);
 
         return html_writer::tag('div', $output, array('class' => 'groupselector'));
-
-        /*$currentgroup = -1;
-        $sessiontypeselector = '';
-        if ($printselector === GROUP_SELECTOR) {
-            $groupmode = groups_get_activity_groupmode($cm);
-            $currentgroup = groups_get_activity_group($cm, true);
-            $groupselector = '';
-            $context = get_context_instance(CONTEXT_MODULE, $cm->id);
-            if ($groupmode == VISIBLEGROUPS ||
-                    ($groupmode && has_capability('moodle/site:accessallgroups', $context))) {
-                $groupselector = groups_print_activity_menu($cm, $CFG->wwwroot . '/mod/attforblock/' . $link, true);
-            }
-        } elseif ($printselector === SESSION_TYPE_SELECTOR and $groupmode = groups_get_activity_groupmode($cm)) {
-            $context = get_context_instance(CONTEXT_MODULE, $cm->id);
-            if ($groupmode == VISIBLEGROUPS or has_capability('moodle/site:accessallgroups', $context)) {
-                $allowedgroups = groups_get_all_groups($cm->course, 0, $cm->groupingid); // any group in grouping (all if groupings not used)
-                // detect changes related to groups and fix active group
-                if (!empty($SESSION->activegroup[$cm->course][VISIBLEGROUPS][$cm->groupingid])) {
-                    if (!array_key_exists($SESSION->activegroup[$cm->course][VISIBLEGROUPS][$cm->groupingid], $allowedgroups)) {
-                        // active group does not exist anymore
-                        unset($SESSION->activegroup[$cm->course][VISIBLEGROUPS][$cm->groupingid]);
-                    }
-                }
-                if (!empty($SESSION->activegroup[$cm->course]['aag'][$cm->groupingid])) {
-                    if (!array_key_exists($SESSION->activegroup[$cm->course]['aag'][$cm->groupingid], $allowedgroups)) {
-                        // active group does not exist anymore
-                        unset($SESSION->activegroup[$cm->course]['aag'][$cm->groupingid]);
-                    }
-                }
-
-            } else {
-                $allowedgroups = groups_get_all_groups($cm->course, $USER->id, $cm->groupingid); // only assigned groups
-                // detect changes related to groups and fix active group
-                if (isset($SESSION->activegroup[$cm->course][SEPARATEGROUPS][$cm->groupingid])) {
-                    if ($SESSION->activegroup[$cm->course][SEPARATEGROUPS][$cm->groupingid] == 0) {
-                        if ($allowedgroups) {
-                            // somebody must have assigned at least one group, we can select it now - yay!
-                            unset($SESSION->activegroup[$cm->course][SEPARATEGROUPS][$cm->groupingid]);
-                        }
-                    } else {
-                        if (!array_key_exists($SESSION->activegroup[$cm->course][SEPARATEGROUPS][$cm->groupingid], $allowedgroups)) {
-                            // active group not allowed or does not exist anymore
-                            unset($SESSION->activegroup[$cm->course][SEPARATEGROUPS][$cm->groupingid]);
-                        }
-                    }
-                }
-            }
-
-            $group = optional_param('group', -2, PARAM_INT);
-            if (!array_key_exists('attsessiontype', $SESSION)) {
-                $SESSION->attsessiontype = array();
-            }
-            if ($group > -2) {
-                $SESSION->attsessiontype[$cm->course] = $group;
-            } elseif (!array_key_exists($cm->course, $SESSION->attsessiontype)) {
-                $SESSION->attsessiontype[$cm->course] = -1;
-            }
-
-            if ($group == -1) {
-                $currentgroup = $group;
-                unset($SESSION->activegroup[$cm->course][VISIBLEGROUPS][$cm->groupingid]);
-                unset($SESSION->activegroup[$cm->course]['aag'][$cm->groupingid]);
-                unset($SESSION->activegroup[$cm->course][SEPARATEGROUPS][$cm->groupingid]);
-            } else {
-                $currentgroup = groups_get_activity_group($cm, true);
-                if ($currentgroup == 0 and $SESSION->attsessiontype[$cm->course] == -1) {
-                    $currentgroup = -1;
-                }
-            }
-
-            $selector = array();
-            if ($allowedgroups or $groupmode == VISIBLEGROUPS or
-                    has_capability('moodle/site:accessallgroups', $context)) {
-                $selector[-1] = get_string('all', 'attforblock');
-            }
-            if ($groupmode == VISIBLEGROUPS) {
-                $selector[0] = get_string('commonsessions', 'attforblock');
-            }
-
-            if ($allowedgroups) {
-                foreach ($allowedgroups as $group) {
-                    $selector[$group->id] = format_string($group->name);
-                }
-            }
-
-            if (count($selector) > 1) {
-                $sessiontypeselector = popup_form($url.'?id='.$cm->id.'&amp;group=', $selector, 'selectgroup', $currentgroup, '', '', '', true, 'self', get_string('sessions', 'attforblock'));
-            }
-
-            $sessiontypeselector = '<div class="groupselector">'.$sessiontypeselector.'</div>';
-        }*/
     }
     
-    private function render_curdate_controls(attforblock_filter_controls $fcontrols) {
+    protected function render_curdate_controls(attforblock_filter_controls $fcontrols) {
         global $CFG;
 
         $curdate_controls = '';
@@ -207,12 +116,12 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         return $curdate_controls;
     }
 
-    private function render_view_controls(attforblock_filter_controls $fcontrols) {
-        $views[attforblock_view_params::VIEW_ALL] = get_string('all', 'attforblock');
-        $views[attforblock_view_params::VIEW_ALLTAKEN] = get_string('alltaken', 'attforblock');
-        $views[attforblock_view_params::VIEW_MONTHS] = get_string('months', 'attforblock');
-        $views[attforblock_view_params::VIEW_WEEKS] = get_string('weeks', 'attforblock');
-        $views[attforblock_view_params::VIEW_DAYS] = get_string('days', 'attforblock');
+    protected function render_view_controls(attforblock_filter_controls $fcontrols) {
+        $views[att_manage_page_params::VIEW_ALL] = get_string('all', 'attforblock');
+        $views[att_manage_page_params::VIEW_ALLTAKEN] = get_string('alltaken', 'attforblock');
+        $views[att_manage_page_params::VIEW_MONTHS] = get_string('months', 'attforblock');
+        $views[att_manage_page_params::VIEW_WEEKS] = get_string('weeks', 'attforblock');
+        $views[att_manage_page_params::VIEW_DAYS] = get_string('days', 'attforblock');
         $viewcontrols = '';
         foreach ($views as $key => $sview) {
             if ($key != $fcontrols->view) {
@@ -233,7 +142,8 @@ class mod_attforblock_renderer extends plugin_renderer_base {
      * @return string html code
      */
     protected function render_attforblock_sessions_manage_data(attforblock_sessions_manage_data $sessdata) {
-
+        // TODO: nosessionexists
+        // TODO: log
         $o = $this->render_sess_manage_table($sessdata) . $this->render_sess_control_table($sessdata);
         $o = html_writer::tag('form', $o, array('method' => 'post', 'action' => $sessdata->url_sessions()->out()));
         $o = $this->output->container($o, 'generalbox attwidth');
@@ -242,7 +152,7 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         return $o;
     }
 
-    private function render_sess_manage_table(attforblock_sessions_manage_data $sessdata) {
+    protected function render_sess_manage_table(attforblock_sessions_manage_data $sessdata) {
         $sesstable = new html_table();
         $sesstable->width = '100%';
         $sesstable->head = array(
@@ -310,7 +220,7 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         return html_writer::table($sesstable);
     }
 
-    private function render_sess_control_table(attforblock_sessions_manage_data $sessdata) {
+    protected function render_sess_control_table(attforblock_sessions_manage_data $sessdata) {
         $controltable = new html_table();
         $controltable->attributes['class'] = ' ';
         $controltable->width = '100%';

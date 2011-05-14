@@ -278,6 +278,16 @@ function xmldb_attforblock_upgrade($oldversion=0) {
 
         upgrade_mod_savepoint(true, 2010123003, 'attforblock');
     }
+
+    if ($oldversion < 2011053000) {
+        $table = new xmldb_table('attendance_sessions');
+
+        $field = new xmldb_field('description');
+        $field->set_attributes(XMLDB_TYPE_TEXT, 'small', null, XMLDB_NOTNULL, null, null, 'timemodified');
+        $dbman->change_field_type($table, $field);
+
+        upgrade_mod_savepoint(true, 2011053000, 'attforblock');
+    }
     return $result;
 }
 

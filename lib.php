@@ -405,6 +405,50 @@ function attforblock_scale_used ($attforblockid, $scaleid) {
     return $return;
 }
 
+/**
+ * Serves the attendance sessions descriptions files.
+ *
+ * @param object $course
+ * @param object $cm
+ * @param object $context
+ * @param string $filearea
+ * @param array $args
+ * @param bool $forcedownload
+ * @return bool false if file not found, does not return if found - justsend the file
+ */
+function attforblock_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload) {
+    global $CFG, $DB;
+
+    if ($context->contextlevel != CONTEXT_MODULE) {
+        return false;
+    }
+
+    require_login($course, false, $cm);
+
+    if (!$att = $DB->get_record('attforblock', array('id' => $cm->instance))) {
+        return false;
+    }
+
+    // 'session' area is served by pluginfile.php
+    $fileareas = array('session');
+    if (!in_array($filearea, $fileareas)) {
+        return false;
+    }
+
+    $sessid = (int)array_shift($args);
+    if (!$sess = $DB->get_record('attendance_sessions', array('id' => $sessid))) {
+        return false;
+    }
+
+    $fs = get_file_storage();
+    $relativepath = implode('/', $args);
+    $fullpath = "/$context->id/mod_attforblock/$filearea/$sessid/$relativepath";
+    if (!$file = $fs->get_file_by_hash(sha1($fullpath)) or $file->is_directory()) {
+        return false;
+    }
+    send_stored_file($file, 0, 0, true);
+}
+
 //////////////////////////////////////////////////////////////////////////////////////
 /// Any other attforblock functions go here.  Each of them must have a name that 
 /// starts with attforblock_

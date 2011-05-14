@@ -20,11 +20,11 @@ require_once(dirname(__FILE__).'/locallib.php');
  *
  */
 class attforblock_tabs implements renderable {
-    const TAB_SESSIONS  = 'sessions';
-    const TAB_ADD       = 'add';
-    const TAB_REPORT    = 'report';
-    const TAB_EXPORT    = 'export';
-    const TAB_SETTINGS  = 'settings';
+    const TAB_SESSIONS  = 1;
+    const TAB_ADD       = 2;
+    const TAB_REPORT    = 3;
+    const TAB_EXPORT    = 4;
+    const TAB_SETTINGS  = 5;
 
     public $currenttab;
 
@@ -51,12 +51,12 @@ class attforblock_tabs implements renderable {
         if ($this->att->perm->can_manage() or
                 $this->att->perm->can_take() or
                 $this->att->perm->can_change()) {
-            $toprow[] = new tabobject(self::TAB_SESSIONS, $this->att->url_sessions()->out(),
+            $toprow[] = new tabobject(self::TAB_SESSIONS, $this->att->url_manage()->out(),
                         get_string('sessions','attforblock'));
         }
 
         if ($this->att->perm->can_manage()) {
-            $toprow[] = new tabobject(self::TAB_ADD, $this->att->url_sessions()->out(true, array('action' => 'add')),
+            $toprow[] = new tabobject(self::TAB_ADD, $this->att->url_sessions()->out(true, array('action' => att_sessions_page_params::ACTION_ADD)),
                         get_string('add','attforblock'));
         }
 
@@ -90,66 +90,66 @@ class attforblock_filter_controls implements renderable {
     public $nextcur;
     public $curdatetxt;
 
-    private $url_path;
-    private $url_params;
+    private $urlpath;
+    private $urlparams;
 
     private $att;
 
     public function __construct(attforblock $att) {
         global $PAGE;
 
-        $this->view = $att->view_params->view;
+        $this->view = $att->pageparams->view;
 
-        $this->curdate = $att->view_params->curdate;
+        $this->curdate = $att->pageparams->curdate;
 
-        $date = usergetdate($att->view_params->curdate);
+        $date = usergetdate($att->pageparams->curdate);
         $mday = $date['mday'];
         $wday = $date['wday'];
         $mon = $date['mon'];
         $year = $date['year'];
 
         switch ($this->view) {
-            case attforblock_view_params::VIEW_DAYS:
+            case att_manage_page_params::VIEW_DAYS:
                 $format = get_string('strftimedm', 'attforblock');
                 $this->prevcur = make_timestamp($year, $mon, $mday - 1);
                 $this->nextcur = make_timestamp($year, $mon, $mday + 1);
-                $this->curdatetxt =  userdate($att->view_params->startdate, $format);
+                $this->curdatetxt =  userdate($att->pageparams->startdate, $format);
                 break;
-            case attforblock_view_params::VIEW_WEEKS:
+            case att_manage_page_params::VIEW_WEEKS:
                 $format = get_string('strftimedm', 'attforblock');
-                $this->prevcur = $att->view_params->startdate - WEEKSECS;
-                $this->nextcur = $att->view_params->startdate + WEEKSECS;
-                $this->curdatetxt = userdate($att->view_params->startdate, $format)." - ".userdate($att->view_params->enddate, $format);
+                $this->prevcur = $att->pageparams->startdate - WEEKSECS;
+                $this->nextcur = $att->pageparams->startdate + WEEKSECS;
+                $this->curdatetxt = userdate($att->pageparams->startdate, $format)." - ".userdate($att->pageparams->enddate, $format);
                 break;
-            case attforblock_view_params::VIEW_MONTHS:
+            case att_manage_page_params::VIEW_MONTHS:
                 $format = '%B';
                 $this->prevcur = make_timestamp($year, $mon - 1);
                 $this->nextcur = make_timestamp($year, $mon + 1);
-                $this->curdatetxt = userdate($att->view_params->startdate, $format);
+                $this->curdatetxt = userdate($att->pageparams->startdate, $format);
                 break;
         }
 
-        $this->url_path = $PAGE->url->out_omit_querystring();
+        $this->urlpath = $PAGE->url->out_omit_querystring();
         $params = array('id' => $att->cm->id);
-        if (isset($att->view_params->students_sort)) $params['sort'] = $att->view_params->students_sort;
-        if (isset($att->view_params->student_id)) $params['studentid'] = $att->view_params->student_id;
-        $this->url_params = $params;
+        if (isset($att->pageparams->studentssort)) $params['sort'] = $att->pageparams->studentssort;
+        if (isset($att->pageparams->studentid)) $params['studentid'] = $att->pageparams->studentid;
+        $this->urlparams = $params;
 
         $this->att = $att;
     }
 
     public function url($params=array()) {
-        $params = array_merge($this->url_params, $params);
+        $params = array_merge($this->urlparams, $params);
 
-        return new moodle_url($this->url_path, $params);
+        return new moodle_url($this->urlpath, $params);
     }
 
     public function url_path() {
-        return $this->url_path;
+        return $this->urlpath;
     }
 
     public function url_params($params=array()) {
-        $params = array_merge($this->url_params, $params);
+        $params = array_merge($this->urlparams, $params);
 
         return $params;
     }
@@ -206,10 +206,10 @@ class attforblock_sessions_manage_data implements renderable {
 
         $this->perm = $att->perm;
 
-        $this->showendtime = $att->view_params->show_endtime;
+        $this->showendtime = $att->pageparams->showendtime;
 
-        $this->startdate = $att->view_params->startdate;
-        $this->enddate = $att->view_params->enddate;
+        $this->startdate = $att->pageparams->startdate;
+        $this->enddate = $att->pageparams->enddate;
 
         if ($this->startdate && $this->enddate) {
             $where = "courseid=:cid AND attendanceid = :aid AND sessdate >= :csdate AND sessdate >= :sdate AND sessdate < :edate";
@@ -227,6 +227,9 @@ class attforblock_sessions_manage_data implements renderable {
                 'edate'     => $this->enddate,
                 'cgroup'    => $att->get_current_group());
         $this->sessions = $DB->get_records_select('attendance_sessions', $where, $params, 'sessdate asc');
+        foreach ($this->sessions as $sess) {
+            $sess->description = file_rewrite_pluginfile_urls($sess->description, 'pluginfile.php', $att->context->id, 'mod_attforblock', 'session', $sess->id);
+        }
 
         $where = "courseid = :cid AND attendanceid = :aid AND sessdate < :csdate";
         $params = array(
