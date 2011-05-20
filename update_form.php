@@ -14,12 +14,18 @@ class mod_attforblock_update_form extends moodleform {
         $modcontext    = $this->_customdata['modcontext'];
         $sessionid     = $this->_customdata['sessionid'];
 
-
         if (!$sess = $DB->get_record('attendance_sessions', array('id'=> $sessionid) )) {
 	        error('No such session in this course');
 	    }
+        $dhours = floor($sess->duration / HOURSECS);
+        $dmins = floor(($sess->duration - $dhours * HOURSECS) / MINSECS);
+        $defopts = array('maxfiles'=>EDITOR_UNLIMITED_FILES, 'noclean'=>true, 'context'=>$modcontext);
+        $sess = file_prepare_standard_editor($sess, 'description', $defopts, $modcontext, 'mod_attforblock', 'session', $sess->id);
+        $data = array('sessiondate' => $sess->sessdate,
+                'durtime' => array('hours' => $dhours, 'minutes' => $dmins),
+                'sdescription' => $sess->description_editor);
+
         $mform->addElement('header', 'general', get_string('changesession','attforblock'));
-		$mform->setHelpButton('general', array('changesession', get_string('changesession','attforblock'), 'attforblock'));
         
 		$mform->addElement('static', 'olddate', get_string('olddate','attforblock'), userdate($sess->sessdate, get_string('strftimedmyhm', 'attforblock')));
         $mform->addElement('date_time_selector', 'sessiondate', get_string('newdate','attforblock'));
@@ -34,14 +40,10 @@ class mod_attforblock_update_form extends moodleform {
 		$durselect[] =& MoodleQuickForm::createElement('select', 'minutes', '', $minutes, false, true);
 		$mform->addGroup($durselect, 'durtime', get_string('duration','attforblock'), array(' '), true);
 		
-        $mform->addElement('editor', 'sdescription', get_string('description', 'attforblock'), null, array('maxfiles'=>EDITOR_UNLIMITED_FILES, 'noclean'=>true, 'context'=>$modcontext));
+        $mform->addElement('editor', 'sdescription', get_string('description', 'attforblock'), null, $defopts);
         $mform->setType('sdescription', PARAM_RAW);
         
-        $dhours = floor($sess->duration / HOURSECS);
-        $dmins = floor(($sess->duration - $dhours * HOURSECS) / MINSECS);
-        $mform->setDefaults(array('sessiondate' => $sess->sessdate,
-        						  'durtime' => array('hours'=>$dhours, 'minutes'=>$dmins),
-        						  'sdescription' => $sess->description));
+        $mform->setDefaults($data);
 		
 //-------------------------------------------------------------------------------
         // buttons

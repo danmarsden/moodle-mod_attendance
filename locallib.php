@@ -534,6 +534,7 @@ class attforblock {
         $rec->sessdate = $formdata->sessiondate;
         $rec->duration = $duration;
         $rec->description = $formdata->sdescription['text'];
+        $rec->descriptionformat = $formdata->sdescription['format'];
         $rec->timemodified = time();
         
         if ($formdata->sessiontype == self::SESSION_COMMON) {
@@ -554,6 +555,26 @@ class attforblock {
         }
         // TODO: log
         //add_to_log($course->id, 'attendance', 'one session added', 'mod/attforblock/manage.php?id='.$id, $user->lastname.' '.$user->firstname);
+    }
+
+    public function update_session_from_form_data($formdata, $sessionid) {
+        global $DB;
+
+        if (!$sess = $DB->get_record('attendance_sessions', array('id' => $sessionid) )) {
+            print_error('No such session in this course');
+        }
+
+        $sess->sessdate = $formdata->sessiondate;
+        $sess->duration = $formdata->durtime['hours']*HOURSECS + $formdata->durtime['minutes']*MINSECS;
+        $description = file_save_draft_area_files($formdata->sdescription['itemid'],
+                                $this->context->id, 'mod_attforblock', 'session', $sessionid,
+                                array('subdirs' => false, 'maxfiles' => -1, 'maxbytes' => 0), $formdata->sdescription['text']);
+        $sess->description = $description;
+        $sess->descriptionformat = $formdata->sdescription['format'];
+        $sess->timemodified = time();
+        $DB->update_record('attendance_sessions', $sess);
+        // TODO: log
+        // add_to_log($course->id, 'attendance', 'Session updated', 'mod/attforblock/manage.php?id='.$id, $user->lastname.' '.$user->firstname);
     }
 }
 

@@ -33,6 +33,7 @@ switch ($att->pageparams->action) {
     case att_sessions_page_params::ACTION_ADD:
         $url = $att->url_sessions(array('action' => att_sessions_page_params::ACTION_ADD));
 		$mform = new mod_attforblock_add_form($url, $formparams);
+        
         if ($mform->is_submitted()) {
             $formdata = $mform->get_data();
             if (isset($formdata->addmultiply)) {
@@ -40,24 +41,26 @@ switch ($att->pageparams->action) {
             }
             else {
                 $att->add_session_from_form_data($formdata);
-                notice(get_string('sessionadded','attforblock'), $url);
+                redirect($url, get_string('sessionadded','attforblock'), 3);
             }
         }
 
         break;
     case att_sessions_page_params::ACTION_UPDATE:
-		$sessionid	= required_param('sessionid');
+		$sessionid	= required_param('sessionid', PARAM_INT);
 
         $url = $att->url_sessions(array('action' => att_sessions_page_params::ACTION_UPDATE, 'sessionid' => $sessionid));
         $formparams['sessionid'] = $sessionid;
 		$mform = new mod_attforblock_update_form($url, $formparams);
         
-	    if ($mform_update->is_cancelled()) {
+	    if ($mform->is_cancelled()) {
 	    	redirect($att->url_manage());
 	    }
 
         if ($mform->is_submitted()) {
-            
+            $att->update_session_from_form_data($mform->get_data(), $sessionid);
+
+            redirect($att->url_manage(), get_string('sessionupdated','attforblock'), 3);
         }
         break;
 }

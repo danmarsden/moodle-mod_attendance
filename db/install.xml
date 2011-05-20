@@ -29,7 +29,8 @@
         <FIELD NAME="lasttaken" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="true" SEQUENCE="false" PREVIOUS="duration" NEXT="lasttakenby"/>
         <FIELD NAME="lasttakenby" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="lasttaken" NEXT="timemodified"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="true" SEQUENCE="false" PREVIOUS="lasttakenby" NEXT="description"/>
-        <FIELD NAME="description" TYPE="text" LENGTH="small" NOTNULL="true" SEQUENCE="false" PREVIOUS="timemodified"/>
+        <FIELD NAME="description" TYPE="text" LENGTH="small" NOTNULL="true" SEQUENCE="false" PREVIOUS="timemodified" NEXT="descriptionformat"/>
+        <FIELD NAME="descriptionformat" TYPE="int" LENGTH="2" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="description"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="Primary key for attendance_sessions"/>

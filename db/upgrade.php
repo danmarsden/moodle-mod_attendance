@@ -279,14 +279,32 @@ function xmldb_attforblock_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2010123003, 'attforblock');
     }
 
-    if ($oldversion < 2011053000) {
+    if ($oldversion < 2011053006) {
         $table = new xmldb_table('attendance_sessions');
 
         $field = new xmldb_field('description');
         $field->set_attributes(XMLDB_TYPE_TEXT, 'small', null, XMLDB_NOTNULL, null, null, 'timemodified');
         $dbman->change_field_type($table, $field);
 
-        upgrade_mod_savepoint(true, 2011053000, 'attforblock');
+        $field = new xmldb_field('descriptionformat', XMLDB_TYPE_INTEGER, '4', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'description');
+
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // conditionally migrate to html format in intro
+        if ($CFG->texteditors !== 'textarea') {
+            $rs = $DB->get_recordset('attendance_sessions', array('descriptionformat' => FORMAT_MOODLE), '', 'id,description,descriptionformat');
+            foreach ($rs as $s) {
+                $s->description       = text_to_html($s->description, false, false, true);
+                $s->descriptionformat = FORMAT_HTML;
+                $DB->update_record('attendance_sessions', $s);
+                upgrade_set_timeout();
+            }
+            $rs->close();
+        }
+
+        upgrade_mod_savepoint(true, 2011053006, 'attforblock');
     }
     return $result;
 }

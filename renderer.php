@@ -191,11 +191,11 @@ class mod_attforblock_renderer extends plugin_renderer_base {
                 }
             }
             if($sessdata->perm->can_manage()) {
-                $url = $sessdata->url_sessions($sess->id, 'update');
+                $url = $sessdata->url_sessions($sess->id, att_sessions_page_params::ACTION_UPDATE);
                 $title = get_string('editsession','attforblock');
                 $actions .= $this->output->action_icon($url, new pix_icon('t/edit', $title));
 
-                $url = $sessdata->url_sessions($sess->id, 'delete');
+                $url = $sessdata->url_sessions($sess->id, att_sessions_page_params::ACTION_DELETE);
                 $title = get_string('deletesession','attforblock');
                 $actions .= $this->output->action_icon($url, new pix_icon('t/delete', $title));
             }
