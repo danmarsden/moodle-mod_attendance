@@ -12,13 +12,13 @@
 require_once(dirname(__FILE__).'/../../config.php');
 require_once(dirname(__FILE__).'/locallib.php');
 
-$view_params = new att_manage_page_params();
+$pageparams = new att_manage_page_params();
 
-$id                     = required_param('id', PARAM_INT);
-$from                   = optional_param('from', NULL, PARAM_ACTION);
-$view_params ->view     = optional_param('view', NULL, PARAM_INT);        // which page to show
-$view_params ->curdate  = optional_param('curdate', NULL, PARAM_INT);
-$view_params ->showendtime = optional_param('showendtime', NULL, PARAM_INT);
+$id                         = required_param('id', PARAM_INT);
+$from                       = optional_param('from', NULL, PARAM_ACTION);
+$pageparams ->view          = optional_param('view', NULL, PARAM_INT);
+$pageparams ->curdate       = optional_param('curdate', NULL, PARAM_INT);
+$pageparams ->showendtime   = optional_param('showendtime', NULL, PARAM_INT);
 
 $cm             = get_coursemodule_from_id('attforblock', $id, 0, false, MUST_EXIST);
 $course         = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
@@ -26,11 +26,10 @@ $att            = $DB->get_record('attforblock', array('id' => $cm->instance), '
 
 require_login($course, true, $cm);
 
-$att = new attforblock($att, $cm, $course, $PAGE->context, att_manage_page_params::create_default());
+$pageparams->init($course->id);
+$att = new attforblock($att, $cm, $course, $PAGE->context, $pageparams);
 if (!$att->perm->can_manage() && !$att->perm->can_take() && !$att->perm->can_change())
     redirect("view.php?id=$cm->id");
-
-$att->pageparams->init($view_params, $course->id);
 
 // if teacher is coming from block, then check for a session exists for today
 if ($from === 'block') {

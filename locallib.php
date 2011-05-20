@@ -117,71 +117,50 @@ class att_manage_page_params {
     /** @var int whether sessions end time will be displayed on manage.php */
     public $showendtime;
 
-    public $studentssort;
-
-    public $studentid;
-
     private $courseid;
 
-    public static function create_default() {
-        $instance = new att_manage_page_params();
-
-        $instance->view = self::DEFAULT_VIEW;
-        $instance->curdate = time();
-        $instance->showendtime = self::DEFAULT_SHOWENDTIME;
-
-        return $instance;
-    }
-
-    public function init(att_manage_page_params $view_params, $courseid) {
+    public function init($courseid) {
         $this->courseid = $courseid;
-
-        $this->init_view($view_params->view);
-
-        $this->init_curdate($view_params->curdate);
-
-        $this->init_show_endtime($view_params->showendtime);
-
-        $this->studentssort = $view_params->studentssort;
-
-        $this->studentid = $view_params->studentid;
-
+        $this->init_view();
+        $this->init_curdate();
+        $this->init_show_endtime();
         $this->init_start_end_date();
     }
 
-    private function init_view($view) {
+    private function init_view() {
         global $SESSION;
 
-        if (isset($view)) {
-            $SESSION->attcurrentattview[$this->courseid] = $view;
-            $this->view = $view;
+        if (isset($this->view)) {
+            $SESSION->attcurrentattview[$this->courseid] = $this->view;
         }
         elseif (isset($SESSION->attcurrentattview[$this->courseid])) {
             $this->view = $SESSION->attcurrentattview[$this->courseid];
         }
+        else {
+            $this->view = self::DEFAULT_VIEW;
+        }
     }
 
-    private function init_curdate($curdate) {
+    private function init_curdate() {
         global $SESSION;
 
-        if ($curdate) {
-            $SESSION->attcurrentattdate[$this->courseid] = $curdate;
-            $this->curdate = $curdate;
+        if (isset($this->curdate)) {
+            $SESSION->attcurrentattdate[$this->courseid] = $this->curdate;
         }
         elseif (isset($SESSION->attcurrentattdate[$this->courseid])) {
             $this->curdate = $SESSION->attcurrentattdate[$this->courseid];
         }
+        else {
+            $this->curdate = time();
+        }
     }
 
-    private function init_show_endtime($show_endtime) {
-        global $SESSION;
-
-        if (isset($show_endtime)) {
-            set_user_preference("attforblock_showendtime", $show_endtime);
-            $this->showendtime = $show_endtime;
+    private function init_show_endtime() {
+        if (isset($this->show_endtime)) {
+            set_user_preference("attforblock_showendtime", $this->show_endtime);
         }
         else {
-            $this->showendtime = get_user_preferences("attforblock_showendtime", $this->showendtime);
+            $this->showendtime = get_user_preferences("attforblock_showendtime", self::DEFAULT_SHOWENDTIME);
         }
     }
 
