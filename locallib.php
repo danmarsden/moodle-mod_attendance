@@ -1,5 +1,7 @@
 <?php
 
+defined('MOODLE_INTERNAL') || die();
+
 global $CFG;
 require_once($CFG->libdir . '/gradelib.php');
 
@@ -194,6 +196,10 @@ class att_manage_page_params {
                 break;
         }
     }
+
+    public function get_significant_params() {
+        return array();
+    }
 }
 
 class att_sessions_page_params {
@@ -213,31 +219,54 @@ class att_take_page_params {
 
     const DEFAULT_VIEW_MODE     = self::SORTED_LIST;
 
+    const SORT_LASTNAME         = 1;
+    const SORT_FIRSTNAME        = 2;
+
+	public $sessionid;
+    public $grouptype;
+    public $group;
+	public $sort;
+    public $copyfrom;
+    
     /** @var int view mode of taking attendance page*/
-    public $view_mode;
+    public $viewmode;
 
-    public static function create_default() {
-        $instance = new att_take_page_params();
+    public $gridcols;
 
-        $instance->view_mode = self::DEFAULT_VIEW_MODE;
-
-        return $instance;
+    public function init() {
+        if (!isset($this->sort)) $this->sort = self::SORT_LASTNAME;
+        $this->init_view_mode();
+        $this->init_gridcols();
     }
 
-    public function init(att_manage_page_params $view_params, $courseid) {
-        $this->init_view_mode($view_params->view_mode);
-    }
-
-    private function init_view_mode($view_mode) {
-        global $SESSION;
-
-        if (isset($view_mode)) {
-            set_user_preference("attforblock_take_view_mode", $view_mode);
-            $this->view_mode = $view_mode;
+    private function init_view_mode() {
+        if (isset($this->viewmode)) {
+            set_user_preference("attforblock_take_view_mode", $this->viewmode);
         }
         else {
-            $this->view_mode = get_user_preferences("attforblock_take_view_mode", $this->view_mode);
+            $this->viewmode = get_user_preferences("attforblock_take_view_mode", self::DEFAULT_VIEW_MODE);
         }
+    }
+
+    private function init_gridcols() {
+        if (isset($this->gridcols)) {
+            set_user_preference("attforblock_gridcolumns", $this->gridcols);
+        }
+        else {
+            $this->gridcols = get_user_preferences("attforblock_gridcolumns", 5);
+        }
+    }
+
+    public function get_significant_params() {
+        $params = array();
+
+        $params['sessionid'] = $this->sessionid;
+        $params['grouptype'] = $this->grouptype;
+        if (isset($this->group)) $params['group'] = $this->group;
+        $params['sort'] = $this->sort;
+        if (isset($this->copyfrom)) $params['copyfrom'] = $this->copyfrom;
+
+        return $params;
     }
 }
 
@@ -278,6 +307,10 @@ class attforblock {
     private $sessgroupslist;
 
     private $currentgroup;
+
+    private $sessioninfo;
+
+    private $statuses;
 
     /**
      * Initializes the attendance API instance using the data from DB
@@ -367,7 +400,7 @@ class attforblock {
      * @return moodle_url of sessions.php for attendance instance
      */
     public function url_sessions($params=array()) {
-        $params = array_merge(array('id' => $this->cm->id), $params);
+        $params = array('id' => $this->cm->id) + $params;
         return new moodle_url('/mod/attforblock/sessions.php', $params);
     }
 
@@ -400,14 +433,13 @@ class attforblock {
      */
     public function url_take() {
         $params = array('id' => $this->cm->id);
-        return new moodle_url('/mod/attforblock/attendances.php', $params);
+        return new moodle_url('/mod/attforblock/take.php', $params);
     }
 
     private function calc_groupmode_sessgroupslist_currentgroup(){
         global $USER, $SESSION;
 
         $cm = $this->cm;
-        $this->groupmode = groups_get_activity_groupmode($cm);
 
         if ($this->groupmode == NOGROUPS)
             return;
@@ -484,7 +516,7 @@ class attforblock {
 
     public function get_group_mode() {
         if (is_null($this->groupmode))
-            $this->calc_groupmode_sessgroupslist_currentgroup();
+            $this->groupmode = groups_get_activity_groupmode($this->cm);
 
         return $this->groupmode;
     }
@@ -554,6 +586,119 @@ class attforblock {
         $DB->update_record('attendance_sessions', $sess);
         // TODO: log
         // add_to_log($course->id, 'attendance', 'Session updated', 'mod/attforblock/manage.php?id='.$id, $user->lastname.' '.$user->firstname);
+    }
+    
+    public function take_from_form_data($formdata) {
+        global $DB, $USER;
+
+        $statuses = implode(',', array_keys( (array)$this->get_statuses() ));
+        $now = time();
+        $sesslog = array();
+        $formdata = (array)$formdata;
+		foreach($formdata as $key => $value) {
+			if(substr($key, 0, 4) == 'user' && $value !== '') {
+				$sid = substr($key, 4);
+				$sesslog[$sid] = new Object();
+				$sesslog[$sid]->studentid = $sid;
+				$sesslog[$sid]->statusid = $value;
+				$sesslog[$sid]->statusset = $statuses;
+				$sesslog[$sid]->remarks = array_key_exists('remarks'.$sid, $formdata) ? $formdata['remarks'.$sid] : '';
+				$sesslog[$sid]->sessionid = $this->pageparams->sessionid;
+				$sesslog[$sid]->timetaken = $now;
+				$sesslog[$sid]->takenby = $USER->id;
+			}
+		}
+
+        $dbsesslog = $this->get_session_log($this->pageparams->sessionid);
+        foreach ($sesslog as $log) {
+            if (array_key_exists($log->studentid, $dbsesslog)) {
+                $log->id = $dbsesslog[$log->studentid]->id;
+                $DB->update_record('attendance_log', $log);
+            }
+            else
+                $DB->insert_record('attendance_log', $log, false);
+        }
+
+        $rec = new object();
+        $rec->id = $this->pageparams->sessionid;
+        $rec->lasttaken = $now;
+        $rec->lasttakenby = $USER->id;
+        $DB->update_record('attendance_sessions', $rec);
+
+        // TODO: update_grades
+        // TODO: log
+        redirect($this->url_manage(), get_string('attendancesuccess','attforblock'));
+    }
+
+    /**
+     * MDL-27591 made this method obsolete.
+     */
+    public function get_users($groupid = 0) {
+        global $DB;
+
+        //fields we need from the user table
+        $userfields = user_picture::fields('u');
+
+        if (isset($this->pageparams->sort) and ($this->pageparams->sort == att_take_page_params::SORT_FIRSTNAME)) {
+            $orderby = "u.firstname ASC, u.lastname ASC";
+        }
+        else {
+            $orderby = "u.lastname ASC, u.firstname ASC";
+        }
+
+        $users = get_enrolled_users($this->context, 'mod/attforblock:canbelisted', $groupid, $userfields, $orderby);
+
+        //add a flag to each user indicating whether their enrolment is active
+        if (!empty($users)) {
+            list($usql, $uparams) = $DB->get_in_or_equal(array_keys($users), SQL_PARAMS_NAMED, 'usid0');
+
+            $sql = "SELECT ue.userid, ue.status, ue.timestart, ue.timeend
+                      FROM {user_enrolments} ue
+                      JOIN {enrol} e ON e.id = ue.enrolid
+                     WHERE ue.userid $usql
+                           AND e.status = :estatus
+                           AND e.courseid = :courseid
+                  GROUP BY ue.userid";
+            $params = array_merge($uparams, array('estatus'=>ENROL_INSTANCE_ENABLED, 'courseid'=>$this->course->id));
+            $enrolmentsparams = $DB->get_records_sql($sql, $params);
+
+            foreach ($users as $user) {
+                $users[$user->id]->enrolmentstatus = $enrolmentsparams[$user->id]->status;
+                $users[$user->id]->enrolmentstart = $enrolmentsparams[$user->id]->timestart;
+                $users[$user->id]->enrolmentend = $enrolmentsparams[$user->id]->timeend;
+            }
+        }
+
+        return $users;
+    }
+
+    public function get_statuses($onlyvisible = true) {
+        global $DB;
+
+        if (!isset($this->statuses)) {
+            if ($onlyvisible) {
+                $this->statuses = $DB->get_records_select('attendance_statuses', "attendanceid = :aid AND visible = 1 AND deleted = 0", array('aid' => $this->id), 'grade DESC');
+            } else {
+                $this->statuses = $DB->get_records_select('attendance_statuses', "attendanceid = :aid AND deleted = 0",  array('aid' => $this->id), 'grade DESC');
+            }
+        }
+        
+        return $this->statuses;
+    }
+
+    public function get_session_info($sessionid) {
+        global $DB;
+
+        if (!isset($this->sessioninfo))
+            $this->sessioninfo = $DB->get_record('attendance_sessions', array('id' => $sessionid));
+
+        return $this->sessioninfo;
+    }
+
+    public function get_session_log($sessionid) {
+        global $DB;
+
+        return $DB->get_records('attendance_log', array('sessionid' => $sessionid), '', 'studentid,statusid,remarks,id');
     }
 }
 

@@ -153,37 +153,43 @@ class mod_attforblock_renderer extends plugin_renderer_base {
     }
 
     protected function render_sess_manage_table(attforblock_sessions_manage_data $sessdata) {
-        $sesstable = new html_table();
-        $sesstable->width = '100%';
-        $sesstable->head = array(
+        $table = new html_table();
+        $table->width = '100%';
+        $table->head = array(
                 '#',
                 get_string('sessiontypeshort', 'attforblock'),
-                get_string('date'), get_string('from'),
-                ($sessdata->showendtime == '0') ? get_string('duration', 'attforblock') : get_string('to'),
+                get_string('date'),
+                get_string('time'),
                 get_string('description','attforblock'),
                 get_string('actions'),
                 get_string('select')
             );
-        $sesstable->align = array('', '', '', 'right', 'left', 'center', 'center');
-        $sesstable->size = array('1px', '', '1px', '1px', '1px', '*', '1px', '1px');
+        $table->align = array('', '', '', '', 'center', 'center', 'center');
+        $table->size = array('1px', '', '1px', '1px', '*', '1px', '1px');
 
         $i = 0;
         foreach ($sessdata->sessions as $key => $sess) {
             $i++;
             $actions = '';
-            $desctext = empty($sess->description) ? get_string('nodescription', 'attforblock') : $sess->description;
-            if($sess->lasttaken > 0)	//attendance has taken
+            $desc = empty($sess->description) ? get_string('nodescription', 'attforblock') : $sess->description;
+
+            $date = userdate($sess->sessdate, get_string('strftimedmyw', 'attforblock'));
+            $starttime = userdate($sess->sessdate, get_string('strftimehm', 'attforblock'));
+            $endtime = userdate($sess->sessdate + $sess->duration, get_string('strftimehm', 'attforblock'));
+            $time = html_writer::tag('nobr', $starttime . ($sess->duration > 0 ? ' - ' . $endtime : ''));
+            if($sess->lasttaken > 0)
             {
                 if ($sessdata->perm->can_change()) {
                     $url = $sessdata->url_take($sess->id, $sess->groupid);
                     $title = get_string('changeattendance','attforblock');
 
-                    $desc = html_writer::link($url, $desctext, array('title' => $title));
+                    $date = html_writer::link($url, $date, array('title' => $title));
+                    $time = html_writer::link($url, $time, array('title' => $title));
                 } else {
-                    $desc = '<i>' . $desctext . '</i>';
+                    $date = '<i>' . $date . '</i>';
+                    $time = '<i>' . $time . '</i>';
                 }
             } else {
-                $desc = $desctext;
                 if ($sessdata->perm->can_take()) {
                     $url = $sessdata->url_take($sess->id, $sess->groupid);
                     $title = get_string('takeattendance','attforblock');
@@ -200,33 +206,25 @@ class mod_attforblock_renderer extends plugin_renderer_base {
                 $actions .= $this->output->action_icon($url, new pix_icon('t/delete', $title));
             }
 
-            $sesstable->data[$sess->id][] = $i;
-            $sesstable->data[$sess->id][] = $sess->groupid ? $sessdata->groups[$sess->groupid]->name : get_string('commonsession', 'attforblock');
-            $sesstable->data[$sess->id][] = userdate($sess->sessdate, get_string('strftimedmyw', 'attforblock'));
-            $sesstable->data[$sess->id][] = userdate($sess->sessdate, get_string('strftimehm', 'attforblock'));
-            $hours = floor($sess->duration / HOURSECS);
-            $mins = floor(($sess->duration - $hours * HOURSECS) / MINSECS);
-            $mins = $mins < 10 ? "0$mins" : "$mins";
-            $duration = "{$mins}&nbsp;" . get_string('min');
-            if ($hours)
-                $duration = "{$hours}&nbsp;" . get_string('hours') . "&nbsp;" . $duration;
-            $endtime = userdate($sess->sessdate+$sess->duration, get_string('strftimehm', 'attforblock'));
-            $sesstable->data[$sess->id][] =  ($sessdata->showendtime == 0) ? $duration : $endtime;
-            $sesstable->data[$sess->id][] = $desc;
-            $sesstable->data[$sess->id][] = $actions;
-            $sesstable->data[$sess->id][] = html_writer::checkbox('sessid', $sess->id, false);
+            $table->data[$sess->id][] = $i;
+            $table->data[$sess->id][] = $sess->groupid ? $sessdata->groups[$sess->groupid]->name : get_string('commonsession', 'attforblock');
+            $table->data[$sess->id][] = $date;
+            $table->data[$sess->id][] = $time;
+            $table->data[$sess->id][] = $desc;
+            $table->data[$sess->id][] = $actions;
+            $table->data[$sess->id][] = html_writer::checkbox('sessid', $sess->id, false);
         }
 
-        return html_writer::table($sesstable);
+        return html_writer::table($table);
     }
 
     protected function render_sess_control_table(attforblock_sessions_manage_data $sessdata) {
-        $controltable = new html_table();
-        $controltable->attributes['class'] = ' ';
-        $controltable->width = '100%';
-        $controltable->align = array('left', 'right');
+        $table = new html_table();
+        $table->attributes['class'] = ' ';
+        $table->width = '100%';
+        $table->align = array('left', 'right');
 
-        $controltable->data[0][] = $this->output->help_icon('hiddensessions', 'attforblock',
+        $table->data[0][] = $this->output->help_icon('hiddensessions', 'attforblock',
                 get_string('hiddensessions', 'attforblock').': '.$sessdata->hiddensessionscount);
 
         $controls = html_writer::link('javascript:checkall();', get_string('selectall')).' / '.
@@ -244,9 +242,118 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         } else {
             $controls .= get_string('youcantdo', 'attforblock'); //You can't do anything
         }
-        $controltable->data[0][] = $controls;
+        $table->data[0][] = $controls;
 
-        return html_writer::table($controltable);
+        return html_writer::table($table);
+    }
+
+    protected function render_attforblock_take_data(attforblock_take_data $takedata) {
+        $controls = '';
+        if ($takedata->pageparams->grouptype == attforblock::SESSION_COMMON and
+                ($takedata->groupmode == VISIBLEGROUPS or
+                ($takedata->groupmode and $takedata->perm->can_access_all_groups()))) {
+            $controls .= groups_print_activity_menu($takedata->cm, $takedata->url(), true);
+        }
+
+        $controls = html_writer::tag('div', $controls);
+
+        $table = $this->render_attforblock_take_list($takedata);
+        $table .= html_writer::input_hidden_params($takedata->url());
+        $params = array(
+                'type'  => 'submit',
+                'value' => get_string('save','attforblock'));
+        $table .= html_writer::tag('center', html_writer::empty_tag('input', $params));
+        $table = html_writer::tag('form', $table, array('method' => 'post', 'action' => $takedata->url_path()));
+        return $table;
+    }
+    
+    protected function render_attforblock_take_list(attforblock_take_data $takedata) {
+        $table = new html_table();
+        $table->width = '0%';
+        $table->head = array(
+                '#',
+                $this->get_fullname_head($takedata)
+            );
+        $table->align = array('left', 'left');
+        $table->size = array('20px', '');
+        $table->wrap[1] = 'nowrap';
+        foreach ($takedata->statuses as $st) {
+            $table->head[] = html_writer::link("javascript:select_all_in(null, 'st" . $st->id . "', null);", $st->acronym, array('title' => get_string('setallstatusesto', 'attforblock', $st->description)));
+            $table->align[] = 'center';
+            $table->size[] = '20px';
+        }
+        $table->head[] = get_string('remarks', 'attforblock');
+        $table->align[] = 'center';
+        $table->size[] = '20px';
+        $table->attributes['class'] = 'generaltable taketable';
+
+        $i = 0;
+        foreach ($takedata->users as $user) {
+            $i++;
+            $row = new html_table_row();
+            $row->cells[] = $i;
+            $row->cells[] = $this->output->render(new user_picture($user)).fullname($user);
+            if ($user->enrolmentstart > $takedata->sessioninfo->sessdate) {
+                $cell = new html_table_cell(get_string('enrolmentstart', 'attforblock', userdate($user->enrolmentstart, '%d.%m.%Y')));
+                $cell->colspan = count($takedata->statuses) + 1;
+                $row->cells[] = $cell;
+                $row->attributes['class'] = 'userwithoutenrol';
+            }
+            elseif ($user->enrolmentstatus == ENROL_USER_SUSPENDED) {
+                $cell = new html_table_cell(get_string('enrolmentsuspended', 'attforblock'));
+                $cell->colspan = count($takedata->statuses) + 1;
+                $row->cells[] = $cell;
+                $row->attributes['class'] = 'userwithoutenrol';
+            }
+            else {
+                if ($takedata->updatemode and !array_key_exists($user->id, $takedata->sessionlog))
+                    $row->attributes['class'] = 'userwithoutdata';
+
+                foreach ($takedata->statuses as $st) {
+                    $params = array(
+                            'type'  => 'radio',
+                            'name'  => 'user'.$user->id,
+                            'class' => 'st'.$st->id,
+                            'value' => $st->id);
+                    if (array_key_exists($user->id, $takedata->sessionlog) and $st->id == $takedata->sessionlog[$user->id]->statusid)
+                        $params['checked'] = '';
+                    $row->cells[] = html_writer::empty_tag('input', $params);
+                }
+                $params = array(
+                        'type'  => 'text',
+                        'name'  => 'remarks'.$user->id);
+                if (array_key_exists($user->id, $takedata->sessionlog))
+                    $params['value'] = $takedata->sessionlog[$user->id]->remarks;
+                $row->cells[] = html_writer::empty_tag('input', $params);
+            }
+            //$row->attributes['class'] =
+
+            $table->data[] = $row;
+        }
+        return html_writer::table($table);
+        
+    }
+
+    private function get_fullname_head(attforblock_take_data $takedata) {
+        global $CFG;
+
+        if ($takedata->pageparams->sort == att_take_page_params::SORT_LASTNAME)
+            $firstname = html_writer::link($takedata->url(array('sort' => att_take_page_params::SORT_FIRSTNAME)), get_string('firstname'));
+        else
+            $firstname = get_string('firstname');
+
+        if ($takedata->pageparams->sort == att_take_page_params::SORT_FIRSTNAME)
+            $lastname = html_writer::link($takedata->url(array('sort' => att_take_page_params::SORT_LASTNAME)), get_string('lastname'));
+        else
+            $lastname = get_string('lastname');
+
+        if ($CFG->fullnamedisplay == 'lastname firstname') {
+            $fullnamehead = "$lastname / $firstname";
+        } else {
+            $fullnamehead = "$firstname / $lastname";
+        }
+
+        return $fullnamehead;
     }
 
 }

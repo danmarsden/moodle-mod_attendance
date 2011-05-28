@@ -56,7 +56,7 @@ $PAGE->set_button($OUTPUT->update_module_button($cm->id, 'attforblock'));
 $PAGE->navbar->add($att->name);
 
 $output = $PAGE->get_renderer('mod_attforblock');
-$tabs = new attforblock_tabs($att);
+$tabs = new attforblock_tabs($att, attforblock_tabs::TAB_SESSIONS);
 $filtercontrols = new attforblock_filter_controls($att);
 $sesstable = new attforblock_sessions_manage_data($att);
 

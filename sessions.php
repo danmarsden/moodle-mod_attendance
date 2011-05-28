@@ -9,7 +9,7 @@ require_once(dirname(__FILE__).'/duration_form.php');
 $pageparams = new att_sessions_page_params();
 
 $id                     = required_param('id', PARAM_INT);
-$pageparams->action    = required_param('action', PARAM_INT);
+$pageparams->action     = required_param('action', PARAM_INT);
 
 $cm             = get_coursemodule_from_id('attforblock', $id, 0, false, MUST_EXIST);
 $course         = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
@@ -41,7 +41,7 @@ switch ($att->pageparams->action) {
             }
             else {
                 $att->add_session_from_form_data($formdata);
-                redirect($url, get_string('sessionadded','attforblock'), 3);
+                redirect($url, get_string('sessionadded','attforblock'));
             }
         }
 
@@ -60,7 +60,7 @@ switch ($att->pageparams->action) {
         if ($mform->is_submitted()) {
             $att->update_session_from_form_data($mform->get_data(), $sessionid);
 
-            redirect($att->url_manage(), get_string('sessionupdated','attforblock'), 3);
+            redirect($att->url_manage(), get_string('sessionupdated','attforblock'));
         }
         break;
 }

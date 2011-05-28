@@ -37,7 +37,7 @@ class attforblock_tabs implements renderable {
      * @param attforblock $att instance
      * @param $currenttab - one of attforblock_tabs constants
      */
-    public function  __construct(attforblock $att, $currenttab=self::TAB_SESSIONS) {
+    public function  __construct(attforblock $att, $currenttab=NULL) {
         $this->att = $att;
         $this->currenttab = $currenttab;
     }
@@ -130,9 +130,8 @@ class attforblock_filter_controls implements renderable {
         }
 
         $this->urlpath = $PAGE->url->out_omit_querystring();
-        $params = array('id' => $att->cm->id);
-        if (isset($att->pageparams->studentssort)) $params['sort'] = $att->pageparams->studentssort;
-        if (isset($att->pageparams->studentid)) $params['studentid'] = $att->pageparams->studentid;
+        $params = $att->pageparams->get_significant_params();
+        $params['id'] = $att->cm->id;
         $this->urlparams = $params;
 
         $this->att = $att;
@@ -263,6 +262,60 @@ class attforblock_sessions_manage_data implements renderable {
             $url->params(array('sessionid' => $sessionid, 'action' => $action));
 
         return $url;
+    }
+}
+
+class attforblock_take_data implements renderable {
+    public $users;
+
+    public $pageparams;
+    public $perm;
+
+    public $groupmode;
+    public $cm;
+
+    public $statuses;
+
+    public $sessioninfo;
+
+    public $sessionlog;
+
+    public $updatemode;
+
+    private $urlpath;
+    private $urlparams;
+
+    public function  __construct(attforblock $att) {
+        $this->users = $att->get_users();
+
+        $this->pageparams = $att->pageparams;
+        $this->perm = $att->perm;
+
+        $this->groupmode = $att->get_group_mode();
+        $this->cm = $att->cm;
+
+        $this->statuses = $att->get_statuses();
+
+        $this->sessioninfo = $att->get_session_info($att->pageparams->sessionid);
+
+        $this->sessionlog = $att->get_session_log($att->pageparams->sessionid);
+
+        $this->urlpath = $att->url_take()->out_omit_querystring();
+        $params = $att->pageparams->get_significant_params();
+        $params['id'] = $att->cm->id;
+        $this->urlparams = $params;
+
+        $this->updatemode =$this->sessioninfo->lasttaken > 0;
+    }
+    
+    public function url($params=array()) {
+        $params = array_merge($this->urlparams, $params);
+
+        return new moodle_url($this->urlpath, $params);
+    }
+
+    public function url_path() {
+        return $this->urlpath;
     }
 }
 
