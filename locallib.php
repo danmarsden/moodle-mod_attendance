@@ -234,6 +234,7 @@ class att_take_page_params {
     public $gridcols;
 
     public function init() {
+        if (!isset($this->group)) $this->group = 0;
         if (!isset($this->sort)) $this->sort = self::SORT_LASTNAME;
         $this->init_view_mode();
         $this->init_gridcols();
@@ -262,8 +263,8 @@ class att_take_page_params {
 
         $params['sessionid'] = $this->sessionid;
         $params['grouptype'] = $this->grouptype;
-        if (isset($this->group)) $params['group'] = $this->group;
-        $params['sort'] = $this->sort;
+        if ($this->group) $params['group'] = $this->group;
+        if ($this->sort != self::SORT_LASTNAME) $params['sort'] = $this->sort;
         if (isset($this->copyfrom)) $params['copyfrom'] = $this->copyfrom;
 
         return $params;
@@ -346,6 +347,29 @@ class attforblock {
     }
 
     /**
+     * Returns current sessions for this attendance
+     *
+     * Fetches data from {attendance_sessions}
+     *
+     * @return array of records or an empty array
+     */
+    public function get_current_sessions() {
+        global $DB;
+
+		$today = time(); // because we compare with database, we don't need to use usertime()
+        
+        $sql = "SELECT *
+                  FROM {attendance_sessions}
+                 WHERE :time BETWEEN sessdate AND (sessdate + duration)
+                   AND attendanceid = :aid";
+        $params = array(
+                'time'  => $today,
+                'aid'   => $this->id);
+
+        return $DB->get_records_sql($sql, $params);
+    }
+
+    /**
      * Returns today sessions for this attendance
      *
      * Fetches data from {attendance_sessions}
@@ -355,16 +379,43 @@ class attforblock {
     public function get_today_sessions() {
         global $DB;
 
-		$today = time(); // because we compare with database, we don't need to use usertime()
-        
-        $sql = "SELECT id, groupid, lasttaken
+        $start = usergetmidnight(time());
+        $end = $start + DAYSECS;
+
+        $sql = "SELECT *
                   FROM {attendance_sessions}
-                 WHERE :time BETWEEN sessdate AND (sessdate + duration)
-                   AND courseid = :cid AND attendanceid = :aid";
+                 WHERE sessdate >= :start AND sessdate < :end
+                   AND attendanceid = :aid";
         $params = array(
-                'time' => $today,
-                'cid' => $this->course->id,
-                'aid' => $this->id);
+                'start' => $start,
+                'end'   => $end,
+                'aid'   => $this->id);
+
+        return $DB->get_records_sql($sql, $params);
+    }
+
+    /**
+     * Returns today sessions suitable for copying attendance log
+     *
+     * Fetches data from {attendance_sessions}
+     *
+     * @return array of records or an empty array
+     */
+    public function get_today_sessions_for_copy($sess) {
+        global $DB;
+
+        $start = usergetmidnight($sess->sessdate);
+
+        $sql = "SELECT *
+                  FROM {attendance_sessions}
+                 WHERE sessdate >= :start AND sessdate <= :end AND
+                       (groupid = 0 OR groupid = :groupid) AND
+                       lasttaken > 0 AND attendanceid = :aid";
+        $params = array(
+                'start'     => $start,
+                'end'       => $sess->sessdate,
+                'groupid'   => $sess->groupid,
+                'aid'       => $this->id);
 
         return $DB->get_records_sql($sql, $params);
     }
@@ -400,7 +451,7 @@ class attforblock {
      * @return moodle_url of sessions.php for attendance instance
      */
     public function url_sessions($params=array()) {
-        $params = array('id' => $this->cm->id) + $params;
+        $params = array_merge(array('id' => $this->cm->id), $params);
         return new moodle_url('/mod/attforblock/sessions.php', $params);
     }
 
@@ -436,10 +487,17 @@ class attforblock {
         return new moodle_url('/mod/attforblock/take.php', $params);
     }
 
+    public function url_view($params=array()) {
+        $params = array_merge(array('id' => $this->cm->id), $params);
+        return new moodle_url('/mod/attforblock/view.php', $params);
+    }
+
     private function calc_groupmode_sessgroupslist_currentgroup(){
         global $USER, $SESSION;
 
         $cm = $this->cm;
+
+        $this->get_group_mode();
 
         if ($this->groupmode == NOGROUPS)
             return;
@@ -691,6 +749,8 @@ class attforblock {
 
         if (!isset($this->sessioninfo))
             $this->sessioninfo = $DB->get_record('attendance_sessions', array('id' => $sessionid));
+            $this->sessioninfo->description = file_rewrite_pluginfile_urls($this->sessioninfo->description,
+                        'pluginfile.php', $this->context->id, 'mod_attforblock', 'session', $this->sessioninfo->id);
 
         return $this->sessioninfo;
     }

@@ -13,7 +13,7 @@ require_once(dirname(__FILE__).'/../../config.php');
 require_once(dirname(__FILE__).'/locallib.php');
 
 $id         = required_param('id', PARAM_INT);   // Course Module ID, or
-$studentid	= optional_param('student', 0, PARAM_INT);
+$student  	= optional_param('student', 0, PARAM_INT);
 $printing	= optional_param('printing', 0, PARAM_INT);
 $mode 		= optional_param('mode', 'thiscourse', PARAM_ALPHA);
 $view       = optional_param('view', NULL, PARAM_INT);        // which page to show

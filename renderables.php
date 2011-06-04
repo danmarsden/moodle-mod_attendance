@@ -280,13 +280,19 @@ class attforblock_take_data implements renderable {
 
     public $sessionlog;
 
+    public $sessions4copy;
+
     public $updatemode;
 
     private $urlpath;
     private $urlparams;
+    private $att;
 
     public function  __construct(attforblock $att) {
-        $this->users = $att->get_users();
+        if ($att->pageparams->grouptype)
+            $this->users = $att->get_users($att->pageparams->grouptype);
+        else
+            $this->users = $att->get_users($att->pageparams->group);
 
         $this->pageparams = $att->pageparams;
         $this->perm = $att->perm;
@@ -297,21 +303,38 @@ class attforblock_take_data implements renderable {
         $this->statuses = $att->get_statuses();
 
         $this->sessioninfo = $att->get_session_info($att->pageparams->sessionid);
+        $this->updatemode = $this->sessioninfo->lasttaken > 0;
 
-        $this->sessionlog = $att->get_session_log($att->pageparams->sessionid);
+        if (isset($att->pageparams->copyfrom))
+            $this->sessionlog = $att->get_session_log($att->pageparams->copyfrom);
+        elseif ($this->updatemode)
+            $this->sessionlog = $att->get_session_log($att->pageparams->sessionid);
+        else
+            $this->sessionlog = array();
+
+
+        if (!$this->updatemode)
+            $this->sessions4copy = $att->get_today_sessions_for_copy($this->sessioninfo);
 
         $this->urlpath = $att->url_take()->out_omit_querystring();
         $params = $att->pageparams->get_significant_params();
         $params['id'] = $att->cm->id;
         $this->urlparams = $params;
 
-        $this->updatemode =$this->sessioninfo->lasttaken > 0;
+        $this->att = $att;
     }
     
-    public function url($params=array()) {
+    public function url($params=array(), $excludeparams=array()) {
         $params = array_merge($this->urlparams, $params);
 
+        foreach ($excludeparams as $paramkey)
+            unset($params[$paramkey]);
+
         return new moodle_url($this->urlpath, $params);
+    }
+
+    public function url_view($params=array()) {
+        return new moodle_url($this->att->url_view($params), $params);
     }
 
     public function url_path() {

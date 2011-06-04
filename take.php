@@ -11,7 +11,7 @@ $pageparams->grouptype  = required_param('grouptype', PARAM_INT);
 $pageparams->group    	= optional_param('group', null, PARAM_INT);
 $pageparams->sort 		= optional_param('sort', null, PARAM_INT);
 $pageparams->copyfrom   = optional_param('copyfrom', null, PARAM_INT);
-$pageparams->view_mode  = optional_param('view', null, PARAM_INT);
+$pageparams->viewmode   = optional_param('viewmode', null, PARAM_INT);
 $pageparams->gridcols   = optional_param('gridcols', null, PARAM_INT);
 
 $cm             = get_coursemodule_from_id('attforblock', $id, 0, false, MUST_EXIST);
