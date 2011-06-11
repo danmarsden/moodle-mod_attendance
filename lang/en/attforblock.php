@@ -76,6 +76,7 @@ $string['duration'] = 'Duration';
 $string['editsession'] = 'Edit Session';
 $string['endtime'] = 'Session end time';
 $string['endofperiod'] = 'End of period';
+$string['enrolmentend'] = 'User enrolment ends {$a}';
 $string['enrolmentstart'] = 'User enrolment starts {$a}';
 $string['enrolmentsuspended'] = 'Enrolment suspended';
 $string['errorgroupsnotselected'] = 'Select one or more groups';

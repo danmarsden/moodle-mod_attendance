@@ -60,7 +60,7 @@ class attforblock_tabs implements renderable {
                         get_string('add','attforblock'));
         }
 
-        if ($this->att->perm->can_viewreports()) {
+        if ($this->att->perm->can_view_reports()) {
             $toprow[] = new tabobject(self::TAB_REPORT, $this->att->url_report()->out(),
                         get_string('report','attforblock'));
         }
@@ -82,7 +82,7 @@ class attforblock_tabs implements renderable {
 
 class attforblock_filter_controls implements renderable {
     /** @var int current view mode */
-    public $view;
+    public $pageparams;
 
     public $curdate;
 
@@ -98,7 +98,7 @@ class attforblock_filter_controls implements renderable {
     public function __construct(attforblock $att) {
         global $PAGE;
 
-        $this->view = $att->pageparams->view;
+        $this->pageparams = $att->pageparams;
 
         $this->curdate = $att->pageparams->curdate;
 
@@ -108,20 +108,20 @@ class attforblock_filter_controls implements renderable {
         $mon = $date['mon'];
         $year = $date['year'];
 
-        switch ($this->view) {
-            case att_manage_page_params::VIEW_DAYS:
+        switch ($this->pageparams->view) {
+            case VIEW_DAYS:
                 $format = get_string('strftimedm', 'attforblock');
                 $this->prevcur = make_timestamp($year, $mon, $mday - 1);
                 $this->nextcur = make_timestamp($year, $mon, $mday + 1);
                 $this->curdatetxt =  userdate($att->pageparams->startdate, $format);
                 break;
-            case att_manage_page_params::VIEW_WEEKS:
+            case VIEW_WEEKS:
                 $format = get_string('strftimedm', 'attforblock');
                 $this->prevcur = $att->pageparams->startdate - WEEKSECS;
                 $this->nextcur = $att->pageparams->startdate + WEEKSECS;
                 $this->curdatetxt = userdate($att->pageparams->startdate, $format)." - ".userdate($att->pageparams->enddate, $format);
                 break;
-            case att_manage_page_params::VIEW_MONTHS:
+            case VIEW_MONTHS:
                 $format = '%B';
                 $this->prevcur = make_timestamp($year, $mon - 1);
                 $this->nextcur = make_timestamp($year, $mon + 1);
@@ -171,12 +171,6 @@ class attforblock_filter_controls implements renderable {
  *
  */
 class attforblock_sessions_manage_data implements renderable {
-    /** @var int start date of displayed date range */
-    public $startdate;
-
-    /** @var int end date of displayed date range */
-    public $enddate;
-
     /** @var array of sessions*/
     public $sessions;
 
@@ -185,9 +179,6 @@ class attforblock_sessions_manage_data implements renderable {
 
     /** @var attforblock_permissions permission of current user for attendance instance*/
     public $perm;
-
-    /** @var int whether sessions end time will be displayed */
-    public $showendtime;
 
     public $groups;
 
@@ -205,37 +196,7 @@ class attforblock_sessions_manage_data implements renderable {
 
         $this->perm = $att->perm;
 
-        $this->showendtime = $att->pageparams->showendtime;
-
-        $this->startdate = $att->pageparams->startdate;
-        $this->enddate = $att->pageparams->enddate;
-
-        if ($this->startdate && $this->enddate) {
-            $where = "courseid=:cid AND attendanceid = :aid AND sessdate >= :csdate AND sessdate >= :sdate AND sessdate < :edate";
-        } else {
-            $where = "courseid=:cid AND attendanceid = :aid AND sessdate >= :csdate";
-        }
-        if ($att->get_current_group() > attforblock::SELECTOR_ALL) {
-            $where .= " AND groupid=:cgroup";
-        }
-        $params = array(
-                'cid'       => $att->course->id,
-                'aid'       => $att->id,
-                'csdate'    => $att->course->startdate,
-                'sdate'     => $this->startdate,
-                'edate'     => $this->enddate,
-                'cgroup'    => $att->get_current_group());
-        $this->sessions = $DB->get_records_select('attendance_sessions', $where, $params, 'sessdate asc');
-        foreach ($this->sessions as $sess) {
-            $sess->description = file_rewrite_pluginfile_urls($sess->description, 'pluginfile.php', $att->context->id, 'mod_attforblock', 'session', $sess->id);
-        }
-
-        $where = "courseid = :cid AND attendanceid = :aid AND sessdate < :csdate";
-        $params = array(
-                'cid'       => $att->course->id,
-                'aid'       => $att->id,
-                'csdate'    => $att->course->startdate);
-		$this->hiddensessionscount = $DB->count_records_select('attendance_sessions', $where, $params);
+        $this->sessions = $att->get_filtered_sessions();
 
         $this->groups = groups_get_all_groups($att->course->id);
 
@@ -339,6 +300,74 @@ class attforblock_take_data implements renderable {
 
     public function url_path() {
         return $this->urlpath;
+    }
+}
+
+class attforblock_user_data implements renderable {
+    public $user;
+
+    public $pageparams;
+
+    public $stat;
+
+    public $statuses;
+
+    public $gradable;
+
+    public $grade;
+
+    public $maxgrade;
+
+    public $decimalpoints;
+
+    public $filtercontrols;
+
+    public $sessionslog;
+
+    public $courses;
+
+    private $urlpath;
+    private $urlparams;
+
+    public function  __construct(attforblock $att, $userid) {
+        global $CFG;
+
+        $this->user = $att->get_user($userid);
+
+        $this->pageparams = $att->pageparams;
+
+        $this->statuses = $att->get_statuses();
+
+        if (!$this->decimalpoints = grade_get_setting($att->course->id, 'decimalpoints')) {
+            $this->decimalpoints = $CFG->grade_decimalpoints;
+        }
+
+        if ($this->pageparams->mode == att_view_page_params::MODE_THIS_COURSE) {
+            $this->stat = $att->get_user_stat($userid);
+
+            $this->gradable = $att->grade > 0;
+            if ($this->gradable) {
+                $this->grade = $att->get_user_grade($userid);
+                $this->maxgrade = $att->get_user_max_grade($userid);
+            }
+
+
+            $this->filtercontrols = new attforblock_filter_controls($att);
+
+            $this->sessionslog = $att->get_user_filtered_sessions_log($userid);
+        }
+        else {
+            $this->courses = $att->get_user_courses_with_attendance($userid);
+        }
+        
+        $this->urlpath = $att->url_view()->out_omit_querystring();
+        $params = $att->pageparams->get_significant_params();
+        $params['id'] = $att->cm->id;
+        $this->urlparams = $params;
+    }
+
+    public function url() {
+        return new moodle_url($this->urlpath, $this->urlparams);
     }
 }
 

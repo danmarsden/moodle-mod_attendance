@@ -5,6 +5,12 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->libdir . '/gradelib.php');
 
+define('VIEW_DAYS', 1);
+define('VIEW_WEEKS', 2);
+define('VIEW_MONTHS', 3);
+define('VIEW_ALLTAKEN', 4);
+define('VIEW_ALL', 5);
+
 class attforblock_permissions {
     private $canview;
     private $canviewreports;
@@ -29,7 +35,11 @@ class attforblock_permissions {
         return $this->canview;
     }
 
-    public function can_viewreports() {
+    public function require_view_capability() {
+        require_capability('mod/attforblock:view', $this->context);
+    }
+
+    public function can_view_reports() {
         if (is_null($this->canviewreports))
             $this->canviewreports = has_capability('mod/attforblock:viewreports', $this->context);
 
@@ -90,19 +100,10 @@ class attforblock_permissions {
     }
 }
 
-class att_manage_page_params {
-    const VIEW_DAYS             = 1;
-    const VIEW_WEEKS            = 2;
-    const VIEW_MONTHS           = 3;
-    const VIEW_ALLTAKEN         = 4;
-    const VIEW_ALL              = 5;
-
+class att_page_with_filter_controls {
     const SELECTOR_NONE         = 1;
     const SELECTOR_GROUP        = 2;
     const SELECTOR_SESS_TYPE    = 3;
-
-    const DEFAULT_VIEW          = self::VIEW_WEEKS;
-    const DEFAULT_SHOWENDTIME   = 0;
 
     /** @var int current view mode */
     public $view;
@@ -116,8 +117,9 @@ class att_manage_page_params {
     /** @var int end date of displayed date range */
     public $enddate;
 
-    /** @var int whether sessions end time will be displayed on manage.php */
-    public $showendtime;
+    public $selectortype        = self::SELECTOR_NONE;
+
+    protected $defaultview      = VIEW_WEEKS;
 
     private $courseid;
 
@@ -125,7 +127,6 @@ class att_manage_page_params {
         $this->courseid = $courseid;
         $this->init_view();
         $this->init_curdate();
-        $this->init_show_endtime();
         $this->init_start_end_date();
     }
 
@@ -139,7 +140,7 @@ class att_manage_page_params {
             $this->view = $SESSION->attcurrentattview[$this->courseid];
         }
         else {
-            $this->view = self::DEFAULT_VIEW;
+            $this->view = $this->defaultview;
         }
     }
 
@@ -157,15 +158,6 @@ class att_manage_page_params {
         }
     }
 
-    private function init_show_endtime() {
-        if (isset($this->show_endtime)) {
-            set_user_preference("attforblock_showendtime", $this->show_endtime);
-        }
-        else {
-            $this->showendtime = get_user_preferences("attforblock_showendtime", self::DEFAULT_SHOWENDTIME);
-        }
-    }
-
     private function init_start_end_date() {
         $date = usergetdate($this->curdate);
         $mday = $date['mday'];
@@ -174,27 +166,55 @@ class att_manage_page_params {
         $year = $date['year'];
 
         switch ($this->view) {
-            case self::VIEW_DAYS:
+            case VIEW_DAYS:
                 $this->startdate = make_timestamp($year, $mon, $mday);
                 $this->enddate = make_timestamp($year, $mon, $mday + 1);
                 break;
-            case self::VIEW_WEEKS:
+            case VIEW_WEEKS:
                 $this->startdate = make_timestamp($year, $mon, $mday - $wday + 1);
                 $this->enddate = make_timestamp($year, $mon, $mday + 7 - $wday + 1) - 1;
                 break;
-            case self::VIEW_MONTHS:
+            case VIEW_MONTHS:
                 $this->startdate = make_timestamp($year, $mon);
                 $this->enddate = make_timestamp($year, $mon + 1);
                 break;
-            case self::VIEW_ALLTAKEN:
+            case VIEW_ALLTAKEN:
                 $this->startdate = 1;
                 $this->enddate = time();
                 break;
-            case self::VIEW_ALL:
+            case VIEW_ALL:
                 $this->startdate = 0;
                 $this->enddate = 0;
                 break;
         }
+    }
+}
+
+class att_view_page_params extends att_page_with_filter_controls {
+    const MODE_THIS_COURSE  = 0;
+    const MODE_ALL_COURSES  = 1;
+
+    public $student;
+
+    public $mode;
+
+    public function  __construct() {
+        $this->defaultview = VIEW_MONTHS;
+    }
+
+    public function get_significant_params() {
+        $params = array();
+
+        if (isset($this->student)) $params['student'] = $this->student;
+        if ($this->mode != self::MODE_THIS_COURSE) $params['mode'] = $this->mode;
+
+        return $params;
+    }
+}
+
+class att_manage_page_params extends att_page_with_filter_controls {
+    public function  __construct() {
+        $this->selectortype = self::SELECTOR_SESS_TYPE;
     }
 
     public function get_significant_params() {
@@ -312,6 +332,8 @@ class attforblock {
     private $sessioninfo;
 
     private $statuses;
+    private $usertakensesscount;
+    private $userstatusesstat;
 
     /**
      * Initializes the attendance API instance using the data from DB
@@ -437,6 +459,32 @@ class attforblock {
                 'csdate'=> $this->course->startdate);
 
         return $DB->count_records_select('attendance_sessions', $where, $params);
+    }
+
+    public function get_filtered_sessions() {
+        global $DB;
+
+        if ($this->pageparams->startdate && $this->pageparams->enddate) {
+            $where = "courseid=:cid AND attendanceid = :aid AND sessdate >= :csdate AND sessdate >= :sdate AND sessdate < :edate";
+        } else {
+            $where = "courseid=:cid AND attendanceid = :aid AND sessdate >= :csdate";
+        }
+        if ($this->get_current_group() > attforblock::SELECTOR_ALL) {
+            $where .= " AND groupid=:cgroup";
+        }
+        $params = array(
+                'cid'       => $this->course->id,
+                'aid'       => $this->id,
+                'csdate'    => $this->course->startdate,
+                'sdate'     => $this->pageparams->startdate,
+                'edate'     => $this->pageparams->enddate,
+                'cgroup'    => $this->get_current_group());
+        $sessions = $DB->get_records_select('attendance_sessions', $where, $params, 'sessdate asc');
+        foreach ($sessions as $sess) {
+            $sess->description = file_rewrite_pluginfile_urls($sess->description, 'pluginfile.php', $this->context->id, 'mod_attforblock', 'session', $sess->id);
+        }
+
+        return $sessions;
     }
 
     /**
@@ -730,6 +778,28 @@ class attforblock {
         return $users;
     }
 
+    public function get_user($userid) {
+        global $DB;
+
+        $user = $DB->get_record('user', array('id' => $userid), '*', MUST_EXIST);
+
+        $sql = "SELECT ue.userid, ue.status, ue.timestart, ue.timeend
+                  FROM {user_enrolments} ue
+                  JOIN {enrol} e ON e.id = ue.enrolid
+                 WHERE ue.userid = :uid
+                       AND e.status = :estatus
+                       AND e.courseid = :courseid
+              GROUP BY ue.userid";
+        $params = array('uid' => $userid, 'estatus'=>ENROL_INSTANCE_ENABLED, 'courseid'=>$this->course->id);
+        $enrolmentsparams = $DB->get_record_sql($sql, $params);
+
+        $user->enrolmentstatus = $enrolmentsparams->status;
+        $user->enrolmentstart = $enrolmentsparams->timestart;
+        $user->enrolmentend = $enrolmentsparams->timeend;
+
+        return $user;
+    }
+
     public function get_statuses($onlyvisible = true) {
         global $DB;
 
@@ -759,6 +829,141 @@ class attforblock {
         global $DB;
 
         return $DB->get_records('attendance_log', array('sessionid' => $sessionid), '', 'studentid,statusid,remarks,id');
+    }
+
+    public function get_user_stat($userid) {
+        global $DB;
+
+        $ret = array();
+        $ret['completed'] = $this->get_user_taken_sessions_count($userid);
+        $ret['statuses'] = $this->get_user_statuses_stat($userid);
+
+        return $ret;
+    }
+
+    public function get_user_taken_sessions_count($userid, $courseid=NULL) {
+        global $DB;
+
+        if (!isset($this->usertakensesscount)) {
+            $qry = "SELECT count(*) as cnt
+                      FROM {attendance_log} al
+                      JOIN {attendance_sessions} ats
+                        ON al.sessionid = ats.id
+                     WHERE ats.attendanceid = :aid AND
+                           ats.sessdate >= :cstartdate AND
+                           al.studentid = :uid";
+            $params = array(
+                    'aid'           => $this->id,
+                    'cstartdate'    => $this->course->startdate,
+                    'uid'           => $userid);
+
+            $this->usertakensesscount = $DB->count_records_sql($qry, $params);
+        }
+
+        return $this->usertakensesscount;
+    }
+
+    public function get_user_statuses_stat($userid) {
+        global $DB;
+
+        if (!isset($this->userstatusesstat)) {
+            $qry = "SELECT al.statusid, count(al.statusid) AS stcnt
+                      FROM {attendance_log} al
+                      JOIN {attendance_sessions} ats
+                        ON al.sessionid = ats.id
+                     WHERE ats.attendanceid = :aid AND
+                           ats.sessdate >= :cstartdate AND
+                           al.studentid = :uid
+                  GROUP BY al.statusid";
+            $params = array(
+                    'aid'           => $this->id,
+                    'cstartdate'    => $this->course->startdate,
+                    'uid'           => $userid);
+
+            $this->userstatusesstat = $DB->get_records_sql($qry, $params);
+        }
+        
+        return $this->userstatusesstat;
+    }
+
+    public function get_user_grade($userid, $courseid=NULL) {
+        $statistics = $this->get_user_statuses_stat($userid, $courseid);
+        $statuses = $this->get_statuses($courseid);
+
+        $sum = 0;
+        foreach ($statistics as $stat) {
+            $sum += $stat->stcnt * $statuses[$stat->statusid]->grade;
+        }
+
+        return $sum;
+    }
+
+    // For getting sessions count implemented simplest method - taken sessions.
+    // It can have error if users don't have attendance info for some sessions.
+    // In the future we can implement another methods:
+    // * all sessions between user start enrolment date and now;
+    // * all sessions between user start and end enrolment date.
+    public function get_user_max_grade($userid, $courseid=NULL) {
+        $takensessions = $this->get_user_taken_sessions_count($userid, $courseid);
+        $statuses = $this->get_statuses($courseid);
+
+        return current($statuses)->grade * $takensessions;
+    }
+
+    public function get_user_filtered_sessions_log($userid) {
+        global $DB;
+
+        if ($this->pageparams->startdate && $this->pageparams->enddate) {
+            $where = "ats.courseid=:cid AND ats.attendanceid = :aid AND
+                      ats.sessdate >= :csdate AND ats.sessdate >= :sdate AND ats.sessdate < :edate";
+        } else {
+            $where = "AND ats.courseid=:cid AND ats.attendanceid = :aid AND ats.sessdate >= :csdate";
+        }
+
+        $sql = "SELECT ats.id, ats.sessdate, ats.duration, ats.description, al.statusid, al.remarks
+                  FROM {attendance_sessions} ats
+             LEFT JOIN {attendance_log} al
+                    ON ats.id = al.sessionid AND al.studentid = :uid
+                 WHERE $where
+              ORDER BY ats.sessdate ASC";
+
+        $params = array(
+                'uid'       => $userid,
+                'cid'       => $this->course->id,
+                'aid'       => $this->id,
+                'csdate'    => $this->course->startdate,
+                'sdate'     => $this->pageparams->startdate,
+                'edate'     => $this->pageparams->enddate);
+        $sessions = $DB->get_records_sql($sql, $params);
+        foreach ($sessions as $sess) {
+            $sess->description = file_rewrite_pluginfile_urls($sess->description, 'pluginfile.php', $this->context->id, 'mod_attforblock', 'session', $sess->id);
+        }
+
+        return $sessions;
+    }
+
+    public function get_user_courses_with_attendance($userid) {
+        global $DB;
+
+        // we can't get user courses based only on attendance_log information
+        // because of then users will see only courses with taked attendance
+        $usercourses = enrol_get_users_courses($userid);
+
+        list($usql, $uparams) = $DB->get_in_or_equal(array_keys($usercourses), SQL_PARAMS_NAMED, 'cid0');
+
+        $sql = "SELECT ats.courseid, course.fullname
+                  FROM {attendance_sessions} ats
+                  JOIN {attendance_log} al
+                       ON ats.id = al.sessionid AND al.studentid = :uid
+                  JOIN {course} course
+                       ON ats.courseid = course.id
+                 WHERE ats.courseid $usql
+              GROUP BY ats.courseid
+              ORDER BY course.fullname ASC";
+
+        $params = array_merge($uparams, array('uid' => $userid));
+
+        return $DB->get_records_sql($sql, $params);
     }
 }
 

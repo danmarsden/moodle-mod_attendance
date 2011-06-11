@@ -102,3 +102,14 @@
     display: inline;
 }
 
+.path-mod-attforblock table.userinfobox {
+    border: 1px solid #EEEEEE;
+    padding: 0px;
+}
+.path-mod-attforblock table.userinfobox td.left {
+    background-color: #EEEEEE;
+    padding: 30px 10px;
+}
+.path-mod-attforblock table.list td.c0 {
+    text-align: right;
+}

@@ -18,7 +18,6 @@ $id                         = required_param('id', PARAM_INT);
 $from                       = optional_param('from', NULL, PARAM_ACTION);
 $pageparams ->view          = optional_param('view', NULL, PARAM_INT);
 $pageparams ->curdate       = optional_param('curdate', NULL, PARAM_INT);
-$pageparams ->showendtime   = optional_param('showendtime', NULL, PARAM_INT);
 
 $cm             = get_coursemodule_from_id('attforblock', $id, 0, false, MUST_EXIST);
 $course         = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
@@ -44,7 +43,7 @@ if ($from === 'block') {
     } elseif ($size > 1) {
         $att->curdate = $today;
         //temporally set $view for single access to page from block
-        $att->$view = attforblock::VIEW_DAYS;
+        $att->$view = VIEW_DAYS;
     }
 }
 
@@ -69,6 +68,5 @@ echo $output->render($filtercontrols);
 echo $output->render($sesstable);
 
 echo $output->footer();
-
 
 ?>

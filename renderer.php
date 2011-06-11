@@ -59,15 +59,19 @@ class mod_attforblock_renderer extends plugin_renderer_base {
     }
 
     protected function render_sess_group_selector(attforblock_filter_controls $fcontrols) {
-        if ($fcontrols->get_group_mode() == NOGROUPS)
-            return '';
-        
-        $select = new single_select($fcontrols->url(), 'group', $fcontrols->get_sess_groups_list(),
-                                    $fcontrols->get_current_group(), null, 'selectgroup');
-        $select->label = get_string('sessions', 'attforblock');
-        $output = $this->output->render($select);
+        switch ($fcontrols->pageparams->selectortype) {
+            case att_page_with_filter_controls::SELECTOR_SESS_TYPE:
+                $select = new single_select($fcontrols->url(), 'group', $fcontrols->get_sess_groups_list(),
+                                            $fcontrols->get_current_group(), null, 'selectgroup');
+                $select->label = get_string('sessions', 'attforblock');
+                $output = $this->output->render($select);
 
-        return html_writer::tag('div', $output, array('class' => 'groupselector'));
+                return html_writer::tag('div', $output, array('class' => 'groupselector'));
+
+            default:
+                return '';
+        }
+
     }
     
     protected function render_curdate_controls(attforblock_filter_controls $fcontrols) {
@@ -117,14 +121,14 @@ class mod_attforblock_renderer extends plugin_renderer_base {
     }
 
     protected function render_view_controls(attforblock_filter_controls $fcontrols) {
-        $views[att_manage_page_params::VIEW_ALL] = get_string('all', 'attforblock');
-        $views[att_manage_page_params::VIEW_ALLTAKEN] = get_string('alltaken', 'attforblock');
-        $views[att_manage_page_params::VIEW_MONTHS] = get_string('months', 'attforblock');
-        $views[att_manage_page_params::VIEW_WEEKS] = get_string('weeks', 'attforblock');
-        $views[att_manage_page_params::VIEW_DAYS] = get_string('days', 'attforblock');
+        $views[VIEW_ALL] = get_string('all', 'attforblock');
+        $views[VIEW_ALLTAKEN] = get_string('alltaken', 'attforblock');
+        $views[VIEW_MONTHS] = get_string('months', 'attforblock');
+        $views[VIEW_WEEKS] = get_string('weeks', 'attforblock');
+        $views[VIEW_DAYS] = get_string('days', 'attforblock');
         $viewcontrols = '';
         foreach ($views as $key => $sview) {
-            if ($key != $fcontrols->view) {
+            if ($key != $fcontrols->pageparams->view) {
                 $link = html_writer::link($fcontrols->url(array('view' => $key)), $sview);
                 $viewcontrols .= html_writer::tag('span', $link, array('class' => 'attbtn'));
             }
@@ -189,9 +193,7 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         $actions = '';
 
         $date = userdate($sess->sessdate, get_string('strftimedmyw', 'attforblock'));
-        $starttime = userdate($sess->sessdate, get_string('strftimehm', 'attforblock'));
-        $endtime = userdate($sess->sessdate + $sess->duration, get_string('strftimehm', 'attforblock'));
-        $time = html_writer::tag('nobr', $starttime . ($sess->duration > 0 ? ' - ' . $endtime : ''));
+        $time = $this->construct_time($sess->sessdate ,$sess->duration);
         if($sess->lasttaken > 0)
         {
             if ($sessdata->perm->can_change()) {
@@ -367,7 +369,7 @@ class mod_attforblock_renderer extends plugin_renderer_base {
             $row = new html_table_row();
             $row->cells[] = $i;
             $fullname = html_writer::link($takedata->url_view(array('student' => $user->id)), fullname($user));
-            $row->cells[] = $this->output->render(new user_picture($user)).$fullname;
+            $row->cells[] = $this->output->user_picture($user).$fullname;
 
             $celldata = $this->construct_take_user_controls($takedata, $user);
             if (array_key_exists('colspan', $celldata)) {
@@ -403,9 +405,7 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         $i = 0;
         $row = new html_table_row();
         foreach($takedata->users as $user) {
-            $userpict = new user_picture($user);
-            $userpict->size = 100;
-            $celltext = $this->output->render($userpict);
+            $celltext = $this->output->user_picture($user, array('size' => 100));
             $celltext .= html_writer::empty_tag('br');
             $fullname = html_writer::link($takedata->url_view(array('student' => $user->id)), fullname($user));
             $celltext .= html_writer::tag('span', $fullname, array('class' => 'fullname'));
@@ -494,5 +494,133 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         return $celldata;
     }
 
+    protected function render_attforblock_user_data(attforblock_user_data $userdata) {
+        $o = $this->render_user_report_tabs($userdata);
+
+        $table = new html_table();
+
+        $table->attributes['class'] = 'userinfobox';
+        $table->colclasses = array('left side', '');
+        $table->data[0][] = $this->output->user_picture($userdata->user, array('size' => 100));
+        $table->data[0][] = $this->construct_user_data($userdata);
+
+        $o .= html_writer::table($table);
+
+        return $o;
+    }
+
+    protected function render_user_report_tabs(attforblock_user_data $userdata) {
+        $tabs = array();
+
+        $tabs[] = new tabobject(att_view_page_params::MODE_THIS_COURSE,
+                        $userdata->url()->out(true, array('mode' => att_view_page_params::MODE_THIS_COURSE)),
+                        get_string('thiscourse','attforblock'));
+
+        $tabs[] = new tabobject(att_view_page_params::MODE_ALL_COURSES,
+                        $userdata->url()->out(true, array('mode' => att_view_page_params::MODE_ALL_COURSES)),
+                        get_string('allcourses','attforblock'));
+
+        return print_tabs(array($tabs), $userdata->pageparams->mode, NULL, NULL, true);
+    }
+
+    private function construct_user_data(attforblock_user_data $userdata) {
+        $o = html_writer::tag('h2', fullname($userdata->user));
+        $o .= html_writer::empty_tag('hr');
+
+        if ($userdata->pageparams->mode == att_view_page_params::MODE_THIS_COURSE) {
+            $o .= $this->construct_user_data_stat($userdata);
+
+            $o .= $this->render_attforblock_filter_controls($userdata->filtercontrols);
+
+            $o .= $this->construct_user_sessions_log($userdata);
+        }
+
+        return $o;
+    }
+
+    private function construct_user_data_stat(attforblock_user_data $userdata) {
+        $stattable = new html_table();
+        $stattable->attributes['class'] = 'list';
+        $row = new html_table_row();
+        $row->cells[] = get_string('sessionscompleted','attforblock').':';
+        $row->cells[] = $userdata->stat['completed'];
+        $stattable->data[] = $row;
+
+        foreach ($userdata->statuses as $st) {
+            $row = new html_table_row();
+            $row->cells[] = $st->description . ':';
+            $row->cells[] = array_key_exists($st->id, $userdata->stat['statuses']) ? $userdata->stat['statuses'][$st->id]->stcnt : 0;
+
+            $stattable->data[] = $row;
+        }
+
+        if ($userdata->gradable) {
+            $row = new html_table_row();
+            $row->cells[] = get_string('attendancegrade','attforblock') . ':';
+            $row->cells[] = $userdata->grade . ' / ' . $userdata->maxgrade;
+            $stattable->data[] = $row;
+
+            $row = new html_table_row();
+            $row->cells[] = get_string('attendancepercent','attforblock') . ':';
+            if ($userdata->maxgrade == 0) {
+                $percent = 0;
+            } else {
+                $percent = $userdata->grade / $userdata->maxgrade * 100;
+            }
+            $row->cells[] = sprintf("%0.{$userdata->decimalpoints}f", $percent);
+            $stattable->data[] = $row;
+        }
+
+        return html_writer::table($stattable);
+    }
+
+    private function construct_user_sessions_log(attforblock_user_data $userdata) {
+        $table = new html_table();
+        $table->attributes['class'] = 'generaltable attwidth boxaligncenter';
+        $table->head = array('#', get_string('date'), get_string('time'), get_string('description','attforblock'), get_string('status','attforblock'), get_string('remarks','attforblock'));
+        $table->align = array('', '', 'left', 'left', 'center', 'left');
+        $table->size = array('1px', '1px', '1px', '*', '1px', '1px');
+
+        $i = 0;
+        foreach ($userdata->sessionslog as $sess) {
+            $i++;
+
+            $row = new html_table_row();
+            $row->cells[] = $i;
+            $row->cells[] = userdate($sess->sessdate, get_string('strftimedmyw', 'attforblock'));
+            $row->cells[] = $this->construct_time($sess->sessdate, $sess->duration);
+            $row->cells[] = empty($sess->description) ? get_string('nodescription', 'attforblock') : $sess->description;
+            if (isset($sess->statusid)) {
+                $row->cells[] = $userdata->statuses[$sess->statusid]->description;
+                $row->cells[] = $sess->remarks;
+            }
+            elseif ($userdata->user->enrolmentstart && $sess->sessdate < $userdata->user->enrolmentstart) {
+                $cell = new html_table_cell(get_string('enrolmentstart', 'attforblock', userdate($userdata->user->enrolmentstart, '%d.%m.%Y')));
+                $cell->colspan = 2;
+                $row->cells[] = $cell;
+            }
+            elseif ($userdata->user->enrolmentend && $sess->sessdate > $userdata->user->enrolmentend) {
+                $cell = new html_table_cell(get_string('enrolmentend', 'attforblock', userdate($userdata->user->enrolmentend, '%d.%m.%Y')));
+                $cell->colspan = 2;
+                $row->cells[] = $cell;
+            }
+            else {
+                $row->cells[] = '?';
+                $row->cells[] = '';
+            }
+
+            $table->data[] = $row;
+        }
+
+        return html_writer::table($table);
+    }
+
+    private function construct_time($datetime, $duration) {
+        $starttime = userdate($datetime, get_string('strftimehm', 'attforblock'));
+        $endtime = userdate($datetime + $duration, get_string('strftimehm', 'attforblock'));
+        $time = html_writer::tag('nobr', $starttime . ($duration > 0 ? ' - ' . $endtime : ''));
+
+        return $time;
+    }
 }
 ?>

@@ -12,12 +12,13 @@
 require_once(dirname(__FILE__).'/../../config.php');
 require_once(dirname(__FILE__).'/locallib.php');
 
-$id         = required_param('id', PARAM_INT);   // Course Module ID, or
-$student  	= optional_param('student', 0, PARAM_INT);
-$printing	= optional_param('printing', 0, PARAM_INT);
-$mode 		= optional_param('mode', 'thiscourse', PARAM_ALPHA);
-$view       = optional_param('view', NULL, PARAM_INT);        // which page to show
-$current	= optional_param('current', 0, PARAM_INT);
+$pageparams = new att_view_page_params();
+
+$id                     = required_param('id', PARAM_INT);
+$pageparams->student  	= optional_param('student', NULL, PARAM_INT);
+$pageparams->mode 		= optional_param('mode', att_view_page_params::MODE_THIS_COURSE, PARAM_INT);
+$pageparams->view       = optional_param('view', NULL, PARAM_INT);
+$pageparams->curdate	= optional_param('curdate', NULL, PARAM_INT);
 
 $cm             = get_coursemodule_from_id('attforblock', $id, 0, false, MUST_EXIST);
 $course         = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
@@ -25,25 +26,37 @@ $attforblock    = $DB->get_record('attforblock', array('id' => $cm->instance), '
 
 require_login($course, true, $cm);
 
+$pageparams->init($course->id);
+$att = new attforblock($attforblock, $cm, $course, $PAGE->context, $pageparams);
+
 // Not specified studentid for displaying attendance?
 // Redirect to appropriate page if can
-if (!$studentid) {
-    if (has_capability('mod/attforblock:manageattendances', $PAGE->context) ||
-                    has_capability('mod/attforblock:takeattendances', $PAGE->context) ||
-                    has_capability('mod/attforblock:changeattendances', $PAGE->context)) {
-        redirect("manage.php?id=$cm->id");
+if (!$pageparams->student) {
+    if ($att->perm->can_manage() || $att->perm->can_take() || $att->perm->can_change()) {
+        redirect($att->url_manage());
     }
-    elseif (has_capability('mod/attforblock:viewreports', $PAGE->context)) {
-        redirect("report.php?id=$cm->id");
+    elseif ($att->perm->can_view_reports()) {
+        redirect($att->url_report());
     }
 }
 
-if ($view)
-    set_current_view($course->id, $_GET['view']);
-else
-    $view = get_current_view($course->id, 'months');
+$att->perm->require_view_capability();
 
-require_capability('mod/attforblock:view', $PAGE->context);
+$PAGE->set_url($att->url_view());
+$PAGE->set_title($course->shortname. ": ".$att->name);
+$PAGE->set_heading($course->fullname);
+$PAGE->set_cacheable(true);
+$PAGE->navbar->add(get_string('attendancereport', 'attforblock'));
 
+$output = $PAGE->get_renderer('mod_attforblock');
+
+$userid = isset($pageparams->student) ? $pageparams->student : $USER->id;
+$userdata = new attforblock_user_data($att, $userid);
+
+echo $output->header();
+
+echo $output->render($userdata);
+
+echo $output->footer();
 
 ?>
