@@ -57,15 +57,13 @@ function attforblock_add_instance($attforblock) {
 
     $attforblock->id = $DB->insert_record('attforblock', $attforblock);
 
-    //Copy statuses for new instance from defaults
-    //if (!$DB->get_records('attendance_statuses', array('courseid'=> $attforblock->course))) {
-	    $statuses = $DB->get_records('attendance_statuses', array('courseid'=> 0), 'id');
-		foreach($statuses as $stat) {
-			$rec = $stat;
-			$rec->courseid = $attforblock->course;
-			$DB->insert_record('attendance_statuses', $rec);
-		}
-    //}
+    $statuses = $DB->get_records('attendance_statuses', array('courseid'=> 0), 'id');
+    foreach($statuses as $st) {
+        $rec = $st;
+        $rec->courseid = $attforblock->course;
+        $rec->attendanceid = $attforblock->id;
+        $DB->insert_record('attendance_statuses', $rec);
+    }
 						
 //    attforblock_grade_item_update($attforblock);
 //	attforblock_update_grades($attforblock);
