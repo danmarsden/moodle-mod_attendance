@@ -102,16 +102,23 @@ function attforblock_delete_instance($id) {
         return false;
     }
     
-    $result = $DB->delete_records('attforblock', array('id'=> $id));
+	if ($sess = $DB->get_records('attendance_sessions', array('attendanceid'=> $id), '', 'id')) {
+        $slist = implode(',', array_keys($sess));
+        $DB->delete_records_select('attendance_log', "sessionid IN ($slist)");
+        $DB->delete_records('attendance_sessions', array('attendanceid'=> $id));
+    }
+	$DB->delete_records('attendance_statuses', array('attendanceid'=> $id));
+
+    $DB->delete_records('attforblock', array('id'=> $id));
 
     attforblock_grade_item_delete($attforblock);
 
-    return $result;
+    return true;
 }
 
 function attforblock_delete_course($course, $feedback=true){
 
-        global $DB;
+    global $DB;
         
 	if ($sess = $DB->get_records('attendance_sessions', array('courseid'=> $course->id), '', 'id')) {
         $slist = implode(',', array_keys($sess));

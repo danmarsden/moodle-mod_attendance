@@ -80,7 +80,6 @@ $string['includeall'] = 'Выбрать все занятия';
 $string['includenottaken'] = 'Включить не прошедшие занятия';
 $string['indetail'] = 'Подробнее...';
 $string['jumpto'] = 'Перейти к занятию ';
-$string['moduledescription'] = 'Удаление этого модуля не повлечет удаление данных о посещаемости!';
 $string['modulename'] = 'Посещаемость';
 $string['modulenameplural'] = 'Посещаемость';
 $string['months'] = 'Месяц';

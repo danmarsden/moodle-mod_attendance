@@ -94,7 +94,6 @@ $string['includeall'] = 'Select all sessions';
 $string['includenottaken'] = 'Include not taken sessions';
 $string['indetail'] = 'In detail...';
 $string['jumpto'] = 'Jump to';
-$string['moduledescription'] = 'Removal of this module will not entail removal of the data!';
 $string['modulename'] = 'Attendance';
 $string['modulenameplural'] = 'Attendances';
 $string['months'] = 'Months';
