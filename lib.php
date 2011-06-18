@@ -26,25 +26,6 @@ function attforblock_supports($feature) {
     }
 }
 
-function attforblock_install() {
-
-    global $DB;
-        
-	$result = true;
-	$arr = array('P' => 2, 'A' => 0, 'L' => 1, 'E' => 1);
-	foreach ($arr as $k => $v) {
-		unset($rec);
-		$rec->courseid = 0;
-		$rec->acronym = get_string($k.'acronym', 'attforblock');
-		$rec->description = get_string($k.'full', 'attforblock');
-		$rec->grade = $v;
-		$rec->visible = 1;
-		$rec->deleted = 0;
-		$result = $result && $DB->insert_record('attendance_statuses', $rec);
-	}
-	return $result;
-}
-
 function attforblock_add_instance($attforblock) {
 /// Given an object containing all the necessary data, 
 /// (defined by the form in mod.html) this function 
@@ -57,10 +38,9 @@ function attforblock_add_instance($attforblock) {
 
     $attforblock->id = $DB->insert_record('attforblock', $attforblock);
 
-    $statuses = $DB->get_records('attendance_statuses', array('courseid'=> 0), 'id');
+    $statuses = $DB->get_records('attendance_statuses', array('attendanceid'=> 0), 'id');
     foreach($statuses as $st) {
         $rec = $st;
-        $rec->courseid = $attforblock->course;
         $rec->attendanceid = $attforblock->id;
         $DB->insert_record('attendance_statuses', $rec);
     }
@@ -92,19 +72,14 @@ function attforblock_update_instance($attforblock) {
 
 
 function attforblock_delete_instance($id) {
-/// Given an ID of an instance of this module, 
-/// this function will permanently delete the instance 
-/// and any data that depends on it.  
-
     global $DB;
     
     if (! $attforblock = $DB->get_record('attforblock', array('id'=> $id))) {
         return false;
     }
     
-	if ($sess = $DB->get_records('attendance_sessions', array('attendanceid'=> $id), '', 'id')) {
-        $slist = implode(',', array_keys($sess));
-        $DB->delete_records_select('attendance_log', "sessionid IN ($slist)");
+	if ($sessids = array_keys($DB->get_records('attendance_sessions', array('attendanceid'=> $id), '', 'id'))) {
+        $DB->delete_records_list('attendance_log', 'sessionid', $sessids);
         $DB->delete_records('attendance_sessions', array('attendanceid'=> $id));
     }
 	$DB->delete_records('attendance_statuses', array('attendanceid'=> $id));
@@ -117,21 +92,18 @@ function attforblock_delete_instance($id) {
 }
 
 function attforblock_delete_course($course, $feedback=true){
-
     global $DB;
-        
-	if ($sess = $DB->get_records('attendance_sessions', array('courseid'=> $course->id), '', 'id')) {
-        $slist = implode(',', array_keys($sess));
-        $DB->delete_records_select('attendance_log', "sessionid IN ($slist)");
-        $DB->delete_records('attendance_sessions', array('courseid'=> $course->id));
-    }
-	$DB->delete_records('attendance_statuses', array('courseid'=> $course->id));
-	
-    //Inform about changes performed if feedback is enabled
-//    if ($feedback) {
-//        notify(get_string('deletedefaults', 'lesson', $count));
-//    }
 
+    $attids = array_keys($DB->get_records('attforblock', array('course'=> $course->id), '', 'id'));
+    $sessids = array_keys($DB->get_records_list('attendance_sessions', 'attendanceid', $attids, '', 'id'));
+    if ($sessids)
+        $DB->delete_records_list('attendance_log', 'sessionid', $sessids);
+    if ($attids) {
+        $DB->delete_records_list('attendance_statuses', 'attendanceid', $attids);
+        $DB->delete_records_list('attendance_sessions', 'attendanceid', $attids);
+    }
+	$DB->delete_records('attforblock', array('course'=> $course->id));
+	
     return true;
 }
 
