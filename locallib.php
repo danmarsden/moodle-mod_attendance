@@ -194,7 +194,7 @@ class att_view_page_params extends att_page_with_filter_controls {
     const MODE_THIS_COURSE  = 0;
     const MODE_ALL_COURSES  = 1;
 
-    public $student;
+    public $studentid;
 
     public $mode;
 
@@ -205,7 +205,7 @@ class att_view_page_params extends att_page_with_filter_controls {
     public function get_significant_params() {
         $params = array();
 
-        if (isset($this->student)) $params['student'] = $this->student;
+        if (isset($this->studentid)) $params['studentid'] = $this->studentid;
         if ($this->mode != self::MODE_THIS_COURSE) $params['mode'] = $this->mode;
 
         return $params;
@@ -605,13 +605,13 @@ class attforblock {
         }
 
         $this->sessgroupslist = array();
-        if ($allowedgroups or $this->groupmode == VISIBLEGROUPS or $this->perm->can_access_all_groups()) {
-            $this->sessgroupslist[self::SELECTOR_ALL] = get_string('all', 'attforblock');
-        }
-        if ($this->groupmode == VISIBLEGROUPS) {
-            $this->sessgroupslist[self::SELECTOR_COMMON] = get_string('commonsessions', 'attforblock');
-        }        
         if ($allowedgroups) {
+            if ($this->groupmode == VISIBLEGROUPS or $this->perm->can_access_all_groups()) {
+                $this->sessgroupslist[self::SELECTOR_ALL] = get_string('all', 'attforblock');
+            }
+            if ($this->groupmode == VISIBLEGROUPS) {
+                $this->sessgroupslist[self::SELECTOR_COMMON] = get_string('commonsessions', 'attforblock');
+            }
             foreach ($allowedgroups as $group) {
                 $this->sessgroupslist[$group->id] = format_string($group->name);
             }
@@ -802,11 +802,7 @@ class attforblock {
         global $DB;
 
         if (!isset($this->statuses)) {
-            if ($onlyvisible) {
-                $this->statuses = $DB->get_records_select('attendance_statuses', "attendanceid = :aid AND visible = 1 AND deleted = 0", array('aid' => $this->id), 'grade DESC');
-            } else {
-                $this->statuses = $DB->get_records_select('attendance_statuses', "attendanceid = :aid AND deleted = 0",  array('aid' => $this->id), 'grade DESC');
-            }
+            $this->statuses = get_statuses($this->id, $onlyvisible);
         }
         
         return $this->statuses;
@@ -839,24 +835,11 @@ class attforblock {
         return $ret;
     }
 
-    public function get_user_taken_sessions_count($userid, $courseid=NULL) {
+    public function get_user_taken_sessions_count($userid) {
         global $DB;
 
-        if (!isset($this->usertakensesscount)) {
-            $qry = "SELECT count(*) as cnt
-                      FROM {attendance_log} al
-                      JOIN {attendance_sessions} ats
-                        ON al.sessionid = ats.id
-                     WHERE ats.attendanceid = :aid AND
-                           ats.sessdate >= :cstartdate AND
-                           al.studentid = :uid";
-            $params = array(
-                    'aid'           => $this->id,
-                    'cstartdate'    => $this->course->startdate,
-                    'uid'           => $userid);
-
-            $this->usertakensesscount = $DB->count_records_sql($qry, $params);
-        }
+        if (!isset($this->usertakensesscount))
+            $this->usertakensesscount = get_user_taken_sessions_count($this->id, $this->course->startdate, $userid);
 
         return $this->usertakensesscount;
     }
@@ -884,16 +867,8 @@ class attforblock {
         return $this->userstatusesstat;
     }
 
-    public function get_user_grade($userid, $courseid=NULL) {
-        $statistics = $this->get_user_statuses_stat($userid, $courseid);
-        $statuses = $this->get_statuses($courseid);
-
-        $sum = 0;
-        foreach ($statistics as $stat) {
-            $sum += $stat->stcnt * $statuses[$stat->statusid]->grade;
-        }
-
-        return $sum;
+    public function get_user_grade($userid) {
+        return get_user_grade($this->get_user_statuses_stat($userid), $this->get_statuses());
     }
 
     // For getting sessions count implemented simplest method - taken sessions.
@@ -901,11 +876,8 @@ class attforblock {
     // In the future we can implement another methods:
     // * all sessions between user start enrolment date and now;
     // * all sessions between user start and end enrolment date.
-    public function get_user_max_grade($userid, $courseid=NULL) {
-        $takensessions = $this->get_user_taken_sessions_count($userid, $courseid);
-        $statuses = $this->get_statuses($courseid);
-
-        return current($statuses)->grade * $takensessions;
+    public function get_user_max_grade($userid) {
+        return get_user_max_grade($this->get_user_taken_sessions_count($userid), $this->get_statuses());
     }
 
     public function get_user_filtered_sessions_log($userid) {
@@ -938,31 +910,90 @@ class attforblock {
 
         return $sessions;
     }
-
-    public function get_user_courses_with_attendance($userid) {
-        global $DB;
-
-        // we can't get user courses based only on attendance_log information
-        // because of then users will see only courses with taked attendance
-        $usercourses = enrol_get_users_courses($userid);
-
-        list($usql, $uparams) = $DB->get_in_or_equal(array_keys($usercourses), SQL_PARAMS_NAMED, 'cid0');
-
-        $sql = "SELECT ats.courseid, course.fullname
-                  FROM {attendance_sessions} ats
-                  JOIN {attendance_log} al
-                       ON ats.id = al.sessionid AND al.studentid = :uid
-                  JOIN {course} course
-                       ON ats.courseid = course.id
-                 WHERE ats.courseid $usql
-              GROUP BY ats.courseid
-              ORDER BY course.fullname ASC";
-
-        $params = array_merge($uparams, array('uid' => $userid));
-
-        return $DB->get_records_sql($sql, $params);
-    }
 }
 
+
+function get_statuses($attid, $onlyvisible=true) {
+    global $DB;
+
+    if ($onlyvisible) {
+        $statuses = $DB->get_records_select('attendance_statuses', "attendanceid = :aid AND visible = 1 AND deleted = 0", array('aid' => $attid), 'grade DESC');
+    } else {
+        $statuses = $DB->get_records_select('attendance_statuses', "attendanceid = :aid AND deleted = 0",  array('aid' => $attid), 'grade DESC');
+    }
+
+    return $statuses;
+}
+
+function get_user_taken_sessions_count($attid, $coursestartdate, $userid) {
+    global $DB;
+
+    $qry = "SELECT count(*) as cnt
+              FROM {attendance_log} al
+              JOIN {attendance_sessions} ats
+                ON al.sessionid = ats.id
+             WHERE ats.attendanceid = :aid AND
+                   ats.sessdate >= :cstartdate AND
+                   al.studentid = :uid";
+    $params = array(
+            'aid'           => $attid,
+            'cstartdate'    => $coursestartdate,
+            'uid'           => $userid);
+
+    return $DB->count_records_sql($qry, $params);
+}
+
+function get_user_statuses_stat($attid, $coursestartdate, $userid) {
+    global $DB;
+
+    $qry = "SELECT al.statusid, count(al.statusid) AS stcnt
+              FROM {attendance_log} al
+              JOIN {attendance_sessions} ats
+                ON al.sessionid = ats.id
+             WHERE ats.attendanceid = :aid AND
+                   ats.sessdate >= :cstartdate AND
+                   al.studentid = :uid
+          GROUP BY al.statusid";
+    $params = array(
+            'aid'           => $attid,
+            'cstartdate'    => $coursestartdate,
+            'uid'           => $userid);
+
+    return $DB->get_records_sql($qry, $params);
+}
+
+function get_user_grade($userstatusesstat, $statuses) {
+    $sum = 0;
+    foreach ($userstatusesstat as $stat) {
+        $sum += $stat->stcnt * $statuses[$stat->statusid]->grade;
+    }
+
+    return $sum;
+}
+
+function get_user_max_grade($sesscount, $statuses) {
+    reset($statuses);
+    return current($statuses)->grade * $sesscount;
+}
+
+function get_user_courses_attendances($userid) {
+    global $DB;
+
+    $usercourses = enrol_get_users_courses($userid);
+
+    list($usql, $uparams) = $DB->get_in_or_equal(array_keys($usercourses), SQL_PARAMS_NAMED, 'cid0');
+
+    $sql = "SELECT att.id as attid, att.course as courseid, course.fullname as coursefullname,
+                   course.startdate as coursestartdate, att.name as attname, att.grade as attgrade
+              FROM {attforblock} att
+              JOIN {course} course
+                   ON att.course = course.id
+             WHERE att.course $usql
+          ORDER BY coursefullname ASC, attname ASC";
+
+    $params = array_merge($uparams, array('uid' => $userid));
+
+    return $DB->get_records_sql($sql, $params);
+}
 
 ?>

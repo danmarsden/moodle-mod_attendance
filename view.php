@@ -15,7 +15,7 @@ require_once(dirname(__FILE__).'/locallib.php');
 $pageparams = new att_view_page_params();
 
 $id                     = required_param('id', PARAM_INT);
-$pageparams->student  	= optional_param('student', NULL, PARAM_INT);
+$pageparams->studentid	= optional_param('studentid', NULL, PARAM_INT);
 $pageparams->mode 		= optional_param('mode', att_view_page_params::MODE_THIS_COURSE, PARAM_INT);
 $pageparams->view       = optional_param('view', NULL, PARAM_INT);
 $pageparams->curdate	= optional_param('curdate', NULL, PARAM_INT);
@@ -31,7 +31,7 @@ $att = new attforblock($attforblock, $cm, $course, $PAGE->context, $pageparams);
 
 // Not specified studentid for displaying attendance?
 // Redirect to appropriate page if can
-if (!$pageparams->student) {
+if (!$pageparams->studentid) {
     if ($att->perm->can_manage() || $att->perm->can_take() || $att->perm->can_change()) {
         redirect($att->url_manage());
     }
@@ -50,7 +50,7 @@ $PAGE->navbar->add(get_string('attendancereport', 'attforblock'));
 
 $output = $PAGE->get_renderer('mod_attforblock');
 
-$userid = isset($pageparams->student) ? $pageparams->student : $USER->id;
+$userid = isset($pageparams->studentid) ? $pageparams->studentid : $USER->id;
 $userdata = new attforblock_user_data($att, $userid);
 
 echo $output->header();

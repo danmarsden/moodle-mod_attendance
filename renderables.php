@@ -324,7 +324,7 @@ class attforblock_user_data implements renderable {
 
     public $sessionslog;
 
-    public $courses;
+    public $coursesatts;
 
     private $urlpath;
     private $urlparams;
@@ -336,13 +336,13 @@ class attforblock_user_data implements renderable {
 
         $this->pageparams = $att->pageparams;
 
-        $this->statuses = $att->get_statuses();
-
         if (!$this->decimalpoints = grade_get_setting($att->course->id, 'decimalpoints')) {
             $this->decimalpoints = $CFG->grade_decimalpoints;
         }
 
         if ($this->pageparams->mode == att_view_page_params::MODE_THIS_COURSE) {
+            $this->statuses = $att->get_statuses();
+
             $this->stat = $att->get_user_stat($userid);
 
             $this->gradable = $att->grade > 0;
@@ -357,7 +357,40 @@ class attforblock_user_data implements renderable {
             $this->sessionslog = $att->get_user_filtered_sessions_log($userid);
         }
         else {
-            $this->courses = $att->get_user_courses_with_attendance($userid);
+            $this->coursesatts = get_user_courses_attendances($userid);
+
+            $this->statuses = array();
+            $this->stat = array();
+            $this->gradable = array();
+            $this->grade = array();
+            $this->maxgrade = array();
+            foreach ($this->coursesatts as $ca) {
+                $statuses = get_statuses($ca->attid);
+                $user_taken_sessions_count = get_user_taken_sessions_count($ca->attid, $ca->coursestartdate, $userid);
+                $user_statuses_stat = get_user_statuses_stat($ca->attid, $ca->coursestartdate, $userid);
+
+                $this->statuses[$ca->attid] = $statuses;
+
+                $this->stat[$ca->attid]['completed'] = $user_taken_sessions_count;
+                $this->stat[$ca->attid]['statuses'] = $user_statuses_stat;
+
+                $this->gradable[$ca->attid] = $ca->attgrade > 0;
+
+                if ($this->gradable[$ca->attid]) {
+                    $this->grade[$ca->attid] = get_user_grade($user_statuses_stat, $statuses);
+                    // For getting sessions count implemented simplest method - taken sessions.
+                    // It can have error if users don't have attendance info for some sessions.
+                    // In the future we can implement another methods:
+                    // * all sessions between user start enrolment date and now;
+                    // * all sessions between user start and end enrolment date.
+                    $this->maxgrade[$ca->attid] = get_user_max_grade($user_taken_sessions_count, $statuses);
+                }
+                else {
+                    //for more comfortable and universal work with arrays
+                    $this->grade[$ca->attid] = NULL;
+                    $this->maxgrade[$ca->attid] = NULL;
+                }
+            }
         }
         
         $this->urlpath = $att->url_view()->out_omit_querystring();

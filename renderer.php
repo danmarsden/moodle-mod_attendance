@@ -61,17 +61,18 @@ class mod_attforblock_renderer extends plugin_renderer_base {
     protected function render_sess_group_selector(attforblock_filter_controls $fcontrols) {
         switch ($fcontrols->pageparams->selectortype) {
             case att_page_with_filter_controls::SELECTOR_SESS_TYPE:
-                $select = new single_select($fcontrols->url(), 'group', $fcontrols->get_sess_groups_list(),
-                                            $fcontrols->get_current_group(), null, 'selectgroup');
-                $select->label = get_string('sessions', 'attforblock');
-                $output = $this->output->render($select);
+                $sessgroups = $fcontrols->get_sess_groups_list();
+                if ($sessgroups) {
+                    $select = new single_select($fcontrols->url(), 'group', $sessgroups,
+                                                $fcontrols->get_current_group(), null, 'selectgroup');
+                    $select->label = get_string('sessions', 'attforblock');
+                    $output = $this->output->render($select);
 
-                return html_writer::tag('div', $output, array('class' => 'groupselector'));
-
-            default:
-                return '';
+                    return html_writer::tag('div', $output, array('class' => 'groupselector'));
+                }
         }
 
+        return '';
     }
     
     protected function render_curdate_controls(attforblock_filter_controls $fcontrols) {
@@ -368,7 +369,7 @@ class mod_attforblock_renderer extends plugin_renderer_base {
             $i++;
             $row = new html_table_row();
             $row->cells[] = $i;
-            $fullname = html_writer::link($takedata->url_view(array('student' => $user->id)), fullname($user));
+            $fullname = html_writer::link($takedata->url_view(array('studentid' => $user->id)), fullname($user));
             $row->cells[] = $this->output->user_picture($user).$fullname;
 
             $celldata = $this->construct_take_user_controls($takedata, $user);
@@ -407,7 +408,7 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         foreach($takedata->users as $user) {
             $celltext = $this->output->user_picture($user, array('size' => 100));
             $celltext .= html_writer::empty_tag('br');
-            $fullname = html_writer::link($takedata->url_view(array('student' => $user->id)), fullname($user));
+            $fullname = html_writer::link($takedata->url_view(array('studentid' => $user->id)), fullname($user));
             $celltext .= html_writer::tag('span', $fullname, array('class' => 'fullname'));
             $celltext .= html_writer::empty_tag('br');
             $celldata = $this->construct_take_user_controls($takedata, $user);
@@ -525,49 +526,67 @@ class mod_attforblock_renderer extends plugin_renderer_base {
 
     private function construct_user_data(attforblock_user_data $userdata) {
         $o = html_writer::tag('h2', fullname($userdata->user));
-        $o .= html_writer::empty_tag('hr');
 
         if ($userdata->pageparams->mode == att_view_page_params::MODE_THIS_COURSE) {
-            $o .= $this->construct_user_data_stat($userdata);
+            $o .= html_writer::empty_tag('hr');
+
+            $o .= $this->construct_user_data_stat($userdata->stat, $userdata->statuses,
+                        $userdata->gradable, $userdata->grade, $userdata->maxgrade, $userdata->decimalpoints);
 
             $o .= $this->render_attforblock_filter_controls($userdata->filtercontrols);
 
             $o .= $this->construct_user_sessions_log($userdata);
         }
+        else {
+            $prevcid = 0;
+            foreach ($userdata->coursesatts as $ca) {
+                if ($prevcid != $ca->courseid) {
+                    $o .= html_writer::empty_tag('hr');
+                    $prevcid = $ca->courseid;
+
+                    $o .= html_writer::tag('h3', $ca->coursefullname);
+                }
+                $o .= html_writer::tag('h4', $ca->attname);
+
+                $o .= $this->construct_user_data_stat($userdata->stat[$ca->attid], $userdata->statuses[$ca->attid],
+                            $userdata->gradable[$ca->attid], $userdata->grade[$ca->attid],
+                            $userdata->maxgrade[$ca->attid], $userdata->decimalpoints);
+            }
+        }
 
         return $o;
     }
 
-    private function construct_user_data_stat(attforblock_user_data $userdata) {
+    private function construct_user_data_stat($stat, $statuses, $gradable, $grade, $maxgrade, $decimalpoints) {
         $stattable = new html_table();
         $stattable->attributes['class'] = 'list';
         $row = new html_table_row();
         $row->cells[] = get_string('sessionscompleted','attforblock').':';
-        $row->cells[] = $userdata->stat['completed'];
+        $row->cells[] = $stat['completed'];
         $stattable->data[] = $row;
 
-        foreach ($userdata->statuses as $st) {
+        foreach ($statuses as $st) {
             $row = new html_table_row();
             $row->cells[] = $st->description . ':';
-            $row->cells[] = array_key_exists($st->id, $userdata->stat['statuses']) ? $userdata->stat['statuses'][$st->id]->stcnt : 0;
+            $row->cells[] = array_key_exists($st->id, $stat['statuses']) ? $stat['statuses'][$st->id]->stcnt : 0;
 
             $stattable->data[] = $row;
         }
 
-        if ($userdata->gradable) {
+        if ($gradable) {
             $row = new html_table_row();
             $row->cells[] = get_string('attendancegrade','attforblock') . ':';
-            $row->cells[] = $userdata->grade . ' / ' . $userdata->maxgrade;
+            $row->cells[] = $grade . ' / ' . $maxgrade;
             $stattable->data[] = $row;
 
             $row = new html_table_row();
             $row->cells[] = get_string('attendancepercent','attforblock') . ':';
-            if ($userdata->maxgrade == 0) {
+            if ($maxgrade == 0) {
                 $percent = 0;
             } else {
-                $percent = $userdata->grade / $userdata->maxgrade * 100;
+                $percent = $grade / $maxgrade * 100;
             }
-            $row->cells[] = sprintf("%0.{$userdata->decimalpoints}f", $percent);
+            $row->cells[] = sprintf("%0.{$decimalpoints}f", $percent);
             $stattable->data[] = $row;
         }
 
