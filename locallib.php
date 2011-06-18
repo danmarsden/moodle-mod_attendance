@@ -452,9 +452,8 @@ class attforblock {
     public function get_hidden_sessions_count() {
         global $DB;
 
-        $where = "courseid = :cid AND attendanceid = :aid AND sessdate < :csdate";
+        $where = "attendanceid = :aid AND sessdate < :csdate";
         $params = array(
-                'cid'   => $this->course->id,
                 'aid'   => $this->id,
                 'csdate'=> $this->course->startdate);
 
@@ -465,15 +464,14 @@ class attforblock {
         global $DB;
 
         if ($this->pageparams->startdate && $this->pageparams->enddate) {
-            $where = "courseid=:cid AND attendanceid = :aid AND sessdate >= :csdate AND sessdate >= :sdate AND sessdate < :edate";
+            $where = "attendanceid = :aid AND sessdate >= :csdate AND sessdate >= :sdate AND sessdate < :edate";
         } else {
-            $where = "courseid=:cid AND attendanceid = :aid AND sessdate >= :csdate";
+            $where = "attendanceid = :aid AND sessdate >= :csdate";
         }
         if ($this->get_current_group() > attforblock::SELECTOR_ALL) {
             $where .= " AND groupid=:cgroup";
         }
         $params = array(
-                'cid'       => $this->course->id,
                 'aid'       => $this->id,
                 'csdate'    => $this->course->startdate,
                 'sdate'     => $this->pageparams->startdate,
@@ -914,10 +912,10 @@ class attforblock {
         global $DB;
 
         if ($this->pageparams->startdate && $this->pageparams->enddate) {
-            $where = "ats.courseid=:cid AND ats.attendanceid = :aid AND
-                      ats.sessdate >= :csdate AND ats.sessdate >= :sdate AND ats.sessdate < :edate";
+            $where = "ats.attendanceid = :aid AND ats.sessdate >= :csdate AND 
+                      ats.sessdate >= :sdate AND ats.sessdate < :edate";
         } else {
-            $where = "AND ats.courseid=:cid AND ats.attendanceid = :aid AND ats.sessdate >= :csdate";
+            $where = "AND ats.attendanceid = :aid AND ats.sessdate >= :csdate";
         }
 
         $sql = "SELECT ats.id, ats.sessdate, ats.duration, ats.description, al.statusid, al.remarks
@@ -929,7 +927,6 @@ class attforblock {
 
         $params = array(
                 'uid'       => $userid,
-                'cid'       => $this->course->id,
                 'aid'       => $this->id,
                 'csdate'    => $this->course->startdate,
                 'sdate'     => $this->pageparams->startdate,

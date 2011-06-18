@@ -279,7 +279,7 @@ function xmldb_attforblock_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2010123003, 'attforblock');
     }
 
-    if ($oldversion < 2011053006) {
+    if ($oldversion < 2011061800) {
         $table = new xmldb_table('attendance_sessions');
 
         $field = new xmldb_field('description');
@@ -304,7 +304,27 @@ function xmldb_attforblock_upgrade($oldversion=0) {
             $rs->close();
         }
 
-        upgrade_mod_savepoint(true, 2011053006, 'attforblock');
+        // now we can create more than one attendances per course
+        // thus sessions and statuses belongs to attendance
+        // so we don't need courseid fields in attendance_sessions and attendance_statuses
+        $index = new xmldb_index('courseid', XMLDB_INDEX_NOTUNIQUE, array('courseid'));
+        if ($dbman->index_exists($table, $index)) {
+            $dbman->drop_index($table, $index);
+        }
+        $field = new xmldb_field('courseid');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        $table = new xmldb_table('attendance_statuses');
+        if ($dbman->index_exists($table, $index)) {
+            $dbman->drop_index($table, $index);
+        }
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        upgrade_mod_savepoint(true, 2011061800, 'attforblock');
     }
     return $result;
 }

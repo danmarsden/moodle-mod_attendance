@@ -20,11 +20,10 @@
     </TABLE>
     <TABLE NAME="attendance_sessions" COMMENT="attendance_sessions table retrofitted from MySQL" PREVIOUS="attforblock" NEXT="attendance_log">
       <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="courseid"/>
-        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="groupid"/>
-        <FIELD NAME="groupid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="courseid" NEXT="attendanceid"/>
-        <FIELD NAME="attendanceid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="groupid" NEXT="sessdate"/>
-        <FIELD NAME="sessdate" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="attendanceid" NEXT="duration"/>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="attendanceid"/>
+        <FIELD NAME="attendanceid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="groupid"/>
+        <FIELD NAME="groupid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="attendanceid" NEXT="sessdate"/>
+        <FIELD NAME="sessdate" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="groupid" NEXT="duration"/>
         <FIELD NAME="duration" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="sessdate" NEXT="lasttaken"/>
         <FIELD NAME="lasttaken" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="true" SEQUENCE="false" PREVIOUS="duration" NEXT="lasttakenby"/>
         <FIELD NAME="lasttakenby" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="lasttaken" NEXT="timemodified"/>
@@ -36,10 +35,9 @@
         <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="Primary key for attendance_sessions"/>
       </KEYS>
       <INDEXES>
-        <INDEX NAME="courseid" UNIQUE="false" FIELDS="courseid" NEXT="groupid"/>
-        <INDEX NAME="groupid" UNIQUE="false" FIELDS="groupid" PREVIOUS="courseid" NEXT="attendanceid"/>
-        <INDEX NAME="attendanceid" UNIQUE="false" FIELDS="attendanceid" PREVIOUS="groupid" NEXT="sessdate"/>
-        <INDEX NAME="sessdate" UNIQUE="false" FIELDS="sessdate" PREVIOUS="attendanceid"/>
+        <INDEX NAME="attendanceid" UNIQUE="false" FIELDS="attendanceid" NEXT="groupid"/>
+        <INDEX NAME="groupid" UNIQUE="false" FIELDS="groupid" PREVIOUS="attendanceid" NEXT="sessdate"/>
+        <INDEX NAME="sessdate" UNIQUE="false" FIELDS="sessdate" PREVIOUS="groupid"/>
       </INDEXES>
     </TABLE>
     <TABLE NAME="attendance_log" COMMENT="attendance_log table retrofitted from MySQL" PREVIOUS="attendance_sessions" NEXT="attendance_statuses">
@@ -64,9 +62,8 @@
     </TABLE>
     <TABLE NAME="attendance_statuses" COMMENT="attendance_statuses table retrofitted from MySQL" PREVIOUS="attendance_log">
       <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="courseid"/>
-        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="attendanceid"/>
-        <FIELD NAME="attendanceid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="courseid" NEXT="acronym"/>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="attendanceid"/>
+        <FIELD NAME="attendanceid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="acronym"/>
         <FIELD NAME="acronym" TYPE="char" LENGTH="2" NOTNULL="true" SEQUENCE="false" PREVIOUS="attendanceid" NEXT="description"/>
         <FIELD NAME="description" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false" PREVIOUS="acronym" NEXT="grade"/>
         <FIELD NAME="grade" TYPE="int" LENGTH="3" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="description" NEXT="visible"/>
@@ -77,8 +74,7 @@
         <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="Primary key for attendance_settings"/>
       </KEYS>
       <INDEXES>
-        <INDEX NAME="courseid" UNIQUE="false" FIELDS="courseid" NEXT="attendanceid"/>
-        <INDEX NAME="attendanceid" UNIQUE="false" FIELDS="attendanceid" PREVIOUS="courseid" NEXT="visible"/>
+        <INDEX NAME="attendanceid" UNIQUE="false" FIELDS="attendanceid" NEXT="visible"/>
         <INDEX NAME="visible" UNIQUE="false" FIELDS="visible" PREVIOUS="attendanceid" NEXT="deleted"/>
         <INDEX NAME="deleted" UNIQUE="false" FIELDS="deleted" PREVIOUS="visible"/>
       </INDEXES>
