@@ -332,8 +332,9 @@ class attforblock {
     private $sessioninfo;
 
     private $statuses;
-    private $usertakensesscount;
-    private $userstatusesstat;
+    // arrays by userid
+    private $usertakensesscount = array();
+    private $userstatusesstat = array();
 
     /**
      * Initializes the attendance API instance using the data from DB
@@ -700,7 +701,7 @@ class attforblock {
         $sesslog = array();
         $formdata = (array)$formdata;
 		foreach($formdata as $key => $value) {
-			if(substr($key, 0, 4) == 'user' && $value !== '') {
+			if(substr($key, 0, 4) == 'user') {
 				$sid = substr($key, 4);
 				$sesslog[$sid] = new Object();
 				$sesslog[$sid]->studentid = $sid;
@@ -715,12 +716,14 @@ class attforblock {
 
         $dbsesslog = $this->get_session_log($this->pageparams->sessionid);
         foreach ($sesslog as $log) {
-            if (array_key_exists($log->studentid, $dbsesslog)) {
-                $log->id = $dbsesslog[$log->studentid]->id;
-                $DB->update_record('attendance_log', $log);
+            if ($log->statusid) {
+                if (array_key_exists($log->studentid, $dbsesslog)) {
+                    $log->id = $dbsesslog[$log->studentid]->id;
+                    $DB->update_record('attendance_log', $log);
+                }
+                else
+                    $DB->insert_record('attendance_log', $log, false);
             }
-            else
-                $DB->insert_record('attendance_log', $log, false);
         }
 
         $rec = new object();
@@ -729,7 +732,7 @@ class attforblock {
         $rec->lasttakenby = $USER->id;
         $DB->update_record('attendance_sessions', $rec);
 
-        // TODO: update_grades
+        $this->update_users_grade(array_keys($sesslog));
         // TODO: log
         redirect($this->url_manage(), get_string('attendancesuccess','attforblock'));
     }
@@ -838,16 +841,16 @@ class attforblock {
     public function get_user_taken_sessions_count($userid) {
         global $DB;
 
-        if (!isset($this->usertakensesscount))
-            $this->usertakensesscount = get_user_taken_sessions_count($this->id, $this->course->startdate, $userid);
+        if (!array_key_exists($userid, $this->usertakensesscount))
+            $this->usertakensesscount[$userid] = get_user_taken_sessions_count($this->id, $this->course->startdate, $userid);
 
-        return $this->usertakensesscount;
+        return $this->usertakensesscount[$userid];
     }
 
     public function get_user_statuses_stat($userid) {
         global $DB;
 
-        if (!isset($this->userstatusesstat)) {
+        if (!array_key_exists($userid, $this->userstatusesstat)) {
             $qry = "SELECT al.statusid, count(al.statusid) AS stcnt
                       FROM {attendance_log} al
                       JOIN {attendance_sessions} ats
@@ -861,10 +864,10 @@ class attforblock {
                     'cstartdate'    => $this->course->startdate,
                     'uid'           => $userid);
 
-            $this->userstatusesstat = $DB->get_records_sql($qry, $params);
+            $this->userstatusesstat[$userid] = $DB->get_records_sql($qry, $params);
         }
         
-        return $this->userstatusesstat;
+        return $this->userstatusesstat[$userid];
     }
 
     public function get_user_grade($userid) {
@@ -876,8 +879,22 @@ class attforblock {
     // In the future we can implement another methods:
     // * all sessions between user start enrolment date and now;
     // * all sessions between user start and end enrolment date.
+    // While implementing those methods we need recalculate grades of all users
+    // on session adding
     public function get_user_max_grade($userid) {
         return get_user_max_grade($this->get_user_taken_sessions_count($userid), $this->get_statuses());
+    }
+
+    public function update_users_grade($userids) {
+        $grades = array();
+
+        foreach ($userids as $userid) {
+            $grades[$userid]->userid = $userid;
+            $grades[$userid]->rawgrade = $this->get_user_grade($userid) / $this->get_user_max_grade($userid) * 100;
+        }
+
+        return grade_update('mod/attforblock', $this->course->id, 'mod', 'attforblock',
+                            $this->id, 0, $grades);
     }
 
     public function get_user_filtered_sessions_log($userid) {
@@ -994,6 +1011,25 @@ function get_user_courses_attendances($userid) {
     $params = array_merge($uparams, array('uid' => $userid));
 
     return $DB->get_records_sql($sql, $params);
+}
+
+function update_all_users_grades($attid, $course, $context) {
+    global $COURSE;
+
+    $grades = array();
+
+    $userids = get_enrolled_users($context, 'mod/attforblock:canbelisted', 0, 'u.id');
+
+    $statuses = get_statuses($attid);
+    foreach ($userids as $userid) {
+        $grades[$userid]->userid = $userid;
+        $userstatusesstat = get_user_statuses_stat($attid, $course->startdate, $userid);
+        $usertakensesscount = get_user_taken_sessions_count($attid, $course->startdate, $userid);
+        $grades[$userid]->rawgrade = get_user_grade($userstatusesstat, $statuses) / get_user_max_grade($usertakensesscount, $statuses) * 100;
+    }
+
+    return grade_update('mod/attforblock', $course->id, 'mod', 'attforblock',
+                        $attid, 0, $grades);
 }
 
 ?>

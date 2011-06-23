@@ -14,8 +14,10 @@ function attforblock_supports($feature) {
         case FEATURE_GRADE_HAS_GRADE:   return true;
         case FEATURE_GROUPS:            return true;
         // Artem Andreev: AFAIK it's not tested
+        // we need implement filtration of groups list by grouping
         case FEATURE_GROUPINGS:         return false;
         // Artem Andreev: AFAIK it's not tested
+        // harder "All courses" report
         case FEATURE_GROUPMEMBERSONLY:  return false;
         case FEATURE_MOD_INTRO:         return false;
         case FEATURE_BACKUP_MOODLE2:    return true;
@@ -45,7 +47,7 @@ function attforblock_add_instance($attforblock) {
         $DB->insert_record('attendance_statuses', $rec);
     }
 						
-//    attforblock_grade_item_update($attforblock);
+    attforblock_grade_item_update($attforblock);
 //	attforblock_update_grades($attforblock);
     return $attforblock->id;
 }
@@ -217,10 +219,10 @@ function attforblock_cron () {
  * @param int $userid optional user id, 0 means all users
  * @return array array of grades, false if none
  */
-function attforblock_get_user_grades($attforblock, $userid=0) {
+/*function attforblock_get_user_grades($attforblock, $userid=0) {
     global $CFG, $DB;
     
-	require_once('locallib.php');
+	require_once('_locallib.php');
 	
     if (! $course = $DB->get_record('course', array('id'=> $attforblock->course))) {
         error("Course is misconfigured");
@@ -242,7 +244,7 @@ function attforblock_get_user_grades($attforblock, $userid=0) {
     }
 
     return $result;
-}
+}*/
 
 /**
  * Update grades by firing grade_updated event
@@ -250,7 +252,7 @@ function attforblock_get_user_grades($attforblock, $userid=0) {
  * @param object $attforblock null means all attforblocks
  * @param int $userid specific user only, 0 mean all
  */
-function attforblock_update_grades($attforblock=null, $userid=0, $nullifnone=true) {
+/*function attforblock_update_grades($attforblock=null, $userid=0, $nullifnone=true) {
     global $CFG, $DB;
     if (!function_exists('grade_update')) { //workaround for buggy PHP versions
         require_once($CFG->libdir.'/gradelib.php');
@@ -283,7 +285,7 @@ function attforblock_update_grades($attforblock=null, $userid=0, $nullifnone=tru
             $rs->close($rs);
         }
     }
-}
+}*/
 
 /**
  * Create grade item for given attforblock
@@ -321,7 +323,6 @@ function attforblock_grade_item_update($attforblock, $grades=NULL) {
         $params['gradetype'] = GRADE_TYPE_VALUE;
         $params['grademax']  = $attforblock->grade;
         $params['grademin']  = 0;
-
     } 
     else if ($attforblock->grade < 0) {
         $params['gradetype'] = GRADE_TYPE_SCALE;
