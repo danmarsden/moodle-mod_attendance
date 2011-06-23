@@ -31,11 +31,13 @@
     margin: auto;
 }
 
-.path-mod-attforblock .userwithoutenrol {
+.path-mod-attforblock .userwithoutenrol,
+.path-mod-attforblock .userwithoutenrol a{
     color: gray;
 }
 
-.path-mod-attforblock .userwithoutdata {
+.path-mod-attforblock .userwithoutdata,
+.path-mod-attforblock .userwithoutdata a{
     color: red;
 }
 
