@@ -149,7 +149,7 @@ class mod_attforblock_renderer extends plugin_renderer_base {
     protected function render_attforblock_sessions_manage_data(attforblock_sessions_manage_data $sessdata) {
         // TODO: nosessionexists
         // TODO: log
-        $o = $this->render_sess_manage_table($sessdata) . $this->render_sess_control_table($sessdata);
+        $o = $this->render_sess_manage_table($sessdata) . $this->render_sess_manage_control($sessdata);
         $o = html_writer::tag('form', $o, array('method' => 'post', 'action' => $sessdata->url_sessions()->out()));
         $o = $this->output->container($o, 'generalbox attwidth');
         $o = $this->output->container($o, 'attsessions_manage_table');
@@ -158,6 +158,9 @@ class mod_attforblock_renderer extends plugin_renderer_base {
     }
 
     protected function render_sess_manage_table(attforblock_sessions_manage_data $sessdata) {
+        $this->page->requires->js('/mod/attforblock/attforblock.js');
+        $this->page->requires->js_init_call('M.mod_attforblock.init_manage');
+
         $table = new html_table();
         $table->width = '100%';
         $table->head = array(
@@ -167,7 +170,7 @@ class mod_attforblock_renderer extends plugin_renderer_base {
                 get_string('time'),
                 get_string('description','attforblock'),
                 get_string('actions'),
-                get_string('select')
+                html_writer::checkbox('cb_selector', 0, false, '', array('id' => 'cb_selector'))
             );
         $table->align = array('', '', '', '', 'center', 'center', 'center');
         $table->size = array('1px', '', '1px', '1px', '*', '1px', '1px');
@@ -227,7 +230,7 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         return array('date' => $date, 'time' => $time, 'actions' => $actions);
     }
 
-    protected function render_sess_control_table(attforblock_sessions_manage_data $sessdata) {
+    protected function render_sess_manage_control(attforblock_sessions_manage_data $sessdata) {
         $table = new html_table();
         $table->attributes['class'] = ' ';
         $table->width = '100%';
@@ -236,20 +239,17 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         $table->data[0][] = $this->output->help_icon('hiddensessions', 'attforblock',
                 get_string('hiddensessions', 'attforblock').': '.$sessdata->hiddensessionscount);
 
-        $controls = html_writer::link('javascript:checkall();', get_string('selectall')).' / '.
-                html_writer::link('javascript:checknone();', get_string('deselectall')).
-                html_writer::empty_tag('br');
         if ($sessdata->perm->can_manage()) {
             $options = array('deleteselected' => get_string('delete'),
                     'changeduration' => get_string('changeduration', 'attforblock'));
-            $controls .= html_writer::select($options, 'action');
+            $controls = html_writer::select($options, 'action');
             $attributes = array(
                     'type'  => 'submit',
                     'name'  => 'ok',
                     'value' => get_string('ok'));
             $controls .= html_writer::empty_tag('input', $attributes);
         } else {
-            $controls .= get_string('youcantdo', 'attforblock'); //You can't do anything
+            $controls = get_string('youcantdo', 'attforblock'); //You can't do anything
         }
         $table->data[0][] = $controls;
 
