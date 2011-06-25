@@ -29,7 +29,7 @@ class mod_attforblock_duration_form extends moodleform {
 		
         $mform->addElement('hidden', 'ids', $ids);
        	$mform->addElement('hidden', 'id', $cm->id);
-        $mform->addElement('hidden', 'action', 'changeduration');
+        $mform->addElement('hidden', 'action', att_sessions_page_params::ACTION_CHANGE_DURATION);
         
         $mform->setDefaults(array('durtime' => array('hours'=>0, 'minutes'=>0)));
 		

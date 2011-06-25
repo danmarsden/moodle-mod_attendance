@@ -185,9 +185,9 @@ class mod_attforblock_renderer extends plugin_renderer_base {
             $table->data[$sess->id][] = $sess->groupid ? $sessdata->groups[$sess->groupid]->name : get_string('commonsession', 'attforblock');
             $table->data[$sess->id][] = $dta['date'];
             $table->data[$sess->id][] = $dta['time'];
-            $table->data[$sess->id][] = empty($sess->description) ? get_string('nodescription', 'attforblock') : $sess->description;
+            $table->data[$sess->id][] = $sess->description;
             $table->data[$sess->id][] = $dta['actions'];
-            $table->data[$sess->id][] = html_writer::checkbox('sessid', $sess->id, false);
+            $table->data[$sess->id][] = html_writer::checkbox('sessid[]', $sess->id, false);
         }
 
         return html_writer::table($table);
@@ -240,8 +240,9 @@ class mod_attforblock_renderer extends plugin_renderer_base {
                 get_string('hiddensessions', 'attforblock').': '.$sessdata->hiddensessionscount);
 
         if ($sessdata->perm->can_manage()) {
-            $options = array('deleteselected' => get_string('delete'),
-                    'changeduration' => get_string('changeduration', 'attforblock'));
+            $options = array(
+                        att_sessions_page_params::ACTION_DELETE_SELECTED => get_string('delete'),
+                        att_sessions_page_params::ACTION_CHANGE_DURATION => get_string('changeduration', 'attforblock'));
             $controls = html_writer::select($options, 'action');
             $attributes = array(
                     'type'  => 'submit',
@@ -292,7 +293,7 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         $sessinfo = $date.' '.$time;
         $sessinfo .= html_writer::empty_tag('br');
         $sessinfo .= html_writer::empty_tag('br');
-        $sessinfo .= empty($sess->description) ? get_string('nodescription', 'attforblock') : $sess->description;
+        $sessinfo .= $sess->description;
 
         return $sessinfo;
     }
@@ -608,7 +609,7 @@ class mod_attforblock_renderer extends plugin_renderer_base {
             $row->cells[] = $i;
             $row->cells[] = userdate($sess->sessdate, get_string('strftimedmyw', 'attforblock'));
             $row->cells[] = $this->construct_time($sess->sessdate, $sess->duration);
-            $row->cells[] = empty($sess->description) ? get_string('nodescription', 'attforblock') : $sess->description;
+            $row->cells[] = $sess->description;
             if (isset($sess->statusid)) {
                 $row->cells[] = $userdata->statuses[$sess->statusid]->description;
                 $row->cells[] = $sess->remarks;

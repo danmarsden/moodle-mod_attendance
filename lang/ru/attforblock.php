@@ -96,6 +96,7 @@ $string['noofdayslate'] = 'Опозданий';
 $string['noofdayspresent'] = 'Вы присутствовали';
 $string['nosessiondayselected'] = 'Не выбран день занятия';
 $string['nosessionexists'] = 'В данном курсе отсутствуют занятия. Сначала добавьте их';
+$string['nosessionsselected'] = 'Не выбрано ни одного занятия';
 $string['notfound'] = 'Элемент курса - \"Посещаемость\" не найден в данном курсе!';
 $string['olddate'] = 'Старая дата';
 $string['period'] = 'Периодичность';

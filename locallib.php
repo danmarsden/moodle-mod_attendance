@@ -329,9 +329,14 @@ class attforblock {
 
     private $currentgroup;
 
-    private $sessioninfo;
 
     private $statuses;
+
+    // Cache
+
+    // array by sessionid
+    private $sessioninfo = array();
+
     // arrays by userid
     private $usertakensesscount = array();
     private $userstatusesstat = array();
@@ -480,7 +485,13 @@ class attforblock {
                 'cgroup'    => $this->get_current_group());
         $sessions = $DB->get_records_select('attendance_sessions', $where, $params, 'sessdate asc');
         foreach ($sessions as $sess) {
-            $sess->description = file_rewrite_pluginfile_urls($sess->description, 'pluginfile.php', $this->context->id, 'mod_attforblock', 'session', $sess->id);
+            if (empty($sess->description)) {
+                $sess->description = get_string('nodescription', 'attforblock');
+            }
+            else {
+                $sess->description = file_rewrite_pluginfile_urls($sess->description,
+                        'pluginfile.php', $this->context->id, 'mod_attforblock', 'session', $sess->id);
+            }
         }
 
         return $sessions;
@@ -814,12 +825,36 @@ class attforblock {
     public function get_session_info($sessionid) {
         global $DB;
 
-        if (!isset($this->sessioninfo))
-            $this->sessioninfo = $DB->get_record('attendance_sessions', array('id' => $sessionid));
-            $this->sessioninfo->description = file_rewrite_pluginfile_urls($this->sessioninfo->description,
-                        'pluginfile.php', $this->context->id, 'mod_attforblock', 'session', $this->sessioninfo->id);
+        if (!array_key_exists($sessionid, $this->sessioninfo))
+            $this->sessioninfo[$sessionid] = $DB->get_record('attendance_sessions', array('id' => $sessionid));
+            if (empty($this->sessioninfo[$sessionid]->description)) {
+                $this->sessioninfo[$sessionid]->description = get_string('nodescription', 'attforblock');
+            }
+            else {
+                $this->sessioninfo[$sessionid]->description = file_rewrite_pluginfile_urls($this->sessioninfo[$sessionid]->description,
+                            'pluginfile.php', $this->context->id, 'mod_attforblock', 'session', $this->sessioninfo[$sessionid]->id);
+            }
 
-        return $this->sessioninfo;
+        return $this->sessioninfo[$sessionid];
+    }
+
+    public function get_sessions_info($sessionids) {
+        global $DB;
+
+        list($sql, $params) = $DB->get_in_or_equal($sessionids);
+        $sessions = $DB->get_records_select('attendance_sessions', "id $sql", $params, 'sessdate asc');
+
+        foreach ($sessions as $sess) {
+            if (empty($sess->description)) {
+                $sess->description = get_string('nodescription', 'attforblock');
+            }
+            else {
+                $sess->description = file_rewrite_pluginfile_urls($sess->description,
+                            'pluginfile.php', $this->context->id, 'mod_attforblock', 'session', $sess->id);
+            }
+        }
+        
+        return $sessions;
     }
 
     public function get_session_log($sessionid) {
@@ -890,7 +925,7 @@ class attforblock {
 
         foreach ($userids as $userid) {
             $grades[$userid]->userid = $userid;
-            $grades[$userid]->rawgrade = $this->get_user_grade($userid) / $this->get_user_max_grade($userid) * 100;
+            $grades[$userid]->rawgrade = calc_user_grade_percent($this->get_user_grade($userid), $this->get_user_max_grade($userid));
         }
 
         return grade_update('mod/attforblock', $this->course->id, 'mod', 'attforblock',
@@ -922,10 +957,39 @@ class attforblock {
                 'edate'     => $this->pageparams->enddate);
         $sessions = $DB->get_records_sql($sql, $params);
         foreach ($sessions as $sess) {
-            $sess->description = file_rewrite_pluginfile_urls($sess->description, 'pluginfile.php', $this->context->id, 'mod_attforblock', 'session', $sess->id);
+            if (empty($sess->description)) {
+                $sess->description = get_string('nodescription', 'attforblock');
+            }
+            else {
+                $sess->description = file_rewrite_pluginfile_urls($sess->description,
+                        'pluginfile.php', $this->context->id, 'mod_attforblock', 'session', $sess->id);
+            }
         }
 
         return $sessions;
+    }
+
+    public function delete_sessions($sessionsids) {
+        global $DB;
+
+        list($sql, $params) = $DB->get_in_or_equal($sessionsids);
+        $DB->delete_records_select('attendance_log', "sessionid $sql", $params);
+        $DB->delete_records_list('attendance_sessions', 'id', $sessionsids);
+
+        // TODO: log
+    }
+
+    public function change_sessions_duration($sessionsids, $duration) {
+        global $DB;
+
+        $now = time();
+        $sessions = $DB->get_records_list('attendance_sessions', 'id', $sessionsids);
+        foreach ($sessions as $sess) {
+            $sess->duration = $duration;
+            $sess->timemodified = $now;
+            $DB->update_record('attendance_sessions', $sess);
+        }
+        // TODO: log
     }
 }
 
@@ -1013,19 +1077,26 @@ function get_user_courses_attendances($userid) {
     return $DB->get_records_sql($sql, $params);
 }
 
+function calc_user_grade_percent($grade, $maxgrade) {
+    if ($maxgrade == 0)
+        return 0;
+    else
+        return $grade / $maxgrade * 100;
+}
+
 function update_all_users_grades($attid, $course, $context) {
     global $COURSE;
 
     $grades = array();
 
-    $userids = get_enrolled_users($context, 'mod/attforblock:canbelisted', 0, 'u.id');
+    $userids = array_keys(get_enrolled_users($context, 'mod/attforblock:canbelisted', 0, 'u.id'));
 
     $statuses = get_statuses($attid);
     foreach ($userids as $userid) {
         $grades[$userid]->userid = $userid;
         $userstatusesstat = get_user_statuses_stat($attid, $course->startdate, $userid);
         $usertakensesscount = get_user_taken_sessions_count($attid, $course->startdate, $userid);
-        $grades[$userid]->rawgrade = get_user_grade($userstatusesstat, $statuses) / get_user_max_grade($usertakensesscount, $statuses) * 100;
+        $grades[$userid]->rawgrade = calc_user_grade_percent(get_user_grade($userstatusesstat, $statuses), get_user_max_grade($usertakensesscount, $statuses));
     }
 
     return grade_update('mod/attforblock', $course->id, 'mod', 'attforblock',

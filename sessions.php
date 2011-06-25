@@ -44,7 +44,6 @@ switch ($att->pageparams->action) {
                 redirect($url, get_string('sessionadded','attforblock'));
             }
         }
-
         break;
     case att_sessions_page_params::ACTION_UPDATE:
 		$sessionid	= required_param('sessionid', PARAM_INT);
@@ -62,6 +61,92 @@ switch ($att->pageparams->action) {
 
             redirect($att->url_manage(), get_string('sessionupdated','attforblock'));
         }
+        break;
+    case att_sessions_page_params::ACTION_DELETE:
+		$sessionid	= required_param('sessionid', PARAM_INT);
+		$confirm    = optional_param('confirm', NULL, PARAM_INT);
+
+        if (isset($confirm)) {
+            $att->delete_sessions(array($sessionid));
+            update_all_users_grades($att->id, $att->course, $att->context);
+            redirect($att->url_manage(), get_string('sessiondeleted','attforblock'));
+        }
+
+        $sessinfo = $att->get_session_info($sessionid);
+
+        $message = get_string('deletecheckfull', '', get_string('session', 'attforblock'));
+        $message .= str_repeat(html_writer::empty_tag('br'), 2);
+        $message .= userdate($sessinfo->sessdate, get_string('strftimedmyhm', 'attforblock'));
+        $message .= html_writer::empty_tag('br');
+        $message .= $sessinfo->description;
+
+        $params = array('action' => $att->pageparams->action, 'sessionid' => $sessionid, 'confirm' => 1);
+
+        echo $OUTPUT->header();
+        echo $OUTPUT->heading(get_string('attendanceforthecourse','attforblock').' :: ' .$course->fullname);
+        echo $OUTPUT->confirm($message, $att->url_sessions($params), $att->url_manage());
+        echo $OUTPUT->footer();
+        exit;
+    case att_sessions_page_params::ACTION_DELETE_SELECTED:
+		$confirm    = optional_param('confirm', NULL, PARAM_INT);
+
+        if (isset($confirm)) {
+    		$sessionsids = required_param('sessionsids', PARAM_ALPHANUMEXT);
+            $sessionsids = explode('_', $sessionsids);
+
+            $att->delete_sessions($sessionsids);
+            update_all_users_grades($att->id, $att->course, $att->context);
+            redirect($att->url_manage(), get_string('sessiondeleted','attforblock'));
+        }
+
+		$fromform = data_submitted();
+        // nothing selected
+        if (!isset($fromform->sessid))
+            print_error ('nosessionsselected','attforblock', $att->url_manage());
+
+        $sessionsinfo = $att->get_sessions_info($fromform->sessid);
+
+        $message = get_string('deletecheckfull', '', get_string('session', 'attforblock'));
+        $message .= html_writer::empty_tag('br');
+        foreach ($sessionsinfo as $sessinfo) {
+            $message .= html_writer::empty_tag('br');
+            $message .= userdate($sessinfo->sessdate, get_string('strftimedmyhm', 'attforblock'));
+            $message .= html_writer::empty_tag('br');
+            $message .= $sessinfo->description;
+        }
+
+        $sessionsids = implode('_', $fromform->sessid);
+        $params = array('action' => $att->pageparams->action, 'sessionsids' => $sessionsids, 'confirm' => 1);
+
+        echo $OUTPUT->header();
+        echo $OUTPUT->heading(get_string('attendanceforthecourse','attforblock').' :: ' .$course->fullname);
+        echo $OUTPUT->confirm($message, $att->url_sessions($params), $att->url_manage());
+        echo $OUTPUT->footer();
+        exit;
+    case att_sessions_page_params::ACTION_CHANGE_DURATION:
+		$fromform = data_submitted();
+        $slist = isset($fromform->sessid) ? implode('_', $fromform->sessid) : '';
+
+        $url = $att->url_sessions(array('action' => att_sessions_page_params::ACTION_CHANGE_DURATION));
+        $formparams['ids'] = $slist;
+		$mform = new mod_attforblock_duration_form($url, $formparams);
+
+	    if ($mform->is_cancelled()) {
+	    	redirect($att->url_manage());
+	    }
+
+        if ($mform->is_submitted()) {
+            $formdata = $mform->get_data();
+
+            $sessionsids = explode('_', $fromform->ids);
+            $duration = $formdata->durtime['hours']*HOURSECS + $formdata->durtime['minutes']*MINSECS;
+            $att->change_sessions_duration($sessionsids, $duration);
+            redirect($att->url_manage(), get_string('sessionupdated','attforblock'));
+        }
+        
+        if ($slist === '')
+            print_error ('nosessionsselected','attforblock', $att->url_manage());
+
         break;
 }
 
