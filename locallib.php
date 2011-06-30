@@ -651,34 +651,22 @@ class attforblock {
         return $this->currentgroup;
     }
 
-    public function add_session_from_form_data($formdata) {
+    public function add_sessions($sessions) {
         global $DB;
-        
-        $duration = $formdata->durtime['hours']*HOURSECS + $formdata->durtime['minutes']*MINSECS;
 
-        $rec->courseid = $this->course->id;
-        $rec->attendanceid = $this->id;
-        $rec->sessdate = $formdata->sessiondate;
-        $rec->duration = $duration;
-        $rec->description = $formdata->sdescription['text'];
-        $rec->descriptionformat = $formdata->sdescription['format'];
-        $rec->timemodified = time();
-        
-        if ($formdata->sessiontype == self::SESSION_COMMON) {
-            $rec->id = $DB->insert_record('attendance_sessions', $rec);
-            $description = file_save_draft_area_files($formdata->sdescription['itemid'],
-                        $this->context->id, 'mod_attforblock', 'session', $rec->id,
-                        array('subdirs' => false, 'maxfiles' => -1, 'maxbytes' => 0), $formdata->sdescription['text']);
-            $DB->set_field('attendance_sessions', 'description', $description, array('id' => $rec->id));
-        } else {
-            foreach ($formdata->groups as $groupid) {
-                $rec->groupid = $groupid;
-                $rec->id = $DB->insert_record('attendance_sessions', $rec);
-                $description = file_save_draft_area_files($formdata->sdescription['itemid'],
-                            $this->context->id, 'mod_attforblock', 'session', $rec->id,
-                            array('subdirs' => false, 'maxfiles' => -1, 'maxbytes' => 0), $formdata->sdescription['text']);
-                $DB->set_field('attendance_sessions', 'description', $description, array('id' => $rec->id));
-            }
+        $sessionsids = array();
+
+        foreach ($sessions as $sess) {
+            $sess->attendanceid = $this->id;
+
+            $sid = $DB->insert_record('attendance_sessions', $sess);
+            $description = file_save_draft_area_files($sess->descriptionitemid,
+                        $this->context->id, 'mod_attforblock', 'session', $sid,
+                        array('subdirs' => false, 'maxfiles' => -1, 'maxbytes' => 0),
+                        $sess->description);
+            $DB->set_field('attendance_sessions', 'description', $description, array('id' => $sid));
+
+            $sessionsids[] = $sid;
         }
         // TODO: log
         //add_to_log($course->id, 'attendance', 'one session added', 'mod/attforblock/manage.php?id='.$id, $user->lastname.' '.$user->firstname);
@@ -714,7 +702,7 @@ class attforblock {
 		foreach($formdata as $key => $value) {
 			if(substr($key, 0, 4) == 'user') {
 				$sid = substr($key, 4);
-				$sesslog[$sid] = new Object();
+				$sesslog[$sid] = new stdClass();
 				$sesslog[$sid]->studentid = $sid;
 				$sesslog[$sid]->statusid = $value;
 				$sesslog[$sid]->statusset = $statuses;
@@ -979,7 +967,7 @@ class attforblock {
         // TODO: log
     }
 
-    public function change_sessions_duration($sessionsids, $duration) {
+    public function update_sessions_duration($sessionsids, $duration) {
         global $DB;
 
         $now = time();

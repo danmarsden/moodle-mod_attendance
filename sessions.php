@@ -35,14 +35,9 @@ switch ($att->pageparams->action) {
 		$mform = new mod_attforblock_add_form($url, $formparams);
         
         if ($mform->is_submitted()) {
-            $formdata = $mform->get_data();
-            if (isset($formdata->addmultiply)) {
-                notice(get_string('sessionsgenerated','attforblock'), $url);
-            }
-            else {
-                $att->add_session_from_form_data($formdata);
-                redirect($url, get_string('sessionadded','attforblock'));
-            }
+            $sessions = construct_sessions_data_for_add($mform->get_data());
+            $att->add_sessions($sessions);
+            redirect($url, get_string('sessionsgenerated','attforblock'));
         }
         break;
     case att_sessions_page_params::ACTION_UPDATE:
@@ -140,7 +135,7 @@ switch ($att->pageparams->action) {
 
             $sessionsids = explode('_', $fromform->ids);
             $duration = $formdata->durtime['hours']*HOURSECS + $formdata->durtime['minutes']*MINSECS;
-            $att->change_sessions_duration($sessionsids, $duration);
+            $att->update_sessions_duration($sessionsids, $duration);
             redirect($att->url_manage(), get_string('sessionupdated','attforblock'));
         }
         
@@ -159,5 +154,81 @@ echo $output->render($tabs);
 $mform->display();
 
 echo $OUTPUT->footer();
+
+function construct_sessions_data_for_add($formdata) {
+    global $CFG;
+
+    $duration = $formdata->durtime['hours']*HOURSECS + $formdata->durtime['minutes']*MINSECS;
+    $now = time();
+
+    $sessions = array();
+    if (isset($formdata->addmultiply)) {
+        $startdate = $formdata->sessiondate;
+        $starttime = $startdate - usergetmidnight($startdate);
+        $enddate = $formdata->sessionenddate + DAYSECS; // because enddate in 0:0am
+
+        if ($enddate < $startdate) return NULL;
+
+        $days = (int)ceil(($enddate - $startdate) / DAYSECS);
+
+        // Getting first day of week
+        $sdate = $startdate;
+        $dinfo = usergetdate($sdate);
+        if ($CFG->calendar_startwday === '0') { //week start from sunday
+            $startweek = $startdate - $dinfo['wday'] * DAYSECS; //call new variable
+        } else {
+            $wday = $dinfo['wday'] === 0 ? 7 : $dinfo['wday'];
+            $startweek = $startdate - ($wday-1) * DAYSECS;
+        }
+
+        $wdaydesc = array(0=>'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
+
+        while ($sdate < $enddate) {
+            if($sdate < $startweek + WEEKSECS) {
+                $dinfo = usergetdate($sdate);
+                if(key_exists($wdaydesc[$dinfo['wday']], $formdata->sdays)) {
+                    $sess->sessdate =  usergetmidnight($sdate) + $starttime;
+                    $sess->duration = $duration;
+                    $sess->descriptionitemid = $formdata->sdescription['itemid'];
+                    $sess->description = $formdata->sdescription['text'];
+                    $sess->descriptionformat = $formdata->sdescription['format'];
+                    $sess->timemodified = $now;
+
+                    fill_groupid($formdata, &$sessions, $sess);
+                }
+                $sdate += DAYSECS;
+            } else {
+                $startweek += WEEKSECS * $formdata->period;
+                $sdate = $startweek;
+            }
+        }
+    } else {
+        $sess->sessdate = $formdata->sessiondate;
+        $sess->duration = $duration;
+        $sess->descriptionitemid = $formdata->sdescription['itemid'];
+        $sess->description = $formdata->sdescription['text'];
+        $sess->descriptionformat = $formdata->sdescription['format'];
+        $sess->timemodified = $now;
+
+        fill_groupid($formdata, &$sessions, $sess);
+    }
+
+    return $sessions;
+}
+
+function fill_groupid($formdata, $sessions, $sess) {
+    if ($formdata->sessiontype == attforblock::SESSION_COMMON) {
+        $sess = clone $sess;
+        $sess->groupid = 0;
+        $sessions[] = $sess;
+    }
+    else {
+        foreach ($formdata->groups as $groupid) {
+            $sess = clone $sess;
+            $sess->groupid = $groupid;
+            $sessions[] = $sess;
+        }
+    }
+}
 
 ?>
