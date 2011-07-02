@@ -84,6 +84,8 @@ class attforblock_filter_controls implements renderable {
     /** @var int current view mode */
     public $pageparams;
 
+    public $cm;
+
     public $curdate;
 
     public $prevcur;
@@ -99,6 +101,8 @@ class attforblock_filter_controls implements renderable {
         global $PAGE;
 
         $this->pageparams = $att->pageparams;
+
+        $this->cm = $att->cm;
 
         $this->curdate = $att->pageparams->curdate;
 
@@ -170,7 +174,7 @@ class attforblock_filter_controls implements renderable {
  * Represents info about attendance sessions taking into account view parameters.
  *
  */
-class attforblock_sessions_manage_data implements renderable {
+class attforblock_manage_data implements renderable {
     /** @var array of sessions*/
     public $sessions;
 
@@ -205,24 +209,15 @@ class attforblock_sessions_manage_data implements renderable {
         $this->att = $att;
     }
 
-    public function url_take($sessionid, $grouptype=NULL) {
-        $params = array('sessionid' => $sessionid);
-        $url = new moodle_url($this->att->url_take(), $params);
-        if (isset($grouptype))
-            $url->param('grouptype', $grouptype);
-
-        return $url;
+    public function url_take($sessionid, $grouptype) {
+        return url_helpers::url_take($this->att, $sessionid, $grouptype);
     }
 
     /**
      * Must be called without or with both parameters
      */
     public function url_sessions($sessionid=NULL, $action=NULL) {
-        $url = new moodle_url($this->att->url_sessions());
-        if (isset($sessionid) && isset($action))
-            $url->params(array('sessionid' => $sessionid, 'action' => $action));
-
-        return $url;
+        return url_helpers::url_sessions($this->att, $sessionid, $action);
     }
 }
 
@@ -295,7 +290,7 @@ class attforblock_take_data implements renderable {
     }
 
     public function url_view($params=array()) {
-        return new moodle_url($this->att->url_view($params), $params);
+        return url_helpers::url_view($this->att, $params);
     }
 
     public function url_path() {
@@ -354,7 +349,7 @@ class attforblock_user_data implements renderable {
 
             $this->filtercontrols = new attforblock_filter_controls($att);
 
-            $this->sessionslog = $att->get_user_filtered_sessions_log($userid);
+            $this->sessionslog = $att->get_user_filtered_sessions_log_extended($userid);
         }
         else {
             $this->coursesatts = get_user_courses_attendances($userid);
@@ -401,6 +396,115 @@ class attforblock_user_data implements renderable {
 
     public function url() {
         return new moodle_url($this->urlpath, $this->urlparams);
+    }
+}
+
+class attforblock_report_data implements renderable {
+    public $perm;
+    public $pageparams;
+
+    public $users;
+
+    public $groups;
+
+    public $sessions;
+
+    public $statuses;
+    // includes disablrd/deleted statuses
+    public $allstatuses;
+
+    public $gradable;
+
+    public $decimalpoints;
+
+    public $usersgroups = array();
+
+    public $sessionslog = array();
+
+    public $usersstats = array();
+
+    public $grades = array();
+
+    public $maxgrades = array();
+
+    private $att;
+
+    public function  __construct(attforblock $att) {
+        global $CFG;
+
+        $this->perm = $att->perm;
+        $this->pageparams = $att->pageparams;
+
+        $this->users = $att->get_users($att->pageparams->group);
+
+        $this->groups = groups_get_all_groups($att->course->id);
+
+        $this->sessions = $att->get_filtered_sessions();
+
+        $this->statuses = $att->get_statuses();
+        $this->allstatuses = $att->get_statuses(false);
+        
+        $this->gradable = $att->grade > 0;
+
+        if (!$this->decimalpoints = grade_get_setting($att->course->id, 'decimalpoints')) {
+            $this->decimalpoints = $CFG->grade_decimalpoints;
+        }
+
+        foreach ($this->users as $user) {
+            $this->usersgroups[$user->id] = groups_get_all_groups($att->course->id, $user->id);
+
+            $this->sessionslog[$user->id] = $att->get_user_filtered_sessions_log($user->id);
+
+            $this->usersstats[$user->id] = $att->get_user_statuses_stat($user->id);
+
+            if ($this->gradable) {
+                $this->grades[$user->id] = $att->get_user_grade($user->id);
+                $this->maxgrades[$user->id] = $att->get_user_max_grade($user->id);
+            }
+        }
+
+        $this->att = $att;
+    }
+
+    public function url_take($sessionid, $grouptype) {
+        return url_helpers::url_take($this->att, $sessionid, $grouptype);
+    }
+
+    public function url_view($params=array()) {
+        return url_helpers::url_view($this->att, $params);
+    }
+
+    public function url($params=array()) {
+        $params = array_merge($params, $this->pageparams->get_significant_params());
+
+        return $this->att->url_report($params);
+    }
+
+}
+
+class url_helpers {
+    public static function url_take($att, $sessionid, $grouptype) {
+        $params = array('sessionid' => $sessionid);
+        if (isset($grouptype))
+            $params['grouptype'] = $grouptype;
+
+        return $att->url_take($params);
+    }
+
+    /**
+     * Must be called without or with both parameters
+     */
+    public static function url_sessions($att, $sessionid=NULL, $action=NULL) {
+        if (isset($sessionid) && isset($action))
+            $params = array('sessionid' => $sessionid, 'action' => $action);
+        else
+            $params = array();
+
+        return $att->url_sessions($params);
+    }
+
+    public static function url_view($att, $params=array()) {
+        return $att->url_view($params);
     }
 }
 

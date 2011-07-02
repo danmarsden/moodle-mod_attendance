@@ -70,6 +70,9 @@ class mod_attforblock_renderer extends plugin_renderer_base {
 
                     return html_writer::tag('div', $output, array('class' => 'groupselector'));
                 }
+                break;
+            case att_page_with_filter_controls::SELECTOR_GROUP:
+                return groups_print_activity_menu($fcontrols->cm, $fcontrols->url(), true);
         }
 
         return '';
@@ -143,10 +146,10 @@ class mod_attforblock_renderer extends plugin_renderer_base {
     /**
      * Renders attendance sessions managing table
      *
-     * @param attforblock_sessions_manage_data $sessdata to display
+     * @param attforblock_manage_data $sessdata to display
      * @return string html code
      */
-    protected function render_attforblock_sessions_manage_data(attforblock_sessions_manage_data $sessdata) {
+    protected function render_attforblock_manage_data(attforblock_manage_data $sessdata) {
         // TODO: nosessionexists
         // TODO: log
         $o = $this->render_sess_manage_table($sessdata) . $this->render_sess_manage_control($sessdata);
@@ -157,7 +160,7 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         return $o;
     }
 
-    protected function render_sess_manage_table(attforblock_sessions_manage_data $sessdata) {
+    protected function render_sess_manage_table(attforblock_manage_data $sessdata) {
         $this->page->requires->js('/mod/attforblock/attforblock.js');
         $this->page->requires->js_init_call('M.mod_attforblock.init_manage');
 
@@ -193,7 +196,7 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         return html_writer::table($table);
     }
 
-    private function construct_date_time_actions(attforblock_sessions_manage_data $sessdata, $sess) {
+    private function construct_date_time_actions(attforblock_manage_data $sessdata, $sess) {
         $actions = '';
 
         $date = userdate($sess->sessdate, get_string('strftimedmyw', 'attforblock'));
@@ -230,7 +233,7 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         return array('date' => $date, 'time' => $time, 'actions' => $actions);
     }
 
-    protected function render_sess_manage_control(attforblock_sessions_manage_data $sessdata) {
+    protected function render_sess_manage_control(attforblock_manage_data $sessdata) {
         $table = new html_table();
         $table->attributes['class'] = ' ';
         $table->width = '100%';
@@ -430,16 +433,16 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         return html_writer::table($table);
     }
 
-    private function construct_fullname_head(attforblock_take_data $takedata) {
+    private function construct_fullname_head($data) {
         global $CFG;
 
-        if ($takedata->pageparams->sort == att_take_page_params::SORT_LASTNAME)
-            $firstname = html_writer::link($takedata->url(array('sort' => att_take_page_params::SORT_FIRSTNAME)), get_string('firstname'));
+        if ($data->pageparams->sort == SORT_LASTNAME)
+            $firstname = html_writer::link($data->url(array('sort' => SORT_FIRSTNAME)), get_string('firstname'));
         else
             $firstname = get_string('firstname');
 
-        if ($takedata->pageparams->sort == att_take_page_params::SORT_FIRSTNAME)
-            $lastname = html_writer::link($takedata->url(array('sort' => att_take_page_params::SORT_LASTNAME)), get_string('lastname'));
+        if ($data->pageparams->sort == SORT_FIRSTNAME)
+            $lastname = html_writer::link($data->url(array('sort' => SORT_LASTNAME)), get_string('lastname'));
         else
             $lastname = get_string('lastname');
 
@@ -459,7 +462,13 @@ class mod_attforblock_renderer extends plugin_renderer_base {
             $celldata['colspan'] = count($takedata->statuses) + 1;
             $celldata['class'] = 'userwithoutenrol';
         }
-        elseif ($user->enrolmentstatus == ENROL_USER_SUSPENDED) {
+        elseif ($user->enrolmentend and $user->enrolmentend < $takedata->sessioninfo->sessdate) {
+            $celldata['text'] = get_string('enrolmentend', 'attforblock', userdate($user->enrolmentend, '%d.%m.%Y'));
+            $celldata['colspan'] = count($takedata->statuses) + 1;
+            $celldata['class'] = 'userwithoutenrol';
+        }
+        // no enrolmentend and ENROL_USER_SUSPENDED
+        elseif (!$user->enrolmentend and $user->enrolmentstatus == ENROL_USER_SUSPENDED) {
             $celldata['text'] = get_string('enrolmentsuspended', 'attforblock');
             $celldata['colspan'] = count($takedata->statuses) + 1;
             $celldata['class'] = 'userwithoutenrol';
@@ -614,12 +623,12 @@ class mod_attforblock_renderer extends plugin_renderer_base {
                 $row->cells[] = $userdata->statuses[$sess->statusid]->description;
                 $row->cells[] = $sess->remarks;
             }
-            elseif ($userdata->user->enrolmentstart && $sess->sessdate < $userdata->user->enrolmentstart) {
+            elseif ($sess->sessdate < $userdata->user->enrolmentstart) {
                 $cell = new html_table_cell(get_string('enrolmentstart', 'attforblock', userdate($userdata->user->enrolmentstart, '%d.%m.%Y')));
                 $cell->colspan = 2;
                 $row->cells[] = $cell;
             }
-            elseif ($userdata->user->enrolmentend && $sess->sessdate > $userdata->user->enrolmentend) {
+            elseif ($userdata->user->enrolmentend and $sess->sessdate > $userdata->user->enrolmentend) {
                 $cell = new html_table_cell(get_string('enrolmentend', 'attforblock', userdate($userdata->user->enrolmentend, '%d.%m.%Y')));
                 $cell->colspan = 2;
                 $row->cells[] = $cell;
@@ -641,6 +650,125 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         $time = html_writer::tag('nobr', $starttime . ($duration > 0 ? ' - ' . $endtime : ''));
 
         return $time;
+    }
+
+    protected function render_attforblock_report_data(attforblock_report_data $reportdata) {
+        $table = new html_table();
+
+        $table->attributes['class'] = 'generaltable attwidth';
+
+        // user picture
+        $table->head[] = '';
+        $table->align[] = 'left';
+        $table->size[] = '1px';
+
+        $table->head[] = $this->construct_fullname_head($reportdata);
+        $table->align[] = 'left';
+        $table->size[] = '';
+
+        foreach ($reportdata->sessions as $sess) {
+            $sesstext = userdate($sess->sessdate, get_string('strftimedm', 'attforblock'));
+            $sesstext .= html_writer::empty_tag('br');
+            $sesstext .= userdate($sess->sessdate, '('.get_string('strftimehm', 'attforblock').')');
+            if (is_null($sess->lasttaken) and $reportdata->perm->can_take() or $reportdata->perm->can_change())
+                $sesstext = html_writer::link($reportdata->url_take($sess->id, $sess->groupid), $sesstext);
+            $sesstext .= html_writer::empty_tag('br');
+            $sesstext .= $sess->groupid ? $reportdata->groups[$sess->groupid]->name : get_string('commonsession', 'attforblock');
+
+            $table->head[] = $sesstext;
+            $table->align[] = 'center';
+            $table->size[] = '1px';
+        }
+        
+        foreach ($reportdata->statuses as $status) {
+            $table->head[] = $status->acronym;
+            $table->align[] = 'center';
+            $table->size[] = '1px';
+        }
+
+        if ($reportdata->gradable) {
+            $table->head[] = get_string('grade');
+            $table->align[] = 'center';
+            $table->size[] = '1px';
+        }
+
+        foreach ($reportdata->users as $user) {
+            $row = new html_table_row();
+
+            $row->cells[] = $this->output->user_picture($user);
+            $row->cells[] = html_writer::link($reportdata->url_view(array('studentid' => $user->id)), fullname($user));
+
+            $cell = null;
+            foreach ($reportdata->sessions as $sess) {
+                if (array_key_exists($sess->id, $reportdata->sessionslog[$user->id])) {
+                    $statusid = $reportdata->sessionslog[$user->id][$sess->id]->statusid;
+                    if (array_key_exists($statusid, $reportdata->statuses)) {
+                        $row->cells[] = $reportdata->statuses[$statusid]->acronym;
+                    } else {
+                        $row->cells[] = html_writer::tag('s', $reportdata->allstatuses[$statusid]->acronym);
+                    }
+                } else {
+                    if ($user->enrolmentstart > $sess->sessdate) {
+                        $starttext = get_string('enrolmentstart', 'attforblock', userdate($user->enrolmentstart, '%d.%m.%Y'));
+                        $this->construct_report_cell($starttext, $cell);
+                    }
+                    elseif ($user->enrolmentend and $user->enrolmentend < $sess->sessdate) {
+                        $endtext = get_string('enrolmentend', 'attforblock', userdate($user->enrolmentend, '%d.%m.%Y'));
+                        $this->construct_report_cell($endtext, $cell);
+                    }
+                    // no enrolmentend and ENROL_USER_SUSPENDED
+                    elseif (!$user->enrolmentend and $user->enrolmentstatus == ENROL_USER_SUSPENDED) {
+                        $suspendext = get_string('enrolmentsuspended', 'attforblock', userdate($user->enrolmentend, '%d.%m.%Y'));
+                        $this->construct_report_cell($suspendext, $cell);
+                    }
+                    else {
+                        if ($cell) {
+                            $row->cells[] = $cell;
+                            $cell = null;
+                        }
+
+                        if ($sess->groupid == 0 or array_key_exists($sess->groupid, $reportdata->usersgroups[$user->id]))
+                            $row->cells[] = '?';
+                        else
+                            $row->cells[] = '';
+                    }
+                }
+            }
+            if ($cell) $row->cells[] = $cell;
+
+            foreach ($reportdata->statuses as $status) {
+                if (array_key_exists($status->id, $reportdata->usersstats[$user->id]))
+                    $row->cells[] = $reportdata->usersstats[$user->id][$status->id]->stcnt;
+                else
+                    // no attendance data for this $status => no statistic for this status
+                    $row->cells[] = 0;
+            }
+
+            if ($reportdata->gradable) {
+                $row->cells[] = $reportdata->grades[$user->id].' / '.$reportdata->maxgrades[$user->id];
+            }
+
+            $table->data[] = $row;
+        }
+
+        return html_writer::table($table);
+    }
+
+    private function construct_report_cell($text, &$cell) {
+        if (is_null($cell)) {
+            $cell = new html_table_cell($text);
+            $cell->colspan = 1;
+        }
+        else {
+            if ($cell->text != $text) {
+                $row->cells[] = $cell;
+                $cell = new html_table_cell($text);
+                $cell->colspan = 1;
+            }
+            else
+                $cell->colspan++;
+
+        }
     }
 }
 ?>

@@ -16,8 +16,8 @@ $pageparams = new att_manage_page_params();
 
 $id                         = required_param('id', PARAM_INT);
 $from                       = optional_param('from', NULL, PARAM_ACTION);
-$pageparams ->view          = optional_param('view', NULL, PARAM_INT);
-$pageparams ->curdate       = optional_param('curdate', NULL, PARAM_INT);
+$pageparams->view           = optional_param('view', NULL, PARAM_INT);
+$pageparams->curdate        = optional_param('curdate', NULL, PARAM_INT);
 
 $cm             = get_coursemodule_from_id('attforblock', $id, 0, false, MUST_EXIST);
 $course         = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
@@ -57,7 +57,7 @@ $PAGE->navbar->add($att->name);
 $output = $PAGE->get_renderer('mod_attforblock');
 $tabs = new attforblock_tabs($att, attforblock_tabs::TAB_SESSIONS);
 $filtercontrols = new attforblock_filter_controls($att);
-$sesstable = new attforblock_sessions_manage_data($att);
+$sesstable = new attforblock_manage_data($att);
 
 /// Output starts here
 

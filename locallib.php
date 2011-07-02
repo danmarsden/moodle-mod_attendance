@@ -11,6 +11,9 @@ define('VIEW_MONTHS', 3);
 define('VIEW_ALLTAKEN', 4);
 define('VIEW_ALL', 5);
 
+define('SORT_LASTNAME', 1);
+define('SORT_FIRSTNAME', 2);
+
 class attforblock_permissions {
     private $canview;
     private $canviewreports;
@@ -44,6 +47,10 @@ class attforblock_permissions {
             $this->canviewreports = has_capability('mod/attforblock:viewreports', $this->context);
 
         return $this->canviewreports;
+    }
+
+    public function require_view_reports_capability() {
+        require_capability('mod/attforblock:viewreports', $this->context);
     }
 
     public function can_take() {
@@ -239,9 +246,6 @@ class att_take_page_params {
 
     const DEFAULT_VIEW_MODE     = self::SORTED_LIST;
 
-    const SORT_LASTNAME         = 1;
-    const SORT_FIRSTNAME        = 2;
-
 	public $sessionid;
     public $grouptype;
     public $group;
@@ -255,7 +259,7 @@ class att_take_page_params {
 
     public function init() {
         if (!isset($this->group)) $this->group = 0;
-        if (!isset($this->sort)) $this->sort = self::SORT_LASTNAME;
+        if (!isset($this->sort)) $this->sort = SORT_LASTNAME;
         $this->init_view_mode();
         $this->init_gridcols();
     }
@@ -284,12 +288,38 @@ class att_take_page_params {
         $params['sessionid'] = $this->sessionid;
         $params['grouptype'] = $this->grouptype;
         if ($this->group) $params['group'] = $this->group;
-        if ($this->sort != self::SORT_LASTNAME) $params['sort'] = $this->sort;
+        if ($this->sort != SORT_LASTNAME) $params['sort'] = $this->sort;
         if (isset($this->copyfrom)) $params['copyfrom'] = $this->copyfrom;
 
         return $params;
     }
 }
+
+class att_report_page_params extends att_page_with_filter_controls {
+    public $group;
+	public $sort;
+
+    public function  __construct() {
+        $this->selectortype = self::SELECTOR_GROUP;
+    }
+
+    public function init($courseid) {
+        parent::init($courseid);
+        
+        if (!isset($this->group)) $this->group = 0;
+        if (!isset($this->sort)) $this->sort = SORT_LASTNAME;
+    }
+    
+    public function get_significant_params() {
+        $params = array();
+
+        //if ($this->group) $params['group'] = $this->group;
+        if ($this->sort != SORT_LASTNAME) $params['sort'] = $this->sort;
+
+        return $params;
+    }
+}
+
 
 class attforblock {
     const SESSION_COMMON        = 0;
@@ -516,8 +546,8 @@ class attforblock {
     /**
      * @return moodle_url of report.php for attendance instance
      */
-    public function url_report() {
-        $params = array('id' => $this->cm->id);
+    public function url_report($params=array()) {
+        $params = array_merge(array('id' => $this->cm->id), $params);
         return new moodle_url('/mod/attforblock/report.php', $params);
     }
 
@@ -540,8 +570,8 @@ class attforblock {
     /**
      * @return moodle_url of attendances.php for attendance instance
      */
-    public function url_take() {
-        $params = array('id' => $this->cm->id);
+    public function url_take($params=array()) {
+        $params = array_merge(array('id' => $this->cm->id), $params);
         return new moodle_url('/mod/attforblock/take.php', $params);
     }
 
@@ -745,7 +775,7 @@ class attforblock {
         //fields we need from the user table
         $userfields = user_picture::fields('u');
 
-        if (isset($this->pageparams->sort) and ($this->pageparams->sort == att_take_page_params::SORT_FIRSTNAME)) {
+        if (isset($this->pageparams->sort) and ($this->pageparams->sort == SORT_FIRSTNAME)) {
             $orderby = "u.firstname ASC, u.lastname ASC";
         }
         else {
@@ -924,10 +954,42 @@ class attforblock {
         global $DB;
 
         if ($this->pageparams->startdate && $this->pageparams->enddate) {
-            $where = "ats.attendanceid = :aid AND ats.sessdate >= :csdate AND 
+            $where = "ats.attendanceid = :aid AND ats.sessdate >= :csdate AND
                       ats.sessdate >= :sdate AND ats.sessdate < :edate";
         } else {
-            $where = "AND ats.attendanceid = :aid AND ats.sessdate >= :csdate";
+            $where = "ats.attendanceid = :aid AND ats.sessdate >= :csdate";
+        }
+
+        $sql = "SELECT ats.id, ats.sessdate, ats.groupid, al.statusid
+                  FROM {attendance_sessions} ats
+                  JOIN {attendance_log} al
+                    ON ats.id = al.sessionid AND al.studentid = :uid
+                 WHERE $where
+              ORDER BY ats.sessdate ASC";
+
+        $params = array(
+                'uid'       => $userid,
+                'aid'       => $this->id,
+                'csdate'    => $this->course->startdate,
+                'sdate'     => $this->pageparams->startdate,
+                'edate'     => $this->pageparams->enddate);
+        $sessions = $DB->get_records_sql($sql, $params);
+
+        return $sessions;
+    }
+
+    public function get_user_filtered_sessions_log_extended($userid) {
+        global $DB;
+
+        $groups = array_keys(groups_get_all_groups($this->course->id, $userid));
+        $groups[] = 0;
+        list($gsql, $gparams) = $DB->get_in_or_equal($groups, SQL_PARAMS_NAMED, 'gid0');
+
+        if ($this->pageparams->startdate && $this->pageparams->enddate) {
+            $where = "ats.attendanceid = :aid AND ats.sessdate >= :csdate AND 
+                      ats.sessdate >= :sdate AND ats.sessdate < :edate AND ats.groupid $gsql";
+        } else {
+            $where = "ats.attendanceid = :aid AND ats.sessdate >= :csdate AND ats.groupid $gsql";
         }
 
         $sql = "SELECT ats.id, ats.sessdate, ats.duration, ats.description, al.statusid, al.remarks
@@ -943,6 +1005,7 @@ class attforblock {
                 'csdate'    => $this->course->startdate,
                 'sdate'     => $this->pageparams->startdate,
                 'edate'     => $this->pageparams->enddate);
+        $params = array_merge($params, $gparams);
         $sessions = $DB->get_records_sql($sql, $params);
         foreach ($sessions as $sess) {
             if (empty($sess->description)) {
