@@ -85,6 +85,11 @@ class attforblock_permissions {
         return $this->canchangepreferences;
     }
 
+    public function require_change_preferences_capability() {
+        require_capability('mod/attforblock:changepreferences', $this->context);
+    }
+
+
     public function can_export() {
         if (is_null($this->canexport))
             $this->canexport = has_capability('mod/attforblock:export', $this->context);
@@ -319,6 +324,29 @@ class att_report_page_params extends att_page_with_filter_controls {
         return $params;
     }
 }
+
+class att_preferences_page_params {
+    const ACTION_ADD              = 1;
+    const ACTION_DELETE           = 2;
+    const ACTION_HIDE             = 3;
+    const ACTION_SHOW             = 4;
+    const ACTION_SAVE             = 5;
+
+    /** @var int view mode of taking attendance page*/
+    public $action;
+
+    public $statusid;
+
+    public function get_significant_params() {
+        $params = array();
+
+        if (isset($this->action)) $params['action'] = $this->action;
+        if (isset($this->statusid)) $params['statusid'] = $this->statusid;
+
+        return $params;
+    }
+}
+
 
 
 class attforblock {
@@ -562,9 +590,9 @@ class attforblock {
     /**
      * @return moodle_url of attsettings.php for attendance instance
      */
-    public function url_settings() {
-        $params = array('id' => $this->cm->id);
-        return new moodle_url('/mod/attforblock/attsettings.php', $params);
+    public function url_preferences($params=array()) {
+        $params = array_merge(array('id' => $this->cm->id), $params);
+        return new moodle_url('/mod/attforblock/preferences.php', $params);
     }
 
     /**
@@ -1042,6 +1070,59 @@ class attforblock {
         }
         // TODO: log
     }
+
+    public function remove_status($statusid) {
+        global $DB;
+
+        $DB->set_field('attendance_statuses', 'deleted', 1, array('id' => $statusid));
+    }
+
+    public function add_status($acronym, $description, $grade) {
+        global $DB;
+
+        if ($acronym && $description) {
+            $rec = new stdClass();
+            $rec->courseid = $this->course->id;
+            $rec->attendanceid = $this->id;
+            $rec->acronym = $acronym;
+            $rec->description = $description;
+            $rec->grade = $grade;
+            $DB->insert_record('attendance_statuses', $rec);
+
+            // TODO: log
+            //add_to_log($course->id, 'attendance', 'setting added', 'mod/attforblock/attsettings.php?course='.$course->id, $user->lastname.' '.$user->firstname);
+        } else {
+            print_error('cantaddstatus', 'attforblock', $this->url_preferences());
+        }
+    }
+
+    public function update_status($statusid, $acronym, $description, $grade, $visible) {
+        global $DB;
+
+        $updated = array();
+
+        $status = new stdClass();
+        $status->id = $statusid;
+        if ($acronym) {
+            $status->acronym = $acronym;
+            $updated[] = $acronym;
+        }
+        if ($description) {
+            $status->description = $description;
+            $updated[] = $description;
+        }
+        if (isset($grade)) {
+            $status->grade = $grade;
+            $updated[] = $grade;
+        }
+        if (isset($visible)) {
+            $status->visible = $visible;
+            $updated[] = $visible ? get_string('show') : get_string('hide');
+        }
+        $DB->update_record('attendance_statuses', $status);
+
+        // TODO: log
+    }
 }
 
 
@@ -1152,6 +1233,12 @@ function update_all_users_grades($attid, $course, $context) {
 
     return grade_update('mod/attforblock', $course->id, 'mod', 'attforblock',
                         $attid, 0, $grades);
+}
+
+function has_logs_for_status($statusid) {
+    global $DB;
+
+    return $DB->count_records('attendance_log', array('statusid'=> $statusid)) > 0;
 }
 
 ?>

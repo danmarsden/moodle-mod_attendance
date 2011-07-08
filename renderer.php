@@ -161,7 +161,6 @@ class mod_attforblock_renderer extends plugin_renderer_base {
     }
 
     protected function render_sess_manage_table(attforblock_manage_data $sessdata) {
-        $this->page->requires->js('/mod/attforblock/attforblock.js');
         $this->page->requires->js_init_call('M.mod_attforblock.init_manage');
 
         $table = new html_table();
@@ -770,5 +769,95 @@ class mod_attforblock_renderer extends plugin_renderer_base {
 
         }
     }
+
+    protected function render_attforblock_preferences_data(attforblock_preferences_data $prefdata) {
+        $this->page->requires->js('/mod/attforblock/module.js');
+
+        $table = new html_table();
+        $table->width = '100%';
+        $table->head = array('#',
+                             get_string('acronym', 'attforblock'),
+                             get_string('description'),
+                             get_string('grade'),
+                             get_string('action'));
+        $table->align = array('center', 'center', 'center', 'center', 'center', 'center');
+
+        $i = 1;
+        foreach ($prefdata->statuses as $st) {
+            $table->data[$i][] = $i;
+            $table->data[$i][] = $this->construct_text_input('acronym['.$st->id.']', 2, 2, $st->acronym);
+            $table->data[$i][] = $this->construct_text_input('description['.$st->id.']', 30, 30, $st->description);
+            $table->data[$i][] = $this->construct_text_input('grade['.$st->id.']', 4, 4, $st->grade);
+            $table->data[$i][] = $this->construct_preferences_actions_icons($st, $prefdata);
+
+            $i++;
+        }
+
+        $table->data[$i][] = '*';
+        $table->data[$i][] = $this->construct_text_input('newacronym', 2, 2);
+        $table->data[$i][] = $this->construct_text_input('newdescription', 30, 30);
+        $table->data[$i][] = $this->construct_text_input('newgrade', 4, 4);
+        $table->data[$i][] = $this->construct_preferences_button(get_string('add', 'attforblock'), att_preferences_page_params::ACTION_ADD);
+
+        $o = html_writer::tag('h1', get_string('myvariables','attforblock'));
+        $o .= html_writer::table($table);
+        $o .= html_writer::input_hidden_params($prefdata->url(array(), false));
+        $o .= $this->construct_preferences_button(get_string('update', 'attforblock'), att_preferences_page_params::ACTION_SAVE);
+        $o = html_writer::tag('form', $o, array('id' => 'preferencesform', 'method' => 'post', 'action' => $prefdata->url(array(), false)->out_omit_querystring()));
+        $o = $this->output->container($o, 'generalbox attwidth');
+        
+        return $o;
+    }
+
+    private function construct_text_input($name, $size, $maxlength, $value='') {
+        $attributes = array(
+                'type'      => 'text',
+                'name'      => $name,
+                'size'      => $size,
+                'maxlength' => $maxlength,
+                'value'     => $value);
+        return html_writer::empty_tag('input', $attributes);
+    }
+
+    private function construct_preferences_actions_icons($st, $prefdata) {
+        global $OUTPUT;
+
+        if ($st->visible) {
+            $params = array(
+                    'action' => att_preferences_page_params::ACTION_HIDE,
+                    'statusid' => $st->id);
+            $showhideicon = $OUTPUT->action_icon(
+                    $prefdata->url($params),
+                    new pix_icon("t/hide", get_string('hide')));
+        }
+        else {
+            $params = array(
+                    'action' => att_preferences_page_params::ACTION_SHOW,
+                    'statusid' => $st->id);
+            $showhideicon = $OUTPUT->action_icon(
+                    $prefdata->url($params),
+                    new pix_icon("t/show", get_string('show')));
+        }
+        if (!$st->haslogs) {
+            $params = array(
+                    'action' => att_preferences_page_params::ACTION_DELETE,
+                    'statusid' => $st->id);
+            $deleteicon = $OUTPUT->action_icon(
+                    $prefdata->url($params),
+                    new pix_icon("t/delete", get_string('delete')));
+        }
+        else $deleteicon = '';
+
+        return $showhideicon . $deleteicon;
+    }
+
+    private function construct_preferences_button($text, $action) {
+        $attributes = array(
+                'type'      => 'submit',
+                'value'     => $text,
+                'onclick'   => 'M.mod_attforblock.set_preferences_action('.$action.')');
+        return html_writer::empty_tag('input', $attributes);
+    }
+
 }
 ?>

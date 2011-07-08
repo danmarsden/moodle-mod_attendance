@@ -115,3 +115,7 @@
 .path-mod-attforblock table.list td.c0 {
     text-align: right;
 }
+
+#page-mod-attforblock-preferences .generalbox {
+    text-align: center;
+}

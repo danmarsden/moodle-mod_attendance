@@ -20,11 +20,11 @@ require_once(dirname(__FILE__).'/locallib.php');
  *
  */
 class attforblock_tabs implements renderable {
-    const TAB_SESSIONS  = 1;
-    const TAB_ADD       = 2;
-    const TAB_REPORT    = 3;
-    const TAB_EXPORT    = 4;
-    const TAB_SETTINGS  = 5;
+    const TAB_SESSIONS      = 1;
+    const TAB_ADD           = 2;
+    const TAB_REPORT        = 3;
+    const TAB_EXPORT        = 4;
+    const TAB_PREFERENCES   = 5;
 
     public $currenttab;
 
@@ -71,7 +71,7 @@ class attforblock_tabs implements renderable {
         }
 
         if ($this->att->perm->can_change_preferences()) {
-            $toprow[] = new tabobject(self::TAB_SETTINGS, $this->att->url_settings()->out(),
+            $toprow[] = new tabobject(self::TAB_PREFERENCES, $this->att->url_preferences()->out(),
                         get_string('settings','attforblock'));
         }
 
@@ -480,6 +480,27 @@ class attforblock_report_data implements renderable {
         return $this->att->url_report($params);
     }
 
+}
+
+class attforblock_preferences_data implements renderable {
+    public $statuses;
+
+    private $att;
+
+    public function __construct(attforblock $att) {
+        $this->statuses = $att->get_statuses(false);
+
+        foreach ($this->statuses as $st) $st->haslogs = has_logs_for_status ($st->id);
+
+        $this->att = $att;
+    }
+
+    public function url($params=array(), $significant_params=TRUE) {
+        if ($significant_params)
+            $params = array_merge($this->att->pageparams->get_significant_params(), $params);
+
+        return $this->att->url_preferences($params);
+    }
 }
 
 class url_helpers {

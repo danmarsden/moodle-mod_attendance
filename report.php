@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Manage attendance sessions
+ * Attendance report
  *
  * @package    mod
  * @subpackage attforblock
