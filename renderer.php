@@ -126,7 +126,7 @@ class mod_attforblock_renderer extends plugin_renderer_base {
 
     protected function render_view_controls(attforblock_filter_controls $fcontrols) {
         $views[VIEW_ALL] = get_string('all', 'attforblock');
-        $views[VIEW_ALLTAKEN] = get_string('alltaken', 'attforblock');
+        $views[VIEW_ALLPAST] = get_string('allpast', 'attforblock');
         $views[VIEW_MONTHS] = get_string('months', 'attforblock');
         $views[VIEW_WEEKS] = get_string('weeks', 'attforblock');
         $views[VIEW_DAYS] = get_string('days', 'attforblock');

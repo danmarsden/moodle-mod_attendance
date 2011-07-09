@@ -8,7 +8,7 @@ require_once($CFG->libdir . '/gradelib.php');
 define('VIEW_DAYS', 1);
 define('VIEW_WEEKS', 2);
 define('VIEW_MONTHS', 3);
-define('VIEW_ALLTAKEN', 4);
+define('VIEW_ALLPAST', 4);
 define('VIEW_ALL', 5);
 
 define('SORT_LASTNAME', 1);
@@ -89,12 +89,15 @@ class attforblock_permissions {
         require_capability('mod/attforblock:changepreferences', $this->context);
     }
 
-
     public function can_export() {
         if (is_null($this->canexport))
             $this->canexport = has_capability('mod/attforblock:export', $this->context);
 
         return $this->canexport;
+    }
+
+    public function require_export_capability() {
+        require_capability('mod/attforblock:export', $this->context);
     }
 
     public function can_be_listed() {
@@ -190,7 +193,7 @@ class att_page_with_filter_controls {
                 $this->startdate = make_timestamp($year, $mon);
                 $this->enddate = make_timestamp($year, $mon + 1);
                 break;
-            case VIEW_ALLTAKEN:
+            case VIEW_ALLPAST:
                 $this->startdate = 1;
                 $this->enddate = time();
                 break;
