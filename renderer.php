@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Attendance module renderering methods are defined here
+ * Attendance module renderering methods
  *
  * @package    mod
  * @subpackage attforblock
@@ -12,6 +12,7 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once(dirname(__FILE__).'/locallib.php');
 require_once(dirname(__FILE__).'/renderables.php');
+require_once(dirname(__FILE__).'/renderhelpers.php');
 
 /**
  * Attendance module renderer class
@@ -696,44 +697,8 @@ class mod_attforblock_renderer extends plugin_renderer_base {
 
             $row->cells[] = $this->output->user_picture($user);
             $row->cells[] = html_writer::link($reportdata->url_view(array('studentid' => $user->id)), fullname($user));
-
-            $cell = null;
-            foreach ($reportdata->sessions as $sess) {
-                if (array_key_exists($sess->id, $reportdata->sessionslog[$user->id])) {
-                    $statusid = $reportdata->sessionslog[$user->id][$sess->id]->statusid;
-                    if (array_key_exists($statusid, $reportdata->statuses)) {
-                        $row->cells[] = $reportdata->statuses[$statusid]->acronym;
-                    } else {
-                        $row->cells[] = html_writer::tag('s', $reportdata->allstatuses[$statusid]->acronym);
-                    }
-                } else {
-                    if ($user->enrolmentstart > $sess->sessdate) {
-                        $starttext = get_string('enrolmentstart', 'attforblock', userdate($user->enrolmentstart, '%d.%m.%Y'));
-                        $this->construct_report_cell($starttext, $cell);
-                    }
-                    elseif ($user->enrolmentend and $user->enrolmentend < $sess->sessdate) {
-                        $endtext = get_string('enrolmentend', 'attforblock', userdate($user->enrolmentend, '%d.%m.%Y'));
-                        $this->construct_report_cell($endtext, $cell);
-                    }
-                    // no enrolmentend and ENROL_USER_SUSPENDED
-                    elseif (!$user->enrolmentend and $user->enrolmentstatus == ENROL_USER_SUSPENDED) {
-                        $suspendext = get_string('enrolmentsuspended', 'attforblock', userdate($user->enrolmentend, '%d.%m.%Y'));
-                        $this->construct_report_cell($suspendext, $cell);
-                    }
-                    else {
-                        if ($cell) {
-                            $row->cells[] = $cell;
-                            $cell = null;
-                        }
-
-                        if ($sess->groupid == 0 or array_key_exists($sess->groupid, $reportdata->usersgroups[$user->id]))
-                            $row->cells[] = '?';
-                        else
-                            $row->cells[] = '';
-                    }
-                }
-            }
-            if ($cell) $row->cells[] = $cell;
+            $cellsgenerator = new user_sessions_cells_html_generator($reportdata, $user);
+            $row->cells = array_merge($row->cells, $cellsgenerator->get_cells());
 
             foreach ($reportdata->statuses as $status) {
                 if (array_key_exists($status->id, $reportdata->usersstats[$user->id]))
@@ -751,23 +716,6 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         }
 
         return html_writer::table($table);
-    }
-
-    private function construct_report_cell($text, &$cell) {
-        if (is_null($cell)) {
-            $cell = new html_table_cell($text);
-            $cell->colspan = 1;
-        }
-        else {
-            if ($cell->text != $text) {
-                $row->cells[] = $cell;
-                $cell = new html_table_cell($text);
-                $cell->colspan = 1;
-            }
-            else
-                $cell->colspan++;
-
-        }
     }
 
     protected function render_attforblock_preferences_data(attforblock_preferences_data $prefdata) {

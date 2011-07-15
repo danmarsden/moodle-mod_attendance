@@ -240,7 +240,7 @@ class att_page_with_filter_controls {
                 $this->sesstype = $SESSION->attsessiontype[$this->cm->course];
             }
 
-            $this->calc_sessgroupslist();
+            if (is_null($this->sesstype)) $this->calc_sessgroupslist();
         } elseif ($this->selectortype == self::SELECTOR_GROUP) {
             if ($group == 0) {
                 $SESSION->attsessiontype[$this->cm->course] = self::SESSTYPE_ALL;
@@ -295,6 +295,10 @@ class att_page_with_filter_controls {
             $this->calc_sessgroupslist_sesstype();
 
         return $this->sesstype;
+    }
+
+    public function set_current_sesstype($sesstype) {
+        $this->sesstype = $sesstype;
     }
 }
 

@@ -106,7 +106,7 @@ switch ($att->pageparams->action) {
 		$fromform = data_submitted();
         // nothing selected
         if (!isset($fromform->sessid))
-            print_error ('nosessionsselected','attforblock', $att->url_manage());
+            print_error ('nosessionsselected', 'attforblock', $att->url_manage());
 
         $sessionsinfo = $att->get_sessions_info($fromform->sessid);
 
