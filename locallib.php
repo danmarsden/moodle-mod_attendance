@@ -120,6 +120,10 @@ class att_page_with_filter_controls {
     const SELECTOR_GROUP        = 2;
     const SELECTOR_SESS_TYPE    = 3;
 
+    const SESSTYPE_COMMON       = 0;
+    const SESSTYPE_ALL          = -1;
+    const SESSTYPE_NO_VALUE     = -2;
+
     /** @var int current view mode */
     public $view;
 
@@ -136,10 +140,14 @@ class att_page_with_filter_controls {
 
     protected $defaultview      = VIEW_WEEKS;
 
-    private $courseid;
+    private $cm;
 
-    public function init($courseid) {
-        $this->courseid = $courseid;
+    private $sessgroupslist;
+
+    private $sesstype;
+
+    public function init($cm) {
+        $this->cm = $cm;
         $this->init_view();
         $this->init_curdate();
         $this->init_start_end_date();
@@ -149,10 +157,10 @@ class att_page_with_filter_controls {
         global $SESSION;
 
         if (isset($this->view)) {
-            $SESSION->attcurrentattview[$this->courseid] = $this->view;
+            $SESSION->attcurrentattview[$this->cm->course] = $this->view;
         }
-        elseif (isset($SESSION->attcurrentattview[$this->courseid])) {
-            $this->view = $SESSION->attcurrentattview[$this->courseid];
+        elseif (isset($SESSION->attcurrentattview[$this->cm->course])) {
+            $this->view = $SESSION->attcurrentattview[$this->cm->course];
         }
         else {
             $this->view = $this->defaultview;
@@ -163,17 +171,17 @@ class att_page_with_filter_controls {
         global $SESSION;
 
         if (isset($this->curdate)) {
-            $SESSION->attcurrentattdate[$this->courseid] = $this->curdate;
+            $SESSION->attcurrentattdate[$this->cm->course] = $this->curdate;
         }
-        elseif (isset($SESSION->attcurrentattdate[$this->courseid])) {
-            $this->curdate = $SESSION->attcurrentattdate[$this->courseid];
+        elseif (isset($SESSION->attcurrentattdate[$this->cm->course])) {
+            $this->curdate = $SESSION->attcurrentattdate[$this->cm->course];
         }
         else {
             $this->curdate = time();
         }
     }
 
-    private function init_start_end_date() {
+    public function init_start_end_date() {
         $date = usergetdate($this->curdate);
         $mday = $date['mday'];
         $wday = $date['wday'];
@@ -202,6 +210,91 @@ class att_page_with_filter_controls {
                 $this->enddate = 0;
                 break;
         }
+    }
+
+    private function calc_sessgroupslist_sesstype() {
+        global $USER, $SESSION;
+        
+        if (!array_key_exists('attsessiontype', $SESSION)) {
+            $SESSION->attsessiontype = array();
+        }
+        elseif (!array_key_exists($this->cm->course, $SESSION->attsessiontype)) {
+            $SESSION->attsessiontype[$this->cm->course] = self::SESSTYPE_ALL;
+        }
+
+        $group = optional_param('group', self::SESSTYPE_NO_VALUE, PARAM_INT);
+        if ($this->selectortype == self::SELECTOR_SESS_TYPE) {
+            if ($group > self::SESSTYPE_NO_VALUE) {
+                $SESSION->attsessiontype[$this->cm->course] = $group;
+                if ($group > self::SESSTYPE_ALL) {
+                    // set activegroup in $SESSION
+                    groups_get_activity_group($this->cm, true);
+                } else {
+                    // reset activegroup in $SESSION
+                    unset($SESSION->activegroup[$this->cm->course][VISIBLEGROUPS][$this->cm->groupingid]);
+                    unset($SESSION->activegroup[$this->cm->course]['aag'][$this->cm->groupingid]);
+                    unset($SESSION->activegroup[$this->cm->course][SEPARATEGROUPS][$this->cm->groupingid]);
+                }
+                $this->sesstype = $group;
+            } else {
+                $this->sesstype = $SESSION->attsessiontype[$this->cm->course];
+            }
+
+            $this->calc_sessgroupslist();
+        } elseif ($this->selectortype == self::SELECTOR_GROUP) {
+            if ($group == 0) {
+                $SESSION->attsessiontype[$this->cm->course] = self::SESSTYPE_ALL;
+                $this->sesstype = self::SESSTYPE_ALL;
+            }
+            elseif ($group > 0) {
+                $SESSION->attsessiontype[$this->cm->course] = $group;
+                $this->sesstype = $group;
+            }
+            else {
+                $this->sesstype = $SESSION->attsessiontype[$this->cm->course];
+            }
+        }
+    }
+    
+    private function calc_sessgroupslist() {
+        global $PAGE;
+        
+        $this->sessgroupslist = array();
+        $groupmode = groups_get_activity_groupmode($this->cm);
+        if ($groupmode == NOGROUPS)
+            return;
+
+        if ($groupmode == VISIBLEGROUPS or has_capability('moodle/site:accessallgroups', $PAGE->context)) {
+            $allowedgroups = groups_get_all_groups($this->cm->course, 0, $this->cm->groupingid);
+        } else {
+            $allowedgroups = groups_get_all_groups($this->cm->course, $USER->id, $this->cm->groupingid);
+        }
+
+        if ($allowedgroups) {
+            if ($groupmode == VISIBLEGROUPS or $this->perm->can_access_all_groups()) {
+                $this->sessgroupslist[self::SESSTYPE_ALL] = get_string('all', 'attforblock');
+            }
+            if ($groupmode == VISIBLEGROUPS) {
+                $this->sessgroupslist[self::SESSTYPE_COMMON] = get_string('commonsessions', 'attforblock');
+            }
+            foreach ($allowedgroups as $group) {
+                $this->sessgroupslist[$group->id] = format_string($group->name);
+            }
+        }
+    }
+
+    public function get_sess_groups_list() {
+        if (is_null($this->sessgroupslist))
+            $this->calc_sessgroupslist_sesstype();
+
+        return $this->sessgroupslist;
+    }
+
+    public function get_current_sesstype() {
+        if (is_null($this->sesstype))
+            $this->calc_sessgroupslist_sesstype();
+
+        return $this->sesstype;
     }
 }
 
@@ -311,10 +404,10 @@ class att_report_page_params extends att_page_with_filter_controls {
         $this->selectortype = self::SELECTOR_GROUP;
     }
 
-    public function init($courseid) {
-        parent::init($courseid);
+    public function init($cm) {
+        parent::init($cm);
         
-        if (!isset($this->group)) $this->group = 0;
+        if (!isset($this->group)) $this->group = $this->get_current_sesstype() > 0 ? $this->get_current_sesstype() : 0;
         if (!isset($this->sort)) $this->sort = SORT_LASTNAME;
     }
     
@@ -356,10 +449,6 @@ class attforblock {
     const SESSION_COMMON        = 0;
     const SESSION_GROUP         = 1;
 
-    const SELECTOR_COMMON       = 0;
-    const SELECTOR_ALL          = -1;
-    const SELECTOR_NOT_EXISTS   = -2;
-
     /** @var stdclass course module record */
     public $cm;
 
@@ -386,11 +475,6 @@ class attforblock {
 
     private $groupmode;
 
-    private $sessgroupslist;
-
-    private $currentgroup;
-
-
     private $statuses;
 
     // Cache
@@ -413,7 +497,7 @@ class attforblock {
      * @param stdClass $course   Course record from {course} table
      * @param stdClass $context  The context of the workshop instance
      */
-    public function __construct(stdclass $dbrecord, stdclass $cm, stdclass $course, stdclass $context=NULL, $view_params=NULL) {
+    public function __construct(stdclass $dbrecord, stdclass $cm, stdclass $course, stdclass $context=NULL, $pageparams=NULL) {
         foreach ($dbrecord as $field => $value) {
             if (property_exists('attforblock', $field)) {
                 $this->{$field} = $value;
@@ -430,9 +514,16 @@ class attforblock {
             $this->context = $context;
         }
 
-        $this->pageparams = $view_params;
+        $this->pageparams = $pageparams;
 
         $this->perm = new attforblock_permissions($this->context);
+    }
+
+    public function get_group_mode() {
+        if (is_null($this->groupmode))
+            $this->groupmode = groups_get_activity_groupmode($this->cm);
+
+        return $this->groupmode;
     }
 
     /**
@@ -535,7 +626,7 @@ class attforblock {
         } else {
             $where = "attendanceid = :aid AND sessdate >= :csdate";
         }
-        if ($this->get_current_group() > attforblock::SELECTOR_ALL) {
+        if ($this->pageparams->get_current_sesstype() > att_page_with_filter_controls::SESSTYPE_ALL) {
             $where .= " AND groupid=:cgroup";
         }
         $params = array(
@@ -543,7 +634,7 @@ class attforblock {
                 'csdate'    => $this->course->startdate,
                 'sdate'     => $this->pageparams->startdate,
                 'edate'     => $this->pageparams->enddate,
-                'cgroup'    => $this->get_current_group());
+                'cgroup'    => $this->pageparams->get_current_sesstype());
         $sessions = $DB->get_records_select('attendance_sessions', $where, $params, 'sessdate asc');
         foreach ($sessions as $sess) {
             if (empty($sess->description)) {
@@ -609,107 +700,6 @@ class attforblock {
     public function url_view($params=array()) {
         $params = array_merge(array('id' => $this->cm->id), $params);
         return new moodle_url('/mod/attforblock/view.php', $params);
-    }
-
-    private function calc_groupmode_sessgroupslist_currentgroup(){
-        global $USER, $SESSION;
-
-        $cm = $this->cm;
-
-        $this->get_group_mode();
-
-        if ($this->groupmode == NOGROUPS)
-            return;
-
-        if ($this->groupmode == VISIBLEGROUPS or $this->perm->can_access_all_groups()) {
-            $allowedgroups = groups_get_all_groups($cm->course, 0, $cm->groupingid); // any group in grouping (all if groupings not used)
-            // detect changes related to groups and fix active group
-            if (!empty($SESSION->activegroup[$cm->course][VISIBLEGROUPS][$cm->groupingid])) {
-                if (!array_key_exists($SESSION->activegroup[$cm->course][VISIBLEGROUPS][$cm->groupingid], $allowedgroups)) {
-                    // active group does not exist anymore
-                    unset($SESSION->activegroup[$cm->course][VISIBLEGROUPS][$cm->groupingid]);
-                }
-            }
-            if (!empty($SESSION->activegroup[$cm->course]['aag'][$cm->groupingid])) {
-                if (!array_key_exists($SESSION->activegroup[$cm->course]['aag'][$cm->groupingid], $allowedgroups)) {
-                    // active group does not exist anymore
-                    unset($SESSION->activegroup[$cm->course]['aag'][$cm->groupingid]);
-                }
-            }
-
-        } else {
-            $allowedgroups = groups_get_all_groups($cm->course, $USER->id, $cm->groupingid); // only assigned groups
-            // detect changes related to groups and fix active group
-            if (isset($SESSION->activegroup[$cm->course][SEPARATEGROUPS][$cm->groupingid])) {
-                if ($SESSION->activegroup[$cm->course][SEPARATEGROUPS][$cm->groupingid] == 0) {
-                    if ($allowedgroups) {
-                        // somebody must have assigned at least one group, we can select it now - yay!
-                        unset($SESSION->activegroup[$cm->course][SEPARATEGROUPS][$cm->groupingid]);
-                    }
-                } else {
-                    if (!array_key_exists($SESSION->activegroup[$cm->course][SEPARATEGROUPS][$cm->groupingid], $allowedgroups)) {
-                        // active group not allowed or does not exist anymore
-                        unset($SESSION->activegroup[$cm->course][SEPARATEGROUPS][$cm->groupingid]);
-                    }
-                }
-            }
-        }
-
-        $group = optional_param('group', self::SELECTOR_NOT_EXISTS, PARAM_INT);
-        if (!array_key_exists('attsessiontype', $SESSION)) {
-            $SESSION->attsessiontype = array();
-        }
-        if ($group > self::SELECTOR_NOT_EXISTS) {
-            $SESSION->attsessiontype[$cm->course] = $group;
-        } elseif (!array_key_exists($cm->course, $SESSION->attsessiontype)) {
-            $SESSION->attsessiontype[$cm->course] = self::SELECTOR_ALL;
-        }
-
-        if ($group == self::SELECTOR_ALL) {
-            $this->currentgroup = $group;
-            unset($SESSION->activegroup[$cm->course][VISIBLEGROUPS][$cm->groupingid]);
-            unset($SESSION->activegroup[$cm->course]['aag'][$cm->groupingid]);
-            unset($SESSION->activegroup[$cm->course][SEPARATEGROUPS][$cm->groupingid]);
-        } else {
-            $this->currentgroup = groups_get_activity_group($cm, true);
-            if ($this->currentgroup == 0 and $SESSION->attsessiontype[$cm->course] == self::SELECTOR_ALL) {
-                $this->currentgroup = self::SELECTOR_ALL;
-            }
-        }
-
-        $this->sessgroupslist = array();
-        if ($allowedgroups) {
-            if ($this->groupmode == VISIBLEGROUPS or $this->perm->can_access_all_groups()) {
-                $this->sessgroupslist[self::SELECTOR_ALL] = get_string('all', 'attforblock');
-            }
-            if ($this->groupmode == VISIBLEGROUPS) {
-                $this->sessgroupslist[self::SELECTOR_COMMON] = get_string('commonsessions', 'attforblock');
-            }
-            foreach ($allowedgroups as $group) {
-                $this->sessgroupslist[$group->id] = format_string($group->name);
-            }
-        }
-    }
-
-    public function get_group_mode() {
-        if (is_null($this->groupmode))
-            $this->groupmode = groups_get_activity_groupmode($this->cm);
-
-        return $this->groupmode;
-    }
-
-    public function get_sess_groups_list() {
-        if (is_null($this->sessgroupslist))
-            $this->calc_groupmode_sessgroupslist_currentgroup();
-
-        return $this->sessgroupslist;
-    }
-
-    public function get_current_group() {
-        if (is_null($this->currentgroup))
-            $this->calc_groupmode_sessgroupslist_currentgroup();
-
-        return $this->currentgroup;
     }
 
     public function add_sessions($sessions) {
@@ -804,7 +794,7 @@ class attforblock {
         global $DB;
 
         //fields we need from the user table
-        $userfields = user_picture::fields('u');
+        $userfields = user_picture::fields('u').',u.username';
 
         if (isset($this->pageparams->sort) and ($this->pageparams->sort == SORT_FIRSTNAME)) {
             $orderby = "u.firstname ASC, u.lastname ASC";

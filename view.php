@@ -26,7 +26,7 @@ $attforblock    = $DB->get_record('attforblock', array('id' => $cm->instance), '
 
 require_login($course, true, $cm);
 
-$pageparams->init($course->id);
+$pageparams->init($cm);
 $att = new attforblock($attforblock, $cm, $course, $PAGE->context, $pageparams);
 
 // Not specified studentid for displaying attendance?

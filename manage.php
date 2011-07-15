@@ -25,21 +25,21 @@ $att            = $DB->get_record('attforblock', array('id' => $cm->instance), '
 
 require_login($course, true, $cm);
 
-$pageparams->init($course->id);
+$pageparams->init($cm);
 $att = new attforblock($att, $cm, $course, $PAGE->context, $pageparams);
 if (!$att->perm->can_manage() && !$att->perm->can_take() && !$att->perm->can_change())
-    redirect("view.php?id=$cm->id");
+    redirect($att->url_view());
 
 // if teacher is coming from block, then check for a session exists for today
 if ($from === 'block') {
-    $atts = $att->get_today_sessions();
-    $size = count($atts);
+    $sessions = $att->get_today_sessions();
+    $size = count($sessions);
     if ($size == 1) {
-        $att = reset($atts);
+        $sess = reset($sessions);
         $nottaken = !$att->lasttaken && has_capability('mod/attforblock:takeattendances', $context);
         $canchange = $att->lasttaken && has_capability('mod/attforblock:changeattendances', $context);
         if ($nottaken || $canchange)
-            redirect('attendances.php?id='.$id.'&amp;sessionid='.$att->id.'&amp;grouptype='.$att->groupid);
+            redirect($att->url_take(array('sessionid' => $sess->id, 'grouptype' => $sess->groupid)));
     } elseif ($size > 1) {
         $att->curdate = $today;
         //temporally set $view for single access to page from block

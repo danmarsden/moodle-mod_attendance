@@ -64,7 +64,7 @@ class mod_attforblock_renderer extends plugin_renderer_base {
                 $sessgroups = $fcontrols->get_sess_groups_list();
                 if ($sessgroups) {
                     $select = new single_select($fcontrols->url(), 'group', $sessgroups,
-                                                $fcontrols->get_current_group(), null, 'selectgroup');
+                                                $fcontrols->get_current_sesstype(), null, 'selectgroup');
                     $select->label = get_string('sessions', 'attforblock');
                     $output = $this->output->render($select);
 

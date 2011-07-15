@@ -162,11 +162,11 @@ class attforblock_filter_controls implements renderable {
     }
 
     public function get_sess_groups_list() {
-        return $this->att->get_sess_groups_list();
+        return $this->att->pageparams->get_sess_groups_list();
     }
 
-    public function get_current_group() {
-        return $this->att->get_current_group();
+    public function get_current_sesstype() {
+        return $this->att->pageparams->get_current_sesstype();
     }
 }
 

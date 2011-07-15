@@ -27,7 +27,7 @@ $att            = $DB->get_record('attforblock', array('id' => $cm->instance), '
 
 require_login($course, true, $cm);
 
-$pageparams->init($course->id);
+$pageparams->init($cm);
 $att = new attforblock($att, $cm, $course, $PAGE->context, $pageparams);
 
 $att->perm->require_view_reports_capability();
