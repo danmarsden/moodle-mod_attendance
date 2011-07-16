@@ -170,7 +170,7 @@ function construct_session_full_date_time($datetime, $duration) {
 
 function construct_user_data_stat($stat, $statuses, $gradable, $grade, $maxgrade, $decimalpoints) {
     $stattable = new html_table();
-    $stattable->attributes['class'] = 'list';
+    $stattable->attributes['class'] = 'attlist';
     $row = new html_table_row();
     $row->cells[] = get_string('sessionscompleted','attforblock').':';
     $row->cells[] = $stat['completed'];
@@ -202,6 +202,31 @@ function construct_user_data_stat($stat, $statuses, $gradable, $grade, $maxgrade
     }
 
     return html_writer::table($stattable);
+}
+
+function construct_full_user_stat_html_table($attforblock, $course, $user) {
+        global $CFG;
+
+        $gradeable = $attforblock->grade > 0;
+        $statuses = get_statuses($attforblock->id);
+        $userstatusesstat = get_user_statuses_stat($attforblock->id, $course->startdate, $user->id);
+        $stat['completed'] = get_user_taken_sessions_count($attforblock->id, $course->startdate, $user->id);
+        $stat['statuses'] = $userstatusesstat;
+        if ($gradeable) {
+            $grade = get_user_grade($userstatusesstat, $statuses);
+            $maxgrade = get_user_max_grade(get_user_taken_sessions_count($attforblock->id, $course->startdate, $user->id), $statuses);
+            if (!$decimalpoints = grade_get_setting($course->id, 'decimalpoints')) {
+                $decimalpoints = $CFG->grade_decimalpoints;
+            }
+        }
+        else {
+            $grade = 0;
+            $maxgrade = 0;
+            $decimalpoints = 0;
+        }
+
+		return construct_user_data_stat($stat, $statuses,
+                    $gradeable, $grade, $maxgrade, $decimalpoints);
 }
 
 

@@ -198,26 +198,7 @@ function attforblock_user_complete($course, $user, $mod, $attforblock) {
     require_once($CFG->libdir.'/gradelib.php');
 	
   	if (has_capability('mod/attforblock:canbelisted', $mod->context, $user->id)) {
-        $gradeable = $attforblock->grade > 0;
-        $statuses = get_statuses($attforblock->id);
-        $userstatusesstat = get_user_statuses_stat($attforblock->id, $course->startdate, $user->id);
-        $stat['completed'] = get_user_taken_sessions_count($attforblock->id, $course->startdate, $user->id);
-        $stat['statuses'] = $userstatusesstat;
-        if ($gradeable) {
-            $grade = get_user_grade($userstatusesstat, $statuses);
-            $maxgrade = get_user_max_grade(get_user_taken_sessions_count($attforblock->id, $course->startdate, $user->id), $statuses);
-            if (!$decimalpoints = grade_get_setting($course->id, 'decimalpoints')) {
-                $decimalpoints = $CFG->grade_decimalpoints;
-            }
-        }
-        else {
-            $grade = 0;
-            $maxgrade = 0;
-            $decimalpoints = 0;
-        }
-
-		echo construct_user_data_stat($stat, $statuses,
-                    $gradeable, $grade, $maxgrade, $decimalpoints);
+        echo construct_full_user_stat_html_table($attforblock, $course, $user);
 	}
 
     //return true;

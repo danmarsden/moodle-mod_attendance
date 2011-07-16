@@ -657,8 +657,8 @@ class attforblock {
     /**
      * @return moodle_url of manage.php for attendance instance
      */
-    public function url_manage() {
-        $params = array('id' => $this->cm->id);
+    public function url_manage($params=array()) {
+        $params = array_merge(array('id' => $this->cm->id), $params);
         return new moodle_url('/mod/attforblock/manage.php', $params);
     }
 
