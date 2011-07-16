@@ -103,7 +103,7 @@ class attforblock_permissions {
 
     public function can_be_listed() {
         if (is_null($this->canbelisted))
-            $this->canbelisted = has_capability('mod/attforblock:canbelisted', $this->context);
+            $this->canbelisted = has_capability('mod/attforblock:canbelisted', $this->context, null, false);
 
         return $this->canbelisted;
     }
