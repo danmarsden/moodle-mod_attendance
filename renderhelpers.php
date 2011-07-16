@@ -154,4 +154,18 @@ class user_sessions_cells_text_generator extends user_sessions_cells_generator {
     }
 }
 
+function construct_session_time($datetime, $duration) {
+    $starttime = userdate($datetime, get_string('strftimehm', 'attforblock'));
+    $endtime = userdate($datetime + $duration, get_string('strftimehm', 'attforblock'));
+
+    return $starttime . ($duration > 0 ? ' - ' . $endtime : '');
+}
+
+function construct_session_full_date_time($datetime, $duration) {
+    $sessinfo = userdate($datetime, get_string('strftimedmyw', 'attforblock'));
+    $sessinfo .= ' '.construct_session_time($datetime, $duration);
+
+    return $sessinfo;
+}
+
 ?>

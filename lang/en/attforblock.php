@@ -133,6 +133,7 @@ $string['sessionenddate'] = 'Session end date';
 $string['sessionexist'] = 'Session not added (already exists)!';
 $string['sessions'] = 'Sessions';
 $string['sessionscompleted'] = 'Sessions completed';
+$string['sessionsids'] = 'IDs of sessions: ';
 $string['sessionsgenerated'] = 'Sessions successfully generated';
 $string['sessionstartdate'] = 'Session start date';
 $string['sessiontype'] = 'Session type';

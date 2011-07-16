@@ -44,7 +44,8 @@ $tabs = new attforblock_tabs($att, attforblock_tabs::TAB_REPORT);
 $filtercontrols = new attforblock_filter_controls($att);
 $reportdata = new attforblock_report_data($att);
 
-// TODO: log
+global $USER;
+$att->log('report viewed', null, $USER->firstname.' '.$USER->lastname);
 
 /// Output starts here
 

@@ -151,8 +151,6 @@ class mod_attforblock_renderer extends plugin_renderer_base {
      * @return string html code
      */
     protected function render_attforblock_manage_data(attforblock_manage_data $sessdata) {
-        // TODO: nosessionexists
-        // TODO: log
         $o = $this->render_sess_manage_table($sessdata) . $this->render_sess_manage_control($sessdata);
         $o = html_writer::tag('form', $o, array('method' => 'post', 'action' => $sessdata->url_sessions()->out()));
         $o = $this->output->container($o, 'generalbox attwidth');
@@ -200,7 +198,7 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         $actions = '';
 
         $date = userdate($sess->sessdate, get_string('strftimedmyw', 'attforblock'));
-        $time = $this->construct_time($sess->sessdate ,$sess->duration);
+        $time = $this->construct_time($sess->sessdate, $sess->duration);
         if($sess->lasttaken > 0)
         {
             if ($sessdata->perm->can_change()) {
@@ -645,9 +643,7 @@ class mod_attforblock_renderer extends plugin_renderer_base {
     }
 
     private function construct_time($datetime, $duration) {
-        $starttime = userdate($datetime, get_string('strftimehm', 'attforblock'));
-        $endtime = userdate($datetime + $duration, get_string('strftimehm', 'attforblock'));
-        $time = html_writer::tag('nobr', $starttime . ($duration > 0 ? ' - ' . $endtime : ''));
+        $time = html_writer::tag('nobr', construct_session_time($datetime, $duration));
 
         return $time;
     }

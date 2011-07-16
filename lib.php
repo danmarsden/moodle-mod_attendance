@@ -373,14 +373,6 @@ function attforblock_scale_used ($attforblockid, $scaleid) {
 //as reference.
    
     $return = false;
-
-    //$rec = get_record("attforblock","id","$attforblockid","scale","-$scaleid");
-    //
-    //if (!empty($rec)  && !empty($scaleid)) {
-    //    $return = true;
-    //}
-   
-    return $return;
 }
 
 /**

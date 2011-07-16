@@ -116,6 +116,7 @@ $string['sessionenddate'] = 'Дата завершения занятий';
 $string['sessionexist'] = 'Занятие не добавлено (уже существует)!';
 $string['sessions'] = 'Занятия';
 $string['sessionscompleted'] = 'Прошло занятий';
+$string['sessionsids'] = 'Идентификаторы занятий: ';
 $string['sessionsgenerated'] = 'Занятия успешно созданы';
 $string['sessionstartdate'] = 'Дата начала занятий';
 $string['sessiontype'] = 'Тип занятия';

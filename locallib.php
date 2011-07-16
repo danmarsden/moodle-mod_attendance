@@ -4,6 +4,7 @@ defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 require_once($CFG->libdir . '/gradelib.php');
+require_once(dirname(__FILE__).'/renderhelpers.php');
 
 define('VIEW_DAYS', 1);
 define('VIEW_WEEKS', 2);
@@ -216,7 +217,7 @@ class att_page_with_filter_controls {
         global $USER, $SESSION;
         
         if (!array_key_exists('attsessiontype', $SESSION)) {
-            $SESSION->attsessiontype = array();
+            $SESSION->attsessiontype = array($this->cm->course => self::SESSTYPE_ALL);
         }
         elseif (!array_key_exists($this->cm->course, $SESSION->attsessiontype)) {
             $SESSION->attsessiontype[$this->cm->course] = self::SESSTYPE_ALL;
@@ -709,22 +710,23 @@ class attforblock {
     public function add_sessions($sessions) {
         global $DB;
 
-        $sessionsids = array();
-
         foreach ($sessions as $sess) {
             $sess->attendanceid = $this->id;
 
-            $sid = $DB->insert_record('attendance_sessions', $sess);
+            $sess->id = $DB->insert_record('attendance_sessions', $sess);
             $description = file_save_draft_area_files($sess->descriptionitemid,
-                        $this->context->id, 'mod_attforblock', 'session', $sid,
+                        $this->context->id, 'mod_attforblock', 'session', $sess->id,
                         array('subdirs' => false, 'maxfiles' => -1, 'maxbytes' => 0),
                         $sess->description);
-            $DB->set_field('attendance_sessions', 'description', $description, array('id' => $sid));
-
-            $sessionsids[] = $sid;
+            $DB->set_field('attendance_sessions', 'description', $description, array('id' => $sess->id));
         }
-        // TODO: log
-        //add_to_log($course->id, 'attendance', 'one session added', 'mod/attforblock/manage.php?id='.$id, $user->lastname.' '.$user->firstname);
+
+        $info_array = array();
+        foreach ($sessions as $sess) {
+            $info_array[] = construct_session_full_date_time($sess->sessdate, $sess->duration);
+        }
+
+        $this->log('sessions added', $this->url_manage(), implode(', ', $info_array));
     }
 
     public function update_session_from_form_data($formdata, $sessionid) {
@@ -743,8 +745,10 @@ class attforblock {
         $sess->descriptionformat = $formdata->sdescription['format'];
         $sess->timemodified = time();
         $DB->update_record('attendance_sessions', $sess);
-        // TODO: log
-        // add_to_log($course->id, 'attendance', 'Session updated', 'mod/attforblock/manage.php?id='.$id, $user->lastname.' '.$user->firstname);
+
+        $url = $this->url_sessions(array('sessionid' => $sessionid, 'action' => att_sessions_page_params::ACTION_UPDATE));
+        $info = construct_session_full_date_time($sess->sessdate, $sess->duration);
+        $this->log('session updated', $url, $info);
     }
     
     public function take_from_form_data($formdata) {
@@ -787,7 +791,13 @@ class attforblock {
         $DB->update_record('attendance_sessions', $rec);
 
         $this->update_users_grade(array_keys($sesslog));
-        // TODO: log
+
+        $params = array(
+                'sessionid' => $this->pageparams->sessionid,
+                'grouptype' => $this->pageparams->grouptype);
+        $url = $this->url_take($params);
+        $this->log('attendance taked', $url, $USER->firstname.' '.$USER->lastname);
+
         redirect($this->url_manage(), get_string('attendancesuccess','attforblock'));
     }
 
@@ -1052,7 +1062,7 @@ class attforblock {
         $DB->delete_records_select('attendance_log', "sessionid $sql", $params);
         $DB->delete_records_list('attendance_sessions', 'id', $sessionsids);
 
-        // TODO: log
+        $this->log('sessions deleted', null, get_string('sessionsids', 'attforblock').implode(', ', $sessionsids));
     }
 
     public function update_sessions_duration($sessionsids, $duration) {
@@ -1065,7 +1075,8 @@ class attforblock {
             $sess->timemodified = $now;
             $DB->update_record('attendance_sessions', $sess);
         }
-        // TODO: log
+
+        $this->log('sessions duration updated', $this->url_manage(), get_string('sessionsids', 'attforblock').implode(', ', $sessionsids));
     }
 
     public function remove_status($statusid) {
@@ -1086,8 +1097,7 @@ class attforblock {
             $rec->grade = $grade;
             $DB->insert_record('attendance_statuses', $rec);
 
-            // TODO: log
-            //add_to_log($course->id, 'attendance', 'setting added', 'mod/attforblock/attsettings.php?course='.$course->id, $user->lastname.' '.$user->firstname);
+            $this->log('status added', $this->url_preferences(), $acronym.': '.$description.' ('.$grade.')');
         } else {
             print_error('cantaddstatus', 'attforblock', $this->url_preferences());
         }
@@ -1118,7 +1128,27 @@ class attforblock {
         }
         $DB->update_record('attendance_statuses', $status);
 
-        // TODO: log
+        $this->log('status updated', $this->url_preferences(), implode(' ', $updated));
+    }
+
+    /**
+     * wrapper around {@see add_to_log()}
+     *
+     * @param string $action to be logged
+     * @param moodle_url $url absolute url, if null will be used $this->url_manage()
+     * @param mixed $info additional info, usually id in a table
+     */
+    public function log($action, moodle_url $url = null, $info = null) {
+        if (is_null($url)) {
+            $url = $this->url_manage();
+        }
+
+        if (is_null($info)) {
+            $info = $this->id;
+        }
+
+        $logurl = log_convert_url($url);
+        add_to_log($this->course->id, 'attforblock', $action, $logurl, $info, $this->cm->id);
     }
 }
 
@@ -1236,6 +1266,17 @@ function has_logs_for_status($statusid) {
     global $DB;
 
     return $DB->count_records('attendance_log', array('statusid'=> $statusid)) > 0;
+}
+
+function log_convert_url(moodle_url $fullurl) {
+    static $baseurl;
+
+    if (!isset($baseurl)) {
+        $baseurl = new moodle_url('/mod/attforblock/');
+        $baseurl = $baseurl->out();
+    }
+
+    return substr($fullurl->out(), strlen($baseurl));
 }
 
 ?>
