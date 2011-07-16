@@ -22,13 +22,13 @@ class mod_attforblock_add_form extends moodleform {
             case NOGROUPS:
                 $mform->addElement('static', 'sessiontypedescription', get_string('sessiontype', 'attforblock'),
                                   get_string('commonsession', 'attforblock'));
-                $mform->setHelpButton('sessiontypedescription', array('sessiontypes', get_string('sessiontype','attforblock'), 'attforblock'));
+                $mform->addHelpButton('sessiontypedescription', 'sessiontype', 'attforblock');
                 $mform->addElement('hidden', 'sessiontype', attforblock::SESSION_COMMON);
                 break;
             case SEPARATEGROUPS:
                 $mform->addElement('static', 'sessiontypedescription', get_string('sessiontype', 'attforblock'),
                                   get_string('groupsession', 'attforblock'));
-                $mform->setHelpButton('sessiontypedescription', array('sessiontypes', get_string('sessiontype','attforblock'), 'attforblock'));
+                $mform->addHelpButton('sessiontypedescription', 'sessiontype', 'attforblock');
                 $mform->addElement('hidden', 'sessiontype', attforblock::SESSION_GROUP);
                 break;
             case VISIBLEGROUPS:
