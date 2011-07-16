@@ -168,4 +168,41 @@ function construct_session_full_date_time($datetime, $duration) {
     return $sessinfo;
 }
 
+function construct_user_data_stat($stat, $statuses, $gradable, $grade, $maxgrade, $decimalpoints) {
+    $stattable = new html_table();
+    $stattable->attributes['class'] = 'list';
+    $row = new html_table_row();
+    $row->cells[] = get_string('sessionscompleted','attforblock').':';
+    $row->cells[] = $stat['completed'];
+    $stattable->data[] = $row;
+
+    foreach ($statuses as $st) {
+        $row = new html_table_row();
+        $row->cells[] = $st->description . ':';
+        $row->cells[] = array_key_exists($st->id, $stat['statuses']) ? $stat['statuses'][$st->id]->stcnt : 0;
+
+        $stattable->data[] = $row;
+    }
+
+    if ($gradable) {
+        $row = new html_table_row();
+        $row->cells[] = get_string('attendancegrade','attforblock') . ':';
+        $row->cells[] = $grade . ' / ' . $maxgrade;
+        $stattable->data[] = $row;
+
+        $row = new html_table_row();
+        $row->cells[] = get_string('attendancepercent','attforblock') . ':';
+        if ($maxgrade == 0) {
+            $percent = 0;
+        } else {
+            $percent = $grade / $maxgrade * 100;
+        }
+        $row->cells[] = sprintf("%0.{$decimalpoints}f", $percent);
+        $stattable->data[] = $row;
+    }
+
+    return html_writer::table($stattable);
+}
+
+
 ?>

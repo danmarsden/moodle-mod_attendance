@@ -538,7 +538,7 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         if ($userdata->pageparams->mode == att_view_page_params::MODE_THIS_COURSE) {
             $o .= html_writer::empty_tag('hr');
 
-            $o .= $this->construct_user_data_stat($userdata->stat, $userdata->statuses,
+            $o .= construct_user_data_stat($userdata->stat, $userdata->statuses,
                         $userdata->gradable, $userdata->grade, $userdata->maxgrade, $userdata->decimalpoints);
 
             $o .= $this->render_attforblock_filter_controls($userdata->filtercontrols);
@@ -556,49 +556,13 @@ class mod_attforblock_renderer extends plugin_renderer_base {
                 }
                 $o .= html_writer::tag('h4', $ca->attname);
 
-                $o .= $this->construct_user_data_stat($userdata->stat[$ca->attid], $userdata->statuses[$ca->attid],
+                $o .= construct_user_data_stat($userdata->stat[$ca->attid], $userdata->statuses[$ca->attid],
                             $userdata->gradable[$ca->attid], $userdata->grade[$ca->attid],
                             $userdata->maxgrade[$ca->attid], $userdata->decimalpoints);
             }
         }
 
         return $o;
-    }
-
-    private function construct_user_data_stat($stat, $statuses, $gradable, $grade, $maxgrade, $decimalpoints) {
-        $stattable = new html_table();
-        $stattable->attributes['class'] = 'list';
-        $row = new html_table_row();
-        $row->cells[] = get_string('sessionscompleted','attforblock').':';
-        $row->cells[] = $stat['completed'];
-        $stattable->data[] = $row;
-
-        foreach ($statuses as $st) {
-            $row = new html_table_row();
-            $row->cells[] = $st->description . ':';
-            $row->cells[] = array_key_exists($st->id, $stat['statuses']) ? $stat['statuses'][$st->id]->stcnt : 0;
-
-            $stattable->data[] = $row;
-        }
-
-        if ($gradable) {
-            $row = new html_table_row();
-            $row->cells[] = get_string('attendancegrade','attforblock') . ':';
-            $row->cells[] = $grade . ' / ' . $maxgrade;
-            $stattable->data[] = $row;
-
-            $row = new html_table_row();
-            $row->cells[] = get_string('attendancepercent','attforblock') . ':';
-            if ($maxgrade == 0) {
-                $percent = 0;
-            } else {
-                $percent = $grade / $maxgrade * 100;
-            }
-            $row->cells[] = sprintf("%0.{$decimalpoints}f", $percent);
-            $stattable->data[] = $row;
-        }
-
-        return html_writer::table($stattable);
     }
 
     private function construct_user_sessions_log(attforblock_user_data $userdata) {

@@ -164,17 +164,26 @@ function attforblock_user_outline($course, $user, $mod, $attforblock) {
 /// Used for user activity reports.
 /// $return->time = the time they did it
 /// $return->info = a short text description
+    global $CFG;
 	
-	require_once('locallib.php');
-	
-  	if (isstudent($course->id, $user->id)) {
-	  	if ($sescount = get_attendance($user->id,$course, $attforblock)) {
-	  		$strgrade = get_string('grade');
-	  		$maxgrade = get_maxgrade($user->id, $course,$attforblock);
-	  		$usergrade = get_grade($user->id, $course,$attforblock);
-	  		$percent = get_percent($user->id,$course, $attforblock);
-	  		$result->info = "$strgrade: $usergrade / $maxgrade ($percent%)";
-	  	}
+    require_once(dirname(__FILE__).'/locallib.php');
+    require_once($CFG->libdir.'/gradelib.php');
+
+    $grades = grade_get_grades($course->id, 'mod', 'attforblock', $attforblock->id, $user->id);
+
+    $result = new stdClass();
+    if (!empty($grades->items[0]->grades)) {
+        $grade = reset($grades->items[0]->grades);
+        $result->time = $grade->dategraded;
+    }
+    else
+        $result->time = 0;
+  	if (has_capability('mod/attforblock:canbelisted', $mod->context, $user->id)) {
+        $statuses = get_statuses($attforblock->id);
+        $grade = get_user_grade(get_user_statuses_stat($attforblock->id, $course->startdate, $user->id), $statuses);
+        $maxgrade = get_user_max_grade(get_user_taken_sessions_count($attforblock->id, $course->startdate, $user->id), $statuses);
+
+        $result->info = $grade.' / '.$maxgrade;
   	}
   	
 	return $result;
@@ -183,14 +192,32 @@ function attforblock_user_outline($course, $user, $mod, $attforblock) {
 function attforblock_user_complete($course, $user, $mod, $attforblock) {
 /// Print a detailed representation of what a  user has done with 
 /// a given particular instance of this module, for user activity reports.
+    global $CFG;
 
-	require_once('locallib.php');
+    require_once(dirname(__FILE__).'/renderhelpers.php');
+    require_once($CFG->libdir.'/gradelib.php');
 	
-	if (isstudent($course->id, $user->id)) {
-//        if (! $cm = get_coursemodule_from_instance("attforblock", $attforblock->id, $course->id)) {
-//            error("Course Module ID was incorrect");
-//        }
-		print_user_attendaces($user, $mod, $attforblock, $course);
+  	if (has_capability('mod/attforblock:canbelisted', $mod->context, $user->id)) {
+        $gradeable = $attforblock->grade > 0;
+        $statuses = get_statuses($attforblock->id);
+        $userstatusesstat = get_user_statuses_stat($attforblock->id, $course->startdate, $user->id);
+        $stat['completed'] = get_user_taken_sessions_count($attforblock->id, $course->startdate, $user->id);
+        $stat['statuses'] = $userstatusesstat;
+        if ($gradeable) {
+            $grade = get_user_grade($userstatusesstat, $statuses);
+            $maxgrade = get_user_max_grade(get_user_taken_sessions_count($attforblock->id, $course->startdate, $user->id), $statuses);
+            if (!$decimalpoints = grade_get_setting($course->id, 'decimalpoints')) {
+                $decimalpoints = $CFG->grade_decimalpoints;
+            }
+        }
+        else {
+            $grade = 0;
+            $maxgrade = 0;
+            $decimalpoints = 0;
+        }
+
+		echo construct_user_data_stat($stat, $statuses,
+                    $gradeable, $grade, $maxgrade, $decimalpoints);
 	}
 
     //return true;
