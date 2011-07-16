@@ -5,11 +5,15 @@
 --------
 ABOUT
 --------
-This is version 2.2.x of the "Attendance" module (attforblock). It is still IN DEVELOPMENT
-and should not be considered a stable release unless otherwise noted. 
-It has been tested on Moodle 1.9+, MySQL and PHP 5.2+.
+This is version 2.4.x of the "Attendance" module (attforblock).
+It is still IN DEVELOPMENT and
+should not be considered a stable release unless otherwise noted. 
 
-The "Attendance" module is developed by Dmitry Pupinin, Novosibirsk, Russia.
+2.4.x release is compatible only with Moodle 2.0.
+
+The "Attendance" module is developed by
+    Dmitry Pupinin, Novosibirsk, Russia,
+    Artem Andreev, Taganrog, Russia.
 
 This block may be distributed under the terms of the General Public License
 (see http://www.gnu.org/licenses/gpl.txt for details)
@@ -23,4 +27,6 @@ Only the instructor can update the attendance data. However, a student gets to s
 ----------------
 INSTALLATION
 ----------------
-The attendance follows standard installation procedures. Place the "attendance" directory in your blocks directory, "attforblock" directory in your mod directory. Please delete old language files from your moodledata/lang/en directory if you are upgrading the module. Then visit the Admin page in Moodle to activate it.
+The attendance follows standard installation procedures.
+Place the "attforblock" directory in your mod directory.
+Then visit the Admin page in Moodle to activate it.

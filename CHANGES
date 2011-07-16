@@ -1,3 +1,19 @@
+2011-07-16 andreev.artem
+
+        2.4 beta contains such changes:
+        * compatible only with Moodle 2.0
+        * fully internals rewritten (OOP, renderers, etc)
+        * support all 2.3 features: session types (common and group),
+        interface improvements (sessions filtering by different criteria’s),
+        copy attendance data from same-day sessions,
+        fast session switching for same-day sessions,
+        more than one attendance in the same course,
+        list and grid display modes for take page
+        * enhancement: taken into account information
+        about students enrolment (start/end date) on different pages
+        * enhancement: HTML-editor for session description
+        with ability to add links, files, formatting, etc
+
 2011-01-18  lrlopez
 
         * attendances.php: styles.php:
