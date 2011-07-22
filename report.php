@@ -33,6 +33,7 @@ $att = new attforblock($att, $cm, $course, $PAGE->context, $pageparams);
 $att->perm->require_view_reports_capability();
 
 $PAGE->set_url($att->url_report());
+$PAGE->set_pagelayout('report');
 $PAGE->set_title($course->shortname. ": ".$att->name.' - '.get_string('report','attforblock'));
 $PAGE->set_heading($course->fullname);
 $PAGE->set_cacheable(true);
