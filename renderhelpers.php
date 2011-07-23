@@ -94,6 +94,11 @@ class user_sessions_cells_generator {
 class user_sessions_cells_html_generator extends user_sessions_cells_generator {
     private $cell;
     
+    protected function construct_existing_status_cell($text) {
+        $this->close_open_cell_if_needed();
+        $this->cells[] = $text;
+    }
+
     protected function construct_hidden_status_cell($text) {
         $this->cells[] = html_writer::tag('s', $text);
     }
