@@ -31,7 +31,7 @@ YAHOO.util.Event.onDOMReady(function(){
                 dialog.hide();
             }
 
-            dialog = new YAHOO.widget.Dialog("container", {
+            dialog = new YAHOO.widget.Dialog("attcalendarcontainer", {
                 visible:false,
                 context:["show", "tl", "bl"],
                 buttons:[{text: M.str.attforblock.caltoday, handler: resetHandler, isDefault:true}, {text: M.str.attforblock.calclose, handler: closeHandler}],
