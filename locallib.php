@@ -255,6 +255,8 @@ class att_page_with_filter_controls {
                 $this->sesstype = $SESSION->attsessiontype[$this->cm->course];
             }
         }
+
+        $this->calc_sessgroupslist();
     }
     
     private function calc_sessgroupslist() {
@@ -272,7 +274,7 @@ class att_page_with_filter_controls {
         }
 
         if ($allowedgroups) {
-            if ($groupmode == VISIBLEGROUPS or $this->perm->can_access_all_groups()) {
+            if ($groupmode == VISIBLEGROUPS or has_capability('moodle/site:accessallgroups', $PAGE->context)) {
                 $this->sessgroupslist[self::SESSTYPE_ALL] = get_string('all', 'attforblock');
             }
             if ($groupmode == VISIBLEGROUPS) {
@@ -327,7 +329,7 @@ class att_view_page_params extends att_page_with_filter_controls {
 
 class att_manage_page_params extends att_page_with_filter_controls {
     public function  __construct() {
-        $this->selectortype = self::SELECTOR_SESS_TYPE;
+        $this->selectortype = att_page_with_filter_controls::SELECTOR_SESS_TYPE;
     }
 
     public function get_significant_params() {
