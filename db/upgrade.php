@@ -257,7 +257,7 @@ function xmldb_attforblock_upgrade($oldversion=0) {
             $dbman->add_index($table, $index);
         }
 
-        $sql = "UPDATE {attendance_sessions} AS ses,{attforblock} AS att SET ses.attendanceid=att.id WHERE att.course=ses.courseid";
+        $sql = "UPDATE {attendance_sessions}  SET attendanceid={attforblock}.id FROM {attforblock}  WHERE {attforblock}.course=courseid";
         $DB->execute($sql);
 
         $table = new xmldb_table('attendance_statuses');
@@ -273,7 +273,7 @@ function xmldb_attforblock_upgrade($oldversion=0) {
             $dbman->add_index($table, $index);
         }
 
-        $sql = "UPDATE {attendance_statuses} AS sta,{attforblock} AS att SET sta.attendanceid=att.id WHERE att.course=sta.courseid";
+        $sql = "UPDATE {attendance_statuses}  SET attendanceid={attforblock}.id FROM {attforblock} WHERE {attforblock}.course=courseid";
         $DB->execute($sql);
 
         upgrade_mod_savepoint(true, 2010123003, 'attforblock');
