@@ -43,8 +43,8 @@ switch ($att->pageparams->action) {
         $url = $att->url_sessions(array('action' => att_sessions_page_params::ACTION_ADD));
 		$mform = new mod_attforblock_add_form($url, $formparams);
         
-        if ($mform->is_submitted()) {
-            $sessions = construct_sessions_data_for_add($mform->get_data());
+        if ($formdata = $mform->get_data()) {
+            $sessions = construct_sessions_data_for_add($formdata);
             $att->add_sessions($sessions);
             redirect($url, get_string('sessionsgenerated','attforblock'));
         }
@@ -60,8 +60,8 @@ switch ($att->pageparams->action) {
 	    	redirect($att->url_manage());
 	    }
 
-        if ($mform->is_submitted()) {
-            $att->update_session_from_form_data($mform->get_data(), $sessionid);
+        if ($formdata = $mform->get_data()) {
+            $att->update_session_from_form_data($formdata, $sessionid);
 
             redirect($att->url_manage(), get_string('sessionupdated','attforblock'));
         }
@@ -139,9 +139,7 @@ switch ($att->pageparams->action) {
 	    	redirect($att->url_manage());
 	    }
 
-        if ($mform->is_submitted()) {
-            $formdata = $mform->get_data();
-
+        if ($formdata = $mform->get_data()) {
             $sessionsids = explode('_', $fromform->ids);
             $duration = $formdata->durtime['hours']*HOURSECS + $formdata->durtime['minutes']*MINSECS;
             $att->update_sessions_duration($sessionsids, $duration);
