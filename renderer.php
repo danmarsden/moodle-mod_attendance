@@ -372,18 +372,24 @@ class mod_attforblock_renderer extends plugin_renderer_base {
             $row = new html_table_row();
             $row->cells[] = $i;
             $fullname = html_writer::link($takedata->url_view(array('studentid' => $user->id)), fullname($user));
-            $row->cells[] = $this->output->user_picture($user).$fullname;
+            $fullname = $this->output->user_picture($user).$fullname;
 
-            $celldata = $this->construct_take_user_controls($takedata, $user);
-            if (array_key_exists('colspan', $celldata)) {
-                $cell = new html_table_cell($celldata['text']);
-                $cell->colspan = $celldata['colspan'];
+            $ucdata = $this->construct_take_user_controls($takedata, $user);
+            if (array_key_exists('warning', $ucdata)) {
+                $fullname .= html_writer::empty_tag('br');
+                $fullname .= $ucdata['warning'];
+            }
+            $row->cells[] = $fullname;
+
+            if (array_key_exists('colspan', $ucdata)) {
+                $cell = new html_table_cell($ucdata['text']);
+                $cell->colspan = $ucdata['colspan'];
                 $row->cells[] = $cell;
             }
             else
-                $row->cells = array_merge($row->cells, $celldata['text']);
+                $row->cells = array_merge($row->cells, $ucdata['text']);
 
-            if (array_key_exists('class', $celldata)) $row->attributes['class'] = $celldata['class'];
+            if (array_key_exists('class', $ucdata)) $row->attributes['class'] = $ucdata['class'];
 
             $table->data[] = $row;
         }
@@ -413,11 +419,15 @@ class mod_attforblock_renderer extends plugin_renderer_base {
             $fullname = html_writer::link($takedata->url_view(array('studentid' => $user->id)), fullname($user));
             $celltext .= html_writer::tag('span', $fullname, array('class' => 'fullname'));
             $celltext .= html_writer::empty_tag('br');
-            $celldata = $this->construct_take_user_controls($takedata, $user);
-            $celltext .= is_array($celldata['text']) ? implode('', $celldata['text']) : $celldata['text'];
+            $ucdata = $this->construct_take_user_controls($takedata, $user);
+            $celltext .= is_array($ucdata['text']) ? implode('', $ucdata['text']) : $ucdata['text'];
+            if (array_key_exists('warning', $ucdata)) {
+                $celltext .= html_writer::empty_tag('br');
+                $celltext .= $ucdata['warning'];
+            }
 
             $cell = new html_table_cell($celltext);
-            if (array_key_exists('class', $celldata)) $cell->attributes['class'] = $celldata['class'];
+            if (array_key_exists('class', $ucdata)) $cell->attributes['class'] = $ucdata['class'];
             $row->cells[] = $cell;
 
             $i++;
@@ -455,12 +465,7 @@ class mod_attforblock_renderer extends plugin_renderer_base {
 
     private function construct_take_user_controls(attforblock_take_data $takedata, $user) {
         $celldata = array();
-        if ($user->enrolmentstart > $takedata->sessioninfo->sessdate) {
-            $celldata['text'] = get_string('enrolmentstart', 'attforblock', userdate($user->enrolmentstart, '%d.%m.%Y'));
-            $celldata['colspan'] = count($takedata->statuses) + 1;
-            $celldata['class'] = 'userwithoutenrol';
-        }
-        elseif ($user->enrolmentend and $user->enrolmentend < $takedata->sessioninfo->sessdate) {
+        if ($user->enrolmentend and $user->enrolmentend < $takedata->sessioninfo->sessdate) {
             $celldata['text'] = get_string('enrolmentend', 'attforblock', userdate($user->enrolmentend, '%d.%m.%Y'));
             $celldata['colspan'] = count($takedata->statuses) + 1;
             $celldata['class'] = 'userwithoutenrol';
@@ -486,11 +491,11 @@ class mod_attforblock_renderer extends plugin_renderer_base {
                     $params['checked'] = '';
 
                 $input = html_writer::empty_tag('input', $params);
-                if ($takedata->pageparams->viewmode == att_take_page_params::SORTED_LIST)
-                    $celldata['text'][] = $input;
-                else {
-                    $celldata['text'][] = html_writer::tag('nobr', $input . $st->acronym);
-                }
+
+                if ($takedata->pageparams->viewmode == att_take_page_params::SORTED_GRID)
+                    $input = html_writer::tag('nobr', $input . $st->acronym);
+                
+                $celldata['text'][] = $input;
             }
             $params = array(
                     'type'  => 'text',
@@ -498,6 +503,11 @@ class mod_attforblock_renderer extends plugin_renderer_base {
             if (array_key_exists($user->id, $takedata->sessionlog))
                 $params['value'] = $takedata->sessionlog[$user->id]->remarks;
             $celldata['text'][] = html_writer::empty_tag('input', $params);
+
+            if ($user->enrolmentstart > $takedata->sessioninfo->sessdate + $takedata->sessioninfo->duration) {
+                $celldata['warning'] = get_string('enrolmentstart', 'attforblock', userdate($user->enrolmentstart, '%H:%M %d.%m.%Y'));
+                $celldata['class'] = 'userwithoutenrol';
+            }
         }
 
         return $celldata;
