@@ -183,9 +183,12 @@ class att_page_with_filter_controls {
     }
 
     public function init_start_end_date() {
+        global $CFG;
+
         $date = usergetdate($this->curdate);
         $mday = $date['mday'];
-        $wday = $date['wday'];
+        $wday = $date['wday'] - $CFG->calendar_startwday;
+        if ($wday < 0) $wday += 7;
         $mon = $date['mon'];
         $year = $date['year'];
 
@@ -195,8 +198,8 @@ class att_page_with_filter_controls {
                 $this->enddate = make_timestamp($year, $mon, $mday + 1);
                 break;
             case VIEW_WEEKS:
-                $this->startdate = make_timestamp($year, $mon, $mday - $wday + 1);
-                $this->enddate = make_timestamp($year, $mon, $mday + 7 - $wday + 1) - 1;
+                $this->startdate = make_timestamp($year, $mon, $mday - $wday);
+                $this->enddate = make_timestamp($year, $mon, $mday + 7 - $wday) - 1;
                 break;
             case VIEW_MONTHS:
                 $this->startdate = make_timestamp($year, $mon);
