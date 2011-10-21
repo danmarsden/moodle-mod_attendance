@@ -201,7 +201,7 @@ function construct_sessions_data_for_add($formdata) {
                     $sess->descriptionformat = $formdata->sdescription['format'];
                     $sess->timemodified = $now;
 
-                    fill_groupid($formdata, &$sessions, $sess);
+                    fill_groupid($formdata, $sessions, $sess);
                 }
                 $sdate += DAYSECS;
             } else {
@@ -217,13 +217,13 @@ function construct_sessions_data_for_add($formdata) {
         $sess->descriptionformat = $formdata->sdescription['format'];
         $sess->timemodified = $now;
 
-        fill_groupid($formdata, &$sessions, $sess);
+        fill_groupid($formdata, $sessions, $sess);
     }
 
     return $sessions;
 }
 
-function fill_groupid($formdata, $sessions, $sess) {
+function fill_groupid($formdata, &$sessions, $sess) {
     if ($formdata->sessiontype == attforblock::SESSION_COMMON) {
         $sess = clone $sess;
         $sess->groupid = 0;
