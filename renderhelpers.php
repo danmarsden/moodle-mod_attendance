@@ -213,13 +213,13 @@ function construct_full_user_stat_html_table($attforblock, $course, $user) {
         global $CFG;
 
         $gradeable = $attforblock->grade > 0;
-        $statuses = get_statuses($attforblock->id);
+        $statuses = att_get_statuses($attforblock->id);
         $userstatusesstat = get_user_statuses_stat($attforblock->id, $course->startdate, $user->id);
         $stat['completed'] = get_user_taken_sessions_count($attforblock->id, $course->startdate, $user->id);
         $stat['statuses'] = $userstatusesstat;
         if ($gradeable) {
-            $grade = get_user_grade($userstatusesstat, $statuses);
-            $maxgrade = get_user_max_grade(get_user_taken_sessions_count($attforblock->id, $course->startdate, $user->id), $statuses);
+            $grade = att_get_user_grade($userstatusesstat, $statuses);
+            $maxgrade = att_get_user_max_grade(get_user_taken_sessions_count($attforblock->id, $course->startdate, $user->id), $statuses);
             if (!$decimalpoints = grade_get_setting($course->id, 'decimalpoints')) {
                 $decimalpoints = $CFG->grade_decimalpoints;
             }

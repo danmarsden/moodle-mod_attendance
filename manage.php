@@ -43,7 +43,7 @@ if ($from === 'block') {
     } elseif ($size > 1) {
         $att->curdate = $today;
         //temporally set $view for single access to page from block
-        $att->$view = VIEW_DAYS;
+        $att->$view = ATT_VIEW_DAYS;
     }
 }
 

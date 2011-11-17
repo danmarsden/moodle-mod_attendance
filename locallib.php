@@ -6,14 +6,14 @@ global $CFG;
 require_once($CFG->libdir . '/gradelib.php');
 require_once(dirname(__FILE__).'/renderhelpers.php');
 
-define('VIEW_DAYS', 1);
-define('VIEW_WEEKS', 2);
-define('VIEW_MONTHS', 3);
-define('VIEW_ALLPAST', 4);
-define('VIEW_ALL', 5);
+define('ATT_VIEW_DAYS', 1);
+define('ATT_VIEW_WEEKS', 2);
+define('ATT_VIEW_MONTHS', 3);
+define('ATT_VIEW_ALLPAST', 4);
+define('ATT_VIEW_ALL', 5);
 
-define('SORT_LASTNAME', 1);
-define('SORT_FIRSTNAME', 2);
+define('ATT_SORT_LASTNAME', 1);
+define('ATT_SORT_FIRSTNAME', 2);
 
 class attforblock_permissions {
     private $canview;
@@ -139,7 +139,7 @@ class att_page_with_filter_controls {
 
     public $selectortype        = self::SELECTOR_NONE;
 
-    protected $defaultview      = VIEW_WEEKS;
+    protected $defaultview      = ATT_VIEW_WEEKS;
 
     private $cm;
 
@@ -193,23 +193,23 @@ class att_page_with_filter_controls {
         $year = $date['year'];
 
         switch ($this->view) {
-            case VIEW_DAYS:
+            case ATT_VIEW_DAYS:
                 $this->startdate = make_timestamp($year, $mon, $mday);
                 $this->enddate = make_timestamp($year, $mon, $mday + 1);
                 break;
-            case VIEW_WEEKS:
+            case ATT_VIEW_WEEKS:
                 $this->startdate = make_timestamp($year, $mon, $mday - $wday);
                 $this->enddate = make_timestamp($year, $mon, $mday + 7 - $wday) - 1;
                 break;
-            case VIEW_MONTHS:
+            case ATT_VIEW_MONTHS:
                 $this->startdate = make_timestamp($year, $mon);
                 $this->enddate = make_timestamp($year, $mon + 1);
                 break;
-            case VIEW_ALLPAST:
+            case ATT_VIEW_ALLPAST:
                 $this->startdate = 1;
                 $this->enddate = time();
                 break;
-            case VIEW_ALL:
+            case ATT_VIEW_ALL:
                 $this->startdate = 0;
                 $this->enddate = 0;
                 break;
@@ -317,7 +317,7 @@ class att_view_page_params extends att_page_with_filter_controls {
     public $mode;
 
     public function  __construct() {
-        $this->defaultview = VIEW_MONTHS;
+        $this->defaultview = ATT_VIEW_MONTHS;
     }
 
     public function get_significant_params() {
@@ -370,7 +370,7 @@ class att_take_page_params {
 
     public function init() {
         if (!isset($this->group)) $this->group = 0;
-        if (!isset($this->sort)) $this->sort = SORT_LASTNAME;
+        if (!isset($this->sort)) $this->sort = ATT_SORT_LASTNAME;
         $this->init_view_mode();
         $this->init_gridcols();
     }
@@ -399,7 +399,7 @@ class att_take_page_params {
         $params['sessionid'] = $this->sessionid;
         $params['grouptype'] = $this->grouptype;
         if ($this->group) $params['group'] = $this->group;
-        if ($this->sort != SORT_LASTNAME) $params['sort'] = $this->sort;
+        if ($this->sort != ATT_SORT_LASTNAME) $params['sort'] = $this->sort;
         if (isset($this->copyfrom)) $params['copyfrom'] = $this->copyfrom;
 
         return $params;
@@ -418,14 +418,14 @@ class att_report_page_params extends att_page_with_filter_controls {
         parent::init($cm);
         
         if (!isset($this->group)) $this->group = $this->get_current_sesstype() > 0 ? $this->get_current_sesstype() : 0;
-        if (!isset($this->sort)) $this->sort = SORT_LASTNAME;
+        if (!isset($this->sort)) $this->sort = ATT_SORT_LASTNAME;
     }
     
     public function get_significant_params() {
         $params = array();
 
         //if ($this->group) $params['group'] = $this->group;
-        if ($this->sort != SORT_LASTNAME) $params['sort'] = $this->sort;
+        if ($this->sort != ATT_SORT_LASTNAME) $params['sort'] = $this->sort;
 
         return $params;
     }
@@ -759,7 +759,7 @@ class attforblock {
     public function take_from_form_data($formdata) {
         global $DB, $USER;
 
-        $statuses = implode(',', array_keys( (array)$this->get_statuses() ));
+        $statuses = implode(',', array_keys( (array)$this->att_get_statuses() ));
         $now = time();
         $sesslog = array();
         $formdata = (array)$formdata;
@@ -815,7 +815,7 @@ class attforblock {
         //fields we need from the user table
         $userfields = user_picture::fields('u').',u.username';
 
-        if (isset($this->pageparams->sort) and ($this->pageparams->sort == SORT_FIRSTNAME)) {
+        if (isset($this->pageparams->sort) and ($this->pageparams->sort == ATT_SORT_FIRSTNAME)) {
             $orderby = "u.firstname ASC, u.lastname ASC";
         }
         else {
@@ -870,11 +870,11 @@ class attforblock {
         return $user;
     }
 
-    public function get_statuses($onlyvisible = true) {
+    public function att_get_statuses($onlyvisible = true) {
         global $DB;
 
         if (!isset($this->statuses)) {
-            $this->statuses = get_statuses($this->id, $onlyvisible);
+            $this->statuses = att_get_statuses($this->id, $onlyvisible);
         }
         
         return $this->statuses;
@@ -925,22 +925,22 @@ class attforblock {
         global $DB;
 
         $ret = array();
-        $ret['completed'] = $this->get_user_taken_sessions_count($userid);
-        $ret['statuses'] = $this->get_user_statuses_stat($userid);
+        $ret['completed'] = $this->att_get_user_taken_sessions_count($userid);
+        $ret['statuses'] = $this->att_get_user_statuses_stat($userid);
 
         return $ret;
     }
 
-    public function get_user_taken_sessions_count($userid) {
+    public function att_get_user_taken_sessions_count($userid) {
         global $DB;
 
         if (!array_key_exists($userid, $this->usertakensesscount))
-            $this->usertakensesscount[$userid] = get_user_taken_sessions_count($this->id, $this->course->startdate, $userid);
+            $this->usertakensesscount[$userid] = att_get_user_taken_sessions_count($this->id, $this->course->startdate, $userid);
 
         return $this->usertakensesscount[$userid];
     }
 
-    public function get_user_statuses_stat($userid) {
+    public function att_get_user_statuses_stat($userid) {
         global $DB;
 
         if (!array_key_exists($userid, $this->userstatusesstat)) {
@@ -963,8 +963,8 @@ class attforblock {
         return $this->userstatusesstat[$userid];
     }
 
-    public function get_user_grade($userid) {
-        return get_user_grade($this->get_user_statuses_stat($userid), $this->get_statuses());
+    public function att_get_user_grade($userid) {
+        return att_get_user_grade($this->att_get_user_statuses_stat($userid), $this->att_get_statuses());
     }
 
     // For getting sessions count implemented simplest method - taken sessions.
@@ -974,8 +974,8 @@ class attforblock {
     // * all sessions between user start and end enrolment date.
     // While implementing those methods we need recalculate grades of all users
     // on session adding
-    public function get_user_max_grade($userid) {
-        return get_user_max_grade($this->get_user_taken_sessions_count($userid), $this->get_statuses());
+    public function att_get_user_max_grade($userid) {
+        return att_get_user_max_grade($this->att_get_user_taken_sessions_count($userid), $this->att_get_statuses());
     }
 
     public function update_users_grade($userids) {
@@ -983,7 +983,7 @@ class attforblock {
 
         foreach ($userids as $userid) {
             $grades[$userid]->userid = $userid;
-            $grades[$userid]->rawgrade = calc_user_grade_percent($this->get_user_grade($userid), $this->get_user_max_grade($userid));
+            $grades[$userid]->rawgrade = att_calc_user_grade_percent($this->att_get_user_grade($userid), $this->att_get_user_max_grade($userid));
         }
 
         return grade_update('mod/attforblock', $this->course->id, 'mod', 'attforblock',
@@ -1152,13 +1152,13 @@ class attforblock {
             $info = $this->id;
         }
 
-        $logurl = log_convert_url($url);
+        $logurl = att_log_convert_url($url);
         add_to_log($this->course->id, 'attforblock', $action, $logurl, $info, $this->cm->id);
     }
 }
 
 
-function get_statuses($attid, $onlyvisible=true) {
+function att_get_statuses($attid, $onlyvisible=true) {
     global $DB;
 
     if ($onlyvisible) {
@@ -1170,7 +1170,7 @@ function get_statuses($attid, $onlyvisible=true) {
     return $statuses;
 }
 
-function get_user_taken_sessions_count($attid, $coursestartdate, $userid) {
+function att_get_user_taken_sessions_count($attid, $coursestartdate, $userid) {
     global $DB;
 
     $qry = "SELECT count(*) as cnt
@@ -1188,7 +1188,7 @@ function get_user_taken_sessions_count($attid, $coursestartdate, $userid) {
     return $DB->count_records_sql($qry, $params);
 }
 
-function get_user_statuses_stat($attid, $coursestartdate, $userid) {
+function att_get_user_statuses_stat($attid, $coursestartdate, $userid) {
     global $DB;
 
     $qry = "SELECT al.statusid, count(al.statusid) AS stcnt
@@ -1207,7 +1207,7 @@ function get_user_statuses_stat($attid, $coursestartdate, $userid) {
     return $DB->get_records_sql($qry, $params);
 }
 
-function get_user_grade($userstatusesstat, $statuses) {
+function att_get_user_grade($userstatusesstat, $statuses) {
     $sum = 0;
     foreach ($userstatusesstat as $stat) {
         $sum += $stat->stcnt * $statuses[$stat->statusid]->grade;
@@ -1216,12 +1216,12 @@ function get_user_grade($userstatusesstat, $statuses) {
     return $sum;
 }
 
-function get_user_max_grade($sesscount, $statuses) {
+function att_get_user_max_grade($sesscount, $statuses) {
     reset($statuses);
     return current($statuses)->grade * $sesscount;
 }
 
-function get_user_courses_attendances($userid) {
+function att_get_user_courses_attendances($userid) {
     global $DB;
 
     $usercourses = enrol_get_users_courses($userid);
@@ -1241,39 +1241,39 @@ function get_user_courses_attendances($userid) {
     return $DB->get_records_sql($sql, $params);
 }
 
-function calc_user_grade_percent($grade, $maxgrade) {
+function att_calc_user_grade_percent($grade, $maxgrade) {
     if ($maxgrade == 0)
         return 0;
     else
         return $grade / $maxgrade * 100;
 }
 
-function update_all_users_grades($attid, $course, $context) {
+function att_update_all_users_grades($attid, $course, $context) {
     global $COURSE;
 
     $grades = array();
 
     $userids = array_keys(get_enrolled_users($context, 'mod/attforblock:canbelisted', 0, 'u.id'));
 
-    $statuses = get_statuses($attid);
+    $statuses = att_get_statuses($attid);
     foreach ($userids as $userid) {
         $grades[$userid]->userid = $userid;
-        $userstatusesstat = get_user_statuses_stat($attid, $course->startdate, $userid);
-        $usertakensesscount = get_user_taken_sessions_count($attid, $course->startdate, $userid);
-        $grades[$userid]->rawgrade = calc_user_grade_percent(get_user_grade($userstatusesstat, $statuses), get_user_max_grade($usertakensesscount, $statuses));
+        $userstatusesstat = att_get_user_statuses_stat($attid, $course->startdate, $userid);
+        $usertakensesscount = att_get_user_taken_sessions_count($attid, $course->startdate, $userid);
+        $grades[$userid]->rawgrade = att_calc_user_grade_percent(att_get_user_grade($userstatusesstat, $statuses), att_get_user_max_grade($usertakensesscount, $statuses));
     }
 
     return grade_update('mod/attforblock', $course->id, 'mod', 'attforblock',
                         $attid, 0, $grades);
 }
 
-function has_logs_for_status($statusid) {
+function att_has_logs_for_status($statusid) {
     global $DB;
 
     return $DB->count_records('attendance_log', array('statusid'=> $statusid)) > 0;
 }
 
-function log_convert_url(moodle_url $fullurl) {
+function att_log_convert_url(moodle_url $fullurl) {
     static $baseurl;
 
     if (!isset($baseurl)) {

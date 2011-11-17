@@ -53,7 +53,7 @@ switch ($att->pageparams->action) {
             redirect($att->url_preferences(), get_string('statusdeleted','attforblock'));
         }
 
-        $statuses = $att->get_statuses();
+        $statuses = $att->att_get_statuses();
         $status = $statuses[$att->pageparams->statusid];
         $message = get_string('deletecheckfull', '', get_string('variable', 'attforblock'));
         $message .= str_repeat(html_writer::empty_tag('br'), 2);

@@ -130,7 +130,7 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         $views[VIEW_ALLPAST] = get_string('allpast', 'attforblock');
         $views[VIEW_MONTHS] = get_string('months', 'attforblock');
         $views[VIEW_WEEKS] = get_string('weeks', 'attforblock');
-        $views[VIEW_DAYS] = get_string('days', 'attforblock');
+        $views[ATT_VIEW_DAYS] = get_string('days', 'attforblock');
         $viewcontrols = '';
         foreach ($views as $key => $sview) {
             if ($key != $fcontrols->pageparams->view) {

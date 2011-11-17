@@ -179,9 +179,9 @@ function attforblock_user_outline($course, $user, $mod, $attforblock) {
     else
         $result->time = 0;
   	if (has_capability('mod/attforblock:canbelisted', $mod->context, $user->id)) {
-        $statuses = get_statuses($attforblock->id);
-        $grade = get_user_grade(get_user_statuses_stat($attforblock->id, $course->startdate, $user->id), $statuses);
-        $maxgrade = get_user_max_grade(get_user_taken_sessions_count($attforblock->id, $course->startdate, $user->id), $statuses);
+        $statuses = att_get_statuses($attforblock->id);
+        $grade = att_get_user_grade(get_user_statuses_stat($attforblock->id, $course->startdate, $user->id), $statuses);
+        $maxgrade = att_get_user_max_grade(get_user_taken_sessions_count($attforblock->id, $course->startdate, $user->id), $statuses);
 
         $result->info = $grade.' / '.$maxgrade;
   	}
