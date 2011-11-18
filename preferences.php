@@ -44,7 +44,7 @@ switch ($att->pageparams->action) {
         $att->add_status($newacronym, $newdescription, $newgrade);
         break;
     case att_preferences_page_params::ACTION_DELETE:
-        if (has_logs_for_status($att->pageparams->statusid))
+        if (att_has_logs_for_status($att->pageparams->statusid))
             print_error('cantdeletestatus', 'attforblock', "attsettings.php?id=$id");
 
         $confirm    = optional_param('confirm', NULL, PARAM_INT);
@@ -53,7 +53,7 @@ switch ($att->pageparams->action) {
             redirect($att->url_preferences(), get_string('statusdeleted','attforblock'));
         }
 
-        $statuses = $att->att_get_statuses();
+        $statuses = $att->get_statuses();
         $status = $statuses[$att->pageparams->statusid];
         $message = get_string('deletecheckfull', '', get_string('variable', 'attforblock'));
         $message .= str_repeat(html_writer::empty_tag('br'), 2);

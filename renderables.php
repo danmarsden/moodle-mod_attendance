@@ -119,13 +119,13 @@ class attforblock_filter_controls implements renderable {
                 $this->nextcur = make_timestamp($year, $mon, $mday + 1);
                 $this->curdatetxt =  userdate($att->pageparams->startdate, $format);
                 break;
-            case VIEW_WEEKS:
+            case ATT_VIEW_WEEKS:
                 $format = get_string('strftimedm', 'attforblock');
                 $this->prevcur = $att->pageparams->startdate - WEEKSECS;
                 $this->nextcur = $att->pageparams->startdate + WEEKSECS;
                 $this->curdatetxt = userdate($att->pageparams->startdate, $format)." - ".userdate($att->pageparams->enddate, $format);
                 break;
-            case VIEW_MONTHS:
+            case ATT_VIEW_MONTHS:
                 $format = '%B';
                 $this->prevcur = make_timestamp($year, $mon - 1);
                 $this->nextcur = make_timestamp($year, $mon + 1);
@@ -256,7 +256,7 @@ class attforblock_take_data implements renderable {
         $this->groupmode = $att->get_group_mode();
         $this->cm = $att->cm;
 
-        $this->statuses = $att->att_get_statuses();
+        $this->statuses = $att->get_statuses();
 
         $this->sessioninfo = $att->get_session_info($att->pageparams->sessionid);
         $this->updatemode = $this->sessioninfo->lasttaken > 0;
@@ -336,14 +336,14 @@ class attforblock_user_data implements renderable {
         }
 
         if ($this->pageparams->mode == att_view_page_params::MODE_THIS_COURSE) {
-            $this->statuses = $att->att_get_statuses();
+            $this->statuses = $att->get_statuses();
 
             $this->stat = $att->get_user_stat($userid);
 
             $this->gradable = $att->grade > 0;
             if ($this->gradable) {
-                $this->grade = $att->att_get_user_grade($userid);
-                $this->maxgrade = $att->att_get_user_max_grade($userid);
+                $this->grade = $att->get_user_grade($userid);
+                $this->maxgrade = $att->get_user_max_grade($userid);
             }
 
 
@@ -352,7 +352,7 @@ class attforblock_user_data implements renderable {
             $this->sessionslog = $att->get_user_filtered_sessions_log_extended($userid);
         }
         else {
-            $this->coursesatts = get_user_courses_attendances($userid);
+            $this->coursesatts = att_get_user_courses_attendances($userid);
 
             $this->statuses = array();
             $this->stat = array();
@@ -361,8 +361,8 @@ class attforblock_user_data implements renderable {
             $this->maxgrade = array();
             foreach ($this->coursesatts as $ca) {
                 $statuses = att_get_statuses($ca->attid);
-                $user_taken_sessions_count = get_user_taken_sessions_count($ca->attid, $ca->coursestartdate, $userid);
-                $user_statuses_stat = get_user_statuses_stat($ca->attid, $ca->coursestartdate, $userid);
+                $user_taken_sessions_count = att_get_user_taken_sessions_count($ca->attid, $ca->coursestartdate, $userid);
+                $user_statuses_stat = att_get_user_statuses_stat($ca->attid, $ca->coursestartdate, $userid);
 
                 $this->statuses[$ca->attid] = $statuses;
 
@@ -441,8 +441,8 @@ class attforblock_report_data implements renderable {
 
         $this->sessions = $att->get_filtered_sessions();
 
-        $this->statuses = $att->att_get_statuses();
-        $this->allstatuses = $att->att_get_statuses(false);
+        $this->statuses = $att->get_statuses();
+        $this->allstatuses = $att->get_statuses(false);
         
         $this->gradable = $att->grade > 0;
 
@@ -458,8 +458,8 @@ class attforblock_report_data implements renderable {
             $this->usersstats[$user->id] = $att->get_user_statuses_stat($user->id);
 
             if ($this->gradable) {
-                $this->grades[$user->id] = $att->att_get_user_grade($user->id);
-                $this->maxgrades[$user->id] = $att->att_get_user_max_grade($user->id);
+                $this->grades[$user->id] = $att->get_user_grade($user->id);
+                $this->maxgrades[$user->id] = $att->get_user_max_grade($user->id);
             }
         }
 
@@ -488,9 +488,9 @@ class attforblock_preferences_data implements renderable {
     private $att;
 
     public function __construct(attforblock $att) {
-        $this->statuses = $att->att_get_statuses(false);
+        $this->statuses = $att->get_statuses(false);
 
-        foreach ($this->statuses as $st) $st->haslogs = has_logs_for_status ($st->id);
+        foreach ($this->statuses as $st) $st->haslogs = att_has_logs_for_status ($st->id);
 
         $this->att = $att;
     }

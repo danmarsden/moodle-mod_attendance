@@ -46,9 +46,9 @@ if ($mform->is_submitted()) {
     $pageparams->set_current_sesstype($formdata->group ? $formdata->group : att_page_with_filter_controls::SESSTYPE_ALL);
     if (isset($formdata->includeallsessions)) {
         if (isset($formdata->includenottaken)) {
-            $pageparams->view = VIEW_ALL;
+            $pageparams->view = ATT_VIEW_ALL;
         } else {
-            $pageparams->view = VIEW_ALLPAST;
+            $pageparams->view = ATT_VIEW_ALLPAST;
             $pageparams->curdate = time();
         }
         $pageparams->init_start_end_date();

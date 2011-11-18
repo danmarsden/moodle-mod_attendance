@@ -126,10 +126,10 @@ class mod_attforblock_renderer extends plugin_renderer_base {
     }
 
     protected function render_view_controls(attforblock_filter_controls $fcontrols) {
-        $views[VIEW_ALL] = get_string('all', 'attforblock');
-        $views[VIEW_ALLPAST] = get_string('allpast', 'attforblock');
-        $views[VIEW_MONTHS] = get_string('months', 'attforblock');
-        $views[VIEW_WEEKS] = get_string('weeks', 'attforblock');
+        $views[ATT_VIEW_ALL] = get_string('all', 'attforblock');
+        $views[ATT_VIEW_ALLPAST] = get_string('allpast', 'attforblock');
+        $views[ATT_VIEW_MONTHS] = get_string('months', 'attforblock');
+        $views[ATT_VIEW_WEEKS] = get_string('weeks', 'attforblock');
         $views[ATT_VIEW_DAYS] = get_string('days', 'attforblock');
         $viewcontrols = '';
         foreach ($views as $key => $sview) {
@@ -444,12 +444,12 @@ class mod_attforblock_renderer extends plugin_renderer_base {
     private function construct_fullname_head($data) {
         global $CFG;
 
-        if ($data->pageparams->sort == SORT_LASTNAME)
-            $firstname = html_writer::link($data->url(array('sort' => SORT_FIRSTNAME)), get_string('firstname'));
+        if ($data->pageparams->sort == ATT_SORT_LASTNAME)
+            $firstname = html_writer::link($data->url(array('sort' => ATT_SORT_FIRSTNAME)), get_string('firstname'));
         else
             $firstname = get_string('firstname');
 
-        if ($data->pageparams->sort == SORT_FIRSTNAME)
+        if ($data->pageparams->sort == ATT_SORT_FIRSTNAME)
             $lastname = html_writer::link($data->url(array('sort' => SORT_LASTNAME)), get_string('lastname'));
         else
             $lastname = get_string('lastname');

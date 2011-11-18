@@ -759,7 +759,7 @@ class attforblock {
     public function take_from_form_data($formdata) {
         global $DB, $USER;
 
-        $statuses = implode(',', array_keys( (array)$this->att_get_statuses() ));
+        $statuses = implode(',', array_keys( (array)$this->get_statuses() ));
         $now = time();
         $sesslog = array();
         $formdata = (array)$formdata;
@@ -870,7 +870,7 @@ class attforblock {
         return $user;
     }
 
-    public function att_get_statuses($onlyvisible = true) {
+    public function get_statuses($onlyvisible = true) {
         global $DB;
 
         if (!isset($this->statuses)) {
@@ -925,13 +925,13 @@ class attforblock {
         global $DB;
 
         $ret = array();
-        $ret['completed'] = $this->att_get_user_taken_sessions_count($userid);
-        $ret['statuses'] = $this->att_get_user_statuses_stat($userid);
+        $ret['completed'] = $this->get_user_taken_sessions_count($userid);
+        $ret['statuses'] = $this->get_user_statuses_stat($userid);
 
         return $ret;
     }
 
-    public function att_get_user_taken_sessions_count($userid) {
+    public function get_user_taken_sessions_count($userid) {
         global $DB;
 
         if (!array_key_exists($userid, $this->usertakensesscount))
@@ -940,7 +940,7 @@ class attforblock {
         return $this->usertakensesscount[$userid];
     }
 
-    public function att_get_user_statuses_stat($userid) {
+    public function get_user_statuses_stat($userid) {
         global $DB;
 
         if (!array_key_exists($userid, $this->userstatusesstat)) {
@@ -963,8 +963,8 @@ class attforblock {
         return $this->userstatusesstat[$userid];
     }
 
-    public function att_get_user_grade($userid) {
-        return att_get_user_grade($this->att_get_user_statuses_stat($userid), $this->att_get_statuses());
+    public function get_user_grade($userid) {
+        return att_get_user_grade($this->get_user_statuses_stat($userid), $this->get_statuses());
     }
 
     // For getting sessions count implemented simplest method - taken sessions.
@@ -974,8 +974,8 @@ class attforblock {
     // * all sessions between user start and end enrolment date.
     // While implementing those methods we need recalculate grades of all users
     // on session adding
-    public function att_get_user_max_grade($userid) {
-        return att_get_user_max_grade($this->att_get_user_taken_sessions_count($userid), $this->att_get_statuses());
+    public function get_user_max_grade($userid) {
+        return att_get_user_max_grade($this->get_user_taken_sessions_count($userid), $this->get_statuses());
     }
 
     public function update_users_grade($userids) {
@@ -983,7 +983,7 @@ class attforblock {
 
         foreach ($userids as $userid) {
             $grades[$userid]->userid = $userid;
-            $grades[$userid]->rawgrade = att_calc_user_grade_percent($this->att_get_user_grade($userid), $this->att_get_user_max_grade($userid));
+            $grades[$userid]->rawgrade = att_calc_user_grade_percent($this->get_user_grade($userid), $this->get_user_max_grade($userid));
         }
 
         return grade_update('mod/attforblock', $this->course->id, 'mod', 'attforblock',
