@@ -450,7 +450,7 @@ class mod_attforblock_renderer extends plugin_renderer_base {
             $firstname = get_string('firstname');
 
         if ($data->pageparams->sort == ATT_SORT_FIRSTNAME)
-            $lastname = html_writer::link($data->url(array('sort' => SORT_LASTNAME)), get_string('lastname'));
+            $lastname = html_writer::link($data->url(array('sort' => ATT_SORT_LASTNAME)), get_string('lastname'));
         else
             $lastname = get_string('lastname');
 
