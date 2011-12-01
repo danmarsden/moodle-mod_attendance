@@ -36,8 +36,8 @@ if ($from === 'block') {
     $size = count($sessions);
     if ($size == 1) {
         $sess = reset($sessions);
-        $nottaken = !$att->lasttaken && has_capability('mod/attforblock:takeattendances', $context);
-        $canchange = $att->lasttaken && has_capability('mod/attforblock:changeattendances', $context);
+        $nottaken = !$sess->lasttaken && has_capability('mod/attforblock:takeattendances', $PAGE->context);
+        $canchange = $sess->lasttaken && has_capability('mod/attforblock:changeattendances', $PAGE->context);
         if ($nottaken || $canchange)
             redirect($att->url_take(array('sessionid' => $sess->id, 'grouptype' => $sess->groupid)));
     } elseif ($size > 1) {
