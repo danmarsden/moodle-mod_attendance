@@ -72,7 +72,7 @@ switch ($att->pageparams->action) {
 
         if (isset($confirm)) {
             $att->delete_sessions(array($sessionid));
-            update_all_users_grades($att->id, $att->course, $att->context);
+            att_update_all_users_grades($att->id, $att->course, $att->context);
             redirect($att->url_manage(), get_string('sessiondeleted','attforblock'));
         }
 
@@ -99,7 +99,7 @@ switch ($att->pageparams->action) {
             $sessionsids = explode('_', $sessionsids);
 
             $att->delete_sessions($sessionsids);
-            update_all_users_grades($att->id, $att->course, $att->context);
+            att_update_all_users_grades($att->id, $att->course, $att->context);
             redirect($att->url_manage(), get_string('sessiondeleted','attforblock'));
         }
 
