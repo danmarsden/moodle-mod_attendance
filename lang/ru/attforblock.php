@@ -118,6 +118,7 @@ $string['sessions'] = 'Занятия';
 $string['sessionscompleted'] = 'Прошло занятий';
 $string['sessionsids'] = 'Идентификаторы занятий: ';
 $string['sessionsgenerated'] = 'Занятия успешно созданы';
+$string['sessionsnotfound'] = 'В выбранный диапазон времени не попадает ни одно занятие';
 $string['sessionstartdate'] = 'Дата начала занятий';
 $string['sessiontype'] = 'Тип занятия';
 $string['sessiontype_help'] = 'Существует 2 типа занятий: общие и групповые. Возможность добавлять события различных типов зависит от группового режима элемента курса.

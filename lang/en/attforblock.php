@@ -135,6 +135,7 @@ $string['sessions'] = 'Sessions';
 $string['sessionscompleted'] = 'Sessions completed';
 $string['sessionsids'] = 'IDs of sessions: ';
 $string['sessionsgenerated'] = 'Sessions successfully generated';
+$string['sessionsnotfound'] = 'There is no sessions in the selected timespan';
 $string['sessionstartdate'] = 'Session start date';
 $string['sessiontype'] = 'Session type';
 $string['sessiontype_help'] = 'There are two types of sessions: common and groups. Ability to add different types depends on activity group mode.
