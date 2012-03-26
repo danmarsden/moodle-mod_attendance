@@ -827,14 +827,15 @@ class attforblock {
         //add a flag to each user indicating whether their enrolment is active
         if (!empty($users)) {
             list($usql, $uparams) = $DB->get_in_or_equal(array_keys($users), SQL_PARAMS_NAMED, 'usid0');
-
+            
+            //CONTRIB-3549
             $sql = "SELECT ue.userid, ue.status, ue.timestart, ue.timeend
                       FROM {user_enrolments} ue
                       JOIN {enrol} e ON e.id = ue.enrolid
                      WHERE ue.userid $usql
                            AND e.status = :estatus
                            AND e.courseid = :courseid
-                  GROUP BY ue.userid";
+                  GROUP BY ue.userid, ue.status, ue.timestart, ue.timeend;";
             $params = array_merge($uparams, array('estatus'=>ENROL_INSTANCE_ENABLED, 'courseid'=>$this->course->id));
             $enrolmentsparams = $DB->get_records_sql($sql, $params);
 
