@@ -860,7 +860,7 @@ class attforblock {
                  WHERE ue.userid = :uid
                        AND e.status = :estatus
                        AND e.courseid = :courseid
-              GROUP BY ue.userid";
+              GROUP BY ue.userid, ue.status, ue.timestart, ue.timeend";
         $params = array('uid' => $userid, 'estatus'=>ENROL_INSTANCE_ENABLED, 'courseid'=>$this->course->id);
         $enrolmentsparams = $DB->get_record_sql($sql, $params);
 
