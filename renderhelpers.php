@@ -174,6 +174,8 @@ function construct_session_full_date_time($datetime, $duration) {
 }
 
 function construct_user_data_stat($stat, $statuses, $gradable, $grade, $maxgrade, $decimalpoints) {
+    global $OUTPUT;
+    
     $stattable = new html_table();
     $stattable->attributes['class'] = 'attlist';
     $row = new html_table_row();
@@ -191,7 +193,7 @@ function construct_user_data_stat($stat, $statuses, $gradable, $grade, $maxgrade
 
     if ($gradable) {
         $row = new html_table_row();
-        $row->cells[] = get_string('attendancegrade','attforblock') . ':';
+        $row->cells[] = get_string('attendancegrade','attforblock') . $OUTPUT->help_icon('gradebookexplanation', 'attforblock') . ':';
         $row->cells[] = $grade . ' / ' . $maxgrade;
         $stattable->data[] = $row;
 
