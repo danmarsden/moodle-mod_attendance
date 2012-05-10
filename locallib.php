@@ -984,7 +984,7 @@ class attforblock {
 
         foreach ($userids as $userid) {
             $grades[$userid]->userid = $userid;
-            $grades[$userid]->rawgrade = att_calc_user_grade_percent($this->get_user_grade($userid), $this->get_user_max_grade($userid));
+            $grades[$userid]->rawgrade = att_calc_user_grade_fraction($this->get_user_grade($userid), $this->get_user_max_grade($userid)) * $this->grade;
         }
 
         return grade_update('mod/attforblock', $this->course->id, 'mod', 'attforblock',
@@ -1242,26 +1242,33 @@ function att_get_user_courses_attendances($userid) {
     return $DB->get_records_sql($sql, $params);
 }
 
-function att_calc_user_grade_percent($grade, $maxgrade) {
+function att_calc_user_grade_fraction($grade, $maxgrade) {
     if ($maxgrade == 0)
         return 0;
     else
-        return $grade / $maxgrade * 100;
+        return $grade / $maxgrade;
+}
+
+function att_get_gradebook_maxgrade($attid) {
+    global $DB;
+    
+    return $DB->get_field('attforblock', 'grade', array('id' => $attid));
 }
 
 function att_update_all_users_grades($attid, $course, $context) {
-    global $COURSE;
-
     $grades = array();
 
     $userids = array_keys(get_enrolled_users($context, 'mod/attforblock:canbelisted', 0, 'u.id'));
 
     $statuses = att_get_statuses($attid);
+    $gradebook_maxgrade = att_get_gradebook_maxgrade($attid);
     foreach ($userids as $userid) {
         $grades[$userid]->userid = $userid;
         $userstatusesstat = att_get_user_statuses_stat($attid, $course->startdate, $userid);
         $usertakensesscount = att_get_user_taken_sessions_count($attid, $course->startdate, $userid);
-        $grades[$userid]->rawgrade = att_calc_user_grade_percent(att_get_user_grade($userstatusesstat, $statuses), att_get_user_max_grade($usertakensesscount, $statuses));
+        $usergrade = att_get_user_grade($userstatusesstat, $statuses);
+        $usermaxgrade = att_get_user_max_grade($usertakensesscount, $statuses);
+        $grades[$userid]->rawgrade = att_calc_user_grade_fraction($usergrade, $usermaxgrade) * $gradebook_maxgrade;
     }
 
     return grade_update('mod/attforblock', $course->id, 'mod', 'attforblock',
