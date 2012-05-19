@@ -28,6 +28,17 @@ function attforblock_supports($feature) {
     }
 }
 
+function att_add_default_statuses($attid) {
+    global $DB;
+
+    $statuses = $DB->get_records('attendance_statuses', array('attendanceid'=> 0), 'id');
+    foreach($statuses as $st) {
+        $rec = $st;
+        $rec->attendanceid = $attid;
+        $DB->insert_record('attendance_statuses', $rec);
+    }
+}
+
 function attforblock_add_instance($attforblock) {
 /// Given an object containing all the necessary data, 
 /// (defined by the form in mod.html) this function 
@@ -40,13 +51,8 @@ function attforblock_add_instance($attforblock) {
 
     $attforblock->id = $DB->insert_record('attforblock', $attforblock);
 
-    $statuses = $DB->get_records('attendance_statuses', array('attendanceid'=> 0), 'id');
-    foreach($statuses as $st) {
-        $rec = $st;
-        $rec->attendanceid = $attforblock->id;
-        $DB->insert_record('attendance_statuses', $rec);
-    }
-						
+    att_add_default_statuses($attforblock->id);
+
     attforblock_grade_item_update($attforblock);
 //	attforblock_update_grades($attforblock);
     return $attforblock->id;
@@ -54,12 +60,12 @@ function attforblock_add_instance($attforblock) {
 
 
 function attforblock_update_instance($attforblock) {
-/// Given an object containing all the necessary data, 
-/// (defined by the form in mod.html) this function 
+/// Given an object containing all the necessary data,
+/// (defined by the form in mod.html) this function
 /// will update an existing instance with new data.
 
     global $DB;
-    
+
     $attforblock->timemodified = time();
     $attforblock->id = $attforblock->instance;
 
@@ -75,7 +81,7 @@ function attforblock_update_instance($attforblock) {
 
 function attforblock_delete_instance($id) {
     global $DB;
-    
+
     if (! $attforblock = $DB->get_record('attforblock', array('id'=> $id))) {
         return false;
     }
@@ -138,24 +144,50 @@ function attforblock_reset_course_form_defaults($course) {
 function attforblock_reset_userdata($data) {
     global $DB;
 
+    $status = array();
+
+    $attids = array_keys($DB->get_records('attforblock', array('course'=> $data->courseid), '', 'id'));
+
     if (!empty($data->reset_attendance_log)) {
-		$sess = $DB->get_records('attendance_sessions', array('courseid'=> $data->courseid), '', 'id');
-		$slist = implode(',', array_keys($sess));
-    	$DB->delete_records_select('attendance_log', "sessionid IN ($slist)");
-        $DB->set_field('attendance_sessions', 'lasttaken', 0, array('courseid' => $data->courseid));
+		$sess = $DB->get_records_list('attendance_sessions', 'attendanceid', $attids, '', 'id');
+        if (!empty($sess)) {
+            list($sql, $params) = $DB->get_in_or_equal(array_keys($sess));
+            $DB->delete_records_select('attendance_log', "sessionid $sql", $params);
+            list($sql, $params) = $DB->get_in_or_equal($attids);
+            $DB->set_field_select('attendance_sessions', 'lasttaken', 0, "attendanceid $sql", $params);
+
+            $status[] = array(
+                'component' => get_string('modulenameplural', 'attforblock'),
+                'item' => get_string('attendancedata', 'attforblock'),
+                'error' => false
+            );
+        }
     }
+
     if (!empty($data->reset_attendance_statuses)) {
-    	$DB->delete_records('attendance_statuses', array('courseid'=> $data->courseid));
-	    $statuses = $DB->get_records('attendance_statuses', array('courseid'=> 0), 'id');
-		foreach($statuses as $stat) {
-			$rec = $stat;
-			$rec->courseid = $data->courseid;
-			$DB->insert_record('attendance_statuses', $rec);
-		}
+    	$DB->delete_records_list('attendance_statuses', 'attendanceid', $attids);
+        foreach($attids as $attid) {
+            att_add_default_statuses($attid);
+        }
+
+        $status[] = array(
+            'component' => get_string('modulenameplural', 'attforblock'),
+            'item' => get_string('sessions', 'attforblock'),
+            'error' => false
+        );
     }
+
     if (!empty($data->reset_attendance_sessions)) {
-    	$DB->delete_records('attendance_sessions', array('courseid'=> $data->courseid));
+    	$DB->delete_records_list('attendance_sessions', 'attendanceid', $attids);
+
+        $status[] = array(
+            'component' => get_string('modulenameplural', 'attforblock'),
+            'item' => get_string('statuses', 'attforblock'),
+            'error' => false
+        );
     }
+
+    return $status;
 }
 
 function attforblock_user_outline($course, $user, $mod, $attforblock) {
