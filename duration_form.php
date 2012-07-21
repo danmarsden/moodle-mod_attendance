@@ -37,8 +37,8 @@ class mod_attforblock_duration_form extends moodleform {
         for ($i=0; $i<60; $i+=5) {
             $minutes[$i] = sprintf("%02d",$i);
         }
-        $durselect[] =& MoodleQuickForm::createElement('select', 'hours', '', $hours);
-		$durselect[] =& MoodleQuickForm::createElement('select', 'minutes', '', $minutes, false, true);
+        $durselect[] =& $mform->createElement('select', 'hours', '', $hours);
+		$durselect[] =& $mform->createElement('select', 'minutes', '', $minutes, false, true);
 		$mform->addGroup($durselect, 'durtime', get_string('newduration','attforblock'), array(' '), true);
 		
         $mform->addElement('hidden', 'ids', $ids);

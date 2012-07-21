@@ -47,8 +47,8 @@ class mod_attforblock_add_form extends moodleform {
                 break;
             case VISIBLEGROUPS:
                 $radio=array();
-                $radio[] = &MoodleQuickForm::createElement('radio', 'sessiontype', '', get_string('commonsession','attforblock'), attforblock::SESSION_COMMON);
-                $radio[] = &MoodleQuickForm::createElement('radio', 'sessiontype', '', get_string('groupsession','attforblock'), attforblock::SESSION_GROUP);
+                $radio[] = &$mform->createElement('radio', 'sessiontype', '', get_string('commonsession','attforblock'), attforblock::SESSION_COMMON);
+                $radio[] = &$mform->createElement('radio', 'sessiontype', '', get_string('groupsession','attforblock'), attforblock::SESSION_GROUP);
                 $mform->addGroup($radio, 'sessiontype', get_string('sessiontype','attforblock'), ' ', false);
                 $mform->addHelpButton('sessiontype', 'sessiontype', 'attforblock');
                 $mform->setDefault('sessiontype', attforblock::SESSION_COMMON);
@@ -90,8 +90,8 @@ class mod_attforblock_add_form extends moodleform {
             $minutes[$i] = sprintf("%02d",$i);
         }
         $durtime = array();
-        $durtime[] =& MoodleQuickForm::createElement('select', 'hours', get_string('hour', 'form'), $hours, false, true);
-		$durtime[] =& MoodleQuickForm::createElement('select', 'minutes', get_string('minute', 'form'), $minutes, false, true);
+        $durtime[] =& $mform->createElement('select', 'hours', get_string('hour', 'form'), $hours, false, true);
+		$durtime[] =& $mform->createElement('select', 'minutes', get_string('minute', 'form'), $minutes, false, true);
         $mform->addGroup($durtime, 'durtime', get_string('duration','attforblock'), array(' '), true);
         
         $mform->addElement('date_selector', 'sessionenddate', get_string('sessionenddate','attforblock'));
@@ -99,24 +99,24 @@ class mod_attforblock_add_form extends moodleform {
         
         $sdays = array();
 		if ($CFG->calendar_startwday === '0') { //week start from sunday
-        	$sdays[] =& MoodleQuickForm::createElement('checkbox', 'Sun', '', get_string('sunday','calendar'));
+        	$sdays[] =& $mform->createElement('checkbox', 'Sun', '', get_string('sunday','calendar'));
 		}
-        $sdays[] =& MoodleQuickForm::createElement('checkbox', 'Mon', '', get_string('monday','calendar'));
-        $sdays[] =& MoodleQuickForm::createElement('checkbox', 'Tue', '', get_string('tuesday','calendar'));
-        $sdays[] =& MoodleQuickForm::createElement('checkbox', 'Wed', '', get_string('wednesday','calendar'));
-        $sdays[] =& MoodleQuickForm::createElement('checkbox', 'Thu', '', get_string('thursday','calendar'));
-        $sdays[] =& MoodleQuickForm::createElement('checkbox', 'Fri', '', get_string('friday','calendar'));
-        $sdays[] =& MoodleQuickForm::createElement('checkbox', 'Sat', '', get_string('saturday','calendar'));
+        $sdays[] =& $mform->createElement('checkbox', 'Mon', '', get_string('monday','calendar'));
+        $sdays[] =& $mform->createElement('checkbox', 'Tue', '', get_string('tuesday','calendar'));
+        $sdays[] =& $mform->createElement('checkbox', 'Wed', '', get_string('wednesday','calendar'));
+        $sdays[] =& $mform->createElement('checkbox', 'Thu', '', get_string('thursday','calendar'));
+        $sdays[] =& $mform->createElement('checkbox', 'Fri', '', get_string('friday','calendar'));
+        $sdays[] =& $mform->createElement('checkbox', 'Sat', '', get_string('saturday','calendar'));
 		if ($CFG->calendar_startwday !== '0') { //week start from sunday
-        	$sdays[] =& MoodleQuickForm::createElement('checkbox', 'Sun', '', get_string('sunday','calendar'));
+        	$sdays[] =& $mform->createElement('checkbox', 'Sun', '', get_string('sunday','calendar'));
 		}
         $mform->addGroup($sdays, 'sdays', get_string('sessiondays','attforblock'), array(' '), true);
 		$mform->disabledIf('sdays', 'addmultiply', 'notchecked');
         
         $period = array(1=>1,2,3,4,5,6,7,8);
         $periodgroup = array();
-        $periodgroup[] =& MoodleQuickForm::createElement('select', 'period', '', $period, false, true);
-        $periodgroup[] =& MoodleQuickForm::createElement('static', 'perioddesc', '', get_string('week','attforblock'));
+        $periodgroup[] =& $mform->createElement('select', 'period', '', $period, false, true);
+        $periodgroup[] =& $mform->createElement('static', 'perioddesc', '', get_string('week','attforblock'));
         $mform->addGroup($periodgroup, 'periodgroup', get_string('period','attforblock'), array(' '), false);
 		$mform->disabledIf('periodgroup', 'addmultiply', 'notchecked');
         

@@ -210,8 +210,6 @@ class attforblock_manage_data implements renderable {
      * @param attforblock $att instance
      */
     public function __construct(attforblock $att) {
-        global $DB;
-
         $this->perm = $att->perm;
 
         $this->sessions = $att->get_filtered_sessions();

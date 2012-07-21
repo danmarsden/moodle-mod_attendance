@@ -207,7 +207,8 @@ function construct_sessions_data_for_add($formdata) {
         while ($sdate < $enddate) {
             if($sdate < $startweek + WEEKSECS) {
                 $dinfo = usergetdate($sdate);
-                if(key_exists($wdaydesc[$dinfo['wday']], $formdata->sdays)) {
+                if(array_key_exists($wdaydesc[$dinfo['wday']], $formdata->sdays)) {
+                    $sess = new stdClass();
                     $sess->sessdate =  usergetmidnight($sdate) + $starttime;
                     $sess->duration = $duration;
                     $sess->descriptionitemid = $formdata->sdescription['itemid'];
@@ -224,6 +225,7 @@ function construct_sessions_data_for_add($formdata) {
             }
         }
     } else {
+        $sess = new stdClass();
         $sess->sessdate = $formdata->sessiondate;
         $sess->duration = $duration;
         $sess->descriptionitemid = $formdata->sdescription['itemid'];

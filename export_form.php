@@ -43,8 +43,8 @@ class mod_attforblock_export_form extends moodleform {
         $mform->addElement('select', 'group', get_string('group'), $grouplist);
         
         $ident = array();
-        $ident[] =& MoodleQuickForm::createElement('checkbox', 'id', '', get_string('studentid', 'attforblock'));
-        $ident[] =& MoodleQuickForm::createElement('checkbox', 'uname', '', get_string('username'));
+        $ident[] =& $mform->createElement('checkbox', 'id', '', get_string('studentid', 'attforblock'));
+        $ident[] =& $mform->createElement('checkbox', 'uname', '', get_string('username'));
         $mform->addGroup($ident, 'ident', get_string('identifyby','attforblock'), array('<br />'), true);
         $mform->setDefaults(array('ident[id]' => true, 'ident[uname]' => true));
         
