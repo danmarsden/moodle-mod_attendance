@@ -38,6 +38,7 @@ $string['calmonths'] = 'Январь,Февраль,Март,Апрель,Май
 $string['calshow'] = 'Выбрать дату';
 $string['caltoday'] = 'Сегодня';
 $string['calweekdays'] = 'Вс,Пн,Вт,Ср,Чт,Пт,Сб';
+$string['cannottakeforgroup'] = 'Вы не можете отмечать посещаемость для группы "{$a}"' ;
 $string['changeattendance'] = 'Изменить посещаемость';
 $string['changeduration'] = 'Изменить продолжительность';
 $string['changesession'] = 'Изменить занятие';

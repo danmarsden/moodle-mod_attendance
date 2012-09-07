@@ -40,9 +40,11 @@ class attforblock_permissions {
     private $canbelisted;
     private $canaccessallgroups;
 
+    private $cm;
     private $context;
 
-    public function __construct($context) {
+    public function __construct($cm, $context) {
+        $this->cm = $cm;
         $this->context = $context;
     }
 
@@ -73,6 +75,20 @@ class attforblock_permissions {
             $this->cantake = has_capability('mod/attforblock:takeattendances', $this->context);
 
         return $this->cantake;
+    }
+
+    public function can_take_session($groupid) {
+        if (!$this->can_take()) {
+            return false;
+        }
+
+        if ($groupid == attforblock::SESSION_COMMON
+            || $this->can_access_all_groups()
+            || array_key_exists($groupid, groups_get_activity_allowed_groups($this->cm))) {
+            return true;
+        }
+
+        return false;
     }
 
     public function can_change() {
@@ -257,8 +273,6 @@ class att_page_with_filter_controls {
             } else {
                 $this->sesstype = $SESSION->attsessiontype[$this->cm->course];
             }
-
-            if (is_null($this->sesstype)) $this->calc_sessgroupslist();
         } elseif ($this->selectortype == self::SELECTOR_GROUP) {
             if ($group == 0) {
                 $SESSION->attsessiontype[$this->cm->course] = self::SESSTYPE_ALL;
@@ -273,7 +287,12 @@ class att_page_with_filter_controls {
             }
         }
 
-        $this->calc_sessgroupslist();
+        if (is_null($this->sessgroupslist)) $this->calc_sessgroupslist();
+        // for example, we set SESSTYPE_ALL but user can access only to limited set of groups
+        if (!array_key_exists($this->sesstype, $this->sessgroupslist)){
+            reset($this->sessgroupslist);
+            $this->sesstype = key($this->sessgroupslist);
+        }
     }
     
     private function calc_sessgroupslist() {
@@ -540,7 +559,7 @@ class attforblock {
 
         $this->pageparams = $pageparams;
 
-        $this->perm = new attforblock_permissions($this->context);
+        $this->perm = new attforblock_permissions($this->cm, $this->context);
     }
 
     public function get_group_mode() {

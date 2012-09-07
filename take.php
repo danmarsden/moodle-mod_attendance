@@ -37,6 +37,11 @@ require_login($course, true, $cm);
 $pageparams->init($course->id);
 $att = new attforblock($att, $cm, $course, $PAGE->context, $pageparams);
 
+if (!$att->perm->can_take_session($pageparams->grouptype)) {
+    $group = groups_get_group($pageparams->grouptype);
+    throw new moodle_exception('cannottakeforgroup', 'attforblock', '', $group->name);
+}
+
 if ($formdata = data_submitted()) {
     $att->take_from_form_data($formdata);
 }

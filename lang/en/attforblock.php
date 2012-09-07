@@ -51,6 +51,7 @@ $string['calmonths'] = 'January,February,March,April,May,June,July,August,Septem
 $string['calshow'] = 'Choose date';
 $string['caltoday'] = 'Today';
 $string['calweekdays'] = 'Su,Mo,Tu,We,Th,Fr,Sa';
+$string['cannottakeforgroup'] = 'You can\'t take attendance for group "{$a}"' ;
 $string['changeattendance'] = 'Change attendance';
 $string['changeduration'] = 'Change duration';
 $string['changesession'] = 'Change session';
