@@ -119,3 +119,7 @@
 #page-mod-attforblock-preferences .generalbox {
     text-align: center;
 }
+
+.path-mod-attforblock .attsessions_manage_table .action-icon img.smallicon {
+    margin-left: 5px;
+}

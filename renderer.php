@@ -221,6 +221,8 @@ class mod_attforblock_renderer extends plugin_renderer_base {
 
                 $date = html_writer::link($url, $date, array('title' => $title));
                 $time = html_writer::link($url, $time, array('title' => $title));
+
+                $actions = $this->output->action_icon($url, new pix_icon('redo', $title, 'attforblock'));
             } else {
                 $date = '<i>' . $date . '</i>';
                 $time = '<i>' . $time . '</i>';
