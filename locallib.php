@@ -828,7 +828,7 @@ class attforblock {
         $rec->lasttakenby = $USER->id;
         $DB->update_record('attendance_sessions', $rec);
 
-        $this->update_users_grade(array_keys($sesslog));
+        if ($this->grade != 0) $this->update_users_grade(array_keys($sesslog));
 
         $params = array(
                 'sessionid' => $this->pageparams->sessionid,
@@ -1010,6 +1010,7 @@ class attforblock {
         $grades = array();
 
         foreach ($userids as $userid) {
+            $grades[$userid] = new stdClass();
             $grades[$userid]->userid = $userid;
             $grades[$userid]->rawgrade = att_calc_user_grade_fraction($this->get_user_grade($userid), $this->get_user_max_grade($userid)) * $this->grade;
         }
