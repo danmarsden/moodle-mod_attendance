@@ -215,7 +215,8 @@ class att_page_with_filter_controls {
     public function init_start_end_date() {
         global $CFG;
 
-        $date = usergetdate($this->curdate);
+        // HOURSECS solves issue for weeks view with Daylight saving time and clocks adjusting by one hour backward
+        $date = usergetdate($this->curdate + HOURSECS);
         $mday = $date['mday'];
         $wday = $date['wday'] - $CFG->calendar_startwday;
         if ($wday < 0) $wday += 7;
