@@ -34,7 +34,7 @@ function xmldb_attforblock_install() {
 	$result = true;
 	$arr = array('P' => 2, 'A' => 0, 'L' => 1, 'E' => 1);
 	foreach ($arr as $k => $v) {
-		unset($rec);
+		$rec = new stdClass;
 		$rec->attendanceid = 0;
 		$rec->acronym = get_string($k.'acronym', 'attforblock');
 		$rec->description = get_string($k.'full', 'attforblock');

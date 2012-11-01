@@ -1292,12 +1292,14 @@ function att_update_all_users_grades($attid, $course, $context) {
     $statuses = att_get_statuses($attid);
     $gradebook_maxgrade = att_get_gradebook_maxgrade($attid);
     foreach ($userids as $userid) {
-        $grades[$userid]->userid = $userid;
+        $grade = new stdClass;
+        $grade->userid = $userid;
         $userstatusesstat = att_get_user_statuses_stat($attid, $course->startdate, $userid);
         $usertakensesscount = att_get_user_taken_sessions_count($attid, $course->startdate, $userid);
         $usergrade = att_get_user_grade($userstatusesstat, $statuses);
         $usermaxgrade = att_get_user_max_grade($usertakensesscount, $statuses);
-        $grades[$userid]->rawgrade = att_calc_user_grade_fraction($usergrade, $usermaxgrade) * $gradebook_maxgrade;
+        $grade->rawgrade = att_calc_user_grade_fraction($usergrade, $usermaxgrade) * $gradebook_maxgrade;
+        $grades[$userid] = $grade;
     }
 
     return grade_update('mod/attforblock', $course->id, 'mod', 'attforblock',

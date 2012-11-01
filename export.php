@@ -77,6 +77,7 @@ if ($mform->is_submitted()) {
         $filename = clean_filename($course->shortname.'_Attendances_'.userdate(time(), '%Y%m%d-%H%M'));
 
 		$group = $formdata->group ? $reportdata->groups[$formdata->group] : 0;
+        $data = new stdClass;
         $data->tabhead = array();
         $data->course = $att->course->fullname;
         $data->group = $group ? $group->name : get_string('allparticipants');
