@@ -23,7 +23,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$module->version  = 2011071601;  // The current module version (Date: YYYYMMDDXX)
+$module->version  = 2012120700;  // The current module version (Date: YYYYMMDDXX)
 $module->release = '2.4.0';
 $module->cron     = 0;           // Period for cron to check this module (secs)
 $module->component = 'mod_attforblock'; // Full name of the plugin (used for diagnostics)

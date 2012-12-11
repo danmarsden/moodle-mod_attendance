@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+$string['attforblock:addinstance'] = 'Add a new attendance activity';
 $string['Aacronym'] = 'A';
 $string['Afull'] = 'Absent';
 $string['Eacronym'] = 'E';
@@ -174,12 +175,19 @@ $string['startofperiod'] = 'Start of period';
 $string['status'] = 'Status';
 $string['statuses'] = 'Statuses';
 $string['statusdeleted'] = 'Status deleted';
-$string['strftimedm'] = '%d.%m';
-$string['strftimedmy'] = '%d.%m.%Y';
+
+$string['strftimedm'] = '%m.%d';
+$string['strftimedmy'] = '%m.%d.%Y';
+$string['strftimedmyw'] = '%m.%d.%y&nbsp;(%a)';
+$string['strftimeshortdate'] = '%m.%d.%Y';
+$string['strftimedmyhm'] = '%m.%d.%Y %H.%M'; 
+
+//$string['strftimedm'] = '%d.%m';
+//$string['strftimedmy'] = '%d.%m.%Y';
 $string['strftimedmyhm'] = '%d.%m.%Y %H.%M'; // line added to allow multiple sessions in the same day
-$string['strftimedmyw'] = '%d.%m.%y&nbsp;(%a)';
+//$string['strftimedmyw'] = '%d.%m.%y&nbsp;(%a)';
 $string['strftimehm'] = '%H:%M'; //line added to allow display of time
-$string['strftimeshortdate'] = '%d.%m.%Y';
+//$string['strftimeshortdate'] = '%d.%m.%Y';
 $string['studentid'] = 'Student ID';
 $string['takeattendance'] = 'Take attendance';
 $string['thiscourse'] = 'This course';

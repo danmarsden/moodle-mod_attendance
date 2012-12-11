@@ -106,8 +106,8 @@ class mod_attforblock_renderer extends plugin_renderer_base {
                     'cal_cur_date'  => $fcontrols->curdate);
             $curdate_controls = html_writer::script(js_writer::set_variable('M.attforblock', $jsvals));
 
-            $this->page->requires->yui2_lib('container');
-            $this->page->requires->yui2_lib('calendar');
+            //$this->page->requires->yui2_lib('container');
+            //$this->page->requires->yui2_lib('calendar');
             $this->page->requires->js('/mod/attforblock/calendar.js');
 
             $curdate_controls .= html_writer::link($fcontrols->url(array('curdate' => $fcontrols->prevcur)), $this->output->larrow());
