@@ -420,13 +420,30 @@ function attforblock_get_participants($attforblockid) {
     return false;
 }
 
+/**
+ * This function returns if a scale is being used by one attendance
+ * it it has support for grading and scales. Commented code should be
+ * modified if necessary. See book, glossary or journal modules
+ * as reference.
+ *
+ * @param int $attforblockid
+ * @param int $scaleid
+ * @return boolean True if the scale is used by any attendance
+ */
 function attforblock_scale_used ($attforblockid, $scaleid) {
-//This function returns if a scale is being used by one attforblock
-//it it has support for grading and scales. Commented code should be
-//modified if necessary. See forum, glossary or journal modules
-//as reference.
-   
-    $return = false;
+    return false;
+}
+
+/**
+ * Checks if scale is being used by any instance of attendance
+ *
+ * This is used to find out if scale used anywhere
+ *
+ * @param int $scaleid
+ * @return bool true if the scale is used by any book
+ */
+function attforblock_scale_used_anywhere($scaleid) {
+    return false;
 }
 
 /**
