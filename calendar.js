@@ -1,96 +1,101 @@
-document.body.className += ' yui-skin-sam';
+YUI().use('yui2-container', 'yui2-calendar', function(Y) {
+    var YAHOO = Y.YUI2;
 
-YAHOO.util.Event.onDOMReady(function(){
+    document.body.className += ' yui-skin-sam';
 
-    var Event = YAHOO.util.Event,
-        Dom = YAHOO.util.Dom,
-        dialog, calendar;
+    YAHOO.util.Event.onDOMReady(function(){
 
-    var showBtn = Dom.get("show");
+        var Event = YAHOO.util.Event,
+            Dom = YAHOO.util.Dom,
+            dialog, calendar;
 
-    Event.on(showBtn, "click", function() {
+        var showBtn = Dom.get("show");
 
-        // Lazy Dialog Creation - Wait to create the Dialog, and setup document click listeners, until the first time the button is clicked.
-        if (!dialog) {
+        Event.on(showBtn, "click", function() {
 
-            // Hide Calendar if we click anywhere in the document other than the calendar
-            Event.on(document, "click", function(e) {
-                var el = Event.getTarget(e);
-                var dialogEl = dialog.element;
-                if (el != dialogEl && !Dom.isAncestor(dialogEl, el) && el != showBtn && !Dom.isAncestor(showBtn, el)) {
+            // Lazy Dialog Creation - Wait to create the Dialog, and setup document click listeners, until the first time the button is clicked.
+            if (!dialog) {
+
+                // Hide Calendar if we click anywhere in the document other than the calendar
+                Event.on(document, "click", function(e) {
+                    var el = Event.getTarget(e);
+                    var dialogEl = dialog.element;
+                    if (el != dialogEl && !Dom.isAncestor(dialogEl, el) && el != showBtn && !Dom.isAncestor(showBtn, el)) {
+                        dialog.hide();
+                    }
+                });
+
+                function resetHandler() {
+                    calendar.cfg.setProperty("pagedate", calendar.today);
+                    calendar.render();
+                }
+
+                function closeHandler() {
                     dialog.hide();
                 }
-            });
 
-            function resetHandler() {
-                calendar.cfg.setProperty("pagedate", calendar.today);
+                dialog = new YAHOO.widget.Dialog("attcalendarcontainer", {
+                    visible:false,
+                    context:["show", "tl", "bl"],
+                    buttons:[{text: M.str.attforblock.caltoday, handler: resetHandler, isDefault:true}, {text: M.str.attforblock.calclose, handler: closeHandler}],
+                    draggable:false,
+                    close:false
+                });
+                dialog.setHeader('');
+                dialog.setBody('<div id="cal"></div>');
+                dialog.render(document.body);
+
+                dialog.showEvent.subscribe(function() {
+                    if (YAHOO.env.ua.ie) {
+                        // Since we're hiding the table using yui-overlay-hidden, we
+                        // want to let the dialog know that the content size has changed, when
+                        // shown
+                        dialog.fireEvent("changeContent");
+                    }
+                });
+            }
+
+            // Lazy Calendar Creation - Wait to create the Calendar until the first time the button is clicked.
+            if (!calendar) {
+
+                calendar = new YAHOO.widget.Calendar("cal", {
+                    iframe:false,          // Turn iframe off, since container has iframe support.
+                    hide_blank_weeks:true  // Enable, to demonstrate how we handle changing height, using changeContent
+                });
+
+                calendar.cfg.setProperty("start_weekday", M.attforblock.cal_start_weekday);
+                calendar.cfg.setProperty("MONTHS_LONG", M.attforblock.cal_months);
+                calendar.cfg.setProperty("WEEKDAYS_SHORT", M.attforblock.cal_week_days);
+                calendar.select(new Date(M.attforblock.cal_cur_date*1000));
+                calendar.render();
+
+                calendar.selectEvent.subscribe(function() {
+                    if (calendar.getSelectedDates().length > 0) {
+
+                        Dom.get("curdate").value = calendar.getSelectedDates()[0] / 1000;
+
+                        Dom.get("currentdate").submit();
+                    }
+                    dialog.hide();
+                });
+
+                calendar.renderEvent.subscribe(function() {
+                    // Tell Dialog it's contents have changed, which allows
+                    // container to redraw the underlay (for IE6/Safari2)
+                    dialog.fireEvent("changeContent");
+                });
+            }
+
+            var seldate = calendar.getSelectedDates();
+
+            if (seldate.length > 0) {
+                // Set the pagedate to show the selected date if it exists
+                calendar.cfg.setProperty("pagedate", seldate[0]);
                 calendar.render();
             }
-            
-            function closeHandler() {
-                dialog.hide();
-            }
 
-            dialog = new YAHOO.widget.Dialog("attcalendarcontainer", {
-                visible:false,
-                context:["show", "tl", "bl"],
-                buttons:[{text: M.str.attforblock.caltoday, handler: resetHandler, isDefault:true}, {text: M.str.attforblock.calclose, handler: closeHandler}],
-                draggable:false,
-                close:false
-            });
-            dialog.setHeader('');
-            dialog.setBody('<div id="cal"></div>');
-            dialog.render(document.body);
-
-            dialog.showEvent.subscribe(function() {
-                if (YAHOO.env.ua.ie) {
-                    // Since we're hiding the table using yui-overlay-hidden, we
-                    // want to let the dialog know that the content size has changed, when
-                    // shown
-                    dialog.fireEvent("changeContent");
-                }
-            });
-        }
-
-        // Lazy Calendar Creation - Wait to create the Calendar until the first time the button is clicked.
-        if (!calendar) {
-
-            calendar = new YAHOO.widget.Calendar("cal", {
-                iframe:false,          // Turn iframe off, since container has iframe support.
-                hide_blank_weeks:true  // Enable, to demonstrate how we handle changing height, using changeContent
-            });
-
-            calendar.cfg.setProperty("start_weekday", M.attforblock.cal_start_weekday);
-            calendar.cfg.setProperty("MONTHS_LONG", M.attforblock.cal_months);
-            calendar.cfg.setProperty("WEEKDAYS_SHORT", M.attforblock.cal_week_days);
-            calendar.select(new Date(M.attforblock.cal_cur_date*1000));
-            calendar.render();
-
-            calendar.selectEvent.subscribe(function() {
-                if (calendar.getSelectedDates().length > 0) {
-
-                    Dom.get("curdate").value = calendar.getSelectedDates()[0] / 1000;
-
-                    Dom.get("currentdate").submit();
-                }
-                dialog.hide();
-            });
-
-            calendar.renderEvent.subscribe(function() {
-                // Tell Dialog it's contents have changed, which allows
-                // container to redraw the underlay (for IE6/Safari2)
-                dialog.fireEvent("changeContent");
-            });
-        }
-
-        var seldate = calendar.getSelectedDates();
-
-        if (seldate.length > 0) {
-            // Set the pagedate to show the selected date if it exists
-            calendar.cfg.setProperty("pagedate", seldate[0]);
-            calendar.render();
-        }
-
-        dialog.show();
+            dialog.show();
+        });
     });
 });
+
