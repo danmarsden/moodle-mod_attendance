@@ -160,9 +160,9 @@ function ExportToTableEd($data, $filename, $format) {
 /// Sending HTTP headers
     $workbook->send($filename);
 /// Creating the first worksheet
-    $myxls =& $workbook->add_worksheet('Attendances');
+    $myxls = $workbook->add_worksheet('Attendances');
 /// format types
-    $formatbc =& $workbook->add_format();
+    $formatbc = $workbook->add_format();
     $formatbc->set_bold(1);
 
     $myxls->write(0, 0, get_string('course'), $formatbc);
