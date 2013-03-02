@@ -592,9 +592,17 @@ class mod_attforblock_renderer extends plugin_renderer_base {
     private function construct_user_sessions_log(attforblock_user_data $userdata) {
         $table = new html_table();
         $table->attributes['class'] = 'generaltable attwidth boxaligncenter';
-        $table->head = array('#', get_string('date'), get_string('time'), get_string('description','attforblock'), get_string('status','attforblock'), get_string('remarks','attforblock'));
-        $table->align = array('', '', 'left', 'left', 'center', 'left');
-        $table->size = array('1px', '1px', '1px', '*', '1px', '1px');
+        $table->head = array(
+            '#',
+            get_string('sessiontypeshort', 'attforblock'),
+            get_string('date'),
+            get_string('time'),
+            get_string('description','attforblock'),
+            get_string('status','attforblock'),
+            get_string('remarks','attforblock')
+        );
+        $table->align = array('', '', '', 'left', 'left', 'center', 'left');
+        $table->size = array('1px', '1px', '1px', '1px', '*', '1px', '1px');
 
         $i = 0;
         foreach ($userdata->sessionslog as $sess) {
@@ -602,6 +610,7 @@ class mod_attforblock_renderer extends plugin_renderer_base {
 
             $row = new html_table_row();
             $row->cells[] = $i;
+            $row->cells[] = html_writer::tag('nobr', $sess->groupid ? $userdata->groups[$sess->groupid]->name : get_string('commonsession', 'attforblock'));
             $row->cells[] = userdate($sess->sessdate, get_string('strftimedmyw', 'attforblock'));
             $row->cells[] = $this->construct_time($sess->sessdate, $sess->duration);
             $row->cells[] = $sess->description;

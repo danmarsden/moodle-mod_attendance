@@ -1051,20 +1051,18 @@ class attforblock {
     public function get_user_filtered_sessions_log_extended($userid) {
         global $DB;
 
-        $groups = array_keys(groups_get_all_groups($this->course->id, $userid));
-        $groups[] = 0;
-        list($gsql, $gparams) = $DB->get_in_or_equal($groups, SQL_PARAMS_NAMED, 'gid0');
+        // all taked sessions (including previous groups)
 
         if ($this->pageparams->startdate && $this->pageparams->enddate) {
             $where = "ats.attendanceid = :aid AND ats.sessdate >= :csdate AND 
-                      ats.sessdate >= :sdate AND ats.sessdate < :edate AND ats.groupid $gsql";
+                      ats.sessdate >= :sdate AND ats.sessdate < :edate";
         } else {
-            $where = "ats.attendanceid = :aid AND ats.sessdate >= :csdate AND ats.groupid $gsql";
+            $where = "ats.attendanceid = :aid AND ats.sessdate >= :csdate";
         }
 
-        $sql = "SELECT ats.id, ats.sessdate, ats.duration, ats.description, al.statusid, al.remarks
+        $sql = "SELECT ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, al.statusid, al.remarks
                   FROM {attendance_sessions} ats
-             LEFT JOIN {attendance_log} al
+            RIGHT JOIN {attendance_log} al
                     ON ats.id = al.sessionid AND al.studentid = :uid
                  WHERE $where
               ORDER BY ats.sessdate ASC";
@@ -1075,8 +1073,33 @@ class attforblock {
                 'csdate'    => $this->course->startdate,
                 'sdate'     => $this->pageparams->startdate,
                 'edate'     => $this->pageparams->enddate);
-        $params = array_merge($params, $gparams);
         $sessions = $DB->get_records_sql($sql, $params);
+
+
+        // all sessions for current groups
+
+        $groups = array_keys(groups_get_all_groups($this->course->id, $userid));
+        $groups[] = 0;
+        list($gsql, $gparams) = $DB->get_in_or_equal($groups, SQL_PARAMS_NAMED, 'gid0');
+
+        if ($this->pageparams->startdate && $this->pageparams->enddate) {
+            $where = "ats.attendanceid = :aid AND ats.sessdate >= :csdate AND
+                      ats.sessdate >= :sdate AND ats.sessdate < :edate AND ats.groupid $gsql";
+        } else {
+            $where = "ats.attendanceid = :aid AND ats.sessdate >= :csdate AND ats.groupid $gsql";
+        }
+
+        $sql = "SELECT ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, al.statusid, al.remarks
+                  FROM {attendance_sessions} ats
+             LEFT JOIN {attendance_log} al
+                    ON ats.id = al.sessionid AND al.studentid = :uid
+                 WHERE $where
+              ORDER BY ats.sessdate ASC";
+
+        $params = array_merge($params, $gparams);
+        $sessions = array_merge($sessions, $DB->get_records_sql($sql, $params));
+
+
         foreach ($sessions as $sess) {
             if (empty($sess->description)) {
                 $sess->description = get_string('nodescription', 'attforblock');

@@ -333,6 +333,8 @@ class attforblock_user_data implements renderable {
 
     public $sessionslog;
 
+    public $groups;
+
     public $coursesatts;
 
     private $urlpath;
@@ -364,6 +366,8 @@ class attforblock_user_data implements renderable {
             $this->filtercontrols = new attforblock_filter_controls($att);
 
             $this->sessionslog = $att->get_user_filtered_sessions_log_extended($userid);
+
+            $this->groups = groups_get_all_groups($att->course->id);
         }
         else {
             $this->coursesatts = att_get_user_courses_attendances($userid);
