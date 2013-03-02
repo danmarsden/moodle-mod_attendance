@@ -22,7 +22,6 @@ $pageparams = new att_take_page_params();
 $id                     = required_param('id', PARAM_INT);
 $pageparams->sessionid  = required_param('sessionid', PARAM_INT);
 $pageparams->grouptype  = required_param('grouptype', PARAM_INT);
-$pageparams->group    	= optional_param('group', null, PARAM_INT);
 $pageparams->sort 		= optional_param('sort', null, PARAM_INT);
 $pageparams->copyfrom   = optional_param('copyfrom', null, PARAM_INT);
 $pageparams->viewmode   = optional_param('viewmode', null, PARAM_INT);
@@ -33,6 +32,8 @@ $course         = $DB->get_record('course', array('id' => $cm->course), '*', MUS
 $att            = $DB->get_record('attforblock', array('id' => $cm->instance), '*', MUST_EXIST);
 
 require_login($course, true, $cm);
+
+$pageparams->group = groups_get_activity_group($cm, true);
 
 $pageparams->init($course->id);
 $att = new attforblock($att, $cm, $course, $PAGE->context, $pageparams);

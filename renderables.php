@@ -257,10 +257,12 @@ class attforblock_take_data implements renderable {
     private $att;
 
     public function  __construct(attforblock $att) {
-        if ($att->pageparams->grouptype)
+        if ($att->pageparams->grouptype) {
             $this->users = $att->get_users($att->pageparams->grouptype);
-        else
+        }
+        else {
             $this->users = $att->get_users($att->pageparams->group);
+        }
 
         $this->pageparams = $att->pageparams;
         $this->perm = $att->perm;
