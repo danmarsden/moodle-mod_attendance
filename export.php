@@ -75,7 +75,7 @@ if ($mform->is_submitted()) {
     if ($reportdata->users) {
         $filename = clean_filename($course->shortname.'_Attendances_'.userdate(time(), '%Y%m%d-%H%M'));
 
-		$group = $formdata->group ? $reportdata->groups[$formdata->group] : 0;
+        $group = $formdata->group ? $reportdata->groups[$formdata->group] : 0;
         $data = new stdClass;
         $data->tabhead = array();
         $data->course = $att->course->fullname;
@@ -92,7 +92,7 @@ if ($mform->is_submitted()) {
 
 
         if (count($reportdata->sessions) > 0) {
-            foreach($reportdata->sessions as $sess) {
+            foreach ($reportdata->sessions as $sess) {
                 $text = userdate($sess->sessdate, get_string('strftimedmyhm', 'attforblock'));
                 $text .= ' ';
                 $text .= $sess->groupid ? $reportdata->groups[$sess->groupid]->name : get_string('commonsession', 'attforblock');
@@ -101,12 +101,13 @@ if ($mform->is_submitted()) {
         } else {
             print_error('sessionsnotfound', 'attforblock', $att->url_manage());
         }
-        if ($reportdata->gradable)
+        if ($reportdata->gradable) {
             $data->tabhead[] = get_string('grade');
+        }
 
         $i = 0;
         $data->table = array();
-        foreach($reportdata->users as $user) {
+        foreach ($reportdata->users as $user) {
             if (isset($formdata->ident['id'])) {
                 $data->table[$i][] = $user->id;
             }
@@ -117,15 +118,16 @@ if ($mform->is_submitted()) {
             $data->table[$i][] = $user->firstname;
             $cellsgenerator = new user_sessions_cells_text_generator($reportdata, $user);
             $data->table[$i] = array_merge($data->table[$i], $cellsgenerator->get_cells());
-            if ($reportdata->gradable)
+            if ($reportdata->gradable) {
                 $data->table[$i][] = $reportdata->grades[$user->id].' / '.$reportdata->maxgrades[$user->id];
+            }
             $i++;
         }
 
         if ($formdata->format === 'text') {
-            ExportToCSV($data, $filename);
+            exporttocsv($data, $filename);
         } else {
-            ExportToTableEd($data, $filename, $formdata->format);
+            exporttotableed($data, $filename, $formdata->format);
         }
         exit;
     } else {
@@ -136,7 +138,7 @@ if ($mform->is_submitted()) {
 $output = $PAGE->get_renderer('mod_attforblock');
 $tabs = new attforblock_tabs($att, attforblock_tabs::TAB_EXPORT);
 echo $output->header();
-echo $output->heading(get_string('attendanceforthecourse','attforblock').' :: ' .$course->fullname);
+echo $output->heading(get_string('attendanceforthecourse', 'attforblock').' :: ' .$course->fullname);
 echo $output->render($tabs);
 
 $mform->display();
@@ -144,23 +146,23 @@ $mform->display();
 echo $OUTPUT->footer();
 
 
-function ExportToTableEd($data, $filename, $format) {
-	global $CFG;
+function exporttotableed($data, $filename, $format) {
+    global $CFG;
 
     if ($format === 'excel') {
-	    require_once("$CFG->libdir/excellib.class.php");
-	    $filename .= ".xls";
-	    $workbook = new MoodleExcelWorkbook("-");
+        require_once("$CFG->libdir/excellib.class.php");
+        $filename .= ".xls";
+        $workbook = new MoodleExcelWorkbook("-");
     } else {
-	    require_once("$CFG->libdir/odslib.class.php");
-	    $filename .= ".ods";
-	    $workbook = new MoodleODSWorkbook("-");
+        require_once("$CFG->libdir/odslib.class.php");
+        $filename .= ".ods";
+        $workbook = new MoodleODSWorkbook("-");
     }
-/// Sending HTTP headers
+    // Sending HTTP headers.
     $workbook->send($filename);
-/// Creating the first worksheet
+    // Creating the first worksheet.
     $myxls = $workbook->add_worksheet('Attendances');
-/// format types
+    // Format types.
     $formatbc = $workbook->add_format();
     $formatbc->set_bold(1);
 
@@ -172,21 +174,21 @@ function ExportToTableEd($data, $filename, $format) {
     $i = 3;
     $j = 0;
     foreach ($data->tabhead as $cell) {
-    	$myxls->write($i, $j++, $cell, $formatbc);
+        $myxls->write($i, $j++, $cell, $formatbc);
     }
     $i++;
     $j = 0;
     foreach ($data->table as $row) {
-    	foreach ($row as $cell) {
-    		$myxls->write($i, $j++, $cell);
-    	}
-		$i++;
-		$j = 0;
+        foreach ($row as $cell) {
+            $myxls->write($i, $j++, $cell);
+        }
+        $i++;
+        $j = 0;
     }
-	$workbook->close();
+    $workbook->close();
 }
 
-function ExportToCSV($data, $filename) {
+function exporttocsv($data, $filename) {
     $filename .= ".txt";
 
     header("Content-Type: application/download\n");
@@ -200,6 +202,6 @@ function ExportToCSV($data, $filename) {
 
     echo implode("\t", $data->tabhead)."\n";
     foreach ($data->table as $row) {
-    	echo implode("\t", $row)."\n";
+        echo implode("\t", $row)."\n";
     }
 }

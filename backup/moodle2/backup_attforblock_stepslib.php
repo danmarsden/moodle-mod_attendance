@@ -32,13 +32,10 @@ class backup_attforblock_activity_structure_step extends backup_activity_structu
 
     protected function define_structure() {
 
-        // are we including userinfo?
+        // Are we including userinfo?
         $userinfo = $this->get_setting_value('userinfo');
 
-        ////////////////////////////////////////////////////////////////////////
-        // XML nodes declaration - non-user data
-        ////////////////////////////////////////////////////////////////////////
-
+        // XML nodes declaration - non-user data.
         $attforblock = new backup_nested_element('attforblock', array('id'), array(
             'name', 'grade'));
 
@@ -51,18 +48,13 @@ class backup_attforblock_activity_structure_step extends backup_activity_structu
             'groupid', 'sessdate', 'duration', 'lasttaken', 'lasttakenby',
             'timemodified', 'description', 'descriptionformat'));
 
-        ////////////////////////////////////////////////////////////////////////
-        // XML nodes declaration - user data
-        ////////////////////////////////////////////////////////////////////////
-
+        // XML nodes declaration - user data.
         $logs = new backup_nested_element('logs');
         $log  = new backup_nested_element('log', array('id'), array(
             'sessionid', 'studentid', 'statusid', 'lasttaken', 'statusset',
             'timetaken', 'takenby', 'remarks'));
 
-        ////////////////////////////////////////////////////////////////////////
-        // build the tree in the order needed for restore
-        ////////////////////////////////////////////////////////////////////////
+        // Build the tree in the order needed for restore.
         $attforblock->add_child($statuses);
         $statuses->add_child($status);
 
@@ -72,9 +64,7 @@ class backup_attforblock_activity_structure_step extends backup_activity_structu
         $session->add_child($logs);
         $logs->add_child($log);
 
-        ////////////////////////////////////////////////////////////////////////
-        // data sources - non-user data
-        ////////////////////////////////////////////////////////////////////////
+        // Data sources - non-user data.
 
         $attforblock->set_source_table('attforblock', array('id' => backup::VAR_ACTIVITYID));
 
@@ -82,30 +72,21 @@ class backup_attforblock_activity_structure_step extends backup_activity_structu
 
         $session->set_source_table('attendance_sessions', array('attendanceid' => backup::VAR_PARENTID));
 
-        ////////////////////////////////////////////////////////////////////////
-        // data sources - user related data
-        ////////////////////////////////////////////////////////////////////////
-
+        // Data sources - user related data.
         if ($userinfo) {
             $log->set_source_table('attendance_log', array('sessionid' => backup::VAR_PARENTID));
         }
 
-        ////////////////////////////////////////////////////////////////////////
-        // id annotations
-        ////////////////////////////////////////////////////////////////////////
-
+        // Id annotations.
         $session->annotate_ids('user', 'lasttakenby');
         $session->annotate_ids('group', 'groupid');
         $log->annotate_ids('user', 'studentid');
         $log->annotate_ids('user', 'takenby');
 
-        ////////////////////////////////////////////////////////////////////////
-        // file annotations
-        ////////////////////////////////////////////////////////////////////////
-
+        // File annotations.
         $session->annotate_files('mod_attforblock', 'session', 'id');
 
-        // return the root element (workshop), wrapped into standard activity structure
+        // Return the root element (workshop), wrapped into standard activity structure.
         return $this->prepare_activity_structure($attforblock);
     }
 }

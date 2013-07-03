@@ -29,10 +29,10 @@ require_once(dirname(__FILE__).'/locallib.php');
 $pageparams = new att_view_page_params();
 
 $id                     = required_param('id', PARAM_INT);
-$pageparams->studentid	= optional_param('studentid', NULL, PARAM_INT);
-$pageparams->mode 		= optional_param('mode', att_view_page_params::MODE_THIS_COURSE, PARAM_INT);
-$pageparams->view       = optional_param('view', NULL, PARAM_INT);
-$pageparams->curdate	= optional_param('curdate', NULL, PARAM_INT);
+$pageparams->studentid  = optional_param('studentid', null, PARAM_INT);
+$pageparams->mode       = optional_param('mode', att_view_page_params::MODE_THIS_COURSE, PARAM_INT);
+$pageparams->view       = optional_param('view', null, PARAM_INT);
+$pageparams->curdate    = optional_param('curdate', null, PARAM_INT);
 
 $cm             = get_coursemodule_from_id('attforblock', $id, 0, false, MUST_EXIST);
 $course         = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
@@ -44,12 +44,11 @@ $pageparams->init($cm);
 $att = new attforblock($attforblock, $cm, $course, $PAGE->context, $pageparams);
 
 // Not specified studentid for displaying attendance?
-// Redirect to appropriate page if can
+// Redirect to appropriate page if can.
 if (!$pageparams->studentid) {
     if ($att->perm->can_manage() || $att->perm->can_take() || $att->perm->can_change()) {
         redirect($att->url_manage());
-    }
-    elseif ($att->perm->can_view_reports()) {
+    } else if ($att->perm->can_view_reports()) {
         redirect($att->url_report());
     }
 }

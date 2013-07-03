@@ -23,19 +23,18 @@
  */
 
 if (!defined('MOODLE_INTERNAL')) {
-    die('Direct access to this script is forbidden.');    ///  It must be included from a Moodle page
+    die('Direct access to this script is forbidden.');
 }
 
-require_once ($CFG->dirroot.'/course/moodleform_mod.php');
+require_once($CFG->dirroot.'/course/moodleform_mod.php');
 
 class mod_attforblock_mod_form extends moodleform_mod {
 
-    function definition() {
+    public function definition() {
 
         global $CFG;
         $mform    =& $this->_form;
 
-//-------------------------------------------------------------------------------
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
         $mform->addElement('text', 'name', get_string('name'), array('size'=>'64'));
@@ -46,12 +45,8 @@ class mod_attforblock_mod_form extends moodleform_mod {
         $mform->addElement('modgrade', 'grade', get_string('grade'));
         $mform->setDefault('grade', 100);
 
-//-------------------------------------------------------------------------------
-
         $this->standard_coursemodule_elements(true);
 
-//-------------------------------------------------------------------------------
-        // buttons
         $this->add_action_buttons();
     }
 

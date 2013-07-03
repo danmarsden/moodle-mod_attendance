@@ -36,12 +36,9 @@ class restore_attforblock_activity_structure_step extends restore_activity_struc
 
         $paths = array();
 
-        $userinfo = $this->get_setting_value('userinfo'); // are we including userinfo?
+        $userinfo = $this->get_setting_value('userinfo'); // Are we including userinfo?
 
-        ////////////////////////////////////////////////////////////////////////
-        // XML interesting paths - non-user data
-        ////////////////////////////////////////////////////////////////////////
-
+        // XML interesting paths - non-user data.
         $paths[] = new restore_path_element('attforblock', '/activity/attforblock');
 
         $paths[] = new restore_path_element('attforblock_status',
@@ -50,19 +47,16 @@ class restore_attforblock_activity_structure_step extends restore_activity_struc
         $paths[] = new restore_path_element('attforblock_session',
                        '/activity/attforblock/sessions/session');
 
-        // End here if no-user data has been selected
+        // End here if no-user data has been selected.
         if (!$userinfo) {
             return $this->prepare_activity_structure($paths);
         }
 
-        ////////////////////////////////////////////////////////////////////////
-        // XML interesting paths - user data
-        ////////////////////////////////////////////////////////////////////////
-
+        // XML interesting paths - user data.
         $paths[] = new restore_path_element('attforblock_log',
                        '/activity/attforblock/sessions/session/logs/log');
 
-        // Return the paths wrapped into standard activity structure
+        // Return the paths wrapped into standard activity structure.
         return $this->prepare_activity_structure($paths);
     }
 
@@ -73,9 +67,9 @@ class restore_attforblock_activity_structure_step extends restore_activity_struc
         $oldid = $data->id;
         $data->course = $this->get_courseid();
 
-        // insert the attforblock record
+        // Insert the attforblock record.
         $newitemid = $DB->insert_record('attforblock', $data);
-        // immediately after inserting "activity" record, call this
+        // Immediately after inserting "activity" record, call this.
         $this->apply_activity_instance($newitemid);
     }
 
@@ -118,7 +112,9 @@ class restore_attforblock_activity_structure_step extends restore_activity_struc
         $data->studentid = $this->get_mappingid('user', $data->studentid);
         $data->statusid = $this->get_mappingid('attforblock_status', $data->statusid);
         $statusset = explode(',', $data->statusset);
-        foreach ($statusset as $st) $st = $this->get_mappingid('attforblock_status', $st);
+        foreach ($statusset as $st) {
+            $st = $this->get_mappingid('attforblock_status', $st);
+        }
         $data->statusset = implode(',', $statusset);
         $data->timetaken = $this->apply_date_offset($data->timetaken);
         $data->takenby = $this->get_mappingid('user', $data->takenby);

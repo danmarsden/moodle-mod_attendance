@@ -37,7 +37,6 @@ class backup_attforblock_activity_task extends backup_activity_task {
      * Define (add) particular settings this activity can have
      */
     protected function define_my_settings() {
-        // No particular settings for this activity
     }
 
     /**
@@ -54,13 +53,13 @@ class backup_attforblock_activity_task extends backup_activity_task {
     static public function encode_content_links($content) {
         global $CFG;
 
-        $base = preg_quote($CFG->wwwroot,"/");
+        $base = preg_quote($CFG->wwwroot, "/");
 
-        //Link to attforblock view by moduleid
+        // Link to attforblock view by moduleid.
         $search = "/(" . $base . "\/mod\/attforblock\/view.php\?id\=)([0-9]+)/";
         $content= preg_replace($search, '$@ATTFORBLOCKVIEWBYID*$2@$', $content);
 
-        //Link to attforblock view by moduleid and studentid
+        // Link to attforblock view by moduleid and studentid.
         $search = "/(" . $base . "\/mod\/attforblock\/view.php\?id\=)([0-9]+)\&studentid\=([0-9]+)/";
         $content= preg_replace($search, '$@ATTFORBLOCKVIEWBYIDSTUD*$2*$3@$', $content);
 

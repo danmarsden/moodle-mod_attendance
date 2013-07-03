@@ -51,7 +51,7 @@ class attforblock_tabs implements renderable {
      * @param attforblock $att instance
      * @param $currenttab - one of attforblock_tabs constants
      */
-    public function  __construct(attforblock $att, $currenttab=NULL) {
+    public function  __construct(attforblock $att, $currenttab=null) {
         $this->att = $att;
         $this->currenttab = $currenttab;
     }
@@ -66,27 +66,28 @@ class attforblock_tabs implements renderable {
                 $this->att->perm->can_take() or
                 $this->att->perm->can_change()) {
             $toprow[] = new tabobject(self::TAB_SESSIONS, $this->att->url_manage()->out(),
-                        get_string('sessions','attforblock'));
+                        get_string('sessions', 'attforblock'));
         }
 
         if ($this->att->perm->can_manage()) {
-            $toprow[] = new tabobject(self::TAB_ADD, $this->att->url_sessions()->out(true, array('action' => att_sessions_page_params::ACTION_ADD)),
-                        get_string('add','attforblock'));
+            $toprow[] = new tabobject(self::TAB_ADD,
+                                     $this->att->url_sessions()->out(true, array('action' => att_sessions_page_params::ACTION_ADD)),
+                        get_string('add', 'attforblock'));
         }
 
         if ($this->att->perm->can_view_reports()) {
             $toprow[] = new tabobject(self::TAB_REPORT, $this->att->url_report()->out(),
-                        get_string('report','attforblock'));
+                        get_string('report', 'attforblock'));
         }
 
         if ($this->att->perm->can_export()) {
             $toprow[] = new tabobject(self::TAB_EXPORT, $this->att->url_export()->out(),
-                        get_string('export','quiz'));
+                        get_string('export', 'quiz'));
         }
 
         if ($this->att->perm->can_change_preferences()) {
             $toprow[] = new tabobject(self::TAB_PREFERENCES, $this->att->url_preferences()->out(),
-                        get_string('settings','attforblock'));
+                        get_string('settings', 'attforblock'));
         }
 
         return array($toprow);
@@ -137,7 +138,8 @@ class attforblock_filter_controls implements renderable {
                 $format = get_string('strftimedm', 'attforblock');
                 $this->prevcur = $att->pageparams->startdate - WEEKSECS;
                 $this->nextcur = $att->pageparams->startdate + WEEKSECS;
-                $this->curdatetxt = userdate($att->pageparams->startdate, $format)." - ".userdate($att->pageparams->enddate, $format);
+                $this->curdatetxt = userdate($att->pageparams->startdate, $format).
+                                    " - ".userdate($att->pageparams->enddate, $format);
                 break;
             case ATT_VIEW_MONTHS:
                 $format = '%B';
@@ -228,7 +230,7 @@ class attforblock_manage_data implements renderable {
     /**
      * Must be called without or with both parameters
      */
-    public function url_sessions($sessionid=NULL, $action=NULL) {
+    public function url_sessions($sessionid=null, $action=null) {
         return url_helpers::url_sessions($this->att, $sessionid, $action);
     }
 }
@@ -259,8 +261,7 @@ class attforblock_take_data implements renderable {
     public function  __construct(attforblock $att) {
         if ($att->pageparams->grouptype) {
             $this->users = $att->get_users($att->pageparams->grouptype);
-        }
-        else {
+        } else {
             $this->users = $att->get_users($att->pageparams->group);
         }
 
@@ -275,16 +276,17 @@ class attforblock_take_data implements renderable {
         $this->sessioninfo = $att->get_session_info($att->pageparams->sessionid);
         $this->updatemode = $this->sessioninfo->lasttaken > 0;
 
-        if (isset($att->pageparams->copyfrom))
+        if (isset($att->pageparams->copyfrom)) {
             $this->sessionlog = $att->get_session_log($att->pageparams->copyfrom);
-        elseif ($this->updatemode)
+        } else if ($this->updatemode) {
             $this->sessionlog = $att->get_session_log($att->pageparams->sessionid);
-        else
+        } else {
             $this->sessionlog = array();
+        }
 
-
-        if (!$this->updatemode)
+        if (!$this->updatemode) {
             $this->sessions4copy = $att->get_today_sessions_for_copy($this->sessioninfo);
+        }
 
         $this->urlpath = $att->url_take()->out_omit_querystring();
         $params = $att->pageparams->get_significant_params();
@@ -293,12 +295,13 @@ class attforblock_take_data implements renderable {
 
         $this->att = $att;
     }
-    
+
     public function url($params=array(), $excludeparams=array()) {
         $params = array_merge($this->urlparams, $params);
 
-        foreach ($excludeparams as $paramkey)
+        foreach ($excludeparams as $paramkey) {
             unset($params[$paramkey]);
+        }
 
         return new moodle_url($this->urlpath, $params);
     }
@@ -362,14 +365,12 @@ class attforblock_user_data implements renderable {
                 $this->maxgrade = $att->get_user_max_grade($userid);
             }
 
-
             $this->filtercontrols = new attforblock_filter_controls($att);
 
             $this->sessionslog = $att->get_user_filtered_sessions_log_extended($userid);
 
             $this->groups = groups_get_all_groups($att->course->id);
-        }
-        else {
+        } else {
             $this->coursesatts = att_get_user_courses_attendances($userid);
 
             $this->statuses = array();
@@ -397,15 +398,14 @@ class attforblock_user_data implements renderable {
                     // * all sessions between user start enrolment date and now;
                     // * all sessions between user start and end enrolment date.
                     $this->maxgrade[$ca->attid] = att_get_user_max_grade($user_taken_sessions_count, $statuses);
-                }
-                else {
-                    //for more comfortable and universal work with arrays
-                    $this->grade[$ca->attid] = NULL;
-                    $this->maxgrade[$ca->attid] = NULL;
+                } else {
+                    // For more comfortable and universal work with arrays.
+                    $this->grade[$ca->attid] = null;
+                    $this->maxgrade[$ca->attid] = null;
                 }
             }
         }
-        
+
         $this->urlpath = $att->url_view()->out_omit_querystring();
         $params = $att->pageparams->get_significant_params();
         $params['id'] = $att->cm->id;
@@ -428,7 +428,7 @@ class attforblock_report_data implements renderable {
     public $sessions;
 
     public $statuses;
-    // includes disablrd/deleted statuses
+    // Includes disablrd/deleted statuses.
     public $allstatuses;
 
     public $gradable;
@@ -461,7 +461,7 @@ class attforblock_report_data implements renderable {
 
         $this->statuses = $att->get_statuses();
         $this->allstatuses = $att->get_statuses(false);
-        
+
         $this->gradable = $att->grade > 0;
 
         if (!$this->decimalpoints = grade_get_setting($att->course->id, 'decimalpoints')) {
@@ -508,14 +508,17 @@ class attforblock_preferences_data implements renderable {
     public function __construct(attforblock $att) {
         $this->statuses = $att->get_statuses(false);
 
-        foreach ($this->statuses as $st) $st->haslogs = att_has_logs_for_status ($st->id);
+        foreach ($this->statuses as $st) {
+            $st->haslogs = att_has_logs_for_status ($st->id);
+        }
 
         $this->att = $att;
     }
 
-    public function url($params=array(), $significant_params=TRUE) {
-        if ($significant_params)
+    public function url($params=array(), $significant_params=true) {
+        if ($significant_params) {
             $params = array_merge($this->att->pageparams->get_significant_params(), $params);
+        }
 
         return $this->att->url_preferences($params);
     }
@@ -524,8 +527,9 @@ class attforblock_preferences_data implements renderable {
 class url_helpers {
     public static function url_take($att, $sessionid, $grouptype) {
         $params = array('sessionid' => $sessionid);
-        if (isset($grouptype))
+        if (isset($grouptype)) {
             $params['grouptype'] = $grouptype;
+        }
 
         return $att->url_take($params);
     }
@@ -533,11 +537,12 @@ class url_helpers {
     /**
      * Must be called without or with both parameters
      */
-    public static function url_sessions($att, $sessionid=NULL, $action=NULL) {
-        if (isset($sessionid) && isset($action))
+    public static function url_sessions($att, $sessionid=null, $action=null) {
+        if (isset($sessionid) && isset($action)) {
             $params = array('sessionid' => $sessionid, 'action' => $action);
-        else
+        } else {
             $params = array();
+        }
 
         return $att->url_sessions($params);
     }

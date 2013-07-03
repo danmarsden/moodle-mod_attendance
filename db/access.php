@@ -47,9 +47,7 @@
 
 
 $capabilities = array(
-
     'mod/attforblock:view' => array(
-
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes' => array(
@@ -62,7 +60,6 @@ $capabilities = array(
 
     'mod/attforblock:addinstance' => array(
         'riskbitmask' => RISK_XSS,
-
         'captype' => 'write',
         'contextlevel' => CONTEXT_COURSE,
         'archetypes' => array(
@@ -73,9 +70,7 @@ $capabilities = array(
     ),
 
     'mod/attforblock:viewreports' => array(
-
         'riskbitmask' => RISK_PERSONAL,
-
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes' => array(
@@ -86,9 +81,7 @@ $capabilities = array(
     ),
 
     'mod/attforblock:takeattendances' => array(
-
         'riskbitmask' => RISK_DATALOSS,
-    	
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes' => array(
@@ -99,9 +92,7 @@ $capabilities = array(
     ),
 
     'mod/attforblock:changeattendances' => array(
-
         'riskbitmask' => RISK_DATALOSS,
-    	
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes' => array(
@@ -112,9 +103,7 @@ $capabilities = array(
     ),
 
     'mod/attforblock:manageattendances' => array(
-
         'riskbitmask' => RISK_CONFIG,
-
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes' => array(
@@ -124,9 +113,7 @@ $capabilities = array(
     ),
 
     'mod/attforblock:changepreferences' => array(
-
         'riskbitmask' => RISK_CONFIG,
-
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes' => array(
@@ -136,9 +123,7 @@ $capabilities = array(
     ),
 
     'mod/attforblock:export' => array(
-
         'riskbitmask' => RISK_PERSONAL,
-
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes' => array(
@@ -149,9 +134,7 @@ $capabilities = array(
 
 
     'mod/attforblock:canbelisted' => array(
-
         'riskbitmask' => RISK_PERSONAL,
-
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes' => array(

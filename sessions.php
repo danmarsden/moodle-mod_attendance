@@ -54,39 +54,39 @@ $formparams = array('course' => $course, 'cm' => $cm, 'modcontext' => $PAGE->con
 switch ($att->pageparams->action) {
     case att_sessions_page_params::ACTION_ADD:
         $url = $att->url_sessions(array('action' => att_sessions_page_params::ACTION_ADD));
-		$mform = new mod_attforblock_add_form($url, $formparams);
-        
+        $mform = new mod_attforblock_add_form($url, $formparams);
+
         if ($formdata = $mform->get_data()) {
             $sessions = construct_sessions_data_for_add($formdata);
             $att->add_sessions($sessions);
-            redirect($url, get_string('sessionsgenerated','attforblock'));
+            redirect($url, get_string('sessionsgenerated', 'attforblock'));
         }
         break;
     case att_sessions_page_params::ACTION_UPDATE:
-		$sessionid	= required_param('sessionid', PARAM_INT);
+        $sessionid = required_param('sessionid', PARAM_INT);
 
         $url = $att->url_sessions(array('action' => att_sessions_page_params::ACTION_UPDATE, 'sessionid' => $sessionid));
         $formparams['sessionid'] = $sessionid;
-		$mform = new mod_attforblock_update_form($url, $formparams);
-        
-	    if ($mform->is_cancelled()) {
-	    	redirect($att->url_manage());
-	    }
+        $mform = new mod_attforblock_update_form($url, $formparams);
+
+        if ($mform->is_cancelled()) {
+            redirect($att->url_manage());
+        }
 
         if ($formdata = $mform->get_data()) {
             $att->update_session_from_form_data($formdata, $sessionid);
 
-            redirect($att->url_manage(), get_string('sessionupdated','attforblock'));
+            redirect($att->url_manage(), get_string('sessionupdated', 'attforblock'));
         }
         break;
     case att_sessions_page_params::ACTION_DELETE:
-		$sessionid	= required_param('sessionid', PARAM_INT);
-		$confirm    = optional_param('confirm', NULL, PARAM_INT);
+        $sessionid = required_param('sessionid', PARAM_INT);
+        $confirm   = optional_param('confirm', null, PARAM_INT);
 
         if (isset($confirm)) {
             $att->delete_sessions(array($sessionid));
             att_update_all_users_grades($att->id, $att->course, $att->context);
-            redirect($att->url_manage(), get_string('sessiondeleted','attforblock'));
+            redirect($att->url_manage(), get_string('sessiondeleted', 'attforblock'));
         }
 
         $sessinfo = $att->get_session_info($sessionid);
@@ -100,26 +100,27 @@ switch ($att->pageparams->action) {
         $params = array('action' => $att->pageparams->action, 'sessionid' => $sessionid, 'confirm' => 1);
 
         echo $OUTPUT->header();
-        echo $OUTPUT->heading(get_string('attendanceforthecourse','attforblock').' :: ' .$course->fullname);
+        echo $OUTPUT->heading(get_string('attendanceforthecourse', 'attforblock').' :: ' .$course->fullname);
         echo $OUTPUT->confirm($message, $att->url_sessions($params), $att->url_manage());
         echo $OUTPUT->footer();
         exit;
     case att_sessions_page_params::ACTION_DELETE_SELECTED:
-		$confirm    = optional_param('confirm', NULL, PARAM_INT);
+        $confirm    = optional_param('confirm', null, PARAM_INT);
 
         if (isset($confirm)) {
-    		$sessionsids = required_param('sessionsids', PARAM_ALPHANUMEXT);
+            $sessionsids = required_param('sessionsids', PARAM_ALPHANUMEXT);
             $sessionsids = explode('_', $sessionsids);
 
             $att->delete_sessions($sessionsids);
             att_update_all_users_grades($att->id, $att->course, $att->context);
-            redirect($att->url_manage(), get_string('sessiondeleted','attforblock'));
+            redirect($att->url_manage(), get_string('sessiondeleted', 'attforblock'));
         }
 
-		$fromform = data_submitted();
-        // nothing selected
-        if (!isset($fromform->sessid))
+        $fromform = data_submitted();
+        // Nothing selected.
+        if (!isset($fromform->sessid)) {
             print_error ('nosessionsselected', 'attforblock', $att->url_manage());
+        }
 
         $sessionsinfo = $att->get_sessions_info($fromform->sessid);
 
@@ -136,31 +137,32 @@ switch ($att->pageparams->action) {
         $params = array('action' => $att->pageparams->action, 'sessionsids' => $sessionsids, 'confirm' => 1);
 
         echo $OUTPUT->header();
-        echo $OUTPUT->heading(get_string('attendanceforthecourse','attforblock').' :: ' .$course->fullname);
+        echo $OUTPUT->heading(get_string('attendanceforthecourse', 'attforblock').' :: ' .$course->fullname);
         echo $OUTPUT->confirm($message, $att->url_sessions($params), $att->url_manage());
         echo $OUTPUT->footer();
         exit;
     case att_sessions_page_params::ACTION_CHANGE_DURATION:
-		$fromform = data_submitted();
+        $fromform = data_submitted();
         $slist = isset($fromform->sessid) ? implode('_', $fromform->sessid) : '';
 
         $url = $att->url_sessions(array('action' => att_sessions_page_params::ACTION_CHANGE_DURATION));
         $formparams['ids'] = $slist;
-		$mform = new mod_attforblock_duration_form($url, $formparams);
+        $mform = new mod_attforblock_duration_form($url, $formparams);
 
-	    if ($mform->is_cancelled()) {
-	    	redirect($att->url_manage());
-	    }
+        if ($mform->is_cancelled()) {
+            redirect($att->url_manage());
+        }
 
         if ($formdata = $mform->get_data()) {
             $sessionsids = explode('_', $fromform->ids);
             $duration = $formdata->durtime['hours']*HOURSECS + $formdata->durtime['minutes']*MINSECS;
             $att->update_sessions_duration($sessionsids, $duration);
-            redirect($att->url_manage(), get_string('sessionupdated','attforblock'));
+            redirect($att->url_manage(), get_string('sessionupdated', 'attforblock'));
         }
-        
-        if ($slist === '')
-            print_error ('nosessionsselected','attforblock', $att->url_manage());
+
+        if ($slist === '') {
+            print_error('nosessionsselected', 'attforblock', $att->url_manage());
+        }
 
         break;
 }
@@ -168,7 +170,7 @@ switch ($att->pageparams->action) {
 $output = $PAGE->get_renderer('mod_attforblock');
 $tabs = new attforblock_tabs($att, attforblock_tabs::TAB_ADD);
 echo $output->header();
-echo $output->heading(get_string('attendanceforthecourse','attforblock').' :: ' .$course->fullname);
+echo $output->heading(get_string('attendanceforthecourse', 'attforblock').' :: ' .$course->fullname);
 echo $output->render($tabs);
 
 $mform->display();
@@ -185,17 +187,19 @@ function construct_sessions_data_for_add($formdata) {
     if (isset($formdata->addmultiply)) {
         $startdate = $formdata->sessiondate;
         $starttime = $startdate - usergetmidnight($startdate);
-        $enddate = $formdata->sessionenddate + DAYSECS; // because enddate in 0:0am
+        $enddate = $formdata->sessionenddate + DAYSECS; // Because enddate in 0:0am.
 
-        if ($enddate < $startdate) return NULL;
+        if ($enddate < $startdate) {
+            return null;
+        }
 
         $days = (int)ceil(($enddate - $startdate) / DAYSECS);
 
-        // Getting first day of week
+        // Getting first day of week.
         $sdate = $startdate;
         $dinfo = usergetdate($sdate);
-        if ($CFG->calendar_startwday === '0') { //week start from sunday
-            $startweek = $startdate - $dinfo['wday'] * DAYSECS; //call new variable
+        if ($CFG->calendar_startwday === '0') { // Week start from sunday.
+            $startweek = $startdate - $dinfo['wday'] * DAYSECS; // Call new variable.
         } else {
             $wday = $dinfo['wday'] === 0 ? 7 : $dinfo['wday'];
             $startweek = $startdate - ($wday-1) * DAYSECS;
@@ -204,9 +208,9 @@ function construct_sessions_data_for_add($formdata) {
         $wdaydesc = array(0=>'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
 
         while ($sdate < $enddate) {
-            if($sdate < $startweek + WEEKSECS) {
+            if ($sdate < $startweek + WEEKSECS) {
                 $dinfo = usergetdate($sdate);
-                if(array_key_exists($wdaydesc[$dinfo['wday']], $formdata->sdays)) {
+                if (array_key_exists($wdaydesc[$dinfo['wday']], $formdata->sdays)) {
                     $sess = new stdClass();
                     $sess->sessdate =  usergetmidnight($sdate) + $starttime;
                     $sess->duration = $duration;
@@ -243,8 +247,7 @@ function fill_groupid($formdata, &$sessions, $sess) {
         $sess = clone $sess;
         $sess->groupid = 0;
         $sessions[] = $sess;
-    }
-    else {
+    } else {
         foreach ($formdata->groups as $groupid) {
             $sess = clone $sess;
             $sess->groupid = $groupid;

@@ -30,7 +30,7 @@ $pageparams = new att_take_page_params();
 $id                     = required_param('id', PARAM_INT);
 $pageparams->sessionid  = required_param('sessionid', PARAM_INT);
 $pageparams->grouptype  = required_param('grouptype', PARAM_INT);
-$pageparams->sort 		= optional_param('sort', null, PARAM_INT);
+$pageparams->sort       = optional_param('sort', null, PARAM_INT);
 $pageparams->copyfrom   = optional_param('copyfrom', null, PARAM_INT);
 $pageparams->viewmode   = optional_param('viewmode', null, PARAM_INT);
 $pageparams->gridcols   = optional_param('gridcols', null, PARAM_INT);
@@ -66,10 +66,10 @@ $output = $PAGE->get_renderer('mod_attforblock');
 $tabs = new attforblock_tabs($att);
 $sesstable = new attforblock_take_data($att);
 
-/// Output starts here
+// Output starts here.
 
 echo $output->header();
-echo $output->heading(get_string('attendanceforthecourse','attforblock').' :: ' .$course->fullname);
+echo $output->heading(get_string('attendanceforthecourse', 'attforblock').' :: ' .$course->fullname);
 echo $output->render($tabs);
 echo $output->render($sesstable);
 
