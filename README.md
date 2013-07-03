@@ -1,10 +1,6 @@
 ABOUT
 ==========
-This is version 2.4.x of the "Attendance" module (attforblock).
-
-2.4.x release is compatible only with Moodle 2.x.
-
-The "Attendance" module is developed by
+The "Attendance" module was developed by
     Dmitry Pupinin, Novosibirsk, Russia,
     Artem Andreev, Taganrog, Russia.
 
@@ -21,5 +17,5 @@ INSTALLATION
 The attendance module follows standard installation procedure.
 
 1. Create folder <path to your moodle dir>/mod/attforblock.
-2. Extract files from folder inside archive (andreev-artem-moodle_mod_attforblock-xxxxxxx in your case) to created folder.
+2. Extract files from folder inside archive to created folder.
 3. Visit page Home ► Site administration ► Notifications to complete installation.
