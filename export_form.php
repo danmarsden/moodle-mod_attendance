@@ -14,6 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Export attendance sessions forms
+ *
+ * @package   mod_attendance
+ * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 require_once($CFG->libdir.'/formslib.php');
 
 class mod_attforblock_export_form extends moodleform {
@@ -29,25 +37,25 @@ class mod_attforblock_export_form extends moodleform {
 
 
         $mform->addElement('header', 'general', get_string('export','quiz'));
-		
-		$groupmode=groups_get_activity_groupmode($cm);
+
+        $groupmode=groups_get_activity_groupmode($cm);
         $groups = groups_get_activity_allowed_groups($cm, $USER->id);
-		if ($groupmode == VISIBLEGROUPS or has_capability('moodle/site:accessallgroups', $modcontext)) {
-			$grouplist[0] = get_string('allparticipants');
-		}
-		if ($groups) {
+        if ($groupmode == VISIBLEGROUPS or has_capability('moodle/site:accessallgroups', $modcontext)) {
+            $grouplist[0] = get_string('allparticipants');
+        }
+        if ($groups) {
             foreach ($groups as $group) {
                 $grouplist[$group->id] = $group->name;
             }
         }
         $mform->addElement('select', 'group', get_string('group'), $grouplist);
-        
+
         $ident = array();
         $ident[] =& $mform->createElement('checkbox', 'id', '', get_string('studentid', 'attforblock'));
         $ident[] =& $mform->createElement('checkbox', 'uname', '', get_string('username'));
         $mform->addGroup($ident, 'ident', get_string('identifyby','attforblock'), array('<br />'), true);
         $mform->setDefaults(array('ident[id]' => true, 'ident[uname]' => true));
-        
+
         $mform->addElement('checkbox', 'includeallsessions', get_string('includeall','attforblock'), get_string('yes'));
         $mform->setDefault('includeallsessions', true);
         $mform->addElement('checkbox', 'includenottaken', get_string('includenottaken','attforblock'), get_string('yes'));
@@ -56,13 +64,13 @@ class mod_attforblock_export_form extends moodleform {
         $mform->disabledIf('sessionstartdate', 'includeallsessions', 'checked');
         $mform->addElement('date_selector', 'sessionenddate', get_string('endofperiod','attforblock'));
         $mform->disabledIf('sessionenddate', 'includeallsessions', 'checked');
-        
+
         $mform->addElement('select', 'format', get_string('format'), 
-        					array('excel' => get_string('downloadexcel','attforblock'),
-        						  'ooo' => get_string('downloadooo','attforblock'),
-        						  'text' => get_string('downloadtext','attforblock')
-        					));
-        					
+                            array('excel' => get_string('downloadexcel','attforblock'),
+                                  'ooo' => get_string('downloadooo','attforblock'),
+                                  'text' => get_string('downloadtext','attforblock')
+                            ));
+
         // buttons
         $submit_string = get_string('ok');
         $this->add_action_buttons(false, $submit_string);

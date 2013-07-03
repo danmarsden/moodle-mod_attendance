@@ -14,7 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/// Library of functions and constants for module attforblock
+/**
+ * Library of functions and constants for module attforblock
+ *
+ * @package   mod_attendance
+ * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 /**
  * Returns the information if the module supports a feature
@@ -60,7 +66,7 @@ function attforblock_add_instance($attforblock) {
 /// of the new instance.
 
     global $DB;
-    
+
     $attforblock->timemodified = time();
 
     $attforblock->id = $DB->insert_record('attforblock', $attforblock);
@@ -68,7 +74,7 @@ function attforblock_add_instance($attforblock) {
     att_add_default_statuses($attforblock->id);
 
     attforblock_grade_item_update($attforblock);
-//	attforblock_update_grades($attforblock);
+    //attforblock_update_grades($attforblock);
     return $attforblock->id;
 }
 
@@ -99,12 +105,12 @@ function attforblock_delete_instance($id) {
     if (! $attforblock = $DB->get_record('attforblock', array('id'=> $id))) {
         return false;
     }
-    
-	if ($sessids = array_keys($DB->get_records('attendance_sessions', array('attendanceid'=> $id), '', 'id'))) {
+
+    if ($sessids = array_keys($DB->get_records('attendance_sessions', array('attendanceid'=> $id), '', 'id'))) {
         $DB->delete_records_list('attendance_log', 'sessionid', $sessids);
         $DB->delete_records('attendance_sessions', array('attendanceid'=> $id));
     }
-	$DB->delete_records('attendance_statuses', array('attendanceid'=> $id));
+    $DB->delete_records('attendance_statuses', array('attendanceid'=> $id));
 
     $DB->delete_records('attforblock', array('id'=> $id));
 
@@ -124,8 +130,8 @@ function attforblock_delete_course($course, $feedback=true){
         $DB->delete_records_list('attendance_statuses', 'attendanceid', $attids);
         $DB->delete_records_list('attendance_sessions', 'attendanceid', $attids);
     }
-	$DB->delete_records('attforblock', array('course'=> $course->id));
-	
+    $DB->delete_records('attforblock', array('course'=> $course->id));
+
     return true;
 }
 
@@ -136,8 +142,8 @@ function attforblock_delete_course($course, $feedback=true){
 function attforblock_reset_course_form_definition(&$mform) {
     $mform->addElement('header', 'attendanceheader', get_string('modulename', 'attforblock'));
 
-	$mform->addElement('static', 'description', get_string('description', 'attforblock'),
-								get_string('resetdescription', 'attforblock'));    
+    $mform->addElement('static', 'description', get_string('description', 'attforblock'),
+                                get_string('resetdescription', 'attforblock'));
     $mform->addElement('checkbox', 'reset_attendance_log', get_string('deletelogs','attforblock'));
 
     $mform->addElement('checkbox', 'reset_attendance_sessions', get_string('deletesessions','attforblock'));
@@ -163,7 +169,7 @@ function attforblock_reset_userdata($data) {
     $attids = array_keys($DB->get_records('attforblock', array('course'=> $data->courseid), '', 'id'));
 
     if (!empty($data->reset_attendance_log)) {
-		$sess = $DB->get_records_list('attendance_sessions', 'attendanceid', $attids, '', 'id');
+        $sess = $DB->get_records_list('attendance_sessions', 'attendanceid', $attids, '', 'id');
         if (!empty($sess)) {
             list($sql, $params) = $DB->get_in_or_equal(array_keys($sess));
             $DB->delete_records_select('attendance_log', "sessionid $sql", $params);
@@ -179,7 +185,7 @@ function attforblock_reset_userdata($data) {
     }
 
     if (!empty($data->reset_attendance_statuses)) {
-    	$DB->delete_records_list('attendance_statuses', 'attendanceid', $attids);
+        $DB->delete_records_list('attendance_statuses', 'attendanceid', $attids);
         foreach($attids as $attid) {
             att_add_default_statuses($attid);
         }
@@ -192,7 +198,7 @@ function attforblock_reset_userdata($data) {
     }
 
     if (!empty($data->reset_attendance_sessions)) {
-    	$DB->delete_records_list('attendance_sessions', 'attendanceid', $attids);
+        $DB->delete_records_list('attendance_sessions', 'attendanceid', $attids);
 
         $status[] = array(
             'component' => get_string('modulenameplural', 'attforblock'),
@@ -211,7 +217,7 @@ function attforblock_user_outline($course, $user, $mod, $attforblock) {
 /// $return->time = the time they did it
 /// $return->info = a short text description
     global $CFG;
-	
+
     require_once(dirname(__FILE__).'/locallib.php');
     require_once($CFG->libdir.'/gradelib.php');
 
@@ -224,15 +230,15 @@ function attforblock_user_outline($course, $user, $mod, $attforblock) {
     }
     else
         $result->time = 0;
-  	if (has_capability('mod/attforblock:canbelisted', $mod->context, $user->id)) {
+    if (has_capability('mod/attforblock:canbelisted', $mod->context, $user->id)) {
         $statuses = att_get_statuses($attforblock->id);
         $grade = att_get_user_grade(att_get_user_statuses_stat($attforblock->id, $course->startdate, $user->id), $statuses);
         $maxgrade = att_get_user_max_grade(att_get_user_taken_sessions_count($attforblock->id, $course->startdate, $user->id), $statuses);
 
         $result->info = $grade.' / '.$maxgrade;
-  	}
-  	
-	return $result;
+    }
+
+    return $result;
 }
 
 function attforblock_user_complete($course, $user, $mod, $attforblock) {
@@ -242,10 +248,10 @@ function attforblock_user_complete($course, $user, $mod, $attforblock) {
 
     require_once(dirname(__FILE__).'/renderhelpers.php');
     require_once($CFG->libdir.'/gradelib.php');
-	
-  	if (has_capability('mod/attforblock:canbelisted', $mod->context, $user->id)) {
+
+    if (has_capability('mod/attforblock:canbelisted', $mod->context, $user->id)) {
         echo construct_full_user_stat_html_table($attforblock, $course, $user);
-	}
+    }
 
     //return true;
 }
@@ -275,26 +281,26 @@ function attforblock_cron () {
  */
 /*function attforblock_get_user_grades($attforblock, $userid=0) {
     global $CFG, $DB;
-    
-	require_once('_locallib.php');
-	
+
+    require_once('_locallib.php');
+
     if (! $course = $DB->get_record('course', array('id'=> $attforblock->course))) {
         error("Course is misconfigured");
     }
 
     $result = false;
     if ($userid) {
-    	$result = array();
-    	$result[$userid]->userid = $userid;
-    	$result[$userid]->rawgrade = $attforblock->grade * get_percent($userid, $course, $attforblock) / 100;
+        $result = array();
+        $result[$userid]->userid = $userid;
+        $result[$userid]->rawgrade = $attforblock->grade * get_percent($userid, $course, $attforblock) / 100;
     } else {
-    	if ($students = get_course_students($course->id)) {
-    		$result = array();
-    		foreach ($students as $student) {
-		    	$result[$student->id]->userid = $student->id;
-		    	$result[$student->id]->rawgrade = $attforblock->grade * get_percent($student->id, $course, $attforblock) / 100;
-    		}
-    	}
+        if ($students = get_course_students($course->id)) {
+            $result = array();
+            foreach ($students as $student) {
+                $result[$student->id]->userid = $student->id;
+                $result[$student->id]->rawgrade = $attforblock->grade * get_percent($student->id, $course, $attforblock) / 100;
+            }
+        }
     }
 
     return $result;
@@ -350,9 +356,9 @@ function attforblock_cron () {
  */
 function attforblock_grade_item_update($attforblock, $grades=NULL) {
     global $CFG, $DB;
-    
-	require_once('locallib.php');
-	
+
+    require_once('locallib.php');
+
     if (!function_exists('grade_update')) { //workaround for buggy PHP versions
         require_once($CFG->libdir.'/gradelib.php');
     }
@@ -372,7 +378,7 @@ function attforblock_grade_item_update($attforblock, $grades=NULL) {
         $cm = get_coursemodule_from_instance('attforblock', $attforblock->id);
         $params = array('itemname'=>$attforblock->name/*, 'idnumber'=>$attforblock->id*/);
     }
-    
+
     if ($attforblock->grade > 0) {
         $params['gradetype'] = GRADE_TYPE_VALUE;
         $params['grademax']  = $attforblock->grade;

@@ -17,13 +17,14 @@
 /**
  * Version information
  *
- * @package    mod
- * @subpackage attforblock
+ * @package    mod_attforblock
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 $module->version  = 2012120700;  // The current module version (Date: YYYYMMDDXX)
-$module->release = '2.4.0';
+$module->requires = 2012120300;
+$module->release = '2.4.1';
+$module->maturity  = MATURITY_ALPHA;
 $module->cron     = 0;           // Period for cron to check this module (secs)
 $module->component = 'mod_attforblock'; // Full name of the plugin (used for diagnostics)

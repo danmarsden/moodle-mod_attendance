@@ -14,6 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Update form
+ *
+ * @package    mod_attforblock
+ * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+
 require_once($CFG->libdir.'/formslib.php');
 
 class mod_attforblock_update_form extends moodleform {
@@ -29,8 +38,8 @@ class mod_attforblock_update_form extends moodleform {
         $sessionid     = $this->_customdata['sessionid'];
 
         if (!$sess = $DB->get_record('attendance_sessions', array('id'=> $sessionid) )) {
-	        error('No such session in this course');
-	    }
+            error('No such session in this course');
+        }
         $dhours = floor($sess->duration / HOURSECS);
         $dmins = floor(($sess->duration - $dhours * HOURSECS) / MINSECS);
         $defopts = array('maxfiles'=>EDITOR_UNLIMITED_FILES, 'noclean'=>true, 'context'=>$modcontext);
@@ -40,8 +49,8 @@ class mod_attforblock_update_form extends moodleform {
                 'sdescription' => $sess->description_editor);
 
         $mform->addElement('header', 'general', get_string('changesession','attforblock'));
-        
-		$mform->addElement('static', 'olddate', get_string('olddate','attforblock'), userdate($sess->sessdate, get_string('strftimedmyhm', 'attforblock')));
+
+        $mform->addElement('static', 'olddate', get_string('olddate','attforblock'), userdate($sess->sessdate, get_string('strftimedmyhm', 'attforblock')));
         $mform->addElement('date_time_selector', 'sessiondate', get_string('newdate','attforblock'));
 
         for ($i=0; $i<=23; $i++) {
@@ -51,14 +60,14 @@ class mod_attforblock_update_form extends moodleform {
             $minutes[$i] = sprintf("%02d",$i);
         }
         $durselect[] =& $mform->createElement('select', 'hours', '', $hours);
-		$durselect[] =& $mform->createElement('select', 'minutes', '', $minutes, false, true);
-		$mform->addGroup($durselect, 'durtime', get_string('duration','attforblock'), array(' '), true);
-		
+        $durselect[] =& $mform->createElement('select', 'minutes', '', $minutes, false, true);
+        $mform->addGroup($durselect, 'durtime', get_string('duration','attforblock'), array(' '), true);
+
         $mform->addElement('editor', 'sdescription', get_string('description', 'attforblock'), null, $defopts);
         $mform->setType('sdescription', PARAM_RAW);
-        
+
         $mform->setDefaults($data);
-		
+
 //-------------------------------------------------------------------------------
         // buttons
         $submit_string = get_string('update', 'attforblock');

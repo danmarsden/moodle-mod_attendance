@@ -14,11 +14,19 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * This file contains the forms to add
+ *
+ * @package   mod_attendance
+ * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 require_once($CFG->libdir.'/formslib.php');
 
 class mod_attforblock_add_form extends moodleform {
 
-    function definition() {
+    public function definition() {
 
         global $CFG, $USER;
         $mform    =& $this->_form;
@@ -27,9 +35,7 @@ class mod_attforblock_add_form extends moodleform {
         $cm            = $this->_customdata['cm'];
         $modcontext    = $this->_customdata['modcontext'];
 
-
-        $mform->addElement('header', 'general', get_string('addsession','attforblock'));//fill in the data depending on page params
-                                                    //later using set_data
+        $mform->addElement('header', 'general', get_string('addsession','attforblock'));
 
         $groupmode = groups_get_activity_groupmode($cm);
         switch ($groupmode) {
@@ -76,10 +82,10 @@ class mod_attforblock_add_form extends moodleform {
                     return;
             }
         }
-        
+
         $mform->addElement('checkbox', 'addmultiply', '', get_string('createmultiplesessions','attforblock'));
-		$mform->addHelpButton('addmultiply', 'createmultiplesessions', 'attforblock');
-		
+        $mform->addHelpButton('addmultiply', 'createmultiplesessions', 'attforblock');
+
 //        $mform->addElement('date_selector', 'sessiondate', get_string('sessiondate','attforblock'));
         $mform->addElement('date_time_selector', 'sessiondate', get_string('sessiondate','attforblock'));
 
@@ -91,38 +97,38 @@ class mod_attforblock_add_form extends moodleform {
         }
         $durtime = array();
         $durtime[] =& $mform->createElement('select', 'hours', get_string('hour', 'form'), $hours, false, true);
-		$durtime[] =& $mform->createElement('select', 'minutes', get_string('minute', 'form'), $minutes, false, true);
+        $durtime[] =& $mform->createElement('select', 'minutes', get_string('minute', 'form'), $minutes, false, true);
         $mform->addGroup($durtime, 'durtime', get_string('duration','attforblock'), array(' '), true);
-        
+
         $mform->addElement('date_selector', 'sessionenddate', get_string('sessionenddate','attforblock'));
-		$mform->disabledIf('sessionenddate', 'addmultiply', 'notchecked');
-        
+        $mform->disabledIf('sessionenddate', 'addmultiply', 'notchecked');
+
         $sdays = array();
-		if ($CFG->calendar_startwday === '0') { //week start from sunday
-        	$sdays[] =& $mform->createElement('checkbox', 'Sun', '', get_string('sunday','calendar'));
-		}
+        if ($CFG->calendar_startwday === '0') { //week start from sunday
+            $sdays[] =& $mform->createElement('checkbox', 'Sun', '', get_string('sunday','calendar'));
+        }
         $sdays[] =& $mform->createElement('checkbox', 'Mon', '', get_string('monday','calendar'));
         $sdays[] =& $mform->createElement('checkbox', 'Tue', '', get_string('tuesday','calendar'));
         $sdays[] =& $mform->createElement('checkbox', 'Wed', '', get_string('wednesday','calendar'));
         $sdays[] =& $mform->createElement('checkbox', 'Thu', '', get_string('thursday','calendar'));
         $sdays[] =& $mform->createElement('checkbox', 'Fri', '', get_string('friday','calendar'));
         $sdays[] =& $mform->createElement('checkbox', 'Sat', '', get_string('saturday','calendar'));
-		if ($CFG->calendar_startwday !== '0') { //week start from sunday
-        	$sdays[] =& $mform->createElement('checkbox', 'Sun', '', get_string('sunday','calendar'));
-		}
+        if ($CFG->calendar_startwday !== '0') { //week start from sunday
+            $sdays[] =& $mform->createElement('checkbox', 'Sun', '', get_string('sunday','calendar'));
+        }
         $mform->addGroup($sdays, 'sdays', get_string('sessiondays','attforblock'), array(' '), true);
-		$mform->disabledIf('sdays', 'addmultiply', 'notchecked');
-        
+        $mform->disabledIf('sdays', 'addmultiply', 'notchecked');
+
         $period = array(1=>1,2,3,4,5,6,7,8);
         $periodgroup = array();
         $periodgroup[] =& $mform->createElement('select', 'period', '', $period, false, true);
         $periodgroup[] =& $mform->createElement('static', 'perioddesc', '', get_string('week','attforblock'));
         $mform->addGroup($periodgroup, 'periodgroup', get_string('period','attforblock'), array(' '), false);
-		$mform->disabledIf('periodgroup', 'addmultiply', 'notchecked');
-        
+        $mform->disabledIf('periodgroup', 'addmultiply', 'notchecked');
+
         $mform->addElement('editor', 'sdescription', get_string('description', 'attforblock'), null, array('maxfiles'=>EDITOR_UNLIMITED_FILES, 'noclean'=>true, 'context'=>$modcontext));
         $mform->setType('sdescription', PARAM_RAW);
-		
+
 //-------------------------------------------------------------------------------
         // buttons
         $submit_string = get_string('addsession', 'attforblock');
