@@ -30,13 +30,13 @@ require_once(dirname(__FILE__).'/renderhelpers.php');
 
 $id             = required_param('id', PARAM_INT);
 
-$cm             = get_coursemodule_from_id('attforblock', $id, 0, false, MUST_EXIST);
+$cm             = get_coursemodule_from_id('attendance', $id, 0, false, MUST_EXIST);
 $course         = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
-$att            = $DB->get_record('attforblock', array('id' => $cm->instance), '*', MUST_EXIST);
+$att            = $DB->get_record('attendance', array('id' => $cm->instance), '*', MUST_EXIST);
 
 require_login($course, true, $cm);
 
-$att = new attforblock($att, $cm, $course, $PAGE->context);
+$att = new attendance($att, $cm, $course, $PAGE->context);
 
 $att->perm->require_export_capability();
 
@@ -44,11 +44,11 @@ $PAGE->set_url($att->url_export());
 $PAGE->set_title($course->shortname. ": ".$att->name);
 $PAGE->set_heading($course->fullname);
 $PAGE->set_cacheable(true);
-$PAGE->set_button($OUTPUT->update_module_button($cm->id, 'attforblock'));
+$PAGE->set_button($OUTPUT->update_module_button($cm->id, 'attendance'));
 $PAGE->navbar->add(get_string('export', 'quiz'));
 
 $formparams = array('course' => $course, 'cm' => $cm, 'modcontext' => $PAGE->context);
-$mform = new mod_attforblock_export_form($att->url_export(), $formparams);
+$mform = new mod_attendance_export_form($att->url_export(), $formparams);
 
 if ($mform->is_submitted()) {
     $formdata = $mform->get_data();
@@ -71,7 +71,7 @@ if ($mform->is_submitted()) {
     }
     $att->pageparams = $pageparams;
 
-    $reportdata = new attforblock_report_data($att);
+    $reportdata = new attendance_report_data($att);
     if ($reportdata->users) {
         $filename = clean_filename($course->shortname.'_Attendances_'.userdate(time(), '%Y%m%d-%H%M'));
 
@@ -82,7 +82,7 @@ if ($mform->is_submitted()) {
         $data->group = $group ? $group->name : get_string('allparticipants');
 
         if (isset($formdata->ident['id'])) {
-            $data->tabhead[] = get_string('studentid', 'attforblock');
+            $data->tabhead[] = get_string('studentid', 'attendance');
         }
         if (isset($formdata->ident['uname'])) {
             $data->tabhead[] = get_string('username');
@@ -93,13 +93,13 @@ if ($mform->is_submitted()) {
 
         if (count($reportdata->sessions) > 0) {
             foreach ($reportdata->sessions as $sess) {
-                $text = userdate($sess->sessdate, get_string('strftimedmyhm', 'attforblock'));
+                $text = userdate($sess->sessdate, get_string('strftimedmyhm', 'attendance'));
                 $text .= ' ';
-                $text .= $sess->groupid ? $reportdata->groups[$sess->groupid]->name : get_string('commonsession', 'attforblock');
+                $text .= $sess->groupid ? $reportdata->groups[$sess->groupid]->name : get_string('commonsession', 'attendance');
                 $data->tabhead[] = $text;
             }
         } else {
-            print_error('sessionsnotfound', 'attforblock', $att->url_manage());
+            print_error('sessionsnotfound', 'attendance', $att->url_manage());
         }
         if ($reportdata->gradable) {
             $data->tabhead[] = get_string('grade');
@@ -135,10 +135,10 @@ if ($mform->is_submitted()) {
     }
 }
 
-$output = $PAGE->get_renderer('mod_attforblock');
-$tabs = new attforblock_tabs($att, attforblock_tabs::TAB_EXPORT);
+$output = $PAGE->get_renderer('mod_attendance');
+$tabs = new attendance_tabs($att, attendance_tabs::TAB_EXPORT);
 echo $output->header();
-echo $output->heading(get_string('attendanceforthecourse', 'attforblock').' :: ' .$course->fullname);
+echo $output->heading(get_string('attendanceforthecourse', 'attendance').' :: ' .$course->fullname);
 echo $output->render($tabs);
 
 $mform->display();

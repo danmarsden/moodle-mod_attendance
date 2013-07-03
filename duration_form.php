@@ -24,7 +24,7 @@
 
 require_once($CFG->libdir.'/formslib.php');
 
-class mod_attforblock_duration_form extends moodleform {
+class mod_attendance_duration_form extends moodleform {
 
     public function definition() {
 
@@ -36,8 +36,8 @@ class mod_attforblock_duration_form extends moodleform {
         $modcontext    = $this->_customdata['modcontext'];
         $ids           = $this->_customdata['ids'];
 
-        $mform->addElement('header', 'general', get_string('changeduration', 'attforblock'));
-        $mform->addElement('static', 'count', get_string('countofselected', 'attforblock'), count(explode('_', $ids)));
+        $mform->addElement('header', 'general', get_string('changeduration', 'attendance'));
+        $mform->addElement('static', 'count', get_string('countofselected', 'attendance'), count(explode('_', $ids)));
 
         for ($i=0; $i<=23; $i++) {
             $hours[$i] = sprintf("%02d", $i);
@@ -47,7 +47,7 @@ class mod_attforblock_duration_form extends moodleform {
         }
         $durselect[] =& $mform->createElement('select', 'hours', '', $hours);
         $durselect[] =& $mform->createElement('select', 'minutes', '', $minutes, false, true);
-        $mform->addGroup($durselect, 'durtime', get_string('newduration', 'attforblock'), array(' '), true);
+        $mform->addGroup($durselect, 'durtime', get_string('newduration', 'attendance'), array(' '), true);
 
         $mform->addElement('hidden', 'ids', $ids);
         $mform->addElement('hidden', 'id', $cm->id);
@@ -55,7 +55,7 @@ class mod_attforblock_duration_form extends moodleform {
 
         $mform->setDefaults(array('durtime' => array('hours'=>0, 'minutes'=>0)));
 
-        $submit_string = get_string('update', 'attforblock');
+        $submit_string = get_string('update', 'attendance');
         $this->add_action_buttons(true, $submit_string);
     }
 

@@ -47,7 +47,7 @@
 
 
 $capabilities = array(
-    'mod/attforblock:view' => array(
+    'mod/attendance:view' => array(
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes' => array(
@@ -58,7 +58,7 @@ $capabilities = array(
         )
     ),
 
-    'mod/attforblock:addinstance' => array(
+    'mod/attendance:addinstance' => array(
         'riskbitmask' => RISK_XSS,
         'captype' => 'write',
         'contextlevel' => CONTEXT_COURSE,
@@ -69,7 +69,7 @@ $capabilities = array(
         'clonepermissionsfrom' => 'moodle/course:manageactivities'
     ),
 
-    'mod/attforblock:viewreports' => array(
+    'mod/attendance:viewreports' => array(
         'riskbitmask' => RISK_PERSONAL,
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
@@ -80,7 +80,7 @@ $capabilities = array(
         )
     ),
 
-    'mod/attforblock:takeattendances' => array(
+    'mod/attendance:takeattendances' => array(
         'riskbitmask' => RISK_DATALOSS,
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
@@ -91,7 +91,7 @@ $capabilities = array(
         )
     ),
 
-    'mod/attforblock:changeattendances' => array(
+    'mod/attendance:changeattendances' => array(
         'riskbitmask' => RISK_DATALOSS,
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
@@ -102,7 +102,7 @@ $capabilities = array(
         )
     ),
 
-    'mod/attforblock:manageattendances' => array(
+    'mod/attendance:manageattendances' => array(
         'riskbitmask' => RISK_CONFIG,
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
@@ -112,7 +112,7 @@ $capabilities = array(
         )
     ),
 
-    'mod/attforblock:changepreferences' => array(
+    'mod/attendance:changepreferences' => array(
         'riskbitmask' => RISK_CONFIG,
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
@@ -122,7 +122,7 @@ $capabilities = array(
         )
     ),
 
-    'mod/attforblock:export' => array(
+    'mod/attendance:export' => array(
         'riskbitmask' => RISK_PERSONAL,
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
@@ -133,7 +133,7 @@ $capabilities = array(
     ),
 
 
-    'mod/attforblock:canbelisted' => array(
+    'mod/attendance:canbelisted' => array(
         'riskbitmask' => RISK_PERSONAL,
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,

@@ -16,7 +16,7 @@
 
 /**
  * @package    mod
- * @subpackage attforblock
+ * @subpackage attendance
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

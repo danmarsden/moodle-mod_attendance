@@ -17,7 +17,7 @@
 /**
  * Attendance module renderering methods
  *
- * @package    mod_attforblock
+ * @package    mod_attendance
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -33,7 +33,7 @@ require_once(dirname(__FILE__).'/renderhelpers.php');
  *
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_attforblock_renderer extends plugin_renderer_base {
+class mod_attendance_renderer extends plugin_renderer_base {
     // External API - methods to render attendance renderable components.
 
     /**
@@ -42,7 +42,7 @@ class mod_attforblock_renderer extends plugin_renderer_base {
      * @param atttabs - tabs to display
      * @return string html code
      */
-    protected function render_attforblock_tabs(attforblock_tabs $atttabs) {
+    protected function render_attendance_tabs(attendance_tabs $atttabs) {
         return print_tabs($atttabs->get_tabs(), $atttabs->currenttab, null, null, true);
     }
 
@@ -52,7 +52,7 @@ class mod_attforblock_renderer extends plugin_renderer_base {
      * @param fcontrols - filter controls data to display
      * @return string html code
      */
-    protected function render_attforblock_filter_controls(attforblock_filter_controls $fcontrols) {
+    protected function render_attendance_filter_controls(attendance_filter_controls $fcontrols) {
         $filtertable = new html_table();
         $filtertable->attributes['class'] = ' ';
         $filtertable->width = '100%';
@@ -70,14 +70,14 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         return $o;
     }
 
-    protected function render_sess_group_selector(attforblock_filter_controls $fcontrols) {
+    protected function render_sess_group_selector(attendance_filter_controls $fcontrols) {
         switch ($fcontrols->pageparams->selectortype) {
             case att_page_with_filter_controls::SELECTOR_SESS_TYPE:
                 $sessgroups = $fcontrols->get_sess_groups_list();
                 if ($sessgroups) {
                     $select = new single_select($fcontrols->url(), 'group', $sessgroups,
                                                 $fcontrols->get_current_sesstype(), null, 'selectgroup');
-                    $select->label = get_string('sessions', 'attforblock');
+                    $select->label = get_string('sessions', 'attendance');
                     $output = $this->output->render($select);
 
                     return html_writer::tag('div', $output, array('class' => 'groupselector'));
@@ -90,25 +90,25 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         return '';
     }
 
-    protected function render_curdate_controls(attforblock_filter_controls $fcontrols) {
+    protected function render_curdate_controls(attendance_filter_controls $fcontrols) {
         global $CFG;
 
         $curdate_controls = '';
         if ($fcontrols->curdatetxt) {
-            $this->page->requires->strings_for_js(array('calclose', 'caltoday'), 'attforblock');
+            $this->page->requires->strings_for_js(array('calclose', 'caltoday'), 'attendance');
             $jsvals = array(
-                    'cal_months'    => explode(',', get_string('calmonths', 'attforblock')),
-                    'cal_week_days' => explode(',', get_string('calweekdays', 'attforblock')),
+                    'cal_months'    => explode(',', get_string('calmonths', 'attendance')),
+                    'cal_week_days' => explode(',', get_string('calweekdays', 'attendance')),
                     'cal_start_weekday' => $CFG->calendar_startwday,
                     'cal_cur_date'  => $fcontrols->curdate);
-            $curdate_controls = html_writer::script(js_writer::set_variable('M.attforblock', $jsvals));
+            $curdate_controls = html_writer::script(js_writer::set_variable('M.attendance', $jsvals));
 
-            $this->page->requires->js('/mod/attforblock/calendar.js');
+            $this->page->requires->js('/mod/attendance/calendar.js');
 
             $curdate_controls .= html_writer::link($fcontrols->url(array('curdate' => $fcontrols->prevcur)),
                                                                          $this->output->larrow());
             $params = array(
-                    'title' => get_string('calshow', 'attforblock'),
+                    'title' => get_string('calshow', 'attendance'),
                     'id'    => 'show',
                     'type'  => 'button');
             $button_form = html_writer::tag('button', $fcontrols->curdatetxt, $params);
@@ -136,12 +136,12 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         return $curdate_controls;
     }
 
-    protected function render_view_controls(attforblock_filter_controls $fcontrols) {
-        $views[ATT_VIEW_ALL] = get_string('all', 'attforblock');
-        $views[ATT_VIEW_ALLPAST] = get_string('allpast', 'attforblock');
-        $views[ATT_VIEW_MONTHS] = get_string('months', 'attforblock');
-        $views[ATT_VIEW_WEEKS] = get_string('weeks', 'attforblock');
-        $views[ATT_VIEW_DAYS] = get_string('days', 'attforblock');
+    protected function render_view_controls(attendance_filter_controls $fcontrols) {
+        $views[ATT_VIEW_ALL] = get_string('all', 'attendance');
+        $views[ATT_VIEW_ALLPAST] = get_string('allpast', 'attendance');
+        $views[ATT_VIEW_MONTHS] = get_string('months', 'attendance');
+        $views[ATT_VIEW_WEEKS] = get_string('weeks', 'attendance');
+        $views[ATT_VIEW_DAYS] = get_string('days', 'attendance');
         $viewcontrols = '';
         foreach ($views as $key => $sview) {
             if ($key != $fcontrols->pageparams->view) {
@@ -158,10 +158,10 @@ class mod_attforblock_renderer extends plugin_renderer_base {
     /**
      * Renders attendance sessions managing table
      *
-     * @param attforblock_manage_data $sessdata to display
+     * @param attendance_manage_data $sessdata to display
      * @return string html code
      */
-    protected function render_attforblock_manage_data(attforblock_manage_data $sessdata) {
+    protected function render_attendance_manage_data(attendance_manage_data $sessdata) {
         $o = $this->render_sess_manage_table($sessdata) . $this->render_sess_manage_control($sessdata);
         $o = html_writer::tag('form', $o, array('method' => 'post', 'action' => $sessdata->url_sessions()->out()));
         $o = $this->output->container($o, 'generalbox attwidth');
@@ -170,17 +170,17 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         return $o;
     }
 
-    protected function render_sess_manage_table(attforblock_manage_data $sessdata) {
-        $this->page->requires->js_init_call('M.mod_attforblock.init_manage');
+    protected function render_sess_manage_table(attendance_manage_data $sessdata) {
+        $this->page->requires->js_init_call('M.mod_attendance.init_manage');
 
         $table = new html_table();
         $table->width = '100%';
         $table->head = array(
                 '#',
-                get_string('sessiontypeshort', 'attforblock'),
+                get_string('sessiontypeshort', 'attendance'),
                 get_string('date'),
                 get_string('time'),
-                get_string('description', 'attforblock'),
+                get_string('description', 'attendance'),
                 get_string('actions'),
                 html_writer::checkbox('cb_selector', 0, false, '', array('id' => 'cb_selector'))
             );
@@ -195,7 +195,7 @@ class mod_attforblock_renderer extends plugin_renderer_base {
 
             $table->data[$sess->id][] = $i;
             $table->data[$sess->id][] = $sess->groupid ? $sessdata->groups[$sess->groupid]->name :
-                                                         get_string('commonsession', 'attforblock');
+                                                         get_string('commonsession', 'attendance');
             $table->data[$sess->id][] = $dta['date'];
             $table->data[$sess->id][] = $dta['time'];
             $table->data[$sess->id][] = $sess->description;
@@ -206,20 +206,20 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         return html_writer::table($table);
     }
 
-    private function construct_date_time_actions(attforblock_manage_data $sessdata, $sess) {
+    private function construct_date_time_actions(attendance_manage_data $sessdata, $sess) {
         $actions = '';
 
-        $date = userdate($sess->sessdate, get_string('strftimedmyw', 'attforblock'));
+        $date = userdate($sess->sessdate, get_string('strftimedmyw', 'attendance'));
         $time = $this->construct_time($sess->sessdate, $sess->duration);
         if ($sess->lasttaken > 0) {
             if ($sessdata->perm->can_change()) {
                 $url = $sessdata->url_take($sess->id, $sess->groupid);
-                $title = get_string('changeattendance', 'attforblock');
+                $title = get_string('changeattendance', 'attendance');
 
                 $date = html_writer::link($url, $date, array('title' => $title));
                 $time = html_writer::link($url, $time, array('title' => $title));
 
-                $actions = $this->output->action_icon($url, new pix_icon('redo', $title, 'attforblock'));
+                $actions = $this->output->action_icon($url, new pix_icon('redo', $title, 'attendance'));
             } else {
                 $date = '<i>' . $date . '</i>';
                 $time = '<i>' . $time . '</i>';
@@ -227,36 +227,36 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         } else {
             if ($sessdata->perm->can_take()) {
                 $url = $sessdata->url_take($sess->id, $sess->groupid);
-                $title = get_string('takeattendance', 'attforblock');
+                $title = get_string('takeattendance', 'attendance');
                 $actions = $this->output->action_icon($url, new pix_icon('t/go', $title));
             }
         }
         if ($sessdata->perm->can_manage()) {
             $url = $sessdata->url_sessions($sess->id, att_sessions_page_params::ACTION_UPDATE);
-            $title = get_string('editsession', 'attforblock');
+            $title = get_string('editsession', 'attendance');
             $actions .= $this->output->action_icon($url, new pix_icon('t/edit', $title));
 
             $url = $sessdata->url_sessions($sess->id, att_sessions_page_params::ACTION_DELETE);
-            $title = get_string('deletesession', 'attforblock');
+            $title = get_string('deletesession', 'attendance');
             $actions .= $this->output->action_icon($url, new pix_icon('t/delete', $title));
         }
 
         return array('date' => $date, 'time' => $time, 'actions' => $actions);
     }
 
-    protected function render_sess_manage_control(attforblock_manage_data $sessdata) {
+    protected function render_sess_manage_control(attendance_manage_data $sessdata) {
         $table = new html_table();
         $table->attributes['class'] = ' ';
         $table->width = '100%';
         $table->align = array('left', 'right');
 
-        $table->data[0][] = $this->output->help_icon('hiddensessions', 'attforblock',
-                get_string('hiddensessions', 'attforblock').': '.$sessdata->hiddensessionscount);
+        $table->data[0][] = $this->output->help_icon('hiddensessions', 'attendance',
+                get_string('hiddensessions', 'attendance').': '.$sessdata->hiddensessionscount);
 
         if ($sessdata->perm->can_manage()) {
             $options = array(
                         att_sessions_page_params::ACTION_DELETE_SELECTED => get_string('delete'),
-                        att_sessions_page_params::ACTION_CHANGE_DURATION => get_string('changeduration', 'attforblock'));
+                        att_sessions_page_params::ACTION_CHANGE_DURATION => get_string('changeduration', 'attendance'));
             $controls = html_writer::select($options, 'action');
             $attributes = array(
                     'type'  => 'submit',
@@ -264,32 +264,32 @@ class mod_attforblock_renderer extends plugin_renderer_base {
                     'value' => get_string('ok'));
             $controls .= html_writer::empty_tag('input', $attributes);
         } else {
-            $controls = get_string('youcantdo', 'attforblock'); // You can't do anything.
+            $controls = get_string('youcantdo', 'attendance'); // You can't do anything.
         }
         $table->data[0][] = $controls;
 
         return html_writer::table($table);
     }
 
-    protected function render_attforblock_take_data(attforblock_take_data $takedata) {
-        $controls = $this->render_attforblock_take_controls($takedata);
+    protected function render_attendance_take_data(attendance_take_data $takedata) {
+        $controls = $this->render_attendance_take_controls($takedata);
 
         if ($takedata->pageparams->viewmode == att_take_page_params::SORTED_LIST) {
-            $table = $this->render_attforblock_take_list($takedata);
+            $table = $this->render_attendance_take_list($takedata);
         } else {
-            $table = $this->render_attforblock_take_grid($takedata);
+            $table = $this->render_attendance_take_grid($takedata);
         }
         $table .= html_writer::input_hidden_params($takedata->url());
         $params = array(
                 'type'  => 'submit',
-                'value' => get_string('save', 'attforblock'));
+                'value' => get_string('save', 'attendance'));
         $table .= html_writer::tag('center', html_writer::empty_tag('input', $params));
         $table = html_writer::tag('form', $table, array('method' => 'post', 'action' => $takedata->url_path()));
 
         return $controls.$table;
     }
 
-    protected function render_attforblock_take_controls(attforblock_take_data $takedata) {
+    protected function render_attendance_take_controls(attendance_take_data $takedata) {
         $table = new html_table();
         $table->attributes['class'] = ' ';
 
@@ -299,11 +299,11 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         return $this->output->container(html_writer::table($table), 'generalbox takecontrols');
     }
 
-    private function construct_take_session_info(attforblock_take_data $takedata) {
+    private function construct_take_session_info(attendance_take_data $takedata) {
         $sess = $takedata->sessioninfo;
         $date = userdate($sess->sessdate, get_string('strftimedate'));
-        $starttime = userdate($sess->sessdate, get_string('strftimehm', 'attforblock'));
-        $endtime = userdate($sess->sessdate + $sess->duration, get_string('strftimehm', 'attforblock'));
+        $starttime = userdate($sess->sessdate, get_string('strftimehm', 'attendance'));
+        $endtime = userdate($sess->sessdate + $sess->duration, get_string('strftimehm', 'attendance'));
         $time = html_writer::tag('nobr', $starttime . ($sess->duration > 0 ? ' - ' . $endtime : ''));
         $sessinfo = $date.' '.$time;
         $sessinfo .= html_writer::empty_tag('br');
@@ -313,9 +313,9 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         return $sessinfo;
     }
 
-    private function construct_take_controls(attforblock_take_data $takedata) {
+    private function construct_take_controls(attendance_take_data $takedata) {
         $controls = '';
-        if ($takedata->pageparams->grouptype == attforblock::SESSION_COMMON and
+        if ($takedata->pageparams->grouptype == attendance::SESSION_COMMON and
                 ($takedata->groupmode == VISIBLEGROUPS or
                 ($takedata->groupmode and $takedata->perm->can_access_all_groups()))) {
             $controls .= groups_print_activity_menu($takedata->cm, $takedata->url(), true);
@@ -324,19 +324,19 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         $controls .= html_writer::empty_tag('br');
 
         $options = array(
-                att_take_page_params::SORTED_LIST   => get_string('sortedlist', 'attforblock'),
-                att_take_page_params::SORTED_GRID   => get_string('sortedgrid', 'attforblock'));
+                att_take_page_params::SORTED_LIST   => get_string('sortedlist', 'attendance'),
+                att_take_page_params::SORTED_GRID   => get_string('sortedgrid', 'attendance'));
         $select = new single_select($takedata->url(), 'viewmode', $options, $takedata->pageparams->viewmode, null);
-        $select->set_label(get_string('viewmode', 'attforblock'));
+        $select->set_label(get_string('viewmode', 'attendance'));
         $select->class = 'singleselect inline';
         $controls .= $this->output->render($select);
 
         if ($takedata->pageparams->viewmode == att_take_page_params::SORTED_GRID) {
-            $options = array (1 => '1 '.get_string('column', 'attforblock'), '2 '.get_string('columns', 'attforblock'),
-                                   '3 '.get_string('columns', 'attforblock'), '4 '.get_string('columns', 'attforblock'),
-                                   '5 '.get_string('columns', 'attforblock'), '6 '.get_string('columns', 'attforblock'),
-                                   '7 '.get_string('columns', 'attforblock'), '8 '.get_string('columns', 'attforblock'),
-                                   '9 '.get_string('columns', 'attforblock'), '10 '.get_string('columns', 'attforblock'));
+            $options = array (1 => '1 '.get_string('column', 'attendance'), '2 '.get_string('columns', 'attendance'),
+                                   '3 '.get_string('columns', 'attendance'), '4 '.get_string('columns', 'attendance'),
+                                   '5 '.get_string('columns', 'attendance'), '6 '.get_string('columns', 'attendance'),
+                                   '7 '.get_string('columns', 'attendance'), '8 '.get_string('columns', 'attendance'),
+                                   '9 '.get_string('columns', 'attendance'), '10 '.get_string('columns', 'attendance'));
             $select = new single_select($takedata->url(), 'gridcols', $options, $takedata->pageparams->gridcols, null);
             $select->class = 'singleselect inline';
             $controls .= $this->output->render($select);
@@ -348,13 +348,13 @@ class mod_attforblock_renderer extends plugin_renderer_base {
 
             $options = array();
             foreach ($takedata->sessions4copy as $sess) {
-                $start = userdate($sess->sessdate, get_string('strftimehm', 'attforblock'));
+                $start = userdate($sess->sessdate, get_string('strftimehm', 'attendance'));
                 $end = $sess->duration ? ' - '.userdate($sess->sessdate + $sess->duration,
-                                                        get_string('strftimehm', 'attforblock')) : '';
+                                                        get_string('strftimehm', 'attendance')) : '';
                 $options[$sess->id] = $start . $end;
             }
             $select = new single_select($takedata->url(array(), array('copyfrom')), 'copyfrom', $options);
-            $select->set_label(get_string('copyfrom', 'attforblock'));
+            $select->set_label(get_string('copyfrom', 'attendance'));
             $select->class = 'singleselect inline';
             $controls .= $this->output->render($select);
         }
@@ -362,7 +362,7 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         return $controls;
     }
 
-    protected function render_attforblock_take_list(attforblock_take_data $takedata) {
+    protected function render_attendance_take_list(attendance_take_data $takedata) {
         $table = new html_table();
         $table->width = '0%';
         $table->head = array(
@@ -374,11 +374,11 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         $table->wrap[1] = 'nowrap';
         foreach ($takedata->statuses as $st) {
             $table->head[] = html_writer::link("javascript:select_all_in(null, 'st" . $st->id . "', null);", $st->acronym,
-                                               array('title' => get_string('setallstatusesto', 'attforblock', $st->description)));
+                                               array('title' => get_string('setallstatusesto', 'attendance', $st->description)));
             $table->align[] = 'center';
             $table->size[] = '20px';
         }
-        $table->head[] = get_string('remarks', 'attforblock');
+        $table->head[] = get_string('remarks', 'attendance');
         $table->align[] = 'center';
         $table->size[] = '20px';
         $table->attributes['class'] = 'generaltable takelist';
@@ -416,7 +416,7 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         return html_writer::table($table);
     }
 
-    protected function render_attforblock_take_grid(attforblock_take_data $takedata) {
+    protected function render_attendance_take_grid(attendance_take_data $takedata) {
         $table = new html_table();
         for ($i=0; $i < $takedata->pageparams->gridcols; $i++) {
             $table->align[] = 'center';
@@ -427,7 +427,7 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         $head = array();
         foreach ($takedata->statuses as $st) {
             $head[] = html_writer::link("javascript:select_all_in(null, 'st" . $st->id . "', null);", $st->acronym,
-                                        array('title' => get_string('setallstatusesto', 'attforblock', $st->description)));
+                                        array('title' => get_string('setallstatusesto', 'attendance', $st->description)));
         }
         $table->head[] = implode('&nbsp;&nbsp;', $head);
 
@@ -489,15 +489,15 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         return $fullnamehead;
     }
 
-    private function construct_take_user_controls(attforblock_take_data $takedata, $user) {
+    private function construct_take_user_controls(attendance_take_data $takedata, $user) {
         $celldata = array();
         if ($user->enrolmentend and $user->enrolmentend < $takedata->sessioninfo->sessdate) {
-            $celldata['text'] = get_string('enrolmentend', 'attforblock', userdate($user->enrolmentend, '%d.%m.%Y'));
+            $celldata['text'] = get_string('enrolmentend', 'attendance', userdate($user->enrolmentend, '%d.%m.%Y'));
             $celldata['colspan'] = count($takedata->statuses) + 1;
             $celldata['class'] = 'userwithoutenrol';
         } else if (!$user->enrolmentend and $user->enrolmentstatus == ENROL_USER_SUSPENDED) {
             // No enrolmentend and ENROL_USER_SUSPENDED.
-            $celldata['text'] = get_string('enrolmentsuspended', 'attforblock');
+            $celldata['text'] = get_string('enrolmentsuspended', 'attendance');
             $celldata['colspan'] = count($takedata->statuses) + 1;
             $celldata['class'] = 'userwithoutenrol';
         } else {
@@ -533,7 +533,7 @@ class mod_attforblock_renderer extends plugin_renderer_base {
             $celldata['text'][] = html_writer::empty_tag('input', $params);
 
             if ($user->enrolmentstart > $takedata->sessioninfo->sessdate + $takedata->sessioninfo->duration) {
-                $celldata['warning'] = get_string('enrolmentstart', 'attforblock',
+                $celldata['warning'] = get_string('enrolmentstart', 'attendance',
                                                   userdate($user->enrolmentstart, '%H:%M %d.%m.%Y'));
                 $celldata['class'] = 'userwithoutenrol';
             }
@@ -542,7 +542,7 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         return $celldata;
     }
 
-    protected function render_attforblock_user_data(attforblock_user_data $userdata) {
+    protected function render_attendance_user_data(attendance_user_data $userdata) {
         $o = $this->render_user_report_tabs($userdata);
 
         $table = new html_table();
@@ -557,21 +557,21 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         return $o;
     }
 
-    protected function render_user_report_tabs(attforblock_user_data $userdata) {
+    protected function render_user_report_tabs(attendance_user_data $userdata) {
         $tabs = array();
 
         $tabs[] = new tabobject(att_view_page_params::MODE_THIS_COURSE,
                         $userdata->url()->out(true, array('mode' => att_view_page_params::MODE_THIS_COURSE)),
-                        get_string('thiscourse', 'attforblock'));
+                        get_string('thiscourse', 'attendance'));
 
         $tabs[] = new tabobject(att_view_page_params::MODE_ALL_COURSES,
                         $userdata->url()->out(true, array('mode' => att_view_page_params::MODE_ALL_COURSES)),
-                        get_string('allcourses', 'attforblock'));
+                        get_string('allcourses', 'attendance'));
 
         return print_tabs(array($tabs), $userdata->pageparams->mode, null, null, true);
     }
 
-    private function construct_user_data(attforblock_user_data $userdata) {
+    private function construct_user_data(attendance_user_data $userdata) {
         $o = html_writer::tag('h2', fullname($userdata->user));
 
         if ($userdata->pageparams->mode == att_view_page_params::MODE_THIS_COURSE) {
@@ -580,7 +580,7 @@ class mod_attforblock_renderer extends plugin_renderer_base {
             $o .= construct_user_data_stat($userdata->stat, $userdata->statuses,
                         $userdata->gradable, $userdata->grade, $userdata->maxgrade, $userdata->decimalpoints);
 
-            $o .= $this->render_attforblock_filter_controls($userdata->filtercontrols);
+            $o .= $this->render_attendance_filter_controls($userdata->filtercontrols);
 
             $o .= $this->construct_user_sessions_log($userdata);
         } else {
@@ -603,17 +603,17 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         return $o;
     }
 
-    private function construct_user_sessions_log(attforblock_user_data $userdata) {
+    private function construct_user_sessions_log(attendance_user_data $userdata) {
         $table = new html_table();
         $table->attributes['class'] = 'generaltable attwidth boxaligncenter';
         $table->head = array(
             '#',
-            get_string('sessiontypeshort', 'attforblock'),
+            get_string('sessiontypeshort', 'attendance'),
             get_string('date'),
             get_string('time'),
-            get_string('description', 'attforblock'),
-            get_string('status', 'attforblock'),
-            get_string('remarks', 'attforblock')
+            get_string('description', 'attendance'),
+            get_string('status', 'attendance'),
+            get_string('remarks', 'attendance')
         );
         $table->align = array('', '', '', 'left', 'left', 'center', 'left');
         $table->size = array('1px', '1px', '1px', '1px', '*', '1px', '1px');
@@ -625,20 +625,20 @@ class mod_attforblock_renderer extends plugin_renderer_base {
             $row = new html_table_row();
             $row->cells[] = $i;
             $row->cells[] = html_writer::tag('nobr', $sess->groupid ? $userdata->groups[$sess->groupid]->name :
-                                                                      get_string('commonsession', 'attforblock'));
-            $row->cells[] = userdate($sess->sessdate, get_string('strftimedmyw', 'attforblock'));
+                                                                      get_string('commonsession', 'attendance'));
+            $row->cells[] = userdate($sess->sessdate, get_string('strftimedmyw', 'attendance'));
             $row->cells[] = $this->construct_time($sess->sessdate, $sess->duration);
             $row->cells[] = $sess->description;
             if (isset($sess->statusid)) {
                 $row->cells[] = $userdata->statuses[$sess->statusid]->description;
                 $row->cells[] = $sess->remarks;
             } else if ($sess->sessdate < $userdata->user->enrolmentstart) {
-                $cell = new html_table_cell(get_string('enrolmentstart', 'attforblock',
+                $cell = new html_table_cell(get_string('enrolmentstart', 'attendance',
                                             userdate($userdata->user->enrolmentstart, '%d.%m.%Y')));
                 $cell->colspan = 2;
                 $row->cells[] = $cell;
             } else if ($userdata->user->enrolmentend and $sess->sessdate > $userdata->user->enrolmentend) {
-                $cell = new html_table_cell(get_string('enrolmentend', 'attforblock',
+                $cell = new html_table_cell(get_string('enrolmentend', 'attendance',
                                             userdate($userdata->user->enrolmentend, '%d.%m.%Y')));
                 $cell->colspan = 2;
                 $row->cells[] = $cell;
@@ -659,7 +659,7 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         return $time;
     }
 
-    protected function render_attforblock_report_data(attforblock_report_data $reportdata) {
+    protected function render_attendance_report_data(attendance_report_data $reportdata) {
         $table = new html_table();
 
         $table->attributes['class'] = 'generaltable attwidth';
@@ -674,14 +674,14 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         $table->size[] = '';
 
         foreach ($reportdata->sessions as $sess) {
-            $sesstext = userdate($sess->sessdate, get_string('strftimedm', 'attforblock'));
+            $sesstext = userdate($sess->sessdate, get_string('strftimedm', 'attendance'));
             $sesstext .= html_writer::empty_tag('br');
-            $sesstext .= userdate($sess->sessdate, '('.get_string('strftimehm', 'attforblock').')');
+            $sesstext .= userdate($sess->sessdate, '('.get_string('strftimehm', 'attendance').')');
             if (is_null($sess->lasttaken) and $reportdata->perm->can_take() or $reportdata->perm->can_change()) {
                 $sesstext = html_writer::link($reportdata->url_take($sess->id, $sess->groupid), $sesstext);
             }
             $sesstext .= html_writer::empty_tag('br');
-            $sesstext .= $sess->groupid ? $reportdata->groups[$sess->groupid]->name : get_string('commonsession', 'attforblock');
+            $sesstext .= $sess->groupid ? $reportdata->groups[$sess->groupid]->name : get_string('commonsession', 'attendance');
 
             $table->head[] = $sesstext;
             $table->align[] = 'center';
@@ -727,13 +727,13 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         return html_writer::table($table);
     }
 
-    protected function render_attforblock_preferences_data(attforblock_preferences_data $prefdata) {
-        $this->page->requires->js('/mod/attforblock/module.js');
+    protected function render_attendance_preferences_data(attendance_preferences_data $prefdata) {
+        $this->page->requires->js('/mod/attendance/module.js');
 
         $table = new html_table();
         $table->width = '100%';
         $table->head = array('#',
-                             get_string('acronym', 'attforblock'),
+                             get_string('acronym', 'attendance'),
                              get_string('description'),
                              get_string('grade'),
                              get_string('action'));
@@ -754,13 +754,13 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         $table->data[$i][] = $this->construct_text_input('newacronym', 2, 2);
         $table->data[$i][] = $this->construct_text_input('newdescription', 30, 30);
         $table->data[$i][] = $this->construct_text_input('newgrade', 4, 4);
-        $table->data[$i][] = $this->construct_preferences_button(get_string('add', 'attforblock'),
+        $table->data[$i][] = $this->construct_preferences_button(get_string('add', 'attendance'),
                                                                  att_preferences_page_params::ACTION_ADD);
 
-        $o = html_writer::tag('h1', get_string('myvariables', 'attforblock'));
+        $o = html_writer::tag('h1', get_string('myvariables', 'attendance'));
         $o .= html_writer::table($table);
         $o .= html_writer::input_hidden_params($prefdata->url(array(), false));
-        $o .= $this->construct_preferences_button(get_string('update', 'attforblock'), att_preferences_page_params::ACTION_SAVE);
+        $o .= $this->construct_preferences_button(get_string('update', 'attendance'), att_preferences_page_params::ACTION_SAVE);
         $o = html_writer::tag('form', $o, array('id' => 'preferencesform', 'method' => 'post',
                                                 'action' => $prefdata->url(array(), false)->out_omit_querystring()));
         $o = $this->output->container($o, 'generalbox attwidth');
@@ -814,7 +814,7 @@ class mod_attforblock_renderer extends plugin_renderer_base {
         $attributes = array(
                 'type'      => 'submit',
                 'value'     => $text,
-                'onclick'   => 'M.mod_attforblock.set_preferences_action('.$action.')');
+                'onclick'   => 'M.mod_attendance.set_preferences_action('.$action.')');
         return html_writer::empty_tag('input', $attributes);
     }
 

@@ -16,6 +16,6 @@ INSTALLATION
 ==========
 The attendance module follows standard installation procedure.
 
-1. Create folder <path to your moodle dir>/mod/attforblock.
+1. Create folder <path to your moodle dir>/mod/attendance.
 2. Extract files from folder inside archive to created folder.
 3. Visit page Home ► Site administration ► Notifications to complete installation.

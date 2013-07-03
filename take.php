@@ -17,7 +17,7 @@
 /**
  * Take Attendance
  *
- * @package    mod_attforblock
+ * @package    mod_attendance
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -35,20 +35,20 @@ $pageparams->copyfrom   = optional_param('copyfrom', null, PARAM_INT);
 $pageparams->viewmode   = optional_param('viewmode', null, PARAM_INT);
 $pageparams->gridcols   = optional_param('gridcols', null, PARAM_INT);
 
-$cm             = get_coursemodule_from_id('attforblock', $id, 0, false, MUST_EXIST);
+$cm             = get_coursemodule_from_id('attendance', $id, 0, false, MUST_EXIST);
 $course         = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
-$att            = $DB->get_record('attforblock', array('id' => $cm->instance), '*', MUST_EXIST);
+$att            = $DB->get_record('attendance', array('id' => $cm->instance), '*', MUST_EXIST);
 
 require_login($course, true, $cm);
 
 $pageparams->group = groups_get_activity_group($cm, true);
 
 $pageparams->init($course->id);
-$att = new attforblock($att, $cm, $course, $PAGE->context, $pageparams);
+$att = new attendance($att, $cm, $course, $PAGE->context, $pageparams);
 
 if (!$att->perm->can_take_session($pageparams->grouptype)) {
     $group = groups_get_group($pageparams->grouptype);
-    throw new moodle_exception('cannottakeforgroup', 'attforblock', '', $group->name);
+    throw new moodle_exception('cannottakeforgroup', 'attendance', '', $group->name);
 }
 
 if ($formdata = data_submitted()) {
@@ -59,17 +59,17 @@ $PAGE->set_url($att->url_take());
 $PAGE->set_title($course->shortname. ": ".$att->name);
 $PAGE->set_heading($course->fullname);
 $PAGE->set_cacheable(true);
-$PAGE->set_button($OUTPUT->update_module_button($cm->id, 'attforblock'));
+$PAGE->set_button($OUTPUT->update_module_button($cm->id, 'attendance'));
 $PAGE->navbar->add($att->name);
 
-$output = $PAGE->get_renderer('mod_attforblock');
-$tabs = new attforblock_tabs($att);
-$sesstable = new attforblock_take_data($att);
+$output = $PAGE->get_renderer('mod_attendance');
+$tabs = new attendance_tabs($att);
+$sesstable = new attendance_take_data($att);
 
 // Output starts here.
 
 echo $output->header();
-echo $output->heading(get_string('attendanceforthecourse', 'attforblock').' :: ' .$course->fullname);
+echo $output->heading(get_string('attendanceforthecourse', 'attendance').' :: ' .$course->fullname);
 echo $output->render($tabs);
 echo $output->render($sesstable);
 

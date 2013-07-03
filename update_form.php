@@ -17,7 +17,7 @@
 /**
  * Update form
  *
- * @package    mod_attforblock
+ * @package    mod_attendance
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -25,7 +25,7 @@
 
 require_once($CFG->libdir.'/formslib.php');
 
-class mod_attforblock_update_form extends moodleform {
+class mod_attendance_update_form extends moodleform {
     public function definition() {
 
         global $CFG, $DB;
@@ -42,16 +42,16 @@ class mod_attforblock_update_form extends moodleform {
         $dhours = floor($sess->duration / HOURSECS);
         $dmins = floor(($sess->duration - $dhours * HOURSECS) / MINSECS);
         $defopts = array('maxfiles'=>EDITOR_UNLIMITED_FILES, 'noclean'=>true, 'context'=>$modcontext);
-        $sess = file_prepare_standard_editor($sess, 'description', $defopts, $modcontext, 'mod_attforblock', 'session', $sess->id);
+        $sess = file_prepare_standard_editor($sess, 'description', $defopts, $modcontext, 'mod_attendance', 'session', $sess->id);
         $data = array('sessiondate' => $sess->sessdate,
                 'durtime' => array('hours' => $dhours, 'minutes' => $dmins),
                 'sdescription' => $sess->description_editor);
 
-        $mform->addElement('header', 'general', get_string('changesession', 'attforblock'));
+        $mform->addElement('header', 'general', get_string('changesession', 'attendance'));
 
-        $mform->addElement('static', 'olddate', get_string('olddate', 'attforblock'),
-                           userdate($sess->sessdate, get_string('strftimedmyhm', 'attforblock')));
-        $mform->addElement('date_time_selector', 'sessiondate', get_string('newdate', 'attforblock'));
+        $mform->addElement('static', 'olddate', get_string('olddate', 'attendance'),
+                           userdate($sess->sessdate, get_string('strftimedmyhm', 'attendance')));
+        $mform->addElement('date_time_selector', 'sessiondate', get_string('newdate', 'attendance'));
 
         for ($i=0; $i<=23; $i++) {
             $hours[$i] = sprintf("%02d", $i);
@@ -61,14 +61,14 @@ class mod_attforblock_update_form extends moodleform {
         }
         $durselect[] =& $mform->createElement('select', 'hours', '', $hours);
         $durselect[] =& $mform->createElement('select', 'minutes', '', $minutes, false, true);
-        $mform->addGroup($durselect, 'durtime', get_string('duration', 'attforblock'), array(' '), true);
+        $mform->addGroup($durselect, 'durtime', get_string('duration', 'attendance'), array(' '), true);
 
-        $mform->addElement('editor', 'sdescription', get_string('description', 'attforblock'), null, $defopts);
+        $mform->addElement('editor', 'sdescription', get_string('description', 'attendance'), null, $defopts);
         $mform->setType('sdescription', PARAM_RAW);
 
         $mform->setDefaults($data);
 
-        $submit_string = get_string('update', 'attforblock');
+        $submit_string = get_string('update', 'attendance');
         $this->add_action_buttons(true, $submit_string);
     }
 }

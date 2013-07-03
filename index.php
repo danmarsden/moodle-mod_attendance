@@ -30,8 +30,8 @@ $course = $DB->get_record('course', array('id' => $id), '*', MUST_EXIST);
 require_login($course);
 
 // TODO: check if this is correct behaviour - other modules list all the instances of the module in the course.
-if ($att = array_pop(get_all_instances_in_course('attforblock', $course, null, true))) {
+if ($att = array_pop(get_all_instances_in_course('attendance', $course, null, true))) {
     redirect("view.php?id=$att->coursemodule");
 } else {
-    print_error('notfound', 'attforblock');
+    print_error('notfound', 'attendance');
 }

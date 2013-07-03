@@ -17,7 +17,7 @@
 /**
  * Prints attendance info for particular user
  *
- * @package    mod_attforblock
+ * @package    mod_attendance
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -34,14 +34,14 @@ $pageparams->mode       = optional_param('mode', att_view_page_params::MODE_THIS
 $pageparams->view       = optional_param('view', null, PARAM_INT);
 $pageparams->curdate    = optional_param('curdate', null, PARAM_INT);
 
-$cm             = get_coursemodule_from_id('attforblock', $id, 0, false, MUST_EXIST);
+$cm             = get_coursemodule_from_id('attendance', $id, 0, false, MUST_EXIST);
 $course         = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
-$attforblock    = $DB->get_record('attforblock', array('id' => $cm->instance), '*', MUST_EXIST);
+$attendance    = $DB->get_record('attendance', array('id' => $cm->instance), '*', MUST_EXIST);
 
 require_login($course, true, $cm);
 
 $pageparams->init($cm);
-$att = new attforblock($attforblock, $cm, $course, $PAGE->context, $pageparams);
+$att = new attendance($attendance, $cm, $course, $PAGE->context, $pageparams);
 
 // Not specified studentid for displaying attendance?
 // Redirect to appropriate page if can.
@@ -59,12 +59,12 @@ $PAGE->set_url($att->url_view());
 $PAGE->set_title($course->shortname. ": ".$att->name);
 $PAGE->set_heading($course->fullname);
 $PAGE->set_cacheable(true);
-$PAGE->navbar->add(get_string('attendancereport', 'attforblock'));
+$PAGE->navbar->add(get_string('attendancereport', 'attendance'));
 
-$output = $PAGE->get_renderer('mod_attforblock');
+$output = $PAGE->get_renderer('mod_attendance');
 
 $userid = isset($pageparams->studentid) ? $pageparams->studentid : $USER->id;
-$userdata = new attforblock_user_data($att, $userid);
+$userdata = new attendance_user_data($att, $userid);
 
 echo $output->header();
 

@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Forms for updating/adding attforblock
+ * Forms for updating/adding attendance
  *
- * @package    mod_attforblock
+ * @package    mod_attendance
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -28,7 +28,7 @@ if (!defined('MOODLE_INTERNAL')) {
 
 require_once($CFG->dirroot.'/course/moodleform_mod.php');
 
-class mod_attforblock_mod_form extends moodleform_mod {
+class mod_attendance_mod_form extends moodleform_mod {
 
     public function definition() {
 
@@ -40,7 +40,7 @@ class mod_attforblock_mod_form extends moodleform_mod {
         $mform->addElement('text', 'name', get_string('name'), array('size'=>'64'));
         $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', null, 'required', null, 'client');
-        $mform->setDefault('name', get_string('modulename', 'attforblock'));
+        $mform->setDefault('name', get_string('modulename', 'attendance'));
 
         $mform->addElement('modgrade', 'grade', get_string('grade'));
         $mform->setDefault('grade', 100);

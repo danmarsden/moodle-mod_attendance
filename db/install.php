@@ -20,7 +20,7 @@
  * lib.php/modulename_install() post installation hook and partially defaults.php
  *
  * @package    mod
- * @subpackage attforblock
+ * @subpackage attendance
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -28,7 +28,7 @@
 /**
  * Post installation procedure
  */
-function xmldb_attforblock_install() {
+function xmldb_attendance_install() {
     global $DB;
 
     $result = true;
@@ -36,8 +36,8 @@ function xmldb_attforblock_install() {
     foreach ($arr as $k => $v) {
         $rec = new stdClass;
         $rec->attendanceid = 0;
-        $rec->acronym = get_string($k.'acronym', 'attforblock');
-        $rec->description = get_string($k.'full', 'attforblock');
+        $rec->acronym = get_string($k.'acronym', 'attendance');
+        $rec->description = get_string($k.'full', 'attendance');
         $rec->grade = $v;
         $rec->visible = 1;
         $rec->deleted = 0;

@@ -1,6 +1,6 @@
-M.mod_attforblock = {}
+M.mod_attendance = {}
 
-M.mod_attforblock.init_manage = function(Y) {
+M.mod_attendance.init_manage = function(Y) {
 
     Y.on('click', function(e) {
         if (e.target.get('checked')) {
@@ -11,7 +11,7 @@ M.mod_attforblock.init_manage = function(Y) {
     }, '#cb_selector' );
 };
 
-M.mod_attforblock.set_preferences_action = function(action) {
+M.mod_attendance.set_preferences_action = function(action) {
     var item = document.getElementById('preferencesaction');
     if (item) {
         item.setAttribute('value', action);

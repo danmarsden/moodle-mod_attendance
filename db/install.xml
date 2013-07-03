@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/attforblock/db" VERSION="20090112" COMMENT="XMLDB file for Moodle mod/attforblock"
+<XMLDB PATH="mod/attendance/db" VERSION="20090112" COMMENT="XMLDB file for Moodle mod/attendance"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
   <TABLES>
-    <TABLE NAME="attforblock" COMMENT="Module for support Attendances" NEXT="attendance_sessions">
+    <TABLE NAME="attendance" COMMENT="Module for support Attendances" NEXT="attendance_sessions">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" COMMENT="id of the table, please edit me" NEXT="course"/>
         <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="name"/>
@@ -12,13 +12,13 @@
         <FIELD NAME="grade" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" DEFAULT="100" SEQUENCE="false" COMMENT="This is maximum grade for instance" PREVIOUS="name"/>
       </FIELDS>
       <KEYS>
-        <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="Primary key for attforblock"/>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="Primary key for attendance"/>
       </KEYS>
       <INDEXES>
         <INDEX NAME="course" UNIQUE="false" FIELDS="course"/>
       </INDEXES>
     </TABLE>
-    <TABLE NAME="attendance_sessions" COMMENT="attendance_sessions table retrofitted from MySQL" PREVIOUS="attforblock" NEXT="attendance_log">
+    <TABLE NAME="attendance_sessions" COMMENT="attendance_sessions table retrofitted from MySQL" PREVIOUS="attendance" NEXT="attendance_log">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="attendanceid"/>
         <FIELD NAME="attendanceid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="groupid"/>

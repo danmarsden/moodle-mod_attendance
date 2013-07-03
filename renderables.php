@@ -17,7 +17,7 @@
 /**
  * Attendance module renderable components are defined here
  *
- * @package    mod_attforblock
+ * @package    mod_attendance
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -30,10 +30,10 @@ require_once(dirname(__FILE__).'/locallib.php');
 /**
  * Represents info about attendance tabs.
  *
- * Proxy class for security reasons (renderers must not have access to all attforblock methods)
+ * Proxy class for security reasons (renderers must not have access to all attendance methods)
  *
  */
-class attforblock_tabs implements renderable {
+class attendance_tabs implements renderable {
     const TAB_SESSIONS      = 1;
     const TAB_ADD           = 2;
     const TAB_REPORT        = 3;
@@ -42,16 +42,16 @@ class attforblock_tabs implements renderable {
 
     public $currenttab;
 
-    /** @var attforblock */
+    /** @var attendance */
     private $att;
 
     /**
      * Prepare info about sessions for attendance taking into account view parameters.
      *
-     * @param attforblock $att instance
-     * @param $currenttab - one of attforblock_tabs constants
+     * @param attendance $att instance
+     * @param $currenttab - one of attendance_tabs constants
      */
-    public function  __construct(attforblock $att, $currenttab=null) {
+    public function  __construct(attendance $att, $currenttab=null) {
         $this->att = $att;
         $this->currenttab = $currenttab;
     }
@@ -66,18 +66,18 @@ class attforblock_tabs implements renderable {
                 $this->att->perm->can_take() or
                 $this->att->perm->can_change()) {
             $toprow[] = new tabobject(self::TAB_SESSIONS, $this->att->url_manage()->out(),
-                        get_string('sessions', 'attforblock'));
+                        get_string('sessions', 'attendance'));
         }
 
         if ($this->att->perm->can_manage()) {
             $toprow[] = new tabobject(self::TAB_ADD,
                                      $this->att->url_sessions()->out(true, array('action' => att_sessions_page_params::ACTION_ADD)),
-                        get_string('add', 'attforblock'));
+                        get_string('add', 'attendance'));
         }
 
         if ($this->att->perm->can_view_reports()) {
             $toprow[] = new tabobject(self::TAB_REPORT, $this->att->url_report()->out(),
-                        get_string('report', 'attforblock'));
+                        get_string('report', 'attendance'));
         }
 
         if ($this->att->perm->can_export()) {
@@ -87,7 +87,7 @@ class attforblock_tabs implements renderable {
 
         if ($this->att->perm->can_change_preferences()) {
             $toprow[] = new tabobject(self::TAB_PREFERENCES, $this->att->url_preferences()->out(),
-                        get_string('settings', 'attforblock'));
+                        get_string('settings', 'attendance'));
         }
 
         return array($toprow);
@@ -95,7 +95,7 @@ class attforblock_tabs implements renderable {
 }
 
 
-class attforblock_filter_controls implements renderable {
+class attendance_filter_controls implements renderable {
     /** @var int current view mode */
     public $pageparams;
 
@@ -112,7 +112,7 @@ class attforblock_filter_controls implements renderable {
 
     private $att;
 
-    public function __construct(attforblock $att) {
+    public function __construct(attendance $att) {
         global $PAGE;
 
         $this->pageparams = $att->pageparams;
@@ -129,13 +129,13 @@ class attforblock_filter_controls implements renderable {
 
         switch ($this->pageparams->view) {
             case ATT_VIEW_DAYS:
-                $format = get_string('strftimedm', 'attforblock');
+                $format = get_string('strftimedm', 'attendance');
                 $this->prevcur = make_timestamp($year, $mon, $mday - 1);
                 $this->nextcur = make_timestamp($year, $mon, $mday + 1);
                 $this->curdatetxt =  userdate($att->pageparams->startdate, $format);
                 break;
             case ATT_VIEW_WEEKS:
-                $format = get_string('strftimedm', 'attforblock');
+                $format = get_string('strftimedm', 'attendance');
                 $this->prevcur = $att->pageparams->startdate - WEEKSECS;
                 $this->nextcur = $att->pageparams->startdate + WEEKSECS;
                 $this->curdatetxt = userdate($att->pageparams->startdate, $format).
@@ -190,28 +190,28 @@ class attforblock_filter_controls implements renderable {
  * Represents info about attendance sessions taking into account view parameters.
  *
  */
-class attforblock_manage_data implements renderable {
+class attendance_manage_data implements renderable {
     /** @var array of sessions*/
     public $sessions;
 
     /** @var int number of hidden sessions (sessions before $course->startdate)*/
     public $hiddensessionscount;
 
-    /** @var attforblock_permissions permission of current user for attendance instance*/
+    /** @var attendance_permissions permission of current user for attendance instance*/
     public $perm;
 
     public $groups;
 
     public $hiddensesscount;
 
-    /** @var attforblock */
+    /** @var attendance */
     private $att;
     /**
      * Prepare info about attendance sessions taking into account view parameters.
      *
-     * @param attforblock $att instance
+     * @param attendance $att instance
      */
-    public function __construct(attforblock $att) {
+    public function __construct(attendance $att) {
         $this->perm = $att->perm;
 
         $this->sessions = $att->get_filtered_sessions();
@@ -235,7 +235,7 @@ class attforblock_manage_data implements renderable {
     }
 }
 
-class attforblock_take_data implements renderable {
+class attendance_take_data implements renderable {
     public $users;
 
     public $pageparams;
@@ -258,7 +258,7 @@ class attforblock_take_data implements renderable {
     private $urlparams;
     private $att;
 
-    public function  __construct(attforblock $att) {
+    public function  __construct(attendance $att) {
         if ($att->pageparams->grouptype) {
             $this->users = $att->get_users($att->pageparams->grouptype);
         } else {
@@ -315,7 +315,7 @@ class attforblock_take_data implements renderable {
     }
 }
 
-class attforblock_user_data implements renderable {
+class attendance_user_data implements renderable {
     public $user;
 
     public $pageparams;
@@ -343,7 +343,7 @@ class attforblock_user_data implements renderable {
     private $urlpath;
     private $urlparams;
 
-    public function  __construct(attforblock $att, $userid) {
+    public function  __construct(attendance $att, $userid) {
         global $CFG;
 
         $this->user = $att->get_user($userid);
@@ -365,7 +365,7 @@ class attforblock_user_data implements renderable {
                 $this->maxgrade = $att->get_user_max_grade($userid);
             }
 
-            $this->filtercontrols = new attforblock_filter_controls($att);
+            $this->filtercontrols = new attendance_filter_controls($att);
 
             $this->sessionslog = $att->get_user_filtered_sessions_log_extended($userid);
 
@@ -417,7 +417,7 @@ class attforblock_user_data implements renderable {
     }
 }
 
-class attforblock_report_data implements renderable {
+class attendance_report_data implements renderable {
     public $perm;
     public $pageparams;
 
@@ -447,7 +447,7 @@ class attforblock_report_data implements renderable {
 
     private $att;
 
-    public function  __construct(attforblock $att) {
+    public function  __construct(attendance $att) {
         global $CFG;
 
         $this->perm = $att->perm;
@@ -500,12 +500,12 @@ class attforblock_report_data implements renderable {
 
 }
 
-class attforblock_preferences_data implements renderable {
+class attendance_preferences_data implements renderable {
     public $statuses;
 
     private $att;
 
-    public function __construct(attforblock $att) {
+    public function __construct(attendance $att) {
         $this->statuses = $att->get_statuses(false);
 
         foreach ($this->statuses as $st) {

@@ -24,7 +24,7 @@
 
 require_once($CFG->libdir.'/formslib.php');
 
-class mod_attforblock_add_form extends moodleform {
+class mod_attendance_add_form extends moodleform {
 
     public function definition() {
 
@@ -35,31 +35,31 @@ class mod_attforblock_add_form extends moodleform {
         $cm            = $this->_customdata['cm'];
         $modcontext    = $this->_customdata['modcontext'];
 
-        $mform->addElement('header', 'general', get_string('addsession', 'attforblock'));
+        $mform->addElement('header', 'general', get_string('addsession', 'attendance'));
 
         $groupmode = groups_get_activity_groupmode($cm);
         switch ($groupmode) {
             case NOGROUPS:
-                $mform->addElement('static', 'sessiontypedescription', get_string('sessiontype', 'attforblock'),
-                                  get_string('commonsession', 'attforblock'));
-                $mform->addHelpButton('sessiontypedescription', 'sessiontype', 'attforblock');
-                $mform->addElement('hidden', 'sessiontype', attforblock::SESSION_COMMON);
+                $mform->addElement('static', 'sessiontypedescription', get_string('sessiontype', 'attendance'),
+                                  get_string('commonsession', 'attendance'));
+                $mform->addHelpButton('sessiontypedescription', 'sessiontype', 'attendance');
+                $mform->addElement('hidden', 'sessiontype', attendance::SESSION_COMMON);
                 break;
             case SEPARATEGROUPS:
-                $mform->addElement('static', 'sessiontypedescription', get_string('sessiontype', 'attforblock'),
-                                  get_string('groupsession', 'attforblock'));
-                $mform->addHelpButton('sessiontypedescription', 'sessiontype', 'attforblock');
-                $mform->addElement('hidden', 'sessiontype', attforblock::SESSION_GROUP);
+                $mform->addElement('static', 'sessiontypedescription', get_string('sessiontype', 'attendance'),
+                                  get_string('groupsession', 'attendance'));
+                $mform->addHelpButton('sessiontypedescription', 'sessiontype', 'attendance');
+                $mform->addElement('hidden', 'sessiontype', attendance::SESSION_GROUP);
                 break;
             case VISIBLEGROUPS:
                 $radio=array();
                 $radio[] = &$mform->createElement('radio', 'sessiontype', '',
-                                                  get_string('commonsession', 'attforblock'), attforblock::SESSION_COMMON);
+                                                  get_string('commonsession', 'attendance'), attendance::SESSION_COMMON);
                 $radio[] = &$mform->createElement('radio', 'sessiontype', '',
-                                                  get_string('groupsession', 'attforblock'), attforblock::SESSION_GROUP);
-                $mform->addGroup($radio, 'sessiontype', get_string('sessiontype', 'attforblock'), ' ', false);
-                $mform->addHelpButton('sessiontype', 'sessiontype', 'attforblock');
-                $mform->setDefault('sessiontype', attforblock::SESSION_COMMON);
+                                                  get_string('groupsession', 'attendance'), attendance::SESSION_GROUP);
+                $mform->addGroup($radio, 'sessiontype', get_string('sessiontype', 'attendance'), ' ', false);
+                $mform->addHelpButton('sessiontype', 'sessiontype', 'attendance');
+                $mform->setDefault('sessiontype', attendance::SESSION_COMMON);
                 break;
         }
         if ($groupmode == SEPARATEGROUPS or $groupmode == VISIBLEGROUPS) {
@@ -75,21 +75,21 @@ class mod_attforblock_add_form extends moodleform {
                 }
                 $select = &$mform->addElement('select', 'groups', get_string('groups', 'group'), $selectgroups);
                 $select->setMultiple(true);
-                $mform->disabledIf('groups', 'sessiontype', 'neq', attforblock::SESSION_GROUP);
+                $mform->disabledIf('groups', 'sessiontype', 'neq', attendance::SESSION_GROUP);
             } else {
                 $mform->updateElementAttr($radio, array('disabled'=>'disabled'));
                 $mform->addElement('static', 'groups', get_string('groups', 'group'),
-                                  get_string('nogroups', 'attforblock'));
+                                  get_string('nogroups', 'attendance'));
                 if ($groupmode == SEPARATEGROUPS) {
                     return;
                 }
             }
         }
 
-        $mform->addElement('checkbox', 'addmultiply', '', get_string('createmultiplesessions', 'attforblock'));
-        $mform->addHelpButton('addmultiply', 'createmultiplesessions', 'attforblock');
+        $mform->addElement('checkbox', 'addmultiply', '', get_string('createmultiplesessions', 'attendance'));
+        $mform->addHelpButton('addmultiply', 'createmultiplesessions', 'attendance');
 
-        $mform->addElement('date_time_selector', 'sessiondate', get_string('sessiondate', 'attforblock'));
+        $mform->addElement('date_time_selector', 'sessiondate', get_string('sessiondate', 'attendance'));
 
         for ($i=0; $i<=23; $i++) {
             $hours[$i] = sprintf("%02d", $i);
@@ -100,9 +100,9 @@ class mod_attforblock_add_form extends moodleform {
         $durtime = array();
         $durtime[] =& $mform->createElement('select', 'hours', get_string('hour', 'form'), $hours, false, true);
         $durtime[] =& $mform->createElement('select', 'minutes', get_string('minute', 'form'), $minutes, false, true);
-        $mform->addGroup($durtime, 'durtime', get_string('duration', 'attforblock'), array(' '), true);
+        $mform->addGroup($durtime, 'durtime', get_string('duration', 'attendance'), array(' '), true);
 
-        $mform->addElement('date_selector', 'sessionenddate', get_string('sessionenddate', 'attforblock'));
+        $mform->addElement('date_selector', 'sessionenddate', get_string('sessionenddate', 'attendance'));
         $mform->disabledIf('sessionenddate', 'addmultiply', 'notchecked');
 
         $sdays = array();
@@ -118,29 +118,29 @@ class mod_attforblock_add_form extends moodleform {
         if ($CFG->calendar_startwday !== '0') { // Week start from sunday.
             $sdays[] =& $mform->createElement('checkbox', 'Sun', '', get_string('sunday', 'calendar'));
         }
-        $mform->addGroup($sdays, 'sdays', get_string('sessiondays', 'attforblock'), array(' '), true);
+        $mform->addGroup($sdays, 'sdays', get_string('sessiondays', 'attendance'), array(' '), true);
         $mform->disabledIf('sdays', 'addmultiply', 'notchecked');
 
         $period = array(1=>1, 2, 3, 4, 5, 6, 7, 8);
         $periodgroup = array();
         $periodgroup[] =& $mform->createElement('select', 'period', '', $period, false, true);
-        $periodgroup[] =& $mform->createElement('static', 'perioddesc', '', get_string('week', 'attforblock'));
-        $mform->addGroup($periodgroup, 'periodgroup', get_string('period', 'attforblock'), array(' '), false);
+        $periodgroup[] =& $mform->createElement('static', 'perioddesc', '', get_string('week', 'attendance'));
+        $mform->addGroup($periodgroup, 'periodgroup', get_string('period', 'attendance'), array(' '), false);
         $mform->disabledIf('periodgroup', 'addmultiply', 'notchecked');
 
-        $mform->addElement('editor', 'sdescription', get_string('description', 'attforblock'),
+        $mform->addElement('editor', 'sdescription', get_string('description', 'attendance'),
                            null, array('maxfiles'=>EDITOR_UNLIMITED_FILES, 'noclean'=>true, 'context'=>$modcontext));
         $mform->setType('sdescription', PARAM_RAW);
 
-        $submit_string = get_string('addsession', 'attforblock');
+        $submit_string = get_string('addsession', 'attendance');
         $this->add_action_buttons(false, $submit_string);
     }
 
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
 
-        if ($data['sessiontype'] == attforblock::SESSION_GROUP and empty($data['groups'])) {
-            $errors['groups'] = get_string('errorgroupsnotselected', 'attforblock');
+        if ($data['sessiontype'] == attendance::SESSION_GROUP and empty($data['groups'])) {
+            $errors['groups'] = get_string('errorgroupsnotselected', 'attendance');
         }
         return $errors;
     }

@@ -17,7 +17,7 @@
 /**
  * Version information
  *
- * @package    mod_attforblock
+ * @package    mod_attendance
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -27,4 +27,12 @@ $module->requires = 2012120300;
 $module->release = '2.4.1';
 $module->maturity  = MATURITY_ALPHA;
 $module->cron     = 0;
-$module->component = 'mod_attforblock';
+$module->component = 'mod_attendance';
+
+// Nasty upgrade code to check if need to upgrade from attforblock.
+// TODO: remove this asap.
+global $DB;
+if ($DB->record_exists('modules', array('name' =>'attforblock'))) {
+    require_once('locallib.php');
+    attforblock_upgrade();
+}

@@ -1,4 +1,4 @@
-.path-mod-attforblock .attbtn {
+.path-mod-attendance .attbtn {
     border:1px solid #AAAAAA;
     margin-left: 2px;
     margin-right: 2px;
@@ -10,116 +10,116 @@
     -khtml-border-radius: 5px;
 }
 
-.path-mod-attforblock .attcurbtn {
+.path-mod-attendance .attcurbtn {
     margin-left: 2px;
     margin-right: 2px;
     padding: 5px;
 }
 
-.path-mod-attforblock .attfiltercontrols {
+.path-mod-attendance .attfiltercontrols {
     margin-bottom: 10px;
     margin-right:auto;
     margin-left:auto;
 }
 
-.path-mod-attforblock .attfiltercontrols #currentdate{
+.path-mod-attendance .attfiltercontrols #currentdate{
     display: inline;
 }
 
-.path-mod-attforblock .attwidth {
+.path-mod-attendance .attwidth {
     width:90%;
     margin: auto;
 }
 
-.path-mod-attforblock .userwithoutenrol,
-.path-mod-attforblock .userwithoutenrol a{
+.path-mod-attendance .userwithoutenrol,
+.path-mod-attendance .userwithoutenrol a{
     color: gray;
 }
 
-.path-mod-attforblock .userwithoutdata,
-.path-mod-attforblock .userwithoutdata a{
+.path-mod-attendance .userwithoutdata,
+.path-mod-attendance .userwithoutdata a{
     color: red;
 }
 
-.path-mod-attforblock .takelist td {
+.path-mod-attendance .takelist td {
     vertical-align: middle;
 }
 
-.path-mod-attforblock .takelist .userpicture {
+.path-mod-attendance .takelist .userpicture {
     margin:0 3px;
     vertical-align:middle;
 }
 
-.path-mod-attforblock .takegrid input {
+.path-mod-attendance .takegrid input {
     margin: 0px 3px 0px 6px;
 }
 
-.path-mod-attforblock .takegrid .fullname {
+.path-mod-attendance .takegrid .fullname {
     font-size: 0.8em;
 }
 
-.path-mod-attforblock table.controls {
+.path-mod-attendance table.controls {
     width: 100%;
     text-align: center;
 }
 
-.path-mod-attforblock table.controls tr {
+.path-mod-attendance table.controls tr {
     vertical-align: top;
 }
 
-.path-mod-attforblock table.controls td.right,
-.path-mod-attforblock table.controls td.left {
+.path-mod-attendance table.controls td.right,
+.path-mod-attendance table.controls td.left {
     padding-bottom: 4px;
     padding-left: 4px;
     padding-right: 4px;
     padding-top: 4px;
 }
 
-.path-mod-attforblock table.controls .right {
+.path-mod-attendance table.controls .right {
     text-align: right;
 }
 /* for IE7*/
-.path-mod-attforblock .filtercontrols td {
+.path-mod-attendance .filtercontrols td {
     padding:6px;
 }
 
-.path-mod-attforblock .takecontrols {
+.path-mod-attendance .takecontrols {
     width: 800px;
     margin: 0px auto 20px auto;
 }
-.path-mod-attforblock .takecontrols table{
+.path-mod-attendance .takecontrols table{
     margin: 0px auto;
 }
-.path-mod-attforblock .takecontrols .c0 {
+.path-mod-attendance .takecontrols .c0 {
     width: 500px;
     text-align: left;
 }
-.path-mod-attforblock .takecontrols .c1 {
+.path-mod-attendance .takecontrols .c1 {
     text-align: right;
 }
 
-.path-mod-attforblock .inline,
-.path-mod-attforblock .inline form,
-.path-mod-attforblock .inline div {
+.path-mod-attendance .inline,
+.path-mod-attendance .inline form,
+.path-mod-attendance .inline div {
     display: inline;
 }
 
-.path-mod-attforblock table.userinfobox {
+.path-mod-attendance table.userinfobox {
     border: 1px solid #EEEEEE;
     padding: 0px;
 }
-.path-mod-attforblock table.userinfobox td.left {
+.path-mod-attendance table.userinfobox td.left {
     background-color: #EEEEEE;
     padding: 30px 10px;
 }
-.path-mod-attforblock table.attlist td.c0 {
+.path-mod-attendance table.attlist td.c0 {
     text-align: right;
 }
 
-#page-mod-attforblock-preferences .generalbox {
+#page-mod-attendance-preferences .generalbox {
     text-align: center;
 }
 
-.path-mod-attforblock .attsessions_manage_table .action-icon img.smallicon {
+.path-mod-attendance .attsessions_manage_table .action-icon img.smallicon {
     margin-left: 5px;
 }

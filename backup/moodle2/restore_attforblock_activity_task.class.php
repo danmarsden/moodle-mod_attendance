@@ -16,20 +16,20 @@
 
 /**
  * @package    mod
- * @subpackage attforblock
+ * @subpackage attendance
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/mod/attforblock/backup/moodle2/restore_attforblock_stepslib.php');
+require_once($CFG->dirroot . '/mod/attendance/backup/moodle2/restore_attendance_stepslib.php');
 
 /**
- * attforblock restore task that provides all the settings and steps to perform one
+ * attendance restore task that provides all the settings and steps to perform one
  * complete restore of the activity
  */
-class restore_attforblock_activity_task extends restore_activity_task {
+class restore_attendance_activity_task extends restore_activity_task {
 
     /**
      * Define (add) particular settings this activity can have
@@ -41,7 +41,7 @@ class restore_attforblock_activity_task extends restore_activity_task {
      * Define (add) particular steps this activity can have
      */
     protected function define_my_steps() {
-        $this->add_step(new restore_attforblock_activity_structure_step('attforblock_structure', 'attforblock.xml'));
+        $this->add_step(new restore_attendance_activity_structure_step('attendance_structure', 'attendance.xml'));
     }
 
     /**
@@ -52,7 +52,7 @@ class restore_attforblock_activity_task extends restore_activity_task {
         $contents = array();
 
         $contents[] = new restore_decode_content('attendance_sessions',
-                          array('description'), 'attforblock_session');
+                          array('description'), 'attendance_session');
 
         return $contents;
     }
@@ -65,9 +65,9 @@ class restore_attforblock_activity_task extends restore_activity_task {
         $rules = array();
 
         $rules[] = new restore_decode_rule('ATTFORBLOCKVIEWBYID',
-                    '/mod/attforblock/view.php?id=$1', 'course_module');
+                    '/mod/attendance/view.php?id=$1', 'course_module');
         $rules[] = new restore_decode_rule('ATTFORBLOCKVIEWBYIDSTUD',
-                    '/mod/attforblock/view.php?id=$1&studentid=$2', array('course_module', 'user'));
+                    '/mod/attendance/view.php?id=$1&studentid=$2', array('course_module', 'user'));
 
         return $rules;
 
@@ -76,7 +76,7 @@ class restore_attforblock_activity_task extends restore_activity_task {
     /**
      * Define the restore log rules that will be applied
      * by the {@link restore_logs_processor} when restoring
-     * attforblock logs. It must return one array
+     * attendance logs. It must return one array
      * of {@link restore_log_rule} objects
      */
     static public function define_restore_log_rules() {
