@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * lists all the instances of attforblock in a particular course
+ * redjrects to the first Attendance in the course.
  *
  * @package   mod_attendance
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
@@ -24,13 +24,13 @@
 
 require_once('../../config.php');
 
-$id = required_param('id', PARAM_INT);                 // Course id
+$id = required_param('id', PARAM_INT);
 
-if (! $course = $DB->get_record('course', array('id'=> $id))) {
-    error('Course ID is incorrect');
-}
+$course = $DB->get_record('course', array('id' => $id), '*', MUST_EXIST);
+require_login($course);
 
-if ($att = array_pop(get_all_instances_in_course('attforblock', $course, NULL, true))) {
+// TODO: check if this is correct behaviour - other modules list all the instances of the module in the course.
+if ($att = array_pop(get_all_instances_in_course('attforblock', $course, null, true))) {
     redirect("view.php?id=$att->coursemodule");
 } else {
     print_error('notfound', 'attforblock');
