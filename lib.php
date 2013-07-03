@@ -265,6 +265,9 @@ function attendance_cron () {
     return true;
 }
 
+function attendance_update_grades($attendance, $userid=0, $nullifnone=true) {
+    // We need this function to exist so that quick editing of module name is passed to gradebook.
+}
 /**
  * Create grade item for given attendance
  *
