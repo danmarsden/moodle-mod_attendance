@@ -83,7 +83,7 @@ switch ($att->pageparams->action) {
         $sessionid = required_param('sessionid', PARAM_INT);
         $confirm   = optional_param('confirm', null, PARAM_INT);
 
-        if (isset($confirm)) {
+        if (isset($confirm) && confirm_sesskey()) {
             $att->delete_sessions(array($sessionid));
             att_update_all_users_grades($att->id, $att->course, $att->context);
             redirect($att->url_manage(), get_string('sessiondeleted', 'attendance'));
@@ -97,7 +97,7 @@ switch ($att->pageparams->action) {
         $message .= html_writer::empty_tag('br');
         $message .= $sessinfo->description;
 
-        $params = array('action' => $att->pageparams->action, 'sessionid' => $sessionid, 'confirm' => 1);
+        $params = array('action' => $att->pageparams->action, 'sessionid' => $sessionid, 'confirm' => 1, 'sesskey' => sesskey());
 
         echo $OUTPUT->header();
         echo $OUTPUT->heading(get_string('attendanceforthecourse', 'attendance').' :: ' .$course->fullname);
@@ -107,7 +107,7 @@ switch ($att->pageparams->action) {
     case att_sessions_page_params::ACTION_DELETE_SELECTED:
         $confirm    = optional_param('confirm', null, PARAM_INT);
 
-        if (isset($confirm)) {
+        if (isset($confirm) && confirm_sesskey()) {
             $sessionsids = required_param('sessionsids', PARAM_ALPHANUMEXT);
             $sessionsids = explode('_', $sessionsids);
 
@@ -115,14 +115,9 @@ switch ($att->pageparams->action) {
             att_update_all_users_grades($att->id, $att->course, $att->context);
             redirect($att->url_manage(), get_string('sessiondeleted', 'attendance'));
         }
+        $sessid = required_param('sessid', PARAM_SEQUENCE);
 
-        $fromform = data_submitted();
-        // Nothing selected.
-        if (!isset($fromform->sessid)) {
-            print_error ('nosessionsselected', 'attendance', $att->url_manage());
-        }
-
-        $sessionsinfo = $att->get_sessions_info($fromform->sessid);
+        $sessionsinfo = $att->get_sessions_info($sessid);
 
         $message = get_string('deletecheckfull', '', get_string('session', 'attendance'));
         $message .= html_writer::empty_tag('br');
@@ -133,8 +128,8 @@ switch ($att->pageparams->action) {
             $message .= $sessinfo->description;
         }
 
-        $sessionsids = implode('_', $fromform->sessid);
-        $params = array('action' => $att->pageparams->action, 'sessionsids' => $sessionsids, 'confirm' => 1);
+        $sessionsids = implode('_', $sessid);
+        $params = array('action' => $att->pageparams->action, 'sessionsids' => $sessionsids, 'confirm' => 1, 'sesskey' => sesskey());
 
         echo $OUTPUT->header();
         echo $OUTPUT->heading(get_string('attendanceforthecourse', 'attendance').' :: ' .$course->fullname);
@@ -142,8 +137,10 @@ switch ($att->pageparams->action) {
         echo $OUTPUT->footer();
         exit;
     case att_sessions_page_params::ACTION_CHANGE_DURATION:
-        $fromform = data_submitted();
-        $slist = isset($fromform->sessid) ? implode('_', $fromform->sessid) : '';
+        $sessid = optional_param('sessid', '', PARAM_SEQUENCE);
+        $ids = optional_param('ids', '', PARAM_ALPHANUMEXT);
+
+        $slist = isset($sessid) ? implode('_', $sessid) : '';
 
         $url = $att->url_sessions(array('action' => att_sessions_page_params::ACTION_CHANGE_DURATION));
         $formparams['ids'] = $slist;
@@ -154,7 +151,7 @@ switch ($att->pageparams->action) {
         }
 
         if ($formdata = $mform->get_data()) {
-            $sessionsids = explode('_', $fromform->ids);
+            $sessionsids = explode('_', $ids);
             $duration = $formdata->durtime['hours']*HOURSECS + $formdata->durtime['minutes']*MINSECS;
             $att->update_sessions_duration($sessionsids, $duration);
             redirect($att->url_manage(), get_string('sessionupdated', 'attendance'));
