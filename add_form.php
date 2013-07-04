@@ -44,12 +44,14 @@ class mod_attendance_add_form extends moodleform {
                                   get_string('commonsession', 'attendance'));
                 $mform->addHelpButton('sessiontypedescription', 'sessiontype', 'attendance');
                 $mform->addElement('hidden', 'sessiontype', attendance::SESSION_COMMON);
+                $mform->setType('sessiontype', PARAM_INT);
                 break;
             case SEPARATEGROUPS:
                 $mform->addElement('static', 'sessiontypedescription', get_string('sessiontype', 'attendance'),
                                   get_string('groupsession', 'attendance'));
                 $mform->addHelpButton('sessiontypedescription', 'sessiontype', 'attendance');
                 $mform->addElement('hidden', 'sessiontype', attendance::SESSION_GROUP);
+                $mform->setType('sessiontype', PARAM_INT);
                 break;
             case VISIBLEGROUPS:
                 $radio=array();
@@ -58,6 +60,7 @@ class mod_attendance_add_form extends moodleform {
                 $radio[] = &$mform->createElement('radio', 'sessiontype', '',
                                                   get_string('groupsession', 'attendance'), attendance::SESSION_GROUP);
                 $mform->addGroup($radio, 'sessiontype', get_string('sessiontype', 'attendance'), ' ', false);
+                $mform->setType('sessiontype', PARAM_INT);
                 $mform->addHelpButton('sessiontype', 'sessiontype', 'attendance');
                 $mform->setDefault('sessiontype', attendance::SESSION_COMMON);
                 break;

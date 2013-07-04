@@ -51,9 +51,12 @@ class mod_attendance_export_form extends moodleform {
 
         $ident = array();
         $ident[] =& $mform->createElement('checkbox', 'id', '', get_string('studentid', 'attendance'));
+
         $ident[] =& $mform->createElement('checkbox', 'uname', '', get_string('username'));
         $mform->addGroup($ident, 'ident', get_string('identifyby', 'attendance'), array('<br />'), true);
         $mform->setDefaults(array('ident[id]' => true, 'ident[uname]' => true));
+        $mform->setType('id', PARAM_INT);
+        $mform->setType('uname', PARAM_INT);
 
         $mform->addElement('checkbox', 'includeallsessions', get_string('includeall', 'attendance'), get_string('yes'));
         $mform->setDefault('includeallsessions', true);
