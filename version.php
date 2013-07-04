@@ -31,8 +31,10 @@ $module->component = 'mod_attendance';
 
 // Nasty upgrade code to check if need to upgrade from attforblock.
 // TODO: remove this asap.
-global $DB;
-if ($DB->record_exists('modules', array('name' =>'attforblock'))) {
-    require_once('locallib.php');
-    attforblock_upgrade();
+if (defined('MOODLE_INTERNAL')) { // Only run if config.php has already been included.
+    global $DB;
+    if ($DB->record_exists('modules', array('name' =>'attforblock'))) {
+        require_once('locallib.php');
+        attforblock_upgrade();
+    }
 }
