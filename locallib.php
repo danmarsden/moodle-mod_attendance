@@ -826,7 +826,7 @@ class attendance {
 
     public function take_from_form_data($formdata) {
         global $DB, $USER;
-
+        // TODO: WARNING - $formdata is unclean - comes from direct $_POST - ideally needs a rewrite but we do some cleaning below.
         $statuses = implode(',', array_keys( (array)$this->get_statuses() ));
         $now = time();
         $sesslog = array();
@@ -834,11 +834,14 @@ class attendance {
         foreach ($formdata as $key => $value) {
             if (substr($key, 0, 4) == 'user') {
                 $sid = substr($key, 4);
+                if (!(is_numeric($sid) && is_numeric($value))) { // Sanity check on $sid and $value.
+                     print_error('nonnumericid', 'attendance');
+                }
                 $sesslog[$sid] = new stdClass();
-                $sesslog[$sid]->studentid = $sid;
-                $sesslog[$sid]->statusid = $value;
+                $sesslog[$sid]->studentid = $sid; // We check is_numeric on this above.
+                $sesslog[$sid]->statusid = $value; // We check is_numeric on this above.
                 $sesslog[$sid]->statusset = $statuses;
-                $sesslog[$sid]->remarks = array_key_exists('remarks'.$sid, $formdata) ? $formdata['remarks'.$sid] : '';
+                $sesslog[$sid]->remarks = array_key_exists('remarks'.$sid, $formdata) ? clean_param($formdata['remarks'.$sid], PARAM_TEXT) : '';
                 $sesslog[$sid]->sessionid = $this->pageparams->sessionid;
                 $sesslog[$sid]->timetaken = $now;
                 $sesslog[$sid]->takenby = $USER->id;

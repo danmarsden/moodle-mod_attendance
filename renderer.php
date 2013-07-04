@@ -279,7 +279,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         } else {
             $table = $this->render_attendance_take_grid($takedata);
         }
-        $table .= html_writer::input_hidden_params($takedata->url());
+        $table .= html_writer::input_hidden_params($takedata->url(array('sesskey' => sesskey())));
         $params = array(
                 'type'  => 'submit',
                 'value' => get_string('save', 'attendance'));

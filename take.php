@@ -50,8 +50,7 @@ if (!$att->perm->can_take_session($pageparams->grouptype)) {
     $group = groups_get_group($pageparams->grouptype);
     throw new moodle_exception('cannottakeforgroup', 'attendance', '', $group->name);
 }
-
-if ($formdata = data_submitted()) {
+if (($formdata = data_submitted()) && confirm_sesskey()) {
     $att->take_from_form_data($formdata);
 }
 
