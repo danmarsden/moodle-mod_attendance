@@ -15,8 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package    mod
- * @subpackage attendance
+ * Structure step to restore one attendance activity
+ *
+ * @package    mod_attendance
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -25,13 +26,17 @@ defined('MOODLE_INTERNAL') || die();
 
 /**
  * Define all the restore steps that will be used by the restore_attendance_activity_task
- */
-
-/**
- * Structure step to restore one attendance activity
+ *
+ * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class restore_attendance_activity_structure_step extends restore_activity_structure_step {
 
+    /**
+     * Define the structure of the restore workflow.
+     *
+     * @return restore_path_element $structure
+     */
     protected function define_structure() {
 
         $paths = array();
@@ -60,6 +65,12 @@ class restore_attendance_activity_structure_step extends restore_activity_struct
         return $this->prepare_activity_structure($paths);
     }
 
+    /**
+     * Process an attendance restore.
+     *
+     * @param object $data The data in object form
+     * @return void
+     */
     protected function process_attendance($data) {
         global $DB;
 
@@ -73,6 +84,11 @@ class restore_attendance_activity_structure_step extends restore_activity_struct
         $this->apply_activity_instance($newitemid);
     }
 
+    /**
+     * Process attendance status restore
+     * @param object $data The data in object form
+     * @return void
+     */
     protected function process_attendance_status($data) {
         global $DB;
 
@@ -85,6 +101,11 @@ class restore_attendance_activity_structure_step extends restore_activity_struct
         $this->set_mapping('attendance_status', $oldid, $newitemid);
     }
 
+    /**
+     * Process attendance session restore
+     * @param object $data The data in object form
+     * @return void
+     */
     protected function process_attendance_session($data) {
         global $DB;
 
@@ -102,6 +123,11 @@ class restore_attendance_activity_structure_step extends restore_activity_struct
         $this->set_mapping('attendance_session', $oldid, $newitemid, true);
     }
 
+    /**
+     * Process attendance log restore
+     * @param object $data The data in object form
+     * @return void
+     */
     protected function process_attendance_log($data) {
         global $DB;
 
@@ -122,6 +148,10 @@ class restore_attendance_activity_structure_step extends restore_activity_struct
         $newitemid = $DB->insert_record('attendance_log', $data);
     }
 
+    /**
+     * Once the database tables have been fully restored, restore the files
+     * @return void
+     */
     protected function after_execute() {
         $this->add_related_files('mod_attendance', 'session', 'attendance_session');
     }

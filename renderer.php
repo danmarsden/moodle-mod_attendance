@@ -31,6 +31,7 @@ require_once(dirname(__FILE__).'/renderhelpers.php');
 /**
  * Attendance module renderer class
  *
+ * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mod_attendance_renderer extends plugin_renderer_base {

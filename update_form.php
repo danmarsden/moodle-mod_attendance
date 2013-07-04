@@ -25,10 +25,22 @@
 
 require_once($CFG->libdir.'/formslib.php');
 
+/**
+ * class for displaying update form.
+ *
+ * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class mod_attendance_update_form extends moodleform {
+
+    /**
+     * Called to define this moodle form
+     *
+     * @return void
+     */
     public function definition() {
 
-        global $CFG, $DB;
+        global $DB;
         $mform    =& $this->_form;
 
         $course        = $this->_customdata['course'];

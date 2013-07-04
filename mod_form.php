@@ -28,11 +28,20 @@ if (!defined('MOODLE_INTERNAL')) {
 
 require_once($CFG->dirroot.'/course/moodleform_mod.php');
 
+/**
+ * class for displaying add/update form.
+ *
+ * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class mod_attendance_mod_form extends moodleform_mod {
 
+    /**
+     * Called to define this moodle form
+     *
+     * @return void
+     */
     public function definition() {
-
-        global $CFG;
         $mform    =& $this->_form;
 
         $mform->addElement('header', 'general', get_string('general', 'form'));
@@ -46,8 +55,6 @@ class mod_attendance_mod_form extends moodleform_mod {
         $mform->setDefault('grade', 100);
 
         $this->standard_coursemodule_elements(true);
-
         $this->add_action_buttons();
     }
-
 }

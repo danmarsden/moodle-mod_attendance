@@ -17,8 +17,7 @@
 /**
  * Defines all the backup steps that will be used by {@link backup_attendance_activity_task}
  *
- * @package    mod
- * @subpackage attendance
+ * @package    mod_attendance
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -27,9 +26,17 @@ defined('MOODLE_INTERNAL') || die();
 
 /**
  * Defines the complete attendance structure for backup, with file and id annotations
+ *
+ * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class backup_attendance_activity_structure_step extends backup_activity_structure_step {
 
+    /**
+     * Define the structure of the backup workflow.
+     *
+     * @return restore_path_element $structure
+     */
     protected function define_structure() {
 
         // Are we including userinfo?

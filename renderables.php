@@ -32,6 +32,9 @@ require_once(dirname(__FILE__).'/locallib.php');
  *
  * Proxy class for security reasons (renderers must not have access to all attendance methods)
  *
+ * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ *
  */
 class attendance_tabs implements renderable {
     const TAB_SESSIONS      = 1;
@@ -189,6 +192,8 @@ class attendance_filter_controls implements renderable {
 /**
  * Represents info about attendance sessions taking into account view parameters.
  *
+ * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class attendance_manage_data implements renderable {
     /** @var array of sessions*/

@@ -24,8 +24,19 @@
 
 require_once($CFG->libdir.'/formslib.php');
 
+/**
+ * class for displaying add form.
+ *
+ * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class mod_attendance_add_form extends moodleform {
 
+    /**
+     * Called to define this moodle form
+     *
+     * @return void
+     */
     public function definition() {
 
         global $CFG, $USER;
@@ -139,6 +150,11 @@ class mod_attendance_add_form extends moodleform {
         $this->add_action_buttons(false, $submit_string);
     }
 
+    /**
+     * Perform minimal validation on the settings form
+     * @param array $data
+     * @param array $files
+     */
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
 

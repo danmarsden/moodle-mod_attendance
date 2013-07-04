@@ -17,8 +17,7 @@
 /**
  * Class {@link backup_attendance_activity_task} definition
  *
- * @package    mod
- * @subpackage attendance
+ * @package    mod_attendance
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -30,6 +29,9 @@ require_once($CFG->dirroot . '/mod/attendance/backup/moodle2/backup_attendance_s
 
 /**
  * Provides all the settings and steps to perform one complete backup of attendance activity
+ *
+ * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class backup_attendance_activity_task extends backup_activity_task {
 
@@ -49,6 +51,8 @@ class backup_attendance_activity_task extends backup_activity_task {
     /**
      * Code the transformations to perform in the activity in
      * order to get transportable (encoded) links
+     * @param string $content
+     * @return string
      */
     static public function encode_content_links($content) {
         global $CFG;

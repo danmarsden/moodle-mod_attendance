@@ -129,7 +129,8 @@ switch ($att->pageparams->action) {
         }
 
         $sessionsids = implode('_', $sessid);
-        $params = array('action' => $att->pageparams->action, 'sessionsids' => $sessionsids, 'confirm' => 1, 'sesskey' => sesskey());
+        $params = array('action' => $att->pageparams->action, 'sessionsids' => $sessionsids,
+                        'confirm' => 1, 'sesskey' => sesskey());
 
         echo $OUTPUT->header();
         echo $OUTPUT->heading(get_string('attendanceforthecourse', 'attendance').' :: ' .$course->fullname);

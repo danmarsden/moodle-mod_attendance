@@ -24,11 +24,22 @@
 
 require_once($CFG->libdir.'/formslib.php');
 
+/**
+ * class for displaying export form.
+ *
+ * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class mod_attendance_export_form extends moodleform {
 
+    /**
+     * Called to define this moodle form
+     *
+     * @return void
+     */
     public function definition() {
 
-        global $CFG, $USER;
+        global $USER;
         $mform    =& $this->_form;
 
         $course        = $this->_customdata['course'];
@@ -77,7 +88,6 @@ class mod_attendance_export_form extends moodleform {
         $this->add_action_buttons(false, $submit_string);
 
         $mform->addElement('hidden', 'id', $cm->id);
-
     }
 }
 

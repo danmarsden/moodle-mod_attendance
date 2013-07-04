@@ -841,7 +841,8 @@ class attendance {
                 $sesslog[$sid]->studentid = $sid; // We check is_numeric on this above.
                 $sesslog[$sid]->statusid = $value; // We check is_numeric on this above.
                 $sesslog[$sid]->statusset = $statuses;
-                $sesslog[$sid]->remarks = array_key_exists('remarks'.$sid, $formdata) ? clean_param($formdata['remarks'.$sid], PARAM_TEXT) : '';
+                $sesslog[$sid]->remarks = array_key_exists('remarks'.$sid, $formdata) ?
+                                                      clean_param($formdata['remarks'.$sid], PARAM_TEXT) : '';
                 $sesslog[$sid]->sessionid = $this->pageparams->sessionid;
                 $sesslog[$sid]->timetaken = $now;
                 $sesslog[$sid]->takenby = $USER->id;

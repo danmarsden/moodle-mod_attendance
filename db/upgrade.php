@@ -14,9 +14,19 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-// This file keeps track of upgrades to
-// the attendance module.
+/**
+ * upgrade processes for this module.
+ *
+ * @package   mod_attendance
+ * @copyright 2011 Artem Andreev <andreev.artem@gmail.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
+/**
+ * upgrade this attendance instance - this function could be skipped but it will be needed later
+ * @param int $oldversion The old version of the attendance module
+ * @return bool
+ */
 function xmldb_attendance_upgrade($oldversion=0) {
 
     global $CFG, $THEME, $DB;
@@ -24,6 +34,6 @@ function xmldb_attendance_upgrade($oldversion=0) {
 
     $result = true;
 
-    // UPGRADES from attforblock are only supported for sites that are running attforblock version 2012120700
+    // UPGRADES from attforblock are only supported for sites that are running attforblock version 2012120700.
     return $result;
 }

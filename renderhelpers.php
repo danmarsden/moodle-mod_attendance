@@ -27,7 +27,10 @@ defined('MOODLE_INTERNAL') || die();
 require_once(dirname(__FILE__).'/renderables.php');
 
 /**
- * Template method for generating user's session's cells
+ * class Template method for generating user's session's cells
+ *
+ * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class user_sessions_cells_generator {
     protected $cells = array();
@@ -103,6 +106,12 @@ class user_sessions_cells_generator {
     }
 }
 
+/**
+ * class Template method for generating user's session's cells in html
+ *
+ * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class user_sessions_cells_html_generator extends user_sessions_cells_generator {
     private $cell;
 
@@ -154,6 +163,12 @@ class user_sessions_cells_html_generator extends user_sessions_cells_generator {
     }
 }
 
+/**
+ * class Template method for generating user's session's cells in text
+ *
+ * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class user_sessions_cells_text_generator extends user_sessions_cells_generator {
     private $enrolments_info_cell_text;
 

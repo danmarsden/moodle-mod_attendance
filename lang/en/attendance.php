@@ -14,6 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Strings for component 'attendance', language 'en'
+ *
+ * @package   mod_attendance
+ * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 $string['attendance:addinstance'] = 'Add a new attendance activity';
 $string['Aacronym'] = 'A';
 $string['Afull'] = 'Absent';

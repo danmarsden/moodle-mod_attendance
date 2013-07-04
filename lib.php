@@ -76,7 +76,7 @@ function attendance_add_instance($attendance) {
     att_add_default_statuses($attendance->id);
 
     attendance_grade_item_update($attendance);
-    // attendance_update_grades($attendance);
+
     return $attendance->id;
 }
 
@@ -290,7 +290,6 @@ function attendance_grade_item_update($attendance, $grades=null) {
     if (! $course = $DB->get_record('course', array('id'=> $attendance->course))) {
         error("Course is misconfigured");
     }
-    // $attendance->grade = get_maxgrade($course);
 
     if (!empty($attendance->cmidnumber)) {
         $params = array('itemname'=>$attendance->name, 'idnumber'=>$attendance->cmidnumber);
