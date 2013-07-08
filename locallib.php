@@ -1388,7 +1388,7 @@ function att_log_convert_url(moodle_url $fullurl) {
 function attforblock_upgrade() {
     global $DB, $CFG;
     $module = $DB->get_record('modules', array('name' => 'attforblock'));
-    if ($module->version > '2011061800') {
+    if ($module->version <= '2011061800') {
         print_error("noupgradefromthisversion", 'attendance');
     }
     if (file_exists($CFG->dirroot.'/mod/attforblock')) {
