@@ -24,7 +24,6 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/mod/attendance/backup/moodle2/backup_attendance_settingslib.php');
 require_once($CFG->dirroot . '/mod/attendance/backup/moodle2/backup_attendance_stepslib.php');
 
 /**
