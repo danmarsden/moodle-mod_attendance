@@ -123,3 +123,6 @@
 .path-mod-attendance .attsessions_manage_table .action-icon img.smallicon {
     margin-left: 5px;
 }
+#page-mod-attendance-sessions input[type="checkbox"] {
+    margin-right: 2px;
+}

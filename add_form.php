@@ -132,7 +132,7 @@ class mod_attendance_add_form extends moodleform {
         if ($CFG->calendar_startwday !== '0') { // Week start from sunday.
             $sdays[] =& $mform->createElement('checkbox', 'Sun', '', get_string('sunday', 'calendar'));
         }
-        $mform->addGroup($sdays, 'sdays', get_string('sessiondays', 'attendance'), array(' '), true);
+        $mform->addGroup($sdays, 'sdays', get_string('sessiondays', 'attendance'), array('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'), true);
         $mform->disabledIf('sdays', 'addmultiply', 'notchecked');
 
         $period = array(1=>1, 2, 3, 4, 5, 6, 7, 8);
