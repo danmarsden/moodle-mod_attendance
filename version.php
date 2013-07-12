@@ -33,8 +33,13 @@ $module->component = 'mod_attendance';
 // TODO: remove this asap.
 if (defined('MOODLE_INTERNAL')) { // Only run if config.php has already been included.
     global $DB;
-    if ($DB->record_exists('modules', array('name' =>'attforblock'))) {
-        require_once('locallib.php');
-        attforblock_upgrade();
+    try {
+        if ($DB->record_exists('modules', array('name' =>'attforblock'))) {
+            require_once('locallib.php');
+            attforblock_upgrade();
+        }
+    } catch (Exception $e) {
+        // Probably a fresh install - modules table doesn't exist
     }
+
 }
