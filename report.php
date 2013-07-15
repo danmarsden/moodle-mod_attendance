@@ -58,8 +58,7 @@ $tabs = new attendance_tabs($att, attendance_tabs::TAB_REPORT);
 $filtercontrols = new attendance_filter_controls($att);
 $reportdata = new attendance_report_data($att);
 
-global $USER;
-$att->log('report viewed', null, $USER->firstname.' '.$USER->lastname);
+add_to_log($course->id, 'attendance', 'report viewed', '/mod/attendance/report.php?id='.$id, '', $cm->id);
 
 // Output starts here.
 
