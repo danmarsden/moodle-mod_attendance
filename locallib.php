@@ -795,10 +795,21 @@ class attendance {
         }
 
         $info_array = array();
+        $maxlog = 10; // Only log first 10 sessions and last session in the log info. as we can only store 255 chars.
+        $i = 0;
         foreach ($sessions as $sess) {
-            $info_array[] = construct_session_full_date_time($sess->sessdate, $sess->duration);
+            if ($i > $maxlog) {
+                $lastsession = end($sessions);
+                $info_array[] = '...';
+                $info_array[] = construct_session_full_date_time($lastsession->sessdate, $lastsession->duration);
+                break;
+            } else {
+                $info_array[] = construct_session_full_date_time($sess->sessdate, $sess->duration);
+            }
+            $i++;
         }
-        add_to_log($this->course->id, 'attendance', 'sessions added', $this->url_manage(), implode(',', $info_array), $this->cm->id);
+        add_to_log($this->course->id, 'attendance', 'sessions added', $this->url_manage(),
+            implode(',', $info_array), $this->cm->id);
     }
 
     public function update_session_from_form_data($formdata, $sessionid) {
