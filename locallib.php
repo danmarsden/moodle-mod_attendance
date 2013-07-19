@@ -795,7 +795,7 @@ class attendance {
         }
 
         $info_array = array();
-        $maxlog = 10; // Only log first 10 sessions and last session in the log info. as we can only store 255 chars.
+        $maxlog = 7; // Only log first 10 sessions and last session in the log info. as we can only store 255 chars.
         $i = 0;
         foreach ($sessions as $sess) {
             if ($i > $maxlog) {
