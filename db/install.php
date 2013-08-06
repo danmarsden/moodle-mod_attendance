@@ -38,7 +38,9 @@ function xmldb_attendance_install() {
         $rec->grade = $v;
         $rec->visible = 1;
         $rec->deleted = 0;
-        $result = $result && $DB->insert_record('attendance_statuses', $rec);
+        if (!$DB->record_exists('attendance_statuses', array('attendanceid' => 0, 'acronym' => $rec->acronym))) {
+            $result = $result && $DB->insert_record('attendance_statuses', $rec);
+        }
     }
 
     return $result;
