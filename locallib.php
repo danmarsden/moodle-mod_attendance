@@ -1396,7 +1396,7 @@ function attforblock_upgrade() {
     $DB->update_record('modules', $module);
 
     // Clear cache for courses with attendances.
-    $attendances = $DB->get_recordset('attendance', array(), '', 'courseid');
+    $attendances = $DB->get_recordset('attendance', array(), '', 'course');
     foreach ($attendances as $attendance) {
         rebuild_course_cache($attendance->course, true);
     }
