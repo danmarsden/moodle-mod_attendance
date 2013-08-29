@@ -23,7 +23,7 @@
  */
 
 $module->version  = 2013082900;
-$module->requires = 2012120300;
+$module->requires = 2013040500;
 $module->release = '2.5.1';
 $module->maturity  = MATURITY_STABLE;
 $module->cron     = 0;
