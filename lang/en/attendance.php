@@ -208,3 +208,11 @@ $string['viewmode'] = 'View mode';
 $string['week'] = 'week(s)';
 $string['weeks'] = 'Weeks';
 $string['youcantdo'] = 'You can\'t do anything';
+// New strings.
+$string['studentscanmark'] = 'Allow students to record own attendance';
+$string['studentscanmark_help'] = 'If checked students will be able to change their own attendance status for the session.';
+$string['set_by_student'] = 'Self-recorded';
+$string['attendance_already_submitted'] = 'You may not self register attendance that has already been set.';
+$string['lowgrade'] = 'Low grade';
+$string['submitattendance'] = 'Submit attendance';
+$string['attendancenotset'] = 'You must set your attendance';

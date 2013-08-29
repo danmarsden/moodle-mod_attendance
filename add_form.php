@@ -103,6 +103,10 @@ class mod_attendance_add_form extends moodleform {
         $mform->addElement('checkbox', 'addmultiply', '', get_string('createmultiplesessions', 'attendance'));
         $mform->addHelpButton('addmultiply', 'createmultiplesessions', 'attendance');
 
+        // Studetns can mark own attendance.
+        $mform->addElement('checkbox', 'studentscanmark', '', get_string('studentscanmark','attforblock'));
+        $mform->addHelpButton('studentscanmark', 'studentscanmark', 'attforblock');
+
         $mform->addElement('date_time_selector', 'sessiondate', get_string('sessiondate', 'attendance'));
 
         for ($i=0; $i<=23; $i++) {

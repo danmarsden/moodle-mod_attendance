@@ -63,7 +63,7 @@ $PAGE->navbar->add(get_string('attendancereport', 'attendance'));
 
 $output = $PAGE->get_renderer('mod_attendance');
 
-$userid = isset($pageparams->studentid) ? $pageparams->studentid : $USER->id;
+$userid = (isset($pageparams->studentid) && ($att->perm->can_manage() || $att->perm->can_take() || $att->perm->can_change())) ? $pageparams->studentid : $USER->id;
 $userdata = new attendance_user_data($att, $userid);
 
 echo $output->header();

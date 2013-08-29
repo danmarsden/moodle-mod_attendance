@@ -32,7 +32,17 @@ function xmldb_attendance_upgrade($oldversion=0) {
     global $CFG, $THEME, $DB;
     $dbman = $DB->get_manager(); // Loads ddl manager and xmldb classes.
 
-    $result = true;
+    if ($oldversion < 2013082901) {
+        $table = new xmldb_table('attendance_sessions');
+
+        $field = new xmldb_field('studentscanmark');
+        $field->set_attributes(XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        
+        upgrade_mod_savepoint(true, 2013082901, 'attendance');
+    }
 
     // UPGRADES from attforblock are only supported for sites that are running attforblock version 2012120700.
     return $result;
