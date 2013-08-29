@@ -123,6 +123,11 @@ $string['includenottaken'] = 'Include not taken sessions';
 $string['indetail'] = 'In detail...';
 $string['jumpto'] = 'Jump to';
 $string['modulename'] = 'Attendance';
+$string['modulename_help'] = 'The attendance activity module enables a teacher to take attendance during class and students to view their own attendance record.
+
+The teacher can create multiple sessions and can mark the attendance status as "Present", "Absent", "Late", or "Excused" or modify the statuses to suit their needs.
+
+Reports are available for the entire class or individual students.';
 $string['modulenameplural'] = 'Attendances';
 $string['months'] = 'Months';
 $string['myvariables'] = 'My Variables';
