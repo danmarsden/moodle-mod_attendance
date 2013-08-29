@@ -173,6 +173,9 @@ class mod_attendance_renderer extends plugin_renderer_base {
     protected function render_view_controls(attendance_filter_controls $fcontrols) {
         $views[ATT_VIEW_ALL] = get_string('all', 'attendance');
         $views[ATT_VIEW_ALLPAST] = get_string('allpast', 'attendance');
+        if ($fcontrols->reportcontrol) {
+            $views[ATT_VIEW_NOTPRESENT] = get_string('lowgrade', 'attforblock');
+        }
         $views[ATT_VIEW_MONTHS] = get_string('months', 'attendance');
         $views[ATT_VIEW_WEEKS] = get_string('weeks', 'attendance');
         $views[ATT_VIEW_DAYS] = get_string('days', 'attendance');
@@ -734,8 +737,17 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 $cell->colspan = 2;
                 $row->cells[] = $cell;
             } else {
-                $row->cells[] = '?';
-                $row->cells[] = '';
+                if (!empty($sess->studentscanmark)) { // Student can mark their own attendance.
+                    // URL to the page that lets the student modify their attendance.
+                    $url = new moodle_url('/mod/attforblock/attendance.php',
+                            array('sessid' => $sess->id, 'sesskey' => sesskey()));
+                    $cell = new html_table_cell(html_writer::link($url, get_string('submitattendance', 'attforblock')));
+                    $cell->colspan = 2;
+                    $row->cells[] = $cell;
+                } else { // Student cannot mark their own attendace.
+                    $row->cells[] = '?';
+                    $row->cells[] = '';
+                }
             }
 
             $table->data[] = $row;
@@ -751,6 +763,14 @@ class mod_attendance_renderer extends plugin_renderer_base {
     }
 
     protected function render_attendance_report_data(attendance_report_data $reportdata) {
+        global $PAGE;
+
+        // Initilise Javascript used to (un)check all checkboxes.
+        $this->page->requires->js_init_call('M.mod_attforblock.init_manage');
+
+        // Check if the user should be able to bulk send messages to other users on the course.
+        $bulkmessagecapability = has_capability('moodle/course:bulkmessaging', $PAGE->context);
+
         $table = new html_table();
 
         $table->attributes['class'] = 'generaltable attwidth';
@@ -792,6 +812,14 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $table->align[] = 'center';
             $table->size[] = '1px';
         }
+
+        if ($bulkmessagecapability) { // Display the table header for bulk messaging.
+            // The checkbox must have an id of cb_selector so that the JavaScript will pick it up.
+            $table->head[] = html_writer::checkbox('cb_selector', 0, false, '', array('id' => 'cb_selector'));
+            $table->align[] = 'center';
+            $table->size[] = '1px';
+        }
+
         
         if ($reportdata->sessionslog) {
             $table->head[] = get_string('remarks', 'attendance');
@@ -820,6 +848,28 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 $row->cells[] = $reportdata->grades[$user->id].' / '.$reportdata->maxgrades[$user->id];
             }
 
+            if ($bulkmessagecapability) { // Create the checkbox for bulk messaging.
+                $row->cells[] = html_writer::checkbox('user'.$user->id, 'on', false);
+            }
+
+            $table->data[] = $row;
+        }
+
+        if ($bulkmessagecapability) { // Require that the user can bulk message users.
+            // Display check boxes that will allow the user to send a message to the students that have been checked.
+            $output = html_writer::empty_tag('input', array('name' => 'sesskey', 'type' => 'hidden', 'value' => sesskey()));
+            $output .= html_writer::empty_tag('input', array('name' => 'formaction', 'type' => 'hidden', 'value' => 'messageselect.php'));
+            $output .= html_writer::empty_tag('input', array('name' => 'id', 'type' => 'hidden', 'value' => $GLOBALS['COURSE']->id));
+            $output .= html_writer::empty_tag('input', array('name' => 'returnto', 'type' => 'hidden', 'value' => s(me())));
+            $output .= html_writer::table($table);
+            $output .= html_writer::tag('div',
+                    html_writer::empty_tag('input', array('type' => 'submit', 'value' => get_string('messageselectadd'))),
+                    array('class' => 'buttons'));
+            $url = new moodle_url('/user/action_redir.php');
+            return html_writer::tag('form', $output, array('action' => $url->out(), 'method' => 'post'));
+        } else {
+            return html_writer::table($table);
+        }
             if ($reportdata->sessionslog) {
                 if (isset($sess) && isset($reportdata->sessionslog[$user->id][$sess->id]->remarks)) {
                     $row->cells[] = $reportdata->sessionslog[$user->id][$sess->id]->remarks;
