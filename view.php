@@ -63,8 +63,9 @@ $PAGE->navbar->add(get_string('attendancereport', 'attendance'));
 
 $output = $PAGE->get_renderer('mod_attendance');
 
-if (isset($pageparams->studentid) && has_capability('mod/attendance:viewreports', $PAGE->context)) {
+if (isset($pageparams->studentid) && $USER->id != $pageparams->studentid) {
     // Only users with proper permissions should be able to see any user's individual report.
+    require_capability('mod/attendance:viewreports', $PAGE->context);
     $userid = $pageparams->studentid;
 } else {
     // A valid request to see another users report has not been sent, show the user's own.
