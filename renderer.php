@@ -57,11 +57,13 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $filtertable = new html_table();
         $filtertable->attributes['class'] = ' ';
         $filtertable->width = '100%';
-        $filtertable->align = array('left', 'center', 'right');
+        $filtertable->align = array('left', 'center', 'right', 'right');
 
         $filtertable->data[0][] = $this->render_sess_group_selector($fcontrols);
 
         $filtertable->data[0][] = $this->render_curdate_controls($fcontrols);
+
+        $filtertable->data[0][] = $this->render_paging_controls($fcontrols);
 
         $filtertable->data[0][] = $this->render_view_controls($fcontrols);
 
@@ -89,6 +91,37 @@ class mod_attendance_renderer extends plugin_renderer_base {
         }
 
         return '';
+    }
+
+    protected function render_paging_controls(attendance_filter_controls $fcontrols) {
+        global $CFG;
+
+        $paging_controls = '';
+
+        $group = 0;
+        if (!empty($fcontrols->pageparams->group)) {
+            $group = $fcontrols->pageparams->group;
+        }
+
+        $totalusers = count_enrolled_users(get_context_instance(CONTEXT_MODULE, $fcontrols->cm->id), 'mod/attendance:canbelisted', $group);
+        $usersperpage = $fcontrols->pageparams->perpage;
+        if (empty($fcontrols->pageparams->page) || !$fcontrols->pageparams->page || !$totalusers || !$usersperpage) {
+            return $paging_controls;
+        }
+
+        $numberofpages = ceil($totalusers / $usersperpage);
+
+        if ($fcontrols->pageparams->page > 1) {
+            $paging_controls .= html_writer::link($fcontrols->url(array('curdate' => $fcontrols->nextcur, 'page' => $fcontrols->pageparams->page - 1)),
+                                                                         $this->output->larrow());
+        }
+        $paging_controls .= html_writer::tag('span', "Page {$fcontrols->pageparams->page} of $numberofpages", array('class' => 'attbtn'));
+        if ($fcontrols->pageparams->page < $numberofpages) {
+            $paging_controls .= html_writer::link($fcontrols->url(array('curdate' => $fcontrols->nextcur, 'page' => $fcontrols->pageparams->page + 1)),
+                                                                         $this->output->rarrow());
+        }
+
+        return $paging_controls ;
     }
 
     protected function render_curdate_controls(attendance_filter_controls $fcontrols) {
@@ -280,7 +313,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         } else {
             $table = $this->render_attendance_take_grid($takedata);
         }
-        $table .= html_writer::input_hidden_params($takedata->url(array('sesskey' => sesskey())));
+        $table .= html_writer::input_hidden_params($takedata->url(array('sesskey' => sesskey(), 'page' => $takedata->pageparams->page)));
         $params = array(
                 'type'  => 'submit',
                 'value' => get_string('save', 'attendance'));
@@ -316,6 +349,31 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
     private function construct_take_controls(attendance_take_data $takedata) {
         $controls = '';
+
+        $group = 0;
+        if ($takedata->pageparams->grouptype != attendance::SESSION_COMMON) {
+            $group = $takedata->pageparams->grouptype;
+        } else {
+            if ($takedata->pageparams->group) {
+                $group = $takedata->pageparams->group;
+            }
+        }
+
+        $totalusers = count_enrolled_users(get_context_instance(CONTEXT_MODULE, $takedata->cm->id), 'mod/attendance:canbelisted', $group);
+        $usersperpage = $takedata->pageparams->perpage;
+        if (!empty($takedata->pageparams->page) && $takedata->pageparams->page && $totalusers && $usersperpage) {
+            $controls .= html_writer::empty_tag('br');
+            $numberofpages = ceil($totalusers / $usersperpage);
+
+            if ($takedata->pageparams->page > 1) {
+                $controls .= html_writer::link($takedata->url(array('page' => $takedata->pageparams->page - 1)), $this->output->larrow());
+            }
+            $controls .= html_writer::tag('span', "Page {$takedata->pageparams->page} of $numberofpages", array('class' => 'attbtn'));
+            if ($takedata->pageparams->page < $numberofpages) {
+                $controls .= html_writer::link($takedata->url(array('page' => $takedata->pageparams->page + 1)), $this->output->rarrow());
+            }
+        }
+
         if ($takedata->pageparams->grouptype == attendance::SESSION_COMMON and
                 ($takedata->groupmode == VISIBLEGROUPS or
                 ($takedata->groupmode and $takedata->perm->can_access_all_groups()))) {

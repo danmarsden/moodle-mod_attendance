@@ -265,9 +265,9 @@ class attendance_take_data implements renderable {
 
     public function  __construct(attendance $att) {
         if ($att->pageparams->grouptype) {
-            $this->users = $att->get_users($att->pageparams->grouptype);
+            $this->users = $att->get_users($att->pageparams->grouptype, $att->pageparams->page);
         } else {
-            $this->users = $att->get_users($att->pageparams->group);
+            $this->users = $att->get_users($att->pageparams->group, $att->pageparams->page);
         }
 
         $this->pageparams = $att->pageparams;
@@ -458,7 +458,7 @@ class attendance_report_data implements renderable {
         $this->perm = $att->perm;
         $this->pageparams = $att->pageparams;
 
-        $this->users = $att->get_users($att->pageparams->group);
+        $this->users = $att->get_users($att->pageparams->group, $att->pageparams->page);
 
         $this->groups = groups_get_all_groups($att->course->id);
 
