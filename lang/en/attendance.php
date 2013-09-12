@@ -153,6 +153,7 @@ $string['pluginname'] = 'Attendance';
 $string['pluginadministration'] = 'Attendance administration';
 $string['remarks'] = 'Remarks';
 $string['report'] = 'Report';
+$string['required'] = 'Required*';
 $string['resetdescription'] = 'Remember that deleting attendance data will erase information from database. You can just hide older sessions having changed start date of course!';
 $string['resetstatuses'] = 'Reset statuses to default';
 $string['restoredefaults'] = 'Restore defaults';
