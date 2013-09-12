@@ -121,6 +121,7 @@ $string['identifyby'] = 'Identify student by';
 $string['includeall'] = 'Select all sessions';
 $string['includenottaken'] = 'Include not taken sessions';
 $string['indetail'] = 'In detail...';
+$string['invalidsessionenddate'] = 'The session end date can not be earlier than the session start date';
 $string['jumpto'] = 'Jump to';
 $string['modulename'] = 'Attendance';
 $string['modulename_help'] = 'The attendance activity module enables a teacher to take attendance during class and students to view their own attendance record.
@@ -130,6 +131,7 @@ The teacher can create multiple sessions and can mark the attendance status as "
 Reports are available for the entire class or individual students.';
 $string['modulenameplural'] = 'Attendances';
 $string['months'] = 'Months';
+$string['moreattendance'] = 'Attendance has been successfully taken for this page';
 $string['myvariables'] = 'My Variables';
 $string['newdate'] = 'New date';
 $string['newduration'] = 'New duration';
@@ -152,6 +154,7 @@ $string['pluginname'] = 'Attendance';
 $string['pluginadministration'] = 'Attendance administration';
 $string['remarks'] = 'Remarks';
 $string['report'] = 'Report';
+$string['required'] = 'Required*';
 $string['resetdescription'] = 'Remember that deleting attendance data will erase information from database. You can just hide older sessions having changed start date of course!';
 $string['resetstatuses'] = 'Reset statuses to default';
 $string['restoredefaults'] = 'Restore defaults';

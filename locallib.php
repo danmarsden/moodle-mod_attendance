@@ -887,13 +887,33 @@ class attendance {
         $url = $this->url_take($params);
         add_to_log($this->course->id, 'attendance', 'taken', $url, '', $this->cm->id);
 
+        $group = 0;
+        if ($this->pageparams->grouptype != attendance::SESSION_COMMON) {
+            $group = $this->pageparams->grouptype;
+        } else {
+            if ($this->pageparams->group) {
+                $group = $this->pageparams->group;
+            }
+        }
+
+        $totalusers = count_enrolled_users(get_context_instance(CONTEXT_MODULE, $this->cm->id), 'mod/attendance:canbelisted', $group);
+        $usersperpage = $this->pageparams->perpage;
+
+        if (!empty($this->pageparams->page) && $this->pageparams->page && $totalusers && $usersperpage) {
+            $numberofpages = ceil($totalusers / $usersperpage);
+            if ($this->pageparams->page < $numberofpages) {
+                $params['page'] = $this->pageparams->page + 1;
+                redirect($this->url_take($params), get_string('moreattendance', 'attendance'));
+            }
+        }
+
         redirect($this->url_manage(), get_string('attendancesuccess', 'attendance'));
     }
 
     /**
      * MDL-27591 made this method obsolete.
      */
-    public function get_users($groupid = 0) {
+    public function get_users($groupid = 0, $page = 1) {
         global $DB;
 
         // Fields we need from the user table.
@@ -905,7 +925,14 @@ class attendance {
             $orderby = "u.lastname ASC, u.firstname ASC";
         }
 
-        $users = get_enrolled_users($this->context, 'mod/attendance:canbelisted', $groupid, $userfields, $orderby);
+        if ($page) {
+            $totalusers = count_enrolled_users($this->context, 'mod/attendance:canbelisted', $groupid);
+            $usersperpage = $this->pageparams->perpage;
+            $startusers = ($page - 1) * $usersperpage;
+            $users = get_enrolled_users($this->context, 'mod/attendance:canbelisted', $groupid, $userfields, $orderby, $startusers, $usersperpage);
+        } else {
+            $users = get_enrolled_users($this->context, 'mod/attendance:canbelisted', $groupid, $userfields, $orderby);
+        }
 
         // Add a flag to each user indicating whether their enrolment is active.
         if (!empty($users)) {
