@@ -158,6 +158,10 @@ class mod_attendance_add_form extends moodleform {
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
 
+        if ($data['sessiondate'] != 0 && $data['sessionenddate'] != 0 && $data['sessionenddate'] < $data['sessiondate']) {
+            $errors['sessionenddate'] = get_string('invalidsessionenddate', 'attendance');
+        }
+
         if ($data['sessiontype'] == attendance::SESSION_GROUP and empty($data['groups'])) {
             $errors['groups'] = get_string('errorgroupsnotselected', 'attendance');
         }

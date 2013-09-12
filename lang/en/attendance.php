@@ -121,6 +121,7 @@ $string['identifyby'] = 'Identify student by';
 $string['includeall'] = 'Select all sessions';
 $string['includenottaken'] = 'Include not taken sessions';
 $string['indetail'] = 'In detail...';
+$string['invalidsessionenddate'] = 'The session end date can not be earlier than the session start date';
 $string['jumpto'] = 'Jump to';
 $string['modulename'] = 'Attendance';
 $string['modulename_help'] = 'The attendance activity module enables a teacher to take attendance during class and students to view their own attendance record.
