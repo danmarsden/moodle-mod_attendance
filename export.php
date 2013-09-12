@@ -55,6 +55,7 @@ if ($mform->is_submitted()) {
 
     $pageparams = new att_page_with_filter_controls();
     $pageparams->init($cm);
+    $pageparams->page = 0;
     $pageparams->group = $formdata->group;
     $pageparams->set_current_sesstype($formdata->group ? $formdata->group : att_page_with_filter_controls::SESSTYPE_ALL);
     if (isset($formdata->includeallsessions)) {

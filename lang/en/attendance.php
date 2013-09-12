@@ -130,6 +130,7 @@ The teacher can create multiple sessions and can mark the attendance status as "
 Reports are available for the entire class or individual students.';
 $string['modulenameplural'] = 'Attendances';
 $string['months'] = 'Months';
+$string['moreattendance'] = 'Attendance has been successfully taken for this page';
 $string['myvariables'] = 'My Variables';
 $string['newdate'] = 'New date';
 $string['newduration'] = 'New duration';
