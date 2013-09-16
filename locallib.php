@@ -1128,32 +1128,24 @@ class attendance {
 
         // All taked sessions (including previous groups).
 
-        $groups = array_keys(groups_get_all_groups($this->course->id, $userid));
-        $groups[] = 0;
-        list($gsql, $gparams) = $DB->get_in_or_equal($groups, SQL_PARAMS_NAMED, 'gid0');
-
         if ($this->pageparams->startdate && $this->pageparams->enddate) {
             $where = "ats.attendanceid = :aid AND ats.sessdate >= :csdate AND
                       ats.sessdate >= :sdate AND ats.sessdate < :edate";
-            $where2 = "ats.attendanceid = :aid2 AND ats.sessdate >= :csdate2 AND
-                      ats.sessdate >= :sdate2 AND ats.sessdate < :edate2 AND ats.groupid $gsql";
         } else {
             $where = "ats.attendanceid = :aid AND ats.sessdate >= :csdate";
-            $where2 = "ats.attendanceid = :aid2 AND ats.sessdate >= :csdate2 AND ats.groupid $gsql";
         }
 
-        $sql = "SELECT ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, al.statusid, al.remarks
+        // We need to add this concatination so that moodle will use it as the array index that is a string.
+        // If the array's index is a number it will not merge entries.
+        // It would be better as a UNION query butunfortunatly MS SQL does not seem to support doing a DISTINCT on a the description field.
+        $id = $DB->sql_concat(':value', 'ats.id');
+
+        $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, al.statusid, al.remarks
                   FROM {attendance_sessions} ats
-                RIGHT JOIN {attendance_log} al
+            RIGHT JOIN {attendance_log} al
                     ON ats.id = al.sessionid AND al.studentid = :uid
                  WHERE $where
-            UNION
-                SELECT ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, al.statusid, al.remarks
-                  FROM {attendance_sessions} ats
-                LEFT JOIN {attendance_log} al
-                    ON ats.id = al.sessionid AND al.studentid = :uid2
-                 WHERE $where2
-             ORDER BY sessdate ASC";
+              ORDER BY ats.sessdate ASC";
 
         $params = array(
                 'uid'       => $userid,
@@ -1161,13 +1153,31 @@ class attendance {
                 'csdate'    => $this->course->startdate,
                 'sdate'     => $this->pageparams->startdate,
                 'edate'     => $this->pageparams->enddate,
-                'uid2'       => $userid,
-                'aid2'       => $this->id,
-                'csdate2'    => $this->course->startdate,
-                'sdate2'     => $this->pageparams->startdate,
-                'edate2'     => $this->pageparams->enddate);
-        $params = array_merge($params, $gparams);
+                'value'     => 'c');
         $sessions = $DB->get_records_sql($sql, $params);
+
+        // All sessions for current groups.
+
+        $groups = array_keys(groups_get_all_groups($this->course->id, $userid));
+        $groups[] = 0;
+        list($gsql, $gparams) = $DB->get_in_or_equal($groups, SQL_PARAMS_NAMED, 'gid0');
+
+        if ($this->pageparams->startdate && $this->pageparams->enddate) {
+            $where = "ats.attendanceid = :aid AND ats.sessdate >= :csdate AND
+                      ats.sessdate >= :sdate AND ats.sessdate < :edate AND ats.groupid $gsql";
+        } else {
+            $where = "ats.attendanceid = :aid AND ats.sessdate >= :csdate AND ats.groupid $gsql";
+        }
+
+        $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, al.statusid, al.remarks
+                  FROM {attendance_sessions} ats
+             LEFT JOIN {attendance_log} al
+                    ON ats.id = al.sessionid AND al.studentid = :uid
+                 WHERE $where
+              ORDER BY ats.sessdate ASC";
+
+        $params = array_merge($params, $gparams);
+        $sessions = array_merge($sessions, $DB->get_records_sql($sql, $params));
 
         foreach ($sessions as $sess) {
             if (empty($sess->description)) {
