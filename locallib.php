@@ -1432,6 +1432,12 @@ function attforblock_upgrade() {
     $module->name = 'attendance';
     $DB->update_record('modules', $module);
 
+    // Now convert grade items to 'attendance'
+    $sql = "UPDATE {grade_items}
+            SET itemmodule = ?
+            WHERE itemmodule = ?";
+    $DB->execute($sql, array('attendance', 'attforblock'));
+
     // Clear cache for courses with attendances.
     $attendances = $DB->get_recordset('attendance', array(), '', 'course');
     foreach ($attendances as $attendance) {
