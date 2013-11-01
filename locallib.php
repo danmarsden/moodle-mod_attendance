@@ -329,9 +329,8 @@ class att_page_with_filter_controls {
             if ($groupmode == VISIBLEGROUPS or has_capability('moodle/site:accessallgroups', $PAGE->context)) {
                 $this->sessgroupslist[self::SESSTYPE_ALL] = get_string('all', 'attendance');
             }
-            if ($groupmode == VISIBLEGROUPS) {
-                $this->sessgroupslist[self::SESSTYPE_COMMON] = get_string('commonsessions', 'attendance');
-            }
+            // Show Common groups always
+            $this->sessgroupslist[self::SESSTYPE_COMMON] = get_string('commonsessions', 'attendance');
             foreach ($allowedgroups as $group) {
                 $this->sessgroupslist[$group->id] = format_string($group->name);
             }
