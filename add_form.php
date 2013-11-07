@@ -78,9 +78,9 @@ class mod_attendance_add_form extends moodleform {
         }
         if ($groupmode == SEPARATEGROUPS or $groupmode == VISIBLEGROUPS) {
             if ($groupmode == SEPARATEGROUPS and !has_capability('moodle/site:accessallgroups', $modcontext)) {
-                $groups = groups_get_all_groups ($course->id, $USER->id);
+                $groups = groups_get_all_groups ($course->id, $USER->id, $cm->groupingid);
             } else {
-                $groups = groups_get_all_groups($course->id);
+                $groups = groups_get_all_groups($course->id, 0, $cm->groupingid);
             }
             if ($groups) {
                 $selectgroups = array();

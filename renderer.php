@@ -348,6 +348,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
     }
 
     private function construct_take_controls(attendance_take_data $takedata) {
+        GLOBAL $CFG;
+        
         $controls = '';
 
         $group = 0;
@@ -359,7 +361,20 @@ class mod_attendance_renderer extends plugin_renderer_base {
             }
         }
 
-        $totalusers = count_enrolled_users(get_context_instance(CONTEXT_MODULE, $takedata->cm->id), 'mod/attendance:canbelisted', $group);
+        if (!empty($CFG->enablegroupmembersonly) and $takedata->cm->groupmembersonly) {
+            if ($group == 0) {
+                $groups = array_keys(groups_get_all_groups($takedata->cm->course, 0, $takedata->cm->groupingid, 'g.id'));
+            } else {
+                $groups = $group;
+            }
+            $users = get_users_by_capability(get_context_instance(CONTEXT_MODULE, $takedata->cm->id), 'mod/attendance:canbelisted',
+                            'u.id, u.firstname, u.lastname, u.email',
+                            '', '', '', $groups,
+                            '', false, true);
+            $totalusers = count($users);
+        } else {
+            $totalusers = count_enrolled_users(get_context_instance(CONTEXT_MODULE, $takedata->cm->id), 'mod/attendance:canbelisted', $group);
+        }
         $usersperpage = $takedata->pageparams->perpage;
         if (!empty($takedata->pageparams->page) && $takedata->pageparams->page && $totalusers && $usersperpage) {
             $controls .= html_writer::empty_tag('br');

@@ -913,7 +913,7 @@ class attendance {
      * MDL-27591 made this method obsolete.
      */
     public function get_users($groupid = 0, $page = 1) {
-        global $DB;
+        global $DB, $CFG;
 
         // Fields we need from the user table.
         $userfields = user_picture::fields('u').',u.username';
@@ -925,12 +925,36 @@ class attendance {
         }
 
         if ($page) {
-            $totalusers = count_enrolled_users($this->context, 'mod/attendance:canbelisted', $groupid);
             $usersperpage = $this->pageparams->perpage;
-            $startusers = ($page - 1) * $usersperpage;
-            $users = get_enrolled_users($this->context, 'mod/attendance:canbelisted', $groupid, $userfields, $orderby, $startusers, $usersperpage);
+            if (!empty($CFG->enablegroupmembersonly) and $this->cm->groupmembersonly) {
+                $startusers = ($page - 1) * $usersperpage;
+                if ($groupid == 0) {
+                    $groups = array_keys(groups_get_all_groups($this->cm->course, 0, $this->cm->groupingid, 'g.id'));
+                } else {
+                    $groups = $groupid;
+                }
+                $users = get_users_by_capability($this->context, 'mod/attendance:canbelisted',
+                                $userfields.',u.id, u.firstname, u.lastname, u.email',
+                                $orderby, $startusers, $usersperpage, $groups,
+                                '', false, true);			
+            } else {
+                $startusers = ($page - 1) * $usersperpage;
+                $users = get_enrolled_users($this->context, 'mod/attendance:canbelisted', $groupid, $userfields, $orderby, $startusers, $usersperpage);            
+            }
         } else {
-            $users = get_enrolled_users($this->context, 'mod/attendance:canbelisted', $groupid, $userfields, $orderby);
+            if (!empty($CFG->enablegroupmembersonly) and $this->cm->groupmembersonly) {
+                if ($groupid == 0) {
+                    $groups = array_keys(groups_get_all_groups($this->cm->course, 0, $this->cm->groupingid, 'g.id'));
+                } else {
+                    $groups = $groupid;
+                }
+                $users = get_users_by_capability($this->context, 'mod/attendance:canbelisted',
+                                $userfields.',u.id, u.firstname, u.lastname, u.email',
+                                $orderby, '', '', $groups,
+                                '', false, true);
+            } else {
+                $users = get_enrolled_users($this->context, 'mod/attendance:canbelisted', $groupid, $userfields, $orderby);
+            }
         }
 
         // Add a flag to each user indicating whether their enrolment is active.
