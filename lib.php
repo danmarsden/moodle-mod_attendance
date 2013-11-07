@@ -35,14 +35,10 @@ function attendance_supports($feature) {
             return true;
         case FEATURE_GROUPS:
             return true;
-        // Artem Andreev: AFAIK it's not tested
-        // we need implement filtration of groups list by grouping.
         case FEATURE_GROUPINGS:
-            return false;
-        // Artem Andreev: AFAIK it's not tested
-        // harder "All courses" report.
+            return true;
         case FEATURE_GROUPMEMBERSONLY:
-            return false;
+            return true;
         case FEATURE_MOD_INTRO:
             return false;
         case FEATURE_BACKUP_MOODLE2:
