@@ -22,7 +22,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$module->version  = 2013070404;
+$module->version  = 2013070405;
 $module->requires = 2012062504;
 $module->release = '2.4.3';
 $module->maturity  = MATURITY_STABLE;
