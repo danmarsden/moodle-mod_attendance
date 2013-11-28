@@ -34,6 +34,44 @@ function xmldb_attendance_upgrade($oldversion=0) {
 
     $result = true;
 
-    // UPGRADES from attforblock are only supported for sites that are running attforblock version 2012120700.
+    if ($oldversion < 2013082902) {
+        // Replace values that reference old module "attforblock" to "attendance".
+        $sql = "UPDATE {grade_items}
+                   SET itemmodule = 'attendance'
+                 WHERE itemmodule = 'attforblock'";
+
+        $DB->execute($sql);
+
+        $sql = "UPDATE {grade_items_history}
+                   SET itemmodule = 'attendance'
+                 WHERE itemmodule = 'attforblock'";
+
+        $DB->execute($sql);
+
+        /*
+         * The user's custom capabilities need to be preserved due to the module renaming.
+         * Capabilities with a modifierid = 0 value are installed by default.
+         * Only update the user's custom capabilities where modifierid is not zero.
+         */
+        $sql = $DB->sql_like('capability', '?').' AND modifierid <> 0';
+        $rs = $DB->get_recordset_select('role_capabilities', $sql, array('%mod/attforblock%'));
+        foreach ($rs as $cap) {
+            $renamedcapability = str_replace('mod/attforblock', 'mod/attendance', $cap->capability);
+            $exists = $DB->record_exists('role_capabilities', array('roleid' => $cap->roleid, 'capability' => $renamedcapability));
+            if (!$exists) {
+                $DB->update_record('role_capabilities', array('id' => $cap->id, 'capability' => $renamedcapability));
+            }
+        }
+
+        // Delete old role capabilities.
+        $sql = $DB->sql_like('capability', '?');
+        $DB->delete_records_select('role_capabilities', $sql, array('%mod/attforblock%'));
+
+        // Delete old capabilities.
+        $DB->delete_records_select('capabilities', 'component = ?', array('mod_attforblock'));
+
+        upgrade_plugin_savepoint($result, 2013082902, 'mod', 'attendance');
+    }
+
     return $result;
 }
