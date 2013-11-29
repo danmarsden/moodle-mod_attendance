@@ -1395,6 +1395,24 @@ function attforblock_upgrade() {
     $module->name = 'attendance';
     $DB->update_record('modules', $module);
 
+    // Now convert grade items to 'attendance'
+    $sql = "UPDATE {grade_items}
+            SET itemmodule = ?
+            WHERE itemmodule = ?";
+    $DB->execute($sql, array('attendance', 'attforblock'));
+
+    $sql = "UPDATE {grade_items_history}
+               SET itemmodule = 'attendance'
+             WHERE itemmodule = 'attforblock'";
+    $DB->execute($sql);
+
+    // Now convert role capabilities to 'attendance'
+    $sql = "UPDATE {role_capabilities}
+            SET capability = REPLACE(capability, ?, ?)
+            WHERE " . $DB->sql_like('capability', '?');
+    $params = array("mod/attforblock:", "mod/attendance:", "mod/attforblock:%");
+    $DB->execute($sql, $params);
+
     // Clear cache for courses with attendances.
     $attendances = $DB->get_recordset('attendance', array(), '', 'course');
     foreach ($attendances as $attendance) {
