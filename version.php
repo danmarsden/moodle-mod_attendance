@@ -24,7 +24,7 @@
 
 $module->version  = 2013082902;
 $module->requires = 2013040500;
-$module->release = '2.5.2';
+$module->release = '2.5.3';
 $module->maturity  = MATURITY_STABLE;
 $module->cron     = 0;
 $module->component = 'mod_attendance';
