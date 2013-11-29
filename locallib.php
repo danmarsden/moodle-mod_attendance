@@ -1461,6 +1461,11 @@ function attforblock_upgrade() {
             WHERE itemmodule = ?";
     $DB->execute($sql, array('attendance', 'attforblock'));
 
+    $sql = "UPDATE {grade_items_history}
+               SET itemmodule = 'attendance'
+             WHERE itemmodule = 'attforblock'";
+    $DB->execute($sql);
+
     // Now convert role capabilities to 'attendance'
     $sql = "UPDATE {role_capabilities}
             SET capability = REPLACE(capability, ?, ?)
