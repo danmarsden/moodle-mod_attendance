@@ -1078,7 +1078,7 @@ class attendance {
             $where = "ats.attendanceid = :aid AND ats.sessdate >= :csdate";
         }
 
-        $sql = "SELECT ats.id, ats.sessdate, ats.groupid, al.statusid
+        $sql = "SELECT ats.id, ats.sessdate, ats.groupid, al.statusid, al.remarks
                   FROM {attendance_sessions} ats
                   JOIN {attendance_log} al
                     ON ats.id = al.sessionid AND al.studentid = :uid
