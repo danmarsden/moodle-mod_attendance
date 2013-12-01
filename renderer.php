@@ -103,7 +103,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $group = $fcontrols->pageparams->group;
         }
 
-        $totalusers = count_enrolled_users(get_context_instance(CONTEXT_MODULE, $fcontrols->cm->id), 'mod/attendance:canbelisted', $group);
+        $totalusers = count_enrolled_users(context_module::instance($fcontrols->cm->id), 'mod/attendance:canbelisted', $group);
         $usersperpage = $fcontrols->pageparams->perpage;
         if (empty($fcontrols->pageparams->page) || !$fcontrols->pageparams->page || !$totalusers || !$usersperpage) {
             return $paging_controls;
@@ -367,13 +367,13 @@ class mod_attendance_renderer extends plugin_renderer_base {
             } else {
                 $groups = $group;
             }
-            $users = get_users_by_capability(get_context_instance(CONTEXT_MODULE, $takedata->cm->id), 'mod/attendance:canbelisted',
+            $users = get_users_by_capability(context_module::instance($takedata->cm->id), 'mod/attendance:canbelisted',
                             'u.id, u.firstname, u.lastname, u.email',
                             '', '', '', $groups,
                             '', false, true);
             $totalusers = count($users);
         } else {
-            $totalusers = count_enrolled_users(get_context_instance(CONTEXT_MODULE, $takedata->cm->id), 'mod/attendance:canbelisted', $group);
+            $totalusers = count_enrolled_users(context_module::instance($takedata->cm->id), 'mod/attendance:canbelisted', $group);
         }
         $usersperpage = $takedata->pageparams->perpage;
         if (!empty($takedata->pageparams->page) && $takedata->pageparams->page && $totalusers && $usersperpage) {
