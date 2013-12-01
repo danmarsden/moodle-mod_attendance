@@ -689,8 +689,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
             get_string('status', 'attendance'),
             get_string('remarks', 'attendance')
         );
-        $table->align = array('', '', '', 'left', 'left', 'center', 'left');
-        $table->size = array('1px', '1px', '1px', '1px', '*', '1px', '1px');
+        $table->align = array('', '', '', 'left', 'left', 'center', 'left', 'center');
+        $table->size = array('1px', '1px', '1px', '1px', '*', '1px', '1px', '*');
 
         $i = 0;
         foreach ($userdata->sessionslog as $sess) {
@@ -773,7 +773,13 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $table->align[] = 'center';
             $table->size[] = '1px';
         }
-
+        
+        if ($reportdata->sessionslog) {
+            $table->head[] = get_string('remarks', 'attendance');
+            $table->align[] = 'center';
+            $table->size[] = '200px';
+         }
+         
         foreach ($reportdata->users as $user) {
             $row = new html_table_row();
 
@@ -795,6 +801,9 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 $row->cells[] = $reportdata->grades[$user->id].' / '.$reportdata->maxgrades[$user->id];
             }
 
+            if ($reportdata->sessionslog) {
+                $row->cells[] = $reportdata->sessionslog[$user->id][$sess->id]->remarks;
+            }    
             $table->data[] = $row;
         }
 
