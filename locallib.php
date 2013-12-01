@@ -1461,12 +1461,32 @@ function attforblock_upgrade() {
             WHERE itemmodule = ?";
     $DB->execute($sql, array('attendance', 'attforblock'));
 
-    // Now convert role capabilities to 'attendance'
-    $sql = "UPDATE {role_capabilities}
-            SET capability = REPLACE(capability, ?, ?)
-            WHERE " . $DB->sql_like('capability', '?');
-    $params = array("mod/attforblock:", "mod/attendance:", "mod/attforblock:%");
-    $DB->execute($sql, $params);
+    $sql = "UPDATE {grade_items_history}
+               SET itemmodule = 'attendance'
+             WHERE itemmodule = 'attforblock'";
+    $DB->execute($sql);
+
+    /*
+     * The user's custom capabilities need to be preserved due to the module renaming.
+     * Capabilities with a modifierid = 0 value are installed by default.
+     * Only update the user's custom capabilities where modifierid is not zero.
+    */
+    $sql = $DB->sql_like('capability', '?').' AND modifierid <> 0';
+    $rs = $DB->get_recordset_select('role_capabilities', $sql, array('%mod/attforblock%'));
+    foreach ($rs as $cap) {
+        $renamedcapability = str_replace('mod/attforblock', 'mod/attendance', $cap->capability);
+        $exists = $DB->record_exists('role_capabilities', array('roleid' => $cap->roleid, 'capability' => $renamedcapability));
+        if (!$exists) {
+            $DB->update_record('role_capabilities', array('id' => $cap->id, 'capability' => $renamedcapability));
+        }
+    }
+
+    // Delete old role capabilities.
+    $sql = $DB->sql_like('capability', '?');
+    $DB->delete_records_select('role_capabilities', $sql, array('%mod/attforblock%'));
+
+    // Delete old capabilities.
+    $DB->delete_records_select('capabilities', 'component = ?', array('mod_attforblock'));
 
     // Clear cache for courses with attendances.
     $attendances = $DB->get_recordset('attendance', array(), '', 'course');
