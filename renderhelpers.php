@@ -43,7 +43,7 @@ class user_sessions_cells_generator {
         $this->user = $user;
     }
 
-    public function get_cells() {
+    public function get_cells($remarks = false) {
         $this->init_cells();
         foreach ($this->reportdata->sessions as $sess) {
             if (array_key_exists($sess->id, $this->reportdata->sessionslog[$this->user->id])) {
@@ -52,6 +52,9 @@ class user_sessions_cells_generator {
                     $this->construct_existing_status_cell($this->reportdata->statuses[$statusid]->acronym);
                 } else {
                     $this->construct_hidden_status_cell($this->reportdata->allstatuses[$statusid]->acronym);
+                }
+                if ($remarks) {
+                    $this->construct_remarks_cell($this->reportdata->sessionslog[$this->user->id][$sess->id]->remarks);
                 }
             } else {
                 if ($this->user->enrolmentstart > $sess->sessdate) {
@@ -70,6 +73,9 @@ class user_sessions_cells_generator {
                     } else {
                         $this->construct_not_existing_for_user_session_cell('');
                     }
+                }
+                if ($remarks) {
+                    $this->construct_remarks_cell('');
                 }
             }
         }
@@ -95,6 +101,10 @@ class user_sessions_cells_generator {
     }
 
     protected function construct_not_taken_cell($text) {
+        $this->cells[] = $text;
+    }
+    
+    protected function construct_remarks_cell($text) {
         $this->cells[] = $text;
     }
 
@@ -147,6 +157,11 @@ class user_sessions_cells_html_generator extends user_sessions_cells_generator {
     }
 
     protected function construct_not_taken_cell($text) {
+        $this->close_open_cell_if_needed();
+        $this->cells[] = $text;
+    }
+    
+    protected function construct_remarks_cell($text) {
         $this->close_open_cell_if_needed();
         $this->cells[] = $text;
     }
