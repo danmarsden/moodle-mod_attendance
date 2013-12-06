@@ -153,6 +153,7 @@ $string['olddate'] = 'Old date';
 $string['period'] = 'Frequency';
 $string['pluginname'] = 'Attendance';
 $string['pluginadministration'] = 'Attendance administration';
+$string['remark'] = 'Remark for: {a}';
 $string['remarks'] = 'Remarks';
 $string['report'] = 'Report';
 $string['required'] = 'Required*';

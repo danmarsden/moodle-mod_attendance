@@ -600,7 +600,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
             }
             $params = array(
                     'type'  => 'text',
-                    'name'  => 'remarks'.$user->id);
+                    'name'  => 'remarks'.$user->id,
+                    'maxlength' => 255);
             if (array_key_exists($user->id, $takedata->sessionlog)) {
                 $params['value'] = $takedata->sessionlog[$user->id]->remarks;
             }

@@ -29,8 +29,11 @@ $id = required_param('id', PARAM_INT);
 $course = $DB->get_record('course', array('id' => $id), '*', MUST_EXIST);
 require_login($course);
 
+$PAGE->set_url('/mod/attendance/index.php', array('id' => $id));
+
 // TODO: check if this is correct behaviour - other modules list all the instances of the module in the course.
-if ($att = array_pop(get_all_instances_in_course('attendance', $course, null, true))) {
+if ($att = get_all_instances_in_course('attendance', $course, null, true)) {
+    $att = array_pop($att);
     redirect("view.php?id=$att->coursemodule");
 } else {
     print_error('notfound', 'attendance');

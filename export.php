@@ -98,6 +98,9 @@ if ($mform->is_submitted()) {
                 $text .= ' ';
                 $text .= $sess->groupid ? $reportdata->groups[$sess->groupid]->name : get_string('commonsession', 'attendance');
                 $data->tabhead[] = $text;
+                if (isset($formdata->includeremarks)) {
+                    $data->tabhead[] = get_string('remark', 'attendance', $text);
+                }
             }
         } else {
             print_error('sessionsnotfound', 'attendance', $att->url_manage());
@@ -118,7 +121,7 @@ if ($mform->is_submitted()) {
             $data->table[$i][] = $user->lastname;
             $data->table[$i][] = $user->firstname;
             $cellsgenerator = new user_sessions_cells_text_generator($reportdata, $user);
-            $data->table[$i] = array_merge($data->table[$i], $cellsgenerator->get_cells());
+            $data->table[$i] = array_merge($data->table[$i], $cellsgenerator->get_cells(isset($formdata->includeremarks)));
             if ($reportdata->gradable) {
                 $data->table[$i][] = $reportdata->grades[$user->id].' / '.$reportdata->maxgrades[$user->id];
             }
