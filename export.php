@@ -121,7 +121,7 @@ if ($mform->is_submitted()) {
             $data->table[$i][] = $user->lastname;
             $data->table[$i][] = $user->firstname;
             $cellsgenerator = new user_sessions_cells_text_generator($reportdata, $user);
-            $data->table[$i] = array_merge($data->table[$i], $cellsgenerator->get_cells($formdata->includeremarks));
+            $data->table[$i] = array_merge($data->table[$i], $cellsgenerator->get_cells(isset($formdata->includeremarks)));
             if ($reportdata->gradable) {
                 $data->table[$i][] = $reportdata->grades[$user->id].' / '.$reportdata->maxgrades[$user->id];
             }
