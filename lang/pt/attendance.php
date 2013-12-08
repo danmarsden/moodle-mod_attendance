@@ -121,6 +121,7 @@ Pode usar esta característica para esconder sessões antigas ao invés de as el
 $string['identifyby'] = 'Identificar aluno por';
 $string['includeall'] = 'Seleccionar todas as sessões';
 $string['includenottaken'] = 'Incluir sessões não registadas';
+$string['includeremarks'] = 'Incluir comentários';
 $string['indetail'] = 'Ao pormenor...';
 $string['invalidsessionenddate'] = 'A data de fim da sessão não pode ser anterior à data de início';
 $string['jumpto'] = 'Saltar para';
