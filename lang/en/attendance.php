@@ -121,6 +121,7 @@ You can use this feature to hide older sessions instead delete. Remember than on
 $string['identifyby'] = 'Identify student by';
 $string['includeall'] = 'Select all sessions';
 $string['includenottaken'] = 'Include not taken sessions';
+$string['includeremarks'] = 'Include remarks';
 $string['indetail'] = 'In detail...';
 $string['invalidsessionenddate'] = 'The session end date can not be earlier than the session start date';
 $string['jumpto'] = 'Jump to';
