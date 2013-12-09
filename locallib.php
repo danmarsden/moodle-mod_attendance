@@ -1070,7 +1070,21 @@ class attendance {
         global $DB;
 
         if (!array_key_exists($userid, $this->userstatusesstat)) {
-            $qry = "SELECT al.statusid, count(al.statusid) AS stcnt
+            if (!empty($this->cm->groupmode)) {
+                $qry = "SELECT al.statusid, count(al.statusid) AS stcnt
+                      FROM {attendance_log} al
+                      JOIN {attendance_sessions} ats ON al.sessionid = ats.id
+                      JOIN {groups_members} gm ON gm.userid = al.studentid AND gm.groupid = ats.groupid
+                     WHERE ats.attendanceid = :aid AND
+                           ats.sessdate >= :cstartdate AND
+                           al.studentid = :uid
+                  GROUP BY al.statusid";
+                $params = array(
+                    'aid'           => $this->id,
+                    'cstartdate'    => $this->course->startdate,
+                    'uid'           => $userid);
+            } else {
+                $qry = "SELECT al.statusid, count(al.statusid) AS stcnt
                       FROM {attendance_log} al
                       JOIN {attendance_sessions} ats
                         ON al.sessionid = ats.id
@@ -1078,10 +1092,11 @@ class attendance {
                            ats.sessdate >= :cstartdate AND
                            al.studentid = :uid
                   GROUP BY al.statusid";
-            $params = array(
+                $params = array(
                     'aid'           => $this->id,
                     'cstartdate'    => $this->course->startdate,
                     'uid'           => $userid);
+            }
 
             $this->userstatusesstat[$userid] = $DB->get_records_sql($qry, $params);
         }
@@ -1127,20 +1142,36 @@ class attendance {
         } else {
             $where = "ats.attendanceid = :aid AND ats.sessdate >= :csdate";
         }
+        if (!empty($this->cm->groupmode)) {
+            $sql = "SELECT ats.id, ats.sessdate, ats.groupid, al.statusid, al.remarks
+                  FROM {attendance_sessions} ats
+                  JOIN {attendance_log} al ON ats.id = al.sessionid AND al.studentid = :uid
+                  JOIN {groups_members} gm ON gm.userid = al.studentid AND gm.groupid = ats.groupid
+                 WHERE $where
+              ORDER BY ats.sessdate ASC";
 
-        $sql = "SELECT ats.id, ats.sessdate, ats.groupid, al.statusid, al.remarks
+            $params = array(
+                'uid'       => $userid,
+                'aid'       => $this->id,
+                'csdate'    => $this->course->startdate,
+                'sdate'     => $this->pageparams->startdate,
+                'edate'     => $this->pageparams->enddate);
+
+        } else {
+            $sql = "SELECT ats.id, ats.sessdate, ats.groupid, al.statusid, al.remarks
                   FROM {attendance_sessions} ats
                   JOIN {attendance_log} al
                     ON ats.id = al.sessionid AND al.studentid = :uid
                  WHERE $where
               ORDER BY ats.sessdate ASC";
 
-        $params = array(
+            $params = array(
                 'uid'       => $userid,
                 'aid'       => $this->id,
                 'csdate'    => $this->course->startdate,
                 'sdate'     => $this->pageparams->startdate,
                 'edate'     => $this->pageparams->enddate);
+        }
         $sessions = $DB->get_records_sql($sql, $params);
 
         return $sessions;
