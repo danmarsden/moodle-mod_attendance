@@ -803,8 +803,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
             }
 
             if ($reportdata->sessionslog) {
-                $row->cells[] = $reportdata->sessionslog[$user->id][$sess->id]->remarks;
-            }    
+                if (isset($reportdata->sessionslog[$user->id][$sess->id]->remarks)) {
+                    $row->cells[] = $reportdata->sessionslog[$user->id][$sess->id]->remarks;
+                } else {
+                    $row->cells[] = '';
+                }
+            }
             $table->data[] = $row;
         }
 

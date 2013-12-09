@@ -895,7 +895,7 @@ class attendance {
             }
         }
 
-        $totalusers = count_enrolled_users(get_context_instance(CONTEXT_MODULE, $this->cm->id), 'mod/attendance:canbelisted', $group);
+        $totalusers = count_enrolled_users(context_module::instance($this->cm->id), 'mod/attendance:canbelisted', $group);
         $usersperpage = $this->pageparams->perpage;
 
         if (!empty($this->pageparams->page) && $this->pageparams->page && $totalusers && $usersperpage) {
