@@ -1061,7 +1061,7 @@ class attendance {
 
     public function get_user_taken_sessions_count($userid) {
         if (!array_key_exists($userid, $this->usertakensesscount)) {
-            $this->usertakensesscount[$userid] = att_get_user_taken_sessions_count($this->id, $this->course->startdate, $userid);
+            $this->usertakensesscount[$userid] = att_get_user_taken_sessions_count($this->id, $this->course->startdate, $userid, $this->cm);
         }
         return $this->usertakensesscount[$userid];
     }
@@ -1179,7 +1179,6 @@ class attendance {
 
     public function get_user_filtered_sessions_log_extended($userid) {
         global $DB;
-
         // All taked sessions (including previous groups).
 
         if ($this->pageparams->startdate && $this->pageparams->enddate) {
@@ -1193,13 +1192,22 @@ class attendance {
         // If the array's index is a number it will not merge entries.
         // It would be better as a UNION query butunfortunatly MS SQL does not seem to support doing a DISTINCT on a the description field.
         $id = $DB->sql_concat(':value', 'ats.id');
-
-        $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, al.statusid, al.remarks
+        if (!empty($this->cm->groupmode)) {
+            $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, al.statusid, al.remarks
+                  FROM {attendance_sessions} ats
+            RIGHT JOIN {attendance_log} al
+                    ON ats.id = al.sessionid AND al.studentid = :uid
+                    JOIN {groups_members} gm ON gm.userid = al.studentid AND gm.groupid = ats.groupid
+                 WHERE $where
+              ORDER BY ats.sessdate ASC";
+        } else {
+            $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, al.statusid, al.remarks
                   FROM {attendance_sessions} ats
             RIGHT JOIN {attendance_log} al
                     ON ats.id = al.sessionid AND al.studentid = :uid
                  WHERE $where
               ORDER BY ats.sessdate ASC";
+        }
 
         $params = array(
                 'uid'       => $userid,
@@ -1339,16 +1347,25 @@ function att_get_statuses($attid, $onlyvisible=true) {
     return $statuses;
 }
 
-function att_get_user_taken_sessions_count($attid, $coursestartdate, $userid) {
+function att_get_user_taken_sessions_count($attid, $coursestartdate, $userid, $coursemodule) {
     global $DB;
-
-    $qry = "SELECT count(*) as cnt
+    if (!empty($coursemodule->groupmode)) {
+        $qry = "SELECT count(*) as cnt
+              FROM {attendance_log} al
+              JOIN {attendance_sessions} ats ON al.sessionid = ats.id
+              JOIN {groups_members} gm ON gm.userid = al.studentid AND gm.groupid = ats.groupid
+             WHERE ats.attendanceid = :aid AND
+                   ats.sessdate >= :cstartdate AND
+                   al.studentid = :uid";
+    } else {
+        $qry = "SELECT count(*) as cnt
               FROM {attendance_log} al
               JOIN {attendance_sessions} ats
                 ON al.sessionid = ats.id
              WHERE ats.attendanceid = :aid AND
                    ats.sessdate >= :cstartdate AND
                    al.studentid = :uid";
+    }
     $params = array(
             'aid'           => $attid,
             'cstartdate'    => $coursestartdate,
@@ -1357,10 +1374,20 @@ function att_get_user_taken_sessions_count($attid, $coursestartdate, $userid) {
     return $DB->count_records_sql($qry, $params);
 }
 
-function att_get_user_statuses_stat($attid, $coursestartdate, $userid) {
+function att_get_user_statuses_stat($attid, $coursestartdate, $userid, $coursemodule) {
     global $DB;
 
-    $qry = "SELECT al.statusid, count(al.statusid) AS stcnt
+    if (!empty($coursemodule->groupmode)) {
+        $qry = "SELECT al.statusid, count(al.statusid) AS stcnt
+              FROM {attendance_log} al
+              JOIN {attendance_sessions} ats ON al.sessionid = ats.id
+              JOIN {groups_members} gm ON gm.userid = al.studentid AND gm.groupid = ats.groupid
+             WHERE ats.attendanceid = :aid AND
+                   ats.sessdate >= :cstartdate AND
+                   al.studentid = :uid
+          GROUP BY al.statusid";
+    } else {
+        $qry = "SELECT al.statusid, count(al.statusid) AS stcnt
               FROM {attendance_log} al
               JOIN {attendance_sessions} ats
                 ON al.sessionid = ats.id
@@ -1368,6 +1395,7 @@ function att_get_user_statuses_stat($attid, $coursestartdate, $userid) {
                    ats.sessdate >= :cstartdate AND
                    al.studentid = :uid
           GROUP BY al.statusid";
+    }
     $params = array(
             'aid'           => $attid,
             'cstartdate'    => $coursestartdate,
@@ -1424,7 +1452,7 @@ function att_get_gradebook_maxgrade($attid) {
     return $DB->get_field('attendance', 'grade', array('id' => $attid));
 }
 
-function att_update_all_users_grades($attid, $course, $context) {
+function att_update_all_users_grades($attid, $course, $context, $coursemodule) {
     $grades = array();
 
     $userids = array_keys(get_enrolled_users($context, 'mod/attendance:canbelisted', 0, 'u.id'));
@@ -1434,8 +1462,8 @@ function att_update_all_users_grades($attid, $course, $context) {
     foreach ($userids as $userid) {
         $grade = new stdClass;
         $grade->userid = $userid;
-        $userstatusesstat = att_get_user_statuses_stat($attid, $course->startdate, $userid);
-        $usertakensesscount = att_get_user_taken_sessions_count($attid, $course->startdate, $userid);
+        $userstatusesstat = att_get_user_statuses_stat($attid, $course->startdate, $userid, $coursemodule);
+        $usertakensesscount = att_get_user_taken_sessions_count($attid, $course->startdate, $userid, $coursemodule);
         $usergrade = att_get_user_grade($userstatusesstat, $statuses);
         $usermaxgrade = att_get_user_max_grade($usertakensesscount, $statuses);
         $grade->rawgrade = att_calc_user_grade_fraction($usergrade, $usermaxgrade) * $gradebook_maxgrade;
