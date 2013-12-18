@@ -90,7 +90,8 @@ if ($mform->is_submitted()) {
         }
         $data->tabhead[] = get_string('lastname');
         $data->tabhead[] = get_string('firstname');
-        if (!empty($cm->groupmode)) {
+        $groupmode = groups_get_activity_groupmode($cm, $course);
+        if (!empty($groupmode)) {
             $data->tabhead[] = get_string('groups');
         }
 
@@ -123,7 +124,7 @@ if ($mform->is_submitted()) {
             }
             $data->table[$i][] = $user->lastname;
             $data->table[$i][] = $user->firstname;
-            if (!empty($cm->groupmode)) {
+            if (!empty($groupmode)) {
                 $grouptext = '';
                 $groupsraw = groups_get_all_groups($course->id, $user->id, 0, 'g.name');
                 $groups = array();
