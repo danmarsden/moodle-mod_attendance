@@ -1070,7 +1070,7 @@ class attendance {
         global $DB;
 
         if (!array_key_exists($userid, $this->userstatusesstat)) {
-            if (!empty($this->groupmode)) {
+            if (!empty($this->get_group_mode())) {
                 $qry = "SELECT al.statusid, count(al.statusid) AS stcnt
                       FROM {attendance_log} al
                       JOIN {attendance_sessions} ats ON al.sessionid = ats.id
@@ -1142,7 +1142,7 @@ class attendance {
         } else {
             $where = "ats.attendanceid = :aid AND ats.sessdate >= :csdate";
         }
-        if (!empty($this->groupmode)) {
+        if (!empty($this->get_group_mode())) {
             $sql = "SELECT ats.id, ats.sessdate, ats.groupid, al.statusid, al.remarks
                   FROM {attendance_sessions} ats
                   JOIN {attendance_log} al ON ats.id = al.sessionid AND al.studentid = :uid
@@ -1192,7 +1192,7 @@ class attendance {
         // If the array's index is a number it will not merge entries.
         // It would be better as a UNION query butunfortunatly MS SQL does not seem to support doing a DISTINCT on a the description field.
         $id = $DB->sql_concat(':value', 'ats.id');
-        if (!empty($this->groupmode)) {
+        if (!empty($this->get_group_mode())) {
             $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, al.statusid, al.remarks
                   FROM {attendance_sessions} ats
             RIGHT JOIN {attendance_log} al
@@ -1378,7 +1378,7 @@ function att_get_user_taken_sessions_count($attid, $coursestartdate, $userid, $c
 function att_get_user_statuses_stat($attid, $coursestartdate, $userid, $coursemodule) {
     global $DB, $COURSE;
     $groupmode = groups_get_activity_groupmode($coursemodule, $COURSE);
-    if (!empty($coursemodule->groupmode)) {
+    if (!empty($groupmode)) {
         $qry = "SELECT al.statusid, count(al.statusid) AS stcnt
               FROM {attendance_log} al
               JOIN {attendance_sessions} ats ON al.sessionid = ats.id
