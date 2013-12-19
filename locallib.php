@@ -1267,12 +1267,13 @@ class attendance {
         global $DB;
 
         $now = time();
-        $sessions = $DB->get_records_list('attendance_sessions', 'id', $sessionsids);
+        $sessions = $DB->get_recordset_list('attendance_sessions', 'id', $sessionsids);
         foreach ($sessions as $sess) {
             $sess->duration = $duration;
             $sess->timemodified = $now;
             $DB->update_record('attendance_sessions', $sess);
         }
+        $sessions->close();
         add_to_log($this->course->id, 'attendance', 'sessions duration updated', $this->url_manage(),
             get_string('sessionsids', 'attendance').implode(', ', $sessionsids), $this->cm->id);
     }

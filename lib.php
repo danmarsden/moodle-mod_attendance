@@ -54,12 +54,13 @@ function attendance_supports($feature) {
 function att_add_default_statuses($attid) {
     global $DB;
 
-    $statuses = $DB->get_records('attendance_statuses', array('attendanceid'=> 0), 'id');
+    $statuses = $DB->get_recordset('attendance_statuses', array('attendanceid'=> 0), 'id');
     foreach ($statuses as $st) {
         $rec = $st;
         $rec->attendanceid = $attid;
         $DB->insert_record('attendance_statuses', $rec);
     }
+    $statuses->close();
 }
 
 function attendance_add_instance($attendance) {
