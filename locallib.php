@@ -1074,10 +1074,11 @@ class attendance {
                 $qry = "SELECT al.statusid, count(al.statusid) AS stcnt
                       FROM {attendance_log} al
                       JOIN {attendance_sessions} ats ON al.sessionid = ats.id
-                      JOIN {groups_members} gm ON gm.userid = al.studentid AND gm.groupid = ats.groupid
+                      LEFT JOIN {groups_members} gm ON gm.userid = al.studentid AND gm.groupid = ats.groupid
                      WHERE ats.attendanceid = :aid AND
                            ats.sessdate >= :cstartdate AND
-                           al.studentid = :uid
+                           al.studentid = :uid AND
+                           (ats.groupid = 0 or gm.id is NOT NULL)
                   GROUP BY al.statusid";
                 $params = array(
                     'aid'           => $this->id,
@@ -1146,8 +1147,8 @@ class attendance {
             $sql = "SELECT ats.id, ats.sessdate, ats.groupid, al.statusid, al.remarks
                   FROM {attendance_sessions} ats
                   JOIN {attendance_log} al ON ats.id = al.sessionid AND al.studentid = :uid
-                  JOIN {groups_members} gm ON gm.userid = al.studentid AND gm.groupid = ats.groupid
-                 WHERE $where
+                  LEFT JOIN {groups_members} gm ON gm.userid = al.studentid AND gm.groupid = ats.groupid
+                 WHERE $where AND (ats.groupid = 0 or gm.id is NOT NULL)
               ORDER BY ats.sessdate ASC";
 
             $params = array(
@@ -1197,8 +1198,8 @@ class attendance {
                   FROM {attendance_sessions} ats
             RIGHT JOIN {attendance_log} al
                     ON ats.id = al.sessionid AND al.studentid = :uid
-                    JOIN {groups_members} gm ON gm.userid = al.studentid AND gm.groupid = ats.groupid
-                 WHERE $where
+                    LEFT JOIN {groups_members} gm ON gm.userid = al.studentid AND gm.groupid = ats.groupid
+                 WHERE $where AND (ats.groupid = 0 or gm.id is NOT NULL)
               ORDER BY ats.sessdate ASC";
         } else {
             $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, al.statusid, al.remarks
@@ -1355,10 +1356,11 @@ function att_get_user_taken_sessions_count($attid, $coursestartdate, $userid, $c
         $qry = "SELECT count(*) as cnt
               FROM {attendance_log} al
               JOIN {attendance_sessions} ats ON al.sessionid = ats.id
-              JOIN {groups_members} gm ON gm.userid = al.studentid AND gm.groupid = ats.groupid
+              LEFT JOIN {groups_members} gm ON gm.userid = al.studentid AND gm.groupid = ats.groupid
              WHERE ats.attendanceid = :aid AND
                    ats.sessdate >= :cstartdate AND
-                   al.studentid = :uid";
+                   al.studentid = :uid AND
+                   (ats.groupid = 0 or gm.id is NOT NULL)";
     } else {
         $qry = "SELECT count(*) as cnt
               FROM {attendance_log} al
@@ -1383,10 +1385,11 @@ function att_get_user_statuses_stat($attid, $coursestartdate, $userid, $coursemo
         $qry = "SELECT al.statusid, count(al.statusid) AS stcnt
               FROM {attendance_log} al
               JOIN {attendance_sessions} ats ON al.sessionid = ats.id
-              JOIN {groups_members} gm ON gm.userid = al.studentid AND gm.groupid = ats.groupid
+              LEFT JOIN {groups_members} gm ON gm.userid = al.studentid AND gm.groupid = ats.groupid
              WHERE ats.attendanceid = :aid AND
                    ats.sessdate >= :cstartdate AND
-                   al.studentid = :uid
+                   al.studentid = :uid AND
+                   (ats.groupid = 0 or gm.id is NOT NULL)
           GROUP BY al.statusid";
     } else {
         $qry = "SELECT al.statusid, count(al.statusid) AS stcnt
