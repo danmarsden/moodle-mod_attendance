@@ -812,7 +812,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $table->data[] = $row;
         }
 
-        return html_writer::table($table);
+        return html_writer::table($table).html_writer::tag('div',get_string('users').': '.COUNT($reportdata->users));
     }
 
     protected function render_attendance_preferences_data(attendance_preferences_data $prefdata) {
