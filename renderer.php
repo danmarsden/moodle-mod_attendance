@@ -320,7 +320,20 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $table .= html_writer::tag('center', html_writer::empty_tag('input', $params));
         $table = html_writer::tag('form', $table, array('method' => 'post', 'action' => $takedata->url_path()));
 
-        return $controls.$table;
+        // Calculate the sum of statuses for each user
+        $sessionstats[] = array();
+        foreach ($takedata->sessionlog as $userlog) {
+            foreach($takedata->statuses as $status) {
+                if ($userlog->statusid == $status->id) $sessionstats[$status->id]++;
+            }
+        }
+
+        $statsoutput = '<br/>';
+        foreach($takedata->statuses as $status) {
+            $statsoutput .= "$status->description = ".$sessionstats[$status->id]." <br/>";
+        }
+
+        return $controls.$table.$statsoutput;
     }
 
     protected function render_attendance_take_controls(attendance_take_data $takedata) {
