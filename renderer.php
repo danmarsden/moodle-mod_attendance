@@ -812,6 +812,27 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $table->data[] = $row;
         }
 
+        // Calculate the sum of statuses for each user
+        $statrow = new html_table_row();
+        $statrow->cells[] = '';
+        $statrow->cells[] = get_string('summary');
+        foreach ($reportdata->sessions as $sess) {
+            $sessionstats = array();
+            foreach ($reportdata->users as $user) {
+                foreach($reportdata->statuses as $status) {
+                    if ($reportdata->sessionslog[$user->id][$sess->id]->statusid == $status->id) $sessionstats[$status->id]++;
+                }
+            }
+
+            $statsoutput = '<br/>';
+            foreach($reportdata->statuses as $status) {
+                $statsoutput .= "$status->description:".$sessionstats[$status->id]." <br/>";
+            }
+            $statrow->cells[] = $statsoutput;
+
+        }
+        $table->data[] = $statrow;
+        
         return html_writer::table($table);
     }
 
