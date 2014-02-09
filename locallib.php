@@ -936,10 +936,10 @@ class attendance {
                 $users = get_users_by_capability($this->context, 'mod/attendance:canbelisted',
                                 $userfields.',u.id, u.firstname, u.lastname, u.email',
                                 $orderby, $startusers, $usersperpage, $groups,
-                                '', false, true);			
+                                '', false, true);
             } else {
                 $startusers = ($page - 1) * $usersperpage;
-                $users = get_enrolled_users($this->context, 'mod/attendance:canbelisted', $groupid, $userfields, $orderby, $startusers, $usersperpage);            
+                $users = get_enrolled_users($this->context, 'mod/attendance:canbelisted', $groupid, $userfields, $orderby, $startusers, $usersperpage);
             }
         } else {
             if (!empty($CFG->enablegroupmembersonly) and $this->cm->groupmembersonly) {
@@ -962,8 +962,8 @@ class attendance {
             list($sql, $params) = $DB->get_in_or_equal(array_keys($users), SQL_PARAMS_NAMED, 'usid0');
 
             // CONTRIB-4868
-            $mintime = 'MIN(CASE WHEN (ue.timestart > :mintime) THEN ue.timestart ELSE ue.timecreated END)';
-            $maxtime = 'MAX(CASE WHEN (ue.timeend > :maxtime) THEN ue.timeend ELSE ue.timemodified END)';
+            $mintime = 'MIN(CASE WHEN (ue.timestart > :zerotime) THEN ue.timestart ELSE ue.timecreated END)';
+            $maxtime = 'MAX(ue.timeend)';
 
             // CONTRIB-3549
             $sql = "SELECT ue.userid, ue.status,
@@ -975,7 +975,7 @@ class attendance {
                            AND e.status = :estatus
                            AND e.courseid = :courseid
                   GROUP BY ue.userid, ue.status";
-            $params += array('mintime'=>0, 'maxtime'=>0, 'estatus'=>ENROL_INSTANCE_ENABLED, 'courseid'=>$this->course->id);
+            $params += array('zerotime'=>0, 'estatus'=>ENROL_INSTANCE_ENABLED, 'courseid'=>$this->course->id);
             $enrolments = $DB->get_records_sql($sql, $params);
 
             foreach ($users as $user) {
@@ -993,19 +993,25 @@ class attendance {
 
         $user = $DB->get_record('user', array('id' => $userid), '*', MUST_EXIST);
 
-        $sql = "SELECT ue.userid, ue.status, ue.timestart, ue.timeend
+        // CONTRIB-4868
+        $mintime = 'MIN(CASE WHEN (ue.timestart > :zerotime) THEN ue.timestart ELSE ue.timecreated END)';
+        $maxtime = 'MAX(ue.timeend)';
+
+        $sql = "SELECT ue.userid, ue.status,
+                       $mintime AS mintime,
+                       $maxtime AS maxtime
                   FROM {user_enrolments} ue
                   JOIN {enrol} e ON e.id = ue.enrolid
                  WHERE ue.userid = :uid
                        AND e.status = :estatus
                        AND e.courseid = :courseid
-              GROUP BY ue.userid, ue.status, ue.timestart, ue.timeend";
-        $params = array('uid' => $userid, 'estatus'=>ENROL_INSTANCE_ENABLED, 'courseid'=>$this->course->id);
-        $enrolmentsparams = $DB->get_record_sql($sql, $params);
+              GROUP BY ue.userid, ue.status";
+        $params = array('zerotime'=>0, 'uid'=>$userid, 'estatus'=>ENROL_INSTANCE_ENABLED, 'courseid'=>$this->course->id);
+        $enrolments = $DB->get_record_sql($sql, $params);
 
-        $user->enrolmentstatus = $enrolmentsparams->status;
-        $user->enrolmentstart = $enrolmentsparams->timestart;
-        $user->enrolmentend = $enrolmentsparams->timeend;
+        $user->enrolmentstatus = $enrolments->status;
+        $user->enrolmentstart = $enrolments->mintime;
+        $user->enrolmentend = $enrolments->maxtime;
 
         return $user;
     }
