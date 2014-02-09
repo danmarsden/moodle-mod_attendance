@@ -916,7 +916,7 @@ class attendance {
         global $DB, $CFG;
 
         // Fields we need from the user table.
-        $userfields = user_picture::fields('u').',u.username';
+        $userfields = user_picture::fields('u', array('username'));
 
         if (isset($this->pageparams->sort) and ($this->pageparams->sort == ATT_SORT_FIRSTNAME)) {
             $orderby = "u.firstname ASC, u.lastname ASC";
@@ -959,23 +959,29 @@ class attendance {
 
         // Add a flag to each user indicating whether their enrolment is active.
         if (!empty($users)) {
-            list($usql, $uparams) = $DB->get_in_or_equal(array_keys($users), SQL_PARAMS_NAMED, 'usid0');
+            list($sql, $params) = $DB->get_in_or_equal(array_keys($users), SQL_PARAMS_NAMED, 'usid0');
 
-            // CONTRIB-3549.
-            $sql = "SELECT ue.userid, ue.status, ue.timestart, ue.timeend
+            // CONTRIB-4868
+            $mintime = 'MIN(CASE WHEN (ue.timestart > :mintime) THEN ue.timestart ELSE ue.timecreated END)';
+            $maxtime = 'MAX(CASE WHEN (ue.timeend > :maxtime) THEN ue.timeend ELSE ue.timemodified END)';
+
+            // CONTRIB-3549
+            $sql = "SELECT ue.userid, ue.status,
+                           $mintime AS mintime,
+                           $maxtime AS maxtime
                       FROM {user_enrolments} ue
                       JOIN {enrol} e ON e.id = ue.enrolid
-                     WHERE ue.userid $usql
+                     WHERE ue.userid $sql
                            AND e.status = :estatus
                            AND e.courseid = :courseid
-                  GROUP BY ue.userid, ue.status, ue.timestart, ue.timeend";
-            $params = array_merge($uparams, array('estatus'=>ENROL_INSTANCE_ENABLED, 'courseid'=>$this->course->id));
-            $enrolmentsparams = $DB->get_records_sql($sql, $params);
+                  GROUP BY ue.userid, ue.status";
+            $params += array('mintime'=>0, 'maxtime'=>0, 'estatus'=>ENROL_INSTANCE_ENABLED, 'courseid'=>$this->course->id);
+            $enrolments = $DB->get_records_sql($sql, $params);
 
             foreach ($users as $user) {
-                $users[$user->id]->enrolmentstatus = $enrolmentsparams[$user->id]->status;
-                $users[$user->id]->enrolmentstart = $enrolmentsparams[$user->id]->timestart;
-                $users[$user->id]->enrolmentend = $enrolmentsparams[$user->id]->timeend;
+                $users[$user->id]->enrolmentstatus = $enrolments[$user->id]->status;
+                $users[$user->id]->enrolmentstart = $enrolments[$user->id]->mintime;
+                $users[$user->id]->enrolmentend = $enrolments[$user->id]->maxtime;
             }
         }
 
