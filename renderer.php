@@ -320,7 +320,20 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $table .= html_writer::tag('center', html_writer::empty_tag('input', $params));
         $table = html_writer::tag('form', $table, array('method' => 'post', 'action' => $takedata->url_path()));
 
-        return $controls.$table;
+        // Calculate the sum of statuses for each user
+        $sessionstats[] = array();
+        foreach ($takedata->sessionlog as $userlog) {
+            foreach($takedata->statuses as $status) {
+                if ($userlog->statusid == $status->id) $sessionstats[$status->id]++;
+            }
+        }
+
+        $statsoutput = '<br/>';
+        foreach($takedata->statuses as $status) {
+            $statsoutput .= "$status->description = ".$sessionstats[$status->id]." <br/>";
+        }
+
+        return $controls.$table.$statsoutput;
     }
 
     protected function render_attendance_take_controls(attendance_take_data $takedata) {
@@ -803,11 +816,36 @@ class mod_attendance_renderer extends plugin_renderer_base {
             }
 
             if ($reportdata->sessionslog) {
-                $row->cells[] = $reportdata->sessionslog[$user->id][$sess->id]->remarks;
-            }    
+                if (isset($reportdata->sessionslog[$user->id][$sess->id]->remarks)) {
+                    $row->cells[] = $reportdata->sessionslog[$user->id][$sess->id]->remarks;
+                } else {
+                    $row->cells[] = '';
+                }
+            }
             $table->data[] = $row;
         }
 
+        // Calculate the sum of statuses for each user
+        $statrow = new html_table_row();
+        $statrow->cells[] = '';
+        $statrow->cells[] = get_string('summary');
+        foreach ($reportdata->sessions as $sess) {
+            $sessionstats = array();
+            foreach ($reportdata->users as $user) {
+                foreach($reportdata->statuses as $status) {
+                    if ($reportdata->sessionslog[$user->id][$sess->id]->statusid == $status->id) $sessionstats[$status->id]++;
+                }
+            }
+
+            $statsoutput = '<br/>';
+            foreach($reportdata->statuses as $status) {
+                $statsoutput .= "$status->description:".$sessionstats[$status->id]." <br/>";
+            }
+            $statrow->cells[] = $statsoutput;
+
+        }
+        $table->data[] = $statrow;
+        
         return html_writer::table($table);
     }
 

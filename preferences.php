@@ -93,7 +93,7 @@ switch ($att->pageparams->action) {
         foreach ($acronym as $id => $v) {
             $att->update_status($id, $acronym[$id], $description[$id], $grade[$id], null);
         }
-        att_update_all_users_grades($att->id, $att->course, $att->context);
+        att_update_all_users_grades($att->id, $att->course, $att->context, $cm);
         break;
 }
 

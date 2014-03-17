@@ -54,12 +54,13 @@ function attendance_supports($feature) {
 function att_add_default_statuses($attid) {
     global $DB;
 
-    $statuses = $DB->get_records('attendance_statuses', array('attendanceid'=> 0), 'id');
+    $statuses = $DB->get_recordset('attendance_statuses', array('attendanceid'=> 0), 'id');
     foreach ($statuses as $st) {
         $rec = $st;
         $rec->attendanceid = $attid;
         $DB->insert_record('attendance_statuses', $rec);
     }
+    $statuses->close();
 }
 
 function attendance_add_instance($attendance) {
@@ -213,7 +214,6 @@ function attendance_reset_userdata($data) {
  */
 function attendance_user_outline($course, $user, $mod, $attendance) {
     global $CFG;
-
     require_once(dirname(__FILE__).'/locallib.php');
     require_once($CFG->libdir.'/gradelib.php');
 
@@ -229,9 +229,9 @@ function attendance_user_outline($course, $user, $mod, $attendance) {
     if (has_capability('mod/attendance:canbelisted', $mod->context, $user->id)) {
         $statuses = att_get_statuses($attendance->id);
         $grade = att_get_user_grade(att_get_user_statuses_stat($attendance->id, $course->startdate,
-                                                               $user->id), $statuses);
+                                                               $user->id, $mod), $statuses);
         $maxgrade = att_get_user_max_grade(att_get_user_taken_sessions_count($attendance->id, $course->startdate,
-                                                                             $user->id), $statuses);
+                                                                             $user->id, $mod), $statuses);
 
         $result->info = $grade.' / '.$maxgrade;
     }
@@ -250,7 +250,7 @@ function attendance_user_complete($course, $user, $mod, $attendance) {
     require_once($CFG->libdir.'/gradelib.php');
 
     if (has_capability('mod/attendance:canbelisted', $mod->context, $user->id)) {
-        echo construct_full_user_stat_html_table($attendance, $course, $user);
+        echo construct_full_user_stat_html_table($attendance, $course, $user, $mod);
     }
 }
 function attendance_print_recent_activity($course, $isteacher, $timestart) {

@@ -48,7 +48,7 @@ class mod_attendance_export_form extends moodleform {
 
         $mform->addElement('header', 'general', get_string('export', 'quiz'));
 
-        $groupmode=groups_get_activity_groupmode($cm);
+        $groupmode=groups_get_activity_groupmode($cm, $course);
         $groups = groups_get_activity_allowed_groups($cm, $USER->id);
         if ($groupmode == VISIBLEGROUPS or has_capability('moodle/site:accessallgroups', $modcontext)) {
             $grouplist[0] = get_string('allparticipants');

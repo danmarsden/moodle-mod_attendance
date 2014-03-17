@@ -254,17 +254,17 @@ function construct_user_data_stat($stat, $statuses, $gradable, $grade, $maxgrade
     return html_writer::table($stattable);
 }
 
-function construct_full_user_stat_html_table($attendance, $course, $user) {
+function construct_full_user_stat_html_table($attendance, $course, $user, $coursemodule) {
     global $CFG;
     $gradeable = $attendance->grade > 0;
     $statuses = att_get_statuses($attendance->id);
-    $userstatusesstat = att_get_user_statuses_stat($attendance->id, $course->startdate, $user->id);
-    $stat['completed'] = att_get_user_taken_sessions_count($attendance->id, $course->startdate, $user->id);
+    $userstatusesstat = att_get_user_statuses_stat($attendance->id, $course->startdate, $user->id, $coursemodule);
+    $stat['completed'] = att_get_user_taken_sessions_count($attendance->id, $course->startdate, $user->id, $coursemodule);
     $stat['statuses'] = $userstatusesstat;
     if ($gradeable) {
         $grade = att_get_user_grade($userstatusesstat, $statuses);
         $maxgrade = att_get_user_max_grade(att_get_user_taken_sessions_count($attendance->id, $course->startdate,
-                                                                             $user->id), $statuses);
+                                                                             $user->id, $coursemodule), $statuses);
         if (!$decimalpoints = grade_get_setting($course->id, 'decimalpoints')) {
             $decimalpoints = $CFG->grade_decimalpoints;
         }

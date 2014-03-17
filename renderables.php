@@ -385,8 +385,8 @@ class attendance_user_data implements renderable {
             $this->maxgrade = array();
             foreach ($this->coursesatts as $ca) {
                 $statuses = att_get_statuses($ca->attid);
-                $user_taken_sessions_count = att_get_user_taken_sessions_count($ca->attid, $ca->coursestartdate, $userid);
-                $user_statuses_stat = att_get_user_statuses_stat($ca->attid, $ca->coursestartdate, $userid);
+                $user_taken_sessions_count = att_get_user_taken_sessions_count($ca->attid, $ca->coursestartdate, $userid, $att->cm);
+                $user_statuses_stat = att_get_user_statuses_stat($ca->attid, $ca->coursestartdate, $userid, $att->cm);
 
                 $this->statuses[$ca->attid] = $statuses;
 
