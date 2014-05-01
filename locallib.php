@@ -1511,6 +1511,14 @@ function att_log_convert_url(moodle_url $fullurl) {
 function attforblock_upgrade() {
     global $DB, $CFG;
     $module = $DB->get_record('modules', array('name' => 'attforblock'));
+
+    // Deal with Moodle versions above 2013092001.02, where version is in config
+    $versioninmodtable = true;
+    if (!isset($module->version)) {
+        $versioninmodtable = false;
+        $module->version = get_config('mod_attforblock', 'version');
+    }
+
     if ($module->version <= '2011061800') {
         print_error("noupgradefromthisversion", 'attendance');
     }
@@ -1529,6 +1537,10 @@ function attforblock_upgrade() {
     }
     // Now convert module record.
     $module->name = 'attendance';
+    if (!$versioninmodtable) {
+        set_config('version', $module->version, 'mod_attendance');
+        unset($module->version);
+    }
     $DB->update_record('modules', $module);
 
     // Now convert grade items to 'attendance'
