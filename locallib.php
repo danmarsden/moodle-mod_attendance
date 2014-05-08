@@ -1073,13 +1073,28 @@ class attendance {
 
     public function get_user_taken_sessions_count($userid) {
         if (!array_key_exists($userid, $this->usertakensesscount)) {
-            $this->usertakensesscount[$userid] = att_get_user_taken_sessions_count($this->id, $this->course->startdate, $userid, $this->cm);
+            if ($this->pageparams->startdate && $this->pageparams->enddate) {
+                $this->usertakensesscount[$userid] = att_get_user_taken_sessions_count($this->id, $this->course->startdate, $userid, $this->cm, $this->pageparams->startdate, $this->pageparams->enddate);
+            } else {
+                $this->usertakensesscount[$userid] = att_get_user_taken_sessions_count($this->id, $this->course->startdate, $userid, $this->cm);
+            }
         }
         return $this->usertakensesscount[$userid];
     }
 
     public function get_user_statuses_stat($userid) {
         global $DB;
+        $params = array(
+            'aid'           => $this->id,
+            'cstartdate'    => $this->course->startdate,
+            'uid'           => $userid);
+
+        $period = '';
+        if (!empty($this->pageparams->startdate) && !empty($this->pageparams->enddate)) {
+            $period = ' AND ats.sessdate >= :sdate AND ats.sessdate < :edate ';
+            $params['sdate'] = $this->pageparams->startdate;
+            $params['edate'] = $this->pageparams->enddate;
+        }
 
         if (!array_key_exists($userid, $this->userstatusesstat)) {
             if ($this->get_group_mode()) {
@@ -1090,12 +1105,8 @@ class attendance {
                      WHERE ats.attendanceid = :aid AND
                            ats.sessdate >= :cstartdate AND
                            al.studentid = :uid AND
-                           (ats.groupid = 0 or gm.id is NOT NULL)
+                           (ats.groupid = 0 or gm.id is NOT NULL)".$period."
                   GROUP BY al.statusid";
-                $params = array(
-                    'aid'           => $this->id,
-                    'cstartdate'    => $this->course->startdate,
-                    'uid'           => $userid);
             } else {
                 $qry = "SELECT al.statusid, count(al.statusid) AS stcnt
                       FROM {attendance_log} al
@@ -1103,13 +1114,11 @@ class attendance {
                         ON al.sessionid = ats.id
                      WHERE ats.attendanceid = :aid AND
                            ats.sessdate >= :cstartdate AND
-                           al.studentid = :uid
+                           al.studentid = :uid".$period."
                   GROUP BY al.statusid";
-                $params = array(
-                    'aid'           => $this->id,
-                    'cstartdate'    => $this->course->startdate,
-                    'uid'           => $userid);
+
             }
+
 
             $this->userstatusesstat[$userid] = $DB->get_records_sql($qry, $params);
         }
@@ -1361,7 +1370,7 @@ function att_get_statuses($attid, $onlyvisible=true) {
     return $statuses;
 }
 
-function att_get_user_taken_sessions_count($attid, $coursestartdate, $userid, $coursemodule) {
+function att_get_user_taken_sessions_count($attid, $coursestartdate, $userid, $coursemodule, $startdate = '', $enddate = '') {
     global $DB, $COURSE;
     $groupmode = groups_get_activity_groupmode($coursemodule, $COURSE);
     if (!empty($groupmode)) {
@@ -1383,9 +1392,15 @@ function att_get_user_taken_sessions_count($attid, $coursestartdate, $userid, $c
                    al.studentid = :uid";
     }
     $params = array(
-            'aid'           => $attid,
-            'cstartdate'    => $coursestartdate,
-            'uid'           => $userid);
+        'aid'           => $attid,
+        'cstartdate'    => $coursestartdate,
+        'uid'           => $userid);
+
+    if (!empty($startdate) && !empty($enddate)) {
+        $qry .= ' AND sessdate >= :sdate AND sessdate < :edate ';
+        $params['sdate'] = $startdate;
+        $params['edate'] = $enddate;
+    }
 
     return $DB->count_records_sql($qry, $params);
 }
