@@ -216,3 +216,12 @@ $string['viewmode'] = 'View mode';
 $string['week'] = 'week(s)';
 $string['weeks'] = 'Weeks';
 $string['youcantdo'] = 'You can\'t do anything';
+
+$string['eventreportviewed'] = 'Report viewed';
+$string['eventsessionadded'] = 'Session added';
+$string['eventsessionupdated'] = 'Session updated';
+$string['eventtaken'] = 'Attendance taken';
+$string['eventsessiondeleted'] = 'Session deleted';
+$string['eventdurationupdated'] = 'Session duration updated';
+$string['eventstatusupdated'] = 'Status updated';
+$string['eventstatusadded'] = 'Status added';

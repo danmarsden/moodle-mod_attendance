@@ -60,7 +60,15 @@ $tabs = new attendance_tabs($att, attendance_tabs::TAB_REPORT);
 $filtercontrols = new attendance_filter_controls($att);
 $reportdata = new attendance_report_data($att);
 
-add_to_log($course->id, 'attendance', 'report viewed', '/mod/attendance/report.php?id='.$id, '', $cm->id);
+// Trigger a report viewed event.
+$event = \mod_attendance\event\report_viewed::create(array(
+    'objectid' => $att->id,
+    'context' => $PAGE->context,
+    'other' => array()
+));
+$event->add_record_snapshot('course_modules', $cm);
+$event->add_record_snapshot('attendance', $att);
+$event->trigger();
 
 // Output starts here.
 
