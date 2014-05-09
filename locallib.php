@@ -1091,7 +1091,7 @@ class attendance {
 
     public function get_user_taken_sessions_count($userid) {
         if (!array_key_exists($userid, $this->usertakensesscount)) {
-            if ($this->pageparams->startdate && $this->pageparams->enddate) {
+            if (!empty($this->pageparams->startdate) && !empty($this->pageparams->enddate)) {
                 $this->usertakensesscount[$userid] = att_get_user_taken_sessions_count($this->id, $this->course->startdate, $userid, $this->cm, $this->pageparams->startdate, $this->pageparams->enddate);
             } else {
                 $this->usertakensesscount[$userid] = att_get_user_taken_sessions_count($this->id, $this->course->startdate, $userid, $this->cm);
