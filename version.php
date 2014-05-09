@@ -22,12 +22,12 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$module->version  = 2014050900;
-$module->requires = 2014042900;
-$module->release = '2.7.0';
-$module->maturity  = MATURITY_STABLE;
-$module->cron     = 0;
-$module->component = 'mod_attendance';
+$plugin->version  = 2014050900;
+$plugin->requires = 2014042900;
+$plugin->release = '2.7.0';
+$plugin->maturity  = MATURITY_STABLE;
+$plugin->cron     = 0;
+$plugin->component = 'mod_attendance';
 
 // Nasty upgrade code to check if need to upgrade from attforblock.
 // TODO: remove this asap.
