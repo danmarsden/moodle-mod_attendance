@@ -807,8 +807,16 @@ class attendance {
             }
             $i++;
         }
-        add_to_log($this->course->id, 'attendance', 'sessions added', $this->url_manage(),
-            implode(',', $info_array), $this->cm->id);
+        // Trigger a report viewed event.
+        $event = \mod_attendance\event\session_added::create(array(
+            'objectid' => $this->id,
+            'context' => $this->context,
+            'other' => array('info' => implode(',', $info_array))
+        ));
+        $event->add_record_snapshot('course_modules', $this->cm);
+        $event->add_record_snapshot('attendance', $this);
+        $event->trigger();
+
     }
 
     public function update_session_from_form_data($formdata, $sessionid) {
@@ -828,9 +836,14 @@ class attendance {
         $sess->timemodified = time();
         $DB->update_record('attendance_sessions', $sess);
 
-        $url = $this->url_sessions(array('sessionid' => $sessionid, 'action' => att_sessions_page_params::ACTION_UPDATE));
         $info = construct_session_full_date_time($sess->sessdate, $sess->duration);
-        add_to_log($this->course->id, 'attendance', 'session updated', $url, $info, $this->cm->id);
+        $event = \mod_attendance\event\session_updated::create(array(
+            'objectid' => $this->id,
+            'context' => $this->context,
+            'other' => array('info' => $info, 'sessionid' => $sessionid, 'action' => att_sessions_page_params::ACTION_UPDATE)));
+        $event->add_record_snapshot('course_modules', $this->cm);
+        $event->add_record_snapshot('attendance', $this);
+        $event->trigger();
     }
 
     public function take_from_form_data($formdata) {
@@ -883,8 +896,13 @@ class attendance {
         $params = array(
                 'sessionid' => $this->pageparams->sessionid,
                 'grouptype' => $this->pageparams->grouptype);
-        $url = $this->url_take($params);
-        add_to_log($this->course->id, 'attendance', 'taken', $url, '', $this->cm->id);
+        $event = \mod_attendance\event\attendance_taken::create(array(
+            'objectid' => $this->id,
+            'context' => $this->context,
+            'other' => $params));
+        $event->add_record_snapshot('course_modules', $this->cm);
+        $event->add_record_snapshot('attendance', $this);
+        $event->trigger();
 
         $group = 0;
         if ($this->pageparams->grouptype != attendance::SESSION_COMMON) {
@@ -1281,8 +1299,13 @@ class attendance {
         list($sql, $params) = $DB->get_in_or_equal($sessionsids);
         $DB->delete_records_select('attendance_log', "sessionid $sql", $params);
         $DB->delete_records_list('attendance_sessions', 'id', $sessionsids);
-        add_to_log($this->course->id, 'attendance', 'sessions deleted', $this->url_manage(),
-            get_string('sessionsids', 'attendance').implode(', ', $sessionsids), $this->cm->id);
+        $event = \mod_attendance\event\session_deleted::create(array(
+            'objectid' => $this->id,
+            'context' => $this->context,
+            'other' => array('info' => implode(', ', $sessionsids))));
+        $event->add_record_snapshot('course_modules', $this->cm);
+        $event->add_record_snapshot('attendance', $this);
+        $event->trigger();
     }
 
     public function update_sessions_duration($sessionsids, $duration) {
@@ -1296,8 +1319,13 @@ class attendance {
             $DB->update_record('attendance_sessions', $sess);
         }
         $sessions->close();
-        add_to_log($this->course->id, 'attendance', 'sessions duration updated', $this->url_manage(),
-            get_string('sessionsids', 'attendance').implode(', ', $sessionsids), $this->cm->id);
+        $event = \mod_attendance\event\session_duration_updated::create(array(
+            'objectid' => $this->id,
+            'context' => $this->context,
+            'other' => array('info' => implode(', ', $sessionsids))));
+        $event->add_record_snapshot('course_modules', $this->cm);
+        $event->add_record_snapshot('attendance', $this);
+        $event->trigger();
     }
 
     public function remove_status($statusid) {
@@ -1318,8 +1346,13 @@ class attendance {
             $rec->grade = $grade;
             $DB->insert_record('attendance_statuses', $rec);
 
-            add_to_log($this->course->id, 'attendance', 'status added', $this->url_preferences(),
-                $acronym.': '.$description.' ('.$grade.')', $this->cm->id);
+            $event = \mod_attendance\event\status_added::create(array(
+                'objectid' => $this->id,
+                'context' => $this->context,
+                'other' => array('acronym' => $acronym, 'description' => $description, 'grade' => $grade)));
+            $event->add_record_snapshot('course_modules', $this->cm);
+            $event->add_record_snapshot('attendance', $this);
+            $event->trigger();
         } else {
             print_error('cantaddstatus', 'attendance', $this->url_preferences());
         }
@@ -1350,8 +1383,13 @@ class attendance {
         }
         $DB->update_record('attendance_statuses', $status);
 
-        add_to_log($this->course->id, 'attendance', 'status updated', $this->url_preferences(),
-            implode(' ', $updated), $this->cm->id);
+        $event = \mod_attendance\event\status_updated::create(array(
+            'objectid' => $this->id,
+            'context' => $this->context,
+            'other' => array('acronym' => $acronym, 'description' => $description, 'grade' => $grade, 'updated' => implode(' ', $updated))));
+        $event->add_record_snapshot('course_modules', $this->cm);
+        $event->add_record_snapshot('attendance', $this);
+        $event->trigger();
     }
 }
 
