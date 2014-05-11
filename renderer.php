@@ -320,6 +320,9 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $table .= html_writer::tag('center', html_writer::empty_tag('input', $params));
         $table = html_writer::tag('form', $table, array('method' => 'post', 'action' => $takedata->url_path()));
 
+        foreach($takedata->statuses as $status) {
+            $sessionstats[$status->id] = 0;
+        }
         // Calculate the sum of statuses for each user
         $sessionstats[] = array();
         foreach ($takedata->sessionlog as $userlog) {
@@ -760,6 +763,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $table->head[] = $this->construct_fullname_head($reportdata);
         $table->align[] = 'left';
         $table->size[] = '';
+        $sessionstats = array();
 
         foreach ($reportdata->sessions as $sess) {
             $sesstext = userdate($sess->sessdate, get_string('strftimedm', 'attendance'));
@@ -780,6 +784,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $table->head[] = $status->acronym;
             $table->align[] = 'center';
             $table->size[] = '1px';
+            $sessionstats[$status->id] = 0;
         }
 
         if ($reportdata->gradable) {
@@ -830,7 +835,6 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $statrow->cells[] = '';
         $statrow->cells[] = get_string('summary');
         foreach ($reportdata->sessions as $sess) {
-            $sessionstats = array();
             foreach ($reportdata->users as $user) {
                 foreach($reportdata->statuses as $status) {
                     if ($reportdata->sessionslog[$user->id][$sess->id]->statusid == $status->id) $sessionstats[$status->id]++;
