@@ -879,10 +879,23 @@ class attendance {
         // Update the users grade.
         $this->update_users_grade(array($USER->id));
 
-        // Log the change.
+        /* create url for link in log screen
+         * need to set grouptype to 0 to allow take attendance page to be called
+         * from report/log page */
+         
         $params = array(
-                'sessionid' => $mformdata->sessid);
-        $url = $this->url_take($params);
+                'sessionid' => $this->pageparams->sessionid,
+                'grouptype' => 0,
+                'id' => $this->cm->id);
+        
+        $url = 'take.php?';
+        foreach ($params as $param => $value) {
+            $url = $url . $param . '=' . $value . '&';   
+        }
+        
+        $url = rtrim($url,'&');
+        
+        // Log the change.
         add_to_log($this->course->id, 'attendance', 'taken', $url, '', $USER->id);
         
         return true;
@@ -935,10 +948,19 @@ class attendance {
             $this->update_users_grade(array_keys($sesslog));
         }
 
+        // create url for link in log screen
         $params = array(
                 'sessionid' => $this->pageparams->sessionid,
-                'grouptype' => $this->pageparams->grouptype);
-        $url = $this->url_take($params);
+                'grouptype' => $this->pageparams->grouptype,
+                'id' => $this->cm->id);
+        
+        $url = 'take.php?';
+        foreach ($params as $param => $value) {
+            $url = $url . $param . '=' . $value . '&';
+        }
+        
+        $url = rtrim($url,'&');
+        
         add_to_log($this->course->id, 'attendance', 'taken', $url, '', $this->cm->id);
 
         redirect($this->url_manage(), get_string('attendancesuccess', 'attendance'));
