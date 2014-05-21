@@ -854,7 +854,7 @@ class attendance {
         $record->studentid = $USER->id;
         $record->statusid = $mformdata->status;
         $record->statusset = $statuses;
-        $record->remarks = get_string('set_by_student', 'mod_attforblock');
+        $record->remarks = get_string('set_by_student', 'mod_attendance');
         $record->sessionid = $mformdata->sessid;
         $record->timetaken = $now;
         $record->takenby = $USER->id;
@@ -882,8 +882,8 @@ class attendance {
         $params = array(
                 'sessionid' => $mformdata->sessid);
         $url = $this->url_take($params);
-        $this->log('attendance taked', $url, $USER->firstname.' '.$USER->lastname);
-
+        add_to_log($this->course->id, 'attendance', 'taken', $url, '', $USER->id);
+        
         return true;
     }
 

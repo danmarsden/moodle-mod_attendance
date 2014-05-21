@@ -18,7 +18,7 @@
  * Prints attendance info for particular user
  *
  * @package    mod
- * @subpackage attforblock
+ * @subpackage attendance
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -34,37 +34,37 @@ $attendance_session_id = required_param('sessid', PARAM_INT);
 
 
 $attforsession = $DB->get_record('attendance_sessions', array('id' => $id), '*', MUST_EXIST);
-$attforblock = $DB->get_record('attforblock', array('id' => $attforsession->attendanceid), '*', MUST_EXIST);
-$cm = get_coursemodule_from_instance('attforblock', $attforblock->id, 0, false, MUST_EXIST);
+$attendance = $DB->get_record('attendance', array('id' => $attforsession->attendanceid), '*', MUST_EXIST);
+$cm = get_coursemodule_from_instance('attendance', $attendance->id, 0, false, MUST_EXIST);
 $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
 
 // Require the user is logged in.
 require_login($course, true, $cm);
 
 $pageparams->sessionid = $id;
-$att = new attforblock($attforblock, $cm, $course, $PAGE->context, $pageparams);
+$att = new attendance($attendance, $cm, $course, $PAGE->context, $pageparams);
 
 // Require that a session key is passed to this page.
 require_sesskey();
 
 // Create the form.
-$mform = new mod_attforblock_student_attendance_form(null,
+$mform = new mod_attendance_student_attendance_form(null,
         array('course' => $course, 'cm' => $cm, 'modcontext' => $PAGE->context, 'session' => $attforsession, 'attendance' => $att));
 
 if ($mform->is_cancelled()) {
     // The user cancelled the form, so redirect them to the view page.
-    $url = new moodle_url('/mod/attforblock/view.php', array('id' => $cm->id));
+    $url = new moodle_url('/mod/attendance/view.php', array('id' => $cm->id));
     redirect($url);
 } else if ($fromform = $mform->get_data()) {
     if (!empty($fromform->status)) {
         $success = $att->take_from_student($fromform);
 
-        $url = new moodle_url('/mod/attforblock/view.php', array('id' => $cm->id));
+        $url = new moodle_url('/mod/attendance/view.php', array('id' => $cm->id));
         if ($success) {
             // Redirect back to the view page for the block.
             redirect($url);
         } else {
-            print_error ('attendance_already_submitted', 'mod_attforblock', $url);
+            print_error ('attendance_already_submitted', 'mod_attendance', $url);
         }
     }
 
@@ -78,7 +78,7 @@ $PAGE->set_heading($course->fullname);
 $PAGE->set_cacheable(true);
 $PAGE->navbar->add($att->name);
 
-$output = $PAGE->get_renderer('mod_attforblock');
+$output = $PAGE->get_renderer('mod_attendance');
 echo $output->header();
 $mform->display();
 echo $output->footer();

@@ -174,7 +174,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $views[ATT_VIEW_ALL] = get_string('all', 'attendance');
         $views[ATT_VIEW_ALLPAST] = get_string('allpast', 'attendance');
         if ($fcontrols->reportcontrol) {
-            $views[ATT_VIEW_NOTPRESENT] = get_string('lowgrade', 'attforblock');
+            $views[ATT_VIEW_NOTPRESENT] = get_string('lowgrade', 'attendance');
         }
         $views[ATT_VIEW_MONTHS] = get_string('months', 'attendance');
         $views[ATT_VIEW_WEEKS] = get_string('weeks', 'attendance');
@@ -739,9 +739,9 @@ class mod_attendance_renderer extends plugin_renderer_base {
             } else {
                 if (!empty($sess->studentscanmark)) { // Student can mark their own attendance.
                     // URL to the page that lets the student modify their attendance.
-                    $url = new moodle_url('/mod/attforblock/attendance.php',
+                    $url = new moodle_url('/mod/attendance/attendance.php',
                             array('sessid' => $sess->id, 'sesskey' => sesskey()));
-                    $cell = new html_table_cell(html_writer::link($url, get_string('submitattendance', 'attforblock')));
+                    $cell = new html_table_cell(html_writer::link($url, get_string('submitattendance', 'attendance')));
                     $cell->colspan = 2;
                     $row->cells[] = $cell;
                 } else { // Student cannot mark their own attendace.
@@ -766,7 +766,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         global $PAGE;
 
         // Initilise Javascript used to (un)check all checkboxes.
-        $this->page->requires->js_init_call('M.mod_attforblock.init_manage');
+        $this->page->requires->js_init_call('M.mod_attendance.init_manage');
 
         // Check if the user should be able to bulk send messages to other users on the course.
         $bulkmessagecapability = has_capability('moodle/course:bulkmessaging', $PAGE->context);
