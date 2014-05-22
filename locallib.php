@@ -811,8 +811,8 @@ class attendance {
             }
             $i++;
         }
-        add_to_log($this->course->id, 'attendance', 'sessions added', $this->url_manage(),
-            implode(',', $info_array), $this->cm->id);
+        
+        $this->log('sessions added', $this->url_manage(), implode(', ', $info_array));
     }
 
     public function update_session_from_form_data($formdata, $sessionid) {
@@ -834,7 +834,7 @@ class attendance {
 
         $url = $this->url_sessions(array('sessionid' => $sessionid, 'action' => att_sessions_page_params::ACTION_UPDATE));
         $info = construct_session_full_date_time($sess->sessdate, $sess->duration);
-        add_to_log($this->course->id, 'attendance', 'session updated', $url, $info, $this->cm->id);
+        $this->log('session updated', $url, $info);
     }
 
     /**
@@ -885,18 +885,12 @@ class attendance {
          
         $params = array(
                 'sessionid' => $this->pageparams->sessionid,
-                'grouptype' => 0,
-                'id' => $this->cm->id);
-        
-        $url = 'take.php?';
-        foreach ($params as $param => $value) {
-            $url = $url . $param . '=' . $value . '&';   
-        }
-        
-        $url = rtrim($url,'&');
+                'grouptype' => 0);
+               
+        $url = $this->url_take($params);
         
         // Log the change.
-        add_to_log($this->course->id, 'attendance', 'taken', $url, '', $USER->id);
+        $this->log('attendance taken', $url, $USER->firstname.' '.$USER->lastname);
         
         return true;
     }
@@ -951,17 +945,12 @@ class attendance {
         // create url for link in log screen
         $params = array(
                 'sessionid' => $this->pageparams->sessionid,
-                'grouptype' => $this->pageparams->grouptype,
-                'id' => $this->cm->id);
+                'grouptype' => $this->pageparams->grouptype);
+              
+        $url = $this->url_take($params);
         
-        $url = 'take.php?';
-        foreach ($params as $param => $value) {
-            $url = $url . $param . '=' . $value . '&';
-        }
-        
-        $url = rtrim($url,'&');
-        
-        add_to_log($this->course->id, 'attendance', 'taken', $url, '', $this->cm->id);
+        // Log the change.
+        $this->log('attendance taken', $url, $USER->firstname.' '.$USER->lastname);
 
         redirect($this->url_manage(), get_string('attendancesuccess', 'attendance'));
     }
@@ -1270,8 +1259,7 @@ class attendance {
         list($sql, $params) = $DB->get_in_or_equal($sessionsids);
         $DB->delete_records_select('attendance_log', "sessionid $sql", $params);
         $DB->delete_records_list('attendance_sessions', 'id', $sessionsids);
-        add_to_log($this->course->id, 'attendance', 'sessions deleted', $this->url_manage(),
-            get_string('sessionsids', 'attendance').implode(', ', $sessionsids), $this->cm->id);
+        $this->log('sessions deleted', null, get_string('sessionsids', 'attforblock').implode(', ', $sessionsids));
     }
 
     public function update_sessions_duration($sessionsids, $duration) {
@@ -1284,8 +1272,8 @@ class attendance {
             $sess->timemodified = $now;
             $DB->update_record('attendance_sessions', $sess);
         }
-        add_to_log($this->course->id, 'attendance', 'sessions duration updated', $this->url_manage(),
-            get_string('sessionsids', 'attendance').implode(', ', $sessionsids), $this->cm->id);
+        
+        $this->log('sessions duration updated', $this->url_manage(), get_string('sessionsids', 'attforblock').implode(', ', $sessionsids));
     }
 
     public function remove_status($statusid) {
@@ -1306,8 +1294,7 @@ class attendance {
             $rec->grade = $grade;
             $DB->insert_record('attendance_statuses', $rec);
 
-            add_to_log($this->course->id, 'attendance', 'status added', $this->url_preferences(),
-                $acronym.': '.$description.' ('.$grade.')', $this->cm->id);
+            $this->log('status added', $this->url_preferences(), $acronym.': '.$description.' ('.$grade.')');
         } else {
             print_error('cantaddstatus', 'attendance', $this->url_preferences());
         }
@@ -1338,8 +1325,7 @@ class attendance {
         }
         $DB->update_record('attendance_statuses', $status);
 
-        add_to_log($this->course->id, 'attendance', 'status updated', $this->url_preferences(),
-            implode(' ', $updated), $this->cm->id);
+        $this->log('status updated', $this->url_preferences(), implode(' ', $updated));
     }
 }
 
