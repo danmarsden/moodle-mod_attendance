@@ -890,7 +890,7 @@ class attendance {
         $url = $this->url_take($params);
         
         // Log the change.
-        $this->log('attendance taken', $url, $USER->firstname.' '.$USER->lastname);
+        $this->log('taken by student', $url, $USER->firstname.' '.$USER->lastname);
         
         return true;
     }
@@ -950,7 +950,7 @@ class attendance {
         $url = $this->url_take($params);
         
         // Log the change.
-        $this->log('attendance taken', $url, $USER->firstname.' '.$USER->lastname);
+        $this->log('taken', $url, $USER->firstname.' '.$USER->lastname);
 
         redirect($this->url_manage(), get_string('attendancesuccess', 'attendance'));
     }
