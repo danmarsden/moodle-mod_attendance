@@ -1381,7 +1381,7 @@ class attendance {
         list($sql, $params) = $DB->get_in_or_equal($sessionsids);
         $DB->delete_records_select('attendance_log', "sessionid $sql", $params);
         $DB->delete_records_list('attendance_sessions', 'id', $sessionsids);
-        $this->log('sessions deleted', null, get_string('sessionsids', 'attforblock').implode(', ', $sessionsids));
+        $this->log('sessions deleted', null, get_string('sessionsids', 'attendance').implode(', ', $sessionsids));
     }
 
     public function update_sessions_duration($sessionsids, $duration) {
@@ -1398,7 +1398,7 @@ class attendance {
         add_to_log($this->course->id, 'attendance', 'sessions duration updated', $this->url_manage(),
             get_string('sessionsids', 'attendance').implode(', ', $sessionsids), $this->cm->id);
         
-        $this->log('sessions duration updated', $this->url_manage(), get_string('sessionsids', 'attforblock').implode(', ', $sessionsids));
+        $this->log('sessions duration updated', $this->url_manage(), get_string('sessionsids', 'attendance').implode(', ', $sessionsids));
     }
 
     public function remove_status($statusid) {
