@@ -88,15 +88,14 @@ if ($mform->is_submitted()) {
         if (isset($formdata->ident['uname'])) {
             $data->tabhead[] = get_string('username');
         }
-        if (isset($formdata->ident['idnumber'])) {
-            $data->tabhead[] = get_string('idnumber');
+        
+        $optional = array('idnumber', 'institution', 'department');
+        foreach ($optional as $opt) {
+            if (isset($formdata->ident[$opt])) {
+                $data->tabhead[] = get_string($opt);
+            }
         }
-        if (isset($formdata->ident['institution'])) {
-            $data->tabhead[] = get_string('institution');
-        }
-        if (isset($formdata->ident['department'])) {
-            $data->tabhead[] = get_string('department');
-        }
+        
         $data->tabhead[] = get_string('lastname');
         $data->tabhead[] = get_string('firstname');
         $groupmode = groups_get_activity_groupmode($cm, $course);
@@ -130,15 +129,14 @@ if ($mform->is_submitted()) {
             if (isset($formdata->ident['uname'])) {
                 $data->table[$i][] = $user->username;
             }
-            if (isset($formdata->ident['idnumber'])) {
-                $data->table[$i][] = $user->idnumber;
+            
+            $optional_row = array('idnumber', 'institution', 'department');
+            foreach ($$optional_row as $opt) {
+                if (isset($formdata->ident[$opt])) {
+                    $data->table[$i][] = $user->$opt;
+                }
             }
-            if (isset($formdata->ident['institution'])) {
-                $data->table[$i][] = $user->institution;
-            }
-            if (isset($formdata->ident['department'])) {
-                $data->table[$i][] = $user->department;
-            }
+            
             $data->table[$i][] = $user->lastname;
             $data->table[$i][] = $user->firstname;
             if (!empty($groupmode)) {
