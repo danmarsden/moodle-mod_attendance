@@ -88,13 +88,15 @@ if ($mform->is_submitted()) {
         if (isset($formdata->ident['uname'])) {
             $data->tabhead[] = get_string('username');
         }
+        if (isset($formdata->ident['idnumber'])) {
+            $data->tabhead[] = get_string('idnumber');
+        }
         $data->tabhead[] = get_string('lastname');
         $data->tabhead[] = get_string('firstname');
         $groupmode = groups_get_activity_groupmode($cm, $course);
         if (!empty($groupmode)) {
             $data->tabhead[] = get_string('groups');
         }
-
 
         if (count($reportdata->sessions) > 0) {
             foreach ($reportdata->sessions as $sess) {
@@ -121,6 +123,9 @@ if ($mform->is_submitted()) {
             }
             if (isset($formdata->ident['uname'])) {
                 $data->table[$i][] = $user->username;
+            }
+            if (isset($formdata->ident['idnumber'])) {
+                $data->table[$i][] = $user->idnumber;
             }
             $data->table[$i][] = $user->lastname;
             $data->table[$i][] = $user->firstname;

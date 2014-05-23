@@ -981,12 +981,12 @@ class attendance {
         global $DB, $CFG;
 
         // Fields we need from the user table.
-        $userfields = user_picture::fields('u', array('username'));
+        $userfields = user_picture::fields('u').',u.username,u.idnumber';
 
         if (isset($this->pageparams->sort) and ($this->pageparams->sort == ATT_SORT_FIRSTNAME)) {
-            $orderby = "u.firstname ASC, u.lastname ASC";
+            $orderby = "u.firstname ASC, u.lastname ASC, u.idnumber ASC";
         } else {
-            $orderby = "u.lastname ASC, u.firstname ASC";
+            $orderby = "u.lastname ASC, u.firstname ASC, u.idnumber ASC";
         }
 
         if ($page) {
