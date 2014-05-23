@@ -16,7 +16,7 @@
 
 require_once($CFG->libdir.'/formslib.php');
 
-class mod_attforblock_student_attendance_form extends moodleform {
+class mod_attendance_student_attendance_form extends moodleform {
     public function definition() {
         global $CFG, $USER;
 
@@ -40,7 +40,7 @@ class mod_attforblock_student_attendance_form extends moodleform {
 
         // Set a title as the date and time of the session.
         $sesstiontitle = userdate($attforsession->sessdate, get_string('strftimedate')).' '
-                .userdate($attforsession->sessdate, get_string('strftimehm', 'mod_attforblock'));
+                .userdate($attforsession->sessdate, get_string('strftimehm', 'mod_attendance'));
 
         $mform->addElement('header', 'session', $sesstiontitle);
 
@@ -56,7 +56,7 @@ class mod_attforblock_student_attendance_form extends moodleform {
         }
         // Add the radio buttons as a control with the user's name in front.
         $mform->addGroup($radioarray, 'statusarray', $USER->firstname.' '.$USER->lastname.':', array(''), false);
-        $mform->addRule('statusarray', get_string('attendancenotset', 'attforblock'), 'required', '', 'client', false, false);
+        $mform->addRule('statusarray', get_string('attendancenotset', 'attendance'), 'required', '', 'client', false, false);
 
         $this->add_action_buttons();
     }
