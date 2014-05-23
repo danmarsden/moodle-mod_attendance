@@ -123,7 +123,7 @@ if ($mform->is_submitted()) {
             }
             
             $optional_row = array('idnumber', 'institution', 'department');
-            foreach ($$optional_row as $opt) {
+            foreach ($optional_row as $opt) {
                 if (isset($formdata->ident[$opt])) {
                     $data->table[$i][] = $user->$opt;
                 }
