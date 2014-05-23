@@ -91,6 +91,12 @@ if ($mform->is_submitted()) {
         if (isset($formdata->ident['idnumber'])) {
             $data->tabhead[] = get_string('idnumber');
         }
+        if (isset($formdata->ident['institution'])) {
+            $data->tabhead[] = get_string('institution');
+        }
+        if (isset($formdata->ident['department'])) {
+            $data->tabhead[] = get_string('department');
+        }
         $data->tabhead[] = get_string('lastname');
         $data->tabhead[] = get_string('firstname');
         $groupmode = groups_get_activity_groupmode($cm, $course);
@@ -126,6 +132,12 @@ if ($mform->is_submitted()) {
             }
             if (isset($formdata->ident['idnumber'])) {
                 $data->table[$i][] = $user->idnumber;
+            }
+            if (isset($formdata->ident['institution'])) {
+                $data->table[$i][] = $user->institution;
+            }
+            if (isset($formdata->ident['department'])) {
+                $data->table[$i][] = $user->department;
             }
             $data->table[$i][] = $user->lastname;
             $data->table[$i][] = $user->firstname;
