@@ -87,9 +87,16 @@ if ($mform->is_submitted()) {
         if (isset($formdata->ident['uname'])) {
             $data->tabhead[] = get_string('username');
         }
+        
+        $optional = array('idnumber', 'institution', 'department');
+        foreach ($optional as $opt) {
+            if (isset($formdata->ident[$opt])) {
+                $data->tabhead[] = get_string($opt);
+            }
+        }
+        
         $data->tabhead[] = get_string('lastname');
         $data->tabhead[] = get_string('firstname');
-
 
         if (count($reportdata->sessions) > 0) {
             foreach ($reportdata->sessions as $sess) {
@@ -114,6 +121,14 @@ if ($mform->is_submitted()) {
             if (isset($formdata->ident['uname'])) {
                 $data->table[$i][] = $user->username;
             }
+            
+            $optional_row = array('idnumber', 'institution', 'department');
+            foreach ($optional_row as $opt) {
+                if (isset($formdata->ident[$opt])) {
+                    $data->table[$i][] = $user->$opt;
+                }
+            }
+            
             $data->table[$i][] = $user->lastname;
             $data->table[$i][] = $user->firstname;
             $cellsgenerator = new user_sessions_cells_text_generator($reportdata, $user);
