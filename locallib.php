@@ -1467,7 +1467,7 @@ class attendance {
         }
 
         $logurl = att_log_convert_url($url);
-        add_to_log($this->course->id, 'attforblock', $action, $logurl, $info, $this->cm->id);
+        add_to_log($this->course->id, 'attendance', $action, $logurl, $info, $this->cm->id);
     }
 }
 

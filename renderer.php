@@ -813,6 +813,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $table->size[] = '1px';
         }
 
+        if ($reportdata->sessionslog) {
+            $table->head[] = get_string('remarks', 'attendance');
+            $table->align[] = 'center';
+            $table->size[] = '200px';
+         }
+
         if ($bulkmessagecapability) { // Display the table header for bulk messaging.
             // The checkbox must have an id of cb_selector so that the JavaScript will pick it up.
             $table->head[] = html_writer::checkbox('cb_selector', 0, false, '', array('id' => 'cb_selector'));
@@ -820,12 +826,6 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $table->size[] = '1px';
         }
 
-        if ($reportdata->sessionslog) {
-            $table->head[] = get_string('remarks', 'attendance');
-            $table->align[] = 'center';
-            $table->size[] = '200px';
-         }
-         
         foreach ($reportdata->users as $user) {
             $row = new html_table_row();
 
@@ -847,10 +847,6 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 $row->cells[] = $reportdata->grades[$user->id].' / '.$reportdata->maxgrades[$user->id];
             }
 
-            if ($bulkmessagecapability) { // Create the checkbox for bulk messaging.
-                $row->cells[] = html_writer::checkbox('user'.$user->id, 'on', false);
-            }
-
             if ($reportdata->sessionslog) {
                 if (isset($sess) && isset($reportdata->sessionslog[$user->id][$sess->id]->remarks)) {
                     $row->cells[] = $reportdata->sessionslog[$user->id][$sess->id]->remarks;
@@ -858,6 +854,11 @@ class mod_attendance_renderer extends plugin_renderer_base {
                     $row->cells[] = '';
                 }
             }
+
+            if ($bulkmessagecapability) { // Create the checkbox for bulk messaging.
+                $row->cells[] = html_writer::checkbox('user'.$user->id, 'on', false);
+            }
+            
             $table->data[] = $row;
         }
 
