@@ -702,8 +702,6 @@ class attendance {
 
         if ($this->pageparams->startdate && $this->pageparams->enddate) {
             $where = "attendanceid = :aid AND sessdate >= :csdate AND sessdate >= :sdate AND sessdate < :edate";
-        } else if ($this->pageparams->enddate) {
-            $where = "attendanceid = :aid AND sessdate >= :csdate AND sessdate < :edate";
         } else {
             $where = "attendanceid = :aid AND sessdate >= :csdate";
         }
@@ -1188,32 +1186,16 @@ class attendance {
                            ats.sessdate >= :cstartdate AND
                            al.studentid = :uid".$period."
                   GROUP BY al.statusid";
-
+                
             }
-        }
 
-        // Make the filter array into a SQL string.
-        if (!empty($processed_filters)) {
-            $processed_filters = 'AND '.implode(' AND ', $processed_filters);
-        } else {
-            $processed_filters = '';
-        }
+            if ($filters !== null) { // We do not want to cache, or use a cached version of the results when a filter is set.
+                return $DB->get_records_sql($qry, $params);
+            } else if (!array_key_exists($userid, $this->userstatusesstat)) {
+                // Not filtered so if we do not already have them do the query.
+                $this->userstatusesstat[$userid] = $DB->get_records_sql($qry, $params);
+            }
 
-        $qry = "SELECT al.statusid, count(al.statusid) AS stcnt
-                    FROM {attendance_log} al
-                    JOIN {attendance_sessions} ats
-                      ON al.sessionid = ats.id
-                   WHERE ats.attendanceid = :aid AND
-                         ats.sessdate >= :cstartdate AND
-                         al.studentid = :uid
-                         $processed_filters
-                GROUP BY al.statusid";
-
-        if ($filters !== null) { // We do not want to cache, or use a cached version of the results when a filter is set.
-            return $DB->get_records_sql($qry, $params);
-        } else if (!array_key_exists($userid, $this->userstatusesstat)) {
-            // Not filtered so if we do not already have them do the query.
-            $this->userstatusesstat[$userid] = $DB->get_records_sql($qry, $params);
         }
 
         // Return the cached stats.
