@@ -1186,7 +1186,6 @@ class attendance {
                            ats.sessdate >= :cstartdate AND
                            al.studentid = :uid".$period."
                   GROUP BY al.statusid";
-                
             }
 
             if ($filters !== null) { // We do not want to cache, or use a cached version of the results when a filter is set.
