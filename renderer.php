@@ -820,7 +820,6 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $table->size[] = '1px';
         }
 
-        
         if ($reportdata->sessionslog) {
             $table->head[] = get_string('remarks', 'attendance');
             $table->align[] = 'center';
@@ -852,24 +851,6 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 $row->cells[] = html_writer::checkbox('user'.$user->id, 'on', false);
             }
 
-            $table->data[] = $row;
-        }
-
-        if ($bulkmessagecapability) { // Require that the user can bulk message users.
-            // Display check boxes that will allow the user to send a message to the students that have been checked.
-            $output = html_writer::empty_tag('input', array('name' => 'sesskey', 'type' => 'hidden', 'value' => sesskey()));
-            $output .= html_writer::empty_tag('input', array('name' => 'formaction', 'type' => 'hidden', 'value' => 'messageselect.php'));
-            $output .= html_writer::empty_tag('input', array('name' => 'id', 'type' => 'hidden', 'value' => $GLOBALS['COURSE']->id));
-            $output .= html_writer::empty_tag('input', array('name' => 'returnto', 'type' => 'hidden', 'value' => s(me())));
-            $output .= html_writer::table($table);
-            $output .= html_writer::tag('div',
-                    html_writer::empty_tag('input', array('type' => 'submit', 'value' => get_string('messageselectadd'))),
-                    array('class' => 'buttons'));
-            $url = new moodle_url('/user/action_redir.php');
-            return html_writer::tag('form', $output, array('action' => $url->out(), 'method' => 'post'));
-        } else {
-            return html_writer::table($table);
-        }
             if ($reportdata->sessionslog) {
                 if (isset($sess) && isset($reportdata->sessionslog[$user->id][$sess->id]->remarks)) {
                     $row->cells[] = $reportdata->sessionslog[$user->id][$sess->id]->remarks;
@@ -899,8 +880,24 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
         }
         $table->data[] = $statrow;
-        
-        return html_writer::table($table).html_writer::tag('div', get_string('users').': '.count($reportdata->users));
+
+        if ($bulkmessagecapability) { // Require that the user can bulk message users.
+            // Display check boxes that will allow the user to send a message to the students that have been checked.
+            $output = html_writer::empty_tag('input', array('name' => 'sesskey', 'type' => 'hidden', 'value' => sesskey()));
+            $output .= html_writer::empty_tag('input', array('name' => 'formaction', 'type' => 'hidden', 'value' => 'messageselect.php'));
+            $output .= html_writer::empty_tag('input', array('name' => 'id', 'type' => 'hidden', 'value' => $GLOBALS['COURSE']->id));
+            $output .= html_writer::empty_tag('input', array('name' => 'returnto', 'type' => 'hidden', 'value' => s(me())));
+            $output .= html_writer::table($table);
+            $output .= html_writer::tag('div',
+                    html_writer::empty_tag('input', array('type' => 'submit', 'value' => get_string('messageselectadd'))),
+                    array('class' => 'buttons'));
+            $url = new moodle_url('/user/action_redir.php');
+            html_writer::tag('div', get_string('users').': '.count($reportdata->users));
+            return html_writer::tag('form', $output, array('action' => $url->out(), 'method' => 'post'));
+        } else {
+            return html_writer::table($table).html_writer::tag('div', get_string('users').': '.count($reportdata->users));
+        }
+            
     }
 
     protected function render_attendance_preferences_data(attendance_preferences_data $prefdata) {

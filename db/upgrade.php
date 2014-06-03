@@ -32,6 +32,8 @@ function xmldb_attendance_upgrade($oldversion=0) {
     global $CFG, $THEME, $DB;
     $dbman = $DB->get_manager(); // Loads ddl manager and xmldb classes.
 
+    $result = true;
+
     if ($oldversion < 2013082901) {
         $table = new xmldb_table('attendance_sessions');
 
@@ -41,7 +43,7 @@ function xmldb_attendance_upgrade($oldversion=0) {
             $dbman->add_field($table, $field);
         }
         
-        upgrade_mod_savepoint(true, 2013082901, 'attendance');
+        upgrade_mod_savepoint($result, 2013082901, 'attendance');
     }
 
     if ($oldversion < 2013082902) {

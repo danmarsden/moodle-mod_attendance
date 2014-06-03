@@ -1190,7 +1190,7 @@ class attendance {
                   GROUP BY al.statusid";
 
             }
-
+        }
 
         // Make the filter array into a SQL string.
         if (!empty($processed_filters)) {
@@ -1315,7 +1315,7 @@ class attendance {
         // It would be better as a UNION query butunfortunatly MS SQL does not seem to support doing a DISTINCT on a the description field.
         $id = $DB->sql_concat(':value', 'ats.id');
         if ($this->get_group_mode()) {
-            $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, al.statusid, al.remarks
+            $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, al.statusid, al.remarks, ats.studentscanmark
                   FROM {attendance_sessions} ats
             RIGHT JOIN {attendance_log} al
                     ON ats.id = al.sessionid AND al.studentid = :uid
@@ -1323,7 +1323,7 @@ class attendance {
                  WHERE $where AND (ats.groupid = 0 or gm.id is NOT NULL)
               ORDER BY ats.sessdate ASC";
         } else {
-            $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, al.statusid, al.remarks
+            $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, al.statusid, al.remarks, ats.studentscanmark
                   FROM {attendance_sessions} ats
             RIGHT JOIN {attendance_log} al
                     ON ats.id = al.sessionid AND al.studentid = :uid
@@ -1353,7 +1353,7 @@ class attendance {
             $where = "ats.attendanceid = :aid AND ats.sessdate >= :csdate AND ats.groupid $gsql";
         }
 
-        $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, al.statusid, al.remarks
+        $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, al.statusid, al.remarks, ats.studentscanmark
                   FROM {attendance_sessions} ats
              LEFT JOIN {attendance_log} al
                     ON ats.id = al.sessionid AND al.studentid = :uid
@@ -1394,10 +1394,7 @@ class attendance {
             $sess->timemodified = $now;
             $DB->update_record('attendance_sessions', $sess);
         }
-        $sessions->close();
-        add_to_log($this->course->id, 'attendance', 'sessions duration updated', $this->url_manage(),
-            get_string('sessionsids', 'attendance').implode(', ', $sessionsids), $this->cm->id);
-        
+        $sessions->close();        
         $this->log('sessions duration updated', $this->url_manage(), get_string('sessionsids', 'attendance').implode(', ', $sessionsids));
     }
 
@@ -1451,6 +1448,26 @@ class attendance {
         $DB->update_record('attendance_statuses', $status);
 
         $this->log('status updated', $this->url_preferences(), implode(' ', $updated));
+    }
+
+    /**
+     * wrapper around {@see add_to_log()}
+     *
+     * @param string $action to be logged
+     * @param moodle_url $url absolute url, if null will be used $this->url_manage()
+     * @param mixed $info additional info, usually id in a table
+     */
+    public function log($action, moodle_url $url = null, $info = null) {
+        if (is_null($url)) {
+            $url = $this->url_manage();
+        }
+
+        if (is_null($info)) {
+            $info = $this->id;
+        }
+
+        $logurl = att_log_convert_url($url);
+        add_to_log($this->course->id, 'attforblock', $action, $logurl, $info, $this->cm->id);
     }
 }
 
