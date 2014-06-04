@@ -151,6 +151,7 @@ $string['nosessionsselected'] = 'No sessions selected';
 $string['notfound'] = 'Attendance activity not found in this course!';
 $string['noupgradefromthisversion'] = 'The Attendance module cannot upgrade from the version of attforblock you have installed. - please delete attforblock or upgrade it to the latest version before isntalling the new attendance module';
 $string['olddate'] = 'Old date';
+$string['pageparamsmustbeset'] = 'The $pageparams property <strong>must</strong> be set first.';
 $string['period'] = 'Frequency';
 $string['pluginname'] = 'Attendance';
 $string['pluginadministration'] = 'Attendance administration';

@@ -591,8 +591,8 @@ class attendance {
         } else {
             $this->context = $context;
         }
-
         $this->pageparams = $pageparams;
+
 
         $this->perm = new attendance_permissions($this->cm, $this->context);
     }
@@ -699,20 +699,20 @@ class attendance {
     public function get_filtered_sessions() {
         global $DB;
 
-        if ($this->pageparams->startdate && $this->pageparams->enddate) {
+        if (!is_null($this->pageparams) && $this->pageparams->startdate && $this->pageparams->enddate) {
             $where = "attendanceid = :aid AND sessdate >= :csdate AND sessdate >= :sdate AND sessdate < :edate";
         } else {
             $where = "attendanceid = :aid AND sessdate >= :csdate";
         }
-        if ($this->pageparams->get_current_sesstype() > att_page_with_filter_controls::SESSTYPE_ALL) {
+        if (!is_null($this->pageparams) && $this->pageparams->get_current_sesstype() > att_page_with_filter_controls::SESSTYPE_ALL) {
             $where .= " AND groupid=:cgroup";
         }
         $params = array(
                 'aid'       => $this->id,
                 'csdate'    => $this->course->startdate,
-                'sdate'     => $this->pageparams->startdate,
-                'edate'     => $this->pageparams->enddate,
-                'cgroup'    => $this->pageparams->get_current_sesstype());
+                'sdate'     => !is_null($this->pageparams) ? $this->pageparams->startdate: 0,
+                'edate'     => !is_null($this->pageparams) ? $this->pageparams->enddate: 0 ,
+                'cgroup'    => !is_null($this->pageparams) ? $this->pageparams->get_current_sesstype(): 0);
         $sessions = $DB->get_records_select('attendance_sessions', $where, $params, 'sessdate asc');
         foreach ($sessions as $sess) {
             if (empty($sess->description)) {
@@ -848,6 +848,10 @@ class attendance {
 
     public function take_from_form_data($formdata) {
         global $DB, $USER;
+        //Added a check for pageparams being set as it is required in this case.
+        if (is_null($this->pageparams)) {
+            throw new moodle_exception('pageparamsmustbeset', 'mod_attendance');
+        }
         // TODO: WARNING - $formdata is unclean - comes from direct $_POST - ideally needs a rewrite but we do some cleaning below.
         $statuses = implode(',', array_keys( (array)$this->get_statuses() ));
         $now = time();
@@ -936,13 +940,16 @@ class attendance {
         // Fields we need from the user table.
         $userfields = user_picture::fields('u', array('username'));
 
-        if (isset($this->pageparams->sort) and ($this->pageparams->sort == ATT_SORT_FIRSTNAME)) {
+        if (isset($this->pageparams) and isset($this->pageparams->sort) and ($this->pageparams->sort == ATT_SORT_FIRSTNAME)) {
             $orderby = "u.firstname ASC, u.lastname ASC";
         } else {
             $orderby = "u.lastname ASC, u.firstname ASC";
         }
 
         if ($page) {
+            if (is_null($this->pageparams)) {
+                throw new moodle_exception('pageparamsmustbeset', 'mod_attendance');
+            }
             $usersperpage = $this->pageparams->perpage;
             if (!empty($CFG->enablegroupmembersonly) and $this->cm->groupmembersonly) {
                 $startusers = ($page - 1) * $usersperpage;
@@ -1091,7 +1098,7 @@ class attendance {
 
     public function get_user_taken_sessions_count($userid) {
         if (!array_key_exists($userid, $this->usertakensesscount)) {
-            if (!empty($this->pageparams->startdate) && !empty($this->pageparams->enddate)) {
+            if (!is_null($this->pageparams) && !empty($this->pageparams->startdate) && !empty($this->pageparams->enddate)) {
                 $this->usertakensesscount[$userid] = att_get_user_taken_sessions_count($this->id, $this->course->startdate, $userid, $this->cm, $this->pageparams->startdate, $this->pageparams->enddate);
             } else {
                 $this->usertakensesscount[$userid] = att_get_user_taken_sessions_count($this->id, $this->course->startdate, $userid, $this->cm);
@@ -1108,7 +1115,7 @@ class attendance {
             'uid'           => $userid);
 
         $period = '';
-        if (!empty($this->pageparams->startdate) && !empty($this->pageparams->enddate)) {
+        if (!is_null($this->pageparams) && (!empty($this->pageparams->startdate) && !empty($this->pageparams->enddate))) {
             $period = ' AND ats.sessdate >= :sdate AND ats.sessdate < :edate ';
             $params['sdate'] = $this->pageparams->startdate;
             $params['edate'] = $this->pageparams->enddate;
@@ -1176,7 +1183,7 @@ class attendance {
     public function get_user_filtered_sessions_log($userid) {
         global $DB;
 
-        if ($this->pageparams->startdate && $this->pageparams->enddate) {
+        if (!is_null($this->pageparams) && $this->pageparams->startdate && $this->pageparams->enddate) {
             $where = "ats.attendanceid = :aid AND ats.sessdate >= :csdate AND
                       ats.sessdate >= :sdate AND ats.sessdate < :edate";
         } else {
@@ -1194,8 +1201,9 @@ class attendance {
                 'uid'       => $userid,
                 'aid'       => $this->id,
                 'csdate'    => $this->course->startdate,
-                'sdate'     => $this->pageparams->startdate,
-                'edate'     => $this->pageparams->enddate);
+                'sdate'     => !is_null($this->pageparams) ? $this->pageparams->startdate: 0 ,
+                'edate'     => !is_null($this->pageparams) ? $this->pageparams->enddate:0
+            );
 
         } else {
             $sql = "SELECT ats.id, ats.sessdate, ats.groupid, al.statusid, al.remarks
@@ -1209,8 +1217,9 @@ class attendance {
                 'uid'       => $userid,
                 'aid'       => $this->id,
                 'csdate'    => $this->course->startdate,
-                'sdate'     => $this->pageparams->startdate,
-                'edate'     => $this->pageparams->enddate);
+                'sdate'     => !is_null($this->pageparams) ? $this->pageparams->startdate : 0,
+                'edate'     => !is_null($this->pageparams) ? $this->pageparams->enddate : 0
+            );
         }
         $sessions = $DB->get_records_sql($sql, $params);
 
@@ -1220,8 +1229,8 @@ class attendance {
     public function get_user_filtered_sessions_log_extended($userid) {
         global $DB;
         // All taked sessions (including previous groups).
-
-        if ($this->pageparams->startdate && $this->pageparams->enddate) {
+        
+        if (!is_null($this->pageparams) && ($this->pageparams->startdate && $this->pageparams->enddate)) {
             $where = "ats.attendanceid = :aid AND ats.sessdate >= :csdate AND
                       ats.sessdate >= :sdate AND ats.sessdate < :edate";
         } else {
@@ -1253,8 +1262,8 @@ class attendance {
                 'uid'       => $userid,
                 'aid'       => $this->id,
                 'csdate'    => $this->course->startdate,
-                'sdate'     => $this->pageparams->startdate,
-                'edate'     => $this->pageparams->enddate,
+                'sdate'     => !is_null($this->pageparams) ? $this->pageparams->startdate: 0,
+                'edate'     => !is_null($this->pageparams) ? $this->pageparams->enddate: 0,
                 'value'     => 'c');
         $sessions = $DB->get_records_sql($sql, $params);
 
@@ -1264,7 +1273,7 @@ class attendance {
         $groups[] = 0;
         list($gsql, $gparams) = $DB->get_in_or_equal($groups, SQL_PARAMS_NAMED, 'gid0');
 
-        if ($this->pageparams->startdate && $this->pageparams->enddate) {
+        if (!is_null($this->pageparams) && ($this->pageparams->startdate && $this->pageparams->enddate)) {
             $where = "ats.attendanceid = :aid AND ats.sessdate >= :csdate AND
                       ats.sessdate >= :sdate AND ats.sessdate < :edate AND ats.groupid $gsql";
         } else {
