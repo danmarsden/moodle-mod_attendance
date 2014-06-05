@@ -888,12 +888,11 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $output .= html_writer::empty_tag('input', array('name' => 'formaction', 'type' => 'hidden', 'value' => 'messageselect.php'));
             $output .= html_writer::empty_tag('input', array('name' => 'id', 'type' => 'hidden', 'value' => $GLOBALS['COURSE']->id));
             $output .= html_writer::empty_tag('input', array('name' => 'returnto', 'type' => 'hidden', 'value' => s(me())));
-            $output .= html_writer::table($table);
+            $output .= html_writer::table($table).html_writer::tag('div', get_string('users').': '.count($reportdata->users));;
             $output .= html_writer::tag('div',
                     html_writer::empty_tag('input', array('type' => 'submit', 'value' => get_string('messageselectadd'))),
                     array('class' => 'buttons'));
             $url = new moodle_url('/user/action_redir.php');
-            html_writer::tag('div', get_string('users').': '.count($reportdata->users));
             return html_writer::tag('form', $output, array('action' => $url->out(), 'method' => 'post'));
         } else {
             return html_writer::table($table).html_writer::tag('div', get_string('users').': '.count($reportdata->users));
