@@ -869,7 +869,9 @@ class mod_attendance_renderer extends plugin_renderer_base {
         foreach ($reportdata->sessions as $sess) {
             foreach ($reportdata->users as $user) {
                 foreach($reportdata->statuses as $status) {
-                    if ($reportdata->sessionslog[$user->id][$sess->id]->statusid == $status->id) $sessionstats[$status->id]++;
+                    if (!empty($reportdata->sessionslog[$user->id][$sess->id])) {
+                        if ($reportdata->sessionslog[$user->id][$sess->id]->statusid == $status->id) $sessionstats[$status->id]++;
+                    }
                 }
             }
 
