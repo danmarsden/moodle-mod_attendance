@@ -105,18 +105,11 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
         $totalusers = count_enrolled_users(context_module::instance($fcontrols->cm->id), 'mod/attendance:canbelisted', $group);
         
-        // No per page param on student view.
-        if (!empty($fcontrols->pageparams->perpage)) {
-            $usersperpage = $fcontrols->pageparams->perpage;
-        } else {
-            $usersperpage = 0;
-        }
-
-        if (empty($fcontrols->pageparams->page) || !$fcontrols->pageparams->page || !$totalusers || !$usersperpage) {
+        if (empty($fcontrols->pageparams->page) || !$fcontrols->pageparams->page || !$totalusers || empty($fcontrols->pageparams->perpage)) {
             return $paging_controls;
         }
 
-        $numberofpages = ceil($totalusers / $usersperpage);
+        $numberofpages = ceil($totalusers / $fcontrols->pageparams->perpage);
 
         if ($fcontrols->pageparams->page > 1) {
             $paging_controls .= html_writer::link($fcontrols->url(array('curdate' => $fcontrols->nextcur, 'page' => $fcontrols->pageparams->page - 1)),
