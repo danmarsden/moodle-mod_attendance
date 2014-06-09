@@ -15,34 +15,30 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information
+ * Attendance plugin settings
  *
  * @package    mod_attendance
- * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
+ * @copyright  2013 Netspot, Tim Lock.
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$plugin->version  = 2014022801;
-$plugin->requires = 2013040500;
-$plugin->release = '2.6.1';
-$plugin->maturity  = MATURITY_STABLE;
-$plugin->cron     = 0;
-$plugin->component = 'mod_attendance';
+defined('MOODLE_INTERNAL') || die;
 
-// Nasty upgrade code to check if need to upgrade from attforblock.
-// TODO: remove this asap.
-if (defined('MOODLE_INTERNAL')) { // Only run if config.php has already been included.
-    global $DB;
-    $moduleexists = false;
+if ($ADMIN->fulltree) {
+    require_once(dirname(__FILE__).'/lib.php');
 
-    try {
-        $moduleexists = $DB->record_exists('modules', array('name' =>'attforblock'));
-    } catch (Exception $e) {
-        // Probably a fresh install - modules table doesn't exist
-    }
-    if ($moduleexists) {
-        require_once('locallib.php');
-        attforblock_upgrade();
-    }
+    // Paging options.
+    $options = array(
+          0 => get_string('donotusepaging', 'attendance'),
+         25 => 25,
+         50 => 50,
+         75 => 75,
+         100 => 100,
+         250 => 250,
+         500 => 500,
+         1000 => 1000,
+    );
 
+    $settings->add(new admin_setting_configselect('attendance/resultsperpage',
+        get_string('resultsperpage', 'attendance'), get_string('resultsperpage_desc', 'attendance'), 25, $options));
 }

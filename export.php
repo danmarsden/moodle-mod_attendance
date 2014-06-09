@@ -55,6 +55,7 @@ if ($mform->is_submitted()) {
 
     $pageparams = new att_page_with_filter_controls();
     $pageparams->init($cm);
+    $pageparams->page = 0;
     $pageparams->group = $formdata->group;
     $pageparams->set_current_sesstype($formdata->group ? $formdata->group : att_page_with_filter_controls::SESSTYPE_ALL);
     if (isset($formdata->includeallsessions)) {
@@ -97,6 +98,10 @@ if ($mform->is_submitted()) {
         
         $data->tabhead[] = get_string('lastname');
         $data->tabhead[] = get_string('firstname');
+        $groupmode = groups_get_activity_groupmode($cm, $course);
+        if (!empty($groupmode)) {
+            $data->tabhead[] = get_string('groups');
+        }
 
         if (count($reportdata->sessions) > 0) {
             foreach ($reportdata->sessions as $sess) {
@@ -104,6 +109,9 @@ if ($mform->is_submitted()) {
                 $text .= ' ';
                 $text .= $sess->groupid ? $reportdata->groups[$sess->groupid]->name : get_string('commonsession', 'attendance');
                 $data->tabhead[] = $text;
+                if (isset($formdata->includeremarks)) {
+                    $data->tabhead[] = get_string('remark', 'attendance', $text);
+                }
             }
         } else {
             print_error('sessionsnotfound', 'attendance', $att->url_manage());
@@ -131,8 +139,17 @@ if ($mform->is_submitted()) {
             
             $data->table[$i][] = $user->lastname;
             $data->table[$i][] = $user->firstname;
+            if (!empty($groupmode)) {
+                $grouptext = '';
+                $groupsraw = groups_get_all_groups($course->id, $user->id, 0, 'g.name');
+                $groups = array();
+                foreach ($groupsraw as $group) {
+                    $groups[] = $group->name;;
+                }
+                $data->table[$i][] = implode(', ', $groups);
+            }
             $cellsgenerator = new user_sessions_cells_text_generator($reportdata, $user);
-            $data->table[$i] = array_merge($data->table[$i], $cellsgenerator->get_cells());
+            $data->table[$i] = array_merge($data->table[$i], $cellsgenerator->get_cells(isset($formdata->includeremarks)));
             if ($reportdata->gradable) {
                 $data->table[$i][] = $reportdata->grades[$user->id].' / '.$reportdata->maxgrades[$user->id];
             }

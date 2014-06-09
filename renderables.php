@@ -269,9 +269,9 @@ class attendance_take_data implements renderable {
 
     public function  __construct(attendance $att) {
         if ($att->pageparams->grouptype) {
-            $this->users = $att->get_users($att->pageparams->grouptype);
+            $this->users = $att->get_users($att->pageparams->grouptype, $att->pageparams->page);
         } else {
-            $this->users = $att->get_users($att->pageparams->group);
+            $this->users = $att->get_users($att->pageparams->group, $att->pageparams->page);
         }
 
         $this->pageparams = $att->pageparams;
@@ -389,8 +389,8 @@ class attendance_user_data implements renderable {
             $this->maxgrade = array();
             foreach ($this->coursesatts as $ca) {
                 $statuses = att_get_statuses($ca->attid);
-                $user_taken_sessions_count = att_get_user_taken_sessions_count($ca->attid, $ca->coursestartdate, $userid);
-                $user_statuses_stat = att_get_user_statuses_stat($ca->attid, $ca->coursestartdate, $userid);
+                $user_taken_sessions_count = att_get_user_taken_sessions_count($ca->attid, $ca->coursestartdate, $userid, $att->cm);
+                $user_statuses_stat = att_get_user_statuses_stat($ca->attid, $ca->coursestartdate, $userid, $att->cm);
 
                 $this->statuses[$ca->attid] = $statuses;
 
@@ -468,7 +468,7 @@ class attendance_report_data implements renderable {
 
         $this->pageparams = $att->pageparams;
 
-        $this->users = $att->get_users($att->pageparams->group);
+        $this->users = $att->get_users($att->pageparams->group, $att->pageparams->page);
 
         $this->groups = groups_get_all_groups($att->course->id);
 

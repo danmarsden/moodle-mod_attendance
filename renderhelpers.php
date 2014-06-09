@@ -43,7 +43,7 @@ class user_sessions_cells_generator {
         $this->user = $user;
     }
 
-    public function get_cells() {
+    public function get_cells($remarks = false) {
         $this->init_cells();
         foreach ($this->reportdata->sessions as $sess) {
             if (array_key_exists($sess->id, $this->reportdata->sessionslog[$this->user->id])) {
@@ -52,6 +52,9 @@ class user_sessions_cells_generator {
                     $this->construct_existing_status_cell($this->reportdata->statuses[$statusid]->acronym);
                 } else {
                     $this->construct_hidden_status_cell($this->reportdata->allstatuses[$statusid]->acronym);
+                }
+                if ($remarks) {
+                    $this->construct_remarks_cell($this->reportdata->sessionslog[$this->user->id][$sess->id]->remarks);
                 }
             } else {
                 if ($this->user->enrolmentstart > $sess->sessdate) {
@@ -70,6 +73,9 @@ class user_sessions_cells_generator {
                     } else {
                         $this->construct_not_existing_for_user_session_cell('');
                     }
+                }
+                if ($remarks) {
+                    $this->construct_remarks_cell('');
                 }
             }
         }
@@ -95,6 +101,10 @@ class user_sessions_cells_generator {
     }
 
     protected function construct_not_taken_cell($text) {
+        $this->cells[] = $text;
+    }
+    
+    protected function construct_remarks_cell($text) {
         $this->cells[] = $text;
     }
 
@@ -147,6 +157,11 @@ class user_sessions_cells_html_generator extends user_sessions_cells_generator {
     }
 
     protected function construct_not_taken_cell($text) {
+        $this->close_open_cell_if_needed();
+        $this->cells[] = $text;
+    }
+    
+    protected function construct_remarks_cell($text) {
         $this->close_open_cell_if_needed();
         $this->cells[] = $text;
     }
@@ -239,17 +254,17 @@ function construct_user_data_stat($stat, $statuses, $gradable, $grade, $maxgrade
     return html_writer::table($stattable);
 }
 
-function construct_full_user_stat_html_table($attendance, $course, $user) {
+function construct_full_user_stat_html_table($attendance, $course, $user, $coursemodule) {
     global $CFG;
     $gradeable = $attendance->grade > 0;
     $statuses = att_get_statuses($attendance->id);
-    $userstatusesstat = att_get_user_statuses_stat($attendance->id, $course->startdate, $user->id);
-    $stat['completed'] = att_get_user_taken_sessions_count($attendance->id, $course->startdate, $user->id);
+    $userstatusesstat = att_get_user_statuses_stat($attendance->id, $course->startdate, $user->id, $coursemodule);
+    $stat['completed'] = att_get_user_taken_sessions_count($attendance->id, $course->startdate, $user->id, $coursemodule);
     $stat['statuses'] = $userstatusesstat;
     if ($gradeable) {
         $grade = att_get_user_grade($userstatusesstat, $statuses);
         $maxgrade = att_get_user_max_grade(att_get_user_taken_sessions_count($attendance->id, $course->startdate,
-                                                                             $user->id), $statuses);
+                                                                             $user->id, $coursemodule), $statuses);
         if (!$decimalpoints = grade_get_setting($course->id, 'decimalpoints')) {
             $decimalpoints = $CFG->grade_decimalpoints;
         }

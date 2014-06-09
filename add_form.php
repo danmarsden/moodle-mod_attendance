@@ -78,9 +78,9 @@ class mod_attendance_add_form extends moodleform {
         }
         if ($groupmode == SEPARATEGROUPS or $groupmode == VISIBLEGROUPS) {
             if ($groupmode == SEPARATEGROUPS and !has_capability('moodle/site:accessallgroups', $modcontext)) {
-                $groups = groups_get_all_groups ($course->id, $USER->id);
+                $groups = groups_get_all_groups ($course->id, $USER->id, $cm->groupingid);
             } else {
-                $groups = groups_get_all_groups($course->id);
+                $groups = groups_get_all_groups($course->id, 0, $cm->groupingid);
             }
             if ($groups) {
                 $selectgroups = array();
@@ -162,8 +162,18 @@ class mod_attendance_add_form extends moodleform {
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
 
+        if (!empty($data['addmultiply']) && $data['sessiondate'] != 0 && $data['sessionenddate'] != 0 && $data['sessionenddate'] < $data['sessiondate']) {
+            $errors['sessionenddate'] = get_string('invalidsessionenddate', 'attendance');
+        }
+
         if ($data['sessiontype'] == attendance::SESSION_GROUP and empty($data['groups'])) {
             $errors['groups'] = get_string('errorgroupsnotselected', 'attendance');
+        }
+
+        $addmulti = isset($data['addmultiply'])? (int)$data['addmultiply'] : 0;
+        if (($addmulti != 0) && (!array_key_exists('sdays',$data) || empty($data['sdays']))) {
+            $data['sdays']= array();
+            $errors['sdays'] = get_string('required', 'attendance');
         }
         return $errors;
     }

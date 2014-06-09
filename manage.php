@@ -31,6 +31,7 @@ $id                         = required_param('id', PARAM_INT);
 $from                       = optional_param('from', null, PARAM_ALPHANUMEXT);
 $pageparams->view           = optional_param('view', null, PARAM_INT);
 $pageparams->curdate        = optional_param('curdate', null, PARAM_INT);
+$pageparams->perpage        = get_config('attendance', 'resultsperpage');
 
 $cm             = get_coursemodule_from_id('attendance', $id, 0, false, MUST_EXIST);
 $course         = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);

@@ -48,7 +48,7 @@ class mod_attendance_export_form extends moodleform {
 
         $mform->addElement('header', 'general', get_string('export', 'quiz'));
 
-        $groupmode=groups_get_activity_groupmode($cm);
+        $groupmode=groups_get_activity_groupmode($cm, $course);
         $groups = groups_get_activity_allowed_groups($cm, $USER->id);
         if ($groupmode == VISIBLEGROUPS or has_capability('moodle/site:accessallgroups', $modcontext)) {
             $grouplist[0] = get_string('allparticipants');
@@ -78,6 +78,7 @@ class mod_attendance_export_form extends moodleform {
         $mform->addElement('checkbox', 'includeallsessions', get_string('includeall', 'attendance'), get_string('yes'));
         $mform->setDefault('includeallsessions', true);
         $mform->addElement('checkbox', 'includenottaken', get_string('includenottaken', 'attendance'), get_string('yes'));
+        $mform->addElement('checkbox', 'includeremarks', get_string('includeremarks', 'attendance'), get_string('yes'));
         $mform->addElement('date_selector', 'sessionstartdate', get_string('startofperiod', 'attendance'));
         $mform->setDefault('sessionstartdate', $course->startdate);
         $mform->disabledIf('sessionstartdate', 'includeallsessions', 'checked');
