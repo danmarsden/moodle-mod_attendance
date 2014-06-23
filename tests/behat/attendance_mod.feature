@@ -78,7 +78,7 @@ Feature: Teachers and Students can record session attendance
         Then "attendance report viewed" "link" should exist
 
     # Dependency - selenium running with firefox profile with auto saving of txt files to $CFG->behat_download.
-    @javascript @ignore
+    @javascript @_file_download
     Scenario: Export report includes id number, department and institution
         When I log in as "teacher1"
         And I follow "Course 1"
