@@ -33,6 +33,7 @@ define('ATT_VIEW_WEEKS', 2);
 define('ATT_VIEW_MONTHS', 3);
 define('ATT_VIEW_ALLPAST', 4);
 define('ATT_VIEW_ALL', 5);
+define('ATT_VIEW_NOTPRESENT', 6);
 
 define('ATT_SORT_LASTNAME', 1);
 define('ATT_SORT_FIRSTNAME', 2);
@@ -701,6 +702,8 @@ class attendance {
 
         if ($this->pageparams->startdate && $this->pageparams->enddate) {
             $where = "attendanceid = :aid AND sessdate >= :csdate AND sessdate >= :sdate AND sessdate < :edate";
+        } else if ($this->pageparams->enddate) {
+            $where = "attendanceid = :aid AND sessdate >= :csdate AND sessdate < :edate";
         } else {
             $where = "attendanceid = :aid AND sessdate >= :csdate";
         }
@@ -846,6 +849,68 @@ class attendance {
         $event->trigger();
     }
 
+    /**
+     * Used to record attendance submitted by the student.
+     *
+     * @global type $DB
+     * @global type $USER
+     * @param type $mformdata
+     * @return boolean
+     */
+    public function take_from_student($mformdata) {
+        global $DB, $USER;
+
+        $statuses = implode(',', array_keys( (array)$this->get_statuses() ));
+        $now = time();
+
+        $record = new stdClass();
+        $record->studentid = $USER->id;
+        $record->statusid = $mformdata->status;
+        $record->statusset = $statuses;
+        $record->remarks = get_string('set_by_student', 'mod_attendance');
+        $record->sessionid = $mformdata->sessid;
+        $record->timetaken = $now;
+        $record->takenby = $USER->id;
+
+        $dbsesslog = $this->get_session_log($mformdata->sessid);
+        if (array_key_exists($record->studentid, $dbsesslog)) {
+            // Already recorded do not save.
+            return false;
+        }
+        else {
+            $DB->insert_record('attendance_log', $record, false);
+        }
+
+        // Update the session to show that a register has been taken, or staff may overwrite records.
+        $rec = new object();
+        $rec->id = $mformdata->sessid;
+        $rec->lasttaken = $now;
+        $rec->lasttakenby = $USER->id;
+        $DB->update_record('attendance_sessions', $rec);
+
+        // Update the users grade.
+        $this->update_users_grade(array($USER->id));
+
+        /* create url for link in log screen
+         * need to set grouptype to 0 to allow take attendance page to be called
+         * from report/log page */
+         
+        $params = array(
+                'sessionid' => $this->pageparams->sessionid,
+                'grouptype' => 0);
+               
+        // Log the change.
+        $event = \mod_attendance\event\attendance_taken::create(array(
+            'objectid' => $this->id,
+            'context' => $this->context,
+            'other' => $params));
+        $event->add_record_snapshot('course_modules', $this->cm);
+        $event->add_record_snapshot('attendance', $this);
+        $event->trigger();
+
+        return true;
+    }
+
     public function take_from_form_data($formdata) {
         global $DB, $USER;
         // TODO: WARNING - $formdata is unclean - comes from direct $_POST - ideally needs a rewrite but we do some cleaning below.
@@ -893,6 +958,7 @@ class attendance {
             $this->update_users_grade(array_keys($sesslog));
         }
 
+        // create url for link in log screen
         $params = array(
                 'sessionid' => $this->pageparams->sessionid,
                 'grouptype' => $this->pageparams->grouptype);
@@ -934,12 +1000,12 @@ class attendance {
         global $DB, $CFG;
 
         // Fields we need from the user table.
-        $userfields = user_picture::fields('u', array('username'));
+        $userfields = user_picture::fields('u', array('username' , 'idnumber' , 'institution' , 'department'));
 
         if (isset($this->pageparams->sort) and ($this->pageparams->sort == ATT_SORT_FIRSTNAME)) {
-            $orderby = "u.firstname ASC, u.lastname ASC";
+            $orderby = "u.firstname ASC, u.lastname ASC, u.idnumber ASC, u.institution ASC, u.department ASC";
         } else {
-            $orderby = "u.lastname ASC, u.firstname ASC";
+            $orderby = "u.lastname ASC, u.firstname ASC, u.idnumber ASC, u.institution ASC, u.department ASC";
         }
 
         if ($page) {
@@ -1100,12 +1166,35 @@ class attendance {
         return $this->usertakensesscount[$userid];
     }
 
-    public function get_user_statuses_stat($userid) {
+    /**
+     *
+     * @global type $DB
+     * @param type $userid
+     * @param type $filters - An array things to filter by. For now only enddate is valid.
+     * @return type
+     */
+    public function get_user_statuses_stat($userid, array $filters = null) {
         global $DB;
         $params = array(
             'aid'           => $this->id,
             'cstartdate'    => $this->course->startdate,
             'uid'           => $userid);
+
+        $processed_filters = array();
+
+        // We test for any valid filters sent.
+        if (isset($filters['enddate'])) {
+            $processed_filters[] = 'ats.sessdate <= :enddate';
+            $params['enddate'] = $filters['enddate'];
+        }
+
+        // Make the filter array into a SQL string.
+        if (!empty($processed_filters)) {
+            $processed_filters = ' AND '.implode(' AND ', $processed_filters);
+        } else {
+            $processed_filters = '';
+        }
+
 
         $period = '';
         if (!empty($this->pageparams->startdate) && !empty($this->pageparams->enddate)) {
@@ -1114,38 +1203,47 @@ class attendance {
             $params['edate'] = $this->pageparams->enddate;
         }
 
-        if (!array_key_exists($userid, $this->userstatusesstat)) {
-            if ($this->get_group_mode()) {
-                $qry = "SELECT al.statusid, count(al.statusid) AS stcnt
-                      FROM {attendance_log} al
-                      JOIN {attendance_sessions} ats ON al.sessionid = ats.id
-                      LEFT JOIN {groups_members} gm ON gm.userid = al.studentid AND gm.groupid = ats.groupid
-                     WHERE ats.attendanceid = :aid AND
-                           ats.sessdate >= :cstartdate AND
-                           al.studentid = :uid AND
-                           (ats.groupid = 0 or gm.id is NOT NULL)".$period."
-                  GROUP BY al.statusid";
-            } else {
-                $qry = "SELECT al.statusid, count(al.statusid) AS stcnt
-                      FROM {attendance_log} al
-                      JOIN {attendance_sessions} ats
-                        ON al.sessionid = ats.id
-                     WHERE ats.attendanceid = :aid AND
-                           ats.sessdate >= :cstartdate AND
-                           al.studentid = :uid".$period."
-                  GROUP BY al.statusid";
+        if ($this->get_group_mode()) {
+            $qry = "SELECT al.statusid, count(al.statusid) AS stcnt
+                  FROM {attendance_log} al
+                  JOIN {attendance_sessions} ats ON al.sessionid = ats.id
+                  LEFT JOIN {groups_members} gm ON gm.userid = al.studentid AND gm.groupid = ats.groupid
+                 WHERE ats.attendanceid = :aid AND
+                       ats.sessdate >= :cstartdate AND
+                       al.studentid = :uid AND
+                       (ats.groupid = 0 or gm.id is NOT NULL)".$period.$processed_filters."
+              GROUP BY al.statusid";
+        } else {
+            $qry = "SELECT al.statusid, count(al.statusid) AS stcnt
+                  FROM {attendance_log} al
+                  JOIN {attendance_sessions} ats
+                    ON al.sessionid = ats.id
+                 WHERE ats.attendanceid = :aid AND
+                       ats.sessdate >= :cstartdate AND
+                       al.studentid = :uid".$period.$processed_filters."
+              GROUP BY al.statusid";
+        }
 
-            }
-
-
+        // We do not want to cache, or use a cached version of the results when a filter is set.
+        if ($filters !== null) {
+            return $DB->get_records_sql($qry, $params);
+        } else if (!array_key_exists($userid, $this->userstatusesstat)) {
+            // Not filtered so if we do not already have them do the query.
             $this->userstatusesstat[$userid] = $DB->get_records_sql($qry, $params);
         }
 
+        // Return the cached stats.
         return $this->userstatusesstat[$userid];
     }
 
-    public function get_user_grade($userid) {
-        return att_get_user_grade($this->get_user_statuses_stat($userid), $this->get_statuses());
+    /**
+     *
+     * @param type $userid
+     * @param type $filters - An array things to filter by. For now only enddate is valid.
+     * @return type
+     */
+    public function get_user_grade($userid, array $filters = null) {
+        return att_get_user_grade($this->get_user_statuses_stat($userid, $filters), $this->get_statuses());
     }
 
     // For getting sessions count implemented simplest method - taken sessions.
@@ -1233,7 +1331,7 @@ class attendance {
         // It would be better as a UNION query butunfortunatly MS SQL does not seem to support doing a DISTINCT on a the description field.
         $id = $DB->sql_concat(':value', 'ats.id');
         if ($this->get_group_mode()) {
-            $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, al.statusid, al.remarks
+            $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, al.statusid, al.remarks, ats.studentscanmark
                   FROM {attendance_sessions} ats
             RIGHT JOIN {attendance_log} al
                     ON ats.id = al.sessionid AND al.studentid = :uid
@@ -1241,7 +1339,7 @@ class attendance {
                  WHERE $where AND (ats.groupid = 0 or gm.id is NOT NULL)
               ORDER BY ats.sessdate ASC";
         } else {
-            $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, al.statusid, al.remarks
+            $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, al.statusid, al.remarks, ats.studentscanmark
                   FROM {attendance_sessions} ats
             RIGHT JOIN {attendance_log} al
                     ON ats.id = al.sessionid AND al.studentid = :uid
@@ -1271,7 +1369,7 @@ class attendance {
             $where = "ats.attendanceid = :aid AND ats.sessdate >= :csdate AND ats.groupid $gsql";
         }
 
-        $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, al.statusid, al.remarks
+        $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, al.statusid, al.remarks, ats.studentscanmark
                   FROM {attendance_sessions} ats
              LEFT JOIN {attendance_log} al
                     ON ats.id = al.sessionid AND al.studentid = :uid
@@ -1391,8 +1489,8 @@ class attendance {
         $event->add_record_snapshot('attendance', $this);
         $event->trigger();
     }
+    
 }
-
 
 function att_get_statuses($attid, $onlyvisible=true) {
     global $DB;
