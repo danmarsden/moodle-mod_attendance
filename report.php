@@ -57,7 +57,7 @@ $PAGE->navbar->add(get_string('report', 'attendance'));
 
 $output = $PAGE->get_renderer('mod_attendance');
 $tabs = new attendance_tabs($att, attendance_tabs::TAB_REPORT);
-$filtercontrols = new attendance_filter_controls($att);
+$filtercontrols = new attendance_filter_controls($att, true);
 $reportdata = new attendance_report_data($att);
 
 add_to_log($course->id, 'attendance', 'report viewed', '/mod/attendance/report.php?id='.$id, '', $cm->id);
