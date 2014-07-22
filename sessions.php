@@ -220,6 +220,9 @@ function construct_sessions_data_for_add($formdata) {
                     $sess->description = $formdata->sdescription['text'];
                     $sess->descriptionformat = $formdata->sdescription['format'];
                     $sess->timemodified = $now;
+                    if (isset($formdata->studentscanmark)) { // Students will be able to mark their own attendance.
+                        $sess->studentscanmark = 1;
+                    }
 
                     fill_groupid($formdata, $sessions, $sess);
                 }
@@ -237,6 +240,9 @@ function construct_sessions_data_for_add($formdata) {
         $sess->description = $formdata->sdescription['text'];
         $sess->descriptionformat = $formdata->sdescription['format'];
         $sess->timemodified = $now;
+        if (isset($formdata->studentscanmark)) { // Students will be able to mark their own attendance.
+            $sess->studentscanmark = 1; 
+        }
 
         fill_groupid($formdata, $sessions, $sess);
     }
