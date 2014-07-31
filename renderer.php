@@ -911,6 +911,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
                              get_string('acronym', 'attendance'),
                              get_string('description'),
                              get_string('grade'),
+                             get_string('calc_total','attendance'),
                              get_string('action'));
         $table->align = array('center', 'center', 'center', 'center', 'center', 'center');
 
@@ -920,6 +921,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $table->data[$i][] = $this->construct_text_input('acronym['.$st->id.']', 2, 2, $st->acronym);
             $table->data[$i][] = $this->construct_text_input('description['.$st->id.']', 30, 30, $st->description);
             $table->data[$i][] = $this->construct_text_input('grade['.$st->id.']', 4, 4, $st->grade);
+            $table->data[$i][] = $this->construct_check_box('calc_total['.$st->id.']',$st->calc_total);
             $table->data[$i][] = $this->construct_preferences_actions_icons($st, $prefdata);
 
             $i++;
@@ -929,6 +931,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $table->data[$i][] = $this->construct_text_input('newacronym', 2, 2);
         $table->data[$i][] = $this->construct_text_input('newdescription', 30, 30);
         $table->data[$i][] = $this->construct_text_input('newgrade', 4, 4);
+        $table->data[$i][] = $this->construct_check_box('newcalc_total', 0);
         $table->data[$i][] = $this->construct_preferences_button(get_string('add', 'attendance'),
                                                                  att_preferences_page_params::ACTION_ADD);
 
@@ -990,6 +993,15 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 'type'      => 'submit',
                 'value'     => $text,
                 'onclick'   => 'M.mod_attendance.set_preferences_action('.$action.')');
+        return html_writer::empty_tag('input', $attributes);
+    }
+
+    private function construct_check_box($name, $text) {
+        $attributes = array(
+                'name'      => $name,
+                'type'      => 'checkbox' );
+        if( $text==1 )
+            $attributes["checked"] = "checked";
         return html_writer::empty_tag('input', $attributes);
     }
 

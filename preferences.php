@@ -53,8 +53,9 @@ switch ($att->pageparams->action) {
         $newacronym         = optional_param('newacronym', null, PARAM_TEXT);
         $newdescription     = optional_param('newdescription', null, PARAM_TEXT);
         $newgrade           = optional_param('newgrade', 0, PARAM_INT);
+        $newcalc_total      = optional_param('newcalc_total', false, PARAM_BOOL);
 
-        $att->add_status($newacronym, $newdescription, $newgrade);
+        $att->add_status($newacronym, $newdescription, $newgrade, $newcalc_total);
         break;
     case att_preferences_page_params::ACTION_DELETE:
         if (att_has_logs_for_status($att->pageparams->statusid)) {
@@ -80,18 +81,19 @@ switch ($att->pageparams->action) {
         echo $OUTPUT->footer();
         exit;
     case att_preferences_page_params::ACTION_HIDE:
-        $att->update_status($att->pageparams->statusid, null, null, null, 0);
+        $att->update_status($att->pageparams->statusid, null, null, null, null, 0);
         break;
     case att_preferences_page_params::ACTION_SHOW:
-        $att->update_status($att->pageparams->statusid, null, null, null, 1);
+        $att->update_status($att->pageparams->statusid, null, null, null, null, 1);
         break;
     case att_preferences_page_params::ACTION_SAVE:
         $acronym        = required_param_array('acronym', PARAM_MULTILANG);
         $description    = required_param_array('description', PARAM_MULTILANG);
         $grade          = required_param_array('grade', PARAM_INT);
+        $calc_total     = optional_param_array('calc_total', false, PARAM_BOOL);
 
         foreach ($acronym as $id => $v) {
-            $att->update_status($id, $acronym[$id], $description[$id], $grade[$id], null);
+            $att->update_status($id, $acronym[$id], $description[$id], $grade[$id], $calc_total[$id], null);
         }
         if ($att->grade > 0) {
             att_update_all_users_grades($att->id, $att->course, $att->context, $cm);

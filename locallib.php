@@ -1432,7 +1432,7 @@ class attendance {
         $DB->set_field('attendance_statuses', 'deleted', 1, array('id' => $statusid));
     }
 
-    public function add_status($acronym, $description, $grade) {
+    public function add_status($acronym, $description, $grade, $calc_total) {
         global $DB;
 
         if ($acronym && $description) {
@@ -1442,12 +1442,13 @@ class attendance {
             $rec->acronym = $acronym;
             $rec->description = $description;
             $rec->grade = $grade;
+            $rec->calc_total = $calc_total;
             $DB->insert_record('attendance_statuses', $rec);
 
             $event = \mod_attendance\event\status_added::create(array(
                 'objectid' => $this->id,
                 'context' => $this->context,
-                'other' => array('acronym' => $acronym, 'description' => $description, 'grade' => $grade)));
+                'other' => array('acronym' => $acronym, 'description' => $description, 'grade' => $grade, 'calc_total' => $calc_total)));
             $event->add_record_snapshot('course_modules', $this->cm);
             $event->add_record_snapshot('attendance', $this);
             $event->trigger();
@@ -1456,7 +1457,7 @@ class attendance {
         }
     }
 
-    public function update_status($statusid, $acronym, $description, $grade, $visible) {
+    public function update_status($statusid, $acronym, $description, $grade, $calc_total, $visible) {
         global $DB;
 
         $updated = array();
@@ -1475,6 +1476,10 @@ class attendance {
             $status->grade = $grade;
             $updated[] = $grade;
         }
+        if (isset($calc_total)) {
+            $status->calc_total = $calc_total;
+            $updated[] = $calc_total;
+        }
         if (isset($visible)) {
             $status->visible = $visible;
             $updated[] = $visible ? get_string('show') : get_string('hide');
@@ -1484,7 +1489,7 @@ class attendance {
         $event = \mod_attendance\event\status_updated::create(array(
             'objectid' => $this->id,
             'context' => $this->context,
-            'other' => array('acronym' => $acronym, 'description' => $description, 'grade' => $grade, 'updated' => implode(' ', $updated))));
+            'other' => array('acronym' => $acronym, 'description' => $description, 'grade' => $grade, 'calc_total' => $calc_total, 'updated' => implode(' ', $updated))));
         $event->add_record_snapshot('course_modules', $this->cm);
         $event->add_record_snapshot('attendance', $this);
         $event->trigger();
@@ -1514,16 +1519,20 @@ function att_get_user_taken_sessions_count($attid, $coursestartdate, $userid, $c
               FROM {attendance_log} al
               JOIN {attendance_sessions} ats ON al.sessionid = ats.id
               LEFT JOIN {groups_members} gm ON gm.userid = al.studentid AND gm.groupid = ats.groupid
+              LEFT JOIN {attendance_statuses} sts ON al.statusid = sts.id
              WHERE ats.attendanceid = :aid AND
+                   sts.calc_total = 0 AND
                    ats.sessdate >= :cstartdate AND
                    al.studentid = :uid AND
                    (ats.groupid = 0 or gm.id is NOT NULL)";
     } else {
         $qry = "SELECT count(*) as cnt
               FROM {attendance_log} al
+              LEFT JOIN {attendance_statuses} sts ON al.statusid = sts.id
               JOIN {attendance_sessions} ats
                 ON al.sessionid = ats.id
              WHERE ats.attendanceid = :aid AND
+                  sts.calc_total = 0 AND
                    ats.sessdate >= :cstartdate AND
                    al.studentid = :uid";
     }
