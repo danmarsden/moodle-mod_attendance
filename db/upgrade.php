@@ -83,6 +83,27 @@ function xmldb_attendance_upgrade($oldversion=0) {
         $DB->delete_records_select('capabilities', 'component = ?', array('mod_attforblock'));
 
         upgrade_plugin_savepoint($result, 2013082902, 'mod', 'attendance');
+
+    } else if( $oldversion<2014072100 ) {
+
+        $table = new xmldb_table('attendance');
+        // ADD NEW FIELDS TO 'attendance' table
+
+        $field = new xmldb_field('min_attendance');
+        $field->set_attributes(XMLDB_TYPE_INTEGER, '3', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '65');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('show_percentage');
+        $field->set_attributes(XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '1');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Certificate savepoint reached.
+        upgrade_mod_savepoint(true, 2014072101, 'attendance');
+    
     }
 
     return $result;

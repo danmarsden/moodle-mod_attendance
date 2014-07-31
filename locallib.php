@@ -543,6 +543,12 @@ class attendance {
     /** @var int attendance instance identifier */
     public $id;
 
+    /** @var int number minimum percentage of attendance */
+    public $min_attendance;
+    
+    /** @var boolean show column percentage of attendance in report */
+    public $show_percentage;
+
     /** @var string attendance activity name */
     public $name;
 

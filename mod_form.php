@@ -54,6 +54,14 @@ class mod_attendance_mod_form extends moodleform_mod {
         $mform->addElement('modgrade', 'grade', get_string('grade'));
         $mform->setDefault('grade', 100);
 
+        $mform->addElement('text', 'min_attendance', get_string('min_attendance', 'attendance'), array('size'=>'10','maxlength'=>'3'));
+        $mform->setType('min_attendance', PARAM_TEXT);
+        $mform->setDefault('min_attendance', '65');
+
+        $mform->addElement('advcheckbox', 'show_percentage', get_string('show_percentage', 'attendance'), '', array('group' => 1), array(0, 1));
+        $mform->setType('show_percentage', PARAM_BOOL);
+        $mform->setDefault('show_percentage', true);
+
         $this->standard_coursemodule_elements(true);
         $this->add_action_buttons();
     }
