@@ -83,7 +83,10 @@ function xmldb_attendance_upgrade($oldversion=0) {
         $DB->delete_records_select('capabilities', 'component = ?', array('mod_attforblock'));
 
         upgrade_plugin_savepoint($result, 2013082902, 'mod', 'attendance');
-    } else if( $oldversion<2014072101 ) {
+
+    }
+
+    if( $oldversion<2014072101 ) {
 
         $table = new xmldb_table('attendance_statuses');
         // ADD NEW FIELDS TO 'attendance_status' table
@@ -96,6 +99,7 @@ function xmldb_attendance_upgrade($oldversion=0) {
 
         // Certificate savepoint reached.
         upgrade_mod_savepoint(true, 2014072101, 'attendance');
+        
     }
 
     return $result;
