@@ -773,7 +773,9 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
         $table = new html_table();
 
-        $table->attributes['class'] = 'generaltable attwidth';
+        // 'table' class instead of 'generaltable'
+        // to show default bootstrap row colours
+        $table->attributes['class'] = 'table attwidth';
 
         // User picture.
         $table->head[] = '';
@@ -784,6 +786,24 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $table->align[] = 'left';
         $table->size[] = '';
         $sessionstats = array();
+
+        // Show totals at the beginning of the table
+        if ($reportdata->gradable) {
+            if($reportdata->min_attendance != null && $reportdata->show_percentage) {
+                $table->head[] = get_string('percentage', 'attendance');
+                $table->align[] = 'center';
+                $table->size[] = '1px';
+            }
+            $table->head[] = get_string('grade');
+            $table->align[] = 'center';
+            $table->size[] = '1px';
+        }
+
+        foreach ($reportdata->statuses as $status) {
+            $table->head[] = $status->acronym;
+            $table->align[] = 'center';
+            $table->size[] = '1px';
+        }
 
         foreach ($reportdata->sessions as $sess) {
             $sesstext = userdate($sess->sessdate, get_string('strftimedm', 'attendance'));
@@ -834,6 +854,17 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $cellsgenerator = new user_sessions_cells_html_generator($reportdata, $user);
             $row->cells = array_merge($row->cells, $cellsgenerator->get_cells());
 
+            // Show totals at the beginning of the table
+            if ($reportdata->gradable) {
+                if($reportdata->min_attendance != null && $reportdata->show_percentage) {
+                    $percentage = $this->get_percentage($reportdata->grades[$user->id], $reportdata->maxgrades[$user->id]);
+                    $row->cells[] = $percentage."%";
+                    if($percentage >= $reportdata->min_attendance) $row->attributes['class'] = "success";
+                    else $row->attributes['class'] = "error";                    
+                } 
+                $row->cells[] = $reportdata->grades[$user->id].' / '.$reportdata->maxgrades[$user->id];
+            }
+
             foreach ($reportdata->statuses as $status) {
                 if (array_key_exists($status->id, $reportdata->usersstats[$user->id])) {
                     $row->cells[] = $reportdata->usersstats[$user->id][$status->id]->stcnt;
@@ -841,10 +872,6 @@ class mod_attendance_renderer extends plugin_renderer_base {
                     // No attendance data for this $status => no statistic for this status.
                     $row->cells[] = 0;
                 }
-            }
-
-            if ($reportdata->gradable) {
-                $row->cells[] = $reportdata->grades[$user->id].' / '.$reportdata->maxgrades[$user->id];
             }
 
             if ($reportdata->sessionslog) {
@@ -864,8 +891,16 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
         // Calculate the sum of statuses for each user
         $statrow = new html_table_row();
-        $statrow->cells[] = '';
         $statrow->cells[] = get_string('summary');
+        // this to let summaries stay on right position below sessions
+        $statrow->cells[] = '';
+        $statrow->cells[] = '';
+        if($reportdata->show_percentage){
+            $statrow->cells[] = '';
+        }
+        for ($i=0; $i < count($reportdata->statuses); $i++) { 
+            $statrow->cells[] = '';
+        }
         foreach ($reportdata->sessions as $sess) {
             foreach ($reportdata->users as $user) {
                 foreach($reportdata->statuses as $status) {
@@ -993,4 +1028,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         return html_writer::empty_tag('input', $attributes);
     }
 
+    private function get_percentage($usergrades, $usermaxgrades) {
+        return number_format(floatval($usergrades) * 100.0 / floatval($usermaxgrades), 0);
+    }
 }

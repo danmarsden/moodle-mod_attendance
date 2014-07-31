@@ -10,6 +10,8 @@
         <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="grade" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="100" SEQUENCE="false" COMMENT="This is maximum grade for instance"/>
+        <FIELD NAME="min_attendance" TYPE="int" LENGTH="3" NOTNULL="true" DEFAULT="65" SEQUENCE="false" COMMENT="Minimum attendance percentage to access final exam"/>
+        <FIELD NAME="show_percentage" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="Show or not percentage column in reports"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="Primary key for attendance"/>

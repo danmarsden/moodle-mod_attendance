@@ -456,6 +456,10 @@ class attendance_report_data implements renderable {
 
     private $att;
 
+    public $min_attendance;
+
+    public $show_percentage;
+
     public function  __construct(attendance $att) {
         global $CFG;
 
@@ -509,6 +513,9 @@ class attendance_report_data implements renderable {
         }
 
         $this->att = $att;
+
+        $this->min_attendance = $att->min_attendance;
+        $this->show_percentage = $att->show_percentage;
     }
 
     public function url_take($sessionid, $grouptype) {
