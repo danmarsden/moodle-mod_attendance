@@ -84,7 +84,9 @@ function xmldb_attendance_upgrade($oldversion=0) {
 
         upgrade_plugin_savepoint($result, 2013082902, 'mod', 'attendance');
 
-    } else if( $oldversion<2014072100 ) {
+    }
+
+    if( $oldversion<2014072100 ) {
 
         $table = new xmldb_table('attendance');
         // ADD NEW FIELDS TO 'attendance' table
