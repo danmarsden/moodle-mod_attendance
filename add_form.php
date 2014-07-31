@@ -175,7 +175,37 @@ class mod_attendance_add_form extends moodleform {
             $data['sdays']= array();
             $errors['sdays'] = get_string('required', 'attendance');
         }
+        if (isset($data['sdays'])) {
+            if (!$this->checkWeekDays($data['sessiondate'], $data['sessionenddate'], $data['sdays']) ) {
+                $errors['sdays'] = get_string('checkweekdays', 'attendance');
+            }
+        }
         return $errors;
     }
 
+    private function checkWeekDays($sessiondate, $sessionenddate, $sdays) {
+
+        $found = false;
+
+        $daysOfWeek = array(0 => "Sun", 1 => "Mon", 2 => "Tue", 3 => "Wed", 4 => "Thu", 5 => "Fri", 6 => "Sat");
+        $start = new DateTime( date("Y-m-d",$sessiondate) );
+        $interval = new DateInterval('P1D');
+        $end = new DateTime( date("Y-m-d",$sessionenddate) );
+        $end->add( new DateInterval('P1D') );
+
+        $period = new DatePeriod($start, $interval, $end);
+        foreach ($period as $date) {
+            if (!$found) {
+                foreach ($sdays as $name => $value) {
+                    $key = array_search($name, $daysOfWeek);
+                    if ($date->format("w") == $key) {
+                        $found = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return $found;
+    }
 }
