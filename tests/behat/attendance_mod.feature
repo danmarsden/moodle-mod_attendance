@@ -36,7 +36,7 @@ Feature: Teachers and Students can record session attendance
         And I follow "Course 1"
         And I follow "Attendance"
         And I follow "Add"
-        And I check "Allow students to record own attendance"
+        And I set the field "Allow students to record own attendance" to "1"
         And I set the following fields to these values:
             | id_sessiondate_hour | 23 |
         And I click on "id_submitbutton" "button"
@@ -46,7 +46,7 @@ Feature: Teachers and Students can record session attendance
         And I follow "Course 1"
         And I follow "Attendance"
         And I follow "Submit attendance"
-        And I check "Present"
+        And I set the field "Present" to "1"
         And I press "Save changes"
         Then I should see "Self-recorded"
         And I log out
@@ -68,7 +68,7 @@ Feature: Teachers and Students can record session attendance
         And I follow "Continue"
         And I follow "Report"
         And I follow "Low grade"
-        And I check "user3"
+        And I set the field "user3" to "1"
         And I click on "Send a message" "button"
         Then I should see "Message body"
         And I should see "student1@asd.com"
@@ -92,9 +92,9 @@ Feature: Teachers and Students can record session attendance
         Then the "id_ident_idnumber" checkbox should not be checked
         And the "id_ident_institution" checkbox should not be checked
         And the "id_ident_department" checkbox should not be checked
-        And I check "id_ident_idnumber"
-        And I check "id_ident_institution"
-        And I check "id_ident_department"
+        And I set the field "id_ident_idnumber" to "1"
+        And I set the field "id_ident_institution" to "1"
+        And I set the field "id_ident_department" to "1"
         And I set the following fields to these values:
             | format | Download in text format |
         And I click on "OK" "button"
