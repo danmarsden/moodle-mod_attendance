@@ -55,7 +55,7 @@ Feature: Teachers and Students can record session attendance
         And I expand "Reports" node
         And I follow "Logs"
         And I click on "Get these logs" "button"
-        Then "attendance taken by student" "link" should exist
+        Then "Attendance taken by student" "link" should exist
 
     Scenario: Teachers can view low grade report and send a message
         When I log in as "teacher1"
@@ -75,7 +75,7 @@ Feature: Teachers and Students can record session attendance
         And I expand "Reports" node
         And I follow "Logs"
         And I click on "Get these logs" "button"
-        Then "attendance report viewed" "link" should exist
+        Then "Attendance report viewed" "link" should exist
 
     # Dependency - selenium running with firefox profile with auto saving of txt files to $CFG->behat_download.
     @javascript @_file_download

@@ -900,7 +900,7 @@ class attendance {
                 'grouptype' => 0);
                
         // Log the change.
-        $event = \mod_attendance\event\attendance_taken::create(array(
+        $event = \mod_attendance\event\attendance_taken_by_student::create(array(
             'objectid' => $this->id,
             'context' => $this->context,
             'other' => $params));
