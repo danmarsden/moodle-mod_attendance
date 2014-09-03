@@ -112,12 +112,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $numberofpages = ceil($totalusers / $fcontrols->pageparams->perpage);
 
         if ($fcontrols->pageparams->page > 1) {
-            $paging_controls .= html_writer::link($fcontrols->url(array('curdate' => $fcontrols->nextcur, 'page' => $fcontrols->pageparams->page - 1)),
+            $paging_controls .= html_writer::link($fcontrols->url(array('curdate' => $fcontrols->curdate, 'page' => $fcontrols->pageparams->page - 1)),
                                                                          $this->output->larrow());
         }
         $paging_controls .= html_writer::tag('span', "Page {$fcontrols->pageparams->page} of $numberofpages", array('class' => 'attbtn'));
         if ($fcontrols->pageparams->page < $numberofpages) {
-            $paging_controls .= html_writer::link($fcontrols->url(array('curdate' => $fcontrols->nextcur, 'page' => $fcontrols->pageparams->page + 1)),
+            $paging_controls .= html_writer::link($fcontrols->url(array('curdate' => $fcontrols->curdate, 'page' => $fcontrols->pageparams->page + 1)),
                                                                          $this->output->rarrow());
         }
 
