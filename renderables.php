@@ -353,7 +353,7 @@ class attendance_user_data implements renderable {
     private $urlparams;
 
     public function  __construct(attendance $att, $userid) {
-        global $CFG;
+        global $CFG, $USER;
 
         $this->user = $att->get_user($userid);
 
@@ -388,6 +388,10 @@ class attendance_user_data implements renderable {
             $this->grade = array();
             $this->maxgrade = array();
             foreach ($this->coursesatts as $ca) {
+                // Check to make sure the user can view this cm.
+                if (!get_fast_modinfo($ca->courseid)->instances['attendance'][$ca->attid]->uservisible) {
+                    continue;
+                }
                 $statuses = att_get_statuses($ca->attid);
                 $user_taken_sessions_count = att_get_user_taken_sessions_count($ca->attid, $ca->coursestartdate, $userid, $att->cm);
                 $user_statuses_stat = att_get_user_statuses_stat($ca->attid, $ca->coursestartdate, $userid, $att->cm);
