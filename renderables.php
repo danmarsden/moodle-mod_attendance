@@ -381,15 +381,15 @@ class attendance_user_data implements renderable {
             $this->groups = groups_get_all_groups($att->course->id);
         } else {
             $this->coursesatts = att_get_user_courses_attendances($userid);
-
             $this->statuses = array();
             $this->stat = array();
             $this->gradable = array();
             $this->grade = array();
             $this->maxgrade = array();
-            foreach ($this->coursesatts as $ca) {
+            foreach ($this->coursesatts as $atid => $ca) {
                 // Check to make sure the user can view this cm.
                 if (!get_fast_modinfo($ca->courseid)->instances['attendance'][$ca->attid]->uservisible) {
+                    unset($this->courseatts[$atid]);
                     continue;
                 }
                 $statuses = att_get_statuses($ca->attid);
@@ -418,7 +418,6 @@ class attendance_user_data implements renderable {
                 }
             }
         }
-
         $this->urlpath = $att->url_view()->out_omit_querystring();
         $params = $att->pageparams->get_significant_params();
         $params['id'] = $att->cm->id;
