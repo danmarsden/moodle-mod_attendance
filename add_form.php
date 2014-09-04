@@ -175,8 +175,10 @@ class mod_attendance_add_form extends moodleform {
             $data['sdays']= array();
             $errors['sdays'] = get_string('required', 'attendance');
         }
-        if (!$this->checkWeekDays($data['sessiondate'], $data['sessionenddate'], $data['sdays']) ) {
-            $errors['sdays'] = get_string('checkweekdays', 'attendance');
+        if (isset($data['sdays'])) {
+            if (!$this->checkWeekDays($data['sessiondate'], $data['sessionenddate'], $data['sdays']) ) {
+                $errors['sdays'] = get_string('checkweekdays', 'attendance');
+            }
         }
         return $errors;
     }
