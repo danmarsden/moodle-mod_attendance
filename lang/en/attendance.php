@@ -216,10 +216,11 @@ $string['week'] = 'week(s)';
 $string['weeks'] = 'Weeks';
 $string['youcantdo'] = 'You can\'t do anything';
 
-$string['eventreportviewed'] = 'Report viewed';
+$string['eventreportviewed'] = 'Attendance report viewed';
 $string['eventsessionadded'] = 'Session added';
 $string['eventsessionupdated'] = 'Session updated';
 $string['eventtaken'] = 'Attendance taken';
+$string['eventtakenbystudent'] = 'Attendance taken by student';
 $string['eventsessiondeleted'] = 'Session deleted';
 $string['eventdurationupdated'] = 'Session duration updated';
 $string['eventstatusupdated'] = 'Status updated';
