@@ -404,7 +404,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
             }
             $controls .= html_writer::tag('span', "Page {$takedata->pageparams->page} of $numberofpages", array('class' => 'attbtn'));
             if ($takedata->pageparams->page < $numberofpages) {
-                $controls .= html_writer::link($takedata->url(array('page' => $takedata->pageparams->page + 1)), $this->output->rarrow());
+                $controls .= html_writer::link($takedata->url(array('page' => $takedata->pageparams->page + 1,
+                            'perpage' => $takedata->pageparams->perpage)), $this->output->rarrow());
             }
         }
 
@@ -423,6 +424,15 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $select->set_label(get_string('viewmode', 'attendance'));
         $select->class = 'singleselect inline';
         $controls .= $this->output->render($select);
+
+        if ($takedata->pageparams->viewmode == att_take_page_params::SORTED_LIST) {
+            $options = array(
+                    0 => get_string('donotusepaging', 'attendance'),
+                   get_config('attendance', 'resultsperpage') => get_config('attendance', 'resultsperpage'));
+            $select = new single_select($takedata->url(), 'perpage', $options, $takedata->pageparams->perpage, null);
+            $select->class = 'singleselect inline';
+            $controls .= $this->output->render($select);
+        }
 
         if ($takedata->pageparams->viewmode == att_take_page_params::SORTED_GRID) {
             $options = array (1 => '1 '.get_string('column', 'attendance'), '2 '.get_string('columns', 'attendance'),
