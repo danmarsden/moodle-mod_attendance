@@ -73,7 +73,7 @@ function xmldb_attendance_upgrade($oldversion=0) {
         upgrade_plugin_savepoint($result, 2013082902, 'mod', 'attendance');
     }
 
-    if ($oldversion < 2014022802) {
+    if ($oldversion < 2014022803) {
         $table = new xmldb_table('attendance_sessions');
 
         $field = new xmldb_field('studentscanmark');
@@ -82,7 +82,7 @@ function xmldb_attendance_upgrade($oldversion=0) {
             $dbman->add_field($table, $field);
         }
         
-        upgrade_mod_savepoint($result, 2014022802, 'attendance');
+        upgrade_mod_savepoint($result, 2014022803, 'attendance');
     }
 
     return $result;
