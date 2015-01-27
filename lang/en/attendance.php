@@ -233,3 +233,4 @@ $string['attendance_already_submitted'] = 'You may not self register attendance 
 $string['lowgrade'] = 'Low grade';
 $string['submitattendance'] = 'Submit attendance';
 $string['attendancenotset'] = 'You must set your attendance';
+$string['export'] = 'Export';

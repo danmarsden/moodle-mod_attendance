@@ -46,7 +46,7 @@ class mod_attendance_export_form extends moodleform {
         $cm            = $this->_customdata['cm'];
         $modcontext    = $this->_customdata['modcontext'];
 
-        $mform->addElement('header', 'general', get_string('export', 'quiz'));
+        $mform->addElement('header', 'general', get_string('export', 'attendance'));
 
         $groupmode=groups_get_activity_groupmode($cm, $course);
         $groups = groups_get_activity_allowed_groups($cm, $USER->id);
