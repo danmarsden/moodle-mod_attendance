@@ -52,7 +52,7 @@ class mod_attendance_mod_form extends moodleform_mod {
         $mform->setDefault('name', get_string('modulename', 'attendance'));
 
         $mform->addElement('modgrade', 'grade', get_string('grade'));
-        $mform->setDefault('grade', 100);
+        $mform->setDefault('grade', get_config('attendance' ,'maximumpoints'));
 
         $this->standard_coursemodule_elements(true);
         $this->add_action_buttons();
