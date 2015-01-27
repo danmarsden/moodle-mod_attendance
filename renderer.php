@@ -445,7 +445,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $controls .= $this->output->render($select);
         }
 
-        if (count($takedata->sessions4copy) > 1) {
+        if (count($takedata->sessions4copy) > 0) {
             $controls .= html_writer::empty_tag('br');
             $controls .= html_writer::empty_tag('br');
 
