@@ -179,6 +179,9 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $views[ATT_VIEW_MONTHS] = get_string('months', 'attendance');
         $views[ATT_VIEW_WEEKS] = get_string('weeks', 'attendance');
         $views[ATT_VIEW_DAYS] = get_string('days', 'attendance');
+        if ($fcontrols->reportcontrol) {
+            $views[ATT_VIEW_SUMMARY] = get_string('summary', 'attendance');
+        }
         $viewcontrols = '';
         foreach ($views as $key => $sview) {
             if ($key != $fcontrols->pageparams->view) {
@@ -844,6 +847,24 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $table->head[] = get_string('grade');
             $table->align[] = 'center';
             $table->size[] = '1px';
+
+            if ($reportdata->pageparams->view == ATT_VIEW_SUMMARY) {
+                $table->head[] = get_string('attendancepercent', 'attendance');
+                $table->align[] = 'center';
+                $table->size[] = '1px';
+
+                $table->head[] = get_string('numsessions', 'attendance');
+                $table->align[] = 'center';
+                $table->size[] = '1px';
+
+                $table->head[] = get_string('maxgrade', 'attendance');
+                $table->align[] = 'center';
+                $table->size[] = '1px';
+
+                $table->head[] = get_string('attendancepercent', 'attendance');
+                $table->align[] = 'center';
+                $table->size[] = '1px';
+            }
         }
 
 
@@ -873,6 +894,29 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
             if ($reportdata->gradable) {
                 $row->cells[] = format_float($reportdata->grades[$user->id]).' / '.format_float($reportdata->maxgrades[$user->id]);
+
+                $row->cells[] = $reportdata->grades[$user->id].' / '.$reportdata->maxgrades[$user->id];
+
+                if ($reportdata->pageparams->view == ATT_VIEW_SUMMARY) {
+                    $percentage = $reportdata->maxgrades[$user->id] == 0 ? 0 : $reportdata->grades[$user->id] * 100 / $reportdata->maxgrades[$user->id];
+                    $percentage = format_float($percentage, 1, true);
+                    $row->cells[] = $percentage . ' %';
+
+                    $row->cells[] = $reportdata->numsessions;
+                    $row->cells[] = $reportdata->grades[$user->id].' / '.$reportdata->maxgrade;
+
+                    $percentage = $reportdata->maxgrade == 0 ? 0 : $reportdata->grades[$user->id] * 100 / $reportdata->maxgrade;
+                    $percentage = format_float($percentage, 1, true);
+                    $row->cells[] = $percentage . ' %';
+                }
+            }
+
+            if ($reportdata->sessionslog) {
+                if (isset($sess) && isset($reportdata->sessionslog[$user->id][$sess->id]->remarks)) {
+                    $row->cells[] = $reportdata->sessionslog[$user->id][$sess->id]->remarks;
+                } else {
+                    $row->cells[] = '';
+                }
             }
 
             if ($bulkmessagecapability) { // Create the checkbox for bulk messaging.
