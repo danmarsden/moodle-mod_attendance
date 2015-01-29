@@ -104,7 +104,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         }
 
         $totalusers = count_enrolled_users(context_module::instance($fcontrols->cm->id), 'mod/attendance:canbelisted', $group);
-        
+
         if (empty($fcontrols->pageparams->page) || !$fcontrols->pageparams->page || !$totalusers || empty($fcontrols->pageparams->perpage)) {
             return $paging_controls;
         }
@@ -115,7 +115,10 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $paging_controls .= html_writer::link($fcontrols->url(array('curdate' => $fcontrols->curdate, 'page' => $fcontrols->pageparams->page - 1)),
                                                                          $this->output->larrow());
         }
-        $paging_controls .= html_writer::tag('span', "Page {$fcontrols->pageparams->page} of $numberofpages", array('class' => 'attbtn'));
+        $a = new stdClass();
+        $a->page = $fcontrols->pageparams->page;
+        $a->numberofpages = $numberofpages;
+        $paging_controls .= html_writer::tag('span', get_string('pageof', 'attendance', $a), array('class' => 'attbtn'));
         if ($fcontrols->pageparams->page < $numberofpages) {
             $paging_controls .= html_writer::link($fcontrols->url(array('curdate' => $fcontrols->curdate, 'page' => $fcontrols->pageparams->page + 1)),
                                                                          $this->output->rarrow());
@@ -405,7 +408,11 @@ class mod_attendance_renderer extends plugin_renderer_base {
             if ($takedata->pageparams->page > 1) {
                 $controls .= html_writer::link($takedata->url(array('page' => $takedata->pageparams->page - 1)), $this->output->larrow());
             }
-            $controls .= html_writer::tag('span', "Page {$takedata->pageparams->page} of $numberofpages", array('class' => 'attbtn'));
+
+            $a = new stdClass();
+            $a->page = $takedata->pageparams->page;
+            $a->numberofpages = $numberofpages;
+            $controls .= html_writer::tag('span', get_string('pageof', 'attendance', $a), array('class' => 'attbtn'));
             if ($takedata->pageparams->page < $numberofpages) {
                 $controls .= html_writer::link($takedata->url(array('page' => $takedata->pageparams->page + 1,
                             'perpage' => $takedata->pageparams->perpage)), $this->output->rarrow());
