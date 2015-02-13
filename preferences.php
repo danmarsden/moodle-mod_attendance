@@ -62,13 +62,14 @@ switch ($att->pageparams->action) {
         }
 
         $confirm    = optional_param('confirm', null, PARAM_INT);
+        $statuses = $att->get_statuses(false);
+        $status = $statuses[$att->pageparams->statusid];
+
         if (isset($confirm)) {
-            $att->remove_status($att->pageparams->statusid);
+            $att->remove_status($status);
             redirect($att->url_preferences(), get_string('statusdeleted', 'attendance'));
         }
 
-        $statuses = $att->get_statuses();
-        $status = $statuses[$att->pageparams->statusid];
         $message = get_string('deletecheckfull', '', get_string('variable', 'attendance'));
         $message .= str_repeat(html_writer::empty_tag('br'), 2);
         $message .= $status->acronym.': '.
@@ -80,18 +81,24 @@ switch ($att->pageparams->action) {
         echo $OUTPUT->footer();
         exit;
     case att_preferences_page_params::ACTION_HIDE:
-        $att->update_status($att->pageparams->statusid, null, null, null, 0);
+        $statuses = $att->get_statuses();
+        $status = $statuses[$att->pageparams->statusid];
+        $att->update_status($status, null, null, null, 0);
         break;
     case att_preferences_page_params::ACTION_SHOW:
-        $att->update_status($att->pageparams->statusid, null, null, null, 1);
+        $statuses = $att->get_statuses(false);
+        $status = $statuses[$att->pageparams->statusid];
+        $att->update_status($status, null, null, null, 1);
         break;
     case att_preferences_page_params::ACTION_SAVE:
         $acronym        = required_param_array('acronym', PARAM_MULTILANG);
         $description    = required_param_array('description', PARAM_MULTILANG);
         $grade          = required_param_array('grade', PARAM_INT);
+        $statuses = $att->get_statuses(false);
 
         foreach ($acronym as $id => $v) {
-            $att->update_status($id, $acronym[$id], $description[$id], $grade[$id], null);
+            $status = $statuses[$id];
+            $att->update_status($status, $acronym[$id], $description[$id], $grade[$id], null);
         }
         if ($att->grade > 0) {
             att_update_all_users_grades($att->id, $att->course, $att->context, $cm);
