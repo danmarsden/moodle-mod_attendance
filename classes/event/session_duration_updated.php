@@ -44,9 +44,9 @@ class session_duration_updated extends \core\event\base {
      * Init method.
      */
     protected function init() {
-        $this->data['crud'] = 'r';
+        $this->data['crud'] = 'u';
         $this->data['edulevel'] = self::LEVEL_TEACHING;
-        $this->data['objecttable'] = 'attendance';
+        $this->data['objecttable'] = 'attendance_sessions';
     }
 
     /**
