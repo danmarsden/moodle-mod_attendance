@@ -1477,7 +1477,7 @@ class attendance {
      * Update status variable for a particular Attendance module instance
      * 
      * @global moodle_database $DB
-     * @param stdClass $statusid
+     * @param stdClass $status
      * @param string $acronym
      * @param string $description
      * @param int $grade
