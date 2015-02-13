@@ -697,7 +697,7 @@ class attendance {
         return $DB->count_records_select('attendance_sessions', $where, $params);
     }
 
-    public function get_filtered_sessions() {
+    public function get_filtered_sessions($filtergroups = true) {
         global $DB;
 
         if ($this->pageparams->startdate && $this->pageparams->enddate) {
@@ -707,7 +707,7 @@ class attendance {
         } else {
             $where = "attendanceid = :aid AND sessdate >= :csdate";
         }
-        if ($this->pageparams->get_current_sesstype() > att_page_with_filter_controls::SESSTYPE_ALL) {
+        if ($filtergroups && $this->pageparams->get_current_sesstype() > att_page_with_filter_controls::SESSTYPE_ALL) {
             $where .= " AND groupid=:cgroup";
         }
         $params = array(
@@ -806,7 +806,7 @@ class attendance {
                 $info_array[] = construct_session_full_date_time($lastsession->sessdate, $lastsession->duration);
                 break;
             } else {
-                $info_array[] = construct_session_full_date_time($sess->sessdate, $sess->duration);
+            $info_array[] = construct_session_full_date_time($sess->sessdate, $sess->duration);
             }
             $i++;
         }

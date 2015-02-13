@@ -475,7 +475,7 @@ class attendance_report_data implements renderable {
 
         $this->groups = groups_get_all_groups($att->course->id);
 
-        $this->sessions = $att->get_filtered_sessions();
+        $this->sessions = $att->get_filtered_sessions(false);
 
         $this->statuses = $att->get_statuses();
         $this->allstatuses = $att->get_statuses(false);
