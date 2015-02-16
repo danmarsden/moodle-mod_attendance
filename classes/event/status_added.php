@@ -44,9 +44,9 @@ class status_added extends \core\event\base {
      * Init method.
      */
     protected function init() {
-        $this->data['crud'] = 'r';
+        $this->data['crud'] = 'c';
         $this->data['edulevel'] = self::LEVEL_TEACHING;
-        $this->data['objecttable'] = 'attendance';
+        $this->data['objecttable'] = 'attendance_statuses';
     }
 
     /**
