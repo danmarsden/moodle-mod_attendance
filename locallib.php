@@ -806,7 +806,7 @@ class attendance {
                 $info_array[] = construct_session_full_date_time($lastsession->sessdate, $lastsession->duration);
                 break;
             } else {
-            $info_array[] = construct_session_full_date_time($sess->sessdate, $sess->duration);
+                $info_array[] = construct_session_full_date_time($sess->sessdate, $sess->duration);
             }
             $i++;
         }
