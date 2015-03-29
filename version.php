@@ -29,20 +29,3 @@ $plugin->maturity  = MATURITY_STABLE;
 $plugin->cron     = 0;
 $plugin->component = 'mod_attendance';
 
-// Nasty upgrade code to check if need to upgrade from attforblock.
-// TODO: remove this asap.
-if (defined('MOODLE_INTERNAL')) { // Only run if config.php has already been included.
-    global $DB;
-    $moduleexists = false;
-
-    try {
-        $moduleexists = $DB->record_exists('modules', array('name' =>'attforblock'));
-    } catch (Exception $e) {
-        // Probably a fresh install - modules table doesn't exist
-    }
-    if ($moduleexists) {
-        require_once('locallib.php');
-        attforblock_upgrade();
-    }
-
-}
