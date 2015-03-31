@@ -1047,7 +1047,7 @@ class attendance {
 
             // CONTRIB-4868
             $mintime = 'MIN(CASE WHEN (ue.timestart > :zerotime) THEN ue.timestart ELSE ue.timecreated END)';
-            $maxtime = 'MAX(ue.timeend)';
+            $maxtime = 'CASE WHEN MIN(ue.timeend) = 0 THEN 0 ELSE MAX(ue.timeend) END';
 
             // CONTRIB-3549
             $sql = "SELECT ue.userid, ue.status,
