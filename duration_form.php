@@ -61,8 +61,11 @@ class mod_attendance_duration_form extends moodleform {
         $mform->addGroup($durselect, 'durtime', get_string('newduration', 'attendance'), array(' '), true);
 
         $mform->addElement('hidden', 'ids', $ids);
+        $mform->setType('ids', PARAM_ALPHANUMEXT);
         $mform->addElement('hidden', 'id', $cm->id);
+        $mform->setType('id', PARAM_INT);
         $mform->addElement('hidden', 'action', att_sessions_page_params::ACTION_CHANGE_DURATION);
+        $mform->setType('action', PARAM_INT);
 
         $mform->setDefaults(array('durtime' => array('hours'=>0, 'minutes'=>0)));
 
