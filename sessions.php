@@ -126,7 +126,7 @@ switch ($att->pageparams->action) {
             }
             redirect($att->url_manage(), get_string('sessiondeleted', 'attendance'));
         }
-        $sessid = required_param('sessid', PARAM_SEQUENCE);
+        $sessid = required_param_array('sessid', PARAM_SEQUENCE);
 
         $sessionsinfo = $att->get_sessions_info($sessid);
 
@@ -149,10 +149,10 @@ switch ($att->pageparams->action) {
         echo $OUTPUT->footer();
         exit;
     case att_sessions_page_params::ACTION_CHANGE_DURATION:
-        $sessid = optional_param('sessid', '', PARAM_SEQUENCE);
+        $sessid = optional_param_array('sessid', '', PARAM_SEQUENCE);
         $ids = optional_param('ids', '', PARAM_ALPHANUMEXT);
 
-        $slist = isset($sessid) ? implode('_', $sessid) : '';
+        $slist = !empty($sessid) ? implode('_', $sessid) : '';
 
         $url = $att->url_sessions(array('action' => att_sessions_page_params::ACTION_CHANGE_DURATION));
         $formparams['ids'] = $slist;
