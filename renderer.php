@@ -294,6 +294,9 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $options = array(
                         att_sessions_page_params::ACTION_DELETE_SELECTED => get_string('delete'),
                         att_sessions_page_params::ACTION_CHANGE_DURATION => get_string('changeduration', 'attendance'));
+
+
+
             $controls = html_writer::select($options, 'action');
             $attributes = array(
                     'type'  => 'submit',

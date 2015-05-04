@@ -33,6 +33,13 @@ $pageparams = new att_sessions_page_params();
 $id                     = required_param('id', PARAM_INT);
 $pageparams->action     = required_param('action', PARAM_INT);
 
+if (empty($pageparams->action)) {
+    // The form on manage.php can submit with the "choose" option - this should be fixed in the long term,
+    // but in the meantime show a useful error and redirect when it occurs.
+    $url = new moodle_url('/mod/attendance/view.php', array('id' => $id));
+    redirect($url, get_string('invalidaction', 'mod_attendance'), 2);
+}
+
 $cm             = get_coursemodule_from_id('attendance', $id, 0, false, MUST_EXIST);
 $course         = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
 $att            = $DB->get_record('attendance', array('id' => $cm->instance), '*', MUST_EXIST);
