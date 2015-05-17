@@ -707,8 +707,9 @@ class attendance {
         } else {
             $where = "attendanceid = :aid AND sessdate >= :csdate";
         }
+
         if ($this->pageparams->get_current_sesstype() > att_page_with_filter_controls::SESSTYPE_ALL) {
-            $where .= " AND groupid=:cgroup";
+            $where .= " AND (groupid = :cgroup OR groupid = 0)";
         }
         $params = array(
                 'aid'       => $this->id,
