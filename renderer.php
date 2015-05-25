@@ -632,7 +632,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             foreach ($takedata->statuses as $st) {
                 $params = array(
                         'type'  => 'radio',
-                        'name'  => 'user'.$user->id,
+                        'name'  => 'users['.$user->id.'][statusid]',
                         'class' => 'st'.$st->id,
                         'value' => $st->id);
                 if (array_key_exists($user->id, $takedata->sessionlog) and $st->id == $takedata->sessionlog[$user->id]->statusid) {
@@ -641,15 +641,17 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
                 $input = html_writer::empty_tag('input', $params);
 
+
                 if ($takedata->pageparams->viewmode == att_take_page_params::SORTED_GRID) {
                     $input = html_writer::tag('nobr', $input . $st->acronym);
                 }
 
                 $celldata['text'][] = $input;
+
             }
             $params = array(
                     'type'  => 'text',
-                    'name'  => 'remarks'.$user->id,
+                    'name'  => 'users['.$user->id.'][remarks]',
                     'maxlength' => 255);
             if (array_key_exists($user->id, $takedata->sessionlog)) {
                 $params['value'] = $takedata->sessionlog[$user->id]->remarks;
@@ -661,6 +663,13 @@ class mod_attendance_renderer extends plugin_renderer_base {
                                                   userdate($user->enrolmentstart, '%H:%M %d.%m.%Y'));
                 $celldata['class'] = 'userwithoutenrol';
             }
+
+            $params = array(
+                    'type'  => 'hidden',
+                    'name'  => 'users['.$user->id.'][userid]',
+                    'value' => $user->id);
+            $celldata['text'][] = html_writer::empty_tag('input', $params);
+
         }
 
         return $celldata;

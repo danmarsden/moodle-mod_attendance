@@ -53,7 +53,8 @@ if (!$att->perm->can_take_session($pageparams->grouptype)) {
     throw new moodle_exception('cannottakeforgroup', 'attendance', '', $group->name);
 }
 if (($formdata = data_submitted()) && confirm_sesskey()) {
-    $att->take_from_form_data($formdata);
+    $att->take_attendance($formdata);
+    $att->redirect_after_take_from_form($formdata);
 }
 
 $PAGE->set_url($att->url_take());
@@ -66,6 +67,7 @@ $PAGE->navbar->add($att->name);
 $output = $PAGE->get_renderer('mod_attendance');
 $tabs = new attendance_tabs($att);
 $sesstable = new attendance_take_data($att);
+
 
 // Output starts here.
 

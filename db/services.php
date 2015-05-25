@@ -15,16 +15,27 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information
- *
+ * Web service for mod attendance
  * @package    mod_attendance
- * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
+ * @copyright  2015 Daniel Neis Araujo <danielneis@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$plugin->version  = 2015052900;
-$plugin->requires = 2014042900;
-$plugin->release = '2.9.1';
-$plugin->maturity  = MATURITY_STABLE;
-$plugin->cron     = 0;
-$plugin->component = 'mod_attendance';
+$functions = array(
+
+    'mod_attendance_take_attendance' => array(
+            'classname'   => 'mod_attendance_external',
+            'methodname'  => 'take_attendance',
+            'classpath'   => 'mod/attendance/externallib.php',
+            'description' => 'Register (add/update) attendance logs',
+            'type'        => 'write'
+    ),
+
+    'mod_attendance_add_sessions' => array(
+            'classname'   => 'mod_attendance_external',
+            'methodname'  => 'add_sessions',
+            'classpath'   => 'mod/attendance/externallib.php',
+            'description' => 'Add sessions to an attendance',
+            'type'        => 'write'
+    ),
+);
