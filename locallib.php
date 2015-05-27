@@ -878,7 +878,7 @@ class attendance {
             return false;
         }
         else {
-            $DB->insert_record('attendance_log', $record, false);
+            $logid = $DB->insert_record('attendance_log', $record, false);
         }
 
         // Update the session to show that a register has been taken, or staff may overwrite records.
@@ -898,7 +898,9 @@ class attendance {
         $params = array(
                 'sessionid' => $this->pageparams->sessionid,
                 'grouptype' => 0);
-               
+
+        $record->id = $logid;
+
         // Log the change.
         $event = \mod_attendance\event\attendance_taken_by_student::create(array(
             'objectid' => $this->id,
