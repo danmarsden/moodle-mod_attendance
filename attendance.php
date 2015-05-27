@@ -51,6 +51,8 @@ require_sesskey();
 $mform = new mod_attendance_student_attendance_form(null,
         array('course' => $course, 'cm' => $cm, 'modcontext' => $PAGE->context, 'session' => $attforsession, 'attendance' => $att));
 
+$PAGE->set_url($att->url_sessions());
+
 if ($mform->is_cancelled()) {
     // The user cancelled the form, so redirect them to the view page.
     $url = new moodle_url('/mod/attendance/view.php', array('id' => $cm->id));
@@ -72,7 +74,6 @@ if ($mform->is_cancelled()) {
     $mform->set_data($fromform);
 }
 
-$PAGE->set_url($att->url_sessions());
 $PAGE->set_title($course->shortname. ": ".$att->name);
 $PAGE->set_heading($course->fullname);
 $PAGE->set_cacheable(true);
