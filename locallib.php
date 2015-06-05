@@ -870,9 +870,9 @@ class attendance {
             // Already recorded do not save.
             return false;
         }
-        else {
-            $DB->insert_record('attendance_log', $record, false);
-        }
+
+        $logid = $DB->insert_record('attendance_log', $record, false);
+        $record->id = $logid;
 
         // Update the session to show that a register has been taken, or staff may overwrite records.
         $session = $this->get_session_info($mformdata->sessid);
