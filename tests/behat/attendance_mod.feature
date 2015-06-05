@@ -78,6 +78,7 @@ Feature: Teachers and Students can record session attendance
         Then "Attendance report viewed" "link" should exist
 
     # Dependency - selenium running with firefox profile with auto saving of txt files to $CFG->behat_download.
+    # e.g. $CFG->behat_download = 'C:\\Users\\username\\Downloads\\';
     @javascript @_file_download
     Scenario: Export report includes id number, department and institution
         When I log in as "teacher1"
@@ -89,9 +90,9 @@ Feature: Teachers and Students can record session attendance
         And I click on "id_submitbutton" "button"
         And I follow "Continue"
         And I follow "Export"
-        Then the "id_ident_idnumber" checkbox should not be checked
-        And the "id_ident_institution" checkbox should not be checked
-        And the "id_ident_department" checkbox should not be checked
+        Then the field "id_ident_idnumber" matches value ""
+        And the field "id_ident_institution" matches value ""
+        And the field "id_ident_department" matches value ""
         And I set the field "id_ident_idnumber" to "1"
         And I set the field "id_ident_institution" to "1"
         And I set the field "id_ident_department" to "1"
