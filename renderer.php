@@ -849,7 +849,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $table->size[] = '1px';
 
             if ($reportdata->pageparams->view == ATT_VIEW_SUMMARY) {
-                $table->head[] = get_string('attendancepercent', 'attendance');
+                $table->head[] = get_string('attendancepercenttaken', 'attendance');
                 $table->align[] = 'center';
                 $table->size[] = '1px';
 
@@ -857,11 +857,11 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 $table->align[] = 'center';
                 $table->size[] = '1px';
 
-                $table->head[] = get_string('maxgrade', 'attendance');
+                $table->head[] = get_string('modgrademaxgrade', 'grades');
                 $table->align[] = 'center';
                 $table->size[] = '1px';
 
-                $table->head[] = get_string('attendancepercent', 'attendance');
+                $table->head[] = get_string('attendancepercentall', 'attendance');
                 $table->align[] = 'center';
                 $table->size[] = '1px';
             }

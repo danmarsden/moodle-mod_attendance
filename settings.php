@@ -41,8 +41,4 @@ if ($ADMIN->fulltree) {
 
     $settings->add(new admin_setting_configselect('attendance/resultsperpage',
         get_string('resultsperpage', 'attendance'), get_string('resultsperpage_desc', 'attendance'), 25, $options));
-
-    $settings->add(new admin_setting_configtext('attendance/maximumpoints',
-        get_string('maximumpoints', 'attendance'), get_string('maximumpoints_desc', 'attendance'), 100, PARAM_INT));
-
 }

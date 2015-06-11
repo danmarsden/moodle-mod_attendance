@@ -42,6 +42,7 @@ class mod_attendance_mod_form extends moodleform_mod {
      * @return void
      */
     public function definition() {
+        global $CFG;
         $mform    =& $this->_form;
 
         $mform->addElement('header', 'general', get_string('general', 'form'));
@@ -52,7 +53,7 @@ class mod_attendance_mod_form extends moodleform_mod {
         $mform->setDefault('name', get_string('modulename', 'attendance'));
 
         $mform->addElement('modgrade', 'grade', get_string('grade'));
-        $mform->setDefault('grade', get_config('attendance' ,'maximumpoints'));
+        $mform->setDefault('grade', $CFG->gradepointdefault);
 
         $this->standard_coursemodule_elements(true);
         $this->add_action_buttons();
