@@ -33,7 +33,24 @@ function xmldb_attendance_upgrade($oldversion=0) {
     $dbman = $DB->get_manager(); // Loads ddl manager and xmldb classes.
 
     $result = true;
-
+    
+    if ($oldversion < %NEW_VERSION%) // Please replace %NEW_VERSION% with the prospect version number in version.php
+    {
+        $field = new xmldb_field('intro');
+        $field->set_attributes(XMLDB_TYPE_TEXT);
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        
+		$field = new xmldb_field('introformat');
+        $field->set_attributes(XMLDB_TYPE_INTEGER, '4', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        
+        upgrade_mod_savepoint($result, %NEW_VERSION%, 'attendance');
+    }
+    
     if ($oldversion < 2014112000) {
         $table = new xmldb_table('attendance_sessions');
 
