@@ -30,25 +30,18 @@
  * @return mixed true if the feature is supported, null if unknown
  */
 function attendance_supports($feature) {
-    switch($feature) {
-        case FEATURE_GRADE_HAS_GRADE:
-            return true;
-        case FEATURE_GROUPS:
-            return true;
-        case FEATURE_GROUPINGS:
-            return true;
-        case FEATURE_GROUPMEMBERSONLY:
-            return true;
-        case FEATURE_MOD_INTRO:
-            return false;
-        case FEATURE_BACKUP_MOODLE2:
-            return true;
-        // Artem Andreev: AFAIK it's not tested.
-        case FEATURE_COMPLETION_TRACKS_VIEWS:
-            return false;
-        default:
-            return null;
-    }
+    switch($feature)
+	{
+		case FEATURE_GRADE_HAS_GRADE:			return true;
+		case FEATURE_GROUPS:					return true;
+		case FEATURE_GROUPINGS:					return true;
+		case FEATURE_GROUPMEMBERSONLY:			return true;
+		case FEATURE_MOD_INTRO:					return true; // has no effect at the moment
+		case FEATURE_SHOW_DESCRIPTION:			return true;
+		case FEATURE_BACKUP_MOODLE2:			return true;
+		case FEATURE_COMPLETION_TRACKS_VIEWS:	return true;
+		default:								return null;
+	}
 }
 
 function att_add_default_statuses($attid) {
