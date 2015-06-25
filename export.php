@@ -118,6 +118,7 @@ if ($mform->is_submitted()) {
         }
         if ($reportdata->gradable) {
             $data->tabhead[] = get_string('grade');
+            $data->tabhead[] = get_string('percentage', 'attendance');
         }
 
         $i = 0;
@@ -151,7 +152,14 @@ if ($mform->is_submitted()) {
             $cellsgenerator = new user_sessions_cells_text_generator($reportdata, $user);
             $data->table[$i] = array_merge($data->table[$i], $cellsgenerator->get_cells(isset($formdata->includeremarks)));
             if ($reportdata->gradable) {
-                $data->table[$i][] = $reportdata->grades[$user->id].' / '.$reportdata->maxgrades[$user->id];
+                $data->table[$i][] = format_float($reportdata->grades[$user->id]).' / '.
+                    format_float($reportdata->maxgrades[$user->id]);
+                if ($reportdata->maxgrades[$user->id]) {
+                    $percent = $reportdata->grades[$user->id] * 100.0 / $reportdata->maxgrades[$user->id];
+                } else {
+                    $percent = 0.0;
+                }
+                $data->table[$i][] = $percent;
             }
             $i++;
         }

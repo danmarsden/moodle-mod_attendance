@@ -860,7 +860,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             }
 
             if ($reportdata->gradable) {
-                $row->cells[] = $reportdata->grades[$user->id].' / '.$reportdata->maxgrades[$user->id];
+                $row->cells[] = format_float($reportdata->grades[$user->id]).' / '.format_float($reportdata->maxgrades[$user->id]);
             }
 
             if ($reportdata->sessionslog) {
@@ -962,7 +962,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $table->data[$i][] = $i;
             $table->data[$i][] = $this->construct_text_input('acronym['.$st->id.']', 2, 2, $st->acronym);
             $table->data[$i][] = $this->construct_text_input('description['.$st->id.']', 30, 30, $st->description);
-            $table->data[$i][] = $this->construct_text_input('grade['.$st->id.']', 4, 4, $st->grade);
+            $table->data[$i][] = $this->construct_text_input('grade['.$st->id.']', 4, 4, format_float($st->grade));
             $table->data[$i][] = $this->construct_preferences_actions_icons($st, $prefdata);
 
             $i++;

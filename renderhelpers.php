@@ -237,7 +237,7 @@ function construct_user_data_stat($stat, $statuses, $gradable, $grade, $maxgrade
         $row = new html_table_row();
         $row->cells[] = get_string('attendancegrade', 'attendance') .
                         $OUTPUT->help_icon('gradebookexplanation', 'attendance') . ':';
-        $row->cells[] = $grade . ' / ' . $maxgrade;
+        $row->cells[] = format_float($grade) . ' / ' . format_float($maxgrade);
         $stattable->data[] = $row;
 
         $row = new html_table_row();
@@ -247,7 +247,7 @@ function construct_user_data_stat($stat, $statuses, $gradable, $grade, $maxgrade
         } else {
             $percent = $grade / $maxgrade * 100;
         }
-        $row->cells[] = sprintf("%0.{$decimalpoints}f", $percent);
+        $row->cells[] = format_float(sprintf("%0.{$decimalpoints}f", $percent));
         $stattable->data[] = $row;
     }
 

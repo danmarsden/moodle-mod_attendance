@@ -145,5 +145,18 @@ function xmldb_attendance_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2015040502, 'attendance');
     }
 
+    if ($oldversion < 2015040503) {
+
+        // Changing type of field grade on table attendance_statuses to number.
+        $table = new xmldb_table('attendance_statuses');
+        $field = new xmldb_field('grade', XMLDB_TYPE_NUMBER, '5, 2', null, XMLDB_NOTNULL, null, '0', 'description');
+
+        // Launch change of type for field grade.
+        $dbman->change_field_type($table, $field);
+
+        // Attendance savepoint reached.
+        upgrade_mod_savepoint(true, 2015040503, 'attendance');
+    }
+
     return $result;
 }
