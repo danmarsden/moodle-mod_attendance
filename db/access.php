@@ -117,5 +117,18 @@ $capabilities = array(
         'archetypes' => array(
             'student' => CAP_ALLOW
         )
-    )
+    ),
+
+    // Allow teachers to manage temporary users.
+    'mod/attendance:managetemporaryusers' => array(
+        'riskbitmask' => RISK_DATALOSS,
+
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+            'teacher' => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW
+        )
+    ),
 );

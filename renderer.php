@@ -495,7 +495,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $row = new html_table_row();
             $row->cells[] = $i;
             $fullname = html_writer::link($takedata->url_view(array('studentid' => $user->id)), fullname($user));
-            $fullname = $this->output->user_picture($user).$fullname;
+            $fullname = $this->user_picture($user).$fullname; // Show different picture if it is a temporary user.
 
             $ucdata = $this->construct_take_user_controls($takedata, $user);
             if (array_key_exists('warning', $ucdata)) {
@@ -540,7 +540,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $i = 0;
         $row = new html_table_row();
         foreach ($takedata->users as $user) {
-            $celltext = $this->output->user_picture($user, array('size' => 100));
+            $celltext = $this->user_picture($user, array('size' => 100));  // Show different picture if it is a temporary user.
             $celltext .= html_writer::empty_tag('br');
             $fullname = html_writer::link($takedata->url_view(array('studentid' => $user->id)), fullname($user));
             $celltext .= html_writer::tag('span', $fullname, array('class' => 'fullname'));
@@ -656,7 +656,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
         $table->attributes['class'] = 'userinfobox';
         $table->colclasses = array('left side', '');
-        $table->data[0][] = $this->output->user_picture($userdata->user, array('size' => 100));
+        $table->data[0][] = $this->user_picture($userdata->user, array('size' => 100));  // Show different picture if it is a temporary user.
         $table->data[0][] = $this->construct_user_data($userdata);
 
         $o .= html_writer::table($table);
@@ -671,9 +671,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
                         $userdata->url()->out(true, array('mode' => att_view_page_params::MODE_THIS_COURSE)),
                         get_string('thiscourse', 'attendance'));
 
-        $tabs[] = new tabobject(att_view_page_params::MODE_ALL_COURSES,
-                        $userdata->url()->out(true, array('mode' => att_view_page_params::MODE_ALL_COURSES)),
-                        get_string('allcourses', 'attendance'));
+        // Skip the 'all courses' tab for 'temporary' users.
+        if ($userdata->user->type == 'standard') {
+            $tabs[] = new tabobject(att_view_page_params::MODE_ALL_COURSES,
+                            $userdata->url()->out(true, array('mode' => att_view_page_params::MODE_ALL_COURSES)),
+                            get_string('allcourses', 'attendance'));
+        }
 
         return print_tabs(array($tabs), $userdata->pageparams->mode, null, null, true);
     }
@@ -842,7 +845,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         foreach ($reportdata->users as $user) {
             $row = new html_table_row();
 
-            $row->cells[] = $this->output->user_picture($user);
+            $row->cells[] = $this->user_picture($user);  // Show different picture if it is a temporary user.
             $row->cells[] = html_writer::link($reportdata->url_view(array('studentid' => $user->id)), fullname($user));
             $cellsgenerator = new user_sessions_cells_html_generator($reportdata, $user);
             $row->cells = array_merge($row->cells, $cellsgenerator->get_cells());
@@ -1006,4 +1009,20 @@ class mod_attendance_renderer extends plugin_renderer_base {
         return html_writer::empty_tag('input', $attributes);
     }
 
+    // Show different picture if it is a temporary user.
+    protected function user_picture($user, array $opts = null) {
+        if ($user->type == 'temporary') {
+            $attrib = array(
+                'width' => '35',
+                'height' => '35',
+                'class' => 'userpicture defaultuserpic',
+            );
+            if (isset($opts['size'])) {
+                $attrib['width'] = $attrib['height'] = $opts['size'];
+            }
+            return $this->output->pix_icon('ghost', '', 'mod_attendance', $attrib);
+        }
+
+        return $this->output->user_picture($user, $opts);
+    }
 }

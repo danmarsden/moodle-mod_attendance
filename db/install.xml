@@ -80,5 +80,22 @@
         <INDEX NAME="deleted" UNIQUE="false" FIELDS="deleted"/>
       </INDEXES>
     </TABLE>
+    <TABLE NAME="attendance_tempusers" COMMENT="Stores temporary users details">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="studentid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="student id"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="course id"/>
+        <FIELD NAME="fullname" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false" COMMENT="temp user fullname"/>
+        <FIELD NAME="email" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false" COMMENT="temporary user email"/>
+        <FIELD NAME="created" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="unix timestamp for temp user creation"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="courseid" UNIQUE="false" FIELDS="courseid"/>
+        <INDEX NAME="studentid" UNIQUE="true" FIELDS="studentid"/>
+      </INDEXES>
+    </TABLE>
   </TABLES>
 </XMLDB>

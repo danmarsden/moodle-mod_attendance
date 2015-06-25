@@ -42,6 +42,7 @@ class attendance_tabs implements renderable {
     const TAB_REPORT        = 3;
     const TAB_EXPORT        = 4;
     const TAB_PREFERENCES   = 5;
+    const TAB_TEMPORARYUSERS = 6; // Tab for managing temporary users.
 
     public $currenttab;
 
@@ -91,6 +92,10 @@ class attendance_tabs implements renderable {
         if ($this->att->perm->can_change_preferences()) {
             $toprow[] = new tabobject(self::TAB_PREFERENCES, $this->att->url_preferences()->out(),
                         get_string('settings', 'attendance'));
+        }
+        if ($this->att->perm->can_managetemp()) {
+            $toprow[] = new tabobject(self::TAB_TEMPORARYUSERS, $this->att->url_managetemp()->out(),
+                                      get_string('tempusers', 'attendance'));
         }
 
         return array($toprow);

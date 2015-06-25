@@ -85,5 +85,41 @@ function xmldb_attendance_upgrade($oldversion=0) {
         upgrade_plugin_savepoint($result, 2014112001, 'mod', 'attendance');
     }
 
+    if ($oldversion < 2015040501) {
+        // Define table attendance_tempusers to be created.
+        $table = new xmldb_table('attendance_tempusers');
+
+        // Adding fields to table attendance_tempusers.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('studentid', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+        $table->add_field('courseid', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+        $table->add_field('fullname', XMLDB_TYPE_CHAR, '100', null, null, null, null);
+        $table->add_field('email', XMLDB_TYPE_CHAR, '100', null, null, null, null);
+        $table->add_field('created', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+
+        // Adding keys to table attendance_tempusers.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+
+        // Conditionally launch create table for attendance_tempusers.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Conditionally launch add index courseid.
+        $index = new xmldb_index('courseid', XMLDB_INDEX_NOTUNIQUE, array('courseid'));
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        // Conditionally launch add index studentid.
+        $index = new xmldb_index('studentid', XMLDB_INDEX_UNIQUE, array('studentid'));
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        // Attendance savepoint reached.
+        upgrade_mod_savepoint(true, 2015040501, 'attendance');
+    }
+
     return $result;
 }

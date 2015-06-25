@@ -44,6 +44,7 @@ class attendance_permissions {
     private $cantake;
     private $canchange;
     private $canmanage;
+    private $canmanagetemp; // Can manage temporary users.
     private $canchangepreferences;
     private $canexport;
     private $canbelisted;
@@ -121,6 +122,18 @@ class attendance_permissions {
 
     public function require_manage_capability() {
         require_capability('mod/attendance:manageattendances', $this->context);
+    }
+    
+    // Check to see if the user can manage temporary users.
+    public function can_managetemp() {
+        if (is_null($this->canmanagetemp)) {
+            $this->canmanagetemp = has_capability('mod/attendance:managetemporaryusers', $this->context);
+        }
+        return $this->canmanagetemp;
+    }
+
+    public function require_managetemp_capability() {
+        require_capability('mod/attendance:managetemporaryusers', $this->context);
     }
 
     public function can_change_preferences() {
@@ -588,7 +601,7 @@ class attendance {
         $this->cm           = $cm;
         $this->course       = $course;
         if (is_null($context)) {
-            $this->context = context_module::instance_by_id($this->cm->id);
+            $this->context = context_module::instance($this->cm->id);
         } else {
             $this->context = $context;
         }
@@ -736,6 +749,42 @@ class attendance {
     public function url_manage($params=array()) {
         $params = array_merge(array('id' => $this->cm->id), $params);
         return new moodle_url('/mod/attendance/manage.php', $params);
+    }
+
+    /**
+     * @param array $params optional
+     * @return moodle_url of tempusers.php for attendance instance
+     */
+    public function url_managetemp($params=array()) {
+        $params = array_merge(array('id' => $this->cm->id), $params);
+        return new moodle_url('/mod/attendance/tempusers.php', $params);
+    }
+
+    /**
+     * @param array $params optional
+     * @return moodle_url of tempdelete.php for attendance instance
+     */
+    public function url_tempdelete($params=array()) {
+        $params = array_merge(array('id' => $this->cm->id, 'action' => 'delete'), $params);
+        return new moodle_url('/mod/attendance/tempedit.php', $params);
+    }
+
+    /**
+     * @param array $params optional
+     * @return moodle_url of tempedit.php for attendance instance
+     */
+    public function url_tempedit($params=array()) {
+        $params = array_merge(array('id' => $this->cm->id), $params);
+        return new moodle_url('/mod/attendance/tempedit.php', $params);
+    }
+
+    /**
+     * @param array $params optional
+     * @return moodle_url of tempedit.php for attendance instance
+     */
+    public function url_tempmerge($params=array()) {
+        $params = array_merge(array('id' => $this->cm->id), $params);
+        return new moodle_url('/mod/attendance/tempmerge.php', $params);
     }
 
     /**
@@ -1058,16 +1107,52 @@ class attendance {
                 $users[$user->id]->enrolmentstatus = $enrolments[$user->id]->status;
                 $users[$user->id]->enrolmentstart = $enrolments[$user->id]->mintime;
                 $users[$user->id]->enrolmentend = $enrolments[$user->id]->maxtime;
+                $users[$user->id]->type = 'standard'; // Mark as a standard (not a temporary) user.
             }
         }
 
+        // Add the 'temporary' users to this list.
+        $tempusers = $DB->get_records('attendance_tempusers', array('courseid' => $this->course->id));
+        foreach ($tempusers as $tempuser) {
+            $users[] = self::tempuser_to_user($tempuser);
+        }
+
         return $users;
+    }
+
+    // Convert a tempuser record into a user object.
+    protected static function tempuser_to_user($tempuser) {
+        $ret = (object)array(
+            'id' => $tempuser->studentid,
+            'firstname' => $tempuser->fullname,
+            'email' => $tempuser->email,
+            'username' => '',
+            'enrolmentstatus' => 0,
+            'enrolmentstart' => 0,
+            'enrolmentend' => 0,
+            'picture' => 0,
+            'type' => 'temporary',
+        );
+        foreach (get_all_user_name_fields() as $namefield) {
+            if (!isset($ret->$namefield)) {
+                $ret->$namefield = '';
+            }
+        }
+        return $ret;
     }
 
     public function get_user($userid) {
         global $DB;
 
         $user = $DB->get_record('user', array('id' => $userid), '*', MUST_EXIST);
+
+        // Look for 'temporary' users and return their details from the attendance_tempusers table.
+        if ($user->idnumber == 'tempghost') {
+            $tempuser = $DB->get_record('attendance_tempusers', array('studentid' => $userid), '*', MUST_EXIST);
+            return self::tempuser_to_user($tempuser);
+        }
+
+        $user->type = 'standard';
 
         // CONTRIB-4868
         $mintime = 'MIN(CASE WHEN (ue.timestart > :zerotime) THEN ue.timestart ELSE ue.timecreated END)';
@@ -1516,7 +1601,33 @@ class attendance {
         $event->trigger();
     }
 
+    /**
+     * Check if the email address is already in use by either another temporary user,
+     * or a real user.
+     *
+     * @param string $email the address to check for
+     * @param int $tempuserid optional the ID of the temporary user (to avoid matching against themself)
+     * @return null|string the error message to display, null if there is no error
+     */
+    public static function check_existing_email($email, $tempuserid = 0) {
+        global $DB;
+
+        if (empty($email)) {
+            return null; // Fine to create temporary users without an email address.
+        }
+        if ($tempuser = $DB->get_record('attendance_tempusers', array('email' => $email), 'id')) {
+            if ($tempuser->id != $tempuserid) {
+                return get_string('tempexists', 'attendance');
+            }
+        }
+        if ($DB->record_exists('user', array('email' => $email))) {
+            return get_string('userexists', 'attendance');
+        }
+
+        return null;
+    }
 }
+
 
 function att_get_statuses($attid, $onlyvisible=true) {
     global $DB;
