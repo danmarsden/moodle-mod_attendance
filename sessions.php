@@ -50,7 +50,7 @@ $att = new attendance($att, $cm, $course, $PAGE->context, $pageparams);
 
 $att->perm->require_manage_capability();
 
-$PAGE->set_url($att->url_sessions());
+$PAGE->set_url($att->url_sessions(array('action'=>$pageparams->action)));
 $PAGE->set_title($course->shortname. ": ".$att->name);
 $PAGE->set_heading($course->fullname);
 $PAGE->set_cacheable(true);
