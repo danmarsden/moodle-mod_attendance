@@ -50,8 +50,7 @@ $PAGE->navbar->add(get_string('export', 'attendance'));
 $formparams = array('course' => $course, 'cm' => $cm, 'modcontext' => $PAGE->context);
 $mform = new mod_attendance_export_form($att->url_export(), $formparams);
 
-if ($mform->is_submitted()) {
-    $formdata = $mform->get_data();
+if ($formdata = $mform->get_data()) {
 
     $pageparams = new att_page_with_filter_controls();
     $pageparams->init($cm);
@@ -69,6 +68,9 @@ if ($mform->is_submitted()) {
     } else {
         $pageparams->startdate = $formdata->sessionstartdate;
         $pageparams->enddate = $formdata->sessionenddate;
+    }
+    if ($formdata->selectedusers) {
+        $pageparams->userids = $formdata->users;
     }
     $att->pageparams = $pageparams;
 

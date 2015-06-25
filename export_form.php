@@ -39,7 +39,7 @@ class mod_attendance_export_form extends moodleform {
      */
     public function definition() {
 
-        global $USER;
+        global $USER, $DB, $PAGE;
         $mform    =& $this->_form;
 
         $course        = $this->_customdata['course'];
@@ -59,6 +59,43 @@ class mod_attendance_export_form extends moodleform {
             }
         }
         $mform->addElement('select', 'group', get_string('group'), $grouplist);
+
+
+        // Restrict the export to the selected users.
+        $namefields = get_all_user_name_fields(true, 'u');
+        $allusers = get_enrolled_users($modcontext, 'mod/attendance:canbelisted', 0, 'u.id,'.$namefields);
+        $userlist = array();
+        foreach ($allusers as $user) {
+            $userlist[$user->id] = fullname($user);
+        }
+        unset($allusers);
+        $tempusers = $DB->get_records('attendance_tempusers', array('courseid' => $course->id), 'studentid, fullname');
+        foreach ($tempusers as $user) {
+            $userlist[$user->studentid] = $user->fullname;
+        }
+        list($gsql, $gparams) = $DB->get_in_or_equal(array_keys($grouplist), SQL_PARAMS_NAMED);
+        list($usql, $uparams) = $DB->get_in_or_equal(array_keys($userlist), SQL_PARAMS_NAMED);
+        $params = array_merge($gparams, $uparams);
+        $groupmembers = $DB->get_recordset_select('groups_members', "groupid {$gsql} AND userid {$usql}", $params,
+                                                  '', 'groupid, userid');
+        $groupmappings = array();
+        foreach ($groupmembers as $groupmember) {
+            if (!isset($groupmappings[$groupmember->groupid])) {
+                $groupmappings[$groupmember->groupid] = array();
+            }
+            $groupmappings[$groupmember->groupid][$groupmember->userid] = $userlist[$groupmember->userid];
+        }
+        if (isset($grouplist[0])) {
+            $groupmappings[0] = $userlist;
+        }
+
+        $mform->addElement('selectyesno', 'selectedusers', get_string('onlyselectedusers', 'mod_attendance'));
+        $sel = $mform->addElement('select', 'users', get_string('users', 'mod_attendance'), $userlist, array('size' => 12));
+        $sel->setMultiple(true);
+        $mform->disabledIf('users', 'selectedusers', 'eq', 0);
+
+        $opts = array('groupmappings' => $groupmappings);
+        $PAGE->requires->yui_module('moodle-mod_attendance-groupfilter', 'M.mod_attendance.groupfilter.init', array($opts));
 
         $ident = array();
         $ident[] =& $mform->createElement('checkbox', 'id', '', get_string('studentid', 'attendance'));
@@ -95,6 +132,17 @@ class mod_attendance_export_form extends moodleform {
         $this->add_action_buttons(false, $submit_string);
 
         $mform->addElement('hidden', 'id', $cm->id);
+    }
+
+    function validation($data, $files) {
+        $errors = parent::validation($data, $files);
+
+       // Validate the 'users' field.
+        if ($data['selectedusers'] && empty($data['users'])) {
+            $errors['users'] = get_string('mustselectusers', 'mod_attendance');
+        }
+
+        return $errors;
     }
 }
 

@@ -111,6 +111,40 @@ Feature: Test the various new features in the attendance module
     And "A" "text" should exist in the "Student 3" "table_row"
     And I should not see "Temporary user 2"
 
+  Scenario: A teacher can select a subset of users for export
+    Given the following "groups" exist:
+      | course | name   | idnumber |
+      | C1     | Group1 | Group1   |
+      | C1     | Group2 | Group2   |
+    And the following "group members" exist:
+      | group  | user     |
+      | Group1 | student1 |
+      | Group1 | student2 |
+      | Group2 | student2 |
+      | Group2 | student3 |
+
+    And I log in as "teacher1"
+    And I follow "Course 1"
+    And I follow "Test attendance"
+    And I follow "Add"
+    And I set the following fields to these values:
+      | Create multiple sessions | 0 |
+    And I click on "submitbutton" "button"
+
+    And I follow "Export"
+
+    When I set the field "Export specific users" to "Yes"
+    And I set the field "Group" to "Group1"
+    Then the "Users to export" select box should contain "Student 1"
+    And the "Users to export" select box should contain "Student 2"
+    And the "Users to export" select box should not contain "Student 3"
+
+    When I set the field "Group" to "Group2"
+    Then the "Users to export" select box should contain "Student 2"
+    And the "Users to export" select box should contain "Student 3"
+    And the "Users to export" select box should not contain "Student 1"
+    # Ideally the download would be tested here, but that is difficult to configure.
+
   Scenario: A teacher can create and use multiple status lists
     Given I log in as "teacher1"
     And I follow "Course 1"
