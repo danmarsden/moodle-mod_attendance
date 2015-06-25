@@ -489,6 +489,23 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $table->size[] = '20px';
         $table->attributes['class'] = 'generaltable takelist';
 
+        // Show a 'select all' row of radio buttons.
+        $row = new html_table_row();
+        $row->cells[] = '';
+        $row->cells[] = html_writer::div(get_string('setallstatuses', 'attendance'), 'setallstatuses');
+        foreach ($takedata->statuses as $st) {
+            $attribs = array(
+                'type' => 'radio',
+                'title' => get_string('setallstatusesto', 'attendance', $st->description),
+                'onclick' => "select_all_in(null, 'st" . $st->id . "', null);",
+                'name' => 'setallstatuses',
+                'class' => "st{$st->id}",
+            );
+            $row->cells[] = html_writer::empty_tag('input', $attribs);
+        }
+        $row->cells[] = '';
+        $table->data[] = $row;
+
         $i = 0;
         foreach ($takedata->users as $user) {
             $i++;

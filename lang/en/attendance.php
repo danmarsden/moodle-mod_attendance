@@ -234,6 +234,7 @@ $string['sessiontype_help'] = 'There are two types of sessions: common and group
 ';
 $string['sessiontypeshort'] = 'Type';
 $string['sessionupdated'] = 'Session successfully updated';
+$string['setallstatuses'] = 'Set status for all users';
 $string['setallstatusesto'] = 'Set status for all users to «{$a}»';
 $string['settings'] = 'Settings';
 $string['showdefaults'] = 'Show defaults';

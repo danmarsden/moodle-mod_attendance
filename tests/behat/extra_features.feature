@@ -194,3 +194,20 @@ Feature: Test the various new features in the attendance module
     And "Set status for all users to «OK»" "link" should exist
     And "Set status for all users to «Bad»" "link" should exist
 
+  Scenario: A teacher can use the radio buttons to set attendance values for all users
+    Given I log in as "teacher1"
+    And I follow "Course 1"
+    And I follow "Test attendance"
+    And I follow "Add"
+    And I set the following fields to these values:
+      | Create multiple sessions | 0 |
+    And I click on "submitbutton" "button"
+    And I follow "Sessions"
+    And I click on "Take attendance" "link"
+
+    When I click on "setallstatuses" "field" in the ".takelist tbody td.c3" "css_element"
+    And I press "Save attendance"
+    And I follow "Report"
+    Then "L" "text" should exist in the "Student 1" "table_row"
+    And "L" "text" should exist in the "Student 2" "table_row"
+    And "L" "text" should exist in the "Student 3" "table_row"

@@ -126,3 +126,8 @@
 #page-mod-attendance-sessions input[type="checkbox"] {
     margin-right: 2px;
 }
+
+.path-mod-attendance .setallstatuses {
+    text-align: right;
+}
+
