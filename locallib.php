@@ -524,6 +524,8 @@ class att_preferences_page_params {
 
     public $statusid;
 
+    public $statusset;
+
     public function get_significant_params() {
         $params = array();
 
@@ -532,6 +534,9 @@ class att_preferences_page_params {
         }
         if (isset($this->statusid)) {
             $params['statusid'] = $this->statusid;
+        }
+        if (isset($this->statusset)) {
+            $params['statusset'] = $this->statusset;
         }
 
         return $params;
@@ -571,6 +576,7 @@ class attendance {
     private $groupmode;
 
     private $statuses;
+    private $allstatuses; // Cache list of all statuses (not just one used by current session).
 
     // Array by sessionid.
     private $sessioninfo = array();
@@ -815,6 +821,10 @@ class attendance {
      * @return moodle_url of attsettings.php for attendance instance
      */
     public function url_preferences($params=array()) {
+        // Add the statusset params.
+        if (isset($this->pageparams->statusset) && !isset($params['statusset'])) {
+            $params['statusset'] = $this->pageparams->statusset;
+        }
         $params = array_merge(array('id' => $this->cm->id), $params);
         return new moodle_url('/mod/attendance/preferences.php', $params);
     }
@@ -1177,11 +1187,24 @@ class attendance {
         return $user;
     }
 
-    public function get_statuses($onlyvisible = true) {
+    public function get_statuses($onlyvisible = true, $allsets = false) {
         if (!isset($this->statuses)) {
-            $this->statuses = att_get_statuses($this->id, $onlyvisible);
+            // Get the statuses for the current set only.
+            $statusset = 0;
+            if (isset($this->pageparams->statusset)) {
+                $statusset = $this->pageparams->statusset;
+            } else if (isset($this->pageparams->sessionid)) {
+                $sessioninfo = $this->get_session_info($this->pageparams->sessionid);
+                $statusset = $sessioninfo->statusset;
+            }
+            $this->statuses = att_get_statuses($this->id, $onlyvisible, $statusset);
+            $this->allstatuses = att_get_statuses($this->id, $onlyvisible);
         }
 
+        // Return all sets, if requested.
+        if ($allsets) {
+            return $this->allstatuses;
+        }
         return $this->statuses;
     }
 
@@ -1320,7 +1343,7 @@ class attendance {
      * @return type
      */
     public function get_user_grade($userid, array $filters = null) {
-        return att_get_user_grade($this->get_user_statuses_stat($userid, $filters), $this->get_statuses());
+        return att_get_user_grade($this->get_user_statuses_stat($userid, $filters), $this->get_statuses(true, true));
     }
 
     // For getting sessions count implemented simplest method - taken sessions.
@@ -1331,7 +1354,7 @@ class attendance {
     // While implementing those methods we need recalculate grades of all users
     // on session adding.
     public function get_user_max_grade($userid) {
-        return att_get_user_max_grade($this->get_user_taken_sessions_count($userid), $this->get_statuses());
+        return att_get_user_max_grade($this->get_user_taken_sessions_count($userid), $this->get_statuses(true, true));
     }
 
     public function update_users_grade($userids) {
@@ -1542,6 +1565,7 @@ class attendance {
             $rec->acronym = $acronym;
             $rec->description = $description;
             $rec->grade = $grade;
+            $rec->setnumber = $this->pageparams->statusset; // Save which set it is part of.
             $rec->deleted = 0;
             $rec->visible = 1;
             $id = $DB->insert_record('attendance_statuses', $rec);
@@ -1629,18 +1653,55 @@ class attendance {
 }
 
 
-function att_get_statuses($attid, $onlyvisible=true) {
+function att_get_statuses($attid, $onlyvisible=true, $statusset = -1) {
     global $DB;
 
+    // Set selector.
+    $params = array('aid' => $attid);
+    $setsql = '';
+    if ($statusset >= 0) {
+        $params['statusset'] = $statusset;
+        $setsql = ' AND setnumber = :statusset ';
+    }
+
     if ($onlyvisible) {
-        $statuses = $DB->get_records_select('attendance_statuses', "attendanceid = :aid AND visible = 1 AND deleted = 0",
-                                            array('aid' => $attid), 'grade DESC');
+        $statuses = $DB->get_records_select('attendance_statuses', "attendanceid = :aid AND visible = 1 AND deleted = 0 $setsql",
+                                            $params, 'setnumber ASC, grade DESC');
     } else {
-        $statuses = $DB->get_records_select('attendance_statuses', "attendanceid = :aid AND deleted = 0",
-                                            array('aid' => $attid), 'grade DESC');
+        $statuses = $DB->get_records_select('attendance_statuses', "attendanceid = :aid AND deleted = 0 $setsql",
+                                            $params, 'setnumber ASC, grade DESC');
     }
 
     return $statuses;
+}
+
+/**
+ * Get the name of the status set.
+ *
+ * @param int $attid
+ * @param int $statusset
+ * @param bool $includevalues
+ * @return string
+ */
+function att_get_setname($attid, $statusset, $includevalues = true) {
+    $statusname = get_string('statusset', 'mod_attendance', $statusset + 1);
+    if ($includevalues) {
+        $statuses = att_get_statuses($attid, true, $statusset);
+        $statusesout = array();
+        foreach ($statuses as $status) {
+            $statusesout[] = $status->acronym;
+        }
+        if ($statusesout) {
+            if (count($statusesout) > 6) {
+                $statusesout = array_slice($statusesout, 0, 6);
+                $statusesout[] = '&helip;';
+            }
+            $statusesout = implode(' ', $statusesout);
+            $statusname .= ' ('.$statusesout.')';
+        }
+    }
+
+    return $statusname;
 }
 
 function att_get_user_taken_sessions_count($attid, $coursestartdate, $userid, $coursemodule, $startdate = '', $enddate = '') {

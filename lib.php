@@ -406,3 +406,15 @@ function attendance_pluginfile($course, $cm, $context, $filearea, $args, $forced
     }
     send_stored_file($file, 0, 0, true);
 }
+
+// Count the number of status sets that exist for this instance.
+function attendance_get_max_statusset($attendanceid) {
+    global $DB;
+
+    $max = $DB->get_field_sql('SELECT MAX(setnumber) FROM {attendance_statuses} WHERE attendanceid = ? AND deleted = 0',
+                              array($attendanceid));
+    if ($max) {
+        return $max;
+    }
+    return 0;
+}

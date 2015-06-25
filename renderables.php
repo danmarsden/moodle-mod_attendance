@@ -369,7 +369,7 @@ class attendance_user_data implements renderable {
         }
 
         if ($this->pageparams->mode == att_view_page_params::MODE_THIS_COURSE) {
-            $this->statuses = $att->get_statuses();
+            $this->statuses = $att->get_statuses(true, true);
 
             $this->stat = $att->get_user_stat($userid);
 
@@ -482,8 +482,8 @@ class attendance_report_data implements renderable {
 
         $this->sessions = $att->get_filtered_sessions();
 
-        $this->statuses = $att->get_statuses();
-        $this->allstatuses = $att->get_statuses(false);
+        $this->statuses = $att->get_statuses(true, true);
+        $this->allstatuses = $att->get_statuses(false, true);
 
         $this->gradable = $att->grade > 0;
 
@@ -556,6 +556,36 @@ class attendance_preferences_data implements renderable {
         }
 
         return $this->att->url_preferences($params);
+    }
+}
+
+// Output a selector to change between status sets.
+class attendance_set_selector implements renderable {
+    public $maxstatusset;
+
+    private $att;
+
+    public function __construct(attendance $att, $maxstatusset) {
+        $this->att = $att;
+        $this->maxstatusset = $maxstatusset;
+    }
+
+    public function url($statusset) {
+        $params = array();
+        $params['statusset'] = $statusset;
+
+        return $this->att->url_preferences($params);
+    }
+
+    public function get_current_statusset() {
+        if (isset($this->att->pageparams->statusset)) {
+            return $this->att->pageparams->statusset;
+        }
+        return 0;
+    }
+
+    public function get_status_name($statusset) {
+        return att_get_setname($this->att->id, $statusset, true);
     }
 }
 

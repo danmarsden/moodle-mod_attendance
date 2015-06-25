@@ -30,12 +30,19 @@ $pageparams = new att_preferences_page_params();
 $id                         = required_param('id', PARAM_INT);
 $pageparams->action         = optional_param('action', null, PARAM_INT);
 $pageparams->statusid       = optional_param('statusid', null, PARAM_INT);
+$pageparams->statusset      = optional_param('statusset', 0, PARAM_INT); // Set of statuses to view.
 
 $cm             = get_coursemodule_from_id('attendance', $id, 0, false, MUST_EXIST);
 $course         = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
 $att            = $DB->get_record('attendance', array('id' => $cm->instance), '*', MUST_EXIST);
 
 require_login($course, true, $cm);
+
+// Make sure the statusset is valid.
+$maxstatusset = attendance_get_max_statusset($att->id);
+if ($pageparams->statusset > $maxstatusset + 1) {
+    $pageparams->statusset = $maxstatusset + 1;
+}
 
 $att = new attendance($att, $cm, $course, $PAGE->context, $pageparams);
 
@@ -55,6 +62,9 @@ switch ($att->pageparams->action) {
         $newgrade           = optional_param('newgrade', 0, PARAM_INT);
 
         $att->add_status($newacronym, $newdescription, $newgrade);
+        if ($pageparams->statusset > $maxstatusset) {
+            $maxstatusset = $pageparams->statusset; // Make sure the new maximum is shown without a page refresh.
+        }
         break;
     case att_preferences_page_params::ACTION_DELETE:
         if (att_has_logs_for_status($att->pageparams->statusid)) {
@@ -109,12 +119,14 @@ switch ($att->pageparams->action) {
 $output = $PAGE->get_renderer('mod_attendance');
 $tabs = new attendance_tabs($att, attendance_tabs::TAB_PREFERENCES);
 $prefdata = new attendance_preferences_data($att);
+$setselector = new attendance_set_selector($att, $maxstatusset);
 
 // Output starts here.
 
 echo $output->header();
 echo $output->heading(get_string('attendanceforthecourse', 'attendance').' :: ' .$course->fullname);
 echo $output->render($tabs);
+echo $output->render($setselector);
 echo $output->render($prefdata);
 
 echo $output->footer();

@@ -110,3 +110,53 @@ Feature: Test the various new features in the attendance module
     And "E" "text" should exist in the "Temporary user 1" "table_row"
     And "A" "text" should exist in the "Student 3" "table_row"
     And I should not see "Temporary user 2"
+
+  Scenario: A teacher can create and use multiple status lists
+    Given I log in as "teacher1"
+    And I follow "Course 1"
+    And I follow "Test attendance"
+    And I follow "Settings"
+    And I set the field "jump" to "New set of statuses"
+    And I set the field with xpath "//*[@id='preferencesform']/table/tbody/tr[1]/td[2]/input" to "G"
+    And I set the field with xpath "//*[@id='preferencesform']/table/tbody/tr[1]/td[3]/input" to "Great"
+    And I set the field with xpath "//*[@id='preferencesform']/table/tbody/tr[1]/td[4]/input" to "3"
+    And I click on "Add" "button" in the ".lastrow" "css_element"
+    And I set the field with xpath "//*[@id='preferencesform']/table/tbody/tr[2]/td[2]/input" to "O"
+    And I set the field with xpath "//*[@id='preferencesform']/table/tbody/tr[2]/td[3]/input" to "OK"
+    And I set the field with xpath "//*[@id='preferencesform']/table/tbody/tr[2]/td[4]/input" to "2"
+    And I click on "Add" "button" in the ".lastrow" "css_element"
+    And I set the field with xpath "//*[@id='preferencesform']/table/tbody/tr[3]/td[2]/input" to "B"
+    And I set the field with xpath "//*[@id='preferencesform']/table/tbody/tr[3]/td[3]/input" to "Bad"
+    And I set the field with xpath "//*[@id='preferencesform']/table/tbody/tr[3]/td[4]/input" to "0"
+    And I click on "Add" "button" in the ".lastrow" "css_element"
+    And I click on "Update" "button" in the "#preferencesform" "css_element"
+
+    And I follow "Add"
+    And I set the following fields to these values:
+      | Create multiple sessions | 0                      |
+      | Use status set           | Status set 1 (P L E A) |
+      | id_sessiondate_hour      | 10                     |
+      | id_sessiondate_minute    | 0                      |
+    And I click on "submitbutton" "button"
+    And I follow "Sessions"
+    And I follow "Add"
+    And I set the following fields to these values:
+      | Create multiple sessions | 0                    |
+      | Use status set           | Status set 2 (G O B) |
+      | id_sessiondate_hour      | 11                   |
+      | id_sessiondate_minute    | 0                    |
+    And I click on "submitbutton" "button"
+    And I follow "Sessions"
+
+    When I click on "Take attendance" "link" in the "10:00" "table_row"
+    Then "Set status for all users to «Present»" "link" should exist
+    And "Set status for all users to «Late»" "link" should exist
+    And "Set status for all users to «Excused»" "link" should exist
+    And "Set status for all users to «Absent»" "link" should exist
+
+    When I follow "Sessions"
+    And I click on "Take attendance" "link" in the "11:00" "table_row"
+    Then "Set status for all users to «Great»" "link" should exist
+    And "Set status for all users to «OK»" "link" should exist
+    And "Set status for all users to «Bad»" "link" should exist
+

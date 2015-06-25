@@ -75,6 +75,12 @@ class mod_attendance_update_form extends moodleform {
         $durselect[] =& $mform->createElement('select', 'minutes', '', $minutes, false, true);
         $mform->addGroup($durselect, 'durtime', get_string('duration', 'attendance'), array(' '), true);
 
+        // Show which status set is in use.
+        $maxstatusset = attendance_get_max_statusset($this->_customdata['att']->id);
+        if ($maxstatusset > 0) {
+            $mform->addElement('static', 'statusset', get_string('usestatusset', 'mod_attendance'),
+                               att_get_setname($this->_customdata['att']->id, $sess->statusset));
+        }
         $mform->addElement('editor', 'sdescription', get_string('description', 'attendance'), null, $defopts);
         $mform->setType('sdescription', PARAM_RAW);
 

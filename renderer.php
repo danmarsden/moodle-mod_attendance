@@ -918,6 +918,33 @@ class mod_attendance_renderer extends plugin_renderer_base {
             
     }
 
+    /**
+     * Output the status set selector.
+     *
+     * @param attendance_set_selector $sel
+     * @return string
+     */
+    protected function render_attendance_set_selector(attendance_set_selector $sel) {
+        $current = $sel->get_current_statusset();
+        $selected = null;
+        $opts = array();
+        for ($i = 0; $i <= $sel->maxstatusset; $i++) {
+            $url = $sel->url($i);
+            $display = $sel->get_status_name($i);
+            $opts[$url->out(false)] = $display;
+            if ($i == $current) {
+                $selected = $url->out(false);
+            }
+        }
+        $newurl = $sel->url($sel->maxstatusset + 1);
+        $opts[$newurl->out(false)] = get_string('newstatusset', 'mod_attendance');
+        if ($current == $sel->maxstatusset + 1) {
+            $selected = $newurl->out(false);
+        }
+
+        return $this->output->url_select($opts, $selected, null);
+    }
+
     protected function render_attendance_preferences_data(attendance_preferences_data $prefdata) {
         $this->page->requires->js('/mod/attendance/module.js');
 

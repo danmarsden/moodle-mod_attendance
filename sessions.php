@@ -57,7 +57,7 @@ $PAGE->set_cacheable(true);
 $PAGE->set_button($OUTPUT->update_module_button($cm->id, 'attendance'));
 $PAGE->navbar->add($att->name);
 
-$formparams = array('course' => $course, 'cm' => $cm, 'modcontext' => $PAGE->context);
+$formparams = array('course' => $course, 'cm' => $cm, 'modcontext' => $PAGE->context, 'att' => $att);
 switch ($att->pageparams->action) {
     case att_sessions_page_params::ACTION_ADD:
         $url = $att->url_sessions(array('action' => att_sessions_page_params::ACTION_ADD));
@@ -230,6 +230,7 @@ function construct_sessions_data_for_add($formdata) {
                     if (isset($formdata->studentscanmark)) { // Students will be able to mark their own attendance.
                         $sess->studentscanmark = 1;
                     }
+                    $sess->statusset = $formdata->statusset;
 
                     fill_groupid($formdata, $sessions, $sess);
                 }
@@ -250,6 +251,7 @@ function construct_sessions_data_for_add($formdata) {
         if (isset($formdata->studentscanmark)) { // Students will be able to mark their own attendance.
             $sess->studentscanmark = 1; 
         }
+        $sess->statusset = $formdata->statusset;
 
         fill_groupid($formdata, $sessions, $sess);
     }

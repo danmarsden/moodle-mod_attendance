@@ -148,6 +148,19 @@ class mod_attendance_add_form extends moodleform {
         $mform->addGroup($periodgroup, 'periodgroup', get_string('period', 'attendance'), array(' '), false);
         $mform->disabledIf('periodgroup', 'addmultiply', 'notchecked');
 
+        // Select which status set to use:
+        $maxstatusset = attendance_get_max_statusset($this->_customdata['att']->id);
+        if ($maxstatusset > 0) {
+            $opts = array();
+            for ($i=0; $i<=$maxstatusset; $i++) {
+                $opts[$i] = att_get_setname($this->_customdata['att']->id, $i);
+            }
+            $mform->addElement('select', 'statusset', get_string('usestatusset', 'mod_attendance'), $opts);
+        } else {
+            $mform->addElement('hidden', 'statusset', 0);
+            $mform->setType('statusset', PARAM_INT);
+        }
+
         $mform->addElement('editor', 'sdescription', get_string('description', 'attendance'),
                            null, array('maxfiles'=>EDITOR_UNLIMITED_FILES, 'noclean'=>true, 'context'=>$modcontext));
         $mform->setType('sdescription', PARAM_RAW);

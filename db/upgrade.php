@@ -121,5 +121,29 @@ function xmldb_attendance_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2015040501, 'attendance');
     }
 
+    if ($oldversion < 2015040502) {
+
+        // Define field setnumber to be added to attendance_statuses.
+        $table = new xmldb_table('attendance_statuses');
+        $field = new xmldb_field('setnumber', XMLDB_TYPE_INTEGER, '5', null, XMLDB_NOTNULL, null, '0', 'deleted');
+
+        // Conditionally launch add field setnumber.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field statusset to be added to attendance_sessions.
+        $table = new xmldb_table('attendance_sessions');
+        $field = new xmldb_field('statusset', XMLDB_TYPE_INTEGER, '5', null, XMLDB_NOTNULL, null, '0', 'descriptionformat');
+
+        // Conditionally launch add field statusset.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Attendance savepoint reached.
+        upgrade_mod_savepoint(true, 2015040502, 'attendance');
+    }
+
     return $result;
 }
