@@ -112,7 +112,7 @@ if ($formdata = $mform->get_data()) {
                 $text .= $sess->groupid ? $reportdata->groups[$sess->groupid]->name : get_string('commonsession', 'attendance');
                 $data->tabhead[] = $text;
                 if (isset($formdata->includeremarks)) {
-                    $data->tabhead[] = get_string('remark', 'attendance', $text);
+                    $data->tabhead[] = ''; // Space for the remarks.
                 }
             }
         } else {
@@ -216,7 +216,13 @@ function exporttotableed($data, $filename, $format) {
     $i = 3;
     $j = 0;
     foreach ($data->tabhead as $cell) {
-        $myxls->write($i, $j++, $cell, $formatbc);
+        // Merge cells if the heading would be empty (remarks column).
+        if (empty($cell)) {
+            $myxls->merge_cells($i, $j - 1, $i, $j);
+        } else {
+            $myxls->write($i, $j, $cell, $formatbc);
+        }
+        $j++;
     }
     $i++;
     $j = 0;

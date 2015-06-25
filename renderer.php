@@ -846,11 +846,6 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $table->size[] = '1px';
         }
 
-        if ($reportdata->sessionslog) {
-            $table->head[] = get_string('remarks', 'attendance');
-            $table->align[] = 'center';
-            $table->size[] = '200px';
-         }
 
         if ($bulkmessagecapability) { // Display the table header for bulk messaging.
             // The checkbox must have an id of cb_selector so that the JavaScript will pick it up.
@@ -865,7 +860,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $row->cells[] = $this->user_picture($user);  // Show different picture if it is a temporary user.
             $row->cells[] = html_writer::link($reportdata->url_view(array('studentid' => $user->id)), fullname($user));
             $cellsgenerator = new user_sessions_cells_html_generator($reportdata, $user);
-            $row->cells = array_merge($row->cells, $cellsgenerator->get_cells());
+            $row->cells = array_merge($row->cells, $cellsgenerator->get_cells(true));
 
             foreach ($reportdata->statuses as $status) {
                 if (array_key_exists($status->id, $reportdata->usersstats[$user->id])) {
@@ -878,14 +873,6 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
             if ($reportdata->gradable) {
                 $row->cells[] = format_float($reportdata->grades[$user->id]).' / '.format_float($reportdata->maxgrades[$user->id]);
-            }
-
-            if ($reportdata->sessionslog) {
-                if (isset($sess) && isset($reportdata->sessionslog[$user->id][$sess->id]->remarks)) {
-                    $row->cells[] = $reportdata->sessionslog[$user->id][$sess->id]->remarks;
-                } else {
-                    $row->cells[] = '';
-                }
             }
 
             if ($bulkmessagecapability) { // Create the checkbox for bulk messaging.

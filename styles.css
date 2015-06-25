@@ -131,3 +131,24 @@
     text-align: right;
 }
 
+.path-mod-attendance .remarkholder {
+    position: relative;
+}
+
+.path-mod-attendance .remarkholder .remarkcontent {
+    display: none;
+    position: absolute;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    box-shadow: 3px 3px 5px #ccc;
+    background-color: white;
+    left: 20px;
+    top: 0;
+    padding: 5px;
+    width: 150px;
+    z-index: 5000;
+}
+
+.path-mod-attendance .remarkholder:hover .remarkcontent {
+    display: inline-block;
+}
