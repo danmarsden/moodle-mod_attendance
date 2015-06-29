@@ -525,6 +525,11 @@ class attendance_report_data implements renderable {
         }
 
         $this->att = $att;
+        if ($att->pageparams->view == ATT_VIEW_SUMMARY) {
+            $this->numsessions = count($this->sessions);
+            $this->maxgrade = $maxgrade;
+            $this->sessions = array();
+        }
     }
 
     public function url_take($sessionid, $grouptype) {
