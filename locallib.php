@@ -27,6 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->libdir . '/gradelib.php');
 require_once(dirname(__FILE__).'/renderhelpers.php');
+require_once($CFG->libdir . '/filelib.php');
 
 define('ATT_VIEW_DAYS', 1);
 define('ATT_VIEW_WEEKS', 2);
@@ -82,21 +83,29 @@ class attendance_permissions {
         require_capability('mod/attendance:viewreports', $this->context);
     }
 
-    public function can_take() {
+    public function can_take($user = null) {
+        if (is_null($user)) {
+            global $USER;
+            $user = $USER->id;
+        }
         if (is_null($this->cantake)) {
-            $this->cantake = has_capability('mod/attendance:takeattendances', $this->context);
+            $this->cantake = has_capability('mod/attendance:takeattendances', $this->context, $user);
         }
 
         return $this->cantake;
     }
 
-    public function can_take_session($groupid) {
-        if (!$this->can_take()) {
-            return false;
+    public function can_take_session($groupid, $user = null) {
+        if (is_null($user)) {
+            global $USER;
+            $user = $USER->id;
+        }
+        if (!$this->can_take($user)) {
+            return true;
         }
 
         if ($groupid == attendance::SESSION_COMMON
-            || $this->can_access_all_groups()
+            || $this->can_access_all_groups($user)
             || array_key_exists($groupid, groups_get_activity_allowed_groups($this->cm))) {
             return true;
         }
@@ -123,7 +132,7 @@ class attendance_permissions {
     public function require_manage_capability() {
         require_capability('mod/attendance:manageattendances', $this->context);
     }
-    
+
     // Check to see if the user can manage temporary users.
     public function can_managetemp() {
         if (is_null($this->canmanagetemp)) {
@@ -168,9 +177,13 @@ class attendance_permissions {
         return $this->canbelisted;
     }
 
-    public function can_access_all_groups() {
+    public function can_access_all_groups($user = null) {
+        if (is_null($user)) {
+            global $USER;
+            $user = $USER->id;
+        }
         if (is_null($this->canaccessallgroups)) {
-            $this->canaccessallgroups = has_capability('moodle/site:accessallgroups', $this->context);
+            $this->canaccessallgroups = has_capability('moodle/site:accessallgroups', $this->context, $user);
         }
 
         return $this->canaccessallgroups;
@@ -963,50 +976,55 @@ class attendance {
         return true;
     }
 
-    public function take_from_form_data($formdata) {
+    public function take_attendance($formdata, $takenby = 0) {
         global $DB, $USER;
-        // TODO: WARNING - $formdata is unclean - comes from direct $_POST - ideally needs a rewrite but we do some cleaning below.
+
+        if (!$takenby) {
+            $takenby = $USER->id;
+        }
+
+        if (!is_numeric($formdata->sessionid) ||
+            !$DB->record_exists('attendance_sessions', array('id' => $formdata->sessionid))) {
+            throw new invalid_parameter_exception('Invalid sessionid.'.serialize($formdata));
+        }
+
         $statuses = implode(',', array_keys( (array)$this->get_statuses() ));
         $now = time();
-        $sesslog = array();
-        $formdata = (array)$formdata;
-        foreach ($formdata as $key => $value) {
-            if (substr($key, 0, 4) == 'user') {
-                $sid = substr($key, 4);
-                if (!(is_numeric($sid) && is_numeric($value))) { // Sanity check on $sid and $value.
-                     print_error('nonnumericid', 'attendance');
-                }
-                $sesslog[$sid] = new stdClass();
-                $sesslog[$sid]->studentid = $sid; // We check is_numeric on this above.
-                $sesslog[$sid]->statusid = $value; // We check is_numeric on this above.
-                $sesslog[$sid]->statusset = $statuses;
-                $sesslog[$sid]->remarks = array_key_exists('remarks'.$sid, $formdata) ?
-                                                      clean_param($formdata['remarks'.$sid], PARAM_TEXT) : '';
-                $sesslog[$sid]->sessionid = $this->pageparams->sessionid;
-                $sesslog[$sid]->timetaken = $now;
-                $sesslog[$sid]->takenby = $USER->id;
+        $dbsesslog = $this->get_session_log($formdata->sessionid);
+        $attendancelogarray = array();
+        foreach ($formdata->users as $log) {
+            $attendancelog = new stdClass();
+            if (!is_numeric($log['userid'])) {
+                throw new invalid_parameter_exception('Invalid userid.');
             }
-        }
-
-        $dbsesslog = $this->get_session_log($this->pageparams->sessionid);
-        foreach ($sesslog as $log) {
-            if ($log->statusid) {
-                if (array_key_exists($log->studentid, $dbsesslog)) {
-                    $log->id = $dbsesslog[$log->studentid]->id;
-                    $DB->update_record('attendance_log', $log);
+            if (!is_numeric($log['statusid'])) {
+                throw new invalid_parameter_exception('Invalid statusid.');
+            }
+            $attendancelog->studentid = $log['userid'];
+            $attendancelog->statusid = $log['statusid'];
+            $attendancelog->statusset = $statuses;
+            $attendancelog->remarks = clean_param($log['remarks'], PARAM_TEXT);
+            $attendancelog->sessionid = $formdata->sessionid;
+            $attendancelog->timetaken = $now;
+            $attendancelog->takenby = $takenby;
+            if ($log['statusid']) {
+                if (array_key_exists($attendancelog->studentid, $dbsesslog)) {
+                    $attendancelog->id = $dbsesslog[$attendancelog->studentid]->id;
+                    $DB->update_record('attendance_log', $attendancelog);
                 } else {
-                    $DB->insert_record('attendance_log', $log, false);
+                    $DB->insert_record('attendance_log', $attendancelog, false);
                 }
             }
+            $attendancelogarray[$log['userid']] = $attendancelog;
         }
 
-        $session = $this->get_session_info($this->pageparams->sessionid);
+        $session = $this->get_session_info($formdata->sessionid);
         $session->lasttaken = $now;
-        $session->lasttakenby = $USER->id;
+        $session->lasttakenby = $takenby;
         $DB->update_record('attendance_sessions', $session);
 
         if ($this->grade != 0) {
-            $this->update_users_grade(array_keys($sesslog));
+            $this->update_users_grade(array_keys($attendancelogarray));
         }
 
         // create url for link in log screen
@@ -1020,6 +1038,14 @@ class attendance {
         $event->add_record_snapshot('course_modules', $this->cm);
         $event->add_record_snapshot('attendance_sessions', $session);
         $event->trigger();
+
+    }
+
+    function redirect_after_take_from_form() {
+
+        $params = array(
+                'sessionid' => $this->pageparams->sessionid,
+                'grouptype' => $this->pageparams->grouptype);
 
         $group = 0;
         if ($this->pageparams->grouptype != attendance::SESSION_COMMON) {
@@ -1527,7 +1553,7 @@ class attendance {
 
     /**
      * Remove a status variable from an attendance instance
-     * 
+     *
      * @global moodle_database $DB
      * @param stdClass $status
      */
@@ -1537,7 +1563,7 @@ class attendance {
         $DB->set_field('attendance_statuses', 'deleted', 1, array('id' => $status->id));
         $event = \mod_attendance\event\status_removed::create(array(
             'objectid' => $status->id,
-            'context' => $this->context, 
+            'context' => $this->context,
             'other' => array(
                 'acronym' => $status->acronym,
                 'description' => $status->description
@@ -1549,7 +1575,7 @@ class attendance {
 
     /**
      * Add an attendance status variable
-     * 
+     *
      * @global moodle_database $DB
      * @param string $acronym
      * @param string $description
@@ -1585,7 +1611,7 @@ class attendance {
 
     /**
      * Update status variable for a particular Attendance module instance
-     * 
+     *
      * @global moodle_database $DB
      * @param stdClass $status
      * @param string $acronym
@@ -1856,4 +1882,3 @@ function att_log_convert_url(moodle_url $fullurl) {
 
     return substr($fullurl->out(), strlen($baseurl));
 }
-
