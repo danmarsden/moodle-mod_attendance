@@ -24,7 +24,7 @@
 
 $plugin->version  = 2015040503;
 $plugin->requires = 2014042900;
-$plugin->release = '2.9.1';
+$plugin->release = '2.9.1.1';
 $plugin->maturity  = MATURITY_STABLE;
 $plugin->cron     = 0;
 $plugin->component = 'mod_attendance';
