@@ -51,6 +51,15 @@ class mod_attendance_mod_form extends moodleform_mod {
         $mform->addRule('name', null, 'required', null, 'client');
         $mform->setDefault('name', get_string('modulename', 'attendance'));
 
+		if (version_compare(moodle_major_version(true), '2.9', '>='))
+		{
+			$this->standard_intro_elements();
+		}
+		else
+		{
+			$this->add_intro_editor();
+		}
+		
         $mform->addElement('modgrade', 'grade', get_string('grade'));
         $mform->setDefault('grade', 100);
 
