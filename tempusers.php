@@ -64,6 +64,7 @@ if ($data = $mform->get_data()) {
     $user->email = time().'@ghost.user.de';
     $user->username = time().'@ghost.user.de';
     $user->idnumber = 'tempghost';
+    $user->mnethostid = $CFG->mnet_localhost_id;
     $studentid = $DB->insert_record('user', $user);
 
     // Create the temporary user record.
