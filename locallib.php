@@ -1487,6 +1487,10 @@ class attendance {
     public function update_status($status, $acronym, $description, $grade, $visible) {
         global $DB;
 
+        if (empty($acronym) || empty($description)) {
+            return array('acronym' => $acronym, 'description' => $description);
+        }
+
         $updated = array();
 
         if ($acronym) {

@@ -48,6 +48,8 @@ $PAGE->set_cacheable(true);
 $PAGE->set_button($OUTPUT->update_module_button($cm->id, 'attendance'));
 $PAGE->navbar->add(get_string('settings', 'attendance'));
 
+$errors = array();
+
 switch ($att->pageparams->action) {
     case att_preferences_page_params::ACTION_ADD:
         $newacronym         = optional_param('newacronym', null, PARAM_TEXT);
@@ -98,7 +100,7 @@ switch ($att->pageparams->action) {
 
         foreach ($acronym as $id => $v) {
             $status = $statuses[$id];
-            $att->update_status($status, $acronym[$id], $description[$id], $grade[$id], null);
+            $errors[$id] = $att->update_status($status, $acronym[$id], $description[$id], $grade[$id], null);
         }
         if ($att->grade > 0) {
             att_update_all_users_grades($att->id, $att->course, $att->context, $cm);
@@ -108,7 +110,7 @@ switch ($att->pageparams->action) {
 
 $output = $PAGE->get_renderer('mod_attendance');
 $tabs = new attendance_tabs($att, attendance_tabs::TAB_PREFERENCES);
-$prefdata = new attendance_preferences_data($att);
+$prefdata = new attendance_preferences_data($att, array_filter($errors));
 
 // Output starts here.
 

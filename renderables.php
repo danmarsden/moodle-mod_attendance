@@ -535,8 +535,11 @@ class attendance_preferences_data implements renderable {
 
     private $att;
 
-    public function __construct(attendance $att) {
+    public $errors;
+
+    public function __construct(attendance $att, $errors) {
         $this->statuses = $att->get_statuses(false);
+        $this->errors = $errors;
 
         foreach ($this->statuses as $st) {
             $st->haslogs = att_has_logs_for_status ($st->id);
