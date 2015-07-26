@@ -23,7 +23,7 @@
  */
 
 $plugin->version  = 2015062900;
-$plugin->requires = 2014042900;
+$plugin->requires = 2015051100;
 $plugin->release = '2.9.2.1';
 $plugin->maturity  = MATURITY_STABLE;
 $plugin->cron     = 0;
