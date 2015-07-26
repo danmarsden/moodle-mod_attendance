@@ -58,6 +58,9 @@ switch ($att->pageparams->action) {
 
         if ($formdata = $mform->get_data()) {
             $sessions = construct_sessions_data_for_add($formdata);
+            if (empty($sessions)) {
+                redirect($url, get_string('erroringeneratingsessions', 'attendance'));
+            }
             $att->add_sessions($sessions);
             redirect($url, get_string('sessionsgenerated', 'attendance'));
         }
