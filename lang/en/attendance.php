@@ -65,6 +65,7 @@ $string['cannottakeforgroup'] = 'You can\'t take attendance for group "{$a}"';
 $string['changeattendance'] = 'Change attendance';
 $string['changeduration'] = 'Change duration';
 $string['changesession'] = 'Change session';
+$string['checkweekdays'] = 'Select weekdays that fall within your selected session date range.';
 $string['column'] = 'column';
 $string['columns'] = 'columns';
 $string['commonsession'] = 'Common';
