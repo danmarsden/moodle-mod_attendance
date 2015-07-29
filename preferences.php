@@ -89,7 +89,7 @@ switch ($att->pageparams->action) {
                     ($status->description ? $status->description : get_string('nodescription', 'attendance'));
         $params = array_merge($att->pageparams->get_significant_params(), array('confirm' => 1));
         echo $OUTPUT->header();
-        echo $OUTPUT->heading(get_string('attendanceforthecourse', 'attendance').' :: ' .$course->fullname);
+        echo $OUTPUT->heading(get_string('attendanceforthecourse', 'attendance').' :: ' .format_string($course->fullname));
         echo $OUTPUT->confirm($message, $att->url_preferences($params), $att->url_preferences());
         echo $OUTPUT->footer();
         exit;
@@ -130,7 +130,7 @@ $setselector = new attendance_set_selector($att, $maxstatusset);
 // Output starts here.
 
 echo $output->header();
-echo $output->heading(get_string('attendanceforthecourse', 'attendance').' :: ' .$course->fullname);
+echo $output->heading(get_string('attendanceforthecourse', 'attendance').' :: ' format_string($course->fullname));
 echo $output->render($tabs);
 echo $output->render($setselector);
 echo $output->render($prefdata);

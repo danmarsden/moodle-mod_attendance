@@ -98,7 +98,7 @@ $output = $PAGE->get_renderer('mod_attendance');
 $tabs = new attendance_tabs($att, attendance_tabs::TAB_TEMPORARYUSERS);
 
 echo $output->header();
-echo $output->heading(get_string('tempusermerge', 'attendance').' : '.$course->fullname);
+echo $output->heading(get_string('tempusermerge', 'attendance').' : '.format_string($course->fullname));
 echo $output->render($tabs);
 $mform->display();
 echo $output->footer($course);
