@@ -41,4 +41,7 @@ if ($ADMIN->fulltree) {
 
     $settings->add(new admin_setting_configselect('attendance/resultsperpage',
         get_string('resultsperpage', 'attendance'), get_string('resultsperpage_desc', 'attendance'), 25, $options));
+
+    $settings->add(new admin_setting_configtext('attendance/defaultperclowgrade',
+        get_string('defaultperclowgrade', 'attendance'), get_string('defaultperclowgrade_desc', 'attendance'), 75, PARAM_FLOAT, 7));
 }

@@ -117,7 +117,7 @@ switch ($att->pageparams->action) {
             $errors[$id] = $att->update_status($status, $acronym[$id], $description[$id], $grade[$id], null);
         }
         if ($att->grade > 0) {
-            att_update_all_users_grades($att->id, $att->course, $att->context, $cm);
+            att_update_all_users_grades($att->id, $att->context);
         }
         break;
 }
@@ -130,7 +130,7 @@ $setselector = new attendance_set_selector($att, $maxstatusset);
 // Output starts here.
 
 echo $output->header();
-echo $output->heading(get_string('attendanceforthecourse', 'attendance').' :: ' format_string($course->fullname));
+echo $output->heading(get_string('attendanceforthecourse', 'attendance').' :: '.format_string($course->fullname));
 echo $output->render($tabs);
 echo $output->render($setselector);
 echo $output->render($prefdata);
