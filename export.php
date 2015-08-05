@@ -90,14 +90,14 @@ if ($formdata = $mform->get_data()) {
         if (isset($formdata->ident['uname'])) {
             $data->tabhead[] = get_string('username');
         }
-        
+
         $optional = array('idnumber', 'institution', 'department');
         foreach ($optional as $opt) {
             if (isset($formdata->ident[$opt])) {
                 $data->tabhead[] = get_string($opt);
             }
         }
-        
+
         $data->tabhead[] = get_string('lastname');
         $data->tabhead[] = get_string('firstname');
         $groupmode = groups_get_activity_groupmode($cm, $course);
@@ -118,10 +118,8 @@ if ($formdata = $mform->get_data()) {
         } else {
             print_error('sessionsnotfound', 'attendance', $att->url_manage());
         }
-        if ($reportdata->gradable) {
-            $data->tabhead[] = get_string('grade');
-            $data->tabhead[] = get_string('percentage', 'attendance');
-        }
+        $data->tabhead[] = get_string('points', 'attendance');
+        $data->tabhead[] = get_string('percentage', 'attendance');
 
         $i = 0;
         $data->table = array();
@@ -132,14 +130,14 @@ if ($formdata = $mform->get_data()) {
             if (isset($formdata->ident['uname'])) {
                 $data->table[$i][] = $user->username;
             }
-            
+
             $optional_row = array('idnumber', 'institution', 'department');
             foreach ($optional_row as $opt) {
                 if (isset($formdata->ident[$opt])) {
                     $data->table[$i][] = $user->$opt;
                 }
             }
-            
+
             $data->table[$i][] = $user->lastname;
             $data->table[$i][] = $user->firstname;
             if (!empty($groupmode)) {
@@ -153,16 +151,14 @@ if ($formdata = $mform->get_data()) {
             }
             $cellsgenerator = new user_sessions_cells_text_generator($reportdata, $user);
             $data->table[$i] = array_merge($data->table[$i], $cellsgenerator->get_cells(isset($formdata->includeremarks)));
-            if ($reportdata->gradable) {
-                $data->table[$i][] = format_float($reportdata->grades[$user->id]).' / '.
-                    format_float($reportdata->maxgrades[$user->id]);
-                if ($reportdata->maxgrades[$user->id]) {
-                    $percent = $reportdata->grades[$user->id] * 100.0 / $reportdata->maxgrades[$user->id];
-                } else {
-                    $percent = 0.0;
-                }
-                $data->table[$i][] = $percent;
+            $data->table[$i][] = format_float($reportdata->grades[$user->id], att_decimal_points(), true, true).' / '.
+                format_float($reportdata->maxgrades[$user->id], att_decimal_points(), true, true);
+            if ($reportdata->maxgrades[$user->id]) {
+                $percent = $reportdata->grades[$user->id] * 100.0 / $reportdata->maxgrades[$user->id];
+            } else {
+                $percent = 0.0;
             }
+            $data->table[$i][] = format_float($percent, att_decimal_points());
             $i++;
         }
 

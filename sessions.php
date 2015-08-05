@@ -93,7 +93,7 @@ switch ($att->pageparams->action) {
         if (isset($confirm) && confirm_sesskey()) {
             $att->delete_sessions(array($sessionid));
             if ($att->grade > 0) {
-                att_update_all_users_grades($att->id, $att->course, $att->context, $cm);
+                att_update_all_users_grades($att->id, $att->context);
             }
             redirect($att->url_manage(), get_string('sessiondeleted', 'attendance'));
         }
@@ -122,7 +122,7 @@ switch ($att->pageparams->action) {
 
             $att->delete_sessions($sessionsids);
             if ($att->grade > 0) {
-                att_update_all_users_grades($att->id, $att->course, $att->context, $cm);
+                att_update_all_users_grades($att->id, $att->context);
             }
             redirect($att->url_manage(), get_string('sessiondeleted', 'attendance'));
         }
