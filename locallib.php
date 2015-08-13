@@ -39,8 +39,6 @@ define('ATT_SORT_LASTNAME', 1);
 define('ATT_SORT_FIRSTNAME', 2);
 
 class attendance_permissions {
-    private $canview;
-    private $canviewreports;
     private $cantake;
     private $canchange;
     private $canmanage;
@@ -56,22 +54,6 @@ class attendance_permissions {
     public function __construct($cm, $context) {
         $this->cm = $cm;
         $this->context = $context;
-    }
-
-    public function can_view() {
-        if (is_null($this->canview)) {
-            $this->canview = has_capability('mod/attendance:view', $this->context);
-        }
-
-        return $this->canview;
-    }
-
-    public function can_view_reports() {
-        if (is_null($this->canviewreports)) {
-            $this->canviewreports = has_capability('mod/attendance:viewreports', $this->context);
-        }
-
-        return $this->canviewreports;
     }
 
     public function can_take() {
