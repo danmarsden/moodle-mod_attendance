@@ -39,11 +39,17 @@ $att            = $DB->get_record('attendance', array('id' => $cm->instance), '*
 
 require_login($course, true, $cm);
 
-$pageparams->init($cm);
-$att = new attendance($att, $cm, $course, $PAGE->context, $pageparams);
-if (!$att->perm->can_manage() && !$att->perm->can_take() && !$att->perm->can_change()) {
+$capabilities = array(
+    'mod/attendance:manageattendances',
+    'mod/attendance:takeattendances',
+    'mod/attendance:changeattendances'
+);
+if (!has_any_capability($capabilities, $PAGE->context)) {
     redirect($att->url_view());
 }
+
+$pageparams->init($cm);
+$att = new attendance($att, $cm, $course, $PAGE->context, $pageparams);
 
 // If teacher is coming from block, then check for a session exists for today.
 if ($from === 'block') {
