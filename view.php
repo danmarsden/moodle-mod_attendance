@@ -53,7 +53,7 @@ if (!$pageparams->studentid) {
     }
 }
 
-$att->perm->require_view_capability();
+require_capability('mod/attendance:view', $PAGE->context);
 
 $PAGE->set_url($att->url_view());
 $PAGE->set_title($course->shortname. ": ".$att->name);

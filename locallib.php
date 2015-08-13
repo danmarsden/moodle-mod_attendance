@@ -66,10 +66,6 @@ class attendance_permissions {
         return $this->canview;
     }
 
-    public function require_view_capability() {
-        require_capability('mod/attendance:view', $this->context);
-    }
-
     public function can_view_reports() {
         if (is_null($this->canviewreports)) {
             $this->canviewreports = has_capability('mod/attendance:viewreports', $this->context);
