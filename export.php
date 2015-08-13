@@ -35,9 +35,11 @@ $course         = $DB->get_record('course', array('id' => $cm->course), '*', MUS
 $att            = $DB->get_record('attendance', array('id' => $cm->instance), '*', MUST_EXIST);
 
 require_login($course, true, $cm);
-require_capability('mod/attendance:export', $PAGE->context);
 
-$att = new attendance($att, $cm, $course, $PAGE->context);
+$context = context_module::instance($cm->id);
+require_capability('mod/attendance:export', $context);
+
+$att = new attendance($att, $cm, $course, $context);
 
 $PAGE->set_url($att->url_export());
 $PAGE->set_title($course->shortname. ": ".$att->name);
@@ -46,7 +48,7 @@ $PAGE->set_cacheable(true);
 $PAGE->set_button($OUTPUT->update_module_button($cm->id, 'attendance'));
 $PAGE->navbar->add(get_string('export', 'attendance'));
 
-$formparams = array('course' => $course, 'cm' => $cm, 'modcontext' => $PAGE->context);
+$formparams = array('course' => $course, 'cm' => $cm, 'modcontext' => $context);
 $mform = new mod_attendance_export_form($att->url_export(), $formparams);
 
 if ($formdata = $mform->get_data()) {

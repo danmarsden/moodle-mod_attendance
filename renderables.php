@@ -78,8 +78,7 @@ class attendance_tabs implements renderable {
                                      $this->att->url_sessions()->out(true, array('action' => att_sessions_page_params::ACTION_ADD)),
                         get_string('add', 'attendance'));
         }
-
-        if ($this->att->perm->can_view_reports()) {
+        if (has_capability('mod/attendance:viewreports', $this->att->context)) {
             $toprow[] = new tabobject(self::TAB_REPORT, $this->att->url_report()->out(),
                         get_string('report', 'attendance'));
         }

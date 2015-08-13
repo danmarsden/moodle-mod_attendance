@@ -45,9 +45,11 @@ $course         = $DB->get_record('course', array('id' => $cm->course), '*', MUS
 $att            = $DB->get_record('attendance', array('id' => $cm->instance), '*', MUST_EXIST);
 
 require_login($course, true, $cm);
-require_capability('mod/attendance:manageattendances', $PAGE->context);
 
-$att = new attendance($att, $cm, $course, $PAGE->context, $pageparams);
+$context = context_module::instance($cm->id);
+require_capability('mod/attendance:manageattendances', $context);
+
+$att = new attendance($att, $cm, $course, $context, $pageparams);
 
 $PAGE->set_url($att->url_sessions(array('action'=>$pageparams->action)));
 $PAGE->set_title($course->shortname. ": ".$att->name);
@@ -56,7 +58,7 @@ $PAGE->set_cacheable(true);
 $PAGE->set_button($OUTPUT->update_module_button($cm->id, 'attendance'));
 $PAGE->navbar->add($att->name);
 
-$formparams = array('course' => $course, 'cm' => $cm, 'modcontext' => $PAGE->context, 'att' => $att);
+$formparams = array('course' => $course, 'cm' => $cm, 'modcontext' => $context, 'att' => $att);
 switch ($att->pageparams->action) {
     case att_sessions_page_params::ACTION_ADD:
         $url = $att->url_sessions(array('action' => att_sessions_page_params::ACTION_ADD));

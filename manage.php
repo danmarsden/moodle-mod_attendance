@@ -39,17 +39,18 @@ $att            = $DB->get_record('attendance', array('id' => $cm->instance), '*
 
 require_login($course, true, $cm);
 
+$context = context_module::instance($cm->id);
 $capabilities = array(
     'mod/attendance:manageattendances',
     'mod/attendance:takeattendances',
     'mod/attendance:changeattendances'
 );
-if (!has_any_capability($capabilities, $PAGE->context)) {
+if (!has_any_capability($capabilities, $context)) {
     redirect($att->url_view());
 }
 
 $pageparams->init($cm);
-$att = new attendance($att, $cm, $course, $PAGE->context, $pageparams);
+$att = new attendance($att, $cm, $course, $context, $pageparams);
 
 // If teacher is coming from block, then check for a session exists for today.
 if ($from === 'block') {
@@ -57,8 +58,8 @@ if ($from === 'block') {
     $size = count($sessions);
     if ($size == 1) {
         $sess = reset($sessions);
-        $nottaken = !$sess->lasttaken && has_capability('mod/attendance:takeattendances', $PAGE->context);
-        $canchange = $sess->lasttaken && has_capability('mod/attendance:changeattendances', $PAGE->context);
+        $nottaken = !$sess->lasttaken && has_capability('mod/attendance:takeattendances', $context);
+        $canchange = $sess->lasttaken && has_capability('mod/attendance:changeattendances', $context);
         if ($nottaken || $canchange) {
             redirect($att->url_take(array('sessionid' => $sess->id, 'grouptype' => $sess->groupid)));
         }

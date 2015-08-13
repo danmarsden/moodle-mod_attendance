@@ -37,7 +37,9 @@ $course         = $DB->get_record('course', array('id' => $cm->course), '*', MUS
 $att            = $DB->get_record('attendance', array('id' => $cm->instance), '*', MUST_EXIST);
 
 require_login($course, true, $cm);
-require_capability('mod/attendance:changepreferences', $PAGE->context);
+
+$context = context_module::instance($cm->id);
+require_capability('mod/attendance:changepreferences', $context);
 
 // Make sure the statusset is valid.
 $maxstatusset = attendance_get_max_statusset($att->id);
@@ -45,7 +47,7 @@ if ($pageparams->statusset > $maxstatusset + 1) {
     $pageparams->statusset = $maxstatusset + 1;
 }
 
-$att = new attendance($att, $cm, $course, $PAGE->context, $pageparams);
+$att = new attendance($att, $cm, $course, $context, $pageparams);
 
 $PAGE->set_url($att->url_preferences());
 $PAGE->set_title($course->shortname. ": ".$att->name.' - '.get_string('settings', 'attendance'));

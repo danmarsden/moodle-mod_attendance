@@ -41,10 +41,12 @@ $course         = $DB->get_record('course', array('id' => $cm->course), '*', MUS
 $attrecord = $DB->get_record('attendance', array('id' => $cm->instance), '*', MUST_EXIST);
 
 require_login($course, true, $cm);
-require_capability('mod/attendance:viewreports', $PAGE->context);
+
+$context = context_module::instance($cm->id);
+require_capability('mod/attendance:viewreports', $context);
 
 $pageparams->init($cm);
-$att = new attendance($attrecord, $cm, $course, $PAGE->context, $pageparams);
+$att = new attendance($attrecord, $cm, $course, $context, $pageparams);
 
 $PAGE->set_url($att->url_report());
 $PAGE->set_pagelayout('report');

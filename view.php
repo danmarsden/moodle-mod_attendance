@@ -39,17 +39,23 @@ $course         = $DB->get_record('course', array('id' => $cm->course), '*', MUS
 $attendance    = $DB->get_record('attendance', array('id' => $cm->instance), '*', MUST_EXIST);
 
 require_login($course, true, $cm);
-require_capability('mod/attendance:view', $PAGE->context);
+$context = context_module::instance($cm->id);
+require_capability('mod/attendance:view', $context);
 
 $pageparams->init($cm);
-$att = new attendance($attendance, $cm, $course, $PAGE->context, $pageparams);
+$att = new attendance($attendance, $cm, $course, $context, $pageparams);
 
 // Not specified studentid for displaying attendance?
 // Redirect to appropriate page if can.
 if (!$pageparams->studentid) {
-    if ($att->perm->can_manage() || $att->perm->can_take() || $att->perm->can_change()) {
+    $capabilities = array(
+        'mod/attendance:manageattendances',
+        'mod/attendance:takeattendances',
+        'mod/attendance:changeattendances'
+    );
+    if (has_any_capability($capabilities, $context)) {
         redirect($att->url_manage());
-    } else if ($att->perm->can_view_reports()) {
+    } else if (has_capability('mod/attendance:viewreports', $context)) {
         redirect($att->url_report());
     }
 }
@@ -64,7 +70,7 @@ $output = $PAGE->get_renderer('mod_attendance');
 
 if (isset($pageparams->studentid) && $USER->id != $pageparams->studentid) {
     // Only users with proper permissions should be able to see any user's individual report.
-    require_capability('mod/attendance:viewreports', $PAGE->context);
+    require_capability('mod/attendance:viewreports', $context);
     $userid = $pageparams->studentid;
 } else {
     // A valid request to see another users report has not been sent, show the user's own.
