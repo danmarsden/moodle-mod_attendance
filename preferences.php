@@ -130,7 +130,7 @@ $setselector = new attendance_set_selector($att, $maxstatusset);
 // Output starts here.
 
 echo $output->header();
-echo $output->heading(get_string('attendanceforthecourse', 'attendance').' :: ' format_string($course->fullname));
+echo $output->heading(get_string('attendanceforthecourse', 'attendance').' :: '. format_string($course->fullname));
 echo $output->render($tabs);
 echo $output->render($setselector);
 echo $output->render($prefdata);
