@@ -45,7 +45,6 @@ class attendance_permissions {
     private $canmanagetemp; // Can manage temporary users.
     private $canchangepreferences;
     private $canexport;
-    private $canbelisted;
     private $canaccessallgroups;
 
     private $cm;
@@ -116,14 +115,6 @@ class attendance_permissions {
         }
 
         return $this->canexport;
-    }
-
-    public function can_be_listed() {
-        if (is_null($this->canbelisted)) {
-            $this->canbelisted = has_capability('mod/attendance:canbelisted', $this->context, null, false);
-        }
-
-        return $this->canbelisted;
     }
 
     public function can_access_all_groups() {
