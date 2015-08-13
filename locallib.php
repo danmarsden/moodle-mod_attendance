@@ -74,10 +74,6 @@ class attendance_permissions {
         return $this->canviewreports;
     }
 
-    public function require_view_reports_capability() {
-        require_capability('mod/attendance:viewreports', $this->context);
-    }
-
     public function can_take() {
         if (is_null($this->cantake)) {
             $this->cantake = has_capability('mod/attendance:takeattendances', $this->context);
@@ -115,10 +111,6 @@ class attendance_permissions {
 
         return $this->canmanage;
     }
-
-    public function require_manage_capability() {
-        require_capability('mod/attendance:manageattendances', $this->context);
-    }
     
     // Check to see if the user can manage temporary users.
     public function can_managetemp() {
@@ -126,10 +118,6 @@ class attendance_permissions {
             $this->canmanagetemp = has_capability('mod/attendance:managetemporaryusers', $this->context);
         }
         return $this->canmanagetemp;
-    }
-
-    public function require_managetemp_capability() {
-        require_capability('mod/attendance:managetemporaryusers', $this->context);
     }
 
     public function can_change_preferences() {
@@ -140,20 +128,12 @@ class attendance_permissions {
         return $this->canchangepreferences;
     }
 
-    public function require_change_preferences_capability() {
-        require_capability('mod/attendance:changepreferences', $this->context);
-    }
-
     public function can_export() {
         if (is_null($this->canexport)) {
             $this->canexport = has_capability('mod/attendance:export', $this->context);
         }
 
         return $this->canexport;
-    }
-
-    public function require_export_capability() {
-        require_capability('mod/attendance:export', $this->context);
     }
 
     public function can_be_listed() {

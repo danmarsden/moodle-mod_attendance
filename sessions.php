@@ -45,10 +45,9 @@ $course         = $DB->get_record('course', array('id' => $cm->course), '*', MUS
 $att            = $DB->get_record('attendance', array('id' => $cm->instance), '*', MUST_EXIST);
 
 require_login($course, true, $cm);
+require_capability('mod/attendance:manageattendances', $PAGE->context);
 
 $att = new attendance($att, $cm, $course, $PAGE->context, $pageparams);
-
-$att->perm->require_manage_capability();
 
 $PAGE->set_url($att->url_sessions(array('action'=>$pageparams->action)));
 $PAGE->set_title($course->shortname. ": ".$att->name);

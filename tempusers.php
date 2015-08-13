@@ -37,8 +37,7 @@ $att = new attendance($att, $cm, $course);
 $PAGE->set_url($att->url_managetemp());
 
 require_login($course, true, $cm);
-
-$att->perm->require_managetemp_capability();
+require_capability('mod/attendance:managetemporaryusers', $PAGE->context);
 
 $PAGE->set_title($course->shortname.": ".$att->name.' - '.get_string('tempusers', 'attendance'));
 $PAGE->set_heading($course->fullname);

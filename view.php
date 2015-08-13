@@ -39,6 +39,7 @@ $course         = $DB->get_record('course', array('id' => $cm->course), '*', MUS
 $attendance    = $DB->get_record('attendance', array('id' => $cm->instance), '*', MUST_EXIST);
 
 require_login($course, true, $cm);
+require_capability('mod/attendance:view', $PAGE->context);
 
 $pageparams->init($cm);
 $att = new attendance($attendance, $cm, $course, $PAGE->context, $pageparams);
@@ -52,8 +53,6 @@ if (!$pageparams->studentid) {
         redirect($att->url_report());
     }
 }
-
-require_capability('mod/attendance:view', $PAGE->context);
 
 $PAGE->set_url($att->url_view());
 $PAGE->set_title($course->shortname. ": ".$att->name);

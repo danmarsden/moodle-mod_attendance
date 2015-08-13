@@ -46,8 +46,7 @@ if ($action) {
 $PAGE->set_url($att->url_tempedit($params));
 
 require_login($course, true, $cm);
-
-$att->perm->require_managetemp_capability();
+require_capability('mod/attendance:managetemporaryusers', $PAGE->context);
 
 $PAGE->set_title($course->shortname.": ".$att->name.' - '.get_string('tempusersedit', 'attendance'));
 $PAGE->set_heading($course->fullname);

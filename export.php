@@ -35,10 +35,9 @@ $course         = $DB->get_record('course', array('id' => $cm->course), '*', MUS
 $att            = $DB->get_record('attendance', array('id' => $cm->instance), '*', MUST_EXIST);
 
 require_login($course, true, $cm);
+require_capability('mod/attendance:export', $PAGE->context);
 
 $att = new attendance($att, $cm, $course, $PAGE->context);
-
-$att->perm->require_export_capability();
 
 $PAGE->set_url($att->url_export());
 $PAGE->set_title($course->shortname. ": ".$att->name);
