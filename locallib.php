@@ -42,9 +42,6 @@ class attendance_permissions {
     private $cantake;
     private $canchange;
     private $canmanage;
-    private $canmanagetemp; // Can manage temporary users.
-    private $canchangepreferences;
-    private $canexport;
     private $canaccessallgroups;
 
     private $cm;
@@ -91,30 +88,6 @@ class attendance_permissions {
         }
 
         return $this->canmanage;
-    }
-    
-    // Check to see if the user can manage temporary users.
-    public function can_managetemp() {
-        if (is_null($this->canmanagetemp)) {
-            $this->canmanagetemp = has_capability('mod/attendance:managetemporaryusers', $this->context);
-        }
-        return $this->canmanagetemp;
-    }
-
-    public function can_change_preferences() {
-        if (is_null($this->canchangepreferences)) {
-            $this->canchangepreferences = has_capability('mod/attendance:changepreferences', $this->context);
-        }
-
-        return $this->canchangepreferences;
-    }
-
-    public function can_export() {
-        if (is_null($this->canexport)) {
-            $this->canexport = has_capability('mod/attendance:export', $this->context);
-        }
-
-        return $this->canexport;
     }
 
     public function can_access_all_groups() {

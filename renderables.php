@@ -66,14 +66,18 @@ class attendance_tabs implements renderable {
      */
     public function get_tabs() {
         $toprow = array();
-        if ($this->att->perm->can_manage() or
-                $this->att->perm->can_take() or
-                $this->att->perm->can_change()) {
+
+        $capabilities = array(
+            'mod/attendance:manageattendances',
+            'mod/attendance:takeattendances',
+            'mod/attendance:changeattendances'
+        );
+        if (has_any_capability($capabilities, $this->att->context)) {
             $toprow[] = new tabobject(self::TAB_SESSIONS, $this->att->url_manage()->out(),
-                        get_string('sessions', 'attendance'));
+                get_string('sessions', 'attendance'));
         }
 
-        if ($this->att->perm->can_manage()) {
+        if (has_capability('mod/attendance:manageattendances', $this->att->context)) {
             $toprow[] = new tabobject(self::TAB_ADD,
                                      $this->att->url_sessions()->out(true, array('action' => att_sessions_page_params::ACTION_ADD)),
                         get_string('add', 'attendance'));
@@ -83,16 +87,16 @@ class attendance_tabs implements renderable {
                         get_string('report', 'attendance'));
         }
 
-        if ($this->att->perm->can_export()) {
+        if (has_capability('mod/attendance:export', $this->att->context)) {
             $toprow[] = new tabobject(self::TAB_EXPORT, $this->att->url_export()->out(),
                         get_string('export', 'attendance'));
         }
 
-        if ($this->att->perm->can_change_preferences()) {
+        if (has_capability('mod/attendance:changepreferences', $this->att->context)) {
             $toprow[] = new tabobject(self::TAB_PREFERENCES, $this->att->url_preferences()->out(),
                         get_string('settings', 'attendance'));
         }
-        if ($this->att->perm->can_managetemp()) {
+        if (has_capability('mod/attendance:managetemporaryusers', $this->att->context)) {
             $toprow[] = new tabobject(self::TAB_TEMPORARYUSERS, $this->att->url_managetemp()->out(),
                                       get_string('tempusers', 'attendance'));
         }
