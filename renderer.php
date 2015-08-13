@@ -249,7 +249,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $date = userdate($sess->sessdate, get_string('strftimedmyw', 'attendance'));
         $time = $this->construct_time($sess->sessdate, $sess->duration);
         if ($sess->lasttaken > 0) {
-            if ($sessdata->perm->can_change()) {
+            if (has_capability('mod/attendance:changeattendances', $sessdata->att->context)) {
                 $url = $sessdata->url_take($sess->id, $sess->groupid);
                 $title = get_string('changeattendance', 'attendance');
 
@@ -262,13 +262,14 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 $time = '<i>' . $time . '</i>';
             }
         } else {
-            if ($sessdata->perm->can_take()) {
+            if (has_capability('mod/attendance:takeattendances', $sessdata->att->context)) {
                 $url = $sessdata->url_take($sess->id, $sess->groupid);
                 $title = get_string('takeattendance', 'attendance');
                 $actions = $this->output->action_icon($url, new pix_icon('t/go', $title));
             }
         }
-        if ($sessdata->perm->can_manage()) {
+
+        if (has_capability('mod/attendance:manageattendances', $sessdata->att->context)) {
             $url = $sessdata->url_sessions($sess->id, att_sessions_page_params::ACTION_UPDATE);
             $title = get_string('editsession', 'attendance');
             $actions .= $this->output->action_icon($url, new pix_icon('t/edit', $title));
@@ -290,7 +291,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $table->data[0][] = $this->output->help_icon('hiddensessions', 'attendance',
                 get_string('hiddensessions', 'attendance').': '.$sessdata->hiddensessionscount);
 
-        if ($sessdata->perm->can_manage()) {
+        if (has_capability('mod/attendance:manageattendances', $sessdata->att->context)) {
             $options = array(
                         att_sessions_page_params::ACTION_DELETE_SELECTED => get_string('delete'),
                         att_sessions_page_params::ACTION_CHANGE_DURATION => get_string('changeduration', 'attendance'));
@@ -371,7 +372,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         GLOBAL $CFG;
         
         $controls = '';
-
+        $context = context_module::instance($takedata->cm->id);
         $group = 0;
         if ($takedata->pageparams->grouptype != attendance::SESSION_COMMON) {
             $group = $takedata->pageparams->grouptype;
@@ -387,13 +388,13 @@ class mod_attendance_renderer extends plugin_renderer_base {
             } else {
                 $groups = $group;
             }
-            $users = get_users_by_capability(context_module::instance($takedata->cm->id), 'mod/attendance:canbelisted',
+            $users = get_users_by_capability($context, 'mod/attendance:canbelisted',
                             'u.id, u.firstname, u.lastname, u.email',
                             '', '', '', $groups,
                             '', false, true);
             $totalusers = count($users);
         } else {
-            $totalusers = count_enrolled_users(context_module::instance($takedata->cm->id), 'mod/attendance:canbelisted', $group);
+            $totalusers = count_enrolled_users($context, 'mod/attendance:canbelisted', $group);
         }
         $usersperpage = $takedata->pageparams->perpage;
         if (!empty($takedata->pageparams->page) && $takedata->pageparams->page && $totalusers && $usersperpage) {
@@ -412,7 +413,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
         if ($takedata->pageparams->grouptype == attendance::SESSION_COMMON and
                 ($takedata->groupmode == VISIBLEGROUPS or
-                ($takedata->groupmode and $takedata->perm->can_access_all_groups()))) {
+                ($takedata->groupmode and has_capability('moodle/site:accessallgroups', $context)))) {
             $controls .= groups_print_activity_menu($takedata->cm, $takedata->url(), true);
         }
 
@@ -820,7 +821,11 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $sesstext = userdate($sess->sessdate, get_string('strftimedm', 'attendance'));
             $sesstext .= html_writer::empty_tag('br');
             $sesstext .= userdate($sess->sessdate, '('.get_string('strftimehm', 'attendance').')');
-            if (is_null($sess->lasttaken) and $reportdata->perm->can_take() or $reportdata->perm->can_change()) {
+            $capabilities = array(
+                'mod/attendance:takeattendances',
+                'mod/attendance:changeattendances'
+            );
+            if (is_null($sess->lasttaken) and has_any_capability($capabilities, $reportdata->att->context)) {
                 $sesstext = html_writer::link($reportdata->url_take($sess->id, $sess->groupid), $sesstext);
             }
             $sesstext .= html_writer::empty_tag('br');

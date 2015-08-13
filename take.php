@@ -42,16 +42,20 @@ $course         = $DB->get_record('course', array('id' => $cm->course), '*', MUS
 $att            = $DB->get_record('attendance', array('id' => $cm->instance), '*', MUST_EXIST);
 
 require_login($course, true, $cm);
+$context = context_module::instance($cm->id);
+require_capability('mod/attendance:takeattendances', $context);
 
 $pageparams->group = groups_get_activity_group($cm, true);
 
 $pageparams->init($course->id);
 $att = new attendance($att, $cm, $course, $PAGE->context, $pageparams);
 
-if (!$att->perm->can_take_session($pageparams->grouptype)) {
-    $group = groups_get_group($pageparams->grouptype);
-    throw new moodle_exception('cannottakeforgroup', 'attendance', '', $group->name);
+$allowedgroups = groups_get_activity_allowed_groups($this->cm);
+if (!empty($pageparams->grouptype) && !array_key_exists($groupid, $allowedgroups)) {
+     $group = groups_get_group($pageparams->grouptype);
+     throw new moodle_exception('cannottakeforgroup', 'attendance', '', $group->name);
 }
+
 if (($formdata = data_submitted()) && confirm_sesskey()) {
     $att->take_from_form_data($formdata);
 }

@@ -38,66 +38,6 @@ define('ATT_VIEW_NOTPRESENT', 6);
 define('ATT_SORT_LASTNAME', 1);
 define('ATT_SORT_FIRSTNAME', 2);
 
-class attendance_permissions {
-    private $cantake;
-    private $canchange;
-    private $canmanage;
-    private $canaccessallgroups;
-
-    private $cm;
-    private $context;
-
-    public function __construct($cm, $context) {
-        $this->cm = $cm;
-        $this->context = $context;
-    }
-
-    public function can_take() {
-        if (is_null($this->cantake)) {
-            $this->cantake = has_capability('mod/attendance:takeattendances', $this->context);
-        }
-
-        return $this->cantake;
-    }
-
-    public function can_take_session($groupid) {
-        if (!$this->can_take()) {
-            return false;
-        }
-
-        if ($groupid == attendance::SESSION_COMMON
-            || $this->can_access_all_groups()
-            || array_key_exists($groupid, groups_get_activity_allowed_groups($this->cm))) {
-            return true;
-        }
-
-        return false;
-    }
-
-    public function can_change() {
-        if (is_null($this->canchange)) {
-            $this->canchange = has_capability('mod/attendance:changeattendances', $this->context);
-        }
-
-        return $this->canchange;
-    }
-
-    public function can_manage() {
-        if (is_null($this->canmanage)) {
-            $this->canmanage = has_capability('mod/attendance:manageattendances', $this->context);
-        }
-
-        return $this->canmanage;
-    }
-
-    public function can_access_all_groups() {
-        if (is_null($this->canaccessallgroups)) {
-            $this->canaccessallgroups = has_capability('moodle/site:accessallgroups', $this->context);
-        }
-
-        return $this->canaccessallgroups;
-    }
-}
 
 class att_page_with_filter_controls {
     const SELECTOR_NONE         = 1;
@@ -492,9 +432,6 @@ class attendance {
     /** current page parameters */
     public $pageparams;
 
-    /** @var attendance_permissions permission of current user for attendance instance*/
-    public $perm;
-
     private $groupmode;
 
     private $statuses;
@@ -535,8 +472,6 @@ class attendance {
         }
 
         $this->pageparams = $pageparams;
-
-        $this->perm = new attendance_permissions($this->cm, $this->context);
     }
 
     public function get_group_mode() {

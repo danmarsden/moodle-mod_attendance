@@ -214,22 +214,18 @@ class attendance_manage_data implements renderable {
     /** @var int number of hidden sessions (sessions before $course->startdate)*/
     public $hiddensessionscount;
 
-    /** @var attendance_permissions permission of current user for attendance instance*/
-    public $perm;
-
     public $groups;
 
     public $hiddensesscount;
 
     /** @var attendance */
-    private $att;
+    public $att;
     /**
      * Prepare info about attendance sessions taking into account view parameters.
      *
      * @param attendance $att instance
      */
     public function __construct(attendance $att) {
-        $this->perm = $att->perm;
 
         $this->sessions = $att->get_filtered_sessions();
 
@@ -256,7 +252,6 @@ class attendance_take_data implements renderable {
     public $users;
 
     public $pageparams;
-    public $perm;
 
     public $groupmode;
     public $cm;
@@ -283,7 +278,6 @@ class attendance_take_data implements renderable {
         }
 
         $this->pageparams = $att->pageparams;
-        $this->perm = $att->perm;
 
         $this->groupmode = $att->get_group_mode();
         $this->cm = $att->cm;
@@ -438,7 +432,6 @@ class attendance_user_data implements renderable {
 }
 
 class attendance_report_data implements renderable {
-    public $perm;
     public $pageparams;
 
     public $users;
@@ -465,12 +458,10 @@ class attendance_report_data implements renderable {
 
     public $maxgrades = array();
 
-    private $att;
+    public $att;
 
     public function  __construct(attendance $att) {
         global $CFG;
-
-        $this->perm = $att->perm;
 
         $currenttime = time();
         if ($att->pageparams->view == ATT_VIEW_NOTPRESENT) {
