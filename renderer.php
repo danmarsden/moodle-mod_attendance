@@ -179,6 +179,9 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $views[ATT_VIEW_MONTHS] = get_string('months', 'attendance');
         $views[ATT_VIEW_WEEKS] = get_string('weeks', 'attendance');
         $views[ATT_VIEW_DAYS] = get_string('days', 'attendance');
+        if ($fcontrols->reportcontrol) {
+            $views[ATT_VIEW_SUMMARY] = get_string('summary');
+        }
         $viewcontrols = '';
         foreach ($views as $key => $sview) {
             if ($key != $fcontrols->pageparams->view) {
@@ -829,23 +832,29 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $table->size[] = '';
         $sessionstats = array();
 
-        foreach ($reportdata->sessions as $sess) {
-            $sesstext = userdate($sess->sessdate, get_string('strftimedm', 'attendance'));
-            $sesstext .= html_writer::empty_tag('br');
-            $sesstext .= userdate($sess->sessdate, '('.get_string('strftimehm', 'attendance').')');
-            $capabilities = array(
-                'mod/attendance:takeattendances',
-                'mod/attendance:changeattendances'
-            );
-            if (is_null($sess->lasttaken) and has_any_capability($capabilities, $reportdata->att->context)) {
-                $sesstext = html_writer::link($reportdata->url_take($sess->id, $sess->groupid), $sesstext);
-            }
-            $sesstext .= html_writer::empty_tag('br');
-            $sesstext .= $sess->groupid ? $reportdata->groups[$sess->groupid]->name : get_string('commonsession', 'attendance');
-
-            $table->head[] = $sesstext;
+        if ($reportdata->pageparams->view == ATT_VIEW_SUMMARY) {
+            $table->head[] = get_string('eventtaken', 'attendance');
             $table->align[] = 'center';
             $table->size[] = '1px';
+        } else {
+            foreach ($reportdata->sessions as $sess) {
+                $sesstext = userdate($sess->sessdate, get_string('strftimedm', 'attendance'));
+                $sesstext .= html_writer::empty_tag('br');
+                $sesstext .= userdate($sess->sessdate, '('.get_string('strftimehm', 'attendance').')');
+                $capabilities = array(
+                    'mod/attendance:takeattendances',
+                    'mod/attendance:changeattendances'
+                );
+                if (is_null($sess->lasttaken) and has_any_capability($capabilities, $reportdata->att->context)) {
+                    $sesstext = html_writer::link($reportdata->url_take($sess->id, $sess->groupid), $sesstext);
+                }
+                $sesstext .= html_writer::empty_tag('br');
+                $sesstext .= $sess->groupid ? $reportdata->groups[$sess->groupid]->name : get_string('commonsession', 'attendance');
+
+                $table->head[] = $sesstext;
+                $table->align[] = 'center';
+                $table->size[] = '1px';
+            }
         }
 
         $table->head[] = get_string('points', 'attendance');
@@ -868,8 +877,20 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
             $row->cells[] = $this->user_picture($user);  // Show different picture if it is a temporary user.
             $row->cells[] = html_writer::link($reportdata->url_view(array('studentid' => $user->id)), fullname($user));
-            $cellsgenerator = new user_sessions_cells_html_generator($reportdata, $user);
-            $row->cells = array_merge($row->cells, $cellsgenerator->get_cells(true));
+            if ($reportdata->pageparams->view == ATT_VIEW_SUMMARY) {
+                // var_dump($reportdata); exit;
+                $sessions_count = 0;
+                foreach ($reportdata->sessions AS $ses) {
+                    if (empty($ses->groupid) || isset($reportdata->usersgroups[$user->id][$ses->groupid])) {
+                        $sessions_count++;
+                    }
+                }
+                $sessions_taken = isset($reportdata->sessionslog[$user->id]) ? count($reportdata->sessionslog[$user->id]) : 0;
+                $row->cells[] = $sessions_taken . ' / ' . $sessions_count;
+            } else {
+                $cellsgenerator = new user_sessions_cells_html_generator($reportdata, $user);
+                $row->cells = array_merge($row->cells, $cellsgenerator->get_cells(true));
+            }
 
             $row->cells[] = att_format_float($reportdata->grades[$user->id]).' / '.att_format_float($reportdata->maxgrades[$user->id]);
             $percent = att_calc_user_grade_fraction($reportdata->grades[$user->id], $reportdata->maxgrades[$user->id]);
@@ -882,33 +903,35 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $table->data[] = $row;
         }
 
-        // Calculate the sum of statuses for each user
-        $statrow = new html_table_row();
-        $statrow->cells[] = '';
-        $statrow->cells[] = get_string('summary');
-        foreach ($reportdata->sessions as $sess) {
-            $sessionstats = array();
-            foreach($reportdata->statuses as $status) {
-                if ($status->setnumber == $sess->statusset) {
-                    $status->count = 0;
-                    $sessionstats[$status->id] = $status;
+        if ($reportdata->pageparams->view != ATT_VIEW_SUMMARY) {
+            // Calculate the sum of statuses for each user
+            $statrow = new html_table_row();
+            $statrow->cells[] = '';
+            $statrow->cells[] = get_string('summary');
+            foreach ($reportdata->sessions as $sess) {
+                $sessionstats = array();
+                foreach($reportdata->statuses as $status) {
+                    if ($status->setnumber == $sess->statusset) {
+                        $status->count = 0;
+                        $sessionstats[$status->id] = $status;
+                    }
                 }
-            }
 
-            foreach ($reportdata->users as $user) {
-                if (!empty($reportdata->sessionslog[$user->id][$sess->id])) {
-                    $sessionstats[$reportdata->sessionslog[$user->id][$sess->id]->statusid]->count++;
+                foreach ($reportdata->users as $user) {
+                    if (!empty($reportdata->sessionslog[$user->id][$sess->id])) {
+                        $sessionstats[$reportdata->sessionslog[$user->id][$sess->id]->statusid]->count++;
+                    }
                 }
-            }
 
-            $statsoutput = '<br/>';
-            foreach($sessionstats as $status) {
-                $statsoutput .= "$status->description:".$status->count." <br/>";
-            }
-            $statrow->cells[] = $statsoutput;
+                $statsoutput = '<br/>';
+                foreach($sessionstats as $status) {
+                    $statsoutput .= "$status->description:".$status->count." <br/>";
+                }
+                $statrow->cells[] = $statsoutput;
 
+            }
+            $table->data[] = $statrow;
         }
-        $table->data[] = $statrow;
 
         if ($bulkmessagecapability) { // Require that the user can bulk message users.
             // Display check boxes that will allow the user to send a message to the students that have been checked.
