@@ -301,3 +301,4 @@ $string['lowgrade'] = 'Low grade';
 $string['submitattendance'] = 'Submit attendance';
 $string['attendancenotset'] = 'You must set your attendance';
 $string['export'] = 'Export';
+$string['points'] = 'Points';

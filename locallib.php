@@ -576,6 +576,14 @@ class attendance {
     public function get_filtered_sessions() {
         global $DB;
 
+        $statuses = $this->get_statuses(true, true);
+        $statuses_maxgrades = array();
+        foreach ($statuses AS $st) {
+            if (!isset($statuses_maxgrades[$st->setnumber])) {
+                $statuses_maxgrades[$st->setnumber] = $st->grade;
+            }
+        }
+
         if ($this->pageparams->startdate && $this->pageparams->enddate) {
             $where = "attendanceid = :aid AND sessdate >= :csdate AND sessdate >= :sdate AND sessdate < :edate";
         } else if ($this->pageparams->enddate) {
@@ -601,6 +609,7 @@ class attendance {
                 $sess->description = file_rewrite_pluginfile_urls($sess->description,
                         'pluginfile.php', $this->context->id, 'mod_attendance', 'session', $sess->id);
             }
+            $sess->maxgrades = $statuses_maxgrades[$sess->statusset];
         }
 
         return $sessions;
@@ -1215,17 +1224,7 @@ class attendance {
     }
 
     public function update_users_grade($userids) {
-        $grades = array();
-
-        foreach ($userids as $userid) {
-            $grades[$userid] = new stdClass();
-            $grades[$userid]->userid = $userid;
-            $grades[$userid]->rawgrade = att_calc_user_grade_fraction($this->get_user_grade($userid),
-                                                                      $this->get_user_max_grade($userid)) * $this->grade;
-        }
-
-        return grade_update('mod/attendance', $this->course->id, 'mod', 'attendance',
-                            $this->id, 0, $grades);
+        return att_update_users_grades($this->id, $userids);
     }
 
     public function get_user_filtered_sessions_log($userid) {
@@ -1511,6 +1510,18 @@ class attendance {
 
         return null;
     }
+
+    /**
+     * Get points and maxpoints for each user
+     * @param int or array $userids         User ids (empty means all)
+     * @param string       $stardate        Attendance sessions startdate
+     * @param string       $enddate         Attendance sessions enddate
+     *
+     * @return array
+     */
+    public function get_users_points($userids=array(), $startdate='', $enddate='') {
+        return att_get_users_points($this->id, $userids, $startdate, $enddate);
+    }
 }
 
 
@@ -1680,25 +1691,8 @@ function att_get_gradebook_maxgrade($attid) {
 }
 
 function att_update_all_users_grades($attid, $course, $context, $coursemodule) {
-    $grades = array();
-
     $userids = array_keys(get_enrolled_users($context, 'mod/attendance:canbelisted', 0, 'u.id'));
-
-    $statuses = att_get_statuses($attid);
-    $gradebook_maxgrade = att_get_gradebook_maxgrade($attid);
-    foreach ($userids as $userid) {
-        $grade = new stdClass;
-        $grade->userid = $userid;
-        $userstatusesstat = att_get_user_statuses_stat($attid, $course->startdate, $userid, $coursemodule);
-        $usertakensesscount = att_get_user_taken_sessions_count($attid, $course->startdate, $userid, $coursemodule);
-        $usergrade = att_get_user_grade($userstatusesstat, $statuses);
-        $usermaxgrade = att_get_user_max_grade($usertakensesscount, $statuses);
-        $grade->rawgrade = att_calc_user_grade_fraction($usergrade, $usermaxgrade) * $gradebook_maxgrade;
-        $grades[$userid] = $grade;
-    }
-
-    return grade_update('mod/attendance', $course->id, 'mod', 'attendance',
-                        $attid, 0, $grades);
+    return att_update_users_grades($attid, $userids, true);
 }
 
 function att_has_logs_for_status($statusid) {
@@ -1718,3 +1712,126 @@ function att_log_convert_url(moodle_url $fullurl) {
     return substr($fullurl->out(), strlen($baseurl));
 }
 
+/**
+ * Calculate points, maxpoints and numtakensessions for each user
+ *
+ * @param int          $attid           Attendance instance id
+ * @param int or array $userids         User ids (empty means all)
+ * @param string       $stardate        Attendance sessions startdate
+ * @param string       $enddate         Attendance sessions enddate
+ *
+ * @return array
+ */
+
+function att_get_users_points($attid, $userids=0, $startdate = '', $enddate = '') {
+    global $DB;
+
+    list($course, $cm) = get_course_and_cm_from_instance($attid, 'attendance');
+
+    $params = array(
+        'attid'      => $attid,
+        'cstartdate' => $course->startdate,
+        );
+
+    $where = '';
+
+    if (!empty($userid)) {
+        if (is_array($userids)) {
+            list($in_sql, $in_params) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
+            $where .= ' AND atl.studentid ' . $in_sql;
+            $params = array_merge($params, $in_params);
+        } else {
+            $where .= ' AND atl.studentid = :userid';
+            $params['userid'] = $userids;
+        }
+    }
+    if (!empty($startdate)) {
+        $where .= ' AND ats.sessdate >= :startdate';
+        $params['startdate'] = $startdate;
+    }
+    if (!empty($enddate)) {
+        $where .= ' AND ats.sessdate < :enddate ';
+        $params['enddate'] = $enddate;
+    }
+
+    $join_group = '';
+    if (!empty($cm->effectivegroupmode)) {
+        $join_group = 'LEFT JOIN {groups_members} gm ON (gm.userid = atl.studentid AND gm.groupid = ats.groupid)';
+        $where .= ' AND (ats.groupid = 0 or gm.id is NOT NULL)';
+    }
+
+    $sql = "SELECT userid, COUNT(*) AS numtakensessions, SUM(grade) AS points, SUM(maxgrade) AS maxpoints
+             FROM (SELECT atl.studentid AS userid, ats.id AS sessionid, stg.grade, MAX(stm.grade) AS maxgrade
+                     FROM {attendance_sessions} ats
+                     JOIN {attendance_log} atl ON (atl.sessionid = ats.id)
+                     JOIN {attendance_statuses} stg ON (stg.id = atl.statusid)
+                     JOIN {attendance_statuses} stm ON (stm.attendanceid = ats.attendanceid AND stm.setnumber = ats.statusset AND stm.visible = 1 AND stm.deleted = 0)
+                     {$join_group}
+                    WHERE ats.attendanceid = :attid
+                      AND ats.sessdate >= :cstartdate
+                      AND ats.lasttakenby != 0
+                      {$where}
+                   GROUP BY atl.studentid, ats.id, stg.grade) p
+            GROUP BY userid";
+    return $DB->get_records_sql($sql, $params);
+}
+
+/**
+ * Return points, maxpoints and numtakensessions for an user
+ *
+ * @param array        $points          Array of points
+ * @param int          $userid          User id
+ *
+ * @return object
+ */
+function att_get_user_points($points, $userid) {
+    if (isset($points[$userid])) {
+        return $points[$userid];
+    } else {
+        return (object) array('points'=>0, 'maxpoints'=>0, 'numtakensessions'=>0);
+    }
+}
+
+/**
+ * Update grades for some users
+ *
+ * @param int          $attid        Attendance instance id
+ * @param int or array $userids      User ids
+ * @param boolean      $allusers     All users are being updated?
+ *
+ * @return void
+ */
+function att_update_users_grades($attid, $userids=array(), $allusers=false) {
+    list($course, $cm) = get_course_and_cm_from_instance($attid, 'attendance');
+    if ($allusers) {
+        $userspoints = att_get_users_points($attid);
+    } else {
+        $userspoints = att_get_users_points($attid, $userids);
+    }
+    $gradebook_maxgrade = att_get_gradebook_maxgrade($attid);
+
+    $grades = array();
+    foreach ($userids as $userid) {
+        $grade = new stdClass;
+        $grade->userid = $userid;
+        if (isset($userspoints[$userid])) {
+            $grade->rawgrade = att_calc_user_grade_fraction($userspoints[$userid]->points, $userspoints[$userid]->maxpoints) * $gradebook_maxgrade;
+        } else {
+            $grade->rawgrade = 0;
+        }
+        $grades[$userid] = $grade;
+    }
+
+    return grade_update('mod/attendance', $course->id, 'mod', 'attendance', $attid, 0, $grades);
+}
+
+/**
+ * Given a float, prints it nicely.
+ *
+ * @param float $float The float to print
+ * @param bool $stripzeros If true, removes final zeros after decimal point
+ * @return string locale float
+ */
+function att_format_float($float, $stripzeros=true) {
+    return format_float($float, 1, true, $stripzeros);
+}

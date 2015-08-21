@@ -331,17 +331,13 @@ class attendance_user_data implements renderable {
 
     public $pageparams;
 
-    public $stat;
-
     public $statuses;
-
-    public $gradable;
 
     public $grade;
 
     public $maxgrade;
 
-    public $decimalpoints;
+    public $numtakensessions;
 
     public $filtercontrols;
 
@@ -361,20 +357,13 @@ class attendance_user_data implements renderable {
 
         $this->pageparams = $att->pageparams;
 
-        if (!$this->decimalpoints = grade_get_setting($att->course->id, 'decimalpoints')) {
-            $this->decimalpoints = $CFG->grade_decimalpoints;
-        }
-
         if ($this->pageparams->mode == att_view_page_params::MODE_THIS_COURSE) {
             $this->statuses = $att->get_statuses(true, true);
 
-            $this->stat = $att->get_user_stat($userid);
-
-            $this->gradable = $att->grade > 0;
-            if ($this->gradable) {
-                $this->grade = $att->get_user_grade($userid);
-                $this->maxgrade = $att->get_user_max_grade($userid);
-            }
+            $userpoints = att_get_user_points($att->get_users_points($userid, $att->pageparams->startdate, $att->pageparams->enddate), $userid);
+            $this->grade = $userpoints->points;
+            $this->maxgrade = $userpoints->maxpoints;
+            $this->numtakensessions = $userpoints->numtakensessions;
 
             $this->filtercontrols = new attendance_filter_controls($att);
 
@@ -384,40 +373,23 @@ class attendance_user_data implements renderable {
         } else {
             $this->coursesatts = att_get_user_courses_attendances($userid);
             $this->statuses = array();
-            $this->stat = array();
-            $this->gradable = array();
             $this->grade = array();
             $this->maxgrade = array();
+            $this->numtakensessions = array();
             foreach ($this->coursesatts as $atid => $ca) {
                 // Check to make sure the user can view this cm.
                 if (!get_fast_modinfo($ca->courseid)->instances['attendance'][$ca->attid]->uservisible) {
                     unset($this->courseatts[$atid]);
                     continue;
                 }
-                $statuses = att_get_statuses($ca->attid);
-                $user_taken_sessions_count = att_get_user_taken_sessions_count($ca->attid, $ca->coursestartdate, $userid, $att->cm);
-                $user_statuses_stat = att_get_user_statuses_stat($ca->attid, $ca->coursestartdate, $userid, $att->cm);
 
+                $statuses = att_get_statuses($ca->attid);
                 $this->statuses[$ca->attid] = $statuses;
 
-                $this->stat[$ca->attid]['completed'] = $user_taken_sessions_count;
-                $this->stat[$ca->attid]['statuses'] = $user_statuses_stat;
-
-                $this->gradable[$ca->attid] = $ca->attgrade > 0;
-
-                if ($this->gradable[$ca->attid]) {
-                    $this->grade[$ca->attid] = att_get_user_grade($user_statuses_stat, $statuses);
-                    // For getting sessions count implemented simplest method - taken sessions.
-                    // It can have error if users don't have attendance info for some sessions.
-                    // In the future we can implement another methods:
-                    // * all sessions between user start enrolment date and now;
-                    // * all sessions between user start and end enrolment date.
-                    $this->maxgrade[$ca->attid] = att_get_user_max_grade($user_taken_sessions_count, $statuses);
-                } else {
-                    // For more comfortable and universal work with arrays.
-                    $this->grade[$ca->attid] = null;
-                    $this->maxgrade[$ca->attid] = null;
-                }
+                $userpoints = att_get_user_points(att_get_users_points($ca->attid, $userid), $userid);
+                $this->grade[$ca->attid] = $userpoints->points;
+                $this->maxgrade[$ca->attid] = $userpoints->maxpoints;
+                $this->numtakensessions[$ca->attid] = $userpoints->numtakensessions;
             }
         }
         $this->urlpath = $att->url_view()->out_omit_querystring();
@@ -443,10 +415,6 @@ class attendance_report_data implements renderable {
     public $statuses;
     // Includes disablrd/deleted statuses.
     public $allstatuses;
-
-    public $gradable;
-
-    public $decimalpoints;
 
     public $usersgroups = array();
 
@@ -487,32 +455,20 @@ class attendance_report_data implements renderable {
         $this->statuses = $att->get_statuses(true, true);
         $this->allstatuses = $att->get_statuses(false, true);
 
-        $this->gradable = $att->grade > 0;
-
-        if (!$this->decimalpoints = grade_get_setting($att->course->id, 'decimalpoints')) {
-            $this->decimalpoints = $CFG->grade_decimalpoints;
-        }
-
-        $maxgrade = att_get_user_max_grade(count($this->sessions), $this->statuses);
+        $points = $att->get_users_points(array_keys($this->users), $att->pageparams->startdate, $att->pageparams->enddate);
 
         foreach ($this->users as $key => $user) {
-            $grade = 0;
-            if ($this->gradable) {
-                $grade = $att->get_user_grade($user->id, array('enddate' => $currenttime));
-                $totalgrade = $att->get_user_grade($user->id);
-            }
+            $userpoints = att_get_user_points($points, $user->id);
+            $grade = $userpoints->points;
+            $maxgrade = $userpoints->maxpoints;
 
             if ($att->pageparams->view != ATT_VIEW_NOTPRESENT || $grade < $maxgrade) {
                 $this->usersgroups[$user->id] = groups_get_all_groups($att->course->id, $user->id);
 
                 $this->sessionslog[$user->id] = $att->get_user_filtered_sessions_log($user->id);
 
-                $this->usersstats[$user->id] = $att->get_user_statuses_stat($user->id);
-
-                if ($this->gradable) {
-                    $this->grades[$user->id] = $totalgrade;
-                    $this->maxgrades[$user->id] = $att->get_user_max_grade($user->id);;
-                }
+                $this->grades[$user->id] = $grade;
+                $this->maxgrades[$user->id] = $maxgrade;
             } else {
                 unset($this->users[$key]);
             }
