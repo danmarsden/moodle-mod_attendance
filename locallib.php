@@ -1241,36 +1241,21 @@ class attendance {
         } else {
             $where = "ats.attendanceid = :aid AND ats.sessdate >= :csdate";
         }
-        if ($this->get_group_mode()) {
-            $sql = "SELECT ats.id, ats.sessdate, ats.groupid, al.statusid, al.remarks
-                  FROM {attendance_sessions} ats
-                  JOIN {attendance_log} al ON ats.id = al.sessionid AND al.studentid = :uid
-                  LEFT JOIN {groups_members} gm ON gm.userid = al.studentid AND gm.groupid = ats.groupid
-                 WHERE $where AND (ats.groupid = 0 or gm.id is NOT NULL)
-              ORDER BY ats.sessdate ASC";
 
-            $params = array(
-                'uid'       => $userid,
-                'aid'       => $this->id,
-                'csdate'    => $this->course->startdate,
-                'sdate'     => $this->pageparams->startdate,
-                'edate'     => $this->pageparams->enddate);
-
-        } else {
-            $sql = "SELECT ats.id, ats.sessdate, ats.groupid, al.statusid, al.remarks
+        $sql = "SELECT ats.id, ats.sessdate, ats.groupid, al.statusid, al.remarks
                   FROM {attendance_sessions} ats
                   JOIN {attendance_log} al
                     ON ats.id = al.sessionid AND al.studentid = :uid
                  WHERE $where
               ORDER BY ats.sessdate ASC";
 
-            $params = array(
-                'uid'       => $userid,
-                'aid'       => $this->id,
-                'csdate'    => $this->course->startdate,
-                'sdate'     => $this->pageparams->startdate,
-                'edate'     => $this->pageparams->enddate);
-        }
+        $params = array(
+            'uid'       => $userid,
+            'aid'       => $this->id,
+            'csdate'    => $this->course->startdate,
+            'sdate'     => $this->pageparams->startdate,
+            'edate'     => $this->pageparams->enddate);
+
         $sessions = $DB->get_records_sql($sql, $params);
 
         return $sessions;
@@ -1291,22 +1276,13 @@ class attendance {
         // If the array's index is a number it will not merge entries.
         // It would be better as a UNION query butunfortunatly MS SQL does not seem to support doing a DISTINCT on a the description field.
         $id = $DB->sql_concat(':value', 'ats.id');
-        if ($this->get_group_mode()) {
-            $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, al.statusid, al.remarks, ats.studentscanmark
-                  FROM {attendance_sessions} ats
-            RIGHT JOIN {attendance_log} al
-                    ON ats.id = al.sessionid AND al.studentid = :uid
-                    LEFT JOIN {groups_members} gm ON gm.userid = al.studentid AND gm.groupid = ats.groupid
-                 WHERE $where AND (ats.groupid = 0 or gm.id is NOT NULL)
-              ORDER BY ats.sessdate ASC";
-        } else {
-            $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, al.statusid, al.remarks, ats.studentscanmark
+
+        $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, al.statusid, al.remarks, ats.studentscanmark
                   FROM {attendance_sessions} ats
             RIGHT JOIN {attendance_log} al
                     ON ats.id = al.sessionid AND al.studentid = :uid
                  WHERE $where
               ORDER BY ats.sessdate ASC";
-        }
 
         $params = array(
                 'uid'       => $userid,
@@ -1761,8 +1737,8 @@ function att_get_users_points($attid, $userids=0, $startdate = '', $enddate = ''
 
     $join_group = '';
     if (!empty($cm->effectivegroupmode)) {
-        $join_group = 'LEFT JOIN {groups_members} gm ON (gm.userid = atl.studentid AND gm.groupid = ats.groupid)';
-        $where .= ' AND (ats.groupid = 0 or gm.id is NOT NULL)';
+        // $join_group = 'LEFT JOIN {groups_members} gm ON (gm.userid = atl.studentid AND gm.groupid = ats.groupid)';
+        // $where .= ' AND (ats.groupid = 0 or gm.id is NOT NULL)';
     }
 
     $sql = "SELECT userid, COUNT(*) AS numtakensessions, SUM(grade) AS points, SUM(maxgrade) AS maxpoints

@@ -236,8 +236,8 @@ class attendance_manage_data implements renderable {
         $this->att = $att;
     }
 
-    public function url_take($sessionid, $grouptype) {
-        return url_helpers::url_take($this->att, $sessionid, $grouptype);
+    public function url_take($sessionid) {
+        return url_helpers::url_take($this->att, $sessionid);
     }
 
     /**
@@ -271,11 +271,7 @@ class attendance_take_data implements renderable {
     private $att;
 
     public function  __construct(attendance $att) {
-        if ($att->pageparams->grouptype) {
-            $this->users = $att->get_users($att->pageparams->grouptype, $att->pageparams->page);
-        } else {
-            $this->users = $att->get_users($att->pageparams->group, $att->pageparams->page);
-        }
+        $this->users = $att->get_users($att->pageparams->groupid, $att->pageparams->page);
 
         $this->pageparams = $att->pageparams;
 
@@ -345,6 +341,8 @@ class attendance_user_data implements renderable {
 
     public $groups;
 
+    public $usergroups;
+
     public $coursesatts;
 
     private $urlpath;
@@ -370,6 +368,7 @@ class attendance_user_data implements renderable {
             $this->sessionslog = $att->get_user_filtered_sessions_log_extended($userid);
 
             $this->groups = groups_get_all_groups($att->course->id);
+            $this->usergroups = groups_get_all_groups($att->course->id, $userid);
         } else {
             $this->coursesatts = att_get_user_courses_attendances($userid);
             $this->statuses = array();
@@ -477,8 +476,8 @@ class attendance_report_data implements renderable {
         $this->att = $att;
     }
 
-    public function url_take($sessionid, $grouptype) {
-        return url_helpers::url_take($this->att, $sessionid, $grouptype);
+    public function url_take($sessionid) {
+        return url_helpers::url_take($this->att, $sessionid);
     }
 
     public function url_view($params=array()) {
@@ -551,12 +550,8 @@ class attendance_set_selector implements renderable {
 }
 
 class url_helpers {
-    public static function url_take($att, $sessionid, $grouptype) {
+    public static function url_take($att, $sessionid) {
         $params = array('sessionid' => $sessionid);
-        if (isset($grouptype)) {
-            $params['grouptype'] = $grouptype;
-        }
-
         return $att->url_take($params);
     }
 

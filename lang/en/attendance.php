@@ -302,3 +302,5 @@ $string['submitattendance'] = 'Submit attendance';
 $string['attendancenotset'] = 'You must set your attendance';
 $string['export'] = 'Export';
 $string['points'] = 'Points';
+$string['unknowngroup'] = 'Unknown group';
+$string['notmember'] = 'not&nbsp;member';

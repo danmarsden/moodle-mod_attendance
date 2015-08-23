@@ -29,7 +29,6 @@ $pageparams = new att_take_page_params();
 
 $id                     = required_param('id', PARAM_INT);
 $pageparams->sessionid  = required_param('sessionid', PARAM_INT);
-$pageparams->grouptype  = required_param('grouptype', PARAM_INT);
 $pageparams->sort       = optional_param('sort', null, PARAM_INT);
 $pageparams->copyfrom   = optional_param('copyfrom', null, PARAM_INT);
 $pageparams->viewmode   = optional_param('viewmode', null, PARAM_INT);
@@ -45,15 +44,16 @@ require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
 require_capability('mod/attendance:takeattendances', $context);
 
-$pageparams->group = groups_get_activity_group($cm, true);
-
 $pageparams->init($course->id);
 $att = new attendance($att, $cm, $course, $PAGE->context, $pageparams);
 
-$allowedgroups = groups_get_activity_allowed_groups($cm);
-if (!empty($pageparams->grouptype) && !array_key_exists($groupid, $allowedgroups)) {
-     $group = groups_get_group($pageparams->grouptype);
-     throw new moodle_exception('cannottakeforgroup', 'attendance', '', $group->name);
+$pageparams->groupid = $DB->get_field('attendance_sessions', 'groupid', array('id'=>$pageparams->sessionid), MUST_EXIST);
+if ($att->get_group_mode() != NOGROUPS && !empty($pageparams->groupid)) {
+    $allowedgroups = groups_get_activity_allowed_groups($cm);
+    $group = groups_get_group($pageparams->groupid);
+    if (!isset($allowedgroups[$pageparams->groupid])) {
+        throw new moodle_exception('cannottakeforgroup', 'attendance', '', $group->name);
+    }
 }
 
 if (($formdata = data_submitted()) && confirm_sesskey()) {

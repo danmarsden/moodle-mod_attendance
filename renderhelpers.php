@@ -48,15 +48,26 @@ class user_sessions_cells_generator {
         foreach ($this->reportdata->sessions as $sess) {
             if (array_key_exists($sess->id, $this->reportdata->sessionslog[$this->user->id])) {
                 $statusid = $this->reportdata->sessionslog[$this->user->id][$sess->id]->statusid;
+                $maxgrade = att_format_float($sess->maxgrades);
                 if (array_key_exists($statusid, $this->reportdata->statuses)) {
                     $grade = att_format_float($this->reportdata->statuses[$statusid]->grade);
-                    $maxgrade = att_format_float($sess->maxgrades);
-                    $this->construct_existing_status_cell($this->reportdata->statuses[$statusid]->acronym . " ({$grade}/{$maxgrade})");
+                    $acronym = $this->reportdata->statuses[$statusid]->acronym;
+                    $function = 'construct_existing_status_cell';
                 } else {
                     $grade = att_format_float($this->reportdata->allstatuses[$statusid]->grade);
-                    $maxgrade = att_format_float($sess->maxgrades);
-                    $this->construct_hidden_status_cell($this->reportdata->allstatuses[$statusid]->acronym . " ({$grade}/{$maxgrades})");
+                    $acronym = $this->reportdata->allstatuses[$statusid]->acronym;
+                    $function = 'construct_hidden_status_cell';
                 }
+                $text = "{$acronym} ({$grade}/{$maxgrade})";
+                if ($sess->groupid > 0) {
+                    if (!isset($this->reportdata->groups[$sess->groupid])) { // unknown group (deleted?)
+                        $text = html_writer::tag('span', $text, array('style' => "color:red; font-weight: bold;"));
+                    } else if (!isset($this->reportdata->usersgroups[$this->user->id][$sess->groupid])) { // user was removed from group
+                        $text = html_writer::tag('span', $text.'<br>'.get_string('notmember', 'attendance'), array('style' => "color:red; font-weight: bold;"));
+                    }
+                }
+                $this->$function($text);
+
                 if ($remarks) {
                     $this->construct_remarks_cell($this->reportdata->sessionslog[$this->user->id][$sess->id]->remarks);
                 }
