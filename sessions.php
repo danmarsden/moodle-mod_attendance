@@ -213,12 +213,19 @@ echo $OUTPUT->footer();
 function construct_sessions_data_for_add($formdata) {
     global $CFG;
 
-    $duration = $formdata->durtime['hours']*HOURSECS + $formdata->durtime['minutes']*MINSECS;
+    $sesstarttime = $formdata->sesstarttime['hours']*HOURSECS + $formdata->sesstarttime['minutes']*MINSECS;
+    $sessiondate = $formdata->sessiondate + $sesstarttime;
+    if (get_config('attendance', 'sessionendtime') == ATT_DURATION) {
+        $duration = $formdata->durtime['hours']*HOURSECS + $formdata->durtime['minutes']*MINSECS;
+    } else {
+        $sesendtime = $formdata->sesendtime['hours']*HOURSECS + $formdata->sesendtime['minutes']*MINSECS;
+        $duration = $sesendtime - $sesstarttime;
+    }
     $now = time();
 
     $sessions = array();
     if (isset($formdata->addmultiply)) {
-        $startdate = $formdata->sessiondate;
+        $startdate = $sessiondate;
         $starttime = $startdate - usergetmidnight($startdate);
         $enddate = $formdata->sessionenddate + DAYSECS; // Because enddate in 0:0am.
 
@@ -266,7 +273,7 @@ function construct_sessions_data_for_add($formdata) {
         }
     } else {
         $sess = new stdClass();
-        $sess->sessdate = $formdata->sessiondate;
+        $sess->sessdate = $sessiondate;
         $sess->duration = $duration;
         $sess->descriptionitemid = $formdata->sdescription['itemid'];
         $sess->description = $formdata->sdescription['text'];

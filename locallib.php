@@ -39,6 +39,8 @@ define('ATT_VIEW_SUMMARY', 7);
 define('ATT_SORT_LASTNAME', 1);
 define('ATT_SORT_FIRSTNAME', 2);
 
+define('ATT_DURATION', 0);
+define('ATT_ENDTIME', 1);
 
 class att_page_with_filter_controls {
     const SELECTOR_NONE         = 1;
@@ -771,8 +773,15 @@ class attendance {
             print_error('No such session in this course');
         }
 
-        $sess->sessdate = $formdata->sessiondate;
-        $sess->duration = $formdata->durtime['hours']*HOURSECS + $formdata->durtime['minutes']*MINSECS;
+        $sesstarttime = $formdata->sesstarttime['hours']*HOURSECS + $formdata->sesstarttime['minutes']*MINSECS;
+        $sess->sessdate = $formdata->sessiondate + $sesstarttime;
+        if (get_config('attendance', 'sessionendtime') == ATT_DURATION) {
+            $sess->duration = $formdata->durtime['hours']*HOURSECS + $formdata->durtime['minutes']*MINSECS;
+        } else {
+            $sesendtime = $formdata->sesendtime['hours']*HOURSECS + $formdata->sesendtime['minutes']*MINSECS;
+            $sess->duration = $sesendtime - $sesstarttime;
+        }
+
         $description = file_save_draft_area_files($formdata->sdescription['itemid'],
                                 $this->context->id, 'mod_attendance', 'session', $sessionid,
                                 array('subdirs' => false, 'maxfiles' => -1, 'maxbytes' => 0), $formdata->sdescription['text']);

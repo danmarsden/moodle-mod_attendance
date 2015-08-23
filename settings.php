@@ -26,6 +26,7 @@ defined('MOODLE_INTERNAL') || die;
 
 if ($ADMIN->fulltree) {
     require_once(dirname(__FILE__).'/lib.php');
+    require_once($CFG->dirroot.'/mod/attendance/locallib.php');
 
     // Paging options.
     $options = array(
@@ -41,4 +42,14 @@ if ($ADMIN->fulltree) {
 
     $settings->add(new admin_setting_configselect('attendance/resultsperpage',
         get_string('resultsperpage', 'attendance'), get_string('resultsperpage_desc', 'attendance'), 25, $options));
+
+
+    $settings->add(new admin_setting_configcheckbox('attendance/allowoldsessions',
+        get_string('allowoldsessions', 'attendance'), get_string('allowoldsessions_desc', 'attendance'), 1));
+
+    $options = array(
+        ATT_DURATION => get_string('duration', 'attendance'),
+        ATT_ENDTIME  => get_string('endtime', 'attendance'));
+    $settings->add(new admin_setting_configselect('attendance/sessionendtime',
+        get_string('endtime', 'attendance'), get_string('endtime_desc', 'attendance'), 'duration', $options));
 }
