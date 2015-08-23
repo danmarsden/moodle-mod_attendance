@@ -276,6 +276,7 @@ class att_sessions_page_params {
     const ACTION_DELETE           = 3;
     const ACTION_DELETE_SELECTED  = 4;
     const ACTION_CHANGE_DURATION  = 5;
+    const ACTION_DELETE_HIDDEN    = 6;
 
     /** @var int view mode of taking attendance page*/
     public $action;
@@ -571,6 +572,24 @@ class attendance {
                 'csdate'=> $this->course->startdate);
 
         return $DB->count_records_select('attendance_sessions', $where, $params);
+    }
+
+    /**
+     * Returns the hidden sessions for this attendance
+     *
+     * Fetches data from {attendance_sessions}
+     *
+     * @return hidden sessions
+     */
+    public function get_hidden_sessions() {
+        global $DB;
+
+        $where = "attendanceid = :aid AND sessdate < :csdate";
+        $params = array(
+                'aid'   => $this->id,
+                'csdate'=> $this->course->startdate);
+
+        return $DB->get_records_select('attendance_sessions', $where, $params);
     }
 
     public function get_filtered_sessions() {

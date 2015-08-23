@@ -301,3 +301,10 @@ $string['lowgrade'] = 'Low grade';
 $string['submitattendance'] = 'Submit attendance';
 $string['attendancenotset'] = 'You must set your attendance';
 $string['export'] = 'Export';
+$string['points'] = 'Points';
+$string['unknowngroup'] = 'Unknown group';
+$string['notmember'] = 'not&nbsp;member';
+
+$string['deletehiddensessions'] = 'Delete all hidden sessions';
+$string['confirmdeletehiddensessions'] = 'Are you sure you want to delete {$a->count} sessions scheduled before the course start date ({$a->date})?';
+$string['hiddensessionsdeleted'] = 'All hidden sessions were delete';
