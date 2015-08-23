@@ -1531,6 +1531,21 @@ class attendance {
     public function get_users_points($userids=array(), $startdate='', $enddate='') {
         return att_get_users_points($this->id, $userids, $startdate, $enddate);
     }
+
+    public function get_lowgrade_threshold() {
+        $grade_item = grade_item::fetch(array('courseid'=>$this->course->id, 'itemtype'=>'mod',
+                                              'itemmodule'=>'attendance', 'iteminstance'=>$this->id));
+        if ($grade_item->gradetype == GRADE_TYPE_VALUE && !empty($grade_item->gradepass)) {
+            if (empty($grade_item->grademax)) {
+                $lowgrade_threshold = 1;
+            } else {
+                $lowgrade_threshold = $grade_item->gradepass / $grade_item->grademax;
+            }
+        } else {
+            $lowgrade_threshold = get_config('attendance', 'defaultperclowgrade') / 100.0;
+        }
+        return min($lowgrade_threshold, 1);
+    }
 }
 
 

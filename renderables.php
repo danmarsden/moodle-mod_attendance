@@ -118,6 +118,7 @@ class attendance_filter_controls implements renderable {
     public $nextcur;
     public $curdatetxt;
     public $reportcontrol;
+    public $lowgrade_threshold;
 
     private $urlpath;
     private $urlparams;
@@ -132,7 +133,8 @@ class attendance_filter_controls implements renderable {
         $this->cm = $att->cm;
 
         // This is a report control only if $reports is true and the attendance block can be graded.
-        $this->reportcontrol = $report && ($att->grade > 0);
+        $this->reportcontrol = $report;
+        $this->lowgrade_threshold = $att->get_lowgrade_threshold();
 
         $this->curdate = $att->pageparams->curdate;
 
@@ -456,12 +458,14 @@ class attendance_report_data implements renderable {
 
         $points = $att->get_users_points(array_keys($this->users), $att->pageparams->startdate, $att->pageparams->enddate);
 
+        $lowgrade_threshold = $att->get_lowgrade_threshold();
+
         foreach ($this->users as $key => $user) {
             $userpoints = att_get_user_points($points, $user->id);
             $grade = $userpoints->points;
             $maxgrade = $userpoints->maxpoints;
 
-            if ($att->pageparams->view != ATT_VIEW_NOTPRESENT || $grade < $maxgrade) {
+            if ($att->pageparams->view != ATT_VIEW_NOTPRESENT || att_calc_user_grade_fraction($grade, $maxgrade) < $lowgrade_threshold) {
                 $this->usersgroups[$user->id] = groups_get_all_groups($att->course->id, $user->id);
 
                 $this->sessionslog[$user->id] = $att->get_user_filtered_sessions_log($user->id);

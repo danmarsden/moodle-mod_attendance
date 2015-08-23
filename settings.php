@@ -52,4 +52,7 @@ if ($ADMIN->fulltree) {
         ATT_ENDTIME  => get_string('endtime', 'attendance'));
     $settings->add(new admin_setting_configselect('attendance/sessionendtime',
         get_string('endtime', 'attendance'), get_string('endtime_desc', 'attendance'), 'duration', $options));
+
+    $settings->add(new admin_setting_configtext('attendance/defaultperclowgrade',
+        get_string('defaultperclowgrade', 'attendance'), get_string('defaultperclowgrade_desc', 'attendance'), 75, PARAM_FLOAT, 7));
 }

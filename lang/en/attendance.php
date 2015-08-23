@@ -300,7 +300,7 @@ $string['studentscanmark'] = 'Allow students to record own attendance';
 $string['studentscanmark_help'] = 'If checked students will be able to change their own attendance status for the session.';
 $string['set_by_student'] = 'Self-recorded';
 $string['attendance_already_submitted'] = 'You may not self register attendance that has already been set.';
-$string['lowgrade'] = 'Low grade';
+$string['lowgrade'] = 'Below {$a}%';
 $string['submitattendance'] = 'Submit attendance';
 $string['attendancenotset'] = 'You must set your attendance';
 $string['export'] = 'Export';
@@ -315,3 +315,6 @@ $string['sessionenddatepriortocoursestartdate'] = 'Session date can not be prior
 
 $string['allowoldsessions'] = 'Allow old sessions';
 $string['allowoldsessions_desc'] = 'Allow add new sessions prior to course start date';
+
+$string['defaultperclowgrade'] = 'Default percentage for lowgrade';
+$string['defaultperclowgrade_desc'] = 'Default percentage for the lowgrade report. Only users with points below this threshold will be shown. \'Grade to pass\' parameter from attendance instance has precedence over this one.';
