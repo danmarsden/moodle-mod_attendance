@@ -174,11 +174,14 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $views[ATT_VIEW_ALL] = get_string('all', 'attendance');
         $views[ATT_VIEW_ALLPAST] = get_string('allpast', 'attendance');
         if ($fcontrols->reportcontrol) {
-            $views[ATT_VIEW_NOTPRESENT] = get_string('lowgrade', 'attendance');
+            $views[ATT_VIEW_NOTPRESENT] = get_string('lowgrade', 'attendance', att_format_float($fcontrols->lowgrade_threshold*100));
         }
         $views[ATT_VIEW_MONTHS] = get_string('months', 'attendance');
         $views[ATT_VIEW_WEEKS] = get_string('weeks', 'attendance');
         $views[ATT_VIEW_DAYS] = get_string('days', 'attendance');
+        if ($fcontrols->reportcontrol) {
+            $views[ATT_VIEW_SUMMARY] = get_string('summary');
+        }
         $viewcontrols = '';
         foreach ($views as $key => $sview) {
             if ($key != $fcontrols->pageparams->view) {
@@ -228,11 +231,11 @@ class mod_attendance_renderer extends plugin_renderer_base {
         foreach ($sessdata->sessions as $key => $sess) {
             $i++;
 
+            $table->data[$sess->id][] = $i;
+
             $dta = $this->construct_date_time_actions($sessdata, $sess);
 
-            $table->data[$sess->id][] = $i;
-            $table->data[$sess->id][] = $sess->groupid ? $sessdata->groups[$sess->groupid]->name :
-                                                         get_string('commonsession', 'attendance');
+            $table->data[$sess->id][] = $this->get_session_display_type($sess, $sessdata->groups, 'nobr');
             $table->data[$sess->id][] = $dta['date'];
             $table->data[$sess->id][] = $dta['time'];
             $table->data[$sess->id][] = $sess->description;
@@ -248,24 +251,27 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
         $date = userdate($sess->sessdate, get_string('strftimedmyw', 'attendance'));
         $time = $this->construct_time($sess->sessdate, $sess->duration);
-        if ($sess->lasttaken > 0) {
-            if (has_capability('mod/attendance:changeattendances', $sessdata->att->context)) {
-                $url = $sessdata->url_take($sess->id, $sess->groupid);
-                $title = get_string('changeattendance', 'attendance');
 
-                $date = html_writer::link($url, $date, array('title' => $title));
-                $time = html_writer::link($url, $time, array('title' => $title));
+        if ($this->is_session_group_known($sess, $sessdata->groups)) {
+            if ($sess->lasttaken > 0) {
+                if (has_capability('mod/attendance:changeattendances', $sessdata->att->context)) {
+                    $url = $sessdata->url_take($sess->id);
+                    $title = get_string('changeattendance', 'attendance');
 
-                $actions = $this->output->action_icon($url, new pix_icon('redo', $title, 'attendance'));
+                    $date = html_writer::link($url, $date, array('title' => $title));
+                    $time = html_writer::link($url, $time, array('title' => $title));
+
+                    $actions = $this->output->action_icon($url, new pix_icon('redo', $title, 'attendance'));
+                } else {
+                    $date = '<i>' . $date . '</i>';
+                    $time = '<i>' . $time . '</i>';
+                }
             } else {
-                $date = '<i>' . $date . '</i>';
-                $time = '<i>' . $time . '</i>';
-            }
-        } else {
-            if (has_capability('mod/attendance:takeattendances', $sessdata->att->context)) {
-                $url = $sessdata->url_take($sess->id, $sess->groupid);
-                $title = get_string('takeattendance', 'attendance');
-                $actions = $this->output->action_icon($url, new pix_icon('t/go', $title));
+                if (has_capability('mod/attendance:takeattendances', $sessdata->att->context)) {
+                    $url = $sessdata->url_take($sess->id);
+                    $title = get_string('takeattendance', 'attendance');
+                    $actions = $this->output->action_icon($url, new pix_icon('t/go', $title));
+                }
             }
         }
 
@@ -283,6 +289,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
     }
 
     protected function render_sess_manage_control(attendance_manage_data $sessdata) {
+        global $OUTPUT;
+
         $table = new html_table();
         $table->attributes['class'] = ' ';
         $table->width = '100%';
@@ -292,6 +300,14 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 get_string('hiddensessions', 'attendance').': '.$sessdata->hiddensessionscount);
 
         if (has_capability('mod/attendance:manageattendances', $sessdata->att->context)) {
+            if ($sessdata->hiddensessionscount > 0) {
+                $attributes = array(
+                        'type'  => 'submit',
+                        'name'  => 'deletehiddensessions',
+                        'value' => get_string('deletehiddensessions', 'attendance'));
+                $table->data[1][] = html_writer::empty_tag('input', $attributes);
+            }
+
             $options = array(
                         att_sessions_page_params::ACTION_DELETE_SELECTED => get_string('delete'),
                         att_sessions_page_params::ACTION_CHANGE_DURATION => get_string('changeduration', 'attendance'));
@@ -703,8 +719,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         if ($userdata->pageparams->mode == att_view_page_params::MODE_THIS_COURSE) {
             $o .= html_writer::empty_tag('hr');
 
-            $o .= construct_user_data_stat($userdata->stat, $userdata->statuses,
-                        $userdata->gradable, $userdata->grade, $userdata->maxgrade, $userdata->decimalpoints);
+            $o .= construct_user_data_stat($userdata->grade, $userdata->maxgrade, $userdata->numtakensessions);
 
             $o .= $this->render_attendance_filter_controls($userdata->filtercontrols);
 
@@ -720,9 +735,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 }
                 $o .= html_writer::tag('h4', $ca->attname);
 
-                $o .= construct_user_data_stat($userdata->stat[$ca->attid], $userdata->statuses[$ca->attid],
-                            $userdata->gradable[$ca->attid], $userdata->grade[$ca->attid],
-                            $userdata->maxgrade[$ca->attid], $userdata->decimalpoints);
+                if (isset($userdata->grade[$ca->attid])) {
+                    $o .= construct_user_data_stat($userdata->grade[$ca->attid], $userdata->maxgrade[$ca->attid],
+                                $userdata->numtakensessions[$ca->attid]);
+                } else {
+                    $o .= construct_user_data_stat(0, 0, 0);
+                }
             }
         }
 
@@ -739,10 +757,18 @@ class mod_attendance_renderer extends plugin_renderer_base {
             get_string('time'),
             get_string('description', 'attendance'),
             get_string('status', 'attendance'),
+            get_string('points', 'attendance'),
             get_string('remarks', 'attendance')
         );
-        $table->align = array('', '', '', 'left', 'left', 'center', 'left', 'center');
-        $table->size = array('1px', '1px', '1px', '1px', '*', '1px', '1px', '*');
+        $table->align = array('', '', '', 'left', 'left', 'center', 'center', 'center');
+        $table->size = array('1px', '1px', '1px', '1px', '*', '*', '1px', '*');
+
+        $maxgrades = array();
+        foreach ($userdata->statuses AS $st) {
+            if (!isset($maxgrades[$st->setnumber])) {
+                $maxgrades[$st->setnumber] = $st->grade;
+            }
+        }
 
         $i = 0;
         foreach ($userdata->sessionslog as $sess) {
@@ -750,23 +776,33 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
             $row = new html_table_row();
             $row->cells[] = $i;
-            $row->cells[] = html_writer::tag('nobr', $sess->groupid ? $userdata->groups[$sess->groupid]->name :
-                                                                      get_string('commonsession', 'attendance'));
+
+            $sess_name = $this->get_session_display_type($sess, $userdata->groups, 'span');
+
+            $row->cells[] = html_writer::tag('nobr', $sess_name);
             $row->cells[] = userdate($sess->sessdate, get_string('strftimedmyw', 'attendance'));
             $row->cells[] = $this->construct_time($sess->sessdate, $sess->duration);
             $row->cells[] = $sess->description;
             if (isset($sess->statusid)) {
-                $row->cells[] = $userdata->statuses[$sess->statusid]->description;
+                $status = $userdata->statuses[$sess->statusid];
+                $row->cells[] = $status->description;
+                $points = att_format_float($status->grade) . ' / ' . att_format_float($maxgrades[$status->setnumber]);
+                if (!$this->is_session_group_known($sess, $userdata->groups)) {
+                    $points = html_writer::tag('span', $points, array('style' => "color:red; font-weight: bold;"));
+                } else if(!empty($sess->groupid) && !isset($userdata->usergroups[$sess->groupid])) {
+                    $points = html_writer::tag('span', $points.'<br>'.get_string('notmember', 'attendance'), array('style' => "color:red; font-weight: bold;"));
+                }
+                $row->cells[] = $points;
                 $row->cells[] = $sess->remarks;
             } else if ($sess->sessdate < $userdata->user->enrolmentstart) {
                 $cell = new html_table_cell(get_string('enrolmentstart', 'attendance',
                                             userdate($userdata->user->enrolmentstart, '%d.%m.%Y')));
-                $cell->colspan = 2;
+                $cell->colspan = 3;
                 $row->cells[] = $cell;
             } else if ($userdata->user->enrolmentend and $sess->sessdate > $userdata->user->enrolmentend) {
                 $cell = new html_table_cell(get_string('enrolmentend', 'attendance',
                                             userdate($userdata->user->enrolmentend, '%d.%m.%Y')));
-                $cell->colspan = 2;
+                $cell->colspan = 3;
                 $row->cells[] = $cell;
             } else {
                 if (!empty($sess->studentscanmark)) { // Student can mark their own attendance.
@@ -774,10 +810,11 @@ class mod_attendance_renderer extends plugin_renderer_base {
                     $url = new moodle_url('/mod/attendance/attendance.php',
                             array('sessid' => $sess->id, 'sesskey' => sesskey()));
                     $cell = new html_table_cell(html_writer::link($url, get_string('submitattendance', 'attendance')));
-                    $cell->colspan = 2;
+                    $cell->colspan = 3;
                     $row->cells[] = $cell;
                 } else { // Student cannot mark their own attendace.
                     $row->cells[] = '?';
+                    $row->cells[] = '';
                     $row->cells[] = '';
                 }
             }
@@ -816,39 +853,39 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $table->align[] = 'left';
         $table->size[] = '';
         $sessionstats = array();
+        if ($reportdata->pageparams->view == ATT_VIEW_SUMMARY) {
+            $table->head[] = get_string('eventtaken', 'attendance');
+            $table->align[] = 'center';
+            $table->size[] = '1px';
+        } else {
+            foreach ($reportdata->sessions as $sess) {
+                $sesstext = userdate($sess->sessdate, get_string('strftimedm', 'attendance'));
+                $sesstext .= html_writer::empty_tag('br');
+                $sesstext .= userdate($sess->sessdate, '('.get_string('strftimehm', 'attendance').')');
+                $capabilities = array(
+                    'mod/attendance:takeattendances',
+                    'mod/attendance:changeattendances'
+                );
 
-        foreach ($reportdata->sessions as $sess) {
-            $sesstext = userdate($sess->sessdate, get_string('strftimedm', 'attendance'));
-            $sesstext .= html_writer::empty_tag('br');
-            $sesstext .= userdate($sess->sessdate, '('.get_string('strftimehm', 'attendance').')');
-            $capabilities = array(
-                'mod/attendance:takeattendances',
-                'mod/attendance:changeattendances'
-            );
-            if (is_null($sess->lasttaken) and has_any_capability($capabilities, $reportdata->att->context)) {
-                $sesstext = html_writer::link($reportdata->url_take($sess->id, $sess->groupid), $sesstext);
+                if ($this->is_session_group_known($sess, $reportdata->groups) and
+                        is_null($sess->lasttaken) and has_any_capability($capabilities, $reportdata->att->context)) {
+                    $sesstext = html_writer::link($reportdata->url_take($sess->id), $sesstext);
+                }
+                $sesstext .= html_writer::empty_tag('br') . $this->get_session_display_type($sess, $reportdata->groups, 'span');
+
+                $table->head[] = $sesstext;
+                $table->align[] = 'center';
+                $table->size[] = '1px';
             }
-            $sesstext .= html_writer::empty_tag('br');
-            $sesstext .= $sess->groupid ? $reportdata->groups[$sess->groupid]->name : get_string('commonsession', 'attendance');
-
-            $table->head[] = $sesstext;
-            $table->align[] = 'center';
-            $table->size[] = '1px';
         }
 
-        foreach ($reportdata->statuses as $status) {
-            $table->head[] = $status->acronym;
-            $table->align[] = 'center';
-            $table->size[] = '1px';
-            $sessionstats[$status->id] = 0;
-        }
+        $table->head[] = get_string('points', 'attendance');
+        $table->align[] = 'center';
+        $table->size[] = '1px';
 
-        if ($reportdata->gradable) {
-            $table->head[] = get_string('grade');
-            $table->align[] = 'center';
-            $table->size[] = '1px';
-        }
-
+        $table->head[] = get_string('percentage', 'attendance');
+        $table->align[] = 'center';
+        $table->size[] = '1px';
 
         if ($bulkmessagecapability) { // Display the table header for bulk messaging.
             // The checkbox must have an id of cb_selector so that the JavaScript will pick it up.
@@ -862,21 +899,23 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
             $row->cells[] = $this->user_picture($user);  // Show different picture if it is a temporary user.
             $row->cells[] = html_writer::link($reportdata->url_view(array('studentid' => $user->id)), fullname($user));
-            $cellsgenerator = new user_sessions_cells_html_generator($reportdata, $user);
-            $row->cells = array_merge($row->cells, $cellsgenerator->get_cells(true));
-
-            foreach ($reportdata->statuses as $status) {
-                if (array_key_exists($status->id, $reportdata->usersstats[$user->id])) {
-                    $row->cells[] = $reportdata->usersstats[$user->id][$status->id]->stcnt;
-                } else {
-                    // No attendance data for this $status => no statistic for this status.
-                    $row->cells[] = 0;
+            if ($reportdata->pageparams->view == ATT_VIEW_SUMMARY) {
+                $sessions_count = 0;
+                foreach ($reportdata->sessions AS $ses) {
+                    if ($this->is_session_group_known($ses, $reportdata->usersgroups[$user->id])) {
+                        $sessions_count++;
+                    }
                 }
+                $sessions_taken = isset($reportdata->sessionslog[$user->id]) ? count($reportdata->sessionslog[$user->id]) : 0;
+                $row->cells[] = $sessions_taken . ' / ' . $sessions_count;
+            } else {
+                $cellsgenerator = new user_sessions_cells_html_generator($reportdata, $user);
+                $row->cells = array_merge($row->cells, $cellsgenerator->get_cells(true));
             }
 
-            if ($reportdata->gradable) {
-                $row->cells[] = format_float($reportdata->grades[$user->id]).' / '.format_float($reportdata->maxgrades[$user->id]);
-            }
+            $row->cells[] = att_format_float($reportdata->grades[$user->id]).' / '.att_format_float($reportdata->maxgrades[$user->id]);
+            $percent = att_calc_user_grade_fraction($reportdata->grades[$user->id], $reportdata->maxgrades[$user->id]);
+            $row->cells[] = att_format_float($percent*100, false) . '%';
 
             if ($bulkmessagecapability) { // Create the checkbox for bulk messaging.
                 $row->cells[] = html_writer::checkbox('user'.$user->id, 'on', false);
@@ -885,27 +924,35 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $table->data[] = $row;
         }
 
-        // Calculate the sum of statuses for each user
-        $statrow = new html_table_row();
-        $statrow->cells[] = '';
-        $statrow->cells[] = get_string('summary');
-        foreach ($reportdata->sessions as $sess) {
-            foreach ($reportdata->users as $user) {
+        if ($reportdata->pageparams->view != ATT_VIEW_SUMMARY) {
+            // Calculate the sum of statuses for each user
+            $statrow = new html_table_row();
+            $statrow->cells[] = '';
+            $statrow->cells[] = get_string('summary');
+            foreach ($reportdata->sessions as $sess) {
+                $sessionstats = array();
                 foreach($reportdata->statuses as $status) {
-                    if (!empty($reportdata->sessionslog[$user->id][$sess->id])) {
-                        if ($reportdata->sessionslog[$user->id][$sess->id]->statusid == $status->id) $sessionstats[$status->id]++;
+                    if ($status->setnumber == $sess->statusset) {
+                        $status->count = 0;
+                        $sessionstats[$status->id] = $status;
                     }
                 }
-            }
 
-            $statsoutput = '<br/>';
-            foreach($reportdata->statuses as $status) {
-                $statsoutput .= "$status->description:".$sessionstats[$status->id]." <br/>";
-            }
-            $statrow->cells[] = $statsoutput;
+                foreach ($reportdata->users as $user) {
+                    if (!empty($reportdata->sessionslog[$user->id][$sess->id])) {
+                        $sessionstats[$reportdata->sessionslog[$user->id][$sess->id]->statusid]->count++;
+                    }
+                }
 
+                $statsoutput = '<br/>';
+                foreach($sessionstats as $status) {
+                    $statsoutput .= "$status->description:".$status->count." <br/>";
+                }
+                $statrow->cells[] = $statsoutput;
+
+            }
+            $table->data[] = $statrow;
         }
-        $table->data[] = $statrow;
 
         if ($bulkmessagecapability) { // Require that the user can bulk message users.
             // Display check boxes that will allow the user to send a message to the students that have been checked.
@@ -960,7 +1007,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $table->head = array('#',
                              get_string('acronym', 'attendance'),
                              get_string('description'),
-                             get_string('grade'),
+                             get_string('points', 'attendance'),
                              get_string('action'));
         $table->align = array('center', 'center', 'center', 'center', 'center', 'center');
 
@@ -1081,5 +1128,21 @@ class mod_attendance_renderer extends plugin_renderer_base {
         }
 
         return $this->output->user_picture($user, $opts);
+    }
+
+    protected function get_session_display_type($session, $groups, $tag='nobr') {
+        if ($session->groupid) {
+            if (isset($groups[$session->groupid])) {
+                return $groups[$session->groupid]->name;
+            } else {
+                return html_writer::tag($tag, get_string('unknowngroup', 'attendance'), array('style' => "color:red; font-weight: bold;"));
+            }
+        } else {
+            return get_string('commonsession', 'attendance');
+        }
+    }
+
+    protected function is_session_group_known($session, $groups) {
+        return empty($session->groupid) || isset($groups[$session->groupid]);
     }
 }

@@ -48,11 +48,26 @@ class user_sessions_cells_generator {
         foreach ($this->reportdata->sessions as $sess) {
             if (array_key_exists($sess->id, $this->reportdata->sessionslog[$this->user->id])) {
                 $statusid = $this->reportdata->sessionslog[$this->user->id][$sess->id]->statusid;
+                $maxgrade = att_format_float($sess->maxgrades);
                 if (array_key_exists($statusid, $this->reportdata->statuses)) {
-                    $this->construct_existing_status_cell($this->reportdata->statuses[$statusid]->acronym);
+                    $grade = att_format_float($this->reportdata->statuses[$statusid]->grade);
+                    $acronym = $this->reportdata->statuses[$statusid]->acronym;
+                    $function = 'construct_existing_status_cell';
                 } else {
-                    $this->construct_hidden_status_cell($this->reportdata->allstatuses[$statusid]->acronym);
+                    $grade = att_format_float($this->reportdata->allstatuses[$statusid]->grade);
+                    $acronym = $this->reportdata->allstatuses[$statusid]->acronym;
+                    $function = 'construct_hidden_status_cell';
                 }
+                $text = "{$acronym} ({$grade}/{$maxgrade})";
+                if ($sess->groupid > 0) {
+                    if (!isset($this->reportdata->groups[$sess->groupid])) { // unknown group (deleted?)
+                        $text = html_writer::tag('span', $text, array('style' => "color:red; font-weight: bold;"));
+                    } else if (!isset($this->reportdata->usersgroups[$this->user->id][$sess->groupid])) { // user was removed from group
+                        $text = html_writer::tag('span', $text.'<br>'.get_string('notmember', 'attendance'), array('style' => "color:red; font-weight: bold;"));
+                    }
+                }
+                $this->$function($text);
+
                 if ($remarks) {
                     $this->construct_remarks_cell($this->reportdata->sessionslog[$this->user->id][$sess->id]->remarks);
                 }
@@ -228,65 +243,36 @@ function construct_session_full_date_time($datetime, $duration) {
     return $sessinfo;
 }
 
-function construct_user_data_stat($stat, $statuses, $gradable, $grade, $maxgrade, $decimalpoints) {
+function construct_user_data_stat($grade, $maxgrade, $numtakensessions) {
     global $OUTPUT;
 
     $stattable = new html_table();
     $stattable->attributes['class'] = 'attlist';
     $row = new html_table_row();
     $row->cells[] = get_string('sessionscompleted', 'attendance').':';
-    $row->cells[] = $stat['completed'];
+    $row->cells[] = $numtakensessions;
     $stattable->data[] = $row;
 
-    foreach ($statuses as $st) {
-        $row = new html_table_row();
-        $row->cells[] = $st->description . ':';
-        $row->cells[] = array_key_exists($st->id, $stat['statuses']) ? $stat['statuses'][$st->id]->stcnt : 0;
+    $row = new html_table_row();
+    $row->cells[] = get_string('points', 'attendance') .
+                    $OUTPUT->help_icon('gradebookexplanation', 'attendance') . ':';
+    $row->cells[] = att_format_float($grade) . ' / ' . att_format_float($maxgrade);
+    $stattable->data[] = $row;
 
-        $stattable->data[] = $row;
-    }
-
-    if ($gradable) {
-        $row = new html_table_row();
-        $row->cells[] = get_string('attendancegrade', 'attendance') .
-                        $OUTPUT->help_icon('gradebookexplanation', 'attendance') . ':';
-        $row->cells[] = format_float($grade) . ' / ' . format_float($maxgrade);
-        $stattable->data[] = $row;
-
-        $row = new html_table_row();
-        $row->cells[] = get_string('attendancepercent', 'attendance') . ':';
-        if ($maxgrade == 0) {
-            $percent = 0;
-        } else {
-            $percent = $grade / $maxgrade * 100;
-        }
-        $row->cells[] = format_float(sprintf("%0.{$decimalpoints}f", $percent));
-        $stattable->data[] = $row;
-    }
+    $row = new html_table_row();
+    $row->cells[] = get_string('percentage', 'attendance') . ':';
+    $percent = att_calc_user_grade_fraction($grade, $maxgrade) * 100;
+    $row->cells[] = att_format_float($percent, false) . '%';
+    $stattable->data[] = $row;
 
     return html_writer::table($stattable);
 }
 
 function construct_full_user_stat_html_table($attendance, $course, $user, $coursemodule) {
-    global $CFG;
-    $gradeable = $attendance->grade > 0;
-    $statuses = att_get_statuses($attendance->id);
-    $userstatusesstat = att_get_user_statuses_stat($attendance->id, $course->startdate, $user->id, $coursemodule);
-    $stat['completed'] = att_get_user_taken_sessions_count($attendance->id, $course->startdate, $user->id, $coursemodule);
-    $stat['statuses'] = $userstatusesstat;
-    if ($gradeable) {
-        $grade = att_get_user_grade($userstatusesstat, $statuses);
-        $maxgrade = att_get_user_max_grade(att_get_user_taken_sessions_count($attendance->id, $course->startdate,
-                                                                             $user->id, $coursemodule), $statuses);
-        if (!$decimalpoints = grade_get_setting($course->id, 'decimalpoints')) {
-            $decimalpoints = $CFG->grade_decimalpoints;
-        }
-    } else {
-        $grade = 0;
-        $maxgrade = 0;
-        $decimalpoints = 0;
-    }
+    $userpoints = att_get_user_points(att_get_users_points($attendance->id, $user->id), $user->id);
+    $grade = $userpoints->points;
+    $maxgrade = $userpoints->maxpoints;
+    $numtakensessions = $userpoints->numtakensessions;
 
-    return construct_user_data_stat($stat, $statuses,
-                $gradeable, $grade, $maxgrade, $decimalpoints);
+    return construct_user_data_stat($grade, $maxgrade, $numtakensessions);
 }

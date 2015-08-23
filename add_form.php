@@ -109,7 +109,7 @@ class mod_attendance_add_form extends moodleform {
         $mform->addElement('checkbox', 'studentscanmark', '', get_string('studentscanmark','attendance'));
         $mform->addHelpButton('studentscanmark', 'studentscanmark', 'attendance');
 
-        $mform->addElement('date_time_selector', 'sessiondate', get_string('sessiondate', 'attendance'));
+        $mform->addElement('date_selector', 'sessiondate', get_string('sessiondate', 'attendance'));
 
         for ($i=0; $i<=23; $i++) {
             $hours[$i] = sprintf("%02d", $i);
@@ -117,10 +117,26 @@ class mod_attendance_add_form extends moodleform {
         for ($i=0; $i<60; $i+=5) {
             $minutes[$i] = sprintf("%02d", $i);
         }
-        $durtime = array();
-        $durtime[] =& $mform->createElement('select', 'hours', get_string('hour', 'form'), $hours, false, true);
-        $durtime[] =& $mform->createElement('select', 'minutes', get_string('minute', 'form'), $minutes, false, true);
-        $mform->addGroup($durtime, 'durtime', get_string('duration', 'attendance'), array(' '), true);
+
+        $sesstarttime = array();
+        $sesstarttime[] =& $mform->createElement('select', 'hours', get_string('hour', 'form'), $hours, false, true);
+        $sesstarttime[] =& $mform->createElement('select', 'minutes', get_string('minute', 'form'), $minutes, false, true);
+        $mform->addGroup($sesstarttime, 'sesstarttime', get_string('sessiontime', 'attendance'), array(' '), true);
+
+        $mform->addElement('hidden', 'coursestartdate', $course->startdate);
+        $mform->setType('coursestartdate', PARAM_INT);
+
+        if (get_config('attendance', 'sessionendtime') == ATT_DURATION) {
+            $durtime = array();
+            $durtime[] =& $mform->createElement('select', 'hours', get_string('hour', 'form'), $hours, false, true);
+            $durtime[] =& $mform->createElement('select', 'minutes', get_string('minute', 'form'), $minutes, false, true);
+            $mform->addGroup($durtime, 'durtime', get_string('duration', 'attendance'), array(' '), true);
+        } else {
+            $sesendtime = array();
+            $sesendtime[] =& $mform->createElement('select', 'hours', get_string('hour', 'form'), $hours, false, true);
+            $sesendtime[] =& $mform->createElement('select', 'minutes', get_string('minute', 'form'), $minutes, false, true);
+            $mform->addGroup($sesendtime, 'sesendtime', get_string('endtime', 'attendance'), array(' '), true);
+        }
 
         $mform->addElement('date_selector', 'sessionenddate', get_string('sessionenddate', 'attendance'));
         $mform->disabledIf('sessionenddate', 'addmultiply', 'notchecked');
@@ -176,6 +192,22 @@ class mod_attendance_add_form extends moodleform {
      */
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
+
+        $sesstarttime = $data['sesstarttime']['hours']*HOURSECS + $data['sesstarttime']['minutes']*MINSECS;
+        $sessiondate = $data['sessiondate'] + $sesstarttime;
+
+        $allowoldsessions = get_config('attendance', 'allowoldsessions');
+        if (!$allowoldsessions && $sessiondate < $data['coursestartdate']) {
+            $errors['sessiondate'] = get_string('sessionenddatepriortocoursestartdate', 'attendance',
+                userdate($data['coursestartdate'], get_string('strftimedmy', 'attendance')));
+        }
+
+        if (get_config('attendance', 'sessionendtime') == ATT_ENDTIME) {
+            $sesendtime = $data['sesendtime']['hours']*HOURSECS + $data['sesendtime']['minutes']*MINSECS;
+            if ($sesendtime < $sesstarttime) {
+                $errors['sesendtime'] = get_string('invalidsessionendtime', 'attendance');
+            }
+        }
 
         if (!empty($data['addmultiply']) && $data['sessiondate'] != 0 && $data['sessionenddate'] != 0 && $data['sessionenddate'] < $data['sessiondate']) {
             $errors['sessionenddate'] = get_string('invalidsessionenddate', 'attendance');

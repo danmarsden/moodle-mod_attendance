@@ -53,9 +53,12 @@ class mod_attendance_update_form extends moodleform {
         }
         $dhours = floor($sess->duration / HOURSECS);
         $dmins = floor(($sess->duration - $dhours * HOURSECS) / MINSECS);
+        $sesendtime = $sess->sessdate + $sess->duration;
         $defopts = array('maxfiles'=>EDITOR_UNLIMITED_FILES, 'noclean'=>true, 'context'=>$modcontext);
         $sess = file_prepare_standard_editor($sess, 'description', $defopts, $modcontext, 'mod_attendance', 'session', $sess->id);
         $data = array('sessiondate' => $sess->sessdate,
+                'sesstarttime' => array('hours' => userdate($sess->sessdate, '%H'), 'minutes' => userdate($sess->sessdate,'%M')),
+                'sesendtime' => array('hours' => userdate($sesendtime, '%H'), 'minutes' => userdate($sesendtime,'%M')),
                 'durtime' => array('hours' => $dhours, 'minutes' => $dmins),
                 'sdescription' => $sess->description_editor);
 
@@ -63,7 +66,7 @@ class mod_attendance_update_form extends moodleform {
 
         $mform->addElement('static', 'olddate', get_string('olddate', 'attendance'),
                            userdate($sess->sessdate, get_string('strftimedmyhm', 'attendance')));
-        $mform->addElement('date_time_selector', 'sessiondate', get_string('newdate', 'attendance'));
+        $mform->addElement('date_selector', 'sessiondate', get_string('newdate', 'attendance'));
 
         for ($i=0; $i<=23; $i++) {
             $hours[$i] = sprintf("%02d", $i);
@@ -71,9 +74,26 @@ class mod_attendance_update_form extends moodleform {
         for ($i=0; $i<60; $i+=5) {
             $minutes[$i] = sprintf("%02d", $i);
         }
-        $durselect[] =& $mform->createElement('select', 'hours', '', $hours);
-        $durselect[] =& $mform->createElement('select', 'minutes', '', $minutes, false, true);
-        $mform->addGroup($durselect, 'durtime', get_string('duration', 'attendance'), array(' '), true);
+
+        $sesstarttime = array();
+        $sesstarttime[] =& $mform->createElement('select', 'hours', '', $hours, false, true);
+        $sesstarttime[] =& $mform->createElement('select', 'minutes', '', $minutes, false, true);
+        $mform->addGroup($sesstarttime, 'sesstarttime', get_string('sessiontime', 'attendance'), array(' '), true);
+
+        $mform->addElement('hidden', 'coursestartdate', $course->startdate);
+        $mform->setType('coursestartdate', PARAM_INT);
+
+        if (get_config('attendance', 'sessionendtime') == ATT_DURATION) {
+            $durselect = array();
+            $durselect[] =& $mform->createElement('select', 'hours', '', $hours, false, true);
+            $durselect[] =& $mform->createElement('select', 'minutes', '', $minutes, false, true);
+            $mform->addGroup($durselect, 'durtime', get_string('duration', 'attendance'), array(' '), true);
+        } else {
+            $sesendtime = array();
+            $sesendtime[] =& $mform->createElement('select', 'hours', '', $hours, false, true);
+            $sesendtime[] =& $mform->createElement('select', 'minutes', '', $minutes, false, true);
+            $mform->addGroup($sesendtime, 'sesendtime', get_string('endtime', 'attendance'), array(' '), true);
+        }
 
         // Show which status set is in use.
         $maxstatusset = attendance_get_max_statusset($this->_customdata['att']->id);
@@ -88,5 +108,32 @@ class mod_attendance_update_form extends moodleform {
 
         $submit_string = get_string('update', 'attendance');
         $this->add_action_buttons(true, $submit_string);
+    }
+
+    /**
+     * Perform minimal validation on the settings form
+     * @param array $data
+     * @param array $files
+     */
+    public function validation($data, $files) {
+        $errors = parent::validation($data, $files);
+
+        $sesstarttime = $data['sesstarttime']['hours']*HOURSECS + $data['sesstarttime']['minutes']*MINSECS;
+        $sessiondate = $data['sessiondate'] + $sesstarttime;
+
+        $allowoldsessions = get_config('attendance', 'allowoldsessions');
+        if (!$allowoldsessions && $sessiondate < $data['coursestartdate']) {
+            $errors['sessiondate'] = get_string('sessionenddatepriortocoursestartdate', 'attendance',
+                userdate($data['coursestartdate'], get_string('strftimedmy', 'attendance')));
+        }
+
+        if (get_config('attendance', 'sessionendtime') == ATT_ENDTIME) {
+            $sesendtime = $data['sesendtime']['hours']*HOURSECS + $data['sesendtime']['minutes']*MINSECS;
+            if ($sesendtime < $sesstarttime) {
+                $errors['sesendtime'] = get_string('invalidsessionendtime', 'attendance');
+            }
+        }
+
+        return $errors;
     }
 }

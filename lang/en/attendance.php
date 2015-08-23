@@ -108,6 +108,7 @@ $string['emptyacronym'] = 'Empty acronyms are not allowed. Status record not upd
 $string['emptydescription'] = 'Empty descriptions are not allowed. Status record not updated.';
 $string['edituser'] = 'Edit user';
 $string['endtime'] = 'Session end time';
+$string['endtime_desc'] = 'How to define the end of the session time when adding new sessions';
 $string['endofperiod'] = 'End of period';
 $string['enrolmentend'] = 'User enrolment ends {$a}';
 $string['enrolmentstart'] = 'User enrolment starts {$a}';
@@ -131,6 +132,7 @@ $string['includenottaken'] = 'Include not taken sessions';
 $string['includeremarks'] = 'Include remarks';
 $string['indetail'] = 'In detail...';
 $string['invalidsessionenddate'] = 'The session end date can not be earlier than the session start date';
+$string['invalidsessionendtime'] = 'The session end time can not be earlier than the session start time';
 $string['invalidaction'] = 'You must select an action';
 $string['jumpto'] = 'Jump to';
 $string['mergeuser'] = 'Merge user';
@@ -228,6 +230,7 @@ $string['sessionsids'] = 'IDs of sessions: ';
 $string['sessionsgenerated'] = 'Sessions successfully generated';
 $string['sessionsnotfound'] = 'There is no sessions in the selected timespan';
 $string['sessionstartdate'] = 'Session start date';
+$string['sessiontime'] = 'Session start time';
 $string['sessiontype'] = 'Session type';
 $string['sessiontype_help'] = 'There are two types of sessions: common and groups. Ability to add different types depends on activity group mode.
 
@@ -297,7 +300,21 @@ $string['studentscanmark'] = 'Allow students to record own attendance';
 $string['studentscanmark_help'] = 'If checked students will be able to change their own attendance status for the session.';
 $string['set_by_student'] = 'Self-recorded';
 $string['attendance_already_submitted'] = 'You may not self register attendance that has already been set.';
-$string['lowgrade'] = 'Low grade';
+$string['lowgrade'] = 'Below {$a}%';
 $string['submitattendance'] = 'Submit attendance';
 $string['attendancenotset'] = 'You must set your attendance';
 $string['export'] = 'Export';
+$string['points'] = 'Points';
+$string['unknowngroup'] = 'Unknown group';
+$string['notmember'] = 'not&nbsp;member';
+
+$string['deletehiddensessions'] = 'Delete all hidden sessions';
+$string['confirmdeletehiddensessions'] = 'Are you sure you want to delete {$a->count} sessions scheduled before the course start date ({$a->date})?';
+$string['hiddensessionsdeleted'] = 'All hidden sessions were delete';
+$string['sessionenddatepriortocoursestartdate'] = 'Session date can not be prior to course start date: {$a}';
+
+$string['allowoldsessions'] = 'Allow old sessions';
+$string['allowoldsessions_desc'] = 'Allow add new sessions prior to course start date';
+
+$string['defaultperclowgrade'] = 'Default percentage for lowgrade';
+$string['defaultperclowgrade_desc'] = 'Default percentage for the lowgrade report. Only users with points below this threshold will be shown. \'Grade to pass\' parameter from attendance instance has precedence over this one.';

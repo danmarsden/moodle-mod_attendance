@@ -34,10 +34,13 @@ define('ATT_VIEW_MONTHS', 3);
 define('ATT_VIEW_ALLPAST', 4);
 define('ATT_VIEW_ALL', 5);
 define('ATT_VIEW_NOTPRESENT', 6);
+define('ATT_VIEW_SUMMARY', 7);
 
 define('ATT_SORT_LASTNAME', 1);
 define('ATT_SORT_FIRSTNAME', 2);
 
+define('ATT_DURATION', 0);
+define('ATT_ENDTIME', 1);
 
 class att_page_with_filter_controls {
     const SELECTOR_NONE         = 1;
@@ -132,6 +135,10 @@ class att_page_with_filter_controls {
                 $this->enddate = time();
                 break;
             case ATT_VIEW_ALL:
+                $this->startdate = 0;
+                $this->enddate = 0;
+                break;
+            case ATT_VIEW_SUMMARY:
                 $this->startdate = 0;
                 $this->enddate = 0;
                 break;
@@ -276,6 +283,7 @@ class att_sessions_page_params {
     const ACTION_DELETE           = 3;
     const ACTION_DELETE_SELECTED  = 4;
     const ACTION_CHANGE_DURATION  = 5;
+    const ACTION_DELETE_HIDDEN    = 6;
 
     /** @var int view mode of taking attendance page*/
     public $action;
@@ -573,8 +581,34 @@ class attendance {
         return $DB->count_records_select('attendance_sessions', $where, $params);
     }
 
+    /**
+     * Returns the hidden sessions for this attendance
+     *
+     * Fetches data from {attendance_sessions}
+     *
+     * @return hidden sessions
+     */
+    public function get_hidden_sessions() {
+        global $DB;
+
+        $where = "attendanceid = :aid AND sessdate < :csdate";
+        $params = array(
+                'aid'   => $this->id,
+                'csdate'=> $this->course->startdate);
+
+        return $DB->get_records_select('attendance_sessions', $where, $params);
+    }
+
     public function get_filtered_sessions() {
         global $DB;
+
+        $statuses = $this->get_statuses(true, true);
+        $statuses_maxgrades = array();
+        foreach ($statuses AS $st) {
+            if (!isset($statuses_maxgrades[$st->setnumber])) {
+                $statuses_maxgrades[$st->setnumber] = $st->grade;
+            }
+        }
 
         if ($this->pageparams->startdate && $this->pageparams->enddate) {
             $where = "attendanceid = :aid AND sessdate >= :csdate AND sessdate >= :sdate AND sessdate < :edate";
@@ -601,6 +635,7 @@ class attendance {
                 $sess->description = file_rewrite_pluginfile_urls($sess->description,
                         'pluginfile.php', $this->context->id, 'mod_attendance', 'session', $sess->id);
             }
+            $sess->maxgrades = $statuses_maxgrades[$sess->statusset];
         }
 
         return $sessions;
@@ -738,8 +773,15 @@ class attendance {
             print_error('No such session in this course');
         }
 
-        $sess->sessdate = $formdata->sessiondate;
-        $sess->duration = $formdata->durtime['hours']*HOURSECS + $formdata->durtime['minutes']*MINSECS;
+        $sesstarttime = $formdata->sesstarttime['hours']*HOURSECS + $formdata->sesstarttime['minutes']*MINSECS;
+        $sess->sessdate = $formdata->sessiondate + $sesstarttime;
+        if (get_config('attendance', 'sessionendtime') == ATT_DURATION) {
+            $sess->duration = $formdata->durtime['hours']*HOURSECS + $formdata->durtime['minutes']*MINSECS;
+        } else {
+            $sesendtime = $formdata->sesendtime['hours']*HOURSECS + $formdata->sesendtime['minutes']*MINSECS;
+            $sess->duration = $sesendtime - $sesstarttime;
+        }
+
         $description = file_save_draft_area_files($formdata->sdescription['itemid'],
                                 $this->context->id, 'mod_attendance', 'session', $sessionid,
                                 array('subdirs' => false, 'maxfiles' => -1, 'maxbytes' => 0), $formdata->sdescription['text']);
@@ -1215,17 +1257,7 @@ class attendance {
     }
 
     public function update_users_grade($userids) {
-        $grades = array();
-
-        foreach ($userids as $userid) {
-            $grades[$userid] = new stdClass();
-            $grades[$userid]->userid = $userid;
-            $grades[$userid]->rawgrade = att_calc_user_grade_fraction($this->get_user_grade($userid),
-                                                                      $this->get_user_max_grade($userid)) * $this->grade;
-        }
-
-        return grade_update('mod/attendance', $this->course->id, 'mod', 'attendance',
-                            $this->id, 0, $grades);
+        return att_update_users_grades($this->id, $userids);
     }
 
     public function get_user_filtered_sessions_log($userid) {
@@ -1237,36 +1269,21 @@ class attendance {
         } else {
             $where = "ats.attendanceid = :aid AND ats.sessdate >= :csdate";
         }
-        if ($this->get_group_mode()) {
-            $sql = "SELECT ats.id, ats.sessdate, ats.groupid, al.statusid, al.remarks
-                  FROM {attendance_sessions} ats
-                  JOIN {attendance_log} al ON ats.id = al.sessionid AND al.studentid = :uid
-                  LEFT JOIN {groups_members} gm ON gm.userid = al.studentid AND gm.groupid = ats.groupid
-                 WHERE $where AND (ats.groupid = 0 or gm.id is NOT NULL)
-              ORDER BY ats.sessdate ASC";
 
-            $params = array(
-                'uid'       => $userid,
-                'aid'       => $this->id,
-                'csdate'    => $this->course->startdate,
-                'sdate'     => $this->pageparams->startdate,
-                'edate'     => $this->pageparams->enddate);
-
-        } else {
-            $sql = "SELECT ats.id, ats.sessdate, ats.groupid, al.statusid, al.remarks
+        $sql = "SELECT ats.id, ats.sessdate, ats.groupid, al.statusid, al.remarks
                   FROM {attendance_sessions} ats
                   JOIN {attendance_log} al
                     ON ats.id = al.sessionid AND al.studentid = :uid
                  WHERE $where
               ORDER BY ats.sessdate ASC";
 
-            $params = array(
-                'uid'       => $userid,
-                'aid'       => $this->id,
-                'csdate'    => $this->course->startdate,
-                'sdate'     => $this->pageparams->startdate,
-                'edate'     => $this->pageparams->enddate);
-        }
+        $params = array(
+            'uid'       => $userid,
+            'aid'       => $this->id,
+            'csdate'    => $this->course->startdate,
+            'sdate'     => $this->pageparams->startdate,
+            'edate'     => $this->pageparams->enddate);
+
         $sessions = $DB->get_records_sql($sql, $params);
 
         return $sessions;
@@ -1287,22 +1304,13 @@ class attendance {
         // If the array's index is a number it will not merge entries.
         // It would be better as a UNION query butunfortunatly MS SQL does not seem to support doing a DISTINCT on a the description field.
         $id = $DB->sql_concat(':value', 'ats.id');
-        if ($this->get_group_mode()) {
-            $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, al.statusid, al.remarks, ats.studentscanmark
-                  FROM {attendance_sessions} ats
-            RIGHT JOIN {attendance_log} al
-                    ON ats.id = al.sessionid AND al.studentid = :uid
-                    LEFT JOIN {groups_members} gm ON gm.userid = al.studentid AND gm.groupid = ats.groupid
-                 WHERE $where AND (ats.groupid = 0 or gm.id is NOT NULL)
-              ORDER BY ats.sessdate ASC";
-        } else {
-            $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, al.statusid, al.remarks, ats.studentscanmark
+
+        $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, al.statusid, al.remarks, ats.studentscanmark
                   FROM {attendance_sessions} ats
             RIGHT JOIN {attendance_log} al
                     ON ats.id = al.sessionid AND al.studentid = :uid
                  WHERE $where
               ORDER BY ats.sessdate ASC";
-        }
 
         $params = array(
                 'uid'       => $userid,
@@ -1511,6 +1519,33 @@ class attendance {
 
         return null;
     }
+
+    /**
+     * Get points and maxpoints for each user
+     * @param int or array $userids         User ids (empty means all)
+     * @param string       $stardate        Attendance sessions startdate
+     * @param string       $enddate         Attendance sessions enddate
+     *
+     * @return array
+     */
+    public function get_users_points($userids=array(), $startdate='', $enddate='') {
+        return att_get_users_points($this->id, $userids, $startdate, $enddate);
+    }
+
+    public function get_lowgrade_threshold() {
+        $grade_item = grade_item::fetch(array('courseid'=>$this->course->id, 'itemtype'=>'mod',
+                                              'itemmodule'=>'attendance', 'iteminstance'=>$this->id));
+        if ($grade_item->gradetype == GRADE_TYPE_VALUE && !empty($grade_item->gradepass)) {
+            if (empty($grade_item->grademax)) {
+                $lowgrade_threshold = 1;
+            } else {
+                $lowgrade_threshold = $grade_item->gradepass / $grade_item->grademax;
+            }
+        } else {
+            $lowgrade_threshold = get_config('attendance', 'defaultperclowgrade') / 100.0;
+        }
+        return min($lowgrade_threshold, 1);
+    }
 }
 
 
@@ -1680,25 +1715,8 @@ function att_get_gradebook_maxgrade($attid) {
 }
 
 function att_update_all_users_grades($attid, $course, $context, $coursemodule) {
-    $grades = array();
-
     $userids = array_keys(get_enrolled_users($context, 'mod/attendance:canbelisted', 0, 'u.id'));
-
-    $statuses = att_get_statuses($attid);
-    $gradebook_maxgrade = att_get_gradebook_maxgrade($attid);
-    foreach ($userids as $userid) {
-        $grade = new stdClass;
-        $grade->userid = $userid;
-        $userstatusesstat = att_get_user_statuses_stat($attid, $course->startdate, $userid, $coursemodule);
-        $usertakensesscount = att_get_user_taken_sessions_count($attid, $course->startdate, $userid, $coursemodule);
-        $usergrade = att_get_user_grade($userstatusesstat, $statuses);
-        $usermaxgrade = att_get_user_max_grade($usertakensesscount, $statuses);
-        $grade->rawgrade = att_calc_user_grade_fraction($usergrade, $usermaxgrade) * $gradebook_maxgrade;
-        $grades[$userid] = $grade;
-    }
-
-    return grade_update('mod/attendance', $course->id, 'mod', 'attendance',
-                        $attid, 0, $grades);
+    return att_update_users_grades($attid, $userids, true);
 }
 
 function att_has_logs_for_status($statusid) {
@@ -1718,3 +1736,126 @@ function att_log_convert_url(moodle_url $fullurl) {
     return substr($fullurl->out(), strlen($baseurl));
 }
 
+/**
+ * Calculate points, maxpoints and numtakensessions for each user
+ *
+ * @param int          $attid           Attendance instance id
+ * @param int or array $userids         User ids (empty means all)
+ * @param string       $stardate        Attendance sessions startdate
+ * @param string       $enddate         Attendance sessions enddate
+ *
+ * @return array
+ */
+
+function att_get_users_points($attid, $userids=0, $startdate = '', $enddate = '') {
+    global $DB;
+
+    list($course, $cm) = get_course_and_cm_from_instance($attid, 'attendance');
+
+    $params = array(
+        'attid'      => $attid,
+        'cstartdate' => $course->startdate,
+        );
+
+    $where = '';
+
+    if (!empty($userid)) {
+        if (is_array($userids)) {
+            list($in_sql, $in_params) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
+            $where .= ' AND atl.studentid ' . $in_sql;
+            $params = array_merge($params, $in_params);
+        } else {
+            $where .= ' AND atl.studentid = :userid';
+            $params['userid'] = $userids;
+        }
+    }
+    if (!empty($startdate)) {
+        $where .= ' AND ats.sessdate >= :startdate';
+        $params['startdate'] = $startdate;
+    }
+    if (!empty($enddate)) {
+        $where .= ' AND ats.sessdate < :enddate ';
+        $params['enddate'] = $enddate;
+    }
+
+    $join_group = '';
+    if (!empty($cm->effectivegroupmode)) {
+        // $join_group = 'LEFT JOIN {groups_members} gm ON (gm.userid = atl.studentid AND gm.groupid = ats.groupid)';
+        // $where .= ' AND (ats.groupid = 0 or gm.id is NOT NULL)';
+    }
+
+    $sql = "SELECT userid, COUNT(*) AS numtakensessions, SUM(grade) AS points, SUM(maxgrade) AS maxpoints
+             FROM (SELECT atl.studentid AS userid, ats.id AS sessionid, stg.grade, MAX(stm.grade) AS maxgrade
+                     FROM {attendance_sessions} ats
+                     JOIN {attendance_log} atl ON (atl.sessionid = ats.id)
+                     JOIN {attendance_statuses} stg ON (stg.id = atl.statusid)
+                     JOIN {attendance_statuses} stm ON (stm.attendanceid = ats.attendanceid AND stm.setnumber = ats.statusset AND stm.visible = 1 AND stm.deleted = 0)
+                     {$join_group}
+                    WHERE ats.attendanceid = :attid
+                      AND ats.sessdate >= :cstartdate
+                      AND ats.lasttakenby != 0
+                      {$where}
+                   GROUP BY atl.studentid, ats.id, stg.grade) p
+            GROUP BY userid";
+    return $DB->get_records_sql($sql, $params);
+}
+
+/**
+ * Return points, maxpoints and numtakensessions for an user
+ *
+ * @param array        $points          Array of points
+ * @param int          $userid          User id
+ *
+ * @return object
+ */
+function att_get_user_points($points, $userid) {
+    if (isset($points[$userid])) {
+        return $points[$userid];
+    } else {
+        return (object) array('points'=>0, 'maxpoints'=>0, 'numtakensessions'=>0);
+    }
+}
+
+/**
+ * Update grades for some users
+ *
+ * @param int          $attid        Attendance instance id
+ * @param int or array $userids      User ids
+ * @param boolean      $allusers     All users are being updated?
+ *
+ * @return void
+ */
+function att_update_users_grades($attid, $userids=array(), $allusers=false) {
+    list($course, $cm) = get_course_and_cm_from_instance($attid, 'attendance');
+    if ($allusers) {
+        $userspoints = att_get_users_points($attid);
+    } else {
+        $userspoints = att_get_users_points($attid, $userids);
+    }
+    $gradebook_maxgrade = att_get_gradebook_maxgrade($attid);
+
+    $grades = array();
+    foreach ($userids as $userid) {
+        $grade = new stdClass;
+        $grade->userid = $userid;
+        if (isset($userspoints[$userid])) {
+            $grade->rawgrade = att_calc_user_grade_fraction($userspoints[$userid]->points, $userspoints[$userid]->maxpoints) * $gradebook_maxgrade;
+        } else {
+            $grade->rawgrade = 0;
+        }
+        $grades[$userid] = $grade;
+    }
+
+    return grade_update('mod/attendance', $course->id, 'mod', 'attendance', $attid, 0, $grades);
+}
+
+/**
+ * Given a float, prints it nicely.
+ *
+ * @param float $float The float to print
+ * @param bool $stripzeros If true, removes final zeros after decimal point
+ * @return string locale float
+ */
+function att_format_float($float, $stripzeros=true) {
+    return format_float($float, 1, true, $stripzeros);
+}

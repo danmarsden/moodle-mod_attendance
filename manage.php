@@ -61,7 +61,7 @@ if ($from === 'block') {
         $nottaken = !$sess->lasttaken && has_capability('mod/attendance:takeattendances', $context);
         $canchange = $sess->lasttaken && has_capability('mod/attendance:changeattendances', $context);
         if ($nottaken || $canchange) {
-            redirect($att->url_take(array('sessionid' => $sess->id, 'grouptype' => $sess->groupid)));
+            redirect($att->url_take(array('sessionid' => $sess->id)));
         }
     } else if ($size > 1) {
         $att->curdate = $today;
