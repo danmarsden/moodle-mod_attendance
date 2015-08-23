@@ -289,6 +289,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
     }
 
     protected function render_sess_manage_control(attendance_manage_data $sessdata) {
+        global $OUTPUT;
+
         $table = new html_table();
         $table->attributes['class'] = ' ';
         $table->width = '100%';
@@ -298,6 +300,14 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 get_string('hiddensessions', 'attendance').': '.$sessdata->hiddensessionscount);
 
         if (has_capability('mod/attendance:manageattendances', $sessdata->att->context)) {
+            if ($sessdata->hiddensessionscount > 0) {
+                $attributes = array(
+                        'type'  => 'submit',
+                        'name'  => 'deletehiddensessions',
+                        'value' => get_string('deletehiddensessions', 'attendance'));
+                $table->data[1][] = html_writer::empty_tag('input', $attributes);
+            }
+
             $options = array(
                         att_sessions_page_params::ACTION_DELETE_SELECTED => get_string('delete'),
                         att_sessions_page_params::ACTION_CHANGE_DURATION => get_string('changeduration', 'attendance'));

@@ -33,6 +33,10 @@ $pageparams = new att_sessions_page_params();
 $id                     = required_param('id', PARAM_INT);
 $pageparams->action     = required_param('action', PARAM_INT);
 
+if (optional_param('deletehiddensessions', false, PARAM_TEXT)) {
+    $pageparams->action = att_sessions_page_params::ACTION_DELETE_HIDDEN;
+}
+
 if (empty($pageparams->action)) {
     // The form on manage.php can submit with the "choose" option - this should be fixed in the long term,
     // but in the meantime show a useful error and redirect when it occurs.
@@ -175,6 +179,25 @@ switch ($att->pageparams->action) {
         }
 
         break;
+    case att_sessions_page_params::ACTION_DELETE_HIDDEN:
+        $confirm  = optional_param('confirm', null, PARAM_INT);
+        if ($confirm && confirm_sesskey()) {
+            $sessions = $att->get_hidden_sessions();
+            $att->delete_sessions(array_keys($sessions));
+            redirect($att->url_manage(), get_string('hiddensessionsdeleted', 'attendance'));
+        }
+
+        $a = new stdClass();
+        $a->count = $att->get_hidden_sessions_count();
+        $a->date = userdate($course->startdate);
+        $message = get_string('confirmdeletehiddensessions', 'attendance', $a);
+
+        $params = array('action' => $att->pageparams->action, 'confirm' => 1, 'sesskey' => sesskey());
+        echo $OUTPUT->header();
+        echo $OUTPUT->heading(get_string('attendanceforthecourse', 'attendance').' :: ' .format_string($course->fullname));
+        echo $OUTPUT->confirm($message, $att->url_sessions($params), $att->url_manage());
+        echo $OUTPUT->footer();
+        exit;
 }
 
 $output = $PAGE->get_renderer('mod_attendance');
