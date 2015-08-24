@@ -1006,6 +1006,9 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $o = html_writer::tag('h1', get_string('myvariables', 'attendance'));
         $o .= html_writer::table($table);
         $o .= html_writer::input_hidden_params($prefdata->url(array(), false));
+        // We should probably rewrite this to use mforms but for now add sesskey.
+        $o .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()))."\n";
+
         $o .= $this->construct_preferences_button(get_string('update', 'attendance'), att_preferences_page_params::ACTION_SAVE);
         $o = html_writer::tag('form', $o, array('id' => 'preferencesform', 'method' => 'post',
                                                 'action' => $prefdata->url(array(), false)->out_omit_querystring()));
@@ -1026,26 +1029,21 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
     private function construct_preferences_actions_icons($st, $prefdata) {
         global $OUTPUT;
-
+        $params = array('sesskey' => sesskey(),
+                        'statusid' => $st->id);
         if ($st->visible) {
-            $params = array(
-                    'action' => att_preferences_page_params::ACTION_HIDE,
-                    'statusid' => $st->id);
+            $params['action'] = att_preferences_page_params::ACTION_HIDE;
             $showhideicon = $OUTPUT->action_icon(
                     $prefdata->url($params),
                     new pix_icon("t/hide", get_string('hide')));
         } else {
-            $params = array(
-                    'action' => att_preferences_page_params::ACTION_SHOW,
-                    'statusid' => $st->id);
+            $params['action'] = att_preferences_page_params::ACTION_SHOW;
             $showhideicon = $OUTPUT->action_icon(
                     $prefdata->url($params),
                     new pix_icon("t/show", get_string('show')));
         }
         if (!$st->haslogs) {
-            $params = array(
-                    'action' => att_preferences_page_params::ACTION_DELETE,
-                    'statusid' => $st->id);
+            $params['action'] = att_preferences_page_params::ACTION_DELETE;
             $deleteicon = $OUTPUT->action_icon(
                     $prefdata->url($params),
                     new pix_icon("t/delete", get_string('delete')));

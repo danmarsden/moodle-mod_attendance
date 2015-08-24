@@ -58,6 +58,11 @@ $PAGE->navbar->add(get_string('settings', 'attendance'));
 
 $errors = array();
 
+// Check sesskey if we are performing an action.
+if (!empty($att->pageparams->action)) {
+    require_sesskey();
+}
+
 switch ($att->pageparams->action) {
     case att_preferences_page_params::ACTION_ADD:
         $newacronym         = optional_param('newacronym', null, PARAM_TEXT);
