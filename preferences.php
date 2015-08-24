@@ -105,8 +105,8 @@ switch ($att->pageparams->action) {
         $att->update_status($status, null, null, null, 1);
         break;
     case att_preferences_page_params::ACTION_SAVE:
-        $acronym        = required_param_array('acronym', PARAM_MULTILANG);
-        $description    = required_param_array('description', PARAM_MULTILANG);
+        $acronym        = required_param_array('acronym', PARAM_TEXT);
+        $description    = required_param_array('description', PARAM_TEXT);
         $grade          = required_param_array('grade', PARAM_RAW);
         foreach ($grade as &$val) {
             $val = unformat_float($val);
