@@ -152,3 +152,19 @@
 .path-mod-attendance .remarkholder:hover .remarkcontent {
     display: inline-block;
 }
+
+.path-mod-attendance .attendancestatus-P {
+    color: green;
+}
+
+.path-mod-attendance .attendancestatus-E {
+    color: #00AEE3;
+}
+
+.path-mod-attendance .attendancestatus-L {
+    color: #F7931E;
+}
+
+.path-mod-attendance .attendancestatus-A {
+    color: red;
+}
