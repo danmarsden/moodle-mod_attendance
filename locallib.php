@@ -1487,7 +1487,10 @@ class attendance {
     public function update_status($status, $acronym, $description, $grade, $visible) {
         global $DB;
 
-        if (empty($acronym) || empty($description)) {
+        if (isset($visible)) {
+            $status->visible = $visible;
+            $updated[] = $visible ? get_string('show') : get_string('hide');
+        } else if (empty($acronym) || empty($description)) {
             return array('acronym' => $acronym, 'description' => $description);
         }
 
@@ -1504,10 +1507,6 @@ class attendance {
         if (isset($grade)) {
             $status->grade = $grade;
             $updated[] = $grade;
-        }
-        if (isset($visible)) {
-            $status->visible = $visible;
-            $updated[] = $visible ? get_string('show') : get_string('hide');
         }
         $DB->update_record('attendance_statuses', $status);
 
