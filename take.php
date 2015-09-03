@@ -51,7 +51,7 @@ $pageparams->init($course->id);
 $att = new attendance($att, $cm, $course, $PAGE->context, $pageparams);
 
 $allowedgroups = groups_get_activity_allowed_groups($cm);
-if (!empty($pageparams->grouptype) && !array_key_exists($groupid, $allowedgroups)) {
+if (!empty($pageparams->grouptype) && !array_key_exists($pageparams->grouptype, $allowedgroups)) {
      $group = groups_get_group($pageparams->grouptype);
      throw new moodle_exception('cannottakeforgroup', 'attendance', '', $group->name);
 }
