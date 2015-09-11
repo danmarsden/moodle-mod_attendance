@@ -1101,7 +1101,7 @@ class attendance {
             $maxtime = 'CASE WHEN MIN(ue.timeend) = 0 THEN 0 ELSE MAX(ue.timeend) END';
 
             // CONTRIB-3549
-            $sql = "SELECT ue.userid, ue.status,
+            $sql = "SELECT ue.userid, MIN(ue.status) as status,
                            $mintime AS mintime,
                            $maxtime AS maxtime
                       FROM {user_enrolments} ue
@@ -1109,7 +1109,7 @@ class attendance {
                      WHERE ue.userid $sql
                            AND e.status = :estatus
                            AND e.courseid = :courseid
-                  GROUP BY ue.userid, ue.status";
+                  GROUP BY ue.userid";
             $params += array('zerotime'=>0, 'estatus'=>ENROL_INSTANCE_ENABLED, 'courseid'=>$this->course->id);
             $enrolments = $DB->get_records_sql($sql, $params);
 
