@@ -126,8 +126,10 @@ switch ($att->pageparams->action) {
             }
             redirect($att->url_manage(), get_string('sessiondeleted', 'attendance'));
         }
-        $sessid = required_param_array('sessid', PARAM_SEQUENCE);
-
+        $sessid = optional_param_array('sessid', '', PARAM_SEQUENCE);
+        if (empty($sessid)) {
+            print_error('nosessionsselected', 'attendance', $att->url_manage());
+        }
         $sessionsinfo = $att->get_sessions_info($sessid);
 
         $message = get_string('deletecheckfull', '', get_string('session', 'attendance'));
