@@ -83,9 +83,9 @@ switch ($att->pageparams->action) {
         echo $OUTPUT->footer();
         exit;
     case att_preferences_page_params::ACTION_HIDE:
+        $statuses = $att->get_statuses(false);
         $status = $statuses[$att->pageparams->statusid];
         $att->update_status($status, null, null, null, 0);
-        $statuses = $att->get_statuses(false);
         break;
     case att_preferences_page_params::ACTION_SHOW:
         $statuses = $att->get_statuses(false);
