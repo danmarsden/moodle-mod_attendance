@@ -34,7 +34,7 @@ $string['Pacronym'] = 'P';
 $string['Pfull'] = 'Present';
 $string['acronym'] = 'Acronym';
 $string['add'] = 'Add';
-$string['addmultiplesessions'] = 'Add multiple sessions';
+$string['addmultiplesessions'] = 'Multiple sessions';
 $string['addsession'] = 'Add session';
 $string['allcourses'] = 'All courses';
 $string['all'] = 'All';
@@ -70,21 +70,21 @@ $string['changesession'] = 'Change session';
 $string['checkweekdays'] = 'Select weekdays that fall within your selected session date range.';
 $string['column'] = 'column';
 $string['columns'] = 'columns';
-$string['commonsession'] = 'Common';
-$string['commonsessions'] = 'Common';
+$string['commonsession'] = 'All students';
+$string['commonsessions'] = 'All students';
 $string['confirmdeleteuser'] = 'Are you sure you want to delete user \'{$a->fullname}\' ({$a->email})?<br/>All of their attendance records will be permanently deleted.';
 $string['countofselected'] = 'Count of selected';
 $string['copyfrom'] = 'Copy attendance data from';
 $string['createmultiplesessions'] = 'Create multiple sessions';
 $string['createmultiplesessions_help'] = 'This function allows you to create multiple sessions in one simple step.
+The sessions begin on the date of the base session and continue until the \'repeat until\' date.
 
-  * <strong>Session Start Date</strong>: Select the start date of your course (the first day of class)
-  * <strong>Session End Date</strong>: Select the last day of class (the last day you want to take attendance).
-  * <strong>Session Days</strong>: Select the days of the week when your class will meet (for example, Monday/Wednesday/Friday).
-  * <strong>Frequency</strong>: This allows for a frequency setting. If your class will meet every week, select 1; if it will meet every other week, select 2; every 3rd week, select 3, etc.
+  * <strong>Repeat on</strong>: Select the days of the week when your class will meet (for example, Monday/Wednesday/Friday).
+  * <strong>Repeat every</strong>: This allows for a frequency setting. If your class will meet every week, select 1; if it will meet every other week, select 2; every 3rd week, select 3, etc.
+  * <strong>Repeat until</strong>: Select the last day of class (the last day you want to take attendance).
 ';
 $string['createonesession'] = 'Create one session for the course';
-$string['days'] = 'Day';
+$string['days'] = 'Days';
 $string['defaults'] = 'Defaults';
 $string['defaultdisplaymode'] = 'Default display mode';
 $string['delete'] = 'Delete';
@@ -120,7 +120,7 @@ $string['gradebookexplanation_help'] = 'The Attendance module displays your curr
 
 For example, if you have earned 8 of 10 points to date (80% attendance) and attendance for the entire course is worth 50 points, the Attendance module will display 8/10 and the gradebook will display 40/50. You have not yet earned 40 points but 40 is the equivalent point value to your current attendance percentage of 80%. The point value you have earned in the Attendance module can never decrease, as it is based only on attendance to date; however, the attendance point value shown in the gradebook may increase or decrease depending on your future attendance, as it is based on attendance for the entire course.';
 $string['gridcolumns'] = 'Grid columns';
-$string['groupsession'] = 'Group';
+$string['groupsession'] = 'Group of students';
 $string['hiddensessions'] = 'Hidden sessions';
 $string['hiddensessions_help'] = 'Sessions are hidden if they are scheduled before the course start date.
 
@@ -130,7 +130,7 @@ $string['includeall'] = 'Select all sessions';
 $string['includenottaken'] = 'Include not taken sessions';
 $string['includeremarks'] = 'Include remarks';
 $string['indetail'] = 'In detail...';
-$string['invalidsessionenddate'] = 'The session end date can not be earlier than the session start date';
+$string['invalidsessionenddate'] = 'This date can not be earlier than the session date';
 $string['invalidaction'] = 'You must select an action';
 $string['jumpto'] = 'Jump to';
 $string['mergeuser'] = 'Merge user';
@@ -165,7 +165,6 @@ $string['olddate'] = 'Old date';
 $string['onlyselectedusers'] = 'Export specific users';
 $string['participant'] = 'Participant';
 $string['percentage'] = 'Percentage';
-$string['period'] = 'Frequency';
 $string['pluginname'] = 'Attendance';
 $string['pluginadministration'] = 'Attendance administration';
 $string['remark'] = 'Remark for: {$a}';
@@ -217,10 +216,9 @@ $string['session'] = 'Session';
 $string['session_help'] = 'Session';
 $string['sessionadded'] = 'Session successfully added';
 $string['sessionalreadyexists'] = 'Session already exists for this date';
-$string['sessiondate'] = 'Session Date';
+$string['sessiondate'] = 'Date';
 $string['sessiondays'] = 'Session Days';
 $string['sessiondeleted'] = 'Session successfully deleted';
-$string['sessionenddate'] = 'Session end date';
 $string['sessionexist'] = 'Session not added (already exists)!';
 $string['sessions'] = 'Sessions';
 $string['sessionscompleted'] = 'Sessions completed';
@@ -229,12 +227,12 @@ $string['sessiongenerated'] = 'One session was successfully generated';
 $string['sessionsgenerated'] = '{$a} sessions were successfully generated';
 $string['sessionsnotfound'] = 'There is no sessions in the selected timespan';
 $string['sessionstartdate'] = 'Session start date';
-$string['sessiontype'] = 'Session type';
-$string['sessiontype_help'] = 'There are two types of sessions: common and groups. Ability to add different types depends on activity group mode.
+$string['sessiontype'] = 'Type';
+$string['sessiontype_help'] = 'You can add sessions for all students or for a group of students. Ability to add different types depends on activity group mode.
 
-* In group mode "No groups" you can add only common sessions.
-* In group mode "Visible groups" you can add common and group sessions.
-* In group mode "Separate groups" you can add only group sessions.
+* In group mode "No groups" you can add only sessions for all students.
+* In group mode "Separate groups" you can add only sessions for a group of students.
+* In group mode "Visible groups" you can add both types of sessions.
 ';
 $string['sessiontypeshort'] = 'Type';
 $string['sessionupdated'] = 'Session successfully updated';
@@ -273,7 +271,7 @@ $string['tempusermerge'] = 'Merge temporary user';
 $string['tuseremail'] = 'Email';
 $string['tusername'] = 'Full name';
 $string['update'] = 'Update';
-$string['usestatusset'] = 'Use status set';
+$string['usestatusset'] = 'Status set';
 $string['userexists'] = 'There is already a real user with this email address';
 $string['users'] = 'Users to export';
 $string['variable'] = 'variable';
@@ -313,3 +311,11 @@ $string['hiddensessionsdeleted'] = 'All hidden sessions were delete';
 $string['timeahead'] = 'Multiple sessions that exceed one year cannot be created, please adjust the start and end dates.';
 $string['priorto'] = 'The session date is prior to the course start date ({$a}) so that the new sessions scheduled before this date will be hidden (not accessible). You can change the course start date at any time (see course settings) in order to have access to earlier sessions.<br><br>Please change the session date or just click the "Add session" button again to confirm?';
 $string['noattendanceusers'] = 'It is not possible to export any data as there are no students enrolled in the course.';
+$string['time'] = 'Time';
+$string['from'] = 'from:';
+$string['to'] = 'to:';
+$string['repeatasfollows'] = 'Repeat the session above as follows';
+$string['repeatevery'] = 'Repeat every';
+$string['repeatuntil'] = 'Repeat until';
+$string['repeaton'] = 'Repeat on';
+$string['invalidsessionendtime'] = 'The end time must be greater than start time';

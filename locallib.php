@@ -38,7 +38,6 @@ define('ATT_VIEW_NOTPRESENT', 6);
 define('ATT_SORT_LASTNAME', 1);
 define('ATT_SORT_FIRSTNAME', 2);
 
-
 class att_page_with_filter_controls {
     const SELECTOR_NONE         = 1;
     const SELECTOR_GROUP        = 2;
@@ -208,7 +207,7 @@ class att_page_with_filter_controls {
             // Show Common groups always.
             $this->sessgroupslist[self::SESSTYPE_COMMON] = get_string('commonsessions', 'attendance');
             foreach ($allowedgroups as $group) {
-                $this->sessgroupslist[$group->id] = format_string($group->name);
+                $this->sessgroupslist[$group->id] = get_string('group') . ': ' . format_string($group->name);
             }
         }
     }
@@ -757,13 +756,18 @@ class attendance {
             print_error('No such session in this course');
         }
 
-        $sess->sessdate = $formdata->sessiondate;
-        $sess->duration = $formdata->durtime['hours'] * HOURSECS + $formdata->durtime['minutes'] * MINSECS;
+        $sesstarttime = $formdata->sestime['starthour']*HOURSECS + $formdata->sestime['startminute'] * MINSECS;
+        $sesendtime = $formdata->sestime['endhour']*HOURSECS + $formdata->sestime['endminute'] * MINSECS;
+
+        $sess->sessdate = $formdata->sessiondate + $sesstarttime;
+        $sess->duration = $sesendtime - $sesstarttime;
+
         $description = file_save_draft_area_files($formdata->sdescription['itemid'],
                                 $this->context->id, 'mod_attendance', 'session', $sessionid,
                                 array('subdirs' => false, 'maxfiles' => -1, 'maxbytes' => 0), $formdata->sdescription['text']);
         $sess->description = $description;
         $sess->descriptionformat = $formdata->sdescription['format'];
+
         $sess->timemodified = time();
         $DB->update_record('attendance_sessions', $sess);
 
