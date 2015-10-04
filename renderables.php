@@ -43,6 +43,7 @@ class attendance_tabs implements renderable {
     const TAB_EXPORT        = 4;
     const TAB_PREFERENCES   = 5;
     const TAB_TEMPORARYUSERS = 6; // Tab for managing temporary users.
+    const TAB_UPDATE        = 7;
 
     public $currenttab;
 
@@ -74,31 +75,36 @@ class attendance_tabs implements renderable {
         );
         if (has_any_capability($capabilities, $context)) {
             $toprow[] = new tabobject(self::TAB_SESSIONS, $this->att->url_manage()->out(),
-                get_string('sessions', 'attendance'));
+                            get_string('sessions', 'attendance'));
         }
 
         if (has_capability('mod/attendance:manageattendances', $context)) {
             $toprow[] = new tabobject(self::TAB_ADD,
-                                     $this->att->url_sessions()->out(true, array('action' => att_sessions_page_params::ACTION_ADD)),
-                        get_string('add', 'attendance'));
+                            $this->att->url_sessions()->out(true, array('action' => att_sessions_page_params::ACTION_ADD)),
+                            get_string('addsession', 'attendance'));
         }
         if (has_capability('mod/attendance:viewreports', $context)) {
             $toprow[] = new tabobject(self::TAB_REPORT, $this->att->url_report()->out(),
-                        get_string('report', 'attendance'));
+                            get_string('report', 'attendance'));
         }
 
         if (has_capability('mod/attendance:export', $context)) {
             $toprow[] = new tabobject(self::TAB_EXPORT, $this->att->url_export()->out(),
-                        get_string('export', 'attendance'));
+                            get_string('export', 'attendance'));
         }
 
         if (has_capability('mod/attendance:changepreferences', $context)) {
             $toprow[] = new tabobject(self::TAB_PREFERENCES, $this->att->url_preferences()->out(),
-                        get_string('settings', 'attendance'));
+                            get_string('settings', 'attendance'));
         }
         if (has_capability('mod/attendance:managetemporaryusers', $context)) {
             $toprow[] = new tabobject(self::TAB_TEMPORARYUSERS, $this->att->url_managetemp()->out(),
-                                      get_string('tempusers', 'attendance'));
+                            get_string('tempusers', 'attendance'));
+        }
+        if ($this->currenttab == self::TAB_UPDATE && has_capability('mod/attendance:manageattendances', $context)) {
+            $toprow[] = new tabobject(self::TAB_UPDATE,
+                            $this->att->url_sessions()->out(true, array('action' => att_sessions_page_params::ACTION_UPDATE)),
+                            get_string('changesession', 'attendance'));
         }
 
         return array($toprow);
@@ -138,7 +144,6 @@ class attendance_filter_controls implements renderable {
 
         $date = usergetdate($att->pageparams->curdate);
         $mday = $date['mday'];
-        $wday = $date['wday'];
         $mon = $date['mon'];
         $year = $date['year'];
 
@@ -355,7 +360,7 @@ class attendance_user_data implements renderable {
     private $urlparams;
 
     public function  __construct(attendance $att, $userid) {
-        global $CFG, $USER;
+        global $CFG;
 
         $this->user = $att->get_user($userid);
 

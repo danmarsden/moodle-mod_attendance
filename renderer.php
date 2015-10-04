@@ -234,7 +234,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $dta = $this->construct_date_time_actions($sessdata, $sess);
 
             $table->data[$sess->id][] = $i;
-            $table->data[$sess->id][] = $sess->groupid ? $sessdata->groups[$sess->groupid]->name : get_string('commonsession', 'attendance');
+            $table->data[$sess->id][] = $sess->groupid ? get_string('group') . ': ' . $sessdata->groups[$sess->groupid]->name :
+                                                         get_string('commonsession', 'attendance');
             $table->data[$sess->id][] = $dta['date'];
             $table->data[$sess->id][] = $dta['time'];
             $table->data[$sess->id][] = $sess->description;
@@ -769,7 +770,9 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
             $row = new html_table_row();
             $row->cells[] = $i;
-            $row->cells[] = html_writer::tag('nobr', $sess->groupid ? $userdata->groups[$sess->groupid]->name : get_string('commonsession', 'attendance'));
+            $sessiontypeshort = $sess->groupid ? get_string('group') . ': ' . $userdata->groups[$sess->groupid]->name :
+                                                 get_string('commonsession', 'attendance');
+            $row->cells[] = html_writer::tag('nobr', $sessiontypeshort);
             $row->cells[] = userdate($sess->sessdate, get_string('strftimedmyw', 'attendance'));
             $row->cells[] = $this->construct_time($sess->sessdate, $sess->duration);
             $row->cells[] = $sess->description;
@@ -847,7 +850,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 $sesstext = html_writer::link($reportdata->url_take($sess->id, $sess->groupid), $sesstext);
             }
             $sesstext .= html_writer::empty_tag('br');
-            $sesstext .= $sess->groupid ? $reportdata->groups[$sess->groupid]->name : get_string('commonsession', 'attendance');
+            $sesstext .= $sess->groupid ? get_string('group') . ': ' . $reportdata->groups[$sess->groupid]->name : get_string('commonsession', 'attendance');
 
             $table->head[] = $sesstext;
             $table->align[] = 'center';
