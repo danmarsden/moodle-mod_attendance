@@ -195,6 +195,9 @@ class mod_attendance_add_form extends moodleform {
                 $errors['sdays'] = get_string('checkweekdays', 'attendance');
             }
         }
+        if ($addmulti && ceil(($data['sessionenddate'] - $data['sessiondate']) / YEARSECS) > 1) {
+            $errors['sessionenddate'] = get_string('timeahead', 'attendance');
+        }
         return $errors;
     }
 
