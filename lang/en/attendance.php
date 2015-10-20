@@ -308,3 +308,5 @@ $string['notmember'] = 'not&nbsp;member';
 $string['deletehiddensessions'] = 'Delete all hidden sessions';
 $string['confirmdeletehiddensessions'] = 'Are you sure you want to delete {$a->count} sessions scheduled before the course start date ({$a->date})?';
 $string['hiddensessionsdeleted'] = 'All hidden sessions were delete';
+
+$string['confirmaddmsg'] = 'The session date is prior to the course start date: {$a}. You have to change this date in the course settings in order to have access to earlier sessions.'. "\n\n" . 'Continue anyway?';

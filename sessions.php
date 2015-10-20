@@ -202,6 +202,9 @@ switch ($att->pageparams->action) {
         exit;
 }
 
+$PAGE->requires->jquery();
+$PAGE->requires->js(new moodle_url('/mod/attendance/js/confirm_add_session.js'));
+
 $output = $PAGE->get_renderer('mod_attendance');
 $tabs = new attendance_tabs($att, attendance_tabs::TAB_ADD);
 echo $output->header();

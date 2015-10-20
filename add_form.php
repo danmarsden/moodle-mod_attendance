@@ -48,6 +48,9 @@ class mod_attendance_add_form extends moodleform {
 
         $mform->addElement('header', 'general', get_string('addsession', 'attendance'));
 
+        $mform->addElement('hidden','courseid', $course->id);
+        $mform->setType('courseid', PARAM_INT);
+
         $groupmode = groups_get_activity_groupmode($cm);
         switch ($groupmode) {
             case NOGROUPS:
