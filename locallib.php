@@ -1234,13 +1234,23 @@ class attendance {
     }
 
     public function update_users_grade($userids) {
+        global $DB;
         $grades = array();
+
+        if ($this->grade < 0) {
+            $dbparams = array('id' => -($this->grade));
+            $this->scale = $DB->get_record('scale', $dbparams);
+            $scalearray = explode(',', $this->scale->scale);
+            $attendancegrade = count($scalearray);
+        } else {
+            $attendancegrade = $this->grade;
+        }
 
         foreach ($userids as $userid) {
             $grades[$userid] = new stdClass();
             $grades[$userid]->userid = $userid;
             $grades[$userid]->rawgrade = att_calc_user_grade_fraction($this->get_user_grade($userid),
-                                                                      $this->get_user_max_grade($userid)) * $this->grade;
+                                                                      $this->get_user_max_grade($userid)) * $attendancegrade;
         }
 
         return grade_update('mod/attendance', $this->course->id, 'mod', 'attendance',
@@ -1703,7 +1713,14 @@ function att_update_all_users_grades($attid, $course, $context, $coursemodule) {
     $userids = array_keys(get_enrolled_users($context, 'mod/attendance:canbelisted', 0, 'u.id'));
 
     $statuses = att_get_statuses($attid);
-    $gradebook_maxgrade = att_get_gradebook_maxgrade($attid);
+    if ($this->grade < 0) {
+        $dbparams = array('id' => -($this->grade));
+        $this->scale = $DB->get_record('scale', $dbparams);
+        $scalearray = explode(',', $this->scale->scale);
+        $gradebook_maxgrade = count($scalearray);
+    } else {
+        $gradebook_maxgrade = att_get_gradebook_maxgrade($attid);
+    }
     foreach ($userids as $userid) {
         $grade = new stdClass;
         $grade->userid = $userid;
