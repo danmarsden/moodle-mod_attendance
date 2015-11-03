@@ -61,6 +61,9 @@ class mod_attendance_update_form extends moodleform {
 
         $mform->addElement('header', 'general', get_string('changesession', 'attendance'));
 
+        $mform->addElement('hidden','courseid', $course->id);
+        $mform->setType('courseid', PARAM_INT);
+
         $mform->addElement('static', 'olddate', get_string('olddate', 'attendance'),
                            userdate($sess->sessdate, get_string('strftimedmyhm', 'attendance')));
         $mform->addElement('date_time_selector', 'sessiondate', get_string('newdate', 'attendance'));
