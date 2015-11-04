@@ -309,4 +309,4 @@ $string['deletehiddensessions'] = 'Delete all hidden sessions';
 $string['confirmdeletehiddensessions'] = 'Are you sure you want to delete {$a->count} sessions scheduled before the course start date ({$a->date})?';
 $string['hiddensessionsdeleted'] = 'All hidden sessions were delete';
 
-$string['timeahead'] = 'Must not exceed one year ahead of the session date';
+$string['timeahead'] = 'Multiple sessions that exceed one year cannot be created, please adjust the start and end dates.';
