@@ -165,6 +165,12 @@ class mod_attendance_add_form extends moodleform {
                            null, array('maxfiles'=>EDITOR_UNLIMITED_FILES, 'noclean'=>true, 'context'=>$modcontext));
         $mform->setType('sdescription', PARAM_RAW);
 
+        $mform->addElement('hidden', 'coursestartdate', $course->startdate);
+        $mform->setType('coursestartdate', PARAM_INT);
+
+        $mform->addElement('hidden', 'previoussessiondate', 0);
+        $mform->setType('previoussessiondate', PARAM_INT);
+
         $submit_string = get_string('addsession', 'attendance');
         $this->add_action_buttons(false, $submit_string);
     }
@@ -198,6 +204,12 @@ class mod_attendance_add_form extends moodleform {
         if ($addmulti && ceil(($data['sessionenddate'] - $data['sessiondate']) / YEARSECS) > 1) {
             $errors['sessionenddate'] = get_string('timeahead', 'attendance');
         }
+
+        if ($data['sessiondate'] < $data['coursestartdate'] && $data['sessiondate'] != $data['previoussessiondate']) {
+            $errors['sessiondate'] = get_string('priorto', 'attendance', userdate($data['coursestartdate'], get_string('strftimedmy', 'attendance')));
+            $this->_form->setConstant('previoussessiondate', $data['sessiondate']);
+        }
+
         return $errors;
     }
 
