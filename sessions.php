@@ -71,7 +71,12 @@ switch ($att->pageparams->action) {
         if ($formdata = $mform->get_data()) {
             $sessions = construct_sessions_data_for_add($formdata);
             $att->add_sessions($sessions);
-            redirect($url, get_string('sessionsgenerated', 'attendance'));
+            $message = count($sessions) == 1 ? get_string('sessiongenerated', 'attendance')
+                                             : get_string('sessionsgenerated', 'attendance', count($sessions));
+            mod_attendance_notifyqueue::notify_success($message);
+            // Redirect to the sessions tab always showing all sessions
+            $SESSION->attcurrentattview[$cm->course] = ATT_VIEW_ALL;
+            redirect($att->url_manage());
         }
         break;
     case att_sessions_page_params::ACTION_UPDATE:
@@ -88,7 +93,8 @@ switch ($att->pageparams->action) {
         if ($formdata = $mform->get_data()) {
             $att->update_session_from_form_data($formdata, $sessionid);
 
-            redirect($att->url_manage(), get_string('sessionupdated', 'attendance'));
+            mod_attendance_notifyqueue::notify_success(get_string('sessionupdated', 'attendance'));
+            redirect($att->url_manage());
         }
         break;
     case att_sessions_page_params::ACTION_DELETE:

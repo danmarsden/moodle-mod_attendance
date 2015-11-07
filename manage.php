@@ -86,6 +86,7 @@ $sesstable = new attendance_manage_data($att);
 
 echo $output->header();
 echo $output->heading(get_string('attendanceforthecourse', 'attendance').' :: ' .format_string($course->fullname));
+mod_attendance_notifyqueue::show();
 echo $output->render($tabs);
 echo $output->render($filtercontrols);
 echo $output->render($sesstable);
