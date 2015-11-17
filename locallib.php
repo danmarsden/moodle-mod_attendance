@@ -1541,7 +1541,6 @@ class attendance {
     }
 }
 
-
 function att_get_statuses($attid, $onlyvisible=true, $statusset = -1) {
     global $DB;
 
