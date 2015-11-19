@@ -71,8 +71,7 @@ switch ($att->pageparams->action) {
         if ($formdata = $mform->get_data()) {
             $sessions = construct_sessions_data_for_add($formdata);
             $att->add_sessions($sessions);
-            $message = count($sessions) == 1 ? get_string('sessiongenerated', 'attendance') :
-                                               get_string('sessionsgenerated', 'attendance', count($sessions));
+            $message = count($sessions) == 1 ? get_string('sessiongenerated', 'attendance') : get_string('sessionsgenerated', 'attendance', count($sessions));
             mod_attendance_notifyqueue::notify_success($message);
             // Redirect to the sessions tab always showing all sessions.
             $SESSION->attcurrentattview[$cm->course] = ATT_VIEW_ALL;

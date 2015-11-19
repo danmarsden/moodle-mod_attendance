@@ -234,8 +234,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $dta = $this->construct_date_time_actions($sessdata, $sess);
 
             $table->data[$sess->id][] = $i;
-            $table->data[$sess->id][] = $sess->groupid ? $sessdata->groups[$sess->groupid]->name :
-                                                         get_string('commonsession', 'attendance');
+            $table->data[$sess->id][] = $sess->groupid ? $sessdata->groups[$sess->groupid]->name : get_string('commonsession', 'attendance');
             $table->data[$sess->id][] = $dta['date'];
             $table->data[$sess->id][] = $dta['time'];
             $table->data[$sess->id][] = $sess->description;
@@ -770,8 +769,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
             $row = new html_table_row();
             $row->cells[] = $i;
-            $row->cells[] = html_writer::tag('nobr', $sess->groupid ? $userdata->groups[$sess->groupid]->name :
-                                                                      get_string('commonsession', 'attendance'));
+            $row->cells[] = html_writer::tag('nobr', $sess->groupid ? $userdata->groups[$sess->groupid]->name : get_string('commonsession', 'attendance'));
             $row->cells[] = userdate($sess->sessdate, get_string('strftimedmyw', 'attendance'));
             $row->cells[] = $this->construct_time($sess->sessdate, $sess->duration);
             $row->cells[] = $sess->description;
@@ -1076,7 +1074,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
     /**
      * Construct a notice message
-     * 
+     *
      * @param string $text
      * @param string $class
      * @return string

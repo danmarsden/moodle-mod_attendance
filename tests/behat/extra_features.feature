@@ -171,7 +171,6 @@ Feature: Test the various new features in the attendance module
       | id_sessiondate_hour      | 10                     |
       | id_sessiondate_minute    | 0                      |
     And I click on "submitbutton" "button"
-    And I follow "Sessions"
     And I follow "Add"
     And I set the following fields to these values:
       | Create multiple sessions | 0                    |
@@ -179,7 +178,6 @@ Feature: Test the various new features in the attendance module
       | id_sessiondate_hour      | 11                   |
       | id_sessiondate_minute    | 0                    |
     And I click on "submitbutton" "button"
-    And I follow "Sessions"
 
     When I click on "Take attendance" "link" in the "10:00" "table_row"
     Then "Set status for all users to «Present»" "link" should exist
