@@ -76,7 +76,6 @@ Feature: Test the various new features in the attendance module
     And I set the following fields to these values:
       | Create multiple sessions | 0 |
     And I click on "submitbutton" "button"
-    And I follow "Sessions"
 
     When I follow "Take attendance"
     # Present
@@ -202,7 +201,6 @@ Feature: Test the various new features in the attendance module
     And I set the following fields to these values:
       | Create multiple sessions | 0 |
     And I click on "submitbutton" "button"
-    And I follow "Sessions"
     And I click on "Take attendance" "link"
 
     When I click on "setallstatuses" "field" in the ".takelist tbody td.c3" "css_element"
