@@ -40,7 +40,6 @@ Feature: Teachers and Students can record session attendance
         And I set the following fields to these values:
             | id_sessiondate_hour | 23 |
         And I click on "id_submitbutton" "button"
-        And I follow "Continue"
         And I log out
         When I log in as "student1"
         And I follow "Course 1"
@@ -65,7 +64,6 @@ Feature: Teachers and Students can record session attendance
         And I set the following fields to these values:
             | id_sessiondate_hour | 01 |
         And I click on "id_submitbutton" "button"
-        And I follow "Continue"
         And I follow "Report"
         And I follow "Low grade"
         And I set the field "user3" to "1"
@@ -88,7 +86,6 @@ Feature: Teachers and Students can record session attendance
         And I set the following fields to these values:
             | id_sessiondate_hour | 01 |
         And I click on "id_submitbutton" "button"
-        And I follow "Continue"
         And I follow "Export"
         Then the field "id_ident_idnumber" matches value ""
         And the field "id_ident_institution" matches value ""
