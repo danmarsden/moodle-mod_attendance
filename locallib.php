@@ -856,8 +856,7 @@ class attendance {
                 $sesslog[$sid]->studentid = $sid; // We check is_numeric on this above.
                 $sesslog[$sid]->statusid = $value; // We check is_numeric on this above.
                 $sesslog[$sid]->statusset = $statuses;
-                $sesslog[$sid]->remarks = array_key_exists('remarks'.$sid, $formdata) ?
-                                                      clean_param($formdata['remarks'.$sid], PARAM_TEXT) : '';
+                $sesslog[$sid]->remarks = array_key_exists('remarks'.$sid, $formdata) ? clean_param($formdata['remarks'.$sid], PARAM_TEXT) : '';
                 $sesslog[$sid]->sessionid = $this->pageparams->sessionid;
                 $sesslog[$sid]->timetaken = $now;
                 $sesslog[$sid]->takenby = $USER->id;
@@ -1420,7 +1419,7 @@ class attendance {
 
     /**
      * Remove a status variable from an attendance instance
-     * 
+     *
      * @global moodle_database $DB
      * @param stdClass $status
      */
@@ -1442,7 +1441,7 @@ class attendance {
 
     /**
      * Add an attendance status variable
-     * 
+     *
      * @global moodle_database $DB
      * @param string $acronym
      * @param string $description
@@ -1478,7 +1477,7 @@ class attendance {
 
     /**
      * Update status variable for a particular Attendance module instance
-     * 
+     *
      * @global moodle_database $DB
      * @param stdClass $status
      * @param string $acronym

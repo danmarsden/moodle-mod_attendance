@@ -114,7 +114,7 @@ class mod_attendance_add_form extends moodleform {
         for ($i = 0; $i <= 23; $i++) {
             $hours[$i] = sprintf("%02d", $i);
         }
-        for ($i = 0; $i < 60; $i+=5) {
+        for ($i = 0; $i < 60; $i += 5) {
             $minutes[$i] = sprintf("%02d", $i);
         }
         $durtime = array();
@@ -194,12 +194,12 @@ class mod_attendance_add_form extends moodleform {
         }
 
         $addmulti = isset($data['addmultiply']) ? (int)$data['addmultiply'] : 0;
-        if (($addmulti != 0) && (!array_key_exists('sdays',$data) || empty($data['sdays']))) {
-            $data['sdays']= array();
+        if (($addmulti != 0) && (!array_key_exists('sdays', $data) || empty($data['sdays']))) {
+            $data['sdays'] = array();
             $errors['sdays'] = get_string('required', 'attendance');
         }
         if (isset($data['sdays'])) {
-            if (!$this->checkWeekDays($data['sessiondate'], $data['sessionenddate'], $data['sdays']) ) {
+            if (!$this->checkweekdays($data['sessiondate'], $data['sessionenddate'], $data['sdays']) ) {
                 $errors['sdays'] = get_string('checkweekdays', 'attendance');
             }
         }
@@ -216,11 +216,11 @@ class mod_attendance_add_form extends moodleform {
         return $errors;
     }
 
-    private function checkWeekDays($sessiondate, $sessionenddate, $sdays) {
+    private function checkweekdays($sessiondate, $sessionenddate, $sdays) {
 
         $found = false;
 
-        $daysOfWeek = array(0 => "Sun", 1 => "Mon", 2 => "Tue", 3 => "Wed", 4 => "Thu", 5 => "Fri", 6 => "Sat");
+        $daysofweek = array(0 => "Sun", 1 => "Mon", 2 => "Tue", 3 => "Wed", 4 => "Thu", 5 => "Fri", 6 => "Sat");
         $start = new DateTime( date("Y-m-d", $sessiondate) );
         $interval = new DateInterval('P1D');
         $end = new DateTime( date("Y-m-d", $sessionenddate) );
@@ -230,7 +230,7 @@ class mod_attendance_add_form extends moodleform {
         foreach ($period as $date) {
             if (!$found) {
                 foreach ($sdays as $name => $value) {
-                    $key = array_search($name, $daysOfWeek);
+                    $key = array_search($name, $daysofweek);
                     if ($date->format("w") == $key) {
                         $found = true;
                         break;

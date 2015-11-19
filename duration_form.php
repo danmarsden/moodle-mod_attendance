@@ -53,7 +53,7 @@ class mod_attendance_duration_form extends moodleform {
         for ($i = 0; $i <= 23; $i++) {
             $hours[$i] = sprintf("%02d", $i);
         }
-        for ($i = 0; $i < 60; $i+=5) {
+        for ($i = 0; $i < 60; $i += 5) {
             $minutes[$i] = sprintf("%02d", $i);
         }
         $durselect[] =& $mform->createElement('select', 'hours', '', $hours);
