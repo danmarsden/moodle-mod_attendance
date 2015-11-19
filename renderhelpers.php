@@ -103,7 +103,7 @@ class user_sessions_cells_generator {
     protected function construct_not_taken_cell($text) {
         $this->cells[] = $text;
     }
-    
+
     protected function construct_remarks_cell($text) {
         $this->cells[] = $text;
     }
@@ -160,7 +160,7 @@ class user_sessions_cells_html_generator extends user_sessions_cells_generator {
         $this->close_open_cell_if_needed();
         $this->cells[] = $text;
     }
-    
+
     protected function construct_remarks_cell($text) {
         global $OUTPUT;
 
@@ -198,15 +198,15 @@ class user_sessions_cells_html_generator extends user_sessions_cells_generator {
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class user_sessions_cells_text_generator extends user_sessions_cells_generator {
-    private $enrolments_info_cell_text;
+    private $enrolmentsinfocelltext;
 
     protected function construct_hidden_status_cell($text) {
         $this->cells[] = '-'.$text;
     }
 
     protected function construct_enrolments_info_cell($text) {
-        if ($this->enrolments_info_cell_text != $text) {
-            $this->enrolments_info_cell_text = $text;
+        if ($this->enrolmentsinfocelltext != $text) {
+            $this->enrolmentsinfocelltext = $text;
             $this->cells[] = $text;
         } else {
             $this->cells[] = '←';

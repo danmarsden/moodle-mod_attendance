@@ -29,7 +29,7 @@ require_once($CFG->libdir.'/formslib.php');
 
 class tempedit_form extends moodleform {
 
-    function definition() {
+    public function definition() {
 
         $mform = $this->_form;
 
@@ -55,12 +55,12 @@ class tempedit_form extends moodleform {
         $mform->closeHeaderBefore('submit');
     }
 
-    function definition_after_data() {
+    public function definition_after_data() {
         $mform = $this->_form;
         $mform->applyFilter('tname', 'trim');
     }
 
-    function validation($data, $files) {
+    public function validation($data, $files) {
         $errors = parent::validation($data, $files);
 
         if ($err = attendance::check_existing_email($data['temail'], $data['userid'])) {

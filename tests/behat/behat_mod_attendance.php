@@ -34,7 +34,7 @@ use Behat\Mink\Exception\ExpectationException as ExpectationException,
  */
 class behat_mod_attendance extends behat_base {
 
-    protected $file_contents;
+    protected $filecontents;
 
     /**
      * @Then /^attendance export file is ok$/
@@ -42,7 +42,7 @@ class behat_mod_attendance extends behat_base {
     public function attendance_export_file_is_ok() {
 
         global $CFG;
-        
+
         $check = true;
 
         // Location selenium will download to.
@@ -55,26 +55,26 @@ class behat_mod_attendance extends behat_base {
         $header = null;
 
         // The file is tab seperated but not exactly a tsv.
-        while (($row = fgetcsv($file, 0, "\t")) !== FALSE) {
+        while (($row = fgetcsv($file, 0, "\t")) !== false) {
 
             // Ignore unwanted information at the start of the file.
             if ($count < 3) {
                 $count++;
                 continue;
             }
-            
+
             if (!$header) {
                 $header = $row;
             } else {
-                $this->file_contents = array_combine($header, $row);
+                $this->filecontents = array_combine($header, $row);
             }
-            
+
             $count++;
         }
-        
+
         fclose($file);
         unlink($dir . $filename);
-        
+
         // Check if data rows exist.
         if ($count < 2) {
             $check = false;
@@ -95,22 +95,19 @@ class behat_mod_attendance extends behat_base {
      * @Given /^I should see "([^"]*)" as "([^"]*)" in the file$/
      */
     public function i_should_see_as_in_the_file($field, $value) {
-      
-        foreach ($this->file_contents as $array_field => $array_value) {
 
-            if ($field == $array_field) {
+        foreach ($this->filecontents as $arrayfield => $arrayvalue) {
 
-                if ($value == $array_value) {
+            if ($field == $arrayfield) {
+
+                if ($value == $arrayvalue) {
 
                     return true;
 
                 } else {
-                    
                     throw new PendingException();
-
                 }
             }
         }
     }
-    
 }

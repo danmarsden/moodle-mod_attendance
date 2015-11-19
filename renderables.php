@@ -147,7 +147,7 @@ class attendance_filter_controls implements renderable {
                 $format = get_string('strftimedm', 'attendance');
                 $this->prevcur = make_timestamp($year, $mon, $mday - 1);
                 $this->nextcur = make_timestamp($year, $mon, $mday + 1);
-                $this->curdatetxt =  userdate($att->pageparams->startdate, $format);
+                $this->curdatetxt = userdate($att->pageparams->startdate, $format);
                 break;
             case ATT_VIEW_WEEKS:
                 $format = get_string('strftimedm', 'attendance');
@@ -395,24 +395,24 @@ class attendance_user_data implements renderable {
                     continue;
                 }
                 $statuses = att_get_statuses($ca->attid);
-                $user_taken_sessions_count = att_get_user_taken_sessions_count($ca->attid, $ca->coursestartdate, $userid, $att->cm);
-                $user_statuses_stat = att_get_user_statuses_stat($ca->attid, $ca->coursestartdate, $userid, $att->cm);
+                $usertakensessionscount = att_get_user_taken_sessions_count($ca->attid, $ca->coursestartdate, $userid, $att->cm);
+                $userstatusesstat = att_get_user_statuses_stat($ca->attid, $ca->coursestartdate, $userid, $att->cm);
 
                 $this->statuses[$ca->attid] = $statuses;
 
-                $this->stat[$ca->attid]['completed'] = $user_taken_sessions_count;
-                $this->stat[$ca->attid]['statuses'] = $user_statuses_stat;
+                $this->stat[$ca->attid]['completed'] = $usertakensessionscount;
+                $this->stat[$ca->attid]['statuses'] = $userstatusesstat;
 
                 $this->gradable[$ca->attid] = $ca->attgrade > 0;
 
                 if ($this->gradable[$ca->attid]) {
-                    $this->grade[$ca->attid] = att_get_user_grade($user_statuses_stat, $statuses);
+                    $this->grade[$ca->attid] = att_get_user_grade($userstatusesstat, $statuses);
                     // For getting sessions count implemented simplest method - taken sessions.
                     // It can have error if users don't have attendance info for some sessions.
                     // In the future we can implement another methods:
                     // * all sessions between user start enrolment date and now;
                     // * all sessions between user start and end enrolment date.
-                    $this->maxgrade[$ca->attid] = att_get_user_max_grade($user_taken_sessions_count, $statuses);
+                    $this->maxgrade[$ca->attid] = att_get_user_max_grade($usertakensessionscount, $statuses);
                 } else {
                     // For more comfortable and universal work with arrays.
                     $this->grade[$ca->attid] = null;
@@ -555,8 +555,8 @@ class attendance_preferences_data implements renderable {
         $this->att = $att;
     }
 
-    public function url($params=array(), $significant_params=true) {
-        if ($significant_params) {
+    public function url($params=array(), $significantparams=true) {
+        if ($significantparams) {
             $params = array_merge($this->att->pageparams->get_significant_params(), $params);
         }
 

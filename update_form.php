@@ -48,12 +48,12 @@ class mod_attendance_update_form extends moodleform {
         $modcontext    = $this->_customdata['modcontext'];
         $sessionid     = $this->_customdata['sessionid'];
 
-        if (!$sess = $DB->get_record('attendance_sessions', array('id'=> $sessionid) )) {
+        if (!$sess = $DB->get_record('attendance_sessions', array('id' => $sessionid) )) {
             error('No such session in this course');
         }
         $dhours = floor($sess->duration / HOURSECS);
         $dmins = floor(($sess->duration - $dhours * HOURSECS) / MINSECS);
-        $defopts = array('maxfiles'=>EDITOR_UNLIMITED_FILES, 'noclean'=>true, 'context'=>$modcontext);
+        $defopts = array('maxfiles' => EDITOR_UNLIMITED_FILES, 'noclean' => true, 'context' => $modcontext);
         $sess = file_prepare_standard_editor($sess, 'description', $defopts, $modcontext, 'mod_attendance', 'session', $sess->id);
         $data = array('sessiondate' => $sess->sessdate,
                 'durtime' => array('hours' => $dhours, 'minutes' => $dmins),
@@ -65,10 +65,10 @@ class mod_attendance_update_form extends moodleform {
                            userdate($sess->sessdate, get_string('strftimedmyhm', 'attendance')));
         $mform->addElement('date_time_selector', 'sessiondate', get_string('newdate', 'attendance'));
 
-        for ($i=0; $i<=23; $i++) {
+        for ($i = 0; $i <= 23; $i++) {
             $hours[$i] = sprintf("%02d", $i);
         }
-        for ($i=0; $i<60; $i+=5) {
+        for ($i = 0; $i < 60; $i+=5) {
             $minutes[$i] = sprintf("%02d", $i);
         }
         $durselect[] =& $mform->createElement('select', 'hours', '', $hours);
@@ -86,7 +86,7 @@ class mod_attendance_update_form extends moodleform {
 
         $mform->setDefaults($data);
 
-        $submit_string = get_string('update', 'attendance');
-        $this->add_action_buttons(true, $submit_string);
+        $submitstring = get_string('update', 'attendance');
+        $this->add_action_buttons(true, $submitstring);
     }
 }

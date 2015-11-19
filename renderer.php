@@ -94,9 +94,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
     }
 
     protected function render_paging_controls(attendance_filter_controls $fcontrols) {
-        global $CFG;
-
-        $paging_controls = '';
+        $pagingcontrols = '';
 
         $group = 0;
         if (!empty($fcontrols->pageparams->group)) {
@@ -104,30 +102,35 @@ class mod_attendance_renderer extends plugin_renderer_base {
         }
 
         $totalusers = count_enrolled_users(context_module::instance($fcontrols->cm->id), 'mod/attendance:canbelisted', $group);
-        
-        if (empty($fcontrols->pageparams->page) || !$fcontrols->pageparams->page || !$totalusers || empty($fcontrols->pageparams->perpage)) {
-            return $paging_controls;
+
+        if (empty($fcontrols->pageparams->page) || !$fcontrols->pageparams->page || !$totalusers ||
+            empty($fcontrols->pageparams->perpage)) {
+
+            return $pagingcontrols;
         }
 
         $numberofpages = ceil($totalusers / $fcontrols->pageparams->perpage);
 
         if ($fcontrols->pageparams->page > 1) {
-            $paging_controls .= html_writer::link($fcontrols->url(array('curdate' => $fcontrols->curdate, 'page' => $fcontrols->pageparams->page - 1)),
-                                                                         $this->output->larrow());
+            $pagingcontrols .= html_writer::link($fcontrols->url(array('curdate' => $fcontrols->curdate,
+                                                                       'page' => $fcontrols->pageparams->page - 1)),
+                                                                 $this->output->larrow());
         }
-        $paging_controls .= html_writer::tag('span', "Page {$fcontrols->pageparams->page} of $numberofpages", array('class' => 'attbtn'));
+        $pagingcontrols .= html_writer::tag('span', "Page {$fcontrols->pageparams->page} of $numberofpages",
+                                            array('class' => 'attbtn'));
         if ($fcontrols->pageparams->page < $numberofpages) {
-            $paging_controls .= html_writer::link($fcontrols->url(array('curdate' => $fcontrols->curdate, 'page' => $fcontrols->pageparams->page + 1)),
-                                                                         $this->output->rarrow());
+            $pagingcontrols .= html_writer::link($fcontrols->url(array('curdate' => $fcontrols->curdate,
+                                                                       'page' => $fcontrols->pageparams->page + 1)),
+                                                                 $this->output->rarrow());
         }
 
-        return $paging_controls ;
+        return $pagingcontrols;
     }
 
     protected function render_curdate_controls(attendance_filter_controls $fcontrols) {
         global $CFG;
 
-        $curdate_controls = '';
+        $curdatecontrols = '';
         if ($fcontrols->curdatetxt) {
             $this->page->requires->strings_for_js(array('calclose', 'caltoday'), 'attendance');
             $jsvals = array(
@@ -135,24 +138,24 @@ class mod_attendance_renderer extends plugin_renderer_base {
                     'cal_week_days' => explode(',', get_string('calweekdays', 'attendance')),
                     'cal_start_weekday' => $CFG->calendar_startwday,
                     'cal_cur_date'  => $fcontrols->curdate);
-            $curdate_controls = html_writer::script(js_writer::set_variable('M.attendance', $jsvals));
+            $curdatecontrols = html_writer::script(js_writer::set_variable('M.attendance', $jsvals));
 
             $this->page->requires->js('/mod/attendance/calendar.js');
 
-            $curdate_controls .= html_writer::link($fcontrols->url(array('curdate' => $fcontrols->prevcur)),
+            $curdatecontrols .= html_writer::link($fcontrols->url(array('curdate' => $fcontrols->prevcur)),
                                                                          $this->output->larrow());
             $params = array(
                     'title' => get_string('calshow', 'attendance'),
                     'id'    => 'show',
                     'type'  => 'button');
-            $button_form = html_writer::tag('button', $fcontrols->curdatetxt, $params);
+            $buttonform = html_writer::tag('button', $fcontrols->curdatetxt, $params);
             foreach ($fcontrols->url_params(array('curdate' => '')) as $name => $value) {
                 $params = array(
                         'type'  => 'hidden',
                         'id'    => $name,
                         'name'  => $name,
                         'value' => $value);
-                $button_form .= html_writer::empty_tag('input', $params);
+                $buttonform .= html_writer::empty_tag('input', $params);
             }
             $params = array(
                     'id'        => 'currentdate',
@@ -160,14 +163,14 @@ class mod_attendance_renderer extends plugin_renderer_base {
                     'method'    => 'post'
             );
 
-            $button_form = html_writer::tag('form', $button_form, $params);
-            $curdate_controls .= $button_form;
+            $buttonform = html_writer::tag('form', $buttonform, $params);
+            $curdatecontrols .= $buttonform;
 
-            $curdate_controls .= html_writer::link($fcontrols->url(array('curdate' => $fcontrols->nextcur)),
+            $curdatecontrols .= html_writer::link($fcontrols->url(array('curdate' => $fcontrols->nextcur)),
                                                                          $this->output->rarrow());
         }
 
-        return $curdate_controls;
+        return $curdatecontrols;
     }
 
     protected function render_view_controls(attendance_filter_controls $fcontrols) {
@@ -237,7 +240,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $table->data[$sess->id][] = $dta['time'];
             $table->data[$sess->id][] = $sess->description;
             $table->data[$sess->id][] = $dta['actions'];
-            $table->data[$sess->id][] = html_writer::checkbox('sessid[]', $sess->id, false, '', array('class' => 'attendancesesscheckbox'));
+            $table->data[$sess->id][] = html_writer::checkbox('sessid[]', $sess->id, false, '',
+                                                              array('class' => 'attendancesesscheckbox'));
         }
 
         return html_writer::table($table);
@@ -328,26 +332,29 @@ class mod_attendance_renderer extends plugin_renderer_base {
         } else {
             $table = $this->render_attendance_take_grid($takedata);
         }
-        $table .= html_writer::input_hidden_params($takedata->url(array('sesskey' => sesskey(), 'page' => $takedata->pageparams->page)));
+        $table .= html_writer::input_hidden_params($takedata->url(array('sesskey' => sesskey(),
+                                                                        'page' => $takedata->pageparams->page)));
         $params = array(
                 'type'  => 'submit',
                 'value' => get_string('save', 'attendance'));
         $table .= html_writer::tag('center', html_writer::empty_tag('input', $params));
         $table = html_writer::tag('form', $table, array('method' => 'post', 'action' => $takedata->url_path()));
 
-        foreach($takedata->statuses as $status) {
+        foreach ($takedata->statuses as $status) {
             $sessionstats[$status->id] = 0;
         }
-        // Calculate the sum of statuses for each user
+        // Calculate the sum of statuses for each user.
         $sessionstats[] = array();
         foreach ($takedata->sessionlog as $userlog) {
-            foreach($takedata->statuses as $status) {
-                if ($userlog->statusid == $status->id) $sessionstats[$status->id]++;
+            foreach ($takedata->statuses as $status) {
+                if ($userlog->statusid == $status->id) {
+                    $sessionstats[$status->id]++;
+                }
             }
         }
 
         $statsoutput = '<br/>';
-        foreach($takedata->statuses as $status) {
+        foreach ($takedata->statuses as $status) {
             $statsoutput .= "$status->description = ".$sessionstats[$status->id]." <br/>";
         }
 
@@ -379,8 +386,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
     }
 
     private function construct_take_controls(attendance_take_data $takedata) {
-        GLOBAL $CFG;
-        
+        global $CFG;
+
         $controls = '';
         $context = context_module::instance($takedata->cm->id);
         $group = 0;
@@ -412,9 +419,11 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $numberofpages = ceil($totalusers / $usersperpage);
 
             if ($takedata->pageparams->page > 1) {
-                $controls .= html_writer::link($takedata->url(array('page' => $takedata->pageparams->page - 1)), $this->output->larrow());
+                $controls .= html_writer::link($takedata->url(array('page' => $takedata->pageparams->page - 1)),
+                                                              $this->output->larrow());
             }
-            $controls .= html_writer::tag('span', "Page {$takedata->pageparams->page} of $numberofpages", array('class' => 'attbtn'));
+            $controls .= html_writer::tag('span', "Page {$takedata->pageparams->page} of $numberofpages",
+                                          array('class' => 'attbtn'));
             if ($takedata->pageparams->page < $numberofpages) {
                 $controls .= html_writer::link($takedata->url(array('page' => $takedata->pageparams->page + 1,
                             'perpage' => $takedata->pageparams->perpage)), $this->output->rarrow());
@@ -550,7 +559,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
     protected function render_attendance_take_grid(attendance_take_data $takedata) {
         $table = new html_table();
-        for ($i=0; $i < $takedata->pageparams->gridcols; $i++) {
+        for ($i = 0; $i < $takedata->pageparams->gridcols; $i++) {
             $table->align[] = 'center';
             $table->size[] = '110px';
         }
@@ -682,7 +691,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
         $table->attributes['class'] = 'userinfobox';
         $table->colclasses = array('left side', '');
-        $table->data[0][] = $this->user_picture($userdata->user, array('size' => 100));  // Show different picture if it is a temporary user.
+        // Show different picture if it is a temporary user.
+        $table->data[0][] = $this->user_picture($userdata->user, array('size' => 100));
         $table->data[0][] = $this->construct_user_data($userdata);
 
         $o .= html_writer::table($table);
@@ -805,7 +815,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
     }
 
     protected function render_attendance_report_data(attendance_report_data $reportdata) {
-        global $PAGE;
+        global $PAGE, $COURSE;
 
         // Initilise Javascript used to (un)check all checkboxes.
         $this->page->requires->js_init_call('M.mod_attendance.init_manage');
@@ -859,7 +869,6 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $table->size[] = '1px';
         }
 
-
         if ($bulkmessagecapability) { // Display the table header for bulk messaging.
             // The checkbox must have an id of cb_selector so that the JavaScript will pick it up.
             $table->head[] = html_writer::checkbox('cb_selector', 0, false, '', array('id' => 'cb_selector'));
@@ -891,25 +900,27 @@ class mod_attendance_renderer extends plugin_renderer_base {
             if ($bulkmessagecapability) { // Create the checkbox for bulk messaging.
                 $row->cells[] = html_writer::checkbox('user'.$user->id, 'on', false);
             }
-            
+
             $table->data[] = $row;
         }
 
-        // Calculate the sum of statuses for each user
+        // Calculate the sum of statuses for each user.
         $statrow = new html_table_row();
         $statrow->cells[] = '';
         $statrow->cells[] = get_string('summary');
         foreach ($reportdata->sessions as $sess) {
             foreach ($reportdata->users as $user) {
-                foreach($reportdata->statuses as $status) {
+                foreach ($reportdata->statuses as $status) {
                     if (!empty($reportdata->sessionslog[$user->id][$sess->id])) {
-                        if ($reportdata->sessionslog[$user->id][$sess->id]->statusid == $status->id) $sessionstats[$status->id]++;
+                        if ($reportdata->sessionslog[$user->id][$sess->id]->statusid == $status->id) {
+                            $sessionstats[$status->id]++;
+                        }
                     }
                 }
             }
 
             $statsoutput = '<br/>';
-            foreach($reportdata->statuses as $status) {
+            foreach ($reportdata->statuses as $status) {
                 $statsoutput .= "$status->description:".$sessionstats[$status->id]." <br/>";
             }
             $statrow->cells[] = $statsoutput;
@@ -920,8 +931,9 @@ class mod_attendance_renderer extends plugin_renderer_base {
         if ($bulkmessagecapability) { // Require that the user can bulk message users.
             // Display check boxes that will allow the user to send a message to the students that have been checked.
             $output = html_writer::empty_tag('input', array('name' => 'sesskey', 'type' => 'hidden', 'value' => sesskey()));
-            $output .= html_writer::empty_tag('input', array('name' => 'formaction', 'type' => 'hidden', 'value' => 'messageselect.php'));
-            $output .= html_writer::empty_tag('input', array('name' => 'id', 'type' => 'hidden', 'value' => $GLOBALS['COURSE']->id));
+            $output .= html_writer::empty_tag('input', array('name' => 'formaction', 'type' => 'hidden',
+                                                             'value' => 'messageselect.php'));
+            $output .= html_writer::empty_tag('input', array('name' => 'id', 'type' => 'hidden', 'value' => $COURSE->id));
             $output .= html_writer::empty_tag('input', array('name' => 'returnto', 'type' => 'hidden', 'value' => s(me())));
             $output .= html_writer::table($table).html_writer::tag('div', get_string('users').': '.count($reportdata->users));;
             $output .= html_writer::tag('div',
@@ -932,7 +944,6 @@ class mod_attendance_renderer extends plugin_renderer_base {
         } else {
             return html_writer::table($table).html_writer::tag('div', get_string('users').': '.count($reportdata->users));
         }
-            
     }
 
     /**
@@ -989,7 +1000,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
             $table->data[$i][] = $i;
             $table->data[$i][] = $this->construct_text_input('acronym['.$st->id.']', 2, 2, $st->acronym) . $emptyacronym;
-            $table->data[$i][] = $this->construct_text_input('description['.$st->id.']', 30, 30, $st->description) . $emptydescription;
+            $table->data[$i][] = $this->construct_text_input('description['.$st->id.']', 30, 30, $st->description) .
+                                 $emptydescription;
             $table->data[$i][] = $this->construct_text_input('grade['.$st->id.']', 4, 4, $st->grade);
             $table->data[$i][] = $this->construct_preferences_actions_icons($st, $prefdata);
 
