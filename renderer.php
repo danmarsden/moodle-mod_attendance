@@ -896,7 +896,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             }
 
             if ($bulkmessagecapability) { // Create the checkbox for bulk messaging.
-                $row->cells[] = html_writer::checkbox('user'.$user->id, 'on', false);
+                $row->cells[] = html_writer::checkbox('user'.$user->id, 'on', false, '', array('class' => 'attendancesesscheckbox'));
             }
 
             $table->data[] = $row;
