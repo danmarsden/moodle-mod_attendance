@@ -237,7 +237,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $table->data[$sess->id][] = $dta['time'];
             $table->data[$sess->id][] = $sess->description;
             $table->data[$sess->id][] = $dta['actions'];
-            $table->data[$sess->id][] = html_writer::checkbox('sessid[]', $sess->id, false);
+            $table->data[$sess->id][] = html_writer::checkbox('sessid[]', $sess->id, false, '', array('class' => 'attendancesesscheckbox'));
         }
 
         return html_writer::table($table);

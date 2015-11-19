@@ -13,7 +13,17 @@ YUI().use('yui2-container', 'yui2-calendar', function(Y) {
 
         Event.on(showBtn, "click", function() {
 
-            // Lazy Dialog Creation - Wait to create the Dialog, and setup document click listeners, until the first time the button is clicked.
+            function resetHandler() {
+                calendar.cfg.setProperty("pagedate", calendar.today);
+                calendar.render();
+            }
+
+            function closeHandler() {
+                dialog.hide();
+            }
+
+            // Lazy Dialog Creation - Wait to create the Dialog, and setup document click listeners,
+            // until the first time the button is clicked.
             if (!dialog) {
 
                 // Hide Calendar if we click anywhere in the document other than the calendar
@@ -25,19 +35,11 @@ YUI().use('yui2-container', 'yui2-calendar', function(Y) {
                     }
                 });
 
-                function resetHandler() {
-                    calendar.cfg.setProperty("pagedate", calendar.today);
-                    calendar.render();
-                }
-
-                function closeHandler() {
-                    dialog.hide();
-                }
-
                 dialog = new YAHOO.widget.Dialog("attcalendarcontainer", {
                     visible:false,
                     context:["show", "tl", "bl"],
-                    buttons:[{text: M.str.attendance.caltoday, handler: resetHandler, isDefault:true}, {text: M.str.attendance.calclose, handler: closeHandler}],
+                    buttons:[{text: M.str.attendance.caltoday, handler: resetHandler, isDefault:true},
+                             {text: M.str.attendance.calclose, handler: closeHandler}],
                     draggable:false,
                     close:false
                 });

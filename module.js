@@ -1,12 +1,16 @@
-M.mod_attendance = {}
+M.mod_attendance = {};
 
 M.mod_attendance.init_manage = function(Y) {
 
     Y.on('click', function(e) {
         if (e.target.get('checked')) {
-            checkall();
+            Y.all('input.attendancesesscheckbox').each(function() {
+                this.set('checked', 'checked');
+            });
         } else {
-            checknone();
+            Y.all('input.attendancesesscheckbox').each(function() {
+                this.set('checked', '');
+            });
         }
     }, '#cb_selector' );
 };
