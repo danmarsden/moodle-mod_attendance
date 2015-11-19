@@ -42,7 +42,7 @@ function xmldb_attendance_upgrade($oldversion=0) {
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
-        
+
         upgrade_mod_savepoint($result, 2014112000, 'attendance');
     }
 

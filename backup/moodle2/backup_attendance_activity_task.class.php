@@ -60,11 +60,11 @@ class backup_attendance_activity_task extends backup_activity_task {
 
         // Link to attendance view by moduleid.
         $search = "/(" . $base . "\/mod\/attendance\/view.php\?id\=)([0-9]+)/";
-        $content= preg_replace($search, '$@ATTENDANCEVIEWBYID*$2@$', $content);
+        $content = preg_replace($search, '$@ATTENDANCEVIEWBYID*$2@$', $content);
 
         // Link to attendance view by moduleid and studentid.
         $search = "/(" . $base . "\/mod\/attendance\/view.php\?id\=)([0-9]+)\&studentid\=([0-9]+)/";
-        $content= preg_replace($search, '$@ATTENDANCEVIEWBYIDSTUD*$2*$3@$', $content);
+        $content = preg_replace($search, '$@ATTENDANCEVIEWBYIDSTUD*$2*$3@$', $content);
 
         return $content;
     }

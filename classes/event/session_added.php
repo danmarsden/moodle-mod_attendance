@@ -31,7 +31,7 @@ defined('MOODLE_INTERNAL') || die();
  * @property-read array $other {
  *      Extra information about event properties.
  *
- *      @string mode Mode of the report viewed.
+ *      string mode Mode of the report viewed.
  * }
  * @package    mod_attendance
  * @since      Moodle 2.7

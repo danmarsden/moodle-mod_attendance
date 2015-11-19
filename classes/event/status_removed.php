@@ -32,7 +32,7 @@ defined('MOODLE_INTERNAL') || die();
  * @property-read array $other {
  *      Extra information about event properties.
  *
- *      @string mode Mode of the report viewed.
+ *      string mode Mode of the report viewed.
  * }
  * @package    mod_attendance
  * @since      Moodle 2.7
@@ -56,7 +56,8 @@ class status_removed extends \core\event\base {
      * @return string
      */
     public function get_description() {
-        return 'User with id ' . $this->userid . ' deleted attendance status "' . $this->data['other']['acronym'] . ' - ' . $this->data['other']['description'] . '" with instanceid ' .
+        return 'User with id ' . $this->userid . ' deleted attendance status "' . $this->data['other']['acronym'] .
+               ' - ' . $this->data['other']['description'] . '" with instanceid ' .
             $this->objectid . '';
     }
 
@@ -86,15 +87,5 @@ class status_removed extends \core\event\base {
     protected function get_legacy_logdata() {
         return array($this->courseid, 'attendance', 'status removed', $this->get_url(),
             $this->other['acronym'] . ' - ' . $this->other['description'], $this->contextinstanceid);
-    }
-
-    /**
-     * Custom validation.
-     *
-     * @throws \coding_exception
-     * @return void
-     */
-    protected function validate_data() {
-        parent::validate_data();
     }
 }

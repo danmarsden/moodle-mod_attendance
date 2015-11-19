@@ -72,7 +72,7 @@ class restore_attendance_activity_task extends restore_activity_task {
         $rules[] = new restore_decode_rule('ATTENDANCEVIEWBYIDSTUD',
                     '/mod/attendance/view.php?id=$1&studentid=$2', array('course_module', 'user'));
 
-        // Older style backups using previous plugin name
+        // Older style backups using previous plugin name.
         $rules[] = new restore_decode_rule('ATTFORBLOCKVIEWBYID',
             '/mod/attendance/view.php?id=$1', 'course_module');
         $rules[] = new restore_decode_rule('ATTFORBLOCKVIEWBYIDSTUD',

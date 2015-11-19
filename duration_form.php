@@ -50,10 +50,10 @@ class mod_attendance_duration_form extends moodleform {
         $mform->addElement('header', 'general', get_string('changeduration', 'attendance'));
         $mform->addElement('static', 'count', get_string('countofselected', 'attendance'), count(explode('_', $ids)));
 
-        for ($i=0; $i<=23; $i++) {
+        for ($i = 0; $i <= 23; $i++) {
             $hours[$i] = sprintf("%02d", $i);
         }
-        for ($i=0; $i<60; $i+=5) {
+        for ($i = 0; $i < 60; $i+=5) {
             $minutes[$i] = sprintf("%02d", $i);
         }
         $durselect[] =& $mform->createElement('select', 'hours', '', $hours);
@@ -67,10 +67,10 @@ class mod_attendance_duration_form extends moodleform {
         $mform->addElement('hidden', 'action', att_sessions_page_params::ACTION_CHANGE_DURATION);
         $mform->setType('action', PARAM_INT);
 
-        $mform->setDefaults(array('durtime' => array('hours'=>0, 'minutes'=>0)));
+        $mform->setDefaults(array('durtime' => array('hours' => 0, 'minutes' => 0)));
 
-        $submit_string = get_string('update', 'attendance');
-        $this->add_action_buttons(true, $submit_string);
+        $submitstring = get_string('update', 'attendance');
+        $this->add_action_buttons(true, $submitstring);
     }
 
 }

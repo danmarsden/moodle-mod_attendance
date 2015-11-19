@@ -33,7 +33,7 @@ class mod_attendance_notifyqueue {
         global $SESSION, $OUTPUT;
 
         if (isset($SESSION->mod_attendance_notifyqueue)) {
-            foreach ($SESSION->mod_attendance_notifyqueue AS $message) {
+            foreach ($SESSION->mod_attendance_notifyqueue as $message) {
                 echo $OUTPUT->notification($message->message, 'notify'.$message->type);
             }
             unset($SESSION->mod_attendance_notifyqueue);

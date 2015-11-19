@@ -31,7 +31,7 @@ defined('MOODLE_INTERNAL') || die();
  * @property-read array $other {
  *      Extra information about event properties.
  *
- *      @string mode Mode of the report viewed.
+ *      string mode Mode of the report viewed.
  * }
  * @package    mod_attendance
  * @since      Moodle 2.7
@@ -85,15 +85,5 @@ class report_viewed extends \core\event\base {
     protected function get_legacy_logdata() {
         return array($this->courseid, 'attendance', 'report', 'report.php?id=' . $this->objectid,
             $this->objectid, $this->contextinstanceid);
-    }
-
-    /**
-     * Custom validation.
-     *
-     * @throws \coding_exception
-     * @return void
-     */
-    protected function validate_data() {
-        parent::validate_data();
     }
 }

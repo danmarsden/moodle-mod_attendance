@@ -68,7 +68,7 @@ YUI().use('yui2-container', 'yui2-calendar', function(Y) {
                 calendar.cfg.setProperty("start_weekday", M.attendance.cal_start_weekday);
                 calendar.cfg.setProperty("MONTHS_LONG", M.attendance.cal_months);
                 calendar.cfg.setProperty("WEEKDAYS_SHORT", M.attendance.cal_week_days);
-                calendar.select(new Date(M.attendance.cal_cur_date*1000));
+                calendar.select(new Date(M.attendance.cal_cur_date * 1000));
                 calendar.render();
 
                 calendar.selectEvent.subscribe(function() {

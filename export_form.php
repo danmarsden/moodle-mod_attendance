@@ -48,7 +48,7 @@ class mod_attendance_export_form extends moodleform {
 
         $mform->addElement('header', 'general', get_string('export', 'attendance'));
 
-        $groupmode=groups_get_activity_groupmode($cm, $course);
+        $groupmode = groups_get_activity_groupmode($cm, $course);
         $groups = groups_get_activity_allowed_groups($cm, $USER->id);
         if ($groupmode == VISIBLEGROUPS or has_capability('moodle/site:accessallgroups', $modcontext)) {
             $grouplist[0] = get_string('allparticipants');
@@ -59,7 +59,6 @@ class mod_attendance_export_form extends moodleform {
             }
         }
         $mform->addElement('select', 'group', get_string('group'), $grouplist);
-
 
         // Restrict the export to the selected users.
         $namefields = get_all_user_name_fields(true, 'u');
@@ -100,13 +99,13 @@ class mod_attendance_export_form extends moodleform {
         $ident = array();
         $ident[] =& $mform->createElement('checkbox', 'id', '', get_string('studentid', 'attendance'));
         $ident[] =& $mform->createElement('checkbox', 'uname', '', get_string('username'));
-        
+
         $optional = array('idnumber', 'institution', 'department');
         foreach ($optional as $opt) {
             $ident[] =& $mform->createElement('checkbox', $opt, '', get_string($opt));
             $mform->setType($opt, PARAM_NOTAGS);
         }
-        
+
         $mform->addGroup($ident, 'ident', get_string('identifyby', 'attendance'), array('<br />'), true);
         $mform->setDefaults(array('ident[id]' => true, 'ident[uname]' => true));
         $mform->setType('id', PARAM_INT);
@@ -128,13 +127,13 @@ class mod_attendance_export_form extends moodleform {
                                   'text' => get_string('downloadtext', 'attendance')
                             ));
 
-        $submit_string = get_string('ok');
-        $this->add_action_buttons(false, $submit_string);
+        $submitstring = get_string('ok');
+        $this->add_action_buttons(false, $submitstring);
 
         $mform->addElement('hidden', 'id', $cm->id);
     }
 
-    function validation($data, $files) {
+    public function validation($data, $files) {
         $errors = parent::validation($data, $files);
 
        // Validate the 'users' field.

@@ -30,8 +30,6 @@ $pageparams = new att_sessions_page_params();
 
 // Check that the required parameters are present.
 $id = required_param('sessid', PARAM_INT);
-$attendance_session_id = required_param('sessid', PARAM_INT);
-
 
 $attforsession = $DB->get_record('attendance_sessions', array('id' => $id), '*', MUST_EXIST);
 $attendance = $DB->get_record('attendance', array('id' => $attforsession->attendanceid), '*', MUST_EXIST);
