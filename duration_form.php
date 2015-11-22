@@ -39,12 +39,9 @@ class mod_attendance_duration_form extends moodleform {
      */
     public function definition() {
 
-        global $CFG;
         $mform    =& $this->_form;
 
-        $course        = $this->_customdata['course'];
         $cm            = $this->_customdata['cm'];
-        $modcontext    = $this->_customdata['modcontext'];
         $ids           = $this->_customdata['ids'];
 
         $mform->addElement('header', 'general', get_string('changeduration', 'attendance'));

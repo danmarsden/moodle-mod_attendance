@@ -253,13 +253,6 @@ function attendance_user_complete($course, $user, $mod, $attendance) {
         echo construct_full_user_stat_html_table($attendance, $course, $user, $mod);
     }
 }
-function attendance_print_recent_activity($course, $isteacher, $timestart) {
-    return false;
-}
-
-function attendance_cron () {
-    return true;
-}
 
 function attendance_update_grades($attendance, $userid=0, $nullifnone=true) {
     // We need this function to exist so that quick editing of module name is passed to gradebook.
@@ -375,7 +368,7 @@ function attendance_scale_used_anywhere($scaleid) {
  * @return bool false if file not found, does not return if found - justsend the file
  */
 function attendance_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload) {
-    global $CFG, $DB;
+    global $DB;
 
     if ($context->contextlevel != CONTEXT_MODULE) {
         return false;
@@ -383,7 +376,7 @@ function attendance_pluginfile($course, $cm, $context, $filearea, $args, $forced
 
     require_login($course, false, $cm);
 
-    if (!$att = $DB->get_record('attendance', array('id' => $cm->instance))) {
+    if (!$DB->record_exists('attendance', array('id' => $cm->instance))) {
         return false;
     }
 
@@ -394,7 +387,7 @@ function attendance_pluginfile($course, $cm, $context, $filearea, $args, $forced
     }
 
     $sessid = (int)array_shift($args);
-    if (!$sess = $DB->get_record('attendance_sessions', array('id' => $sessid))) {
+    if (!$DB->record_exists('attendance_sessions', array('id' => $sessid))) {
         return false;
     }
 

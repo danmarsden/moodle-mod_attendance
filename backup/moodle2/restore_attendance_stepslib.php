@@ -75,7 +75,6 @@ class restore_attendance_activity_structure_step extends restore_activity_struct
         global $DB;
 
         $data = (object)$data;
-        $oldid = $data->id;
         $data->course = $this->get_courseid();
 
         // Insert the attendance record.
@@ -132,7 +131,6 @@ class restore_attendance_activity_structure_step extends restore_activity_struct
         global $DB;
 
         $data = (object)$data;
-        $oldid = $data->id;
 
         $data->sessionid = $this->get_mappingid('attendance_session', $data->sessionid);
         $data->studentid = $this->get_mappingid('user', $data->studentid);
@@ -145,7 +143,7 @@ class restore_attendance_activity_structure_step extends restore_activity_struct
         $data->timetaken = $this->apply_date_offset($data->timetaken);
         $data->takenby = $this->get_mappingid('user', $data->takenby);
 
-        $newitemid = $DB->insert_record('attendance_log', $data);
+        $DB->insert_record('attendance_log', $data);
     }
 
     /**
