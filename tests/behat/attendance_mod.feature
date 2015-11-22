@@ -1,4 +1,4 @@
-@mod @uon @mod_attendance
+@javascript @mod @uon @mod_attendance
 Feature: Teachers and Students can record session attendance
     In order to record session attendance
     As a student
