@@ -62,16 +62,22 @@ $PAGE->set_cacheable(true);
 $PAGE->set_button($OUTPUT->update_module_button($cm->id, 'attendance'));
 $PAGE->navbar->add($att->name);
 
+$currenttab = attendance_tabs::TAB_ADD;
 $formparams = array('course' => $course, 'cm' => $cm, 'modcontext' => $context, 'att' => $att);
 switch ($att->pageparams->action) {
     case att_sessions_page_params::ACTION_ADD:
         $url = $att->url_sessions(array('action' => att_sessions_page_params::ACTION_ADD));
         $mform = new mod_attendance_add_form($url, $formparams);
 
+        if ($mform->is_cancelled()) {
+            redirect($att->url_manage());
+        }
+
         if ($formdata = $mform->get_data()) {
             $sessions = construct_sessions_data_for_add($formdata);
             $att->add_sessions($sessions);
-            $message = count($sessions) == 1 ? get_string('sessiongenerated', 'attendance') : get_string('sessionsgenerated', 'attendance', count($sessions));
+            $message = count($sessions) == 1 ? get_string('sessiongenerated', 'attendance') :
+                                               get_string('sessionsgenerated', 'attendance', count($sessions));
             mod_attendance_notifyqueue::notify_success($message);
             // Redirect to the sessions tab always showing all sessions.
             $SESSION->attcurrentattview[$cm->course] = ATT_VIEW_ALL;
@@ -95,6 +101,7 @@ switch ($att->pageparams->action) {
             mod_attendance_notifyqueue::notify_success(get_string('sessionupdated', 'attendance'));
             redirect($att->url_manage());
         }
+        $currenttab = attendance_tabs::TAB_UPDATE;
         break;
     case att_sessions_page_params::ACTION_DELETE:
         $sessionid = required_param('sessionid', PARAM_INT);
@@ -208,7 +215,7 @@ switch ($att->pageparams->action) {
 }
 
 $output = $PAGE->get_renderer('mod_attendance');
-$tabs = new attendance_tabs($att, attendance_tabs::TAB_ADD);
+$tabs = new attendance_tabs($att, $currenttab);
 echo $output->header();
 echo $output->heading(get_string('attendanceforthecourse', 'attendance').' :: ' .format_string($course->fullname));
 echo $output->render($tabs);
@@ -220,20 +227,20 @@ echo $OUTPUT->footer();
 function construct_sessions_data_for_add($formdata) {
     global $CFG;
 
-    $duration = $formdata->durtime['hours'] * HOURSECS + $formdata->durtime['minutes'] * MINSECS;
+    $sesstarttime = $formdata->sestime['starthour'] * HOURSECS + $formdata->sestime['startminute'] * MINSECS;
+    $sesendtime = $formdata->sestime['endhour'] * HOURSECS + $formdata->sestime['endminute'] * MINSECS;
+    $sessiondate = $formdata->sessiondate + $sesstarttime;
+    $duration = $sesendtime - $sesstarttime;
     $now = time();
 
     $sessions = array();
     if (isset($formdata->addmultiply)) {
-        $startdate = $formdata->sessiondate;
-        $starttime = $startdate - usergetmidnight($startdate);
+        $startdate = $sessiondate;
         $enddate = $formdata->sessionenddate + DAYSECS; // Because enddate in 0:0am.
 
         if ($enddate < $startdate) {
             return null;
         }
-
-        $days = (int)ceil(($enddate - $startdate) / DAYSECS);
 
         // Getting first day of week.
         $sdate = $startdate;
@@ -252,7 +259,7 @@ function construct_sessions_data_for_add($formdata) {
                 $dinfo = usergetdate($sdate);
                 if (isset($formdata->sdays) && array_key_exists($wdaydesc[$dinfo['wday']], $formdata->sdays)) {
                     $sess = new stdClass();
-                    $sess->sessdate = usergetmidnight($sdate) + $starttime;
+                    $sess->sessdate = usergetmidnight($sdate) + $sesstarttime;
                     $sess->duration = $duration;
                     $sess->descriptionitemid = $formdata->sdescription['itemid'];
                     $sess->description = $formdata->sdescription['text'];
@@ -273,7 +280,7 @@ function construct_sessions_data_for_add($formdata) {
         }
     } else {
         $sess = new stdClass();
-        $sess->sessdate = $formdata->sessiondate;
+        $sess->sessdate = $sessiondate;
         $sess->duration = $duration;
         $sess->descriptionitemid = $formdata->sdescription['itemid'];
         $sess->description = $formdata->sdescription['text'];
