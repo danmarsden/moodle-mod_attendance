@@ -1706,10 +1706,19 @@ function att_update_all_users_grades($attid, $course, $context, $coursemodule) {
     $grades = array();
 
     $userids = array_keys(get_enrolled_users($context, 'mod/attendance:canbelisted', 0, 'u.id'));
+    $attgrades = grade_get_grades($course->id, 'mod', 'attendance', $attid, $userids);
 
+    $usergrades = [];
+    if (!empty($attgrades->items[0]) and !empty($attgrades->items[0]->grades)) {
+        $usergrades = $attgrades->items[0]->grades;
+    }
     $statuses = att_get_statuses($attid);
     $gradebookmaxgrade = att_get_gradebook_maxgrade($attid);
-    foreach ($userids as $userid) {
+    foreach ($usergrades as $userid => $existinggrade) {
+        if (is_null($existinggrade->grade)) {
+            // Don't update grades where one doesn't exist yet.
+            continue;
+        }
         $grade = new stdClass;
         $grade->userid = $userid;
         $userstatusesstat = att_get_user_statuses_stat($attid, $course->startdate, $userid, $coursemodule);
@@ -1720,8 +1729,14 @@ function att_update_all_users_grades($attid, $course, $context, $coursemodule) {
         $grades[$userid] = $grade;
     }
 
-    return grade_update('mod/attendance', $course->id, 'mod', 'attendance',
-                        $attid, 0, $grades);
+    if (!empty($grades)) {
+        $result = grade_update('mod/attendance', $course->id, 'mod', 'attendance',
+            $attid, 0, $grades);
+    } else {
+        $result = true;
+    }
+
+    return $result;
 }
 
 function att_has_logs_for_status($statusid) {
