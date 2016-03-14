@@ -80,23 +80,7 @@ class mod_attendance_update_form extends moodleform {
         $olddate = construct_session_full_date_time($sess->sessdate, $sess->duration);
         $mform->addElement('static', 'olddate', get_string('olddate', 'attendance'), $olddate);
 
-        $mform->addElement('date_selector', 'sessiondate', get_string('sessiondate', 'attendance'));
-
-        for ($i = 0; $i <= 23; $i++) {
-            $hours[$i] = sprintf("%02d", $i);
-        }
-        for ($i = 0; $i < 60; $i += 5) {
-            $minutes[$i] = sprintf("%02d", $i);
-        }
-
-        $sesendtime = array();
-        $sesendtime[] =& $mform->createElement('static', 'from', '', get_string('from', 'attendance'));
-        $sesendtime[] =& $mform->createElement('select', 'starthour', get_string('hour', 'form'), $hours, false, true);
-        $sesendtime[] =& $mform->createElement('select', 'startminute', get_string('minute', 'form'), $minutes, false, true);
-        $sesendtime[] =& $mform->createElement('static', 'to', '', get_string('to', 'attendance'));
-        $sesendtime[] =& $mform->createElement('select', 'endhour', get_string('hour', 'form'), $hours, false, true);
-        $sesendtime[] =& $mform->createElement('select', 'endminute', get_string('minute', 'form'), $minutes, false, true);
-        $mform->addGroup($sesendtime, 'sestime', get_string('time', 'attendance'), array(' '), true);
+        attendance_form_sessiondate_selector($mform);
 
         // Show which status set is in use.
         $maxstatusset = attendance_get_max_statusset($this->_customdata['att']->id);
