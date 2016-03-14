@@ -176,9 +176,9 @@ Feature: Test the various new features in the attendance module
     And I set the following fields to these values:
       | id_addmultiply            | 0                    |
       | Status set                | Status set 2 (G O B) |
-      | id_sestime_starthour      | 11                   |
+      | id_sestime_starthour      | 12                   |
       | id_sestime_startminute    | 0                    |
-      | id_sestime_endhour        | 12 |
+      | id_sestime_endhour        | 13 |
     And I click on "submitbutton" "button"
 
     When I click on "Take attendance" "link" in the "10:00" "table_row"
@@ -188,7 +188,7 @@ Feature: Test the various new features in the attendance module
     And "Set status for all users to «Absent»" "link" should exist
 
     When I follow "Sessions"
-    And I click on "Take attendance" "link" in the "11:00" "table_row"
+    And I click on "Take attendance" "link" in the "12:00" "table_row"
     Then "Set status for all users to «Great»" "link" should exist
     And "Set status for all users to «OK»" "link" should exist
     And "Set status for all users to «Bad»" "link" should exist
