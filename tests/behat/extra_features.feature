@@ -166,17 +166,19 @@ Feature: Test the various new features in the attendance module
 
     And I follow "Add"
     And I set the following fields to these values:
-      | id_addmultiply           | 0                      |
-      | Status set           | Status set 1 (P L E A) |
+      | id_addmultiply            | 0                      |
+      | Status set                | Status set 1 (P L E A) |
       | id_sestime_starthour      | 10                     |
       | id_sestime_startminute    | 0                      |
+      | id_sestime_endhour        | 11 |
     And I click on "submitbutton" "button"
     And I follow "Add"
     And I set the following fields to these values:
-      | id_addmultiply | 0                    |
-      | Status set           | Status set 2 (G O B) |
+      | id_addmultiply            | 0                    |
+      | Status set                | Status set 2 (G O B) |
       | id_sestime_starthour      | 11                   |
       | id_sestime_startminute    | 0                    |
+      | id_sestime_endhour        | 12 |
     And I click on "submitbutton" "button"
 
     When I click on "Take attendance" "link" in the "10:00" "table_row"
