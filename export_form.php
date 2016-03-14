@@ -125,10 +125,10 @@ class mod_attendance_export_form extends moodleform {
         $mform->addElement('date_selector', 'sessionenddate', get_string('endofperiod', 'attendance'));
         $mform->disabledIf('sessionenddate', 'includeallsessions', 'checked');
 
-        $mform->addElement('select', 'format', get_string('format'),
-                            array('excel' => get_string('downloadexcel', 'attendance'),
-                                  'ooo' => get_string('downloadooo', 'attendance'),
-                                  'text' => get_string('downloadtext', 'attendance')));
+        $formatoptions = array('excel' => get_string('downloadexcel', 'attendance'),
+                               'ooo' => get_string('downloadooo', 'attendance'),
+                               'text' => get_string('downloadtext', 'attendance'));
+        $mform->addElement('select', 'format', get_string('format'), $formatoptions);
 
         $submitstring = get_string('ok');
         $this->add_action_buttons(false, $submitstring);
@@ -139,7 +139,7 @@ class mod_attendance_export_form extends moodleform {
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
 
-       // Validate the 'users' field.
+        // Validate the 'users' field.
         if ($data['selectedusers'] && empty($data['users'])) {
             $errors['users'] = get_string('mustselectusers', 'mod_attendance');
         }
