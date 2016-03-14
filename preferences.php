@@ -76,7 +76,7 @@ switch ($att->pageparams->action) {
         }
         break;
     case att_preferences_page_params::ACTION_DELETE:
-        if (att_has_logs_for_status($att->pageparams->statusid)) {
+        if (attendance_has_logs_for_status($att->pageparams->statusid)) {
             print_error('cantdeletestatus', 'attendance', "attsettings.php?id=$id");
         }
 
@@ -123,7 +123,7 @@ switch ($att->pageparams->action) {
             $errors[$id] = $att->update_status($status, $acronym[$id], $description[$id], $grade[$id], null);
         }
         if ($att->grade > 0) {
-            att_update_all_users_grades($att->id, $att->course, $att->context, $cm);
+            attendance_update_all_users_grades($att->id, $att->course, $att->context, $cm);
         }
         break;
 }

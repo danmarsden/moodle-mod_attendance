@@ -554,7 +554,7 @@ class attendance_preferences_data implements renderable {
         $this->errors = $errors;
 
         foreach ($this->statuses as $st) {
-            $st->haslogs = att_has_logs_for_status ($st->id);
+            $st->haslogs = attendance_has_logs_for_status($st->id);
         }
 
         $this->att = $att;

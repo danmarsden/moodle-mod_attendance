@@ -1244,8 +1244,8 @@ class attendance {
         foreach ($userids as $userid) {
             $grades[$userid] = new stdClass();
             $grades[$userid]->userid = $userid;
-            $grades[$userid]->rawgrade = att_calc_user_grade_fraction($this->get_user_grade($userid),
-                                                                      $this->get_user_max_grade($userid)) * $this->grade;
+            $grades[$userid]->rawgrade = attendance_calc_user_grade_fraction($this->get_user_grade($userid),
+                                                                             $this->get_user_max_grade($userid)) * $this->grade;
         }
 
         return grade_update('mod/attendance', $this->course->id, 'mod', 'attendance',
@@ -1692,7 +1692,13 @@ function att_get_user_courses_attendances($userid) {
     return $DB->get_records_sql($sql, $params);
 }
 
-function att_calc_user_grade_fraction($grade, $maxgrade) {
+/**
+ * Used to caclulate usergrade based on rawgrade and max grade.
+ *
+ * @param $grade - raw grade for user
+ * @param $maxgrade - maxgrade for this session.
+ */
+function attendance_calc_user_grade_fraction($grade, $maxgrade) {
     if ($maxgrade == 0) {
         return 0;
     } else {
@@ -1700,13 +1706,16 @@ function att_calc_user_grade_fraction($grade, $maxgrade) {
     }
 }
 
-function att_get_gradebook_maxgrade($attid) {
+/**
+ * Update all user grades - used when settings have changed.
+ *
+ * @param $attid
+ * @param $course
+ * @param $context
+ * @param $coursemodule
+ */
+function attendance_update_all_users_grades($attid, $course, $context, $coursemodule) {
     global $DB;
-
-    return $DB->get_field('attendance', 'grade', array('id' => $attid));
-}
-
-function att_update_all_users_grades($attid, $course, $context, $coursemodule) {
     $grades = array();
 
     $userids = array_keys(get_enrolled_users($context, 'mod/attendance:canbelisted', 0, 'u.id'));
@@ -1717,7 +1726,8 @@ function att_update_all_users_grades($attid, $course, $context, $coursemodule) {
         $usergrades = $attgrades->items[0]->grades;
     }
     $statuses = att_get_statuses($attid);
-    $gradebookmaxgrade = att_get_gradebook_maxgrade($attid);
+    // TODO: we should be able to pass full $attendance record into this function and avoid this db call.
+    $gradebookmaxgrade = $DB->get_field('attendance', 'grade', array('id' => $attid));
     foreach ($usergrades as $userid => $existinggrade) {
         if (is_null($existinggrade->grade)) {
             // Don't update grades where one doesn't exist yet.
@@ -1729,7 +1739,7 @@ function att_update_all_users_grades($attid, $course, $context, $coursemodule) {
         $usertakensesscount = att_get_user_taken_sessions_count($attid, $course->startdate, $userid, $coursemodule);
         $usergrade = att_get_user_grade($userstatusesstat, $statuses);
         $usermaxgrade = att_get_user_max_grade($usertakensesscount, $statuses);
-        $grade->rawgrade = att_calc_user_grade_fraction($usergrade, $usermaxgrade) * $gradebookmaxgrade;
+        $grade->rawgrade = attendance_calc_user_grade_fraction($usergrade, $usermaxgrade) * $gradebookmaxgrade;
         $grades[$userid] = $grade;
     }
 
@@ -1743,24 +1753,21 @@ function att_update_all_users_grades($attid, $course, $context, $coursemodule) {
     return $result;
 }
 
-function att_has_logs_for_status($statusid) {
+/**
+ * Check to see if statusid in use to help prevent deletion etc.
+ *
+ * @param integer $statusid
+ */
+function attendance_has_logs_for_status($statusid) {
     global $DB;
-
-    return $DB->count_records('attendance_log', array('statusid' => $statusid)) > 0;
+    return $DB->record_exists('attendance_log', array('statusid' => $statusid));
 }
 
-function att_log_convert_url(moodle_url $fullurl) {
-    static $baseurl;
-
-    if (!isset($baseurl)) {
-        $baseurl = new moodle_url('/mod/attendance/');
-        $baseurl = $baseurl->out();
-    }
-
-    return substr($fullurl->out(), strlen($baseurl));
-}
-
-// Helper function to add sessiondate_selector to form.
+/**
+ * Helper function to add sessiondate_selector to add/update forms.
+ *
+ * @param MoodleQuickForm $mform
+ */
 function attendance_form_sessiondate_selector (MoodleQuickForm $mform) {
 
     $mform->addElement('date_selector', 'sessiondate', get_string('sessiondate', 'attendance'));
