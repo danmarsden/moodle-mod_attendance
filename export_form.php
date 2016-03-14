@@ -58,7 +58,6 @@ class mod_attendance_export_form extends moodleform {
                 $grouplist[$group->id] = $group->name;
             }
         }
-        $mform->addElement('select', 'group', get_string('group'), $grouplist);
 
         // Restrict the export to the selected users.
         $namefields = get_all_user_name_fields(true, 'u');
@@ -72,6 +71,11 @@ class mod_attendance_export_form extends moodleform {
         foreach ($tempusers as $user) {
             $userlist[$user->studentid] = $user->fullname;
         }
+        if (empty($userlist)) {
+            $mform->addElement('static', 'nousers', '', get_string('noattendanceusers', 'attendance'));
+            return;
+        }
+
         list($gsql, $gparams) = $DB->get_in_or_equal(array_keys($grouplist), SQL_PARAMS_NAMED);
         list($usql, $uparams) = $DB->get_in_or_equal(array_keys($userlist), SQL_PARAMS_NAMED);
         $params = array_merge($gparams, $uparams);
@@ -87,6 +91,8 @@ class mod_attendance_export_form extends moodleform {
         if (isset($grouplist[0])) {
             $groupmappings[0] = $userlist;
         }
+
+        $mform->addElement('select', 'group', get_string('group'), $grouplist);
 
         $mform->addElement('selectyesno', 'selectedusers', get_string('onlyselectedusers', 'mod_attendance'));
         $sel = $mform->addElement('select', 'users', get_string('users', 'mod_attendance'), $userlist, array('size' => 12));

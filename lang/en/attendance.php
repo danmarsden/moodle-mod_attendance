@@ -312,3 +312,4 @@ $string['hiddensessionsdeleted'] = 'All hidden sessions were delete';
 
 $string['timeahead'] = 'Multiple sessions that exceed one year cannot be created, please adjust the start and end dates.';
 $string['priorto'] = 'The session date is prior to the course start date ({$a}) so that the new sessions scheduled before this date will be hidden (not accessible). You can change the course start date at any time (see course settings) in order to have access to earlier sessions.<br><br>Please change the session date or just click the "Add session" button again to confirm?';
+$string['noattendanceusers'] = 'It is not possible to export any data as there are no students enrolled in the course.';
