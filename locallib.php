@@ -756,8 +756,8 @@ class attendance {
             print_error('No such session in this course');
         }
 
-        $sesstarttime = $formdata->sestime['starthour']*HOURSECS + $formdata->sestime['startminute'] * MINSECS;
-        $sesendtime = $formdata->sestime['endhour']*HOURSECS + $formdata->sestime['endminute'] * MINSECS;
+        $sesstarttime = $formdata->sestime['starthour'] * HOURSECS + $formdata->sestime['startminute'] * MINSECS;
+        $sesendtime = $formdata->sestime['endhour'] * HOURSECS + $formdata->sestime['endminute'] * MINSECS;
 
         $sess->sessdate = $formdata->sessiondate + $sesstarttime;
         $sess->duration = $sesendtime - $sesstarttime;

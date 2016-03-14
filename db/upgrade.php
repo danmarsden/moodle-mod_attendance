@@ -29,7 +29,7 @@
  */
 function xmldb_attendance_upgrade($oldversion=0) {
 
-    global $CFG, $THEME, $DB;
+    global $DB;
     $dbman = $DB->get_manager(); // Loads ddl manager and xmldb classes.
 
     $result = true;

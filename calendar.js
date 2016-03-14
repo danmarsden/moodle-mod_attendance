@@ -26,7 +26,7 @@ YUI().use('yui2-container', 'yui2-calendar', function(Y) {
             // until the first time the button is clicked.
             if (!dialog) {
 
-                // Hide Calendar if we click anywhere in the document other than the calendar
+                // Hide Calendar if we click anywhere in the document other than the calendar.
                 Event.on(document, "click", function(e) {
                     var el = Event.getTarget(e);
                     var dialogEl = dialog.element;
@@ -51,7 +51,7 @@ YUI().use('yui2-container', 'yui2-calendar', function(Y) {
                     if (YAHOO.env.ua.ie) {
                         // Since we're hiding the table using yui-overlay-hidden, we
                         // want to let the dialog know that the content size has changed, when
-                        // shown
+                        // shown.
                         dialog.fireEvent("changeContent");
                     }
                 });
@@ -62,7 +62,7 @@ YUI().use('yui2-container', 'yui2-calendar', function(Y) {
 
                 calendar = new YAHOO.widget.Calendar("cal", {
                     iframe:false,          // Turn iframe off, since container has iframe support.
-                    hide_blank_weeks:true  // Enable, to demonstrate how we handle changing height, using changeContent
+                    hide_blank_weeks:true  // Enable, to demonstrate how we handle changing height, using changeContent.
                 });
 
                 calendar.cfg.setProperty("start_weekday", M.attendance.cal_start_weekday);
@@ -83,7 +83,7 @@ YUI().use('yui2-container', 'yui2-calendar', function(Y) {
 
                 calendar.renderEvent.subscribe(function() {
                     // Tell Dialog it's contents have changed, which allows
-                    // container to redraw the underlay (for IE6/Safari2)
+                    // container to redraw the underlay (for IE6/Safari2).
                     dialog.fireEvent("changeContent");
                 });
             }
@@ -91,7 +91,7 @@ YUI().use('yui2-container', 'yui2-calendar', function(Y) {
             var seldate = calendar.getSelectedDates();
 
             if (seldate.length > 0) {
-                // Set the pagedate to show the selected date if it exists
+                // Set the pagedate to show the selected date if it exists.
                 calendar.cfg.setProperty("pagedate", seldate[0]);
                 calendar.render();
             }

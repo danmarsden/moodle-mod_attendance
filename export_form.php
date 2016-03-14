@@ -38,10 +38,8 @@ class mod_attendance_export_form extends moodleform {
      * @return void
      */
     public function definition() {
-
         global $USER, $DB, $PAGE;
         $mform    =& $this->_form;
-
         $course        = $this->_customdata['course'];
         $cm            = $this->_customdata['cm'];
         $modcontext    = $this->_customdata['modcontext'];
@@ -130,8 +128,7 @@ class mod_attendance_export_form extends moodleform {
         $mform->addElement('select', 'format', get_string('format'),
                             array('excel' => get_string('downloadexcel', 'attendance'),
                                   'ooo' => get_string('downloadooo', 'attendance'),
-                                  'text' => get_string('downloadtext', 'attendance')
-                            ));
+                                  'text' => get_string('downloadtext', 'attendance')));
 
         $submitstring = get_string('ok');
         $this->add_action_buttons(false, $submitstring);
