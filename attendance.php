@@ -24,7 +24,7 @@
 
 require_once(dirname(__FILE__).'/../../config.php');
 require_once(dirname(__FILE__).'/locallib.php');
-require_once(dirname(__FILE__).'/student_attenance_form.php');
+require_once(dirname(__FILE__).'/student_attendance_form.php');
 
 $pageparams = new att_sessions_page_params();
 
