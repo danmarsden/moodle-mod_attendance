@@ -696,8 +696,8 @@ class mod_attendance_structure {
                 $sessioninfo = $this->get_session_info($this->pageparams->sessionid);
                 $statusset = $sessioninfo->statusset;
             }
-            $this->statuses = att_get_statuses($this->id, $onlyvisible, $statusset);
-            $this->allstatuses = att_get_statuses($this->id, $onlyvisible);
+            $this->statuses = attendance_get_statuses($this->id, $onlyvisible, $statusset);
+            $this->allstatuses = attendance_get_statuses($this->id, $onlyvisible);
         }
 
         // Return all sets, if requested.
@@ -757,10 +757,10 @@ class mod_attendance_structure {
     public function get_user_taken_sessions_count($userid) {
         if (!array_key_exists($userid, $this->usertakensesscount)) {
             if (!empty($this->pageparams->startdate) && !empty($this->pageparams->enddate)) {
-                $this->usertakensesscount[$userid] = att_get_user_taken_sessions_count($this->id, $this->course->startdate,
+                $this->usertakensesscount[$userid] = attendance_get_user_taken_sessions_count($this->id, $this->course->startdate,
                     $userid, $this->cm, $this->pageparams->startdate, $this->pageparams->enddate);
             } else {
-                $this->usertakensesscount[$userid] = att_get_user_taken_sessions_count($this->id, $this->course->startdate,
+                $this->usertakensesscount[$userid] = attendance_get_user_taken_sessions_count($this->id, $this->course->startdate,
                     $userid, $this->cm);
             }
         }
@@ -842,7 +842,7 @@ class mod_attendance_structure {
      * @return type
      */
     public function get_user_grade($userid, array $filters = null) {
-        return att_get_user_grade($this->get_user_statuses_stat($userid, $filters), $this->get_statuses(true, true));
+        return attendance_get_user_grade($this->get_user_statuses_stat($userid, $filters), $this->get_statuses(true, true));
     }
 
     // For getting sessions count implemented simplest method - taken sessions.
@@ -853,7 +853,7 @@ class mod_attendance_structure {
     // While implementing those methods we need recalculate grades of all users
     // on session adding.
     public function get_user_max_grade($userid) {
-        return att_get_user_max_grade($this->get_user_taken_sessions_count($userid), $this->get_statuses(true, true));
+        return attendance_get_user_max_grade($this->get_user_taken_sessions_count($userid), $this->get_statuses(true, true));
     }
 
     public function update_users_grade($userids) {

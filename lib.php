@@ -227,11 +227,11 @@ function attendance_user_outline($course, $user, $mod, $attendance) {
         $result->time = 0;
     }
     if (has_capability('mod/attendance:canbelisted', $mod->context, $user->id)) {
-        $statuses = att_get_statuses($attendance->id);
-        $grade = att_get_user_grade(att_get_user_statuses_stat($attendance->id, $course->startdate,
-                                                               $user->id, $mod), $statuses);
-        $maxgrade = att_get_user_max_grade(att_get_user_taken_sessions_count($attendance->id, $course->startdate,
-                                                                             $user->id, $mod), $statuses);
+        $statuses = attendance_get_statuses($attendance->id);
+        $grade = attendance_get_user_grade(attendance_get_user_statuses_stat($attendance->id, $course->startdate,
+                                                                      $user->id, $mod), $statuses);
+        $maxgrade = attendance_get_user_max_grade(attendance_get_user_taken_sessions_count($attendance->id, $course->startdate,
+                                                                                    $user->id, $mod), $statuses);
 
         $result->info = $grade.' / '.$maxgrade;
     }

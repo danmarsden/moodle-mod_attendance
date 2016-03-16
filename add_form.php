@@ -109,7 +109,7 @@ class mod_attendance_add_form extends moodleform {
         if ($maxstatusset > 0) {
             $opts = array();
             for ($i = 0; $i <= $maxstatusset; $i++) {
-                $opts[$i] = att_get_setname($this->_customdata['att']->id, $i);
+                $opts[$i] = attendance_get_setname($this->_customdata['att']->id, $i);
             }
             $mform->addElement('select', 'statusset', get_string('usestatusset', 'mod_attendance'), $opts);
         } else {

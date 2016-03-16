@@ -37,7 +37,7 @@ define('ATT_VIEW_NOTPRESENT', 6);
 define('ATT_SORT_LASTNAME', 1);
 define('ATT_SORT_FIRSTNAME', 2);
 
-function att_get_statuses($attid, $onlyvisible=true, $statusset = -1) {
+function attendance_get_statuses($attid, $onlyvisible=true, $statusset = -1) {
     global $DB;
 
     // Set selector.
@@ -67,10 +67,10 @@ function att_get_statuses($attid, $onlyvisible=true, $statusset = -1) {
  * @param bool $includevalues
  * @return string
  */
-function att_get_setname($attid, $statusset, $includevalues = true) {
+function attendance_get_setname($attid, $statusset, $includevalues = true) {
     $statusname = get_string('statusset', 'mod_attendance', $statusset + 1);
     if ($includevalues) {
-        $statuses = att_get_statuses($attid, true, $statusset);
+        $statuses = attendance_get_statuses($attid, true, $statusset);
         $statusesout = array();
         foreach ($statuses as $status) {
             $statusesout[] = $status->acronym;
@@ -88,7 +88,7 @@ function att_get_setname($attid, $statusset, $includevalues = true) {
     return $statusname;
 }
 
-function att_get_user_taken_sessions_count($attid, $coursestartdate, $userid, $coursemodule, $startdate = '', $enddate = '') {
+function attendance_get_user_taken_sessions_count($attid, $coursestartdate, $userid, $coursemodule, $startdate = '', $enddate = '') {
     global $DB, $COURSE;
     $groupmode = groups_get_activity_groupmode($coursemodule, $COURSE);
     if (!empty($groupmode)) {
@@ -123,7 +123,7 @@ function att_get_user_taken_sessions_count($attid, $coursestartdate, $userid, $c
     return $DB->count_records_sql($qry, $params);
 }
 
-function att_get_user_statuses_stat($attid, $coursestartdate, $userid, $coursemodule) {
+function attendance_get_user_statuses_stat($attid, $coursestartdate, $userid, $coursemodule) {
     global $DB, $COURSE;
     $groupmode = groups_get_activity_groupmode($coursemodule, $COURSE);
     if (!empty($groupmode)) {
@@ -154,7 +154,7 @@ function att_get_user_statuses_stat($attid, $coursestartdate, $userid, $coursemo
     return $DB->get_records_sql($qry, $params);
 }
 
-function att_get_user_grade($userstatusesstat, $statuses) {
+function attendance_get_user_grade($userstatusesstat, $statuses) {
     $sum = 0;
     foreach ($userstatusesstat as $stat) {
         $sum += $stat->stcnt * $statuses[$stat->statusid]->grade;
@@ -163,12 +163,12 @@ function att_get_user_grade($userstatusesstat, $statuses) {
     return $sum;
 }
 
-function att_get_user_max_grade($sesscount, $statuses) {
+function attendance_get_user_max_grade($sesscount, $statuses) {
     reset($statuses);
     return current($statuses)->grade * $sesscount;
 }
 
-function att_get_user_courses_attendances($userid) {
+function attendance_get_user_courses_attendances($userid) {
     global $DB;
 
     $usercourses = enrol_get_users_courses($userid);
@@ -219,7 +219,7 @@ function attendance_update_all_users_grades(mod_attendance_structure $attendance
     if (!empty($attgrades->items[0]) and !empty($attgrades->items[0]->grades)) {
         $usergrades = $attgrades->items[0]->grades;
     }
-    $statuses = att_get_statuses($attendance->id);
+    $statuses = attendance_get_statuses($attendance->id);
     foreach ($usergrades as $userid => $existinggrade) {
         if (is_null($existinggrade->grade)) {
             // Don't update grades where one doesn't exist yet.
@@ -227,10 +227,10 @@ function attendance_update_all_users_grades(mod_attendance_structure $attendance
         }
         $grade = new stdClass;
         $grade->userid = $userid;
-        $userstatusesstat = att_get_user_statuses_stat($attendance->id, $course->startdate, $userid, $coursemodule);
-        $usertakensesscount = att_get_user_taken_sessions_count($attendance->id, $course->startdate, $userid, $coursemodule);
-        $usergrade = att_get_user_grade($userstatusesstat, $statuses);
-        $usermaxgrade = att_get_user_max_grade($usertakensesscount, $statuses);
+        $userstatusesstat = attendance_get_user_statuses_stat($attendance->id, $course->startdate, $userid, $coursemodule);
+        $usertakensesscount = attendance_get_user_taken_sessions_count($attendance->id, $course->startdate, $userid, $coursemodule);
+        $usergrade = attendance_get_user_grade($userstatusesstat, $statuses);
+        $usermaxgrade = attendance_get_user_max_grade($usertakensesscount, $statuses);
         $grade->rawgrade = attendance_calc_user_grade_fraction($usergrade, $usermaxgrade) * $attendance->grade;
         $grades[$userid] = $grade;
     }
