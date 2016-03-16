@@ -282,3 +282,20 @@ function attendance_form_sessiondate_selector (MoodleQuickForm $mform) {
     $sesendtime[] =& $mform->createElement('select', 'endminute', get_string('minute', 'form'), $minutes, false, true);
     $mform->addGroup($sesendtime, 'sestime', get_string('time', 'attendance'), array(' '), true);
 }
+
+/**
+ * Count the number of status sets that exist for this instance.
+ *
+ * @param int $attendanceid
+ * @return int
+ */
+function attendance_get_max_statusset($attendanceid) {
+    global $DB;
+
+    $max = $DB->get_field_sql('SELECT MAX(setnumber) FROM {attendance_statuses} WHERE attendanceid = ? AND deleted = 0',
+        array($attendanceid));
+    if ($max) {
+        return $max;
+    }
+    return 0;
+}
