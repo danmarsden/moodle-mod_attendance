@@ -227,9 +227,9 @@ function attendance_update_all_users_grades(mod_attendance_structure $attendance
         $dbparams = array('id' => -($attendance->grade));
         $scale = $DB->get_record('scale', $dbparams);
         $scalearray = explode(',', $scale->scale);
-        $gradebook_maxgrade = count($scalearray);
+        $gradebookmaxgrade = count($scalearray);
     } else {
-        $gradebook_maxgrade = $attendance->grade;
+        $gradebookmaxgrade = $attendance->grade;
     }
     foreach ($usergrades as $userid => $existinggrade) {
         if (is_null($existinggrade->grade)) {
@@ -242,7 +242,7 @@ function attendance_update_all_users_grades(mod_attendance_structure $attendance
         $usertakensesscount = attendance_get_user_taken_sessions_count($attendance->id, $course->startdate, $userid, $coursemodule);
         $usergrade = attendance_get_user_grade($userstatusesstat, $statuses);
         $usermaxgrade = attendance_get_user_max_grade($usertakensesscount, $statuses);
-        $grade->rawgrade = attendance_calc_user_grade_fraction($usergrade, $usermaxgrade) * $gradebook_maxgrade;
+        $grade->rawgrade = attendance_calc_user_grade_fraction($usergrade, $usermaxgrade) * $gradebookmaxgrade;
         $grades[$userid] = $grade;
     }
 
