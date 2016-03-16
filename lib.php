@@ -326,10 +326,6 @@ function attendance_grade_item_delete($attendance) {
                         $attendance->id, 0, null, array('deleted' => 1));
 }
 
-function attendance_get_participants($attendanceid) {
-    return false;
-}
-
 /**
  * This function returns if a scale is being used by one attendance
  * it it has support for grading and scales. Commented code should be
