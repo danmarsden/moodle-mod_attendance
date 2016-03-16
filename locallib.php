@@ -191,8 +191,9 @@ function attendance_get_user_courses_attendances($userid) {
 /**
  * Used to caclulate usergrade based on rawgrade and max grade.
  *
- * @param $grade - raw grade for user
- * @param $maxgrade - maxgrade for this session.
+ * @param float $grade - raw grade for user
+ * @param float $maxgrade - maxgrade for this session.
+ * @return float the calculated grade.
  */
 function attendance_calc_user_grade_fraction($grade, $maxgrade) {
     if ($maxgrade == 0) {
@@ -205,8 +206,9 @@ function attendance_calc_user_grade_fraction($grade, $maxgrade) {
 /**
  * Update all user grades - used when settings have changed.
  *
- * @param $attendance
- * @param $coursemodule
+ * @param mod_attendance_structure $attendance - Full attendance class.
+ * @param stdclass $coursemodule - full coursemodule record
+ * @return float the calculated grade.
  */
 function attendance_update_all_users_grades(mod_attendance_structure $attendance, $coursemodule) {
     $grades = array();
