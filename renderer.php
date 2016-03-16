@@ -329,14 +329,15 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
     protected function render_attendance_take_data(attendance_take_data $takedata) {
         $controls = $this->render_attendance_take_controls($takedata);
-
+        $table = html_writer::start_div('no-overflow');
         if ($takedata->pageparams->viewmode == mod_attendance_take_page_params::SORTED_LIST) {
-            $table = $this->render_attendance_take_list($takedata);
+            $table .= $this->render_attendance_take_list($takedata);
         } else {
-            $table = $this->render_attendance_take_grid($takedata);
+            $table .= $this->render_attendance_take_grid($takedata);
         }
         $table .= html_writer::input_hidden_params($takedata->url(array('sesskey' => sesskey(),
                                                                         'page' => $takedata->pageparams->page)));
+        $table .= html_writer::end_div();
         $params = array(
                 'type'  => 'submit',
                 'value' => get_string('save', 'attendance'));
