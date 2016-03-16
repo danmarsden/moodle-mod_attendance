@@ -39,7 +39,7 @@ require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
 require_capability('mod/attendance:export', $context);
 
-$att = new attendance($att, $cm, $course, $context);
+$att = new mod_attendance_structure($att, $cm, $course, $context);
 
 $PAGE->set_url($att->url_export());
 $PAGE->set_title($course->shortname. ": ".$att->name);

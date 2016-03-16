@@ -54,26 +54,26 @@ class mod_attendance_add_form extends moodleform {
                 $mform->addElement('static', 'sessiontypedescription', get_string('sessiontype', 'attendance'),
                                   get_string('commonsession', 'attendance'));
                 $mform->addHelpButton('sessiontypedescription', 'sessiontype', 'attendance');
-                $mform->addElement('hidden', 'sessiontype', attendance::SESSION_COMMON);
+                $mform->addElement('hidden', 'sessiontype', mod_attendance_structure::SESSION_COMMON);
                 $mform->setType('sessiontype', PARAM_INT);
                 break;
             case SEPARATEGROUPS:
                 $mform->addElement('static', 'sessiontypedescription', get_string('sessiontype', 'attendance'),
                                   get_string('groupsession', 'attendance'));
                 $mform->addHelpButton('sessiontypedescription', 'sessiontype', 'attendance');
-                $mform->addElement('hidden', 'sessiontype', attendance::SESSION_GROUP);
+                $mform->addElement('hidden', 'sessiontype', mod_attendance_structure::SESSION_GROUP);
                 $mform->setType('sessiontype', PARAM_INT);
                 break;
             case VISIBLEGROUPS:
                 $radio = array();
                 $radio[] = &$mform->createElement('radio', 'sessiontype', '',
-                                                  get_string('commonsession', 'attendance'), attendance::SESSION_COMMON);
+                                                  get_string('commonsession', 'attendance'), mod_attendance_structure::SESSION_COMMON);
                 $radio[] = &$mform->createElement('radio', 'sessiontype', '',
-                                                  get_string('groupsession', 'attendance'), attendance::SESSION_GROUP);
+                                                  get_string('groupsession', 'attendance'), mod_attendance_structure::SESSION_GROUP);
                 $mform->addGroup($radio, 'sessiontype', get_string('sessiontype', 'attendance'), ' ', false);
                 $mform->setType('sessiontype', PARAM_INT);
                 $mform->addHelpButton('sessiontype', 'sessiontype', 'attendance');
-                $mform->setDefault('sessiontype', attendance::SESSION_COMMON);
+                $mform->setDefault('sessiontype', mod_attendance_structure::SESSION_COMMON);
                 break;
         }
         if ($groupmode == SEPARATEGROUPS or $groupmode == VISIBLEGROUPS) {
@@ -89,7 +89,7 @@ class mod_attendance_add_form extends moodleform {
                 }
                 $select = &$mform->addElement('select', 'groups', get_string('groups', 'group'), $selectgroups);
                 $select->setMultiple(true);
-                $mform->disabledIf('groups', 'sessiontype', 'neq', attendance::SESSION_GROUP);
+                $mform->disabledIf('groups', 'sessiontype', 'neq', mod_attendance_structure::SESSION_GROUP);
             } else {
                 if ($groupmode == VISIBLEGROUPS) {
                     $mform->updateElementAttr($radio, array('disabled' => 'disabled'));
@@ -187,7 +187,7 @@ class mod_attendance_add_form extends moodleform {
             $errors['sessionenddate'] = get_string('invalidsessionenddate', 'attendance');
         }
 
-        if ($data['sessiontype'] == attendance::SESSION_GROUP and empty($data['groups'])) {
+        if ($data['sessiontype'] == mod_attendance_structure::SESSION_GROUP and empty($data['groups'])) {
             $errors['groups'] = get_string('errorgroupsnotselected', 'attendance');
         }
 

@@ -43,7 +43,7 @@ $context = context_module::instance($cm->id);
 require_capability('mod/attendance:view', $context);
 
 $pageparams->init($cm);
-$att = new attendance($attendance, $cm, $course, $context, $pageparams);
+$att = new mod_attendance_structure($attendance, $cm, $course, $context, $pageparams);
 
 // Not specified studentid for displaying attendance?
 // Redirect to appropriate page if can.

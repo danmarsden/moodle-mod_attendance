@@ -53,7 +53,7 @@ require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
 require_capability('mod/attendance:manageattendances', $context);
 
-$att = new attendance($att, $cm, $course, $context, $pageparams);
+$att = new mod_attendance_structure($att, $cm, $course, $context, $pageparams);
 
 $PAGE->set_url($att->url_sessions(array('action' => $pageparams->action)));
 $PAGE->set_title($course->shortname. ": ".$att->name);
@@ -114,7 +114,7 @@ switch ($att->pageparams->action) {
         if (isset($confirm) && confirm_sesskey()) {
             $att->delete_sessions(array($sessionid));
             if ($att->grade > 0) {
-                attendance_update_all_users_grades($att->id, $att->course, $att->context, $cm);
+                attendance_update_all_users_grades($att, $cm);
             }
             redirect($att->url_manage(), get_string('sessiondeleted', 'attendance'));
         }
@@ -143,7 +143,7 @@ switch ($att->pageparams->action) {
 
             $att->delete_sessions($sessionsids);
             if ($att->grade > 0) {
-                attendance_update_all_users_grades($att->id, $att->course, $att->context, $cm);
+                attendance_update_all_users_grades($att, $cm);
             }
             redirect($att->url_manage(), get_string('sessiondeleted', 'attendance'));
         }
@@ -302,7 +302,7 @@ function construct_sessions_data_for_add($formdata) {
 }
 
 function fill_groupid($formdata, &$sessions, $sess) {
-    if ($formdata->sessiontype == attendance::SESSION_COMMON) {
+    if ($formdata->sessiontype == mod_attendance_structure::SESSION_COMMON) {
         $sess = clone $sess;
         $sess->groupid = 0;
         $sessions[] = $sess;

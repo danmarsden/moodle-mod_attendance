@@ -47,7 +47,7 @@ if ($pageparams->statusset > $maxstatusset + 1) {
     $pageparams->statusset = $maxstatusset + 1;
 }
 
-$att = new attendance($att, $cm, $course, $context, $pageparams);
+$att = new mod_attendance_structure($att, $cm, $course, $context, $pageparams);
 
 $PAGE->set_url($att->url_preferences());
 $PAGE->set_title($course->shortname. ": ".$att->name.' - '.get_string('settings', 'attendance'));
@@ -123,7 +123,7 @@ switch ($att->pageparams->action) {
             $errors[$id] = $att->update_status($status, $acronym[$id], $description[$id], $grade[$id], null);
         }
         if ($att->grade > 0) {
-            attendance_update_all_users_grades($att->id, $att->course, $att->context, $cm);
+            attendance_update_all_users_grades($att, $cm);
         }
         break;
 }

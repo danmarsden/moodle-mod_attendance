@@ -56,7 +56,7 @@ class attendance_tabs implements renderable {
      * @param attendance $att instance
      * @param $currenttab - one of attendance_tabs constants
      */
-    public function  __construct(attendance $att, $currenttab=null) {
+    public function  __construct(mod_attendance_structure $att, $currenttab=null) {
         $this->att = $att;
         $this->currenttab = $currenttab;
     }
@@ -130,7 +130,7 @@ class attendance_filter_controls implements renderable {
 
     private $att;
 
-    public function __construct(attendance $att, $report = false) {
+    public function __construct(mod_attendance_structure $att, $report = false) {
         global $PAGE;
 
         $this->pageparams = $att->pageparams;
@@ -230,7 +230,7 @@ class attendance_manage_data implements renderable {
      *
      * @param attendance $att instance
      */
-    public function __construct(attendance $att) {
+    public function __construct(mod_attendance_structure $att) {
 
         $this->sessions = $att->get_filtered_sessions();
 
@@ -275,7 +275,7 @@ class attendance_take_data implements renderable {
     private $urlparams;
     private $att;
 
-    public function  __construct(attendance $att) {
+    public function  __construct(mod_attendance_structure $att) {
         if ($att->pageparams->grouptype) {
             $this->users = $att->get_users($att->pageparams->grouptype, $att->pageparams->page);
         } else {
@@ -359,7 +359,7 @@ class attendance_user_data implements renderable {
     private $urlpath;
     private $urlparams;
 
-    public function  __construct(attendance $att, $userid) {
+    public function  __construct(mod_attendance_structure $att, $userid) {
         global $CFG;
 
         $this->user = $att->get_user($userid);
@@ -465,7 +465,7 @@ class attendance_report_data implements renderable {
 
     public $att;
 
-    public function  __construct(attendance $att) {
+    public function  __construct(mod_attendance_structure $att) {
         global $CFG;
 
         $currenttime = time();
@@ -549,7 +549,7 @@ class attendance_preferences_data implements renderable {
 
     public $errors;
 
-    public function __construct(attendance $att, $errors) {
+    public function __construct(mod_attendance_structure $att, $errors) {
         $this->statuses = $att->get_statuses(false);
         $this->errors = $errors;
 
@@ -575,7 +575,7 @@ class attendance_set_selector implements renderable {
 
     private $att;
 
-    public function __construct(attendance $att, $maxstatusset) {
+    public function __construct(mod_attendance_structure $att, $maxstatusset) {
         $this->att = $att;
         $this->maxstatusset = $maxstatusset;
     }

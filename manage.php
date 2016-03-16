@@ -50,7 +50,7 @@ if (!has_any_capability($capabilities, $context)) {
 }
 
 $pageparams->init($cm);
-$att = new attendance($att, $cm, $course, $context, $pageparams);
+$att = new mod_attendance_structure($att, $cm, $course, $context, $pageparams);
 
 // If teacher is coming from block, then check for a session exists for today.
 if ($from === 'block') {

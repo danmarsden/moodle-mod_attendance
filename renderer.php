@@ -395,7 +395,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $controls = '';
         $context = context_module::instance($takedata->cm->id);
         $group = 0;
-        if ($takedata->pageparams->grouptype != attendance::SESSION_COMMON) {
+        if ($takedata->pageparams->grouptype != mod_attendance_structure::SESSION_COMMON) {
             $group = $takedata->pageparams->grouptype;
         } else {
             if ($takedata->pageparams->group) {
@@ -434,7 +434,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             }
         }
 
-        if ($takedata->pageparams->grouptype == attendance::SESSION_COMMON and
+        if ($takedata->pageparams->grouptype == mod_attendance_structure::SESSION_COMMON and
                 ($takedata->groupmode == VISIBLEGROUPS or
                 ($takedata->groupmode and has_capability('moodle/site:accessallgroups', $context)))) {
             $controls .= groups_print_activity_menu($takedata->cm, $takedata->url(), true);

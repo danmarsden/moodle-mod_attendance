@@ -37,7 +37,7 @@ $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST)
 $att = $DB->get_record('attendance', array('id' => $cm->instance), '*', MUST_EXIST);
 $tempuser = $DB->get_record('attendance_tempusers', array('id' => $userid), '*', MUST_EXIST);
 
-$att = new attendance($att, $cm, $course);
+$att = new mod_attendance_structure($att, $cm, $course);
 
 $params = array('userid' => $tempuser->id);
 if ($action) {

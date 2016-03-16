@@ -57,7 +57,7 @@ class temp_form extends moodleform {
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
 
-        if ($err = attendance::check_existing_email($data['temail'])) {
+        if ($err = mod_attendance_structure::check_existing_email($data['temail'])) {
             $errors['temail'] = $err;
         }
 

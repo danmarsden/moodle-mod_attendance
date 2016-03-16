@@ -48,7 +48,7 @@ require_capability('mod/attendance:takeattendances', $context);
 $pageparams->group = groups_get_activity_group($cm, true);
 
 $pageparams->init($course->id);
-$att = new attendance($att, $cm, $course, $PAGE->context, $pageparams);
+$att = new mod_attendance_structure($att, $cm, $course, $PAGE->context, $pageparams);
 
 $allowedgroups = groups_get_activity_allowed_groups($cm);
 if (!empty($pageparams->grouptype) && !array_key_exists($pageparams->grouptype, $allowedgroups)) {

@@ -33,7 +33,7 @@ $cm = get_coursemodule_from_id('attendance', $id, 0, false, MUST_EXIST);
 $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
 $att = $DB->get_record('attendance', array('id' => $cm->instance), '*', MUST_EXIST);
 
-$att = new attendance($att, $cm, $course);
+$att = new mod_attendance_structure($att, $cm, $course);
 $PAGE->set_url($att->url_managetemp());
 
 require_login($course, true, $cm);
@@ -94,7 +94,7 @@ if ($tempusers) {
 echo '</div>';
 echo $output->footer($course);
 
-function print_tempusers($tempusers, attendance $att) {
+function print_tempusers($tempusers, mod_attendance_structure $att) {
     echo '<p></p>';
     echo '<table border="1" bordercolor="#EEEEEE" style="background-color:#fff" cellpadding="2" align="center"'.
           'width="80%" summary="'.get_string('temptable', 'attendance').'"><tr>';
