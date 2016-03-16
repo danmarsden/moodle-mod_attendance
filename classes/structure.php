@@ -857,13 +857,23 @@ class mod_attendance_structure {
     }
 
     public function update_users_grade($userids) {
+        global $DB;
         $grades = array();
+
+        if ($this->grade < 0) {
+            $dbparams = array('id' => -($this->grade));
+            $this->scale = $DB->get_record('scale', $dbparams);
+            $scalearray = explode(',', $this->scale->scale);
+            $attendancegrade = count($scalearray);
+        } else {
+            $attendancegrade = $this->grade;
+        }
 
         foreach ($userids as $userid) {
             $grades[$userid] = new stdClass();
             $grades[$userid]->userid = $userid;
             $grades[$userid]->rawgrade = attendance_calc_user_grade_fraction($this->get_user_grade($userid),
-                    $this->get_user_max_grade($userid)) * $this->grade;
+                    $this->get_user_max_grade($userid)) * $attendancegrade;
         }
 
         return grade_update('mod/attendance', $this->course->id, 'mod', 'attendance',
