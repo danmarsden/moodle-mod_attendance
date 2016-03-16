@@ -263,7 +263,8 @@ function construct_sessions_data_for_add($formdata) {
                 $dinfo = usergetdate($sdate);
                 if (isset($formdata->sdays) && array_key_exists($wdaydesc[$dinfo['wday']], $formdata->sdays)) {
                     $sess = new stdClass();
-                    $sess->sessdate = usergetmidnight($sdate) + $sesstarttime;
+                    $sess->sessdate = make_timestamp($dinfo['year'], $dinfo['mon'], $dinfo['mday'],
+                                                     $formdata->sestime['starthour'], $formdata->sestime['startminute']);
                     $sess->duration = $duration;
                     $sess->descriptionitemid = $formdata->sdescription['itemid'];
                     $sess->description = $formdata->sdescription['text'];
