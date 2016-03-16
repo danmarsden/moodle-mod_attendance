@@ -24,6 +24,12 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Notify Queue class
+ *
+ * @copyright 2015 Antonio Carlos Mariani <antonio.c.mariani@gmail.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class mod_attendance_notifyqueue {
 
     /**

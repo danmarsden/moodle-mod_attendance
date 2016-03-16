@@ -25,7 +25,7 @@
 require_once(dirname(__FILE__).'/../../config.php');
 require_once(dirname(__FILE__).'/locallib.php');
 
-$pageparams = new att_preferences_page_params();
+$pageparams = new mod_attendance_preferences_page_params();
 
 $id                         = required_param('id', PARAM_INT);
 $pageparams->action         = optional_param('action', null, PARAM_INT);
@@ -64,7 +64,7 @@ if (!empty($att->pageparams->action)) {
 }
 
 switch ($att->pageparams->action) {
-    case att_preferences_page_params::ACTION_ADD:
+    case mod_attendance_preferences_page_params::ACTION_ADD:
         $newacronym         = optional_param('newacronym', null, PARAM_TEXT);
         $newdescription     = optional_param('newdescription', null, PARAM_TEXT);
         $newgrade           = optional_param('newgrade', 0, PARAM_RAW);
@@ -75,7 +75,7 @@ switch ($att->pageparams->action) {
             $maxstatusset = $pageparams->statusset; // Make sure the new maximum is shown without a page refresh.
         }
         break;
-    case att_preferences_page_params::ACTION_DELETE:
+    case mod_attendance_preferences_page_params::ACTION_DELETE:
         if (attendance_has_logs_for_status($att->pageparams->statusid)) {
             print_error('cantdeletestatus', 'attendance', "attsettings.php?id=$id");
         }
@@ -99,17 +99,17 @@ switch ($att->pageparams->action) {
         echo $OUTPUT->confirm($message, $att->url_preferences($params), $att->url_preferences());
         echo $OUTPUT->footer();
         exit;
-    case att_preferences_page_params::ACTION_HIDE:
+    case mod_attendance_preferences_page_params::ACTION_HIDE:
         $statuses = $att->get_statuses(false);
         $status = $statuses[$att->pageparams->statusid];
         $att->update_status($status, null, null, null, 0);
         break;
-    case att_preferences_page_params::ACTION_SHOW:
+    case mod_attendance_preferences_page_params::ACTION_SHOW:
         $statuses = $att->get_statuses(false);
         $status = $statuses[$att->pageparams->statusid];
         $att->update_status($status, null, null, null, 1);
         break;
-    case att_preferences_page_params::ACTION_SAVE:
+    case mod_attendance_preferences_page_params::ACTION_SAVE:
         $acronym        = required_param_array('acronym', PARAM_TEXT);
         $description    = required_param_array('description', PARAM_TEXT);
         $grade          = required_param_array('grade', PARAM_RAW);

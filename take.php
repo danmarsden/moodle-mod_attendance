@@ -25,7 +25,7 @@
 require_once(dirname(__FILE__).'/../../config.php');
 require_once(dirname(__FILE__).'/locallib.php');
 
-$pageparams = new att_take_page_params();
+$pageparams = new mod_attendance_take_page_params();
 
 $id                     = required_param('id', PARAM_INT);
 $pageparams->sessionid  = required_param('sessionid', PARAM_INT);

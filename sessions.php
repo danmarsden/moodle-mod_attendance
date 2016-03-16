@@ -28,13 +28,13 @@ require_once(dirname(__FILE__).'/add_form.php');
 require_once(dirname(__FILE__).'/update_form.php');
 require_once(dirname(__FILE__).'/duration_form.php');
 
-$pageparams = new att_sessions_page_params();
+$pageparams = new mod_attendance_sessions_page_params();
 
 $id                     = required_param('id', PARAM_INT);
 $pageparams->action     = required_param('action', PARAM_INT);
 
 if (optional_param('deletehiddensessions', false, PARAM_TEXT)) {
-    $pageparams->action = att_sessions_page_params::ACTION_DELETE_HIDDEN;
+    $pageparams->action = mod_attendance_sessions_page_params::ACTION_DELETE_HIDDEN;
 }
 
 if (empty($pageparams->action)) {
@@ -65,8 +65,8 @@ $PAGE->navbar->add($att->name);
 $currenttab = attendance_tabs::TAB_ADD;
 $formparams = array('course' => $course, 'cm' => $cm, 'modcontext' => $context, 'att' => $att);
 switch ($att->pageparams->action) {
-    case att_sessions_page_params::ACTION_ADD:
-        $url = $att->url_sessions(array('action' => att_sessions_page_params::ACTION_ADD));
+    case mod_attendance_sessions_page_params::ACTION_ADD:
+        $url = $att->url_sessions(array('action' => mod_attendance_sessions_page_params::ACTION_ADD));
         $mform = new mod_attendance_add_form($url, $formparams);
 
         if ($mform->is_cancelled()) {
@@ -88,10 +88,10 @@ switch ($att->pageparams->action) {
             redirect($att->url_manage());
         }
         break;
-    case att_sessions_page_params::ACTION_UPDATE:
+    case mod_attendance_sessions_page_params::ACTION_UPDATE:
         $sessionid = required_param('sessionid', PARAM_INT);
 
-        $url = $att->url_sessions(array('action' => att_sessions_page_params::ACTION_UPDATE, 'sessionid' => $sessionid));
+        $url = $att->url_sessions(array('action' => mod_attendance_sessions_page_params::ACTION_UPDATE, 'sessionid' => $sessionid));
         $formparams['sessionid'] = $sessionid;
         $mform = new mod_attendance_update_form($url, $formparams);
 
@@ -107,7 +107,7 @@ switch ($att->pageparams->action) {
         }
         $currenttab = attendance_tabs::TAB_UPDATE;
         break;
-    case att_sessions_page_params::ACTION_DELETE:
+    case mod_attendance_sessions_page_params::ACTION_DELETE:
         $sessionid = required_param('sessionid', PARAM_INT);
         $confirm   = optional_param('confirm', null, PARAM_INT);
 
@@ -134,7 +134,7 @@ switch ($att->pageparams->action) {
         echo $OUTPUT->confirm($message, $att->url_sessions($params), $att->url_manage());
         echo $OUTPUT->footer();
         exit;
-    case att_sessions_page_params::ACTION_DELETE_SELECTED:
+    case mod_attendance_sessions_page_params::ACTION_DELETE_SELECTED:
         $confirm    = optional_param('confirm', null, PARAM_INT);
 
         if (isset($confirm) && confirm_sesskey()) {
@@ -171,13 +171,13 @@ switch ($att->pageparams->action) {
         echo $OUTPUT->confirm($message, $att->url_sessions($params), $att->url_manage());
         echo $OUTPUT->footer();
         exit;
-    case att_sessions_page_params::ACTION_CHANGE_DURATION:
+    case mod_attendance_sessions_page_params::ACTION_CHANGE_DURATION:
         $sessid = optional_param_array('sessid', '', PARAM_SEQUENCE);
         $ids = optional_param('ids', '', PARAM_ALPHANUMEXT);
 
         $slist = !empty($sessid) ? implode('_', $sessid) : '';
 
-        $url = $att->url_sessions(array('action' => att_sessions_page_params::ACTION_CHANGE_DURATION));
+        $url = $att->url_sessions(array('action' => mod_attendance_sessions_page_params::ACTION_CHANGE_DURATION));
         $formparams['ids'] = $slist;
         $mform = new mod_attendance_duration_form($url, $formparams);
 
@@ -197,7 +197,7 @@ switch ($att->pageparams->action) {
         }
 
         break;
-    case att_sessions_page_params::ACTION_DELETE_HIDDEN:
+    case mod_attendance_sessions_page_params::ACTION_DELETE_HIDDEN:
         $confirm  = optional_param('confirm', null, PARAM_INT);
         if ($confirm && confirm_sesskey()) {
             $sessions = $att->get_hidden_sessions();

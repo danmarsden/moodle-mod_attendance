@@ -80,7 +80,7 @@ class attendance_tabs implements renderable {
 
         if (has_capability('mod/attendance:manageattendances', $context)) {
             $toprow[] = new tabobject(self::TAB_ADD,
-                            $this->att->url_sessions()->out(true, array('action' => att_sessions_page_params::ACTION_ADD)),
+                            $this->att->url_sessions()->out(true, array('action' => mod_attendance_sessions_page_params::ACTION_ADD)),
                             get_string('addsession', 'attendance'));
         }
         if (has_capability('mod/attendance:viewreports', $context)) {
@@ -103,7 +103,7 @@ class attendance_tabs implements renderable {
         }
         if ($this->currenttab == self::TAB_UPDATE && has_capability('mod/attendance:manageattendances', $context)) {
             $toprow[] = new tabobject(self::TAB_UPDATE,
-                            $this->att->url_sessions()->out(true, array('action' => att_sessions_page_params::ACTION_UPDATE)),
+                            $this->att->url_sessions()->out(true, array('action' => mod_attendance_sessions_page_params::ACTION_UPDATE)),
                             get_string('changesession', 'attendance'));
         }
 
@@ -370,7 +370,7 @@ class attendance_user_data implements renderable {
             $this->decimalpoints = $CFG->grade_decimalpoints;
         }
 
-        if ($this->pageparams->mode == att_view_page_params::MODE_THIS_COURSE) {
+        if ($this->pageparams->mode == mod_attendance_view_page_params::MODE_THIS_COURSE) {
             $this->statuses = $att->get_statuses(true, true);
 
             $this->stat = $att->get_user_stat($userid);

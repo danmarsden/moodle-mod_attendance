@@ -26,11 +26,11 @@
 require_once(dirname(__FILE__).'/../../config.php');
 require_once(dirname(__FILE__).'/locallib.php');
 
-$pageparams = new att_view_page_params();
+$pageparams = new mod_attendance_view_page_params();
 
 $id                     = required_param('id', PARAM_INT);
 $pageparams->studentid  = optional_param('studentid', null, PARAM_INT);
-$pageparams->mode       = optional_param('mode', att_view_page_params::MODE_THIS_COURSE, PARAM_INT);
+$pageparams->mode       = optional_param('mode', mod_attendance_view_page_params::MODE_THIS_COURSE, PARAM_INT);
 $pageparams->view       = optional_param('view', null, PARAM_INT);
 $pageparams->curdate    = optional_param('curdate', null, PARAM_INT);
 

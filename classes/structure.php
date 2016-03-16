@@ -14,6 +14,20 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Class definition for mod_attendance_structure
+ *
+ * @package   mod_attendance
+ * @copyright  2016 Dan Marsden http://danmarsden.com
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+/**
+ * Main class with all Attendance related info.
+ *
+ * @copyright  2016 Dan Marsden http://danmarsden.com
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class mod_attendance_structure {
     const SESSION_COMMON        = 0;
     const SESSION_GROUP         = 1;
@@ -209,7 +223,7 @@ class mod_attendance_structure {
             $where = "attendanceid = :aid AND sessdate >= :csdate";
         }
 
-        if ($this->pageparams->get_current_sesstype() > att_page_with_filter_controls::SESSTYPE_ALL) {
+        if ($this->pageparams->get_current_sesstype() > mod_attendance_page_with_filter_controls::SESSTYPE_ALL) {
             $where .= " AND (groupid = :cgroup OR groupid = 0)";
         }
         $params = array(
@@ -382,7 +396,7 @@ class mod_attendance_structure {
         $event = \mod_attendance\event\session_updated::create(array(
             'objectid' => $this->id,
             'context' => $this->context,
-            'other' => array('info' => $info, 'sessionid' => $sessionid, 'action' => att_sessions_page_params::ACTION_UPDATE)));
+            'other' => array('info' => $info, 'sessionid' => $sessionid, 'action' => mod_attendance_sessions_page_params::ACTION_UPDATE)));
         $event->add_record_snapshot('course_modules', $this->cm);
         $event->add_record_snapshot('attendance_sessions', $sess);
         $event->trigger();
@@ -391,8 +405,6 @@ class mod_attendance_structure {
     /**
      * Used to record attendance submitted by the student.
      *
-     * @global type $DB
-     * @global type $USER
      * @param type $mformdata
      * @return boolean
      */
@@ -757,7 +769,6 @@ class mod_attendance_structure {
 
     /**
      *
-     * @global type $DB
      * @param type $userid
      * @param type $filters - An array things to filter by. For now only enddate is valid.
      * @return type
@@ -1020,7 +1031,6 @@ class mod_attendance_structure {
     /**
      * Remove a status variable from an attendance instance
      *
-     * @global moodle_database $DB
      * @param stdClass $status
      */
     public function remove_status($status) {
@@ -1042,7 +1052,6 @@ class mod_attendance_structure {
     /**
      * Add an attendance status variable
      *
-     * @global moodle_database $DB
      * @param string $acronym
      * @param string $description
      * @param int $grade
@@ -1078,7 +1087,6 @@ class mod_attendance_structure {
     /**
      * Update status variable for a particular Attendance module instance
      *
-     * @global moodle_database $DB
      * @param stdClass $status
      * @param string $acronym
      * @param string $description
