@@ -110,7 +110,11 @@ if ($formdata = $mform->get_data()) {
             foreach ($reportdata->sessions as $sess) {
                 $text = userdate($sess->sessdate, get_string('strftimedmyhm', 'attendance'));
                 $text .= ' ';
-                $text .= $sess->groupid ? $reportdata->groups[$sess->groupid]->name : get_string('commonsession', 'attendance');
+                if (!empty($sess->groupid) && empty($reportdata->groups[$sess->groupid])) {
+                    $text .= get_string('deletedgroup', 'attendance');
+                } else {
+                    $text .= $sess->groupid ? $reportdata->groups[$sess->groupid]->name : get_string('commonsession', 'attendance');
+                }
                 $data->tabhead[] = $text;
                 if (isset($formdata->includeremarks)) {
                     $data->tabhead[] = ''; // Space for the remarks.

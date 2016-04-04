@@ -867,7 +867,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
             }
             $sesstext .= html_writer::empty_tag('br');
             if ($sess->groupid) {
-                $sesstext .= get_string('group') . ': ' . $reportdata->groups[$sess->groupid]->name;
+                if (empty($reportdata->groups[$sess->groupid])) {
+                    $sesstext .= get_string('deletedgroup', 'attendance');
+                } else {
+                    $sesstext .= get_string('group') . ': ' . $reportdata->groups[$sess->groupid]->name;
+                }
+
             } else {
                 $sesstext .= get_string('commonsession', 'attendance');
             }
