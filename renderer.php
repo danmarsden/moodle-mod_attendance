@@ -235,7 +235,15 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
             $table->data[$sess->id][] = $i;
             if ($sess->groupid) {
-                $table->data[$sess->id][] = get_string('group') . ': ' . $sessdata->groups[$sess->groupid]->name;
+                if (empty($sessdata->groups[$sess->groupid])) {
+                    $table->data[$sess->id][] = get_string('deletedgroup', 'attendance');
+                    // Remove actions and links on date/time.
+                    $dta['actions'] = '';
+                    $dta['date'] = userdate($sess->sessdate, get_string('strftimedmyw', 'attendance'));
+                    $dta['time'] = $this->construct_time($sess->sessdate, $sess->duration);
+                } else {
+                    $table->data[$sess->id][] = get_string('group') . ': ' . $sessdata->groups[$sess->groupid]->name;
+                }
             } else {
                 $table->data[$sess->id][] = get_string('commonsession', 'attendance');
             }

@@ -319,3 +319,4 @@ $string['repeatevery'] = 'Repeat every';
 $string['repeatuntil'] = 'Repeat until';
 $string['repeaton'] = 'Repeat on';
 $string['invalidsessionendtime'] = 'The end time must be greater than start time';
+$string['deletedgroup'] = 'The group associated with this session has been deleted';
