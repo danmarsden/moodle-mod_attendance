@@ -256,6 +256,7 @@ $string['strftimehm'] = '%H:%M'; // Line added to allow display of time.
 $string['strftimeshortdate'] = '%d.%m.%Y';
 $string['studentid'] = 'Student ID';
 $string['takeattendance'] = 'Take attendance';
+$string['takensessions'] = 'Taken sessions';
 $string['tempaddform'] = 'Add temporary user';
 $string['tempexists'] = 'There is already a temporary user with this email address';
 $string['tempusers'] = 'Temporary users';

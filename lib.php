@@ -90,6 +90,10 @@ function attendance_update_instance($attendance) {
 
     attendance_grade_item_update($attendance);
 
+    if ($attendance->grade != 0) {
+        attendance_update_all_users_grades($attendance);
+    }
+
     return true;
 }
 
@@ -227,13 +231,15 @@ function attendance_user_outline($course, $user, $mod, $attendance) {
         $result->time = 0;
     }
     if (has_capability('mod/attendance:canbelisted', $mod->context, $user->id)) {
-        $statuses = attendance_get_statuses($attendance->id);
-        $grade = attendance_get_user_grade(attendance_get_user_statuses_stat($attendance->id, $course->startdate,
-                                                                      $user->id, $mod), $statuses);
-        $maxgrade = attendance_get_user_max_grade(attendance_get_user_taken_sessions_count($attendance->id, $course->startdate,
-                                                                                    $user->id, $mod), $statuses);
-
-        $result->info = $grade.' / '.$maxgrade;
+        $userspoints = attendance_get_users_points($attendance->id, $user->id);
+        if (isset($userspoints[$user->id])) {
+            $points = $userspoints[$user->id]->points;
+            $maxpoints = $userspoints[$user->id]->maxpoints;
+        } else {
+            $points = 0;
+            $maxpoints = 0;
+        }
+        $result->info = attendance_format_float($points).' / '.attendance_format_float($maxpoints);
     }
 
     return $result;
@@ -250,7 +256,7 @@ function attendance_user_complete($course, $user, $mod, $attendance) {
     require_once($CFG->libdir.'/gradelib.php');
 
     if (has_capability('mod/attendance:canbelisted', $mod->context, $user->id)) {
-        echo construct_full_user_stat_html_table($attendance, $course, $user, $mod);
+        echo construct_full_user_stat_html_table($attendance, $user);
     }
 }
 
@@ -295,7 +301,6 @@ function attendance_grade_item_update($attendance, $grades=null) {
     } else if ($attendance->grade < 0) {
         $params['gradetype'] = GRADE_TYPE_SCALE;
         $params['scaleid']   = -$attendance->grade;
-
     } else {
         $params['gradetype'] = GRADE_TYPE_NONE;
     }
