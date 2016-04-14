@@ -74,6 +74,9 @@ switch ($att->pageparams->action) {
         if ($pageparams->statusset > $maxstatusset) {
             $maxstatusset = $pageparams->statusset; // Make sure the new maximum is shown without a page refresh.
         }
+        if ($att->grade != 0) {
+            attendance_update_all_users_grades($att);
+        }
         break;
     case mod_attendance_preferences_page_params::ACTION_DELETE:
         if (attendance_has_logs_for_status($att->pageparams->statusid)) {
@@ -86,6 +89,9 @@ switch ($att->pageparams->action) {
 
         if (isset($confirm)) {
             $att->remove_status($status);
+            if ($att->grade != 0) {
+                attendance_update_all_users_grades($att);
+            }
             redirect($att->url_preferences(), get_string('statusdeleted', 'attendance'));
         }
 
@@ -122,8 +128,8 @@ switch ($att->pageparams->action) {
             $status = $statuses[$id];
             $errors[$id] = $att->update_status($status, $acronym[$id], $description[$id], $grade[$id], null);
         }
-        if ($att->grade > 0) {
-            attendance_update_all_users_grades($att, $cm);
+        if ($att->grade != 0) {
+            attendance_update_all_users_grades($att);
         }
         break;
 }

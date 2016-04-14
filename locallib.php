@@ -88,86 +88,6 @@ function attendance_get_setname($attid, $statusset, $includevalues = true) {
     return $statusname;
 }
 
-function attendance_get_user_taken_sessions_count($attid, $coursestartdate, $userid, $coursemodule, $startdate = '', $enddate = '') {
-    global $DB, $COURSE;
-    $groupmode = groups_get_activity_groupmode($coursemodule, $COURSE);
-    if (!empty($groupmode)) {
-        $qry = "SELECT count(*) as cnt
-              FROM {attendance_log} al
-              JOIN {attendance_sessions} ats ON al.sessionid = ats.id
-              LEFT JOIN {groups_members} gm ON gm.userid = al.studentid AND gm.groupid = ats.groupid
-             WHERE ats.attendanceid = :aid AND
-                   ats.sessdate >= :cstartdate AND
-                   al.studentid = :uid AND
-                   (ats.groupid = 0 or gm.id is NOT NULL)";
-    } else {
-        $qry = "SELECT count(*) as cnt
-              FROM {attendance_log} al
-              JOIN {attendance_sessions} ats
-                ON al.sessionid = ats.id
-             WHERE ats.attendanceid = :aid AND
-                   ats.sessdate >= :cstartdate AND
-                   al.studentid = :uid";
-    }
-    $params = array(
-        'aid'           => $attid,
-        'cstartdate'    => $coursestartdate,
-        'uid'           => $userid);
-
-    if (!empty($startdate) && !empty($enddate)) {
-        $qry .= ' AND sessdate >= :sdate AND sessdate < :edate ';
-        $params['sdate'] = $startdate;
-        $params['edate'] = $enddate;
-    }
-
-    return $DB->count_records_sql($qry, $params);
-}
-
-function attendance_get_user_statuses_stat($attid, $coursestartdate, $userid, $coursemodule) {
-    global $DB, $COURSE;
-    $groupmode = groups_get_activity_groupmode($coursemodule, $COURSE);
-    if (!empty($groupmode)) {
-        $qry = "SELECT al.statusid, count(al.statusid) AS stcnt
-              FROM {attendance_log} al
-              JOIN {attendance_sessions} ats ON al.sessionid = ats.id
-              LEFT JOIN {groups_members} gm ON gm.userid = al.studentid AND gm.groupid = ats.groupid
-             WHERE ats.attendanceid = :aid AND
-                   ats.sessdate >= :cstartdate AND
-                   al.studentid = :uid AND
-                   (ats.groupid = 0 or gm.id is NOT NULL)
-          GROUP BY al.statusid";
-    } else {
-        $qry = "SELECT al.statusid, count(al.statusid) AS stcnt
-              FROM {attendance_log} al
-              JOIN {attendance_sessions} ats
-                ON al.sessionid = ats.id
-             WHERE ats.attendanceid = :aid AND
-                   ats.sessdate >= :cstartdate AND
-                   al.studentid = :uid
-          GROUP BY al.statusid";
-    }
-    $params = array(
-            'aid'           => $attid,
-            'cstartdate'    => $coursestartdate,
-            'uid'           => $userid);
-
-    return $DB->get_records_sql($qry, $params);
-}
-
-function attendance_get_user_grade($userstatusesstat, $statuses) {
-    $sum = 0;
-    foreach ($userstatusesstat as $stat) {
-        $sum += $stat->stcnt * $statuses[$stat->statusid]->grade;
-    }
-
-    return $sum;
-}
-
-function attendance_get_user_max_grade($sesscount, $statuses) {
-    reset($statuses);
-    return current($statuses)->grade * $sesscount;
-}
-
 function attendance_get_user_courses_attendances($userid) {
     global $DB;
 
@@ -189,71 +109,84 @@ function attendance_get_user_courses_attendances($userid) {
 }
 
 /**
- * Used to caclulate usergrade based on rawgrade and max grade.
+ * Used to calculate a fraction based on the part and total values
  *
- * @param float $grade - raw grade for user
- * @param float $maxgrade - maxgrade for this session.
- * @return float the calculated grade.
+ * @param float $part - part of the total value
+ * @param float $total - total value.
+ * @return float the calculated fraction.
  */
-function attendance_calc_user_grade_fraction($grade, $maxgrade) {
-    if ($maxgrade == 0) {
+function attendance_calc_fraction($part, $total) {
+    if ($total == 0) {
         return 0;
     } else {
-        return $grade / $maxgrade;
+        return $part / $total;
     }
 }
 
 /**
  * Update all user grades - used when settings have changed.
  *
- * @param mod_attendance_structure $attendance - Full attendance class.
- * @param stdclass $coursemodule - full coursemodule record
+ * @param mixed mod_attendance_structure|stdClass $attendance
  * @return float the calculated grade.
  */
-function attendance_update_all_users_grades(mod_attendance_structure $attendance, $coursemodule) {
+function attendance_update_all_users_grades($attendance) {
+    return attendance_update_users_grade($attendance, 0);
+}
+
+/**
+ * Update user grades
+ *
+ * @param mixed mod_attendance_structure|stdClass $attendance
+ * @param mixed array|int $userids
+ * @return float the calculated grade.
+ */
+function attendance_update_users_grade($attendance, $userids=0) {
     global $DB;
-    $grades = array();
-    $course = $attendance->course;
 
-    $userids = array_keys(get_enrolled_users($attendance->context, 'mod/attendance:canbelisted', 0, 'u.id'));
-    $attgrades = grade_get_grades($course->id, 'mod', 'attendance', $attendance->id, $userids);
-
-    $usergrades = [];
-    if (!empty($attgrades->items[0]) and !empty($attgrades->items[0]->grades)) {
-        $usergrades = $attgrades->items[0]->grades;
+    if ($attendance instanceof mod_attendance_structure) {
+        $attendanceid = $attendance->id;
+        $course = $attendance->course;
+        $cm = $attendance->cm;
+        $context = $attendance->context;
+        $grade = $attendance->grade;
+    } else {
+        $attendanceid = $attendance->id;
+        list($course, $cm) = get_course_and_cm_from_instance($attendanceid, 'attendance');
+        $context = context_module::instance($cm->id);
+        $grade = $attendance->grade;
     }
-    $statuses = attendance_get_statuses($attendance->id);
-    if ($attendance->grade < 0) {
-        $dbparams = array('id' => -($attendance->grade));
+
+    if (empty($userids)) {
+        $userids = array_keys(get_enrolled_users($context, 'mod/attendance:canbelisted', 0, 'u.id'));
+        $userspoints = attendance_get_users_points($attendance);
+    } else {
+        $userspoints = attendance_get_users_points($attendance, $userids);
+    }
+
+    if ($grade < 0) {
+        $dbparams = array('id' => -($grade));
         $scale = $DB->get_record('scale', $dbparams);
         $scalearray = explode(',', $scale->scale);
-        $gradebookmaxgrade = count($scalearray);
+        $attendancegrade = count($scalearray);
     } else {
-        $gradebookmaxgrade = $attendance->grade;
+        $attendancegrade = $grade;
     }
-    foreach ($usergrades as $userid => $existinggrade) {
-        if (is_null($existinggrade->grade)) {
-            // Don't update grades where one doesn't exist yet.
-            continue;
+
+    $grades = array();
+    foreach ($userids as $userid) {
+        $grades[$userid] = new stdClass();
+        $grades[$userid]->userid = $userid;
+
+        if (isset($userspoints[$userid])) {
+            $points = $userspoints[$userid]->points;
+            $maxpoints = $userspoints[$userid]->maxpoints;
+            $grades[$userid]->rawgrade = attendance_calc_fraction($points, $maxpoints) * $attendancegrade;
+        } else {
+            $grades[$userid]->rawgrade = null;
         }
-        $grade = new stdClass;
-        $grade->userid = $userid;
-        $userstatusesstat = attendance_get_user_statuses_stat($attendance->id, $course->startdate, $userid, $coursemodule);
-        $usertakensesscount = attendance_get_user_taken_sessions_count($attendance->id, $course->startdate, $userid, $coursemodule);
-        $usergrade = attendance_get_user_grade($userstatusesstat, $statuses);
-        $usermaxgrade = attendance_get_user_max_grade($usertakensesscount, $statuses);
-        $grade->rawgrade = attendance_calc_user_grade_fraction($usergrade, $usermaxgrade) * $gradebookmaxgrade;
-        $grades[$userid] = $grade;
     }
 
-    if (!empty($grades)) {
-        $result = grade_update('mod/attendance', $course->id, 'mod', 'attendance',
-            $attendance->id, 0, $grades);
-    } else {
-        $result = true;
-    }
-
-    return $result;
+    return grade_update('mod/attendance', $course->id, 'mod', 'attendance', $attendanceid, 0, $grades);
 }
 
 /**
@@ -307,4 +240,105 @@ function attendance_get_max_statusset($attendanceid) {
         return $max;
     }
     return 0;
+}
+
+/**
+ * Returns the maxpoints for each statusset
+ *
+ * @param array statuses
+ * @return array
+ */
+function attendance_get_statusset_maxpoints($statuses) {
+    $statusset_maxpoints = array();
+    foreach ($statuses AS $st) {
+        if (!isset($statusset_maxpoints[$st->setnumber])) {
+            $statusset_maxpoints[$st->setnumber] = $st->grade;
+        }
+    }
+    return $statusset_maxpoints;
+}
+
+/**
+ * Compute the points of the users that has some taken session
+ *
+ * @param mixed mod_attendance_structure|stdClass|int $attendance
+ * @param mixed int|array $userids one or more userids (zero means all)
+ * @param int $startdate Attendance sessions startdate
+ * @param int $enddate Attendance sessions enddate
+ * @return array of objects (userid, numtakensessions, points, maxpoints)
+ */
+function attendance_get_users_points($attendance, $userids=0, $startdate = '', $enddate = '') {
+    global $DB;
+
+    if (is_object($attendance)) {
+        $attendanceid = $attendance->id;
+    } else {
+        $attendanceid = $attendance;
+    }
+    list($course, $cm) = get_course_and_cm_from_instance($attendanceid, 'attendance');
+
+    $params = array(
+        'attid'      => $attendanceid,
+        'attid2'     => $attendanceid,
+        'cstartdate' => $course->startdate,
+        );
+
+    $where = '';
+
+    if (!empty($userid)) {
+        if (is_array($userids)) {
+            list($in_sql, $in_params) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
+            $where .= ' AND atl.studentid ' . $in_sql;
+            $params = array_merge($params, $in_params);
+        } else {
+            $where .= ' AND atl.studentid = :userid';
+            $params['userid'] = $userids;
+        }
+    }
+    if (!empty($startdate)) {
+        $where .= ' AND ats.sessdate >= :startdate';
+        $params['startdate'] = $startdate;
+    }
+    if (!empty($enddate)) {
+        $where .= ' AND ats.sessdate < :enddate ';
+        $params['enddate'] = $enddate;
+    }
+
+    $join_group = '';
+    if (!empty($cm->effectivegroupmode)) {
+        $join_group = 'LEFT JOIN {groups_members} gm ON (gm.userid = atl.studentid AND gm.groupid = ats.groupid)';
+        $where .= ' AND (ats.groupid = 0 or gm.id is NOT NULL)';
+    }
+
+    $sql = "SELECT userid, COUNT(*) AS numtakensessions, SUM(grade) AS points, SUM(maxgrade) AS maxpoints
+             FROM (SELECT atl.studentid AS userid, ats.id AS sessionid, stg.grade, stm.maxgrade
+                     FROM {attendance_sessions} ats
+                     JOIN {attendance_log} atl ON (atl.sessionid = ats.id)
+                     JOIN {attendance_statuses} stg ON (stg.id = atl.statusid AND stg.deleted = 0 AND stg.visible = 1)
+                     JOIN (SELECT setnumber, MAX(grade) AS maxgrade
+                             FROM {attendance_statuses}
+                            WHERE attendanceid = :attid2
+                              AND deleted = 0
+                              AND visible = 1
+                           GROUP BY setnumber) stm
+                       ON (stm.setnumber = ats.statusset)
+                     {$join_group}
+                    WHERE ats.attendanceid = :attid
+                      AND ats.sessdate >= :cstartdate
+                      AND ats.lasttakenby != 0
+                      {$where}
+                  ) sess
+            GROUP BY userid";
+    return $DB->get_records_sql($sql, $params);
+}
+
+/**
+ * Given a float, prints it nicely.
+ *
+ * @param float $float The float to print
+ * @param bool $stripzeros If true, removes final zeros after decimal point
+ * @return string locale float
+ */
+function attendance_format_float($float, $stripzeros=true) {
+    return format_float($float, 1, true, $stripzeros);
 }
