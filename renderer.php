@@ -801,7 +801,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 $status = $userdata->statuses[$sess->statusid];
                 $row->cells[] = $status->description;
                 $row->cells[] = attendance_format_float($status->grade) . ' / ' .
-                                    attendance_format_float($statusset_maxpoints[$status->setnumber]);
+                                    attendance_format_float($statussetmaxpoints[$status->setnumber]);
                 $row->cells[] = $sess->remarks;
             } else if ($sess->sessdate < $userdata->user->enrolmentstart) {
                 $cell = new html_table_cell(get_string('enrolmentstart', 'attendance',
