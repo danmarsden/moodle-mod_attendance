@@ -285,7 +285,6 @@ function attendance_get_users_points($attendance, $userids=0, $startdate = '', $
 
     $where = '';
 
-    if (!empty($userids)) {
         if (is_array($userids)) {
             list($insql, $inparams) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
             $where .= ' AND atl.studentid ' . $insql;
