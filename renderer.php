@@ -801,9 +801,124 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 $status = $userdata->statuses[$sess->statusid];
                 $row->cells[] = $status->description;
                 $row->cells[] = attendance_format_float($status->grade) . ' / ' .
-                                    attendance_format_float($statussetmaxpoints[$status->setnumber]);
-            $row->cells[] = attendance_format_float($reportdata->points[$user->id]) . ' / ' .
-                                attendance_format_float($reportdata->maxpoints[$user->id]);
+                                    attendance_format_float($statusset_maxpoints[$status->setnumber]);
+                $row->cells[] = $sess->remarks;
+            } else if ($sess->sessdate < $userdata->user->enrolmentstart) {
+                $cell = new html_table_cell(get_string('enrolmentstart', 'attendance',
+                                            userdate($userdata->user->enrolmentstart, '%d.%m.%Y')));
+                $cell->colspan = 2;
+                $row->cells[] = $cell;
+            } else if ($userdata->user->enrolmentend and $sess->sessdate > $userdata->user->enrolmentend) {
+                $cell = new html_table_cell(get_string('enrolmentend', 'attendance',
+                                            userdate($userdata->user->enrolmentend, '%d.%m.%Y')));
+                $cell->colspan = 2;
+                $row->cells[] = $cell;
+            } else {
+                if (!empty($sess->studentscanmark)) { // Student can mark their own attendance.
+                    // URL to the page that lets the student modify their attendance.
+                    $url = new moodle_url('/mod/attendance/attendance.php',
+                            array('sessid' => $sess->id, 'sesskey' => sesskey()));
+                    $cell = new html_table_cell(html_writer::link($url, get_string('submitattendance', 'attendance')));
+                    $cell->colspan = 2;
+                    $row->cells[] = $cell;
+                } else { // Student cannot mark their own attendace.
+                    $row->cells[] = '?';
+                    $row->cells[] = '';
+                }
+            }
+
+            $table->data[] = $row;
+        }
+
+        return html_writer::table($table);
+    }
+
+    private function construct_time($datetime, $duration) {
+        $time = html_writer::tag('nobr', construct_session_time($datetime, $duration));
+
+        return $time;
+    }
+
+    protected function render_attendance_report_data(attendance_report_data $reportdata) {
+        global $PAGE, $COURSE;
+
+        // Initilise Javascript used to (un)check all checkboxes.
+        $this->page->requires->js_init_call('M.mod_attendance.init_manage');
+
+        // Check if the user should be able to bulk send messages to other users on the course.
+        $bulkmessagecapability = has_capability('moodle/course:bulkmessaging', $PAGE->context);
+
+        $table = new html_table();
+
+        $table->attributes['class'] = 'generaltable attwidth';
+
+        // User picture.
+        $table->head[] = '';
+        $table->align[] = 'left';
+        $table->size[] = '1px';
+
+        $table->head[] = $this->construct_fullname_head($reportdata);
+        $table->align[] = 'left';
+        $table->size[] = '';
+        $sessionstats = array();
+
+        foreach ($reportdata->sessions as $sess) {
+            $sesstext = userdate($sess->sessdate, get_string('strftimedm', 'attendance'));
+            $sesstext .= html_writer::empty_tag('br');
+            $sesstext .= userdate($sess->sessdate, '('.get_string('strftimehm', 'attendance').')');
+            $capabilities = array(
+                'mod/attendance:takeattendances',
+                'mod/attendance:changeattendances'
+            );
+            if (is_null($sess->lasttaken) and has_any_capability($capabilities, $reportdata->att->context)) {
+                $sesstext = html_writer::link($reportdata->url_take($sess->id, $sess->groupid), $sesstext);
+            }
+            $sesstext .= html_writer::empty_tag('br');
+            if ($sess->groupid) {
+                if (empty($reportdata->groups[$sess->groupid])) {
+                    $sesstext .= get_string('deletedgroup', 'attendance');
+                } else {
+                    $sesstext .= get_string('group') . ': ' . $reportdata->groups[$sess->groupid]->name;
+                }
+
+            } else {
+                $sesstext .= get_string('commonsession', 'attendance');
+            }
+
+            $table->head[] = $sesstext;
+            $table->align[] = 'center';
+            $table->size[] = '1px';
+        }
+
+        $table->head[] = get_string('takensessions', 'attendance');
+        $table->align[] = 'center';
+        $table->size[] = '1px';
+
+        $table->head[] = get_string('points', 'attendance');
+        $table->align[] = 'center';
+        $table->size[] = '1px';
+
+        $table->head[] = get_string('percentage', 'attendance');
+        $table->align[] = 'center';
+        $table->size[] = '1px';
+
+        if ($bulkmessagecapability) { // Display the table header for bulk messaging.
+            // The checkbox must have an id of cb_selector so that the JavaScript will pick it up.
+            $table->head[] = html_writer::checkbox('cb_selector', 0, false, '', array('id' => 'cb_selector'));
+            $table->align[] = 'center';
+            $table->size[] = '1px';
+        }
+
+        foreach ($reportdata->users as $user) {
+            $row = new html_table_row();
+
+            $row->cells[] = $this->user_picture($user);  // Show different picture if it is a temporary user.
+            $row->cells[] = html_writer::link($reportdata->url_view(array('studentid' => $user->id)), fullname($user));
+            $cellsgenerator = new user_sessions_cells_html_generator($reportdata, $user);
+            $row->cells = array_merge($row->cells, $cellsgenerator->get_cells(true));
+
+            $row->cells[] = $reportdata->numtakensessions[$user->id];
+            $row->cells[] = attendance_format_float($reportdata->points[$user->id]) . ' / ' . attendance_format_float($reportdata->maxpoints[$user->id]);
             $percent = attendance_calc_fraction($reportdata->points[$user->id], $reportdata->maxpoints[$user->id]);
             $row->cells[] = attendance_format_float($percent * 100, false) . '%';
 
