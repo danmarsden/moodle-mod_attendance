@@ -1,4 +1,6 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -19,38 +21,39 @@
  * @copyright  2015 Caio Bressan Doneda
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-// We defined the web service functions to install.
 
-$functions = array(
+    /**
+     * We defined the web service functions to install.
+     */
+    $functions = array(
         'mod_wsattendance_get_courses_with_today_sessions' => array(
-                'classname'   => 'mod_wsattendance_external',
-                'methodname'  => 'get_courses_with_today_sessions',
-                'classpath'   => 'mod/attendance/externallib.php',
-                'description' => 'Method that retrieves courses with today sessions of a teacher.',
-                'type'        => 'read',
+            'classname'   => 'mod_wsattendance_external',
+            'methodname'  => 'get_courses_with_today_sessions',
+            'classpath'   => 'mod/attendance/externallib.php',
+            'description' => 'Method that retrieves courses with today sessions of a teacher.',
+            'type'        => 'read',
         ),
         'mod_wsattendance_get_session' => array(
-                'classname'   => 'mod_wsattendance_external',
-                'methodname'  => 'get_session',
-                'classpath'   => 'mod/attendance/externallib.php',
-                'description' => 'Method that retrieves the session data',
-                'type'        => 'read',
+            'classname'   => 'mod_wsattendance_external',
+            'methodname'  => 'get_session',
+            'classpath'   => 'mod/attendance/externallib.php',
+            'description' => 'Method that retrieves the session data',
+            'type'        => 'read',
         ),
-        
-	'mod_wsattendance_update_user_status' => array(
-                'classname'   => 'mod_wsattendance_external',
-                'methodname'  => 'update_user_status',
-                'classpath'   => 'mod/attendance/externallib.php',
-                'description' => 'Method that updates the user status in a session.',
-                'type'        => 'write',
-        )
-);
 
-// We define the services to install as pre-build services. A pre-build service is not editable by administrator.
-$services = array('Attendance ufscchamadas' => 
-                   array('functions' => 
-                          array ('mod_wsattendance_get_courses_with_today_sessions',
-                                 'mod_wsattendance_get_session',
-				                 'mod_wsattendance_update_user_status'),
-                                 'restrictedusers' => 0,
-                                 'enabled'=>1));
+        'mod_wsattendance_update_user_status' => array(
+            'classname'   => 'mod_wsattendance_external',
+            'methodname'  => 'update_user_status',
+            'classpath'   => 'mod/attendance/externallib.php',
+            'description' => 'Method that updates the user status in a session.',
+            'type'        => 'write',
+        )
+    );
+
+
+    // We define the services to install as pre-build services. A pre-build service is not editable by administrator.
+    $services = array('Attendance ufscchamadas' => array('functions' => array('mod_wsattendance_get_courses_with_today_sessions',
+                   'mod_wsattendance_get_session',
+                   'mod_wsattendance_update_user_status'),
+                   'restrictedusers' => 0,
+                   'enabled' => 1));

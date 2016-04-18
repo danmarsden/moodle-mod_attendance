@@ -28,26 +28,27 @@ require_once(dirname(__FILE__).'/structure.php');
 require_once(dirname(__FILE__).'/../../../lib/sessionlib.php');
 
 class attendance_handler {
-    /* For this user, this method searches in all the courses that this user has permission to take attendance, 
-    ** looking for today sessions and returns the courses with the sessions.
-    */
+    /**
+     * For this user, this method searches in all the courses that this user has permission to take attendance,
+     * looking for today sessions and returns the courses with the sessions.
+     */
     public static function get_courses_with_today_sessions($userid, $period = 1) {
         global $DB;
-      
-        $moduleid = $DB->get_field('modules', 'id', array('name'=>'attendance'));
-        $user_courses = enrol_get_users_courses($userid);
-        $courses_with_today_sessions = array();
-        foreach ($user_courses as $course) {
+
+        $moduleid = $DB->get_field('modules', 'id', array('name' => 'attendance'));
+        $usercourses = enrol_get_users_courses($userid);
+        $coursessessions = array();
+        foreach ($usercourses as $course) {
             $context = context_course::instance($course->id);
             if (has_capability('mod/attendance:takeattendances', $context, $userid)) {
-                if ($cms = $DB->get_records('course_modules', array('course'=>$course->id, 'module'=>$moduleid))) {
+                if ($cms = $DB->get_records('course_modules', array('course' => $course->id, 'module' => $moduleid))) {
                     $course->cms = $cms;
-                    $courses_with_today_sessions[$course->id] = $course;
+                    $coursessessions[$course->id] = $course;
                 }
             }
         }
 
-        foreach ($courses_with_today_sessions as $course) {
+        foreach ($coursessessions as $course) {
             $course->attendance_instance = array();
             foreach ($course->cms as $cm) {
                 $att = $DB->get_record('attendance', array('id' => $cm->instance), '*', MUST_EXIST);
@@ -55,24 +56,24 @@ class attendance_handler {
                 $att = new mod_attendance_structure($att, $cm, $course, $context);
                 $course->attendance_instance[$att->id] = array();
                 $course->attendance_instance[$att->id]['name'] = $att->name;
-        		$today_sessions = $att->get_today_sessions();
-                        
-        		if (empty($today_sessions)) {
-        		    unset($course->cms[$cm->id]);	
-        		} else {
-                    $course->attendance_instance[$att->id]['today_sessions'] = $today_sessions;
-        		}
+                $todaysessions = $att->get_today_sessions();
+
+                if (empty($todaysessions)) {
+                    unset($course->cms[$cm->id]);
+                } else {
+                    $course->attendance_instance[$att->id]['today_sessions'] = $todaysessions;
+                }
             }
         }
 
-        return attendance_handler::prepare_data($courses_with_today_sessions);
+        return self::prepare_data($coursessessions);
     }
 
-    private static function prepare_data($courses_with_today_sessions) {
-	
+    private static function prepare_data($coursessessions) {
+
         $courses = array();
-        
-        foreach ($courses_with_today_sessions as $c) {
+
+        foreach ($coursessessions as $c) {
             $courses[$c->id] = new stdClass();
             $courses[$c->id]->shortname = $c->shortname;
             $courses[$c->id]->fullname = $c->fullname;
@@ -82,61 +83,62 @@ class attendance_handler {
         return $courses;
     }
 
-    /* 
-    ** For this session, returns all the necessary data to take an attendance 
-    */
+    /*
+     ** For this session, returns all the necessary data to take an attendance
+     */
     public static function get_session($sessionid) {
         global $DB;
-            
+
         $session = $DB->get_record('attendance_sessions', array('id' => $sessionid));
         $session->courseid = $DB->get_field('attendance', 'course', array('id' => $session->attendanceid));
-	$session->statuses = attendance_get_statuses($session->attendanceid, true, $session->statusset);
+        $session->statuses = attendance_get_statuses($session->attendanceid, true, $session->statusset);
         $coursecontext = context_course::instance($session->courseid);
         $session->users = get_enrolled_users($coursecontext, 'mod/attendance:canbelisted', 0, 'u.id, u.firstname, u.lastname');
-	$session->attendance_log = array();
-    	
-    	$sql = "SELECT uid.data
+        $session->attendance_log = array();
+
+        $sql = "SELECT uid.data
                   FROM {user_info_data} uid
-                  JOIN {user_info_field} uif 
+                  JOIN {user_info_field} uif
                     ON (uid.fieldid = uif.id)
                  WHERE uif.shortname = 'rfid' AND uid.userid = :userid";
 
-    	foreach ($session->users as $key => $user) {
-    	    $session->users[$key]->rfid = $DB->get_field_sql($sql, array('userid'=>$user->id));
-    	}
+        foreach ($session->users as $key => $user) {
+            $session->users[$key]->rfid = $DB->get_field_sql($sql, array('userid' => $user->id));
+        }
 
-        if ($attendance_log = $DB->get_records('attendance_log', array('sessionid' => $sessionid), '', 'studentid,statusid,remarks,id')) {
-    	    $session->attendance_log = $attendance_log;
-    	}
+        if ($attendancelog = $DB->get_records('attendance_log',
+                                               array('sessionid' => $sessionid), '', 'studentid, statusid, remarks, id')) {
+            $session->attendance_log = $attendancelog;
+        }
 
         return $session;
     }
-	
+
 
     public static function update_user_status($sessionid, $studentid, $takenbyid, $statusid, $statusset) {
-    	global $DB;
+        global $DB;
 
-    	$record = new stdClass();
-    	$record->statusset = $statusset;
-    	$record->sessionid = $sessionid;
-    	$record->timetaken = time();
-    	$record->takenby = $takenbyid;
-	$record->statusid = $statusid;
-	$record->studentid = $studentid;
- 
-        if ($attendance_log = $DB->get_record('attendance_log', array('sessionid'=>$sessionid, 'studentid'=>$studentid))) {
-            $record->id = $attendance_log->id;
+        $record = new stdClass();
+        $record->statusset = $statusset;
+        $record->sessionid = $sessionid;
+        $record->timetaken = time();
+        $record->takenby = $takenbyid;
+        $record->statusid = $statusid;
+        $record->studentid = $studentid;
+
+        if ($attendancelog = $DB->get_record('attendance_log', array('sessionid' => $sessionid, 'studentid' => $studentid))) {
+            $record->id = $attendancelog->id;
             $DB->update_record('attendance_log', $record);
         } else {
             $DB->insert_record('attendance_log', $record);
         }
-            
-    	if ($attendance_session = $DB->get_record('attendance_sessions', array('id'=>$sessionid))) {
-    	    $attendance_session->lasttaken = time();
-    	    $attendance_session->lasttakenby = $takenbyid;
-    	    $attendance_session->timemodified = time();
-            
-            $DB->update_record('attendance_sessions', $attendance_session);
-    	}
-    }	
+
+        if ($attendancesession = $DB->get_record('attendance_sessions', array('id' => $sessionid))) {
+            $attendancesession->lasttaken = time();
+            $attendancesession->lasttakenby = $takenbyid;
+            $attendancesession->timemodified = time();
+
+            $DB->update_record('attendance_sessions', $attendancesession);
+        }
+    }
 }
