@@ -918,7 +918,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $row->cells = array_merge($row->cells, $cellsgenerator->get_cells(true));
 
             $row->cells[] = $reportdata->numtakensessions[$user->id];
-            $row->cells[] = attendance_format_float($reportdata->points[$user->id]) . ' / ' . attendance_format_float($reportdata->maxpoints[$user->id]);
+            $row->cells[] = attendance_format_float($reportdata->points[$user->id]) . ' / ' .
+                                attendance_format_float($reportdata->maxpoints[$user->id]);
             $percent = attendance_calc_fraction($reportdata->points[$user->id], $reportdata->maxpoints[$user->id]);
             $row->cells[] = attendance_format_float($percent * 100, false) . '%';
 

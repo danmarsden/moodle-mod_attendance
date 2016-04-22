@@ -485,7 +485,7 @@ class attendance_report_data implements renderable {
                 $numtakensessions = 0;
             }
 
-            if ($att->pageparams->view != ATT_VIEW_NOTPRESENT || $points < $maxpoints) {
+            if ($att->pageparams->view != ATT_VIEW_NOTPRESENT || $points < $maxpoints || $maxpoints == 0) {
                 $this->usersgroups[$user->id] = groups_get_all_groups($att->course->id, $user->id);
 
                 $this->sessionslog[$user->id] = $att->get_user_filtered_sessions_log($user->id);
