@@ -55,6 +55,9 @@ class mod_attendance_structure {
 
     private $groupmode;
 
+    /** @var float number [0..1], the threshold for student to be shown at low grade report */
+    private $lowgradethreshold;
+
     private $statuses;
     private $allstatuses; // Cache list of all statuses (not just one used by current session).
 
@@ -96,6 +99,23 @@ class mod_attendance_structure {
             $this->groupmode = groups_get_activity_groupmode($this->cm, $this->course);
         }
         return $this->groupmode;
+    }
+
+    public function get_lowgrade_threshold() {
+        if (!isset($this->lowgradethreshold)) {
+            $this->lowgradethreshold = 1;
+
+            if ($this->grade > 0) {
+                $gradeitem = grade_item::fetch(array('courseid' => $this->course->id, 'itemtype' => 'mod',
+                                 'itemmodule' => 'attendance', 'iteminstance' => $this->id));
+                if ($gradeitem->gradepass > 0 && $gradeitem->grademax != $gradeitem->grademin) {
+                    $this->lowgradethreshold = ($gradeitem->gradepass - $gradeitem->grademin) /
+                                ($gradeitem->grademax - $gradeitem->grademin);
+                }
+            }
+        }
+
+        return $this->lowgradethreshold;
     }
 
     /**

@@ -174,14 +174,17 @@ class mod_attendance_renderer extends plugin_renderer_base {
     }
 
     protected function render_view_controls(attendance_filter_controls $fcontrols) {
+        global $OUTPUT;
+
         $views[ATT_VIEW_ALL] = get_string('all', 'attendance');
         $views[ATT_VIEW_ALLPAST] = get_string('allpast', 'attendance');
-        if ($fcontrols->reportcontrol) {
-            $views[ATT_VIEW_NOTPRESENT] = get_string('lowgrade', 'attendance');
-        }
         $views[ATT_VIEW_MONTHS] = get_string('months', 'attendance');
         $views[ATT_VIEW_WEEKS] = get_string('weeks', 'attendance');
         $views[ATT_VIEW_DAYS] = get_string('days', 'attendance');
+        if ($fcontrols->reportcontrol) {
+            $views[ATT_VIEW_NOTPRESENT] = get_string('below', 'attendance',
+                        attendance_format_float($fcontrols->att->get_lowgrade_threshold() * 100));
+        }
         $viewcontrols = '';
         foreach ($views as $key => $sview) {
             if ($key != $fcontrols->pageparams->view) {
@@ -189,6 +192,9 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 $viewcontrols .= html_writer::tag('span', $link, array('class' => 'attbtn'));
             } else {
                 $viewcontrols .= html_writer::tag('span', $sview, array('class' => 'attcurbtn'));
+                if ($key == ATT_VIEW_NOTPRESENT) {
+                    $viewcontrols .= $OUTPUT->help_icon('below', 'attendance');
+                }
             }
         }
 
