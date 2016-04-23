@@ -67,7 +67,7 @@ Feature: Teachers and Students can record session attendance
             | id_sestime_endhour   | 02 |
         And I click on "id_submitbutton" "button"
         And I follow "Report"
-        And I follow "Low grade"
+        And I follow "Below 100%"
         And I set the field "cb_selector" to "1"
         And I click on "Send a message" "button"
         Then I should see "Message body"
