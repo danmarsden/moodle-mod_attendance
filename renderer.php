@@ -305,8 +305,6 @@ class mod_attendance_renderer extends plugin_renderer_base {
     }
 
     protected function render_sess_manage_control(attendance_manage_data $sessdata) {
-        global $OUTPUT;
-
         $table = new html_table();
         $table->attributes['class'] = ' ';
         $table->width = '100%';

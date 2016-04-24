@@ -35,12 +35,13 @@ Feature: Teachers and Students can record session attendance
         When I log in as "teacher1"
         And I follow "Course 1"
         And I follow "Attendance"
-        And I follow "Add"
+        And I follow "Add session"
         And I set the field "Allow students to record own attendance" to "1"
         And I set the following fields to these values:
             | id_sestime_starthour | 22 |
             | id_sestime_endhour   | 23 |
         And I click on "id_submitbutton" "button"
+        Then I should see "22:00 - 23:00"
         And I log out
         When I log in as "student1"
         And I follow "Course 1"

@@ -109,8 +109,7 @@ class mod_attendance_structure {
                 $gradeitem = grade_item::fetch(array('courseid' => $this->course->id, 'itemtype' => 'mod',
                                  'itemmodule' => 'attendance', 'iteminstance' => $this->id));
                 if ($gradeitem->gradepass > 0 && $gradeitem->grademax != $gradeitem->grademin) {
-                    $this->lowgradethreshold = ($gradeitem->gradepass - $gradeitem->grademin)
-                                / ($gradeitem->grademax - $gradeitem->grademin);
+                    $this->lowgradethreshold = ($gradeitem->gradepass - $gradeitem->grademin) / ($gradeitem->grademax - $gradeitem->grademin);
                 }
             }
         }
