@@ -46,6 +46,7 @@ Feature: Teachers and Students can record session attendance
         When I log in as "student1"
         And I follow "Course 1"
         And I follow "Attendance"
+        And I follow "All"
         And I follow "Submit attendance"
         And I set the field "Present" to "1"
         And I press "Save changes"
