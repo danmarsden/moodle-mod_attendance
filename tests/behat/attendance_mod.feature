@@ -47,6 +47,7 @@ Feature: Teachers and Students can record session attendance
         And I follow "Course 1"
         And I follow "Attendance"
         And I follow "All"
+        Then I should see "22:00 - 23:00"
         And I follow "Submit attendance"
         And I set the field "Present" to "1"
         And I press "Save changes"
