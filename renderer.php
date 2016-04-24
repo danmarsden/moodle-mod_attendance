@@ -174,14 +174,17 @@ class mod_attendance_renderer extends plugin_renderer_base {
     }
 
     protected function render_view_controls(attendance_filter_controls $fcontrols) {
+        global $OUTPUT;
+
         $views[ATT_VIEW_ALL] = get_string('all', 'attendance');
         $views[ATT_VIEW_ALLPAST] = get_string('allpast', 'attendance');
-        if ($fcontrols->reportcontrol) {
-            $views[ATT_VIEW_NOTPRESENT] = get_string('lowgrade', 'attendance');
-        }
         $views[ATT_VIEW_MONTHS] = get_string('months', 'attendance');
         $views[ATT_VIEW_WEEKS] = get_string('weeks', 'attendance');
         $views[ATT_VIEW_DAYS] = get_string('days', 'attendance');
+        if ($fcontrols->reportcontrol) {
+            $views[ATT_VIEW_NOTPRESENT] = get_string('below', 'attendance',
+                        attendance_format_float($fcontrols->att->get_lowgrade_threshold() * 100));
+        }
         $viewcontrols = '';
         foreach ($views as $key => $sview) {
             if ($key != $fcontrols->pageparams->view) {
@@ -189,6 +192,9 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 $viewcontrols .= html_writer::tag('span', $link, array('class' => 'attbtn'));
             } else {
                 $viewcontrols .= html_writer::tag('span', $sview, array('class' => 'attcurbtn'));
+                if ($key == ATT_VIEW_NOTPRESENT) {
+                    $viewcontrols .= $OUTPUT->help_icon('below', 'attendance');
+                }
             }
         }
 
@@ -299,8 +305,6 @@ class mod_attendance_renderer extends plugin_renderer_base {
     }
 
     protected function render_sess_manage_control(attendance_manage_data $sessdata) {
-        global $OUTPUT;
-
         $table = new html_table();
         $table->attributes['class'] = ' ';
         $table->width = '100%';
@@ -735,8 +739,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         if ($userdata->pageparams->mode == mod_attendance_view_page_params::MODE_THIS_COURSE) {
             $o .= html_writer::empty_tag('hr');
 
-            $o .= construct_user_data_stat($userdata->stat, $userdata->statuses,
-                        $userdata->gradable, $userdata->grade, $userdata->maxgrade, $userdata->decimalpoints);
+            $o .= construct_user_data_stat($userdata->points, $userdata->maxpoints, $userdata->numtakensessions);
 
             $o .= $this->render_attendance_filter_controls($userdata->filtercontrols);
 
@@ -752,9 +755,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 }
                 $o .= html_writer::tag('h4', $ca->attname);
 
-                $o .= construct_user_data_stat($userdata->stat[$ca->attid], $userdata->statuses[$ca->attid],
-                            $userdata->gradable[$ca->attid], $userdata->grade[$ca->attid],
-                            $userdata->maxgrade[$ca->attid], $userdata->decimalpoints);
+                if (isset($userdata->points[$ca->attid])) {
+                    $o .= construct_user_data_stat($userdata->points[$ca->attid], $userdata->maxpoints[$ca->attid],
+                                $userdata->numtakensessions[$ca->attid]);
+                } else {
+                    $o .= construct_user_data_stat(0, 0, 0);
+                }
             }
         }
 
@@ -771,10 +777,13 @@ class mod_attendance_renderer extends plugin_renderer_base {
             get_string('time'),
             get_string('description', 'attendance'),
             get_string('status', 'attendance'),
+            get_string('points', 'attendance'),
             get_string('remarks', 'attendance')
         );
-        $table->align = array('', '', '', 'left', 'left', 'center', 'left', 'center');
-        $table->size = array('1px', '1px', '1px', '1px', '*', '1px', '1px', '*');
+        $table->align = array('', '', '', 'left', 'left', 'center', 'center', 'center');
+        $table->size = array('1px', '1px', '1px', '1px', '*', '*', '1px', '*');
+
+        $statussetmaxpoints = attendance_get_statusset_maxpoints($userdata->statuses);
 
         $i = 0;
         foreach ($userdata->sessionslog as $sess) {
@@ -793,7 +802,10 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $row->cells[] = $this->construct_time($sess->sessdate, $sess->duration);
             $row->cells[] = $sess->description;
             if (isset($sess->statusid)) {
-                $row->cells[] = $userdata->statuses[$sess->statusid]->description;
+                $status = $userdata->statuses[$sess->statusid];
+                $row->cells[] = $status->description;
+                $row->cells[] = attendance_format_float($status->grade) . ' / ' .
+                                    attendance_format_float($statussetmaxpoints[$status->setnumber]);
                 $row->cells[] = $sess->remarks;
             } else if ($sess->sessdate < $userdata->user->enrolmentstart) {
                 $cell = new html_table_cell(get_string('enrolmentstart', 'attendance',
@@ -882,18 +894,17 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $table->size[] = '1px';
         }
 
-        foreach ($reportdata->statuses as $status) {
-            $table->head[] = $status->acronym;
-            $table->align[] = 'center';
-            $table->size[] = '1px';
-            $sessionstats[$status->id] = 0;
-        }
+        $table->head[] = get_string('takensessions', 'attendance');
+        $table->align[] = 'center';
+        $table->size[] = '1px';
 
-        if ($reportdata->gradable) {
-            $table->head[] = get_string('grade');
-            $table->align[] = 'center';
-            $table->size[] = '1px';
-        }
+        $table->head[] = get_string('points', 'attendance');
+        $table->align[] = 'center';
+        $table->size[] = '1px';
+
+        $table->head[] = get_string('percentage', 'attendance');
+        $table->align[] = 'center';
+        $table->size[] = '1px';
 
         if ($bulkmessagecapability) { // Display the table header for bulk messaging.
             // The checkbox must have an id of cb_selector so that the JavaScript will pick it up.
@@ -910,18 +921,11 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $cellsgenerator = new user_sessions_cells_html_generator($reportdata, $user);
             $row->cells = array_merge($row->cells, $cellsgenerator->get_cells(true));
 
-            foreach ($reportdata->statuses as $status) {
-                if (array_key_exists($status->id, $reportdata->usersstats[$user->id])) {
-                    $row->cells[] = $reportdata->usersstats[$user->id][$status->id]->stcnt;
-                } else {
-                    // No attendance data for this $status => no statistic for this status.
-                    $row->cells[] = 0;
-                }
-            }
-
-            if ($reportdata->gradable) {
-                $row->cells[] = format_float($reportdata->grades[$user->id]).' / '.format_float($reportdata->maxgrades[$user->id]);
-            }
+            $row->cells[] = $reportdata->numtakensessions[$user->id];
+            $row->cells[] = attendance_format_float($reportdata->points[$user->id]) . ' / ' .
+                                attendance_format_float($reportdata->maxpoints[$user->id]);
+            $percent = attendance_calc_fraction($reportdata->points[$user->id], $reportdata->maxpoints[$user->id]);
+            $row->cells[] = attendance_format_float($percent * 100, false) . '%';
 
             if ($bulkmessagecapability) { // Create the checkbox for bulk messaging.
                 $row->cells[] = html_writer::checkbox('user'.$user->id, 'on', false, '',
@@ -936,21 +940,30 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $statrow->cells[] = '';
         $statrow->cells[] = get_string('summary');
         foreach ($reportdata->sessions as $sess) {
+            $sessionstats = array();
+            foreach ($reportdata->statuses as $status) {
+                if ($status->setnumber == $sess->statusset) {
+                    $status->count = 0;
+                    $sessionstats[$status->id] = $status;
+                }
+            }
+
             foreach ($reportdata->users as $user) {
-                foreach ($reportdata->statuses as $status) {
-                    if (!empty($reportdata->sessionslog[$user->id][$sess->id])) {
-                        if ($reportdata->sessionslog[$user->id][$sess->id]->statusid == $status->id) {
-                            $sessionstats[$status->id]++;
-                        }
+                if (!empty($reportdata->sessionslog[$user->id][$sess->id])) {
+                    $statusid = $reportdata->sessionslog[$user->id][$sess->id]->statusid;
+                    if (isset($sessionstats[$statusid]->count)) {
+                        $sessionstats[$statusid]->count++;
                     }
                 }
             }
 
             $statsoutput = '<br/>';
-            foreach ($reportdata->statuses as $status) {
-                $statsoutput .= "$status->description:".$sessionstats[$status->id]." <br/>";
+            foreach ($sessionstats as $status) {
+                $statsoutput .= "$status->description: {$status->count}<br/>";
             }
-            $statrow->cells[] = $statsoutput;
+            $cell = new html_table_cell($statsoutput);
+            $cell->style = 'white-space:nowrap;';
+            $statrow->cells[] = $cell;
 
         }
         $table->data[] = $statrow;
@@ -1008,7 +1021,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $table->head = array('#',
                              get_string('acronym', 'attendance'),
                              get_string('description'),
-                             get_string('grade'),
+                             get_string('points', 'attendance'),
                              get_string('action'));
         $table->align = array('center', 'center', 'center', 'center', 'center', 'center');
 
@@ -1048,7 +1061,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
         // We should probably rewrite this to use mforms but for now add sesskey.
         $o .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()))."\n";
 
-        $o .= $this->construct_preferences_button(get_string('update', 'attendance'), mod_attendance_preferences_page_params::ACTION_SAVE);
+        $o .= $this->construct_preferences_button(get_string('update', 'attendance'),
+                    mod_attendance_preferences_page_params::ACTION_SAVE);
         $o = html_writer::tag('form', $o, array('id' => 'preferencesform', 'method' => 'post',
                                                 'action' => $prefdata->url(array(), false)->out_omit_querystring()));
         $o = $this->output->container($o, 'generalbox attwidth');

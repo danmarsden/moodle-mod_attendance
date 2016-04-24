@@ -35,16 +35,19 @@ Feature: Teachers and Students can record session attendance
         When I log in as "teacher1"
         And I follow "Course 1"
         And I follow "Attendance"
-        And I follow "Add"
+        And I follow "Add session"
         And I set the field "Allow students to record own attendance" to "1"
         And I set the following fields to these values:
             | id_sestime_starthour | 22 |
             | id_sestime_endhour   | 23 |
         And I click on "id_submitbutton" "button"
+        Then I should see "22:00 - 23:00"
         And I log out
         When I log in as "student1"
         And I follow "Course 1"
         And I follow "Attendance"
+        And I follow "All"
+        Then I should see "22:00 - 23:00"
         And I follow "Submit attendance"
         And I set the field "Present" to "1"
         And I press "Save changes"
@@ -67,7 +70,7 @@ Feature: Teachers and Students can record session attendance
             | id_sestime_endhour   | 02 |
         And I click on "id_submitbutton" "button"
         And I follow "Report"
-        And I follow "Low grade"
+        And I follow "Below 100%"
         And I set the field "cb_selector" to "1"
         And I click on "Send a message" "button"
         Then I should see "Message body"
