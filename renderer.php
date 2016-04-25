@@ -177,7 +177,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $views[ATT_VIEW_ALL] = get_string('all', 'attendance');
         $views[ATT_VIEW_ALLPAST] = get_string('allpast', 'attendance');
         if ($fcontrols->reportcontrol) {
-            $views[ATT_VIEW_NOTPRESENT] = get_string('lowgrade', 'attendance');
+            $views[ATT_VIEW_NOTPRESENT] = get_string('below', 'attendance',
+                    attendance_format_float($fcontrols->att->get_lowgrade_threshold() * 100));
         }
         $views[ATT_VIEW_MONTHS] = get_string('months', 'attendance');
         $views[ATT_VIEW_WEEKS] = get_string('weeks', 'attendance');
