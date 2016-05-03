@@ -735,8 +735,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         if ($userdata->pageparams->mode == mod_attendance_view_page_params::MODE_THIS_COURSE) {
             $o .= html_writer::empty_tag('hr');
 
-            $o .= construct_user_data_stat($userdata->stat, $userdata->statuses,
-                        $userdata->gradable, $userdata->grade, $userdata->maxgrade, $userdata->decimalpoints);
+            $o .= construct_user_data_stat($userdata->summary->get_all_sessions_summary_for($userdata->user->id), $userdata->pageparams->view);
 
             $o .= $this->render_attendance_filter_controls($userdata->filtercontrols);
 
@@ -752,9 +751,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 }
                 $o .= html_writer::tag('h4', $ca->attname);
 
-                $o .= construct_user_data_stat($userdata->stat[$ca->attid], $userdata->statuses[$ca->attid],
-                            $userdata->gradable[$ca->attid], $userdata->grade[$ca->attid],
-                            $userdata->maxgrade[$ca->attid], $userdata->decimalpoints);
+                if (isset($userdata->summary[$ca->attid])) {
+                    $usersummary = $userdata->summary[$ca->attid]->get_all_sessions_summary_for($userdata->user->id);
+                } else {
+                    $usersummary = null;
+                }
+                $o .= construct_user_data_stat($usersummary, ATT_VIEW_ALL);
             }
         }
 
@@ -771,10 +773,13 @@ class mod_attendance_renderer extends plugin_renderer_base {
             get_string('time'),
             get_string('description', 'attendance'),
             get_string('status', 'attendance'),
+            get_string('points', 'attendance'),
             get_string('remarks', 'attendance')
         );
-        $table->align = array('', '', '', 'left', 'left', 'center', 'left', 'center');
-        $table->size = array('1px', '1px', '1px', '1px', '*', '1px', '1px', '*');
+        $table->align = array('', '', '', 'left', 'left', 'center', 'center', 'center');
+        $table->size = array('1px', '1px', '1px', '1px', '*', '*', '1px', '*');
+
+        $statussetmaxpoints = attendance_get_statusset_maxpoints($userdata->statuses);
 
         $i = 0;
         foreach ($userdata->sessionslog as $sess) {
@@ -793,7 +798,10 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $row->cells[] = $this->construct_time($sess->sessdate, $sess->duration);
             $row->cells[] = $sess->description;
             if (isset($sess->statusid)) {
-                $row->cells[] = $userdata->statuses[$sess->statusid]->description;
+                $status = $userdata->statuses[$sess->statusid];
+                $row->cells[] = $status->description;
+                $row->cells[] = attendance_format_float($status->grade) . ' / ' .
+                                    attendance_format_float($statussetmaxpoints[$status->setnumber]);
                 $row->cells[] = $sess->remarks;
             } else if ($sess->sessdate < $userdata->user->enrolmentstart) {
                 $cell = new html_table_cell(get_string('enrolmentstart', 'attendance',
@@ -815,6 +823,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
                     $row->cells[] = $cell;
                 } else { // Student cannot mark their own attendace.
                     $row->cells[] = '?';
+                    $row->cells[] = '? / ' . attendance_format_float($statussetmaxpoints[$sess->statusset]);
                     $row->cells[] = '';
                 }
             }
@@ -1008,7 +1017,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $table->head = array('#',
                              get_string('acronym', 'attendance'),
                              get_string('description'),
-                             get_string('grade'),
+                             get_string('points', 'attendance'),
                              get_string('action'));
         $table->align = array('center', 'center', 'center', 'center', 'center', 'center');
 
