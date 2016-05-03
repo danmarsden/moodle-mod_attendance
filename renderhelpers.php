@@ -49,7 +49,10 @@ class user_sessions_cells_generator {
             if (array_key_exists($sess->id, $this->reportdata->sessionslog[$this->user->id])) {
                 $statusid = $this->reportdata->sessionslog[$this->user->id][$sess->id]->statusid;
                 if (array_key_exists($statusid, $this->reportdata->statuses)) {
-                    $this->construct_existing_status_cell($this->reportdata->statuses[$statusid]->acronym);
+                    $points = attendance_format_float($this->reportdata->statuses[$statusid]->grade);
+                    $maxpoints = attendance_format_float($sess->maxpoints);
+                    $this->construct_existing_status_cell($this->reportdata->statuses[$statusid]->acronym .
+                                " ({$points}/{$maxpoints})");
                 } else {
                     $this->construct_hidden_status_cell($this->reportdata->allstatuses[$statusid]->acronym);
                 }

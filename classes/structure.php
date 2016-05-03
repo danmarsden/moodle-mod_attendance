@@ -233,6 +233,7 @@ class mod_attendance_structure {
             'edate'     => $this->pageparams->enddate,
             'cgroup'    => $this->pageparams->get_current_sesstype());
         $sessions = $DB->get_records_select('attendance_sessions', $where, $params, 'sessdate asc');
+        $statussetmaxpoints = attendance_get_statusset_maxpoints($this->get_statuses(true, true));
         foreach ($sessions as $sess) {
             if (empty($sess->description)) {
                 $sess->description = get_string('nodescription', 'attendance');
@@ -240,6 +241,7 @@ class mod_attendance_structure {
                 $sess->description = file_rewrite_pluginfile_urls($sess->description,
                     'pluginfile.php', $this->context->id, 'mod_attendance', 'session', $sess->id);
             }
+            $sess->maxpoints = $statussetmaxpoints[$sess->statusset];
         }
 
         return $sessions;
