@@ -176,12 +176,15 @@ class mod_attendance_renderer extends plugin_renderer_base {
     protected function render_view_controls(attendance_filter_controls $fcontrols) {
         $views[ATT_VIEW_ALL] = get_string('all', 'attendance');
         $views[ATT_VIEW_ALLPAST] = get_string('allpast', 'attendance');
-        if ($fcontrols->reportcontrol) {
+        if ($fcontrols->reportcontrol  && $fcontrols->att->grade > 0) {
             $views[ATT_VIEW_NOTPRESENT] = get_string('lowgrade', 'attendance');
         }
         $views[ATT_VIEW_MONTHS] = get_string('months', 'attendance');
         $views[ATT_VIEW_WEEKS] = get_string('weeks', 'attendance');
         $views[ATT_VIEW_DAYS] = get_string('days', 'attendance');
+        if ($fcontrols->reportcontrol) {
+            $views[ATT_VIEW_SUMMARY] = get_string('summary', 'attendance');
+        }
         $viewcontrols = '';
         foreach ($views as $key => $sview) {
             if ($key != $fcontrols->pageparams->view) {
@@ -852,6 +855,9 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $table = new html_table();
 
         $table->attributes['class'] = 'generaltable attwidth';
+        if ($reportdata->pageparams->view == ATT_VIEW_SUMMARY) {
+            $table->attributes['class'] .= ' summaryreport';
+        }
 
         // User picture.
         $table->head[] = '';
@@ -903,6 +909,28 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $table->align[] = 'center';
         $table->size[] = '1px';
 
+        if ($reportdata->pageparams->view == ATT_VIEW_SUMMARY) {
+            $table->head[] = get_string('sessionstotal', 'attendance');
+            $table->align[] = 'center';
+            $table->size[] = '1px';
+
+            $table->head[] = get_string('pointsallsessions', 'attendance');
+            $table->align[] = 'center';
+            $table->size[] = '1px';
+
+            $table->head[] = get_string('percentageallsessions', 'attendance');
+            $table->align[] = 'center';
+            $table->size[] = '1px';
+
+            $table->head[] = get_string('maxpossiblepoints', 'attendance');
+            $table->align[] = 'center';
+            $table->size[] = '1px';
+
+            $table->head[] = get_string('maxpossiblepercentage', 'attendance');
+            $table->align[] = 'center';
+            $table->size[] = '1px';
+        }
+
         if ($bulkmessagecapability) { // Display the table header for bulk messaging.
             // The checkbox must have an id of cb_selector so that the JavaScript will pick it up.
             $table->head[] = html_writer::checkbox('cb_selector', 0, false, '', array('id' => 'cb_selector'));
@@ -918,11 +946,26 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $cellsgenerator = new user_sessions_cells_html_generator($reportdata, $user);
             $row->cells = array_merge($row->cells, $cellsgenerator->get_cells(true));
 
-            $usersummary = $reportdata->summary->get_taken_sessions_summary_for($user->id);
+            if ($reportdata->pageparams->view == ATT_VIEW_SUMMARY) {
+                $usersummary = $reportdata->summary->get_all_sessions_summary_for($user->id);
+            } else {
+                $usersummary = $reportdata->summary->get_taken_sessions_summary_for($user->id);
+            }
             $row->cells[] = $usersummary->numtakensessions;
             $row->cells[] = attendance_format_float($usersummary->takensessionspoints) . ' / ' .
                                 attendance_format_float($usersummary->takensessionsmaxpoints);
             $row->cells[] = attendance_format_float($usersummary->takensessionspercentage * 100, false) . '%';
+
+            if ($reportdata->pageparams->view == ATT_VIEW_SUMMARY) {
+                $row->cells[] = $usersummary->numallsessions;
+                $row->cells[] = attendance_format_float($usersummary->takensessionspoints) . ' / ' .
+                                attendance_format_float($usersummary->allsessionsmaxpoints);
+                $row->cells[] = attendance_format_float($usersummary->allsessionspercentage * 100, false) . '%';
+
+                $row->cells[] = attendance_format_float($usersummary->maxpossiblepoints) . ' / ' .
+                                attendance_format_float($usersummary->allsessionsmaxpoints);
+                $row->cells[] = attendance_format_float($usersummary->maxpossiblepercentage * 100, false) . '%';
+            }
 
             if ($bulkmessagecapability) { // Create the checkbox for bulk messaging.
                 $row->cells[] = html_writer::checkbox('user'.$user->id, 'on', false, '',

@@ -128,7 +128,7 @@ class attendance_filter_controls implements renderable {
     private $urlpath;
     private $urlparams;
 
-    private $att;
+    public $att;
 
     public function __construct(mod_attendance_structure $att, $report = false) {
         global $PAGE;
@@ -138,7 +138,7 @@ class attendance_filter_controls implements renderable {
         $this->cm = $att->cm;
 
         // This is a report control only if $reports is true and the attendance block can be graded.
-        $this->reportcontrol = $report && ($att->grade > 0);
+        $this->reportcontrol = $report;
 
         $this->curdate = $att->pageparams->curdate;
 
@@ -440,7 +440,11 @@ class attendance_report_data implements renderable {
         $this->statuses = $att->get_statuses(true, true);
         $this->allstatuses = $att->get_statuses(false, true);
 
-        $this->summary = new mod_attendance_summary($att->id, array_keys($this->users), $att->pageparams->startdate, $att->pageparams->enddate);
+        if ($att->pageparams->view == ATT_VIEW_SUMMARY) {
+            $this->summary = new mod_attendance_summary($att->id);
+        } else {
+            $this->summary = new mod_attendance_summary($att->id, array_keys($this->users), $att->pageparams->startdate, $att->pageparams->enddate);
+        }
 
         foreach ($this->users as $key => $user) {
             $usersummary = $this->summary->get_taken_sessions_summary_for($user->id);

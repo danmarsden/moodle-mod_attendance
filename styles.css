@@ -17,7 +17,7 @@
 }
 
 .path-mod-attendance .attfiltercontrols {
-    margin-bottom: 10px;
+    margin-bottom: 10px !important;
     margin-right:auto;
     margin-left:auto;
 }
@@ -164,4 +164,16 @@
 
 .path-mod-attendance .attendancestatus-A {
     color: red;
+}
+
+.path-mod-attendance .summaryreport .c5 {
+    background-color: #EAEAEA;
+}
+
+.path-mod-attendance .summaryreport .c6 {
+    background-color: #EAEAEA;
+}
+
+.path-mod-attendance .summaryreport .c7 {
+    background-color: #EAEAEA;
 }
