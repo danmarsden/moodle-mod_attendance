@@ -123,10 +123,9 @@ if ($formdata = $mform->get_data()) {
         } else {
             print_error('sessionsnotfound', 'attendance', $att->url_manage());
         }
-        if ($reportdata->gradable) {
-            $data->tabhead[] = get_string('grade');
-            $data->tabhead[] = get_string('percentage', 'attendance');
-        }
+        $data->tabhead[] = get_string('takensessions', 'attendance');
+        $data->tabhead[] = get_string('points', 'attendance');
+        $data->tabhead[] = get_string('percentage', 'attendance');
 
         $i = 0;
         $data->table = array();
@@ -158,16 +157,13 @@ if ($formdata = $mform->get_data()) {
             }
             $cellsgenerator = new user_sessions_cells_text_generator($reportdata, $user);
             $data->table[$i] = array_merge($data->table[$i], $cellsgenerator->get_cells(isset($formdata->includeremarks)));
-            if ($reportdata->gradable) {
-                $data->table[$i][] = format_float($reportdata->grades[$user->id]).' / '.
-                    format_float($reportdata->maxgrades[$user->id]);
-                if ($reportdata->maxgrades[$user->id]) {
-                    $percent = $reportdata->grades[$user->id] * 100.0 / $reportdata->maxgrades[$user->id];
-                } else {
-                    $percent = 0.0;
-                }
-                $data->table[$i][] = $percent;
-            }
+
+            $usersummary = $reportdata->summary->get_taken_sessions_summary_for($user->id);
+            $data->table[$i][] = $usersummary->numtakensessions;
+            $data->table[$i][] = attendance_format_float($usersummary->takensessionspoints) . ' / ' .
+                                    attendance_format_float($usersummary->takensessionsmaxpoints);
+            $data->table[$i][] = attendance_format_float($usersummary->takensessionspercentage * 100, false);
+
             $i++;
         }
 
