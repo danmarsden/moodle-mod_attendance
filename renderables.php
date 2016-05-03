@@ -449,25 +449,15 @@ class attendance_report_data implements renderable {
     // Includes disablrd/deleted statuses.
     public $allstatuses;
 
-    public $gradable;
-
-    public $decimalpoints;
-
     public $usersgroups = array();
 
     public $sessionslog = array();
 
-    public $usersstats = array();
-
-    public $grades = array();
-
-    public $maxgrades = array();
+    public $summary = array();
 
     public $att;
 
     public function  __construct(mod_attendance_structure $att) {
-        global $CFG;
-
         $currenttime = time();
         if ($att->pageparams->view == ATT_VIEW_NOTPRESENT) {
             $att->pageparams->enddate = $currenttime;
@@ -492,32 +482,16 @@ class attendance_report_data implements renderable {
         $this->statuses = $att->get_statuses(true, true);
         $this->allstatuses = $att->get_statuses(false, true);
 
-        $this->gradable = $att->grade > 0;
-
-        if (!$this->decimalpoints = grade_get_setting($att->course->id, 'decimalpoints')) {
-            $this->decimalpoints = $CFG->grade_decimalpoints;
-        }
-
-        $maxgrade = attendance_get_user_max_grade(count($this->sessions), $this->statuses);
+        $this->summary = new mod_attendance_summary($att->id, array_keys($this->users), $att->pageparams->startdate, $att->pageparams->enddate);
 
         foreach ($this->users as $key => $user) {
-            $grade = 0;
-            if ($this->gradable) {
-                $grade = $att->get_user_grade($user->id, array('enddate' => $currenttime));
-                $totalgrade = $att->get_user_grade($user->id);
-            }
-
-            if ($att->pageparams->view != ATT_VIEW_NOTPRESENT || $grade < $maxgrade) {
+            $usersummary = $this->summary->get_taken_sessions_summary_for($user->id);
+            if ($att->pageparams->view != ATT_VIEW_NOTPRESENT ||
+                    $usersummary->takensessionspoints < $usersummary->takensessionsmaxpoints ||
+                    $usersummary->takensessionsmaxpoints == 0) {
                 $this->usersgroups[$user->id] = groups_get_all_groups($att->course->id, $user->id);
 
                 $this->sessionslog[$user->id] = $att->get_user_filtered_sessions_log($user->id);
-
-                $this->usersstats[$user->id] = $att->get_user_statuses_stat($user->id);
-
-                if ($this->gradable) {
-                    $this->grades[$user->id] = $totalgrade;
-                    $this->maxgrades[$user->id] = $att->get_user_max_grade($user->id);;
-                }
             } else {
                 unset($this->users[$key]);
             }

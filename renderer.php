@@ -882,18 +882,17 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $table->size[] = '1px';
         }
 
-        foreach ($reportdata->statuses as $status) {
-            $table->head[] = $status->acronym;
-            $table->align[] = 'center';
-            $table->size[] = '1px';
-            $sessionstats[$status->id] = 0;
-        }
+        $table->head[] = get_string('takensessions', 'attendance');
+        $table->align[] = 'center';
+        $table->size[] = '1px';
 
-        if ($reportdata->gradable) {
-            $table->head[] = get_string('grade');
-            $table->align[] = 'center';
-            $table->size[] = '1px';
-        }
+        $table->head[] = get_string('points', 'attendance');
+        $table->align[] = 'center';
+        $table->size[] = '1px';
+
+        $table->head[] = get_string('percentage', 'attendance');
+        $table->align[] = 'center';
+        $table->size[] = '1px';
 
         if ($bulkmessagecapability) { // Display the table header for bulk messaging.
             // The checkbox must have an id of cb_selector so that the JavaScript will pick it up.
@@ -910,18 +909,11 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $cellsgenerator = new user_sessions_cells_html_generator($reportdata, $user);
             $row->cells = array_merge($row->cells, $cellsgenerator->get_cells(true));
 
-            foreach ($reportdata->statuses as $status) {
-                if (array_key_exists($status->id, $reportdata->usersstats[$user->id])) {
-                    $row->cells[] = $reportdata->usersstats[$user->id][$status->id]->stcnt;
-                } else {
-                    // No attendance data for this $status => no statistic for this status.
-                    $row->cells[] = 0;
-                }
-            }
-
-            if ($reportdata->gradable) {
-                $row->cells[] = format_float($reportdata->grades[$user->id]).' / '.format_float($reportdata->maxgrades[$user->id]);
-            }
+            $usersummary = $reportdata->summary->get_taken_sessions_summary_for($user->id);
+            $row->cells[] = $usersummary->numtakensessions;
+            $row->cells[] = attendance_format_float($usersummary->takensessionspoints) . ' / ' .
+                                attendance_format_float($usersummary->takensessionsmaxpoints);
+            $row->cells[] = attendance_format_float($usersummary->takensessionspercentage * 100, false) . '%';
 
             if ($bulkmessagecapability) { // Create the checkbox for bulk messaging.
                 $row->cells[] = html_writer::checkbox('user'.$user->id, 'on', false, '',
@@ -936,22 +928,30 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $statrow->cells[] = '';
         $statrow->cells[] = get_string('summary');
         foreach ($reportdata->sessions as $sess) {
+            $sessionstats = array();
+            foreach ($reportdata->statuses as $status) {
+                if ($status->setnumber == $sess->statusset) {
+                    $status->count = 0;
+                    $sessionstats[$status->id] = $status;
+                }
+            }
+
             foreach ($reportdata->users as $user) {
-                foreach ($reportdata->statuses as $status) {
-                    if (!empty($reportdata->sessionslog[$user->id][$sess->id])) {
-                        if ($reportdata->sessionslog[$user->id][$sess->id]->statusid == $status->id) {
-                            $sessionstats[$status->id]++;
-                        }
+                if (!empty($reportdata->sessionslog[$user->id][$sess->id])) {
+                    $statusid = $reportdata->sessionslog[$user->id][$sess->id]->statusid;
+                    if (isset($sessionstats[$statusid]->count)) {
+                        $sessionstats[$statusid]->count++;
                     }
                 }
             }
 
             $statsoutput = '<br/>';
-            foreach ($reportdata->statuses as $status) {
-                $statsoutput .= "$status->description:".$sessionstats[$status->id]." <br/>";
+            foreach ($sessionstats as $status) {
+                $statsoutput .= "$status->description: {$status->count}<br/>";
             }
-            $statrow->cells[] = $statsoutput;
-
+            $cell = new html_table_cell($statsoutput);
+            $cell->style = 'white-space:nowrap;';
+            $statrow->cells[] = $cell;
         }
         $table->data[] = $statrow;
 
