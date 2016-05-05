@@ -61,10 +61,6 @@ class mod_attendance_structure {
     // Array by sessionid.
     private $sessioninfo = array();
 
-    // Arrays by userid.
-    private $usertakensesscount = array();
-    private $userstatusesstat = array();
-
     /**
      * Initializes the attendance API instance using the data from DB
      *

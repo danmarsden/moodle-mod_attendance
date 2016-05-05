@@ -232,12 +232,6 @@ function construct_session_full_date_time($datetime, $duration) {
 }
 
 function construct_user_data_stat($usersummary, $view) {
-    global $OUTPUT;
-
-    if (empty($usersummary)) {
-       return 'no data';
-    }
-
     $stattable = new html_table();
     $stattable->attributes['class'] = 'attlist';
     $row = new html_table_row();
@@ -293,7 +287,7 @@ function construct_user_data_stat($usersummary, $view) {
     return html_writer::table($stattable);
 }
 
-function construct_full_user_stat_html_table($attendance, $course, $user, $coursemodule) {
+function construct_full_user_stat_html_table($attendance, $user) {
     $summary = new mod_attendance_summary($attendance->id, $user->id);
     return construct_user_data_stat($summary->get_all_sessions_summary_for($user->id), ATT_VIEW_ALL);
 }

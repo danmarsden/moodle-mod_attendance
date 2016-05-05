@@ -336,8 +336,6 @@ class attendance_user_data implements renderable {
 
     public $pageparams;
 
-    public $stat;
-
     public $statuses;
 
     public $summary;
@@ -361,7 +359,8 @@ class attendance_user_data implements renderable {
         if ($this->pageparams->mode == mod_attendance_view_page_params::MODE_THIS_COURSE) {
             $this->statuses = $att->get_statuses(true, true);
 
-            $this->summary = new mod_attendance_summary($att->id, array($userid), $att->pageparams->startdate, $att->pageparams->enddate);
+            $this->summary = new mod_attendance_summary($att->id, array($userid), $att->pageparams->startdate,
+                                                        $att->pageparams->enddate);
 
             $this->filtercontrols = new attendance_filter_controls($att);
 
@@ -378,8 +377,7 @@ class attendance_user_data implements renderable {
                     unset($this->courseatts[$atid]);
                     continue;
                 }
-                $statuses = attendance_get_statuses($ca->attid);
-
+                $this->statuses[$ca->attid] = attendance_get_statuses($ca->attid);
                 $this->summary[$ca->attid] = new mod_attendance_summary($ca->attid, array($userid));
             }
         }
@@ -443,7 +441,8 @@ class attendance_report_data implements renderable {
         if ($att->pageparams->view == ATT_VIEW_SUMMARY) {
             $this->summary = new mod_attendance_summary($att->id);
         } else {
-            $this->summary = new mod_attendance_summary($att->id, array_keys($this->users), $att->pageparams->startdate, $att->pageparams->enddate);
+            $this->summary = new mod_attendance_summary($att->id, array_keys($this->users),
+                                                        $att->pageparams->startdate, $att->pageparams->enddate);
         }
 
         foreach ($this->users as $key => $user) {

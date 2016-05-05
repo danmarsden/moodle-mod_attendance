@@ -302,8 +302,6 @@ class mod_attendance_renderer extends plugin_renderer_base {
     }
 
     protected function render_sess_manage_control(attendance_manage_data $sessdata) {
-        global $OUTPUT;
-
         $table = new html_table();
         $table->attributes['class'] = ' ';
         $table->width = '100%';
@@ -738,7 +736,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
         if ($userdata->pageparams->mode == mod_attendance_view_page_params::MODE_THIS_COURSE) {
             $o .= html_writer::empty_tag('hr');
 
-            $o .= construct_user_data_stat($userdata->summary->get_all_sessions_summary_for($userdata->user->id), $userdata->pageparams->view);
+            $o .= construct_user_data_stat($userdata->summary->get_all_sessions_summary_for($userdata->user->id),
+                                                                                            $userdata->pageparams->view);
 
             $o .= $this->render_attendance_filter_controls($userdata->filtercontrols);
 

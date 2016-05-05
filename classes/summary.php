@@ -100,7 +100,8 @@ class mod_attendance_summary {
             $usersummary->takensessionspoints = 0;
             $usersummary->takensessionsmaxpoints = 0;
         }
-        $usersummary->takensessionspercentage = attendance_calc_fraction($usersummary->takensessionspoints, $usersummary->takensessionsmaxpoints);
+        $usersummary->takensessionspercentage = attendance_calc_fraction($usersummary->takensessionspoints,
+                                                                         $usersummary->takensessionsmaxpoints);
 
         return $usersummary;
     }
@@ -131,11 +132,13 @@ class mod_attendance_summary {
                 }
             }
         }
-        $usersummary->allsessionspercentage = attendance_calc_fraction($usersummary->takensessionspoints, $usersummary->allsessionsmaxpoints);
+        $usersummary->allsessionspercentage = attendance_calc_fraction($usersummary->takensessionspoints,
+                                                                       $usersummary->allsessionsmaxpoints);
 
         $deltapoints = $usersummary->allsessionsmaxpoints - $usersummary->takensessionsmaxpoints;
         $usersummary->maxpossiblepoints = $usersummary->takensessionspoints + $deltapoints;
-        $usersummary->maxpossiblepercentage = attendance_calc_fraction($usersummary->maxpossiblepoints, $usersummary->allsessionsmaxpoints);
+        $usersummary->maxpossiblepercentage = attendance_calc_fraction($usersummary->maxpossiblepoints,
+                                                                       $usersummary->allsessionsmaxpoints);
 
         return $usersummary;
     }
