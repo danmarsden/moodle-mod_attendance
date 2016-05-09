@@ -23,6 +23,7 @@
  */
 
 defined('MOODLE_INTERNAL') || die;
+require_once($CFG->dirroot . '/user/profile/lib.php');
 
 if ($ADMIN->fulltree) {
     require_once(dirname(__FILE__).'/lib.php');
@@ -41,4 +42,17 @@ if ($ADMIN->fulltree) {
 
     $settings->add(new admin_setting_configselect('attendance/resultsperpage',
         get_string('resultsperpage', 'attendance'), get_string('resultsperpage_desc', 'attendance'), 25, $options));
+
+    $fields = profile_get_custom_fields();
+
+    if (!empty($fields)) {
+        $useroptions = array('0' => get_string('donotuserfid', 'attendance'));
+
+        foreach ($fields as $field) {
+            $useroptions[$field->id] = $field->name;
+        }
+
+        $settings->add(new admin_setting_configselect('attendance/rfidfield',
+        get_string('rfidfield', 'attendance'), get_string('rfidfield_desc', 'attendance'), 0, $useroptions));
+    }
 }
