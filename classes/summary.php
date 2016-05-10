@@ -22,7 +22,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-include_once($CFG->dirroot . '/mod/attendance/locallib.php');
+require_once($CFG->dirroot . '/mod/attendance/locallib.php');
 
 class mod_attendance_summary {
 
