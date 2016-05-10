@@ -49,8 +49,8 @@ class user_sessions_cells_generator {
             if (array_key_exists($sess->id, $this->reportdata->sessionslog[$this->user->id])) {
                 $statusid = $this->reportdata->sessionslog[$this->user->id][$sess->id]->statusid;
                 if (array_key_exists($statusid, $this->reportdata->statuses)) {
-                    $points = attendance_format_float($this->reportdata->statuses[$statusid]->grade);
-                    $maxpoints = attendance_format_float($sess->maxpoints);
+                    $points = format_float($this->reportdata->statuses[$statusid]->grade, 1, true, true);
+                    $maxpoints = format_float($sess->maxpoints, 1, true, true);
                     $this->construct_existing_status_cell($this->reportdata->statuses[$statusid]->acronym .
                                 " ({$points}/{$maxpoints})");
                 } else {
@@ -243,44 +243,47 @@ function construct_user_data_stat($usersummary, $view) {
     $row = new html_table_row();
     $row->attributes['class'] = 'normal';
     $row->cells[] = get_string('pointssessionscompleted', 'attendance') . ':';
-    $row->cells[] = attendance_format_float($usersummary->takensessionspoints) . ' / ' . attendance_format_float($usersummary->takensessionsmaxpoints);
+    $row->cells[] = format_float($usersummary->takensessionspoints, 1, true, true) . ' / ' .
+                        format_float($usersummary->takensessionsmaxpoints, 1, true, true);
     $stattable->data[] = $row;
 
     $row = new html_table_row();
     $row->attributes['class'] = 'normal';
     $row->cells[] = get_string('percentagesessionscompleted', 'attendance') . ':';
-    $row->cells[] = attendance_format_float($usersummary->takensessionspercentage * 100, false) . '%';
+    $row->cells[] = format_float($usersummary->takensessionspercentage * 100) . '%';
     $stattable->data[] = $row;
 
     if ($view == ATT_VIEW_ALL) {
         $row = new html_table_row();
         $row->attributes['class'] = 'highlight';
         $row->cells[] = get_string('sessionstotal', 'attendance') . ':';
-        $row->cells[] = attendance_format_float($usersummary->numallsessions);
+        $row->cells[] = $usersummary->numallsessions;
         $stattable->data[] = $row;
 
         $row = new html_table_row();
         $row->attributes['class'] = 'highlight';
         $row->cells[] = get_string('pointsallsessions', 'attendance') . ':';
-        $row->cells[] = attendance_format_float($usersummary->takensessionspoints) . ' / ' . attendance_format_float($usersummary->allsessionsmaxpoints);
+        $row->cells[] = format_float($usersummary->takensessionspoints, 1, true, true) . ' / ' .
+                            format_float($usersummary->allsessionsmaxpoints, 1, true, true);
         $stattable->data[] = $row;
 
         $row = new html_table_row();
         $row->attributes['class'] = 'highlight';
         $row->cells[] = get_string('percentageallsessions', 'attendance') . ':';
-        $row->cells[] = attendance_format_float($usersummary->allsessionspercentage * 100, false) . '%';
+        $row->cells[] = format_float($usersummary->allsessionspercentage * 100) . '%';
         $stattable->data[] = $row;
 
         $row = new html_table_row();
         $row->attributes['class'] = 'normal';
         $row->cells[] = get_string('maxpossiblepoints', 'attendance') . ':';
-        $row->cells[] = attendance_format_float($usersummary->maxpossiblepoints) . ' / ' . attendance_format_float($usersummary->allsessionsmaxpoints);
+        $row->cells[] = format_float($usersummary->maxpossiblepoints, 1, true, true) . ' / ' .
+                            format_float($usersummary->allsessionsmaxpoints, 1, true, true);
         $stattable->data[] = $row;
 
         $row = new html_table_row();
         $row->attributes['class'] = 'normal';
         $row->cells[] = get_string('maxpossiblepercentage', 'attendance') . ':';
-        $row->cells[] = attendance_format_float($usersummary->maxpossiblepercentage * 100, false) . '%';
+        $row->cells[] = format_float($usersummary->maxpossiblepercentage * 100) . '%';
         $stattable->data[] = $row;
     }
 

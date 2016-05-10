@@ -239,14 +239,3 @@ function attendance_update_users_grade($attendance, $userids=array()) {
 
     return grade_update('mod/attendance', $course->id, 'mod', 'attendance', $attendance->id, 0, $grades);
 }
-
-/**
- * Given a float, prints it nicely.
- *
- * @param float $float The float to print
- * @param bool $stripzeros If true, removes final zeros after decimal point
- * @return string locale float
- */
-function attendance_format_float($float, $stripzeros=true) {
-    return format_float($float, 1, true, $stripzeros);
-}

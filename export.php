@@ -160,9 +160,9 @@ if ($formdata = $mform->get_data()) {
 
             $usersummary = $reportdata->summary->get_taken_sessions_summary_for($user->id);
             $data->table[$i][] = $usersummary->numtakensessions;
-            $data->table[$i][] = attendance_format_float($usersummary->takensessionspoints) . ' / ' .
-                                    attendance_format_float($usersummary->takensessionsmaxpoints);
-            $data->table[$i][] = attendance_format_float($usersummary->takensessionspercentage * 100, false);
+            $data->table[$i][] = format_float($usersummary->takensessionspoints, 1, true, true) . ' / ' .
+                                    format_float($usersummary->takensessionsmaxpoints, 1, true, true);
+            $data->table[$i][] = format_float($usersummary->takensessionspercentage * 100);
 
             $i++;
         }

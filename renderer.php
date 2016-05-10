@@ -802,8 +802,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
             if (isset($sess->statusid)) {
                 $status = $userdata->statuses[$sess->statusid];
                 $row->cells[] = $status->description;
-                $row->cells[] = attendance_format_float($status->grade) . ' / ' .
-                                    attendance_format_float($statussetmaxpoints[$status->setnumber]);
+                $row->cells[] = format_float($status->grade, 1, true, true) . ' / ' .
+                                    format_float($statussetmaxpoints[$status->setnumber], 1, true, true);
                 $row->cells[] = $sess->remarks;
             } else if ($sess->sessdate < $userdata->user->enrolmentstart) {
                 $cell = new html_table_cell(get_string('enrolmentstart', 'attendance',
@@ -825,7 +825,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
                     $row->cells[] = $cell;
                 } else { // Student cannot mark their own attendace.
                     $row->cells[] = '?';
-                    $row->cells[] = '? / ' . attendance_format_float($statussetmaxpoints[$sess->statusset]);
+                    $row->cells[] = '? / ' . format_float($statussetmaxpoints[$sess->statusset], 1, true, true);
                     $row->cells[] = '';
                 }
             }
@@ -951,19 +951,19 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 $usersummary = $reportdata->summary->get_taken_sessions_summary_for($user->id);
             }
             $row->cells[] = $usersummary->numtakensessions;
-            $row->cells[] = attendance_format_float($usersummary->takensessionspoints) . ' / ' .
-                                attendance_format_float($usersummary->takensessionsmaxpoints);
-            $row->cells[] = attendance_format_float($usersummary->takensessionspercentage * 100, false) . '%';
+            $row->cells[] = format_float($usersummary->takensessionspoints, 1, true, true) . ' / ' .
+                                format_float($usersummary->takensessionsmaxpoints, 1, true, true);
+            $row->cells[] = format_float($usersummary->takensessionspercentage * 100) . '%';
 
             if ($reportdata->pageparams->view == ATT_VIEW_SUMMARY) {
                 $row->cells[] = $usersummary->numallsessions;
-                $row->cells[] = attendance_format_float($usersummary->takensessionspoints) . ' / ' .
-                                attendance_format_float($usersummary->allsessionsmaxpoints);
-                $row->cells[] = attendance_format_float($usersummary->allsessionspercentage * 100, false) . '%';
+                $row->cells[] = format_float($usersummary->takensessionspoints, 1, true, true) . ' / ' .
+                                format_float($usersummary->allsessionsmaxpoints, 1, true, true);
+                $row->cells[] = format_float($usersummary->allsessionspercentage * 100) . '%';
 
-                $row->cells[] = attendance_format_float($usersummary->maxpossiblepoints) . ' / ' .
-                                attendance_format_float($usersummary->allsessionsmaxpoints);
-                $row->cells[] = attendance_format_float($usersummary->maxpossiblepercentage * 100, false) . '%';
+                $row->cells[] = format_float($usersummary->maxpossiblepoints, 1, true, true) . ' / ' .
+                                format_float($usersummary->allsessionsmaxpoints, 1, true, true);
+                $row->cells[] = format_float($usersummary->maxpossiblepercentage * 100) . '%';
             }
 
             if ($bulkmessagecapability) { // Create the checkbox for bulk messaging.
