@@ -22,6 +22,8 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+include_once($CFG->dirroot . '/mod/attendance/locallib.php');
+
 class mod_attendance_summary {
 
     /** @var int attendance instance identifier */
@@ -80,6 +82,21 @@ class mod_attendance_summary {
      */
     public function get_groupmode() {
         return $this->groupmode;
+    }
+
+    /**
+     * Returns the percentages of each user related to the taken sessions
+     *
+     * @return array
+     */
+    public function get_user_taken_sessions_percentages() {
+        $percentages = array();
+
+        foreach ($this->userspoints as $userid => $userpoints) {
+            $percentages[$userid] = attendance_calc_fraction($userpoints->points, $userpoints->maxpoints);
+        }
+
+        return $percentages;
     }
 
     /**
