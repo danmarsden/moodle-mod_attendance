@@ -49,7 +49,10 @@ class user_sessions_cells_generator {
             if (array_key_exists($sess->id, $this->reportdata->sessionslog[$this->user->id])) {
                 $statusid = $this->reportdata->sessionslog[$this->user->id][$sess->id]->statusid;
                 if (array_key_exists($statusid, $this->reportdata->statuses)) {
-                    $this->construct_existing_status_cell($this->reportdata->statuses[$statusid]->acronym);
+                    $points = format_float($this->reportdata->statuses[$statusid]->grade, 1, true, true);
+                    $maxpoints = format_float($sess->maxpoints, 1, true, true);
+                    $this->construct_existing_status_cell($this->reportdata->statuses[$statusid]->acronym .
+                                " ({$points}/{$maxpoints})");
                 } else {
                     $this->construct_hidden_status_cell($this->reportdata->allstatuses[$statusid]->acronym);
                 }
@@ -228,65 +231,66 @@ function construct_session_full_date_time($datetime, $duration) {
     return $sessinfo;
 }
 
-function construct_user_data_stat($stat, $statuses, $gradable, $grade, $maxgrade, $decimalpoints) {
-    global $OUTPUT;
-
+function construct_user_data_stat($usersummary, $view) {
     $stattable = new html_table();
     $stattable->attributes['class'] = 'attlist';
     $row = new html_table_row();
-    $row->cells[] = get_string('sessionscompleted', 'attendance').':';
-    $row->cells[] = $stat['completed'];
+    $row->attributes['class'] = 'normal';
+    $row->cells[] = get_string('sessionscompleted', 'attendance') . ':';
+    $row->cells[] = $usersummary->numtakensessions;
     $stattable->data[] = $row;
 
-    foreach ($statuses as $st) {
-        $row = new html_table_row();
-        $row->cells[] = $st->description . ':';
-        $row->cells[] = array_key_exists($st->id, $stat['statuses']) ? $stat['statuses'][$st->id]->stcnt : 0;
+    $row = new html_table_row();
+    $row->attributes['class'] = 'normal';
+    $row->cells[] = get_string('pointssessionscompleted', 'attendance') . ':';
+    $row->cells[] = format_float($usersummary->takensessionspoints, 1, true, true) . ' / ' .
+                        format_float($usersummary->takensessionsmaxpoints, 1, true, true);
+    $stattable->data[] = $row;
 
+    $row = new html_table_row();
+    $row->attributes['class'] = 'normal';
+    $row->cells[] = get_string('percentagesessionscompleted', 'attendance') . ':';
+    $row->cells[] = format_float($usersummary->takensessionspercentage * 100) . '%';
+    $stattable->data[] = $row;
+
+    if ($view == ATT_VIEW_ALL) {
+        $row = new html_table_row();
+        $row->attributes['class'] = 'highlight';
+        $row->cells[] = get_string('sessionstotal', 'attendance') . ':';
+        $row->cells[] = $usersummary->numallsessions;
         $stattable->data[] = $row;
-    }
 
-    if ($gradable) {
         $row = new html_table_row();
-        $row->cells[] = get_string('attendancegrade', 'attendance') .
-                        $OUTPUT->help_icon('gradebookexplanation', 'attendance') . ':';
-        $row->cells[] = format_float($grade) . ' / ' . format_float($maxgrade);
+        $row->attributes['class'] = 'highlight';
+        $row->cells[] = get_string('pointsallsessions', 'attendance') . ':';
+        $row->cells[] = format_float($usersummary->takensessionspoints, 1, true, true) . ' / ' .
+                            format_float($usersummary->allsessionsmaxpoints, 1, true, true);
         $stattable->data[] = $row;
 
         $row = new html_table_row();
-        $row->cells[] = get_string('attendancepercent', 'attendance') . ':';
-        if ($maxgrade == 0) {
-            $percent = 0;
-        } else {
-            $percent = $grade / $maxgrade * 100;
-        }
-        $row->cells[] = format_float(sprintf("%0.{$decimalpoints}f", $percent));
+        $row->attributes['class'] = 'highlight';
+        $row->cells[] = get_string('percentageallsessions', 'attendance') . ':';
+        $row->cells[] = format_float($usersummary->allsessionspercentage * 100) . '%';
+        $stattable->data[] = $row;
+
+        $row = new html_table_row();
+        $row->attributes['class'] = 'normal';
+        $row->cells[] = get_string('maxpossiblepoints', 'attendance') . ':';
+        $row->cells[] = format_float($usersummary->maxpossiblepoints, 1, true, true) . ' / ' .
+                            format_float($usersummary->allsessionsmaxpoints, 1, true, true);
+        $stattable->data[] = $row;
+
+        $row = new html_table_row();
+        $row->attributes['class'] = 'normal';
+        $row->cells[] = get_string('maxpossiblepercentage', 'attendance') . ':';
+        $row->cells[] = format_float($usersummary->maxpossiblepercentage * 100) . '%';
         $stattable->data[] = $row;
     }
 
     return html_writer::table($stattable);
 }
 
-function construct_full_user_stat_html_table($attendance, $course, $user, $coursemodule) {
-    global $CFG;
-    $gradeable = $attendance->grade > 0;
-    $statuses = attendance_get_statuses($attendance->id);
-    $userstatusesstat = attendance_get_user_statuses_stat($attendance->id, $course->startdate, $user->id, $coursemodule);
-    $stat['completed'] = attendance_get_user_taken_sessions_count($attendance->id, $course->startdate, $user->id, $coursemodule);
-    $stat['statuses'] = $userstatusesstat;
-    if ($gradeable) {
-        $grade = attendance_get_user_grade($userstatusesstat, $statuses);
-        $maxgrade = attendance_get_user_max_grade(attendance_get_user_taken_sessions_count($attendance->id, $course->startdate,
-                                                                                    $user->id, $coursemodule), $statuses);
-        if (!$decimalpoints = grade_get_setting($course->id, 'decimalpoints')) {
-            $decimalpoints = $CFG->grade_decimalpoints;
-        }
-    } else {
-        $grade = 0;
-        $maxgrade = 0;
-        $decimalpoints = 0;
-    }
-
-    return construct_user_data_stat($stat, $statuses,
-                $gradeable, $grade, $maxgrade, $decimalpoints);
+function construct_full_user_stat_html_table($attendance, $user) {
+    $summary = new mod_attendance_summary($attendance->id, $user->id);
+    return construct_user_data_stat($summary->get_all_sessions_summary_for($user->id), ATT_VIEW_ALL);
 }

@@ -250,7 +250,7 @@ function attendance_user_complete($course, $user, $mod, $attendance) {
     require_once($CFG->libdir.'/gradelib.php');
 
     if (has_capability('mod/attendance:canbelisted', $mod->context, $user->id)) {
-        echo construct_full_user_stat_html_table($attendance, $course, $user, $mod);
+        echo construct_full_user_stat_html_table($attendance, $user);
     }
 }
 
@@ -276,7 +276,7 @@ function attendance_grade_item_update($attendance, $grades=null) {
     if (!isset($attendance->courseid)) {
         $attendance->courseid = $attendance->course;
     }
-    if (! $course = $DB->get_record('course', array('id' => $attendance->course))) {
+    if (!$DB->get_record('course', array('id' => $attendance->course))) {
         error("Course is misconfigured");
     }
 
@@ -284,7 +284,6 @@ function attendance_grade_item_update($attendance, $grades=null) {
         $params = array('itemname' => $attendance->name, 'idnumber' => $attendance->cmidnumber);
     } else {
         // MDL-14303.
-        $cm = get_coursemodule_from_instance('attendance', $attendance->id);
         $params = array('itemname' => $attendance->name/*, 'idnumber'=>$attendance->id*/);
     }
 

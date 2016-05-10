@@ -128,7 +128,7 @@ class attendance_filter_controls implements renderable {
     private $urlpath;
     private $urlparams;
 
-    private $att;
+    public $att;
 
     public function __construct(mod_attendance_structure $att, $report = false) {
         global $PAGE;
@@ -138,7 +138,7 @@ class attendance_filter_controls implements renderable {
         $this->cm = $att->cm;
 
         // This is a report control only if $reports is true and the attendance block can be graded.
-        $this->reportcontrol = $report && ($att->grade > 0);
+        $this->reportcontrol = $report;
 
         $this->curdate = $att->pageparams->curdate;
 
@@ -336,17 +336,9 @@ class attendance_user_data implements renderable {
 
     public $pageparams;
 
-    public $stat;
-
     public $statuses;
 
-    public $gradable;
-
-    public $grade;
-
-    public $maxgrade;
-
-    public $decimalpoints;
+    public $summary;
 
     public $filtercontrols;
 
@@ -360,26 +352,15 @@ class attendance_user_data implements renderable {
     private $urlparams;
 
     public function  __construct(mod_attendance_structure $att, $userid) {
-        global $CFG;
-
         $this->user = $att->get_user($userid);
 
         $this->pageparams = $att->pageparams;
 
-        if (!$this->decimalpoints = grade_get_setting($att->course->id, 'decimalpoints')) {
-            $this->decimalpoints = $CFG->grade_decimalpoints;
-        }
-
         if ($this->pageparams->mode == mod_attendance_view_page_params::MODE_THIS_COURSE) {
             $this->statuses = $att->get_statuses(true, true);
 
-            $this->stat = $att->get_user_stat($userid);
-
-            $this->gradable = $att->grade > 0;
-            if ($this->gradable) {
-                $this->grade = $att->get_user_grade($userid);
-                $this->maxgrade = $att->get_user_max_grade($userid);
-            }
+            $this->summary = new mod_attendance_summary($att->id, array($userid), $att->pageparams->startdate,
+                                                        $att->pageparams->enddate);
 
             $this->filtercontrols = new attendance_filter_controls($att);
 
@@ -389,40 +370,15 @@ class attendance_user_data implements renderable {
         } else {
             $this->coursesatts = attendance_get_user_courses_attendances($userid);
             $this->statuses = array();
-            $this->stat = array();
-            $this->gradable = array();
-            $this->grade = array();
-            $this->maxgrade = array();
+            $this->summary = array();
             foreach ($this->coursesatts as $atid => $ca) {
                 // Check to make sure the user can view this cm.
                 if (!get_fast_modinfo($ca->courseid)->instances['attendance'][$ca->attid]->uservisible) {
                     unset($this->courseatts[$atid]);
                     continue;
                 }
-                $statuses = attendance_get_statuses($ca->attid);
-                $usertakensessionscount = attendance_get_user_taken_sessions_count($ca->attid, $ca->coursestartdate, $userid, $att->cm);
-                $userstatusesstat = attendance_get_user_statuses_stat($ca->attid, $ca->coursestartdate, $userid, $att->cm);
-
-                $this->statuses[$ca->attid] = $statuses;
-
-                $this->stat[$ca->attid]['completed'] = $usertakensessionscount;
-                $this->stat[$ca->attid]['statuses'] = $userstatusesstat;
-
-                $this->gradable[$ca->attid] = $ca->attgrade > 0;
-
-                if ($this->gradable[$ca->attid]) {
-                    $this->grade[$ca->attid] = attendance_get_user_grade($userstatusesstat, $statuses);
-                    // For getting sessions count implemented simplest method - taken sessions.
-                    // It can have error if users don't have attendance info for some sessions.
-                    // In the future we can implement another methods:
-                    // * all sessions between user start enrolment date and now;
-                    // * all sessions between user start and end enrolment date.
-                    $this->maxgrade[$ca->attid] = attendance_get_user_max_grade($usertakensessionscount, $statuses);
-                } else {
-                    // For more comfortable and universal work with arrays.
-                    $this->grade[$ca->attid] = null;
-                    $this->maxgrade[$ca->attid] = null;
-                }
+                $this->statuses[$ca->attid] = attendance_get_statuses($ca->attid);
+                $this->summary[$ca->attid] = new mod_attendance_summary($ca->attid, array($userid));
             }
         }
         $this->urlpath = $att->url_view()->out_omit_querystring();
@@ -449,25 +405,15 @@ class attendance_report_data implements renderable {
     // Includes disablrd/deleted statuses.
     public $allstatuses;
 
-    public $gradable;
-
-    public $decimalpoints;
-
     public $usersgroups = array();
 
     public $sessionslog = array();
 
-    public $usersstats = array();
-
-    public $grades = array();
-
-    public $maxgrades = array();
+    public $summary = array();
 
     public $att;
 
     public function  __construct(mod_attendance_structure $att) {
-        global $CFG;
-
         $currenttime = time();
         if ($att->pageparams->view == ATT_VIEW_NOTPRESENT) {
             $att->pageparams->enddate = $currenttime;
@@ -492,32 +438,21 @@ class attendance_report_data implements renderable {
         $this->statuses = $att->get_statuses(true, true);
         $this->allstatuses = $att->get_statuses(false, true);
 
-        $this->gradable = $att->grade > 0;
-
-        if (!$this->decimalpoints = grade_get_setting($att->course->id, 'decimalpoints')) {
-            $this->decimalpoints = $CFG->grade_decimalpoints;
+        if ($att->pageparams->view == ATT_VIEW_SUMMARY) {
+            $this->summary = new mod_attendance_summary($att->id);
+        } else {
+            $this->summary = new mod_attendance_summary($att->id, array_keys($this->users),
+                                                        $att->pageparams->startdate, $att->pageparams->enddate);
         }
 
-        $maxgrade = attendance_get_user_max_grade(count($this->sessions), $this->statuses);
-
         foreach ($this->users as $key => $user) {
-            $grade = 0;
-            if ($this->gradable) {
-                $grade = $att->get_user_grade($user->id, array('enddate' => $currenttime));
-                $totalgrade = $att->get_user_grade($user->id);
-            }
-
-            if ($att->pageparams->view != ATT_VIEW_NOTPRESENT || $grade < $maxgrade) {
+            $usersummary = $this->summary->get_taken_sessions_summary_for($user->id);
+            if ($att->pageparams->view != ATT_VIEW_NOTPRESENT ||
+                    $usersummary->takensessionspoints < $usersummary->takensessionsmaxpoints ||
+                    $usersummary->takensessionsmaxpoints == 0) {
                 $this->usersgroups[$user->id] = groups_get_all_groups($att->course->id, $user->id);
 
                 $this->sessionslog[$user->id] = $att->get_user_filtered_sessions_log($user->id);
-
-                $this->usersstats[$user->id] = $att->get_user_statuses_stat($user->id);
-
-                if ($this->gradable) {
-                    $this->grades[$user->id] = $totalgrade;
-                    $this->maxgrades[$user->id] = $att->get_user_max_grade($user->id);;
-                }
             } else {
                 unset($this->users[$key]);
             }

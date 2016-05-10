@@ -33,6 +33,7 @@ define('ATT_VIEW_MONTHS', 3);
 define('ATT_VIEW_ALLPAST', 4);
 define('ATT_VIEW_ALL', 5);
 define('ATT_VIEW_NOTPRESENT', 6);
+define('ATT_VIEW_SUMMARY', 7);
 
 define('ATT_SORT_LASTNAME', 1);
 define('ATT_SORT_FIRSTNAME', 2);
@@ -88,86 +89,6 @@ function attendance_get_setname($attid, $statusset, $includevalues = true) {
     return $statusname;
 }
 
-function attendance_get_user_taken_sessions_count($attid, $coursestartdate, $userid, $coursemodule, $startdate = '', $enddate = '') {
-    global $DB, $COURSE;
-    $groupmode = groups_get_activity_groupmode($coursemodule, $COURSE);
-    if (!empty($groupmode)) {
-        $qry = "SELECT count(*) as cnt
-              FROM {attendance_log} al
-              JOIN {attendance_sessions} ats ON al.sessionid = ats.id
-              LEFT JOIN {groups_members} gm ON gm.userid = al.studentid AND gm.groupid = ats.groupid
-             WHERE ats.attendanceid = :aid AND
-                   ats.sessdate >= :cstartdate AND
-                   al.studentid = :uid AND
-                   (ats.groupid = 0 or gm.id is NOT NULL)";
-    } else {
-        $qry = "SELECT count(*) as cnt
-              FROM {attendance_log} al
-              JOIN {attendance_sessions} ats
-                ON al.sessionid = ats.id
-             WHERE ats.attendanceid = :aid AND
-                   ats.sessdate >= :cstartdate AND
-                   al.studentid = :uid";
-    }
-    $params = array(
-        'aid'           => $attid,
-        'cstartdate'    => $coursestartdate,
-        'uid'           => $userid);
-
-    if (!empty($startdate) && !empty($enddate)) {
-        $qry .= ' AND sessdate >= :sdate AND sessdate < :edate ';
-        $params['sdate'] = $startdate;
-        $params['edate'] = $enddate;
-    }
-
-    return $DB->count_records_sql($qry, $params);
-}
-
-function attendance_get_user_statuses_stat($attid, $coursestartdate, $userid, $coursemodule) {
-    global $DB, $COURSE;
-    $groupmode = groups_get_activity_groupmode($coursemodule, $COURSE);
-    if (!empty($groupmode)) {
-        $qry = "SELECT al.statusid, count(al.statusid) AS stcnt
-              FROM {attendance_log} al
-              JOIN {attendance_sessions} ats ON al.sessionid = ats.id
-              LEFT JOIN {groups_members} gm ON gm.userid = al.studentid AND gm.groupid = ats.groupid
-             WHERE ats.attendanceid = :aid AND
-                   ats.sessdate >= :cstartdate AND
-                   al.studentid = :uid AND
-                   (ats.groupid = 0 or gm.id is NOT NULL)
-          GROUP BY al.statusid";
-    } else {
-        $qry = "SELECT al.statusid, count(al.statusid) AS stcnt
-              FROM {attendance_log} al
-              JOIN {attendance_sessions} ats
-                ON al.sessionid = ats.id
-             WHERE ats.attendanceid = :aid AND
-                   ats.sessdate >= :cstartdate AND
-                   al.studentid = :uid
-          GROUP BY al.statusid";
-    }
-    $params = array(
-            'aid'           => $attid,
-            'cstartdate'    => $coursestartdate,
-            'uid'           => $userid);
-
-    return $DB->get_records_sql($qry, $params);
-}
-
-function attendance_get_user_grade($userstatusesstat, $statuses) {
-    $sum = 0;
-    foreach ($userstatusesstat as $stat) {
-        $sum += $stat->stcnt * $statuses[$stat->statusid]->grade;
-    }
-
-    return $sum;
-}
-
-function attendance_get_user_max_grade($sesscount, $statuses) {
-    reset($statuses);
-    return current($statuses)->grade * $sesscount;
-}
-
 function attendance_get_user_courses_attendances($userid) {
     global $DB;
 
@@ -189,71 +110,18 @@ function attendance_get_user_courses_attendances($userid) {
 }
 
 /**
- * Used to caclulate usergrade based on rawgrade and max grade.
+ * Used to calculate a fraction based on the part and total values
  *
- * @param float $grade - raw grade for user
- * @param float $maxgrade - maxgrade for this session.
- * @return float the calculated grade.
+ * @param float $part - part of the total value
+ * @param float $total - total value.
+ * @return float the calculated fraction.
  */
-function attendance_calc_user_grade_fraction($grade, $maxgrade) {
-    if ($maxgrade == 0) {
+function attendance_calc_fraction($part, $total) {
+    if ($total == 0) {
         return 0;
     } else {
-        return $grade / $maxgrade;
+        return $part / $total;
     }
-}
-
-/**
- * Update all user grades - used when settings have changed.
- *
- * @param mod_attendance_structure $attendance - Full attendance class.
- * @param stdclass $coursemodule - full coursemodule record
- * @return float the calculated grade.
- */
-function attendance_update_all_users_grades(mod_attendance_structure $attendance, $coursemodule) {
-    global $DB;
-    $grades = array();
-    $course = $attendance->course;
-
-    $userids = array_keys(get_enrolled_users($attendance->context, 'mod/attendance:canbelisted', 0, 'u.id'));
-    $attgrades = grade_get_grades($course->id, 'mod', 'attendance', $attendance->id, $userids);
-
-    $usergrades = [];
-    if (!empty($attgrades->items[0]) and !empty($attgrades->items[0]->grades)) {
-        $usergrades = $attgrades->items[0]->grades;
-    }
-    $statuses = attendance_get_statuses($attendance->id);
-    if ($attendance->grade < 0) {
-        $dbparams = array('id' => -($attendance->grade));
-        $scale = $DB->get_record('scale', $dbparams);
-        $scalearray = explode(',', $scale->scale);
-        $gradebookmaxgrade = count($scalearray);
-    } else {
-        $gradebookmaxgrade = $attendance->grade;
-    }
-    foreach ($usergrades as $userid => $existinggrade) {
-        if (is_null($existinggrade->grade)) {
-            // Don't update grades where one doesn't exist yet.
-            continue;
-        }
-        $grade = new stdClass;
-        $grade->userid = $userid;
-        $userstatusesstat = attendance_get_user_statuses_stat($attendance->id, $course->startdate, $userid, $coursemodule);
-        $usertakensesscount = attendance_get_user_taken_sessions_count($attendance->id, $course->startdate, $userid, $coursemodule);
-        $usergrade = attendance_get_user_grade($userstatusesstat, $statuses);
-        $usermaxgrade = attendance_get_user_max_grade($usertakensesscount, $statuses);
-        $grade->rawgrade = attendance_calc_user_grade_fraction($usergrade, $usermaxgrade) * $gradebookmaxgrade;
-        $grades[$userid] = $grade;
-    }
-
-    if (!empty($grades)) {
-        $result = grade_update('mod/attendance', $course->id, 'mod', 'attendance',
-            $attendance->id, 0, $grades);
-    } else {
-        $result = true;
-    }
-
-    return $result;
 }
 
 /**
@@ -307,4 +175,67 @@ function attendance_get_max_statusset($attendanceid) {
         return $max;
     }
     return 0;
+}
+
+/**
+ * Returns the maxpoints for each statusset
+ *
+ * @param array statuses
+ * @return array
+ */
+function attendance_get_statusset_maxpoints($statuses) {
+    $statussetmaxpoints = array();
+    foreach ($statuses as $st) {
+        if (!isset($statussetmaxpoints[$st->setnumber])) {
+            $statussetmaxpoints[$st->setnumber] = $st->grade;
+        }
+    }
+    return $statussetmaxpoints;
+}
+
+/**
+ * Update user grades
+ *
+ * @param mixed mod_attendance_structure|stdClass $attendance
+ * @param array $userids
+ */
+function attendance_update_users_grade($attendance, $userids=array()) {
+    global $DB;
+
+    if (empty($attendance->grade)) {
+        return false;
+    }
+
+    list($course, $cm) = get_course_and_cm_from_instance($attendance->id, 'attendance');
+
+    $summary = new mod_attendance_summary($attendance->id, $userids);
+
+    if (empty($userids)) {
+        $context = context_module::instance($cm->id);
+        $userids = array_keys(get_enrolled_users($context, 'mod/attendance:canbelisted', 0, 'u.id'));
+    }
+
+    if ($attendance->grade < 0) {
+        $dbparams = array('id' => -($attendance->grade));
+        $scale = $DB->get_record('scale', $dbparams);
+        $scalearray = explode(',', $scale->scale);
+        $attendancegrade = count($scalearray);
+    } else {
+        $attendancegrade = $attendance->grade;
+    }
+
+    $grades = array();
+    foreach ($userids as $userid) {
+        $grades[$userid] = new stdClass();
+        $grades[$userid]->userid = $userid;
+
+        if ($summary->has_taken_sessions($userid)) {
+            $usersummary = $summary->get_taken_sessions_summary_for($userid);
+            $grades[$userid]->rawgrade = $usersummary->takensessionspercentage * $attendancegrade;
+        } else {
+            $grades[$userid]->rawgrade = null;
+        }
+    }
+
+    return grade_update('mod/attendance', $course->id, 'mod', 'attendance', $attendance->id, 0, $grades);
 }

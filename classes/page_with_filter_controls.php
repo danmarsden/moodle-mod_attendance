@@ -124,6 +124,10 @@ class mod_attendance_page_with_filter_controls {
                 $this->startdate = 0;
                 $this->enddate = 0;
                 break;
+            case ATT_VIEW_SUMMARY:
+                $this->startdate = 1;
+                $this->enddate = 1;
+                break;
         }
     }
 

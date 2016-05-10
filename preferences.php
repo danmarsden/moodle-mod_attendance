@@ -122,9 +122,7 @@ switch ($att->pageparams->action) {
             $status = $statuses[$id];
             $errors[$id] = $att->update_status($status, $acronym[$id], $description[$id], $grade[$id], null);
         }
-        if ($att->grade > 0) {
-            attendance_update_all_users_grades($att, $cm);
-        }
+        attendance_update_users_grade($att);
         break;
 }
 
