@@ -186,25 +186,24 @@ class mod_attendance_summary {
             $where .= ' AND ats.groupid = 0';
         }
 
-        $sql = "SELECT userid, COUNT(*) AS numtakensessions, SUM(grade) AS points, SUM(maxgrade) AS maxpoints
-                 FROM (SELECT atl.studentid AS userid, ats.id AS sessionid, stg.grade, stm.maxgrade
-                         FROM {attendance_sessions} ats
-                         JOIN {attendance_log} atl ON (atl.sessionid = ats.id)
-                         JOIN {attendance_statuses} stg ON (stg.id = atl.statusid AND stg.deleted = 0 AND stg.visible = 1)
-                         JOIN (SELECT setnumber, MAX(grade) AS maxgrade
-                                 FROM {attendance_statuses}
-                                WHERE attendanceid = :attid2
-                                  AND deleted = 0
-                                  AND visible = 1
-                               GROUP BY setnumber) stm
-                           ON (stm.setnumber = ats.statusset)
-                         {$joingroup}
-                        WHERE ats.attendanceid = :attid
-                          AND ats.sessdate >= :cstartdate
-                          AND ats.lasttakenby != 0
-                          {$where}
-                      ) sess
-                GROUP BY userid";
+        $sql = " SELECT atl.studentid AS userid, COUNT(DISTINCT ats.id) AS numtakensessions,
+                        SUM(stg.grade) AS points, SUM(stm.maxgrade) AS maxpoints
+                   FROM {attendance_sessions} ats
+                   JOIN {attendance_log} atl ON (atl.sessionid = ats.id)
+                   JOIN {attendance_statuses} stg ON (stg.id = atl.statusid AND stg.deleted = 0 AND stg.visible = 1)
+                   JOIN (SELECT setnumber, MAX(grade) AS maxgrade
+                           FROM {attendance_statuses}
+                          WHERE attendanceid = :attid2
+                            AND deleted = 0
+                            AND visible = 1
+                         GROUP BY setnumber) stm
+                     ON (stm.setnumber = ats.statusset)
+                   {$joingroup}
+                  WHERE ats.attendanceid = :attid
+                    AND ats.sessdate >= :cstartdate
+                    AND ats.lasttakenby != 0
+                    {$where}
+                GROUP BY atl.studentid";
         $this->userspoints = $DB->get_records_sql($sql, $params);
     }
 
