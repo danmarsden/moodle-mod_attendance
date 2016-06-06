@@ -228,9 +228,9 @@ Feature: Visiting reports
          And I follow "Attendance"
          And I follow "All"
 
-        Then "2" "text" should exist in the "Taked sessions" "table_row"
-         And "3 / 4" "text" should exist in the "Points over taked sessions:" "table_row"
-         And "75.0%" "text" should exist in the "Percentage over taked sessions:" "table_row"
+        Then "2" "text" should exist in the "Taken sessions" "table_row"
+         And "3 / 4" "text" should exist in the "Points over taken sessions:" "table_row"
+         And "75.0%" "text" should exist in the "Percentage over taken sessions:" "table_row"
          And "3" "text" should exist in the "Total number of sessions:" "table_row"
          And "3 / 6" "text" should exist in the "Points over all sessions:" "table_row"
          And "50.0%" "text" should exist in the "Percentage over all sessions:" "table_row"
