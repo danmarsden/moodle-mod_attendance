@@ -101,8 +101,14 @@ function attendance_delete_instance($id) {
         return false;
     }
 
-    if ($sessids = array_keys($DB->get_records('attendance_sessions', array('attendanceid' => $id), '', 'id'))) {
-        $DB->delete_records_list('attendance_log', 'sessionid', $sessids);
+    if ($session_ids = array_keys($DB->get_records('attendance_sessions', array('attendanceid' => $id), '', 'id'))) {
+        $sessions = $DB->get_recordset_list('attendance_sessions', 'id', $session_ids);
+        foreach ($sessions as $sess) {
+            $calendar_event_ids[] = $sess->calendareventid;
+            $session_ids[] = $sess->id;
+        }
+        $DB->delete_records_list('event', 'id', $calendar_event_ids);
+        $DB->delete_records_list('attendance_log', 'sessionid', $session_ids);
         $DB->delete_records('attendance_sessions', array('attendanceid' => $id));
     }
     $DB->delete_records('attendance_statuses', array('attendanceid' => $id));
@@ -117,10 +123,19 @@ function attendance_delete_instance($id) {
 function attendance_delete_course($course, $feedback=true) {
     global $DB;
 
+    if ($session_ids = array_keys($DB->get_records('attendance_sessions', array('attendanceid' => $id), '', 'id'))) {
+        $sessions = $DB->get_recordset_list('attendance_sessions', 'id', $session_ids);
+        foreach ($sessions as $sess) {
+            $calendar_event_ids[] = $sess->calendareventid;
+            $session_ids[] = $sess->id;
+        }
+        $DB->delete_records_list('event', 'id', $calendar_event_ids);
+        $DB->delete_records_list('attendance_log', 'sessionid', $session_ids);
+    }
+
     $attids = array_keys($DB->get_records('attendance', array('course' => $course->id), '', 'id'));
-    $sessids = array_keys($DB->get_records_list('attendance_sessions', 'attendanceid', $attids, '', 'id'));
-    if ($sessids) {
-        $DB->delete_records_list('attendance_log', 'sessionid', $sessids);
+    if ($session_ids) {
+        $DB->delete_records_list('attendance_log', 'sessionid', $session_ids);
     }
     if ($attids) {
         $DB->delete_records_list('attendance_statuses', 'attendanceid', $attids);
