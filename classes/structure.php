@@ -22,6 +22,8 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+require_once(dirname(__FILE__).'/../../../calendar/lib.php');
+
 /**
  * Main class with all Attendance related info.
  *
@@ -349,6 +351,21 @@ class mod_attendance_structure {
                 $sess->description);
             $DB->set_field('attendance_sessions', 'description', $description, array('id' => $sess->id));
 
+            $calendar_event_data = new stdClass();
+            $calendar_event_data->name           = $this->name;
+            $calendar_event_data->courseid       = $this->course->id;
+            $calendar_event_data->groupid        = $sess->groupid;
+            $calendar_event_data->userid         = 0;
+            $calendar_event_data->instance       = $this->id;
+            $calendar_event_data->timestart      = $sess->sessdate;
+            $calendar_event_data->timeduration   = $sess->duration;
+            $calendar_event_data->eventtype      = 'attendance';
+            $calendar_event_data->timemodified   = $now;
+            $calendar_event_data->modulename    = 'attendance';
+
+            $calendar_event = calendar_event::create($calendar_event_data, false);
+            $DB->set_field('attendance_sessions', 'calendareventid', $calendar_event->id, array('id' => $sess->id));
+
             $infoarray = array();
             $infoarray[] = construct_session_full_date_time($sess->sessdate, $sess->duration);
 
@@ -389,6 +406,12 @@ class mod_attendance_structure {
 
         $sess->timemodified = time();
         $DB->update_record('attendance_sessions', $sess);
+
+        $calendar_event_data = new stdClass();
+        $calendar_event_data->timestart      = $sess->sessdate;
+        $calendar_event_data->timeduration   = $sess->duration;
+        $calendar_event = calendar_event::load($sess->calendareventid);
+        $calendar_event->update($calendar_event_data);
 
         $info = construct_session_full_date_time($sess->sessdate, $sess->duration);
         $event = \mod_attendance\event\session_updated::create(array(
@@ -875,6 +898,13 @@ class mod_attendance_structure {
     public function delete_sessions($sessionsids) {
         global $DB;
 
+        $sessions = $DB->get_recordset_list('attendance_sessions', 'id', $sessionsids);
+        $calendar_event_ids = array();
+        foreach ($sessions as $sess){
+            $calendar_event_ids[]=$sess->calendareventid;
+        }
+        $DB->delete_records_list('event', 'id', $calendar_event_ids);
+
         list($sql, $params) = $DB->get_in_or_equal($sessionsids);
         $DB->delete_records_select('attendance_log', "sessionid $sql", $params);
         $DB->delete_records_list('attendance_sessions', 'id', $sessionsids);
@@ -895,6 +925,12 @@ class mod_attendance_structure {
             $sess->duration = $duration;
             $sess->timemodified = $now;
             $DB->update_record('attendance_sessions', $sess);
+
+            $calendar_event_data->timeduration = $duration;
+            $calendar_event_data->timemodified = $now;
+            $calendar_event = calendar_event::load($sess->calendareventid);
+            $calendar_event->update($calendar_event_data);
+
             $event = \mod_attendance\event\session_duration_updated::create(array(
                 'objectid' => $this->id,
                 'context' => $this->context,
