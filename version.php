@@ -23,8 +23,8 @@
  */
 
 $plugin->version  = 2016052201;
-$plugin->requires = 2015051100;
-$plugin->release = '3.1.0.3';
+$plugin->requires = 2016052300;
+$plugin->release = '3.1.1.0';
 $plugin->maturity  = MATURITY_STABLE;
 $plugin->cron     = 0;
 $plugin->component = 'mod_attendance';
