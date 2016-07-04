@@ -212,6 +212,74 @@ switch ($att->pageparams->action) {
         echo $OUTPUT->confirm($message, $att->url_sessions($params), $att->url_manage());
         echo $OUTPUT->footer();
         exit;
+    case mod_attendance_sessions_page_params::ACTION_CREATE_CAL_EVENTS:
+        $confirm = optional_param('confirm', null, PARAM_INT);
+
+        if (isset($confirm) && confirm_sesskey()) {
+            $sessionsids = required_param('sessionsids', PARAM_ALPHANUMEXT);
+            $sessionsids = explode('_', $sessionsids);
+
+            create_calendar_events($sessionsids);
+            redirect($att->url_manage(), get_string('caleventcreated', 'attendance'));
+        }
+        $sessid = optional_param_array('sessid', '', PARAM_SEQUENCE);
+        if (empty($sessid)) {
+            print_error('nosessionsselected', 'attendance', $att->url_manage());
+        }
+        $sessionsinfo = $att->get_sessions_info($sessid);
+
+        $message = get_string('createcheckcalevents', 'attendance');
+        $message .= html_writer::empty_tag('br');
+        foreach ($sessionsinfo as $sessinfo) {
+            $message .= html_writer::empty_tag('br');
+            $message .= userdate($sessinfo->sessdate, get_string('strftimedmyhm', 'attendance'));
+            $message .= html_writer::empty_tag('br');
+            $message .= $sessinfo->description;
+        }
+
+        $sessionsids = implode('_', $sessid);
+        $params = array('action' => $att->pageparams->action, 'sessionsids' => $sessionsids,
+            'confirm' => 1, 'sesskey' => sesskey());
+
+        echo $OUTPUT->header();
+        echo $OUTPUT->heading(get_string('attendanceforthecourse', 'attendance').' :: ' .format_string($course->fullname));
+        echo $OUTPUT->confirm($message, $att->url_sessions($params), $att->url_manage());
+        echo $OUTPUT->footer();
+        exit;
+    case mod_attendance_sessions_page_params::ACTION_DELETE_CAL_EVENTS:
+        $confirm = optional_param('confirm', null, PARAM_INT);
+
+        if (isset($confirm) && confirm_sesskey()) {
+            $sessionsids = required_param('sessionsids', PARAM_ALPHANUMEXT);
+            $sessionsids = explode('_', $sessionsids);
+
+            delete_calendar_events($sessionsids);
+            redirect($att->url_manage(), get_string('caleventdeleted', 'attendance'));
+        }
+        $sessid = optional_param_array('sessid', '', PARAM_SEQUENCE);
+        if (empty($sessid)) {
+            print_error('nosessionsselected', 'attendance', $att->url_manage());
+        }
+        $sessionsinfo = $att->get_sessions_info($sessid);
+
+        $message = get_string('deletecheckcalevents', 'attendance');
+        $message .= html_writer::empty_tag('br');
+        foreach ($sessionsinfo as $sessinfo) {
+            $message .= html_writer::empty_tag('br');
+            $message .= userdate($sessinfo->sessdate, get_string('strftimedmyhm', 'attendance'));
+            $message .= html_writer::empty_tag('br');
+            $message .= $sessinfo->description;
+        }
+
+        $sessionsids = implode('_', $sessid);
+        $params = array('action' => $att->pageparams->action, 'sessionsids' => $sessionsids,
+            'confirm' => 1, 'sesskey' => sesskey());
+
+        echo $OUTPUT->header();
+        echo $OUTPUT->heading(get_string('attendanceforthecourse', 'attendance').' :: ' .format_string($course->fullname));
+        echo $OUTPUT->confirm($message, $att->url_sessions($params), $att->url_manage());
+        echo $OUTPUT->footer();
+        exit;
 }
 
 $output = $PAGE->get_renderer('mod_attendance');
