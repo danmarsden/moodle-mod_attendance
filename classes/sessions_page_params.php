@@ -36,6 +36,8 @@ class mod_attendance_sessions_page_params {
     const ACTION_DELETE_SELECTED  = 4;
     const ACTION_CHANGE_DURATION  = 5;
     const ACTION_DELETE_HIDDEN    = 6;
+    const ACTION_CREATE_CAL_EVENTS = 7;
+    const ACTION_DELETE_CAL_EVENTS = 8;
 
     /** @var int view mode of taking attendance page*/
     public $action;

@@ -133,15 +133,25 @@ switch ($att->pageparams->action) {
         echo $OUTPUT->footer();
         exit;
     case mod_attendance_sessions_page_params::ACTION_DELETE_SELECTED:
+    case mod_attendance_sessions_page_params::ACTION_CREATE_CAL_EVENTS:
+    case mod_attendance_sessions_page_params::ACTION_DELETE_CAL_EVENTS:
         $confirm    = optional_param('confirm', null, PARAM_INT);
+        $message = get_string('deletecheckfull', '', get_string('session', 'attendance'));
 
         if (isset($confirm) && confirm_sesskey()) {
             $sessionsids = required_param('sessionsids', PARAM_ALPHANUMEXT);
             $sessionsids = explode('_', $sessionsids);
-
-            $att->delete_sessions($sessionsids);
-            attendance_update_users_grade($att);
-            redirect($att->url_manage(), get_string('sessiondeleted', 'attendance'));
+            if ($att->pageparams->action == mod_attendance_sessions_page_params::ACTION_DELETE_SELECTED) {
+                $att->delete_sessions($sessionsids);
+                attendance_update_users_grade($att);
+                redirect($att->url_manage(), get_string('sessiondeleted', 'attendance'));
+            } else if ($att->pageparams->action == mod_attendance_sessions_page_params::ACTION_CREATE_CAL_EVENTS) {
+                create_calendar_events($sessionsids);
+                redirect($att->url_manage(), get_string('createcheckcalevents', 'attendance'));
+            } else if ($att->pageparams->action == mod_attendance_sessions_page_params::ACTION_DELETE_CAL_EVENTS) {
+                delete_calendar_events($sessionsids);
+                redirect($att->url_manage(), get_string('deletecheckcalevents', 'attendance'));
+            }
         }
         $sessid = optional_param_array('sessid', '', PARAM_SEQUENCE);
         if (empty($sessid)) {
@@ -149,7 +159,12 @@ switch ($att->pageparams->action) {
         }
         $sessionsinfo = $att->get_sessions_info($sessid);
 
-        $message = get_string('deletecheckfull', '', get_string('session', 'attendance'));
+        if ($att->pageparams->action == mod_attendance_sessions_page_params::ACTION_CREATE_CAL_EVENTS) {
+            $message = get_string('createcheckcalevents', 'attendance');
+        } else if ($att->pageparams->action == mod_attendance_sessions_page_params::ACTION_DELETE_CAL_EVENTS) {
+            $message = get_string('deletecheckcalevents', 'attendance');
+        }
+
         $message .= html_writer::empty_tag('br');
         foreach ($sessionsinfo as $sessinfo) {
             $message .= html_writer::empty_tag('br');
