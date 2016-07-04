@@ -54,7 +54,7 @@ class mod_attendance_mod_form extends moodleform_mod {
         $mform->addElement('selectyesno', 'createcalevents', get_string('createcalevents', 'attendance'));
         $mform->setType('createcalevents', PARAM_INTEGER);
         $mform->addRule('createcalevents', null, 'required', null, 'client');
-        
+
         // Grade settings.
         $this->standard_grading_coursemodule_elements();
 
