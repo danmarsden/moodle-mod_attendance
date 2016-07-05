@@ -751,14 +751,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
                     $o .= html_writer::tag('h3', $ca->coursefullname);
                 }
-                $o .= html_writer::tag('h4', $ca->attname);
 
                 if (isset($userdata->summary[$ca->attid])) {
+                    $o .= html_writer::tag('h4', $ca->attname);
                     $usersummary = $userdata->summary[$ca->attid]->get_all_sessions_summary_for($userdata->user->id);
-                } else {
-                    $usersummary = null;
+                    $o .= construct_user_data_stat($usersummary, ATT_VIEW_ALL);
                 }
-                $o .= construct_user_data_stat($usersummary, ATT_VIEW_ALL);
             }
         }
 
