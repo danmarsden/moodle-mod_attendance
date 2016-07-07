@@ -22,6 +22,8 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+require_once(dirname(__FILE__) . '/calendar_helpers.php');
+
 /**
  * Main class with all Attendance related info.
  *
@@ -52,6 +54,9 @@ class mod_attendance_structure {
 
     /** current page parameters */
     public $pageparams;
+
+    /** @var int number (1, 0) unsigned, determines if calendar events should be auto created */
+    public $createcalevents;
 
     private $groupmode;
 
@@ -349,6 +354,11 @@ class mod_attendance_structure {
                 $sess->description);
             $DB->set_field('attendance_sessions', 'description', $description, array('id' => $sess->id));
 
+            $sess->caleventid = 0;
+            if ($this->createcalevents) {
+                create_calendar_event($sess);
+            }
+
             $infoarray = array();
             $infoarray[] = construct_session_full_date_time($sess->sessdate, $sess->duration);
 
@@ -389,6 +399,8 @@ class mod_attendance_structure {
 
         $sess->timemodified = time();
         $DB->update_record('attendance_sessions', $sess);
+
+        update_calendar_event($sess->caleventid, $sess->duration, $sess->sessdate);
 
         $info = construct_session_full_date_time($sess->sessdate, $sess->duration);
         $event = \mod_attendance\event\session_updated::create(array(
@@ -879,6 +891,9 @@ class mod_attendance_structure {
 
     public function delete_sessions($sessionsids) {
         global $DB;
+        if (existing_calendar_events_ids($sessionsids)) {
+            delete_calendar_events($sessionsids);
+        }
 
         list($sql, $params) = $DB->get_in_or_equal($sessionsids);
         $DB->delete_records_select('attendance_log', "sessionid $sql", $params);
@@ -900,6 +915,9 @@ class mod_attendance_structure {
             $sess->duration = $duration;
             $sess->timemodified = $now;
             $DB->update_record('attendance_sessions', $sess);
+            if ($sess->caleventid) {
+                update_calendar_event($sess->caleventid, $duration);
+            }
             $event = \mod_attendance\event\session_duration_updated::create(array(
                 'objectid' => $this->id,
                 'context' => $this->context,
