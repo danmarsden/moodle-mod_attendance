@@ -676,10 +676,15 @@ class mod_attendance_structure {
               GROUP BY ue.userid, ue.status";
         $params = array('zerotime' => 0, 'uid' => $userid, 'estatus' => ENROL_INSTANCE_ENABLED, 'courseid' => $this->course->id);
         $enrolments = $DB->get_record_sql($sql, $params);
-
-        $user->enrolmentstatus = $enrolments->status;
-        $user->enrolmentstart = $enrolments->mintime;
-        $user->enrolmentend = $enrolments->maxtime;
+        if (!empty($enrolments)) {
+            $user->enrolmentstatus = $enrolments->status;
+            $user->enrolmentstart = $enrolments->mintime;
+            $user->enrolmentend = $enrolments->maxtime;
+        } else {
+            $user->enrolmentstatus = '';
+            $user->enrolmentstart = 0;
+            $user->enrolmentend = 0;
+        }
 
         return $user;
     }

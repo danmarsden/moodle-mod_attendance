@@ -46,7 +46,8 @@ $capabilities = array(
     'mod/attendance:changeattendances'
 );
 if (!has_any_capability($capabilities, $context)) {
-    redirect($att->url_view());
+    $url = new moodle_url('/mod/attendance/view.php', array('id' => $cm->id));
+    redirect($url);
 }
 
 $pageparams->init($cm);
