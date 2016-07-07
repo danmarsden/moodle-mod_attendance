@@ -549,10 +549,15 @@ class mod_attendance_structure {
         // Fields we need from the user table.
         $userfields = user_picture::fields('u', array('username' , 'idnumber' , 'institution' , 'department'));
 
-        if (isset($this->pageparams->sort) and ($this->pageparams->sort == ATT_SORT_FIRSTNAME)) {
-            $orderby = "u.firstname ASC, u.lastname ASC, u.idnumber ASC, u.institution ASC, u.department ASC";
+        if (empty($this->pageparams->sort)) {
+            $this->pageparams->sort = ATT_SORT_DEFAULT;
+        }
+        if ($this->pageparams->sort == ATT_SORT_FIRSTNAME) {
+            $orderby = $DB->sql_fullname('u.firstname', 'u.lastname') . ', u.id';
+        } else if ($this->pageparams->sort == ATT_SORT_LASTNAME) {
+            $orderby = 'u.lastname, u.firstname, u.id';
         } else {
-            $orderby = "u.lastname ASC, u.firstname ASC, u.idnumber ASC, u.institution ASC, u.department ASC";
+            list($orderby, $sortparams) = users_order_by_sql('u');
         }
 
         if ($page) {

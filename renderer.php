@@ -624,14 +624,13 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
         if ($data->pageparams->sort == ATT_SORT_LASTNAME) {
             $firstname = html_writer::link($data->url(array('sort' => ATT_SORT_FIRSTNAME)), get_string('firstname'));
-        } else {
+            $lastname = get_string('lastname');
+        } else if ($data->pageparams->sort == ATT_SORT_FIRSTNAME) {
             $firstname = get_string('firstname');
-        }
-
-        if ($data->pageparams->sort == ATT_SORT_FIRSTNAME) {
             $lastname = html_writer::link($data->url(array('sort' => ATT_SORT_LASTNAME)), get_string('lastname'));
         } else {
-            $lastname = get_string('lastname');
+            $firstname = html_writer::link($data->url(array('sort' => ATT_SORT_FIRSTNAME)), get_string('firstname'));
+            $lastname = html_writer::link($data->url(array('sort' => ATT_SORT_LASTNAME)), get_string('lastname'));
         }
 
         if ($CFG->fullnamedisplay == 'lastname firstname') {

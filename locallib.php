@@ -35,6 +35,7 @@ define('ATT_VIEW_ALL', 5);
 define('ATT_VIEW_NOTPRESENT', 6);
 define('ATT_VIEW_SUMMARY', 7);
 
+define('ATT_SORT_DEFAULT', 0);
 define('ATT_SORT_LASTNAME', 1);
 define('ATT_SORT_FIRSTNAME', 2);
 

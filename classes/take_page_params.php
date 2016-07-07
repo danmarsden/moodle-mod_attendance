@@ -50,7 +50,7 @@ class mod_attendance_take_page_params {
             $this->group = 0;
         }
         if (!isset($this->sort)) {
-            $this->sort = ATT_SORT_LASTNAME;
+            $this->sort = ATT_SORT_DEFAULT;
         }
         $this->init_view_mode();
         $this->init_gridcols();
@@ -80,7 +80,7 @@ class mod_attendance_take_page_params {
         if ($this->group) {
             $params['group'] = $this->group;
         }
-        if ($this->sort != ATT_SORT_LASTNAME) {
+        if ($this->sort != ATT_SORT_DEFAULT) {
             $params['sort'] = $this->sort;
         }
         if (isset($this->copyfrom)) {

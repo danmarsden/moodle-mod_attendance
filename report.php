@@ -32,7 +32,7 @@ $from                   = optional_param('from', null, PARAM_ACTION);
 $pageparams->view       = optional_param('view', null, PARAM_INT);
 $pageparams->curdate    = optional_param('curdate', null, PARAM_INT);
 $pageparams->group      = optional_param('group', null, PARAM_INT);
-$pageparams->sort       = optional_param('sort', null, PARAM_INT);
+$pageparams->sort       = optional_param('sort', ATT_SORT_DEFAULT, PARAM_INT);
 $pageparams->page       = optional_param('page', 1, PARAM_INT);
 $pageparams->perpage    = get_config('attendance', 'resultsperpage');
 
