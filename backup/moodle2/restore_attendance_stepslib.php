@@ -117,6 +117,7 @@ class restore_attendance_activity_structure_step extends restore_activity_struct
         $data->lasttaken = $this->apply_date_offset($data->lasttaken);
         $data->lasttakenby = $this->get_mappingid('user', $data->lasttakenby);
         $data->timemodified = $this->apply_date_offset($data->timemodified);
+        $data->caleventid = $this->get_mappingid('event', $data->caleventid);
 
         $newitemid = $DB->insert_record('attendance_sessions', $data);
         $this->set_mapping('attendance_session', $oldid, $newitemid, true);
