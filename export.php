@@ -45,7 +45,6 @@ $PAGE->set_url($att->url_export());
 $PAGE->set_title($course->shortname. ": ".$att->name);
 $PAGE->set_heading($course->fullname);
 $PAGE->set_cacheable(true);
-$PAGE->set_button($OUTPUT->update_module_button($cm->id, 'attendance'));
 $PAGE->navbar->add(get_string('export', 'attendance'));
 
 $formparams = array('course' => $course, 'cm' => $cm, 'modcontext' => $context);

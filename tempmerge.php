@@ -45,7 +45,6 @@ require_login($course, true, $cm);
 $PAGE->set_title($course->shortname.": ".$att->name.' - '.get_string('tempusermerge', 'attendance'));
 $PAGE->set_heading($course->fullname);
 $PAGE->set_cacheable(true);
-$PAGE->set_button($OUTPUT->update_module_button($cm->id, 'attendance'));
 $PAGE->navbar->add(get_string('tempusermerge', 'attendance'));
 
 $formdata = (object)array(

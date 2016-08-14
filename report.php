@@ -53,7 +53,6 @@ $PAGE->set_pagelayout('report');
 $PAGE->set_title($course->shortname. ": ".$att->name.' - '.get_string('report', 'attendance'));
 $PAGE->set_heading($course->fullname);
 $PAGE->set_cacheable(true);
-$PAGE->set_button($OUTPUT->update_module_button($cm->id, 'attendance'));
 $PAGE->navbar->add(get_string('report', 'attendance'));
 
 $output = $PAGE->get_renderer('mod_attendance');
