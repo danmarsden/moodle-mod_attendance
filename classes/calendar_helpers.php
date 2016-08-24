@@ -29,7 +29,7 @@ require_once(dirname(__FILE__).'/../../../calendar/lib.php');
  * @param stdClass $session initial sessions to take data from
  * @return bool result of calendar event creation
  */
-function create_calendar_event(&$session) {
+function attendance_create_calendar_event(&$session) {
     // We don't want to create multiple calendar events for 1 session.
     if ($session->caleventid) {
         return $session->caleventid;
@@ -64,12 +64,12 @@ function create_calendar_event(&$session) {
  *
  * @param array %sessionsids array of sessions ids
  */
-function create_calendar_events($sessionsids) {
+function attendance_create_calendar_events($sessionsids) {
     global $DB;
     $sessions = $DB->get_recordset_list('attendance_sessions', 'id', $sessionsids);
 
     foreach ($sessions as $session) {
-        create_calendar_event($session);
+        attendance_create_calendar_event($session);
         if ($session->caleventid) {
             $DB->update_record('attendance_sessions', $session);
         }
@@ -84,7 +84,7 @@ function create_calendar_events($sessionsids) {
  * @param $timestart int start time of the event
  * @return bool result of updating
  */
-function update_calendar_event($caleventid, $timeduration, $timestart = null) {
+function attendance_update_calendar_event($caleventid, $timeduration, $timestart = null) {
     $caleventdata = new stdClass();
     $caleventdata->timeduration   = $timeduration;
     $caleventdata->timestart      = $timestart;
@@ -104,9 +104,9 @@ function update_calendar_event($caleventid, $timeduration, $timestart = null) {
  * @param array %sessionsids array of sessions ids
  * @return bool result of updating
  */
-function delete_calendar_events($sessionsids) {
+function attendance_delete_calendar_events($sessionsids) {
     global $DB;
-    $caleventsids = existing_calendar_events_ids($sessionsids);
+    $caleventsids = attendance_existing_calendar_events_ids($sessionsids);
     if ($caleventsids) {
         $DB->delete_records_list('event', 'id', $caleventsids);
     }
@@ -124,7 +124,7 @@ function delete_calendar_events($sessionsids) {
  * @param array $sessionsids of sessions ids
  * @return array | bool array of existing calendar events or false if none found
  */
-function existing_calendar_events_ids($sessionsids) {
+function attendance_existing_calendar_events_ids($sessionsids) {
     global $DB;
     $caleventsids = array_keys($DB->get_records_list('attendance_sessions', 'id', $sessionsids, '', 'caleventid'));
     $existingcaleventsids = array_filter($caleventsids);

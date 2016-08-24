@@ -22,7 +22,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-function create_calendar_events() {
+function attendance_upgrade_create_calendar_events() {
     global $DB;
 
     $attendances = $DB->get_records('attendance', null, null, 'id, name, course');

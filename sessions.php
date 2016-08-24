@@ -145,10 +145,10 @@ switch ($att->pageparams->action) {
                 attendance_update_users_grade($att);
                 redirect($att->url_manage(), get_string('sessiondeleted', 'attendance'));
             } else if ($att->pageparams->action == mod_attendance_sessions_page_params::ACTION_CREATE_CAL_EVENTS) {
-                create_calendar_events($sessionsids);
+                attendance_create_calendar_events($sessionsids);
                 redirect($att->url_manage(), get_string('createcheckcalevents', 'attendance'));
             } else if ($att->pageparams->action == mod_attendance_sessions_page_params::ACTION_DELETE_CAL_EVENTS) {
-                delete_calendar_events($sessionsids);
+                attendance_delete_calendar_events($sessionsids);
                 redirect($att->url_manage(), get_string('deletecheckcalevents', 'attendance'));
             }
         }
