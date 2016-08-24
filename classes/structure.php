@@ -361,7 +361,7 @@ class mod_attendance_structure {
             $DB->set_field('attendance_sessions', 'description', $description, array('id' => $sess->id));
 
             $sess->caleventid = 0;
-            create_calendar_event($sess);
+            attendance_create_calendar_event($sess);
 
             $infoarray = array();
             $infoarray[] = construct_session_full_date_time($sess->sessdate, $sess->duration);
@@ -404,7 +404,7 @@ class mod_attendance_structure {
         $sess->timemodified = time();
         $DB->update_record('attendance_sessions', $sess);
 
-        update_calendar_event($sess->caleventid, $sess->duration, $sess->sessdate);
+        attendance_update_calendar_event($sess->caleventid, $sess->duration, $sess->sessdate);
 
         $info = construct_session_full_date_time($sess->sessdate, $sess->duration);
         $event = \mod_attendance\event\session_updated::create(array(
@@ -900,8 +900,8 @@ class mod_attendance_structure {
 
     public function delete_sessions($sessionsids) {
         global $DB;
-        if (existing_calendar_events_ids($sessionsids)) {
-            delete_calendar_events($sessionsids);
+        if (attendance_existing_calendar_events_ids($sessionsids)) {
+            attendance_delete_calendar_events($sessionsids);
         }
 
         list($sql, $params) = $DB->get_in_or_equal($sessionsids);
@@ -925,7 +925,7 @@ class mod_attendance_structure {
             $sess->timemodified = $now;
             $DB->update_record('attendance_sessions', $sess);
             if ($sess->caleventid) {
-                update_calendar_event($sess->caleventid, $duration, $sess->sessdate);
+                attendance_update_calendar_event($sess->caleventid, $duration);
             }
             $event = \mod_attendance\event\session_duration_updated::create(array(
                 'objectid' => $this->id,

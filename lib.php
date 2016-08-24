@@ -104,8 +104,8 @@ function attendance_delete_instance($id) {
     }
 
     if ($sessids = array_keys($DB->get_records('attendance_sessions', array('attendanceid' => $id), '', 'id'))) {
-        if (existing_calendar_events_ids($sessids)) {
-            delete_calendar_events($sessids);
+        if (attendance_existing_calendar_events_ids($sessids)) {
+            attendance_delete_calendar_events($sessids);
         }
         $DB->delete_records_list('attendance_log', 'sessionid', $sessids);
         $DB->delete_records('attendance_sessions', array('attendanceid' => $id));
@@ -124,8 +124,8 @@ function attendance_delete_course($course, $feedback=true) {
 
     $attids = array_keys($DB->get_records('attendance', array('course' => $course->id), '', 'id'));
     $sessids = array_keys($DB->get_records_list('attendance_sessions', 'attendanceid', $attids, '', 'id'));
-    if (existing_calendar_events_ids($sessids)) {
-        delete_calendar_events($sessids);
+    if (attendance_existing_calendar_events_ids($sessids)) {
+        attendance_delete_calendar_events($sessids);
     }
     if ($sessids) {
         $DB->delete_records_list('attendance_log', 'sessionid', $sessids);
@@ -203,8 +203,8 @@ function attendance_reset_userdata($data) {
 
     if (!empty($data->reset_attendance_sessions)) {
         $sessionsids = array_keys($DB->get_records_list('attendance_sessions', 'attendanceid', $attids, '', 'id'));
-        if (existing_calendar_events_ids($sessionsids)) {
-            delete_calendar_events($sessionsids);
+        if (attendance_existing_calendar_events_ids($sessionsids)) {
+            attendance_delete_calendar_events($sessionsids);
         }
         $DB->delete_records_list('attendance_sessions', 'attendanceid', $attids);
 

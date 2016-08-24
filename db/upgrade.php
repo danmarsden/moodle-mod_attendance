@@ -171,7 +171,7 @@ function xmldb_attendance_upgrade($oldversion=0) {
         }
 
         // Creating events for all existing sessions.
-        create_calendar_events();
+        attendance_upgrade_create_calendar_events();
 
         // Attendance savepoint reached.
         upgrade_mod_savepoint(true, 2016052202, 'attendance');
