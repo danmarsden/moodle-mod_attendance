@@ -239,13 +239,11 @@ function attendance_user_outline($course, $user, $mod, $attendance) {
         $result->time = 0;
     }
     if (has_capability('mod/attendance:canbelisted', $mod->context, $user->id)) {
-        $statuses = attendance_get_statuses($attendance->id);
-        $grade = attendance_get_user_grade(attendance_get_user_statuses_stat($attendance->id, $course->startdate,
-                                                                      $user->id, $mod), $statuses);
-        $maxgrade = attendance_get_user_max_grade(attendance_get_user_taken_sessions_count($attendance->id, $course->startdate,
-                                                                                    $user->id, $mod), $statuses);
+        $summary = new mod_attendance_summary($attendance->id, $user->id);
+        $usersummary = $summary->get_all_sessions_summary_for($user->id);
 
-        $result->info = $grade.' / '.$maxgrade;
+        $result->info = format_float($usersummary->takensessionspoints, 1, true, true) . ' / ' .
+                        format_float($usersummary->allsessionsmaxpoints, 1, true, true);
     }
 
     return $result;
