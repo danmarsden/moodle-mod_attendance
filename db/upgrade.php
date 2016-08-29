@@ -177,5 +177,20 @@ function xmldb_attendance_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2016052202, 'attendance');
     }
 
+    if ($oldversion < 2016082900) {
+
+        // Define field timemodified to be added to attendance.
+        $table = new xmldb_table('attendance');
+        $field = new xmldb_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'grade');
+
+        // Conditionally launch add field timemodified.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Attendance savepoint reached.
+        upgrade_mod_savepoint(true, 2016082900, 'attendance');
+    }
+
     return $result;
 }
