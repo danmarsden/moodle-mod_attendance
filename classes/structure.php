@@ -52,6 +52,9 @@ class mod_attendance_structure {
     /** @var float number (10, 5) unsigned, the maximum grade for attendance */
     public $grade;
 
+    /** @var int last time attendance was modified - used for global search */
+    public $timemodified;
+
     /** current page parameters */
     public $pageparams;
 
