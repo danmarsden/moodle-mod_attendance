@@ -1,4 +1,3 @@
-
 <?xml version="1.0" encoding="UTF-8" ?>
 <XMLDB PATH="mod/attendance/db" VERSION="20160829" COMMENT="XMLDB file for Moodle mod/attendance"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
