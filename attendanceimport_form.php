@@ -105,4 +105,3 @@ class mod_attendance_attendanceimport_form extends moodleform {
         return $errors;
     }
 }
-
