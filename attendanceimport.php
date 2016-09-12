@@ -63,29 +63,29 @@ echo $output->render($tabs);
 
 if ($formdata = data_submitted()) {
 
-    $usersimport_list = $formdata->userslist;
+    $usersimportlist = $formdata->userslist;
 
-    if (!empty($usersimport_list)) {
+    if (!empty($usersimportlist)) {
 
         $session = $att->get_session_info($formdata->sessionid);
 
-        $usersimport_list = explode("\n", $usersimport_list);
+        $usersimportlist = explode("\n", $usersimportlist);
 
         $imported = array();
-        $not_imported = array();
+        $notimported = array();
 
         // Restrict importation to selected users.
         $namefields = get_all_user_name_fields(true, 'u');
-        $allusers = get_enrolled_users($context, 'mod/attendance:canbelisted', 0, 'u.id, u.username, u.idnumber, u.email,'.$namefields);
+        $allusers = get_enrolled_users($context, 'mod/attendance:canbelisted', 0, 'u.id,u.username,u.idnumber,u.email,'.$namefields);
         $userlist = array();
-        $userlist_ids = array();
+
         foreach ($allusers as $user) {
             $user->fullname = fullname($user);
             $userlist[$user->{$formdata->userfield}] = $user;
         }
         unset($allusers);
 
-        //Temp users only are available if is by email
+        // Temp users only are available if is by email.
         if ($formdata->userfield == 'email') {
             $tempusers = $DB->get_records('attendance_tempusers', array('courseid' => $course->id), 'studentid, fullname');
             foreach ($tempusers as $user) {
@@ -96,25 +96,24 @@ if ($formdata = data_submitted()) {
             }
         }
 
-        foreach($usersimport_list as $user_in_list) {
+        foreach ($usersimportlist as $userinlist) {
 
-            $user_in_list = trim($user_in_list);
+            $userinlist = trim($userinlist);
 
-            if (empty($user_in_list)) {
+            if (empty($userinlist)) {
                 continue;
             }
 
-            if (isset($userlist[$user_in_list])) {
-                $user_is = $userlist[$user_in_list];
-                $att->take_student($formdata->status, $formdata->sessionid, $user_is->id);
-                $imported[$user_in_list] = $user_is->fullname;
-            }
-            else {
-                $not_imported[] = $user_in_list;
+            if (isset($userlist[$userinlist])) {
+                $useris = $userlist[$userinlist];
+                $att->take_student($formdata->status, $formdata->sessionid, $useris->id);
+                $imported[$userinlist] = $useris->fullname;
+            } else {
+                $notimported[] = $userinlist;
             }
         }
 
-        //Insert a log entry
+        // Insert a log entry.
         $params = array(
             'sessionid' => $formdata->sessionid,
             'grouptype' => 0);
@@ -129,33 +128,32 @@ if ($formdata = data_submitted()) {
         if (count($imported) > 0) {
             $txt = get_string('importedsuccess', 'attendance');
             $txt .= '<ul>';
-            foreach($imported as $key=>$name) {
+            foreach ($imported as $key => $name) {
                 $txt .= '<li>' . $key . ': ' . $name . '</li>';
             }
             $txt .= '</ul>';
             echo $OUTPUT->notification($txt, 'notifysuccess');
         }
 
-        if (count($not_imported) > 0) {
+        if (count($notimported) > 0) {
             $txt = get_string('notimported', 'attendance');
             $txt .= '<ul>';
-            foreach($not_imported as $userkey) {
+            foreach ($notimported as $userkey) {
                 $txt .= '<li>' . $userkey . '</li>';
             }
             $txt .= '</ul>';
             echo $OUTPUT->notification($txt);
         }
 
-        echo $OUTPUT->single_button(new moodle_url($att->url_attendanceimport(), array('id'=>$id)), get_string('back'), 'get');
-    }
-    else {
+        echo $OUTPUT->single_button(new moodle_url($att->url_attendanceimport(), array('id' => $id)), get_string('back'), 'get');
+    } else {
         print_error('userslistempty', 'attendance', $att->url_attendanceimport());
     }
 
 }
 else {
 
-    $formparams = array('course' => $course, 'cm' => $cm, 'modcontext' => $context, 'att'=>$att);
+    $formparams = array('course' => $course, 'cm' => $cm, 'modcontext' => $context, 'att' => $att);
     $mform = new mod_attendance_attendanceimport_form($att->url_attendanceimport(), $formparams);
 
     $mform->display();

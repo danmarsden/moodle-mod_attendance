@@ -38,11 +38,9 @@ class mod_attendance_attendanceimport_form extends moodleform {
      * @return void
      */
     public function definition() {
-        global $USER, $DB, $PAGE;
+
         $mform    =& $this->_form;
-        $course        = $this->_customdata['course'];
         $cm            = $this->_customdata['cm'];
-        $modcontext    = $this->_customdata['modcontext'];
         $att           = $this->_customdata['att'];
 
         $mform->addElement('header', 'general', get_string('attendanceimport', 'attendance'));
@@ -59,33 +57,33 @@ class mod_attendance_attendanceimport_form extends moodleform {
             return;
         }
 
-        //Attendance list
-        $attendances_list = array();
+        // Attendance list.
+        $attendanceslist = array();
         $userformatdate = get_string('strftimedatetime');
-        foreach($attendances as $attendance) {
-            $attendances_list[$attendance->id] = $attendance->description . ' (' . userdate($attendance->sessdate, $userformatdate) . ')';
+        foreach ($attendances as $attendance) {
+            $attendanceslist[$attendance->id] = $attendance->description . ' (' . userdate($attendance->sessdate, $userformatdate) . ')';
         }
-        $mform->addElement('select', 'sessionid', get_string('session', 'attendance'), $attendances_list);
+        $mform->addElement('select', 'sessionid', get_string('session', 'attendance'), $attendanceslist);
 
-        //Ident type list
+        // Ident type list.
         $ident = array();
-        $ident['id'] =          get_string('studentid', 'attendance');
-        $ident['username'] =    get_string('username');
-        $ident['idnumber'] =    get_string('idnumber');
-        $ident['email'] =       get_string('email');
+        $ident['id'] = get_string('studentid', 'attendance');
+        $ident['username'] = get_string('username');
+        $ident['idnumber'] = get_string('idnumber');
+        $ident['email'] = get_string('email');
 
         $mform->addElement('select', 'userfield', get_string('identifyby', 'attendance'), $ident);
         $mform->setDefault('userfield', 'username');
 
-        //Statuses list
-        $statuses_list = array();
-        foreach($statuses as $status) {
-            $statuses_list[$status->id] = $status->description;
+        // Statuses list.
+        $statuseslist = array();
+        foreach ($statuses as $status) {
+            $statuseslist[$status->id] = $status->description;
         }
-        $mform->addElement('select', 'status', get_string('setstatus', 'attendance'), $statuses_list);
+        $mform->addElement('select', 'status', get_string('setstatus', 'attendance'), $statuseslist);
 
-        //Users list
-        $mform->addElement('textarea', 'userslist', get_string('userslisttoimport', 'attendance'), array('cols'=>40, 'rows'=>15));
+        // Users list.
+        $mform->addElement('textarea', 'userslist', get_string('userslisttoimport', 'attendance'), array('cols' => 40, 'rows' => 15));
         $mform->addHelpButton('userslist', 'userslisttoimport', 'attendance');
         $mform->addRule('userslist', get_string('userslist_required', 'attendance'), 'required', null, 'client');
 
