@@ -150,8 +150,7 @@ if ($formdata = data_submitted()) {
         print_error('userslistempty', 'attendance', $att->url_attendanceimport());
     }
 
-}
-else {
+} else {
 
     $formparams = array('course' => $course, 'cm' => $cm, 'modcontext' => $context, 'att' => $att);
     $mform = new mod_attendance_attendanceimport_form($att->url_attendanceimport(), $formparams);
