@@ -77,8 +77,6 @@ $string['commonsessions'] = 'All students';
 $string['confirmdeleteuser'] = 'Are you sure you want to delete user \'{$a->fullname}\' ({$a->email})?<br/>All of their attendance records will be permanently deleted.';
 $string['countofselected'] = 'Count of selected';
 $string['copyfrom'] = 'Copy attendance data from';
-$string['createcalevents'] = 'Create calendar events';
-$string['createcheckcalevents'] = 'Are you sure you want to create the calendar events for the following sessions?';
 $string['createmultiplesessions'] = 'Create multiple sessions';
 $string['createmultiplesessions_help'] = 'This function allows you to create multiple sessions in one simple step.
 The sessions begin on the date of the base session and continue until the \'repeat until\' date.
@@ -92,8 +90,6 @@ $string['days'] = 'Days';
 $string['defaults'] = 'Defaults';
 $string['defaultdisplaymode'] = 'Default display mode';
 $string['delete'] = 'Delete';
-$string['deletecalevents'] = 'Delete calendar events';
-$string['deletecheckcalevents'] = 'Are you absolutely sure you want to delete the calendar events for the following sessions?';
 $string['deletelogs'] = 'Delete attendance data';
 $string['deleteselected'] = 'Delete selected';
 $string['deletesession'] = 'Delete session';
