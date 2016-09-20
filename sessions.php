@@ -133,8 +133,6 @@ switch ($att->pageparams->action) {
         echo $OUTPUT->footer();
         exit;
     case mod_attendance_sessions_page_params::ACTION_DELETE_SELECTED:
-    case mod_attendance_sessions_page_params::ACTION_CREATE_CAL_EVENTS:
-    case mod_attendance_sessions_page_params::ACTION_DELETE_CAL_EVENTS:
         $confirm    = optional_param('confirm', null, PARAM_INT);
         $message = get_string('deletecheckfull', '', get_string('session', 'attendance'));
 
@@ -145,12 +143,6 @@ switch ($att->pageparams->action) {
                 $att->delete_sessions($sessionsids);
                 attendance_update_users_grade($att);
                 redirect($att->url_manage(), get_string('sessiondeleted', 'attendance'));
-            } else if ($att->pageparams->action == mod_attendance_sessions_page_params::ACTION_CREATE_CAL_EVENTS) {
-                create_calendar_events($sessionsids);
-                redirect($att->url_manage(), get_string('createcheckcalevents', 'attendance'));
-            } else if ($att->pageparams->action == mod_attendance_sessions_page_params::ACTION_DELETE_CAL_EVENTS) {
-                delete_calendar_events($sessionsids);
-                redirect($att->url_manage(), get_string('deletecheckcalevents', 'attendance'));
             }
         }
         $sessid = optional_param_array('sessid', '', PARAM_SEQUENCE);
@@ -158,12 +150,6 @@ switch ($att->pageparams->action) {
             print_error('nosessionsselected', 'attendance', $att->url_manage());
         }
         $sessionsinfo = $att->get_sessions_info($sessid);
-
-        if ($att->pageparams->action == mod_attendance_sessions_page_params::ACTION_CREATE_CAL_EVENTS) {
-            $message = get_string('createcheckcalevents', 'attendance');
-        } else if ($att->pageparams->action == mod_attendance_sessions_page_params::ACTION_DELETE_CAL_EVENTS) {
-            $message = get_string('deletecheckcalevents', 'attendance');
-        }
 
         $message .= html_writer::empty_tag('br');
         foreach ($sessionsinfo as $sessinfo) {
