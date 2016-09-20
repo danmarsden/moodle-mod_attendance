@@ -84,7 +84,7 @@ function create_calendar_events($sessionsids) {
  * @param $timestart int start time of the event
  * @return bool result of updating
  */
-function update_calendar_event($caleventid, $timeduration, $timestart = null) {
+function update_calendar_event($caleventid, $timeduration, $timestart) {
     $caleventdata = new stdClass();
     $caleventdata->timeduration   = $timeduration;
     $caleventdata->timestart      = $timestart;
