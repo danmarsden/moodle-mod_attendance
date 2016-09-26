@@ -194,6 +194,10 @@ function construct_sessions_data_for_add($formdata) {
     $duration = $formdata->durtime['hours']*HOURSECS + $formdata->durtime['minutes']*MINSECS;
     $now = time();
 
+    if (empty(get_config('attendance', 'studentscanmark'))) {
+        $formdata->studentscanmark = 0;
+    }
+
     $sessions = array();
     if (isset($formdata->addmultiply)) {
         $startdate = $formdata->sessiondate;

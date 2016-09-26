@@ -231,6 +231,7 @@ $string['eventstatusupdated'] = 'Status updated';
 $string['eventstatusadded'] = 'Status added';
 
 $string['studentscanmark'] = 'Allow students to record own attendance';
+$string['studentscanmark_desc'] = 'If checked, teachers will be able to allow students to mark their own attendance.';
 $string['studentscanmark_help'] = 'If checked students will be able to change their own attendance status for the session.';
 $string['set_by_student'] = 'Self-recorded';
 $string['attendance_already_submitted'] = 'You may not self register attendance that has already been set.';
