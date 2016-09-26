@@ -41,4 +41,7 @@ if ($ADMIN->fulltree) {
 
     $settings->add(new admin_setting_configselect('attendance/resultsperpage',
         get_string('resultsperpage', 'attendance'), get_string('resultsperpage_desc', 'attendance'), 25, $options));
+
+    $settings->add(new admin_setting_configcheckbox('attendance/studentscanmark',
+        get_string('studentscanmark', 'attendance'), get_string('studentscanmark_desc', 'attendance'), 1));
 }
