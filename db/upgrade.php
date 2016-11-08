@@ -191,6 +191,19 @@ function xmldb_attendance_upgrade($oldversion=0) {
         // Attendance savepoint reached.
         upgrade_mod_savepoint(true, 2016082900, 'attendance');
     }
+    
+    if ($oldversion < 201611071400) {
+    	$table = new xmldb_table('attendance');
+    	$newfield = $table->add_field('requirelan', XMLDB_TYPE_INTEGER, '1', null, null, null, null);
+    	if (!$dbman->field_exists($table, $newfield)) {
+    		$dbman->add_field($table, $newfield);
+    	}
+    	$newfield = $table->add_field('subnet', XMLDB_TYPE_CHAR, '255', null, null, null, null);
+    	if (!$dbman->field_exists($table, $newfield)) {
+    		$dbman->add_field($table, $newfield);
+    	}
+    	upgrade_mod_savepoint(true, 201611071400, 'attendance');
+    }
 
     return $result;
 }
