@@ -337,4 +337,4 @@ $string['configrequiresubnet'] = 'Students can only record own attendance from t
 $string['requiresubnet'] = 'Computers that attendance can be recorded from.';
 $string['subnetwrong'] = 'Attendance can only be recorded from certain locations, and this computer is not on the allowed list.';
 $string['requiresubnet_help'] = 'Attendance recording  may be restricted to particular subnets on the LAN or Internet by specifying a comma-separated list of partial or full IP address numbers.';
-$string['requirelan'] = 'Do you want to aloow access to university computers only?';
+$string['requirelan'] = 'Do you want to allow access to university computers only?';
