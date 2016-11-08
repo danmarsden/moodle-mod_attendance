@@ -57,6 +57,12 @@ class mod_attendance_structure {
 
     /** current page parameters */
     public $pageparams;
+    
+    /* @var int if to use limitation by IPS */
+    public $requirelan;
+    
+    /* @var varchar(255) the IPS allowed to record attendance from */
+    public $subnet;
 
     private $groupmode;
 
