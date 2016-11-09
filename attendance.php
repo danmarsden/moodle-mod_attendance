@@ -94,5 +94,4 @@ if ($attendance->requirelan) {
 } else {
         $mform->display();
 }
-
 echo $output->footer();
