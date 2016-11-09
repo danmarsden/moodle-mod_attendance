@@ -52,17 +52,12 @@ class mod_attendance_structure {
     /** @var float number (10, 5) unsigned, the maximum grade for attendance */
     public $grade;
 
-    /** @var int last time attendance was modified - used for global search */
-    public $timemodified;
+    public $requirelan;
+
+    public $subnet;
 
     /** current page parameters */
-    public $pageparams;    
-    
-    /* @var int if to use limitation by IPS */
-    public $requirelan;    
-    
-    /* @var varchar(255) the IPS allowed to record attendance from */
-    public $subnet;
+    public $pageparams;
 
     private $groupmode;
 
@@ -954,9 +949,9 @@ class mod_attendance_structure {
                 'acronym' => $status->acronym,
                 'description' => $status->description
             )));
-        $event->add_record_snapshot('course_modules', $this->cm);
-        $event->add_record_snapshot('attendance_statuses', $status);
-        $event->trigger();
+            $event->add_record_snapshot('course_modules', $this->cm);
+            $event->add_record_snapshot('attendance_statuses', $status);
+            $event->trigger();
     }
 
     /**
