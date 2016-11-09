@@ -52,14 +52,14 @@ class mod_attendance_structure {
     /** @var float number (10, 5) unsigned, the maximum grade for attendance */
     public $grade;
 
-    /** @var int last time attendance was modified - used for global search */
-    public $timemodified;
+    public $requirelan;
+
+    public $subnet;
 
     /** current page parameters */
     public $pageparams;
 
     private $groupmode;
-
     private $statuses;
     private $allstatuses; // Cache list of all statuses (not just one used by current session).
 
@@ -948,9 +948,9 @@ class mod_attendance_structure {
                 'acronym' => $status->acronym,
                 'description' => $status->description
             )));
-        $event->add_record_snapshot('course_modules', $this->cm);
-        $event->add_record_snapshot('attendance_statuses', $status);
-        $event->trigger();
+            $event->add_record_snapshot('course_modules', $this->cm);
+            $event->add_record_snapshot('attendance_statuses', $status);
+            $event->trigger();
     }
 
     /**
