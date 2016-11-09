@@ -55,7 +55,6 @@ class mod_attendance_mod_form extends moodleform_mod {
         $this->standard_grading_coursemodule_elements();
 
         $this->standard_coursemodule_elements(true);
-
         $mform->addElement('header', 'security', get_string('extrarestrictions', 'attendance'));
         $mform->addElement('selectyesno', 'requirelan', get_string('requirelan', 'attendance'));
         // IP address.
