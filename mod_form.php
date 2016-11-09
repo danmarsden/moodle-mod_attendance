@@ -55,17 +55,16 @@ class mod_attendance_mod_form extends moodleform_mod {
         $this->standard_grading_coursemodule_elements();
 
         $this->standard_coursemodule_elements(true);
-        
+
         $mform->addElement('header', 'security', get_string('extrarestrictions', 'attendance'));
-        
         $mform->addElement('selectyesno', 'requirelan', get_string('requirelan', 'attendance'));
         // IP address.
         $mform->addElement('text', 'subnet', get_string('requiresubnet', 'attendance'), array('size' => '164'));
         $mform->setType('subnet', PARAM_TEXT);
         $mform->addHelpButton('subnet', 'requiresubnet', 'attendance');
         $mform->disabledIf('subnet', 'requirelan', 'eq', 0);
-        $mform->setDefault('subnet', '');  // we put here the IPS of our campus' LAN ('132.66,132.67,172.16,172.18')
-        
+        $mform->setDefault('subnet', '132.66,132.67,172.16,172.18');
+
         $this->add_action_buttons();
     }
 }
