@@ -60,7 +60,6 @@ class mod_attendance_structure {
     public $pageparams;
 
     private $groupmode;
-
     private $statuses;
     private $allstatuses; // Cache list of all statuses (not just one used by current session).
 
