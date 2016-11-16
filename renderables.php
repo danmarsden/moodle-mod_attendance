@@ -80,8 +80,9 @@ class attendance_tabs implements renderable {
 
         if (has_capability('mod/attendance:manageattendances', $context)) {
             $toprow[] = new tabobject(self::TAB_ADD,
-                            $this->att->url_sessions()->out(true, array('action' => mod_attendance_sessions_page_params::ACTION_ADD)),
-                            get_string('addsession', 'attendance'));
+                            $this->att->url_sessions()->out(true,
+                                array('action' => mod_attendance_sessions_page_params::ACTION_ADD)),
+                                get_string('addsession', 'attendance'));
         }
         if (has_capability('mod/attendance:viewreports', $context)) {
             $toprow[] = new tabobject(self::TAB_REPORT, $this->att->url_report()->out(),
@@ -103,8 +104,9 @@ class attendance_tabs implements renderable {
         }
         if ($this->currenttab == self::TAB_UPDATE && has_capability('mod/attendance:manageattendances', $context)) {
             $toprow[] = new tabobject(self::TAB_UPDATE,
-                            $this->att->url_sessions()->out(true, array('action' => mod_attendance_sessions_page_params::ACTION_UPDATE)),
-                            get_string('changesession', 'attendance'));
+                            $this->att->url_sessions()->out(true,
+                                array('action' => mod_attendance_sessions_page_params::ACTION_UPDATE)),
+                                get_string('changesession', 'attendance'));
         }
 
         return array($toprow);

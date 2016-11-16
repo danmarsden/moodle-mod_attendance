@@ -1105,7 +1105,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
         // We should probably rewrite this to use mforms but for now add sesskey.
         $o .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()))."\n";
 
-        $o .= $this->construct_preferences_button(get_string('update', 'attendance'), mod_attendance_preferences_page_params::ACTION_SAVE);
+        $o .= $this->construct_preferences_button(get_string('update', 'attendance'),
+                                                  mod_attendance_preferences_page_params::ACTION_SAVE);
         $o = html_writer::tag('form', $o, array('id' => 'preferencesform', 'method' => 'post',
                                                 'action' => $prefdata->url(array(), false)->out_omit_querystring()));
         $o = $this->output->container($o, 'generalbox attwidth');

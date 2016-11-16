@@ -24,12 +24,15 @@ Feature: Teachers and Students can record session attendance
             | user        | course | role    |
             | student1    | C101   | student |
             | teacher1    | C101   | editingteacher |
-        And I log in as "teacher1"
+        When I log in as "teacher1"
         And I follow "Course 1"
         And I turn editing mode on
         And I add a "Attendance" to section "1" and I fill the form with:
             | Name        | Attendance       |
         And I log out
+        And I log in as "student1"
+        And I follow "Course 1"
+        Then I should see "Attendance"
 
     Scenario: Students can mark their own attendance
         When I log in as "teacher1"
