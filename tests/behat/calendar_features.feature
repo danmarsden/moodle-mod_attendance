@@ -30,9 +30,9 @@ Feature: Test the calendar related features in the attendance module
       | id_sestime_endhour   | 02 |
     And I click on "id_submitbutton" "button"
     And I follow "Course 1"
-    And I follow "Go to calendar"
+    And I follow "Calendar"
     Then I should see "Test attendance"
     And I log out
     And I log in as "student1"
-    And I follow "Go to calendar"
+    And I follow "Calendar"
     Then I should see "Test attendance"

@@ -22,6 +22,8 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+defined('MOODLE_INTERNAL') || die();
+
 require_once($CFG->libdir.'/formslib.php');
 
 /**
@@ -66,10 +68,10 @@ class mod_attendance_add_form extends moodleform {
                 break;
             case VISIBLEGROUPS:
                 $radio = array();
-                $radio[] = &$mform->createElement('radio', 'sessiontype', '',
-                                                  get_string('commonsession', 'attendance'), mod_attendance_structure::SESSION_COMMON);
-                $radio[] = &$mform->createElement('radio', 'sessiontype', '',
-                                                  get_string('groupsession', 'attendance'), mod_attendance_structure::SESSION_GROUP);
+                $radio[] = &$mform->createElement('radio', 'sessiontype', '', get_string('commonsession', 'attendance'),
+                                                  mod_attendance_structure::SESSION_COMMON);
+                $radio[] = &$mform->createElement('radio', 'sessiontype', '', get_string('groupsession', 'attendance'),
+                                                  mod_attendance_structure::SESSION_GROUP);
                 $mform->addGroup($radio, 'sessiontype', get_string('sessiontype', 'attendance'), ' ', false);
                 $mform->setType('sessiontype', PARAM_INT);
                 $mform->addHelpButton('sessiontype', 'sessiontype', 'attendance');
