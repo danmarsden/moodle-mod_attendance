@@ -21,6 +21,7 @@
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+defined('MOODLE_INTERNAL') || die();
 
 $plugin->version  = 2016082900;
 $plugin->requires = 2016052300;
