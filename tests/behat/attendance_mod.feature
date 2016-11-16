@@ -33,6 +33,7 @@ Feature: Teachers and Students can record session attendance
         And I log in as "student1"
         And I follow "Course 1"
         Then I should see "Attendance"
+        And I log out
 
     Scenario: Students can mark their own attendance
         When I log in as "teacher1"
