@@ -27,8 +27,8 @@ Feature: Teachers and Students can record session attendance
         And I log in as "teacher1"
         And I follow "Course 1"
         And I turn editing mode on
-        And I add a "Attendance" to section "1"
-        And I press "Save and display" 
+        And I add a "Attendance" to section "1" and I fill the form with:
+            | Name        | Attendance       |
         And I log out
 
     Scenario: Students can mark their own attendance
