@@ -20,8 +20,9 @@ Feature: Teachers can't change status variables to have empty acronyms or descri
         And I follow "Course 1"
         And I turn editing mode on
         And I add a "Attendance" to section "1" and I fill the form with:
-            | Name        | Attendance       |
-        And I follow "Settings"
+            | Name        | Attendancepreftest       |
+        And I follow "Attendancepreftest"
+        And I follow "Edit settings"
 
     @javascript
     Scenario: Teachers can add status variables
