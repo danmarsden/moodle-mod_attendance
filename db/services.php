@@ -24,10 +24,6 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-/**
- * We defined the web service functions to install.
- */
-
 $functions = array(
     'mod_wsattendance_get_courses_with_today_sessions' => array(
         'classname'   => 'mod_wsattendance_external',

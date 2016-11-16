@@ -405,7 +405,8 @@ class mod_attendance_structure {
         $event = \mod_attendance\event\session_updated::create(array(
             'objectid' => $this->id,
             'context' => $this->context,
-            'other' => array('info' => $info, 'sessionid' => $sessionid, 'action' => mod_attendance_sessions_page_params::ACTION_UPDATE)));
+            'other' => array('info' => $info, 'sessionid' => $sessionid,
+                             'action' => mod_attendance_sessions_page_params::ACTION_UPDATE)));
         $event->add_record_snapshot('course_modules', $this->cm);
         $event->add_record_snapshot('attendance_sessions', $sess);
         $event->trigger();
@@ -488,7 +489,10 @@ class mod_attendance_structure {
                 $sesslog[$sid]->studentid = $sid; // We check is_numeric on this above.
                 $sesslog[$sid]->statusid = $value; // We check is_numeric on this above.
                 $sesslog[$sid]->statusset = $statuses;
-                $sesslog[$sid]->remarks = array_key_exists('remarks'.$sid, $formdata) ? clean_param($formdata['remarks'.$sid], PARAM_TEXT) : '';
+                $sesslog[$sid]->remarks = '';
+                if (array_key_exists('remarks'.$sid, $formdata)) {
+                    $sesslog[$sid]->remarks = clean_param($formdata['remarks' . $sid], PARAM_TEXT);
+                }
                 $sesslog[$sid]->sessionid = $this->pageparams->sessionid;
                 $sesslog[$sid]->timetaken = $now;
                 $sesslog[$sid]->takenby = $USER->id;
