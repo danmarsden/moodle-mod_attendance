@@ -63,7 +63,6 @@ class attendance_webservices_tests extends advanced_testcase {
 
         $this->setUser($this->teacher);
 
-        $sessions = array();
         $session = new stdClass();
         $session->sessdate = time();
         $session->duration = 6000;

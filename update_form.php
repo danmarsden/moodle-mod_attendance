@@ -61,7 +61,6 @@ class mod_attendance_update_form extends moodleform {
         $endhour = floor($endtime / HOURSECS);
         $endminute = floor(($endtime - $endhour * HOURSECS) / MINSECS);
 
-        $sesendtime = $sess->sessdate + $sess->duration;
         $data = array('sessiondate' => $sess->sessdate,
                 'sestime' => array('starthour' => $starthour, 'startminute' => $startminute,
                                    'endhour' => $endhour, 'endminute' => $endminute),

@@ -1,8 +1,4 @@
 .path-mod-attendance .attbtn {
-    -khtml-border-radius: 5px;
-    -moz-border-radius: 5px;
-    -opera-border-radius: 5px;
-    -webkit-border-radius: 5px;
     border:1px solid #AAAAAA;
     border-radius: 5px;
     margin-left: 2px;
@@ -17,9 +13,10 @@
 }
 
 .path-mod-attendance .attfiltercontrols {
-    margin-bottom: 10px !important;
+    margin-bottom: 10px;
     margin-left:auto;
     margin-right:auto;
+    width:90%;
 }
 
 .path-mod-attendance .attfiltercontrols #currentdate{
