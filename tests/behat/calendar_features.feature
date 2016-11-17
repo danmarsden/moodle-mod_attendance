@@ -16,6 +16,7 @@ Feature: Test the calendar related features in the attendance module
     And I log in as "teacher1"
     And I follow "Course 1"
     And I turn editing mode on
+    And I add the "Upcoming events" block
     And I add a "Attendance" to section "1" and I fill the form with:
       | Name | Test attendance |
     And I log out
@@ -30,9 +31,9 @@ Feature: Test the calendar related features in the attendance module
       | id_sestime_endhour   | 02 |
     And I click on "id_submitbutton" "button"
     And I follow "Course 1"
-    And I follow "This month"
+    And I follow "Go to calendar"
     Then I should see "Test attendance"
     And I log out
     And I log in as "student1"
-    And I follow "This month"
+    And I follow "Go to calendar"
     Then I should see "Test attendance"
