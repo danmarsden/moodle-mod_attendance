@@ -10,6 +10,7 @@
         <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="grade" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="100" SEQUENCE="false" COMMENT="This is maximum grade for instance"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The time the settings for this attendance instance were last modified."/>
         <FIELD NAME="subnet" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="add ability to restrict by IP."/>
       </FIELDS>
       <KEYS>
