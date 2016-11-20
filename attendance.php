@@ -83,7 +83,7 @@ $PAGE->navbar->add($att->name);
 
 $output = $PAGE->get_renderer('mod_attendance');
 echo $output->header();
-if (!empty ($attendance->subnet) {
+if (!empty ($attendance->subnet)) {
     if (!address_in_subnet(getremoteaddr(), $attendance->subnet)) {
         $wrongip = html_writer::tag('p', get_string('subnetwrong', 'attendance'));
         $button = html_writer::tag('p', $output->continue_button($CFG->wwwroot . '/course/view.php?id=' . $course->id));
