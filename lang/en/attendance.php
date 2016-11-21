@@ -333,6 +333,6 @@ $string['repeaton'] = 'Repeat on';
 $string['invalidsessionendtime'] = 'The end time must be greater than start time';
 $string['deletedgroup'] = 'The group associated with this session has been deleted';
 $string['extrarestrictions'] = 'Extra restrictions';
-$string['configrequiresubnet'] = 'Students can only record own attendance from these computers.';
+$string['requiresubnet'] = 'Students can only record own attendance from these computers.';
 $string['subnetwrong'] = 'Attendance can only be recorded from certain locations, and this computer is not on the allowed list.';
 $string['requiresubnet_help'] = 'Attendance recording may be restricted to particular subnets by specifying a comma-separated list of partial or full IP addresses.';

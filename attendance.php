@@ -43,6 +43,13 @@ if (empty(get_config('attendance', 'studentscanmark')) || empty($attforsession->
     redirect(new moodle_url('/mod/attendance/view.php', array('id' => $cm->id)));
     exit;
 }
+
+// Check if subnet is set and if the user is in the allowed range.
+if (!empty($attendance->subnet) && !address_in_subnet(getremoteaddr(), $attendance->subnet)) {
+    notice(get_string('subnetwrong', 'attendance'));
+    exit; // Notice calls this anyway.
+}
+
 $pageparams->sessionid = $id;
 $att = new mod_attendance_structure($attendance, $cm, $course, $PAGE->context, $pageparams);
 
@@ -83,15 +90,5 @@ $PAGE->navbar->add($att->name);
 
 $output = $PAGE->get_renderer('mod_attendance');
 echo $output->header();
-if (!empty ($attendance->subnet)) {
-    if (!address_in_subnet(getremoteaddr(), $attendance->subnet)) {
-        $wrongip = html_writer::tag('p', get_string('subnetwrong', 'attendance'));
-        $button = html_writer::tag('p', $output->continue_button($CFG->wwwroot . '/course/view.php?id=' . $course->id));
-        echo $output->box($wrongip ."\n\n".$button."\n", 'generalbox', 'notice');
-        } else {
-            $mform->display();
-    } else {
-        $mform->display();
-}
-
+$mform->display();
 echo $output->footer();

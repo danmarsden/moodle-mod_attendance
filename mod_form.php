@@ -43,6 +43,9 @@ class mod_attendance_mod_form extends moodleform_mod {
      */
     public function definition() {
         $attendanceconfig = get_config('attendance');
+        if (!isset($attendanceconfig->subnet)) {
+            $attendanceconfig->subnet = '';
+        }
         $mform    =& $this->_form;
 
         $mform->addElement('header', 'general', get_string('general', 'form'));
