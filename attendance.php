@@ -43,6 +43,13 @@ if (empty(get_config('attendance', 'studentscanmark')) || empty($attforsession->
     redirect(new moodle_url('/mod/attendance/view.php', array('id' => $cm->id)));
     exit;
 }
+
+// Check if subnet is set and if the user is in the allowed range.
+if (!empty($attendance->subnet) && !address_in_subnet(getremoteaddr(), $attendance->subnet)) {
+    notice(get_string('subnetwrong', 'attendance'));
+    exit; // Notice calls this anyway.
+}
+
 $pageparams->sessionid = $id;
 $att = new mod_attendance_structure($attendance, $cm, $course, $PAGE->context, $pageparams);
 

@@ -192,6 +192,14 @@ function xmldb_attendance_upgrade($oldversion=0) {
         // Attendance savepoint reached.
         upgrade_mod_savepoint(true, 2016082900, 'attendance');
     }
+    if ($oldversion < 2016112100) {
+        $table = new xmldb_table('attendance');
+        $newfield = $table->add_field('subnet', XMLDB_TYPE_CHAR, '255', null, null, null, null, 'timemodified');
+        if (!$dbman->field_exists($table, $newfield)) {
+            $dbman->add_field($table, $newfield);
+        }
+        upgrade_mod_savepoint(true, 2016112100, 'attendance');
+    }
 
     return $result;
 }

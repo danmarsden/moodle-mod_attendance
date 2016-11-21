@@ -39,6 +39,10 @@ class mod_attendance_mod_form extends moodleform_mod {
      * @return void
      */
     public function definition() {
+        $attendanceconfig = get_config('attendance');
+        if (!isset($attendanceconfig->subnet)) {
+            $attendanceconfig->subnet = '';
+        }
         $mform    =& $this->_form;
 
         $mform->addElement('header', 'general', get_string('general', 'form'));
@@ -52,6 +56,14 @@ class mod_attendance_mod_form extends moodleform_mod {
         $this->standard_grading_coursemodule_elements();
 
         $this->standard_coursemodule_elements(true);
+
+        $mform->addElement('header', 'security', get_string('extrarestrictions', 'attendance'));
+        // IP address.
+        $mform->addElement('text', 'subnet', get_string('requiresubnet', 'attendance'), array('size' => '164'));
+        $mform->setType('subnet', PARAM_TEXT);
+        $mform->addHelpButton('subnet', 'requiresubnet', 'attendance');
+        $mform->setDefault('subnet', $attendanceconfig->subnet);
+
         $this->add_action_buttons();
     }
 }

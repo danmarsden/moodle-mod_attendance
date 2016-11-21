@@ -59,6 +59,8 @@ class mod_attendance_structure {
     /** current page parameters */
     public $pageparams;
 
+    public $subnet;
+
     private $groupmode;
 
     private $statuses;
