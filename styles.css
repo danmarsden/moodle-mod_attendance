@@ -163,14 +163,6 @@
     color: red;
 }
 
-.path-mod-attendance .summaryreport .c5 {
-    background-color: #EAEAEA;
-}
-
-.path-mod-attendance .summaryreport .c6 {
-    background-color: #EAEAEA;
-}
-
-.path-mod-attendance .summaryreport .c7 {
+.path-mod-attendance .columncontrast {
     background-color: #EAEAEA;
 }
