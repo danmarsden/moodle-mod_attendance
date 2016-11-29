@@ -289,9 +289,11 @@ class mod_attendance_summary {
                    {$where}
               GROUP BY atl.studentid, sts.setnumber, sts.acronym";
         $this->userstakensessionsbyacronym = array();
-        foreach ($DB->get_recordset_sql($sql, $params) AS $rec) {
+        $records = $DB->get_recordset_sql($sql, $params);
+        foreach ($records as $rec) {
             $this->userstakensessionsbyacronym[$rec->userid][$rec->setnumber][$rec->acronym] = $rec->numtakensessions;
         }
+        $records->close();
     }
 
     /**

@@ -900,7 +900,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         }
 
         $setnumber = -1;
-        foreach ($reportdata->statuses AS $sts) {
+        foreach ($reportdata->statuses as $sts) {
             if ($sts->setnumber != $setnumber) {
                 $colclass = empty($colclass) ? 'columncontrast' : null;
                 $setnumber = $sts->setnumber;
@@ -978,9 +978,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 $usersummary = $reportdata->summary->get_taken_sessions_summary_for($user->id);
             }
 
-            foreach ($reportdata->statuses AS $sts) {
-                $row->cells[] = isset($usersummary->userstakensessionsbyacronym[$sts->setnumber][$sts->acronym]) ?
-                                    $usersummary->userstakensessionsbyacronym[$sts->setnumber][$sts->acronym] : 0;
+            foreach ($reportdata->statuses as $sts) {
+                if (isset($usersummary->userstakensessionsbyacronym[$sts->setnumber][$sts->acronym])) {
+                    $row->cells[] = $usersummary->userstakensessionsbyacronym[$sts->setnumber][$sts->acronym];
+                } else {
+                    $row->cells[] = 0;
+                }
             }
 
             $row->cells[] = $usersummary->numtakensessions;
@@ -1038,7 +1041,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 $cell->style = 'white-space:nowrap;';
                 $statrow->cells[] = $cell;
             }
-            foreach ($reportdata->statuses AS $sts) {
+            foreach ($reportdata->statuses as $sts) {
                 $statrow->cells[] = '';
             }
             $statrow->cells[] = '';
