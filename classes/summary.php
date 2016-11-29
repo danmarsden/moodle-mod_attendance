@@ -41,6 +41,9 @@ class mod_attendance_summary {
     /** @var array pointsbygroup (groupid, numsessions, maxpoints) */
     private $maxpointsbygroupsessions;
 
+    /** @var array userstakensessionsbyacronym */
+    private $userstakensessionsbyacronym;
+
     /**
      * Initializes the class
      *
@@ -53,6 +56,7 @@ class mod_attendance_summary {
         $this->attendanceid = $attendanceid;
 
         $this->compute_users_points($userids, $startdate, $enddate);
+        $this->compute_users_taken_sessions_by_acronym($userids, $startdate, $enddate);
     }
 
     /**
@@ -119,6 +123,11 @@ class mod_attendance_summary {
         }
         $usersummary->takensessionspercentage = attendance_calc_fraction($usersummary->takensessionspoints,
                                                                          $usersummary->takensessionsmaxpoints);
+        if (isset($this->userstakensessionsbyacronym[$userid])) {
+            $usersummary->userstakensessionsbyacronym = $this->userstakensessionsbyacronym[$userid];
+        } else {
+            $usersummary->userstakensessionsbyacronym = array();
+        }
 
         return $usersummary;
     }
@@ -222,6 +231,67 @@ class mod_attendance_summary {
                     {$where}
                 GROUP BY atl.studentid";
         $this->userspoints = $DB->get_records_sql($sql, $params);
+    }
+
+    /**
+     * Computes the summary of taken sessions by acronym
+     *
+     * @param array userids user instances identifier
+     * @param int $startdate Attendance sessions startdate
+     * @param int $enddate Attendance sessions enddate
+     * @return  null
+     */
+    private function compute_users_taken_sessions_by_acronym($userids=array(), $startdate = '', $enddate = '') {
+        global $DB;
+
+        list($this->course, $cm) = get_course_and_cm_from_instance($this->attendanceid, 'attendance');
+        $this->groupmode = $cm->effectivegroupmode;
+
+        $params = array(
+            'attid'      => $this->attendanceid,
+            'cstartdate' => $this->course->startdate,
+            );
+
+        $where = '';
+        if (!empty($userids)) {
+            list($insql, $inparams) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
+            $where .= ' AND atl.studentid ' . $insql;
+            $params = array_merge($params, $inparams);
+        }
+        if (!empty($startdate)) {
+            $where .= ' AND ats.sessdate >= :startdate';
+            $params['startdate'] = $startdate;
+        }
+        if (!empty($enddate)) {
+            $where .= ' AND ats.sessdate < :enddate ';
+            $params['enddate'] = $enddate;
+        }
+
+        if ($this->with_groups()) {
+            $joingroup = 'LEFT JOIN {groups_members} gm ON (gm.userid = atl.studentid AND gm.groupid = ats.groupid)';
+            $where .= ' AND (ats.groupid = 0 or gm.id is NOT NULL)';
+        } else {
+            $joingroup = '';
+            $where .= ' AND ats.groupid = 0';
+        }
+
+        $sql = "SELECT atl.studentid AS userid, sts.setnumber, sts.acronym, COUNT(*) AS numtakensessions
+                  FROM {attendance_sessions} ats
+                  JOIN {attendance_log} atl ON (atl.sessionid = ats.id)
+                  JOIN {attendance_statuses} sts
+                    ON (sts.attendanceid = ats.attendanceid AND
+                        sts.id = atl.statusid AND
+                        sts.deleted = 0 AND sts.visible = 1)
+                  {$joingroup}
+                 WHERE ats.attendanceid = :attid
+                   AND ats.sessdate >= :cstartdate
+                   AND ats.lasttakenby != 0
+                   {$where}
+              GROUP BY atl.studentid, sts.setnumber, sts.acronym";
+        $this->userstakensessionsbyacronym = array();
+        foreach ($DB->get_recordset_sql($sql, $params) AS $rec) {
+            $this->userstakensessionsbyacronym[$rec->userid][$rec->setnumber][$rec->acronym] = $rec->numtakensessions;
+        }
     }
 
     /**
