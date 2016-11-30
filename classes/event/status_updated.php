@@ -86,4 +86,14 @@ class status_updated extends \core\event\base {
         return array($this->courseid, 'attendance', 'status updated', $this->get_url(),
             $this->other['updated'], $this->contextinstanceid);
     }
+
+    /**
+     * Get objectid mapping
+     *
+     * @return array of parameters for object mapping.
+     */
+    public static function get_objectid_mapping() {
+        return array('db' => 'attendance', 'restore' => 'attendance');
+    }
+
 }

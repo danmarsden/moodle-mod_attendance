@@ -88,6 +88,15 @@ class session_deleted extends \core\event\base {
     }
 
     /**
+     * Get objectid mapping
+     *
+     * @return array of parameters for object mapping.
+     */
+    public static function get_objectid_mapping() {
+        return array('db' => 'attendance', 'restore' => 'attendance');
+    }
+
+    /**
      * Custom validation.
      *
      * @throws \coding_exception
