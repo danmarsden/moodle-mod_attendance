@@ -86,4 +86,14 @@ class status_added extends \core\event\base {
         return array($this->courseid, 'attendance', 'status added', $this->get_url(),
             $this->other['acronym'].': '.$this->other['description'].' ('.$this->other['grade'].')', $this->contextinstanceid);
     }
+
+    /**
+     * Get objectid mapping
+     *
+     * @return array of parameters for object mapping.
+     */
+    public static function get_objectid_mapping() {
+        return array('db' => 'attendance', 'restore' => 'attendance');
+    }
+
 }

@@ -88,4 +88,14 @@ class status_removed extends \core\event\base {
         return array($this->courseid, 'attendance', 'status removed', $this->get_url(),
             $this->other['acronym'] . ' - ' . $this->other['description'], $this->contextinstanceid);
     }
+
+    /**
+     * Get objectid mapping
+     *
+     * @return array of parameters for object mapping.
+     */
+    public static function get_objectid_mapping() {
+        return array('db' => 'attendance', 'restore' => 'attendance');
+    }
+
 }

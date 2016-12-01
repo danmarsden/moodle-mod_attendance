@@ -86,4 +86,14 @@ class report_viewed extends \core\event\base {
         return array($this->courseid, 'attendance', 'report', 'report.php?id=' . $this->objectid,
             $this->objectid, $this->contextinstanceid);
     }
+
+    /**
+     * Get objectid mapping
+     *
+     * @return array of parameters for object mapping.
+     */
+    public static function get_objectid_mapping() {
+        return array('db' => 'attendance', 'restore' => 'attendance');
+    }
+
 }
