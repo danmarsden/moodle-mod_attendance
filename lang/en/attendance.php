@@ -218,6 +218,7 @@ $string['restoredefaults'] = 'Restore defaults';
 $string['resultsperpage'] = 'Results per page';
 $string['resultsperpage_desc'] = 'Number of students displayed on a page';
 $string['save'] = 'Save attendance';
+$string['search:activity'] = 'Attendance - activity information';
 $string['session'] = 'Session';
 $string['session_help'] = 'Session';
 $string['sessionadded'] = 'Session successfully added';
