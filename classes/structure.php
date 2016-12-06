@@ -126,6 +126,29 @@ class mod_attendance_structure {
     }
 
     /**
+     * Returns past or current sessions for this attendance.
+     *
+     * Fetches data from {attendance_sessions}
+     *
+     * @return array of records or an empty array
+     */
+    public function get_past_sessions() {
+        global $DB;
+
+        $today = time(); // Because we compare with database, we don't need to use usertime().
+
+        $sql = "SELECT *
+                  FROM {attendance_sessions}
+                 WHERE sessdate < :time
+                   AND attendanceid = :aid";
+        $params = array(
+            'time'  => $today,
+            'aid'   => $this->id);
+
+        return $DB->get_records_sql($sql, $params);
+    }
+
+    /**
      * Returns today sessions for this attendance
      *
      * Fetches data from {attendance_sessions}
@@ -251,6 +274,14 @@ class mod_attendance_structure {
     public function url_manage($params=array()) {
         $params = array_merge(array('id' => $this->cm->id), $params);
         return new moodle_url('/mod/attendance/manage.php', $params);
+    }
+
+    /**
+     * @return moodle_url of attendanceimport.php for attendance instance
+     */
+    public function url_attendanceimport($params=array()) {
+        $params = array_merge(array('id' => $this->cm->id), $params);
+        return new moodle_url('/mod/attendance/attendanceimport.php', $params);
     }
 
     /**
@@ -458,6 +489,47 @@ class mod_attendance_structure {
         $event->add_record_snapshot('attendance_sessions', $session);
         $event->add_record_snapshot('attendance_log', $record);
         $event->trigger();
+
+        return true;
+    }
+
+    /**
+     * Used to record attendance by a specific user.
+     *
+     * @param type $mformdata
+     * @return boolean
+     */
+    public function take_student($status, $sessid, $studentid) {
+        global $DB, $USER;
+
+        $statuses = implode(',', array_keys( (array)$this->get_statuses() ));
+        $now = time();
+
+        $record = new stdClass();
+        $record->studentid = $studentid;
+        $record->statusid = $status;
+        $record->statusset = $statuses;
+        $record->remarks = get_string('set_imported', 'attendance');
+        $record->sessionid = $sessid;
+        $record->timetaken = $now;
+        $record->takenby = $USER->id;
+
+        $dbsesslog = $this->get_session_log($sessid);
+        if (array_key_exists($studentid, $dbsesslog)) {
+            $record->id = $dbsesslog[$studentid]->id;
+            $DB->update_record('attendance_log', $record);
+        } else {
+            $DB->insert_record('attendance_log', $record, false);
+        }
+
+        // Update the session to show that a register has been taken, or staff may overwrite records.
+        $session = $this->get_session_info($sessid);
+        $session->lasttaken = $now;
+        $session->lasttakenby = $USER->id;
+        $DB->update_record('attendance_sessions', $session);
+
+        // Update the users grade.
+        $this->update_users_grade(array($studentid));
 
         return true;
     }

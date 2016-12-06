@@ -44,6 +44,7 @@ class attendance_tabs implements renderable {
     const TAB_PREFERENCES   = 5;
     const TAB_TEMPORARYUSERS = 6; // Tab for managing temporary users.
     const TAB_UPDATE        = 7;
+    const TAB_ATTENDANCEIMPORT   = 8;
 
     public $currenttab;
 
@@ -76,6 +77,9 @@ class attendance_tabs implements renderable {
         if (has_any_capability($capabilities, $context)) {
             $toprow[] = new tabobject(self::TAB_SESSIONS, $this->att->url_manage()->out(),
                             get_string('sessions', 'attendance'));
+
+            $toprow[] = new tabobject(self::TAB_ATTENDANCEIMPORT, $this->att->url_attendanceimport()->out(),
+                            get_string('attendanceimport', 'attendance'));
         }
 
         if (has_capability('mod/attendance:manageattendances', $context)) {
