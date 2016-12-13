@@ -814,7 +814,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 $row->cells[] = $cell;
             } else {
                 $configjs = get_config('attendance', 'studentscanmark');
-                if(!empty($configjs) && !empty($sess->studentscanmark)) {
+                if (!empty($configjs) && !empty($sess->studentscanmark)) {
                     // Student can mark their own attendance.
                     // URL to the page that lets the student modify their attendance.
                     $url = new moodle_url('/mod/attendance/attendance.php',
