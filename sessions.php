@@ -234,7 +234,8 @@ function construct_sessions_data_for_add($formdata) {
     $duration = $sesendtime - $sesstarttime;
     $now = time();
 
-    if (empty(get_config('attendance', 'studentscanmark'))) {
+    $configcanmark = get_config('attendance', 'studentscanmark');
+    if (empty($configcanmark)) {
         $formdata->studentscanmark = 0;
     }
 
