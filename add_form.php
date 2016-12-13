@@ -118,7 +118,8 @@ class mod_attendance_add_form extends moodleform {
         }
 
         // Students can mark own attendance.
-        if (!empty(get_config('attendance', 'studentscanmark'))) {
+        $configcanmark = get_config('attendance', 'studentscanmark');
+        if (!empty($configcanmark)) {
             $mform->addElement('checkbox', 'studentscanmark', '', get_string('studentscanmark', 'attendance'));
             $mform->addHelpButton('studentscanmark', 'studentscanmark', 'attendance');
         } else {
