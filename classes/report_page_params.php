@@ -48,12 +48,6 @@ class mod_attendance_report_page_params extends mod_attendance_page_with_filter_
         if (!isset($this->sort)) {
             $this->sort = ATT_SORT_DEFAULT;
         }
-        if (!isset($this->showsessiondetails)) {
-            $this->showsessiondetails = true;
-        }
-        if (!isset($this->sessiondetailsposition)) {
-            $this->sessiondetailsposition = 'left';
-        }
     }
 
     public function get_significant_params() {
@@ -67,8 +61,8 @@ class mod_attendance_report_page_params extends mod_attendance_page_with_filter_
             $params['showsessiondetails'] = 0;
         }
 
-        if ($this->sessiondetailsposition == 'right') {
-            $params['sessiondetailsposition'] = 'right';
+        if ($this->sessiondetailsposition != 'left') {
+            $params['sessiondetailsposition'] = $this->sessiondetailsposition;
         }
 
         return $params;

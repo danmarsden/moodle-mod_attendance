@@ -34,8 +34,6 @@ $pageparams->curdate    = optional_param('curdate', null, PARAM_INT);
 $pageparams->group      = optional_param('group', null, PARAM_INT);
 $pageparams->sort       = optional_param('sort', ATT_SORT_DEFAULT, PARAM_INT);
 $pageparams->page       = optional_param('page', 1, PARAM_INT);
-$pageparams->showsessiondetails = optional_param('showsessiondetails', null, PARAM_INT);
-$pageparams->sessiondetailsposition = optional_param('sessiondetailsposition', null, PARAM_TEXT);
 $pageparams->perpage    = get_config('attendance', 'resultsperpage');
 
 $cm             = get_coursemodule_from_id('attendance', $id, 0, false, MUST_EXIST);
@@ -48,6 +46,9 @@ $context = context_module::instance($cm->id);
 require_capability('mod/attendance:viewreports', $context);
 
 $pageparams->init($cm);
+$pageparams->showsessiondetails = optional_param('showsessiondetails', $attrecord->showsessiondetails, PARAM_INT);
+$pageparams->sessiondetailsposition = optional_param('sessiondetailsposition', $attrecord->sessiondetailsposition, PARAM_TEXT);
+
 $att = new mod_attendance_structure($attrecord, $cm, $course, $context, $pageparams);
 
 $PAGE->set_url($att->url_report());
