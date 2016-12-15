@@ -61,6 +61,12 @@ class mod_attendance_structure {
 
     public $subnet;
 
+    /** Define if session details should be shown in reports */
+    public $showsessiondetails;
+
+    /** Position for the session detail columns related to summary columns.*/
+    public $sessiondetailsposition;
+
     private $groupmode;
 
     private $statuses;
@@ -81,6 +87,8 @@ class mod_attendance_structure {
      * @param stdClass $context  The context of the workshop instance
      */
     public function __construct(stdclass $dbrecord, stdclass $cm, stdclass $course, stdclass $context=null, $pageparams=null) {
+        global $DB;
+
         foreach ($dbrecord as $field => $value) {
             if (property_exists('mod_attendance_structure', $field)) {
                 $this->{$field} = $value;
@@ -97,6 +105,13 @@ class mod_attendance_structure {
         }
 
         $this->pageparams = $pageparams;
+
+        if (isset($pageparams->showsessiondetails) && $pageparams->showsessiondetails != $this->showsessiondetails) {
+            $DB->set_field('attendance', 'showsessiondetails', $pageparams->showsessiondetails, array('id' => $this->id));
+        }
+        if (isset($pageparams->sessiondetailsposition) && $pageparams->sessiondetailsposition != $this->sessiondetailsposition) {
+            $DB->set_field('attendance', 'sessiondetailsposition', $pageparams->sessiondetailsposition, array('id' => $this->id));
+        }
     }
 
     public function get_group_mode() {

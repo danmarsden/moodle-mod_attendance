@@ -166,3 +166,18 @@
 .path-mod-attendance .columncontrast {
     background-color: #EAEAEA;
 }
+
+.path-mod-attendance .attreport .center {
+    white-space:nowrap;
+    text-align:center;
+    width:1px;
+}
+
+.path-mod-attendance .attreport .left {
+    text-align:left;
+}
+
+.path-mod-attendance .attreport .bottom {
+    white-space:nowrap;
+    vertical-align:bottom;
+}

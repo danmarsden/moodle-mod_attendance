@@ -46,6 +46,9 @@ $context = context_module::instance($cm->id);
 require_capability('mod/attendance:viewreports', $context);
 
 $pageparams->init($cm);
+$pageparams->showsessiondetails = optional_param('showsessiondetails', $attrecord->showsessiondetails, PARAM_INT);
+$pageparams->sessiondetailsposition = optional_param('sessiondetailsposition', $attrecord->sessiondetailsposition, PARAM_TEXT);
+
 $att = new mod_attendance_structure($attrecord, $cm, $course, $context, $pageparams);
 
 $PAGE->set_url($att->url_report());
