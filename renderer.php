@@ -874,11 +874,16 @@ class mod_attendance_renderer extends plugin_renderer_base {
         }
 
         // Extract rows from each side (left and right) and collate them into one row each
+        $sessiondetailsleft = $reportdata->pageparams->sessiondetailsposition == 'left';
         foreach ($userrows as $key => $row) {
             $summaryrow = isset($summaryrows[$key]->cells) ? $summaryrows[$key]->cells : array();
             $bulkmessagingrow = isset($bulkmessagingrows[$key]->cells) ? $bulkmessagingrows[$key]->cells : array();
             $sessionrow = isset($sessionrows[$key]->cells) ? $sessionrows[$key]->cells : array();
-            $row->cells = array_merge($row->cells, $sessionrow, $acronymrows[$key]->cells, $summaryrow, $bulkmessagingrow);
+            if ($sessiondetailsleft) {
+                $row->cells = array_merge($row->cells, $sessionrow, $acronymrows[$key]->cells, $summaryrow, $bulkmessagingrow);
+            } else {
+                $row->cells = array_merge($row->cells, $acronymrows[$key]->cells, $summaryrow, $sessionrow, $bulkmessagingrow);
+            }
             $table->data[] = $row;
         }
 
@@ -1071,70 +1076,108 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
         $row = new html_table_row();
 
-        $row->cells[] = $this->build_header_cell(get_string('sessions', 'attendance'), '', true, count($reportdata->sessions));
+        $showsessiondetails = $reportdata->pageparams->showsessiondetails;
+        $text = get_string('sessions', 'attendance');
+        $params = $reportdata->pageparams->get_significant_params();
+        if ($showsessiondetails) {
+            $params['showsessiondetails'] = 0;
+            $url = $reportdata->att->url_report($params);
+            $text .= $OUTPUT->action_icon($url, new pix_icon('t/switch_minus', get_string('hidensessiondetails', 'attendance')), null, null);
+            $colspan = count($reportdata->sessions);
+        } else {
+            $params['showsessiondetails'] = 1;
+            $url = $reportdata->att->url_report($params);
+            $text .= $OUTPUT->action_icon($url, new pix_icon('t/switch_plus', get_string('showsessiondetails', 'attendance')), null, null);
+            $colspan = 1;
+        }
+
+        $params = $reportdata->pageparams->get_significant_params();
+        if ($reportdata->pageparams->sessiondetailsposition == 'left') {
+            $params['sessiondetailsposition'] = 'right';
+            $url = $reportdata->att->url_report($params);
+            $text .= $OUTPUT->action_icon($url, new pix_icon('t/right', get_string('moveright', 'attendance')), null, null);
+        } else {
+            $params['sessiondetailsposition'] = 'left';
+            $url = $reportdata->att->url_report($params);
+            $text = $OUTPUT->action_icon($url, new pix_icon('t/left', get_string('moveleft', 'attendance')), null, null) . $text;
+        }
+
+        $row->cells[] = $this->build_header_cell($text, '', true, $colspan);
         $rows[] = $row;
 
         $row = new html_table_row();
-        foreach ($reportdata->sessions as $sess) {
-            $sesstext = userdate($sess->sessdate, get_string('strftimedm', 'attendance'));
-            $sesstext .= html_writer::empty_tag('br');
-            $sesstext .= userdate($sess->sessdate, '('.get_string('strftimehm', 'attendance').')');
-            $capabilities = array(
-                'mod/attendance:takeattendances',
-                'mod/attendance:changeattendances'
-            );
-            if (is_null($sess->lasttaken) and has_any_capability($capabilities, $reportdata->att->context)) {
-                $sesstext = html_writer::link($reportdata->url_take($sess->id, $sess->groupid), $sesstext);
-            }
-            $sesstext .= html_writer::empty_tag('br');
-            if ($sess->groupid) {
-                if (empty($reportdata->groups[$sess->groupid])) {
-                    $sesstext .= html_writer::tag('small', get_string('deletedgroup', 'attendance'));
+        if ($showsessiondetails) {
+            foreach ($reportdata->sessions as $sess) {
+                $sesstext = userdate($sess->sessdate, get_string('strftimedm', 'attendance'));
+                $sesstext .= html_writer::empty_tag('br');
+                $sesstext .= userdate($sess->sessdate, '('.get_string('strftimehm', 'attendance').')');
+                $capabilities = array(
+                    'mod/attendance:takeattendances',
+                    'mod/attendance:changeattendances'
+                );
+                if (is_null($sess->lasttaken) and has_any_capability($capabilities, $reportdata->att->context)) {
+                    $sesstext = html_writer::link($reportdata->url_take($sess->id, $sess->groupid), $sesstext);
+                }
+                $sesstext .= html_writer::empty_tag('br');
+                if ($sess->groupid) {
+                    if (empty($reportdata->groups[$sess->groupid])) {
+                        $sesstext .= html_writer::tag('small', get_string('deletedgroup', 'attendance'));
+                    } else {
+                        $sesstext .= html_writer::tag('small', $reportdata->groups[$sess->groupid]->name);
+                    }
+
                 } else {
-                    $sesstext .= html_writer::tag('small', $reportdata->groups[$sess->groupid]->name);
+                    $sesstext .= html_writer::tag('small', get_string('commonsession', 'attendance'));
                 }
 
-            } else {
-                $sesstext .= html_writer::tag('small', get_string('commonsession', 'attendance'));
+                $row->cells[] = $this->build_header_cell($sesstext);
             }
-
-            $row->cells[] = $this->build_header_cell($sesstext);
+        } else {
+            $row->cells[] = $this->build_header_cell('');
         }
         $rows[] = $row;
 
         foreach ($reportdata->users as $user) {
             $row = new html_table_row();
-            $cellsgenerator = new user_sessions_cells_html_generator($reportdata, $user);
-            foreach ($cellsgenerator->get_cells(true) as $text) {
-                $row->cells[] = $this->build_data_cell($text);
+            if ($showsessiondetails) {
+                $cellsgenerator = new user_sessions_cells_html_generator($reportdata, $user);
+                foreach ($cellsgenerator->get_cells(true) as $text) {
+                    $row->cells[] = $this->build_data_cell($text);
+                }
+            } else {
+                $row->cells[] = $this->build_data_cell('');
             }
             $rows[] = $row;
         }
 
         $row = new html_table_row();
-        foreach ($reportdata->sessions as $sess) {
-            $sessionstats = array();
-            foreach ($reportdata->statuses as $status) {
-                if ($status->setnumber == $sess->statusset) {
-                    $status->count = 0;
-                    $sessionstats[$status->id] = $status;
-                }
-            }
-
-            foreach ($reportdata->users as $user) {
-                if (!empty($reportdata->sessionslog[$user->id][$sess->id])) {
-                    $statusid = $reportdata->sessionslog[$user->id][$sess->id]->statusid;
-                    if (isset($sessionstats[$statusid]->count)) {
-                        $sessionstats[$statusid]->count++;
+        if ($showsessiondetails) {
+            foreach ($reportdata->sessions as $sess) {
+                $sessionstats = array();
+                foreach ($reportdata->statuses as $status) {
+                    if ($status->setnumber == $sess->statusset) {
+                        $status->count = 0;
+                        $sessionstats[$status->id] = $status;
                     }
                 }
-            }
 
-            $statsoutput = '';
-            foreach ($sessionstats as $status) {
-                $statsoutput .= "$status->description: {$status->count}<br/>";
+                foreach ($reportdata->users as $user) {
+                    if (!empty($reportdata->sessionslog[$user->id][$sess->id])) {
+                        $statusid = $reportdata->sessionslog[$user->id][$sess->id]->statusid;
+                        if (isset($sessionstats[$statusid]->count)) {
+                            $sessionstats[$statusid]->count++;
+                        }
+                    }
+                }
+
+                $statsoutput = '';
+                foreach ($sessionstats as $status) {
+                    $statsoutput .= "$status->description: {$status->count}<br/>";
+                }
+                $row->cells[] = $this->build_data_cell($statsoutput);
             }
-            $row->cells[] = $this->build_data_cell($statsoutput);
+        } else {
+            $row->cells[] = $this->build_header_cell('');
         }
         $rows[] = $row;
 

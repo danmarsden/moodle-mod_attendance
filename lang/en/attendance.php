@@ -129,6 +129,7 @@ $string['hiddensessions'] = 'Hidden sessions';
 $string['hiddensessions_help'] = 'Sessions are hidden if they are scheduled before the course start date.
 
 You can use this feature to hide older sessions instead of deleting them. Only visible sessions will appear in the Gradebook.';
+$string['hidensessiondetails'] = 'Hide session details';
 $string['identifyby'] = 'Identify student by';
 $string['includeall'] = 'Select all sessions';
 $string['includenottaken'] = 'Include not taken sessions';
@@ -148,6 +149,8 @@ Reports are available for the entire class or individual students.';
 $string['modulenameplural'] = 'Attendances';
 $string['months'] = 'Months';
 $string['moreattendance'] = 'Attendance has been successfully taken for this page';
+$string['moveleft'] = 'Move left';
+$string['moveright'] = 'Move right';
 $string['mustselectusers'] = 'Must select users to export';
 $string['myvariables'] = 'My Variables';
 $string['newdate'] = 'New date';
@@ -247,6 +250,7 @@ $string['setallstatusesto'] = 'Set status for all users to «{$a}»';
 $string['settings'] = 'Settings';
 $string['showdefaults'] = 'Show defaults';
 $string['showduration'] = 'Show duration';
+$string['showsessiondetails'] = 'Show session details';
 $string['sortedgrid'] = 'Sorted grid';
 $string['sortedlist'] = 'Sorted list';
 $string['startofperiod'] = 'Start of period';

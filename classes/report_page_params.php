@@ -32,6 +32,8 @@ defined('MOODLE_INTERNAL') || die();
 class mod_attendance_report_page_params extends mod_attendance_page_with_filter_controls {
     public $group;
     public $sort;
+    public $showsessiondetails;
+    public $sessiondetailsposition;
 
     public function  __construct() {
         $this->selectortype = self::SELECTOR_GROUP;
@@ -46,6 +48,12 @@ class mod_attendance_report_page_params extends mod_attendance_page_with_filter_
         if (!isset($this->sort)) {
             $this->sort = ATT_SORT_DEFAULT;
         }
+        if (!isset($this->showsessiondetails)) {
+            $this->showsessiondetails = true;
+        }
+        if (!isset($this->sessiondetailsposition)) {
+            $this->sessiondetailsposition = 'left';
+        }
     }
 
     public function get_significant_params() {
@@ -53,6 +61,14 @@ class mod_attendance_report_page_params extends mod_attendance_page_with_filter_
 
         if ($this->sort != ATT_SORT_DEFAULT) {
             $params['sort'] = $this->sort;
+        }
+
+        if (empty($this->showsessiondetails)) {
+            $params['showsessiondetails'] = 0;
+        }
+
+        if ($this->sessiondetailsposition == 'right') {
+            $params['sessiondetailsposition'] = 'right';
         }
 
         return $params;
