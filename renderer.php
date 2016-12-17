@@ -878,7 +878,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $bulkmessagingrows = $this->get_bulkmessage_rows($reportdata);
         }
 
-        // Extract rows from each side (left and right) and collate them into one row each
+        // Extract rows from each part and collate them into one row each.
         $sessiondetailsleft = $reportdata->pageparams->sessiondetailspos == 'left';
         foreach ($userrows as $index => $row) {
             $summaryrow = isset($summaryrows[$index]->cells) ? $summaryrows[$index]->cells : array();
@@ -1023,8 +1023,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $summarycells = array();
 
         $row1 = new html_table_row();
-        $help_icon = $this->output->help_icon('oversessionstaken', 'attendance');
-        $row1->cells[] = $this->build_header_cell(get_string('oversessionstaken', 'attendance') . $help_icon, $contrast, true, 3);
+        $helpicon = $this->output->help_icon('oversessionstaken', 'attendance');
+        $row1->cells[] = $this->build_header_cell(get_string('oversessionstaken', 'attendance') . $helpicon, $contrast, true, 3);
 
         $row2 = new html_table_row();
         $row2->cells[] = $this->build_header_cell(get_string('sessions', 'attendance'), $contrast);
@@ -1037,8 +1037,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
         if ($reportdata->pageparams->view == ATT_VIEW_SUMMARY) {
             $contrast = !$contrast;
 
-            $help_icon = $this->output->help_icon('overallsessions', 'attendance');
-            $row1->cells[] = $this->build_header_cell(get_string('overallsessions', 'attendance') . $help_icon, $contrast, true, 3);
+            $helpicon = $this->output->help_icon('overallsessions', 'attendance');
+            $row1->cells[] = $this->build_header_cell(get_string('overallsessions', 'attendance') . $helpicon, $contrast, true, 3);
 
             $row2->cells[] = $this->build_header_cell(get_string('sessions', 'attendance'), $contrast);
             $row2->cells[] = $this->build_header_cell(get_string('points', 'attendance'), $contrast);
@@ -1048,8 +1048,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $summarycells[] = $this->build_data_cell('', $contrast);
 
             $contrast = !$contrast;
-            $help_icon = $this->output->help_icon('maxpossible', 'attendance');
-            $row1->cells[] = $this->build_header_cell(get_string('maxpossible', 'attendance') . $help_icon, $contrast, true, 2);
+            $helpicon = $this->output->help_icon('maxpossible', 'attendance');
+            $row1->cells[] = $this->build_header_cell(get_string('maxpossible', 'attendance') . $helpicon, $contrast, true, 2);
 
             $row2->cells[] = $this->build_header_cell(get_string('points', 'attendance'), $contrast);
             $row2->cells[] = $this->build_header_cell(get_string('percentage', 'attendance'), $contrast);
