@@ -6,16 +6,17 @@ Feature: Teachers can't change status variables to have empty acronyms or descri
 
     Background:
         Given the following "courses" exist:
-            | fullname | shortname | summary | category |
-            | Course 1 | C101      | Prove the attendance activity settings works | 0 |
+            | fullname | shortname | summary                             | category | timecreated   | timemodified  |
+            | Course 1 | C1        | Prove the attendance activity works | 0        | ##yesterday## | ##yesterday## |
         And the following "users" exist:
             | username    | firstname | lastname |
             | student1    | Sam       | Student  |
             | teacher1    | Teacher   | One      |
         And the following "course enrolments" exist:
-            | user        | course | role    |
-            | student1    | C101   | student |
-            | teacher1    | C101   | editingteacher |
+            | course | user     | role           | timestart     |
+            | C1     | student1 | student        | ##yesterday## |
+            | C1     | teacher1 | editingteacher | ##yesterday## |
+
         And I log in as "teacher1"
         And I follow "Course 1"
         And I turn editing mode on

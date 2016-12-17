@@ -4,16 +4,16 @@ Feature: Visiting reports
 
     Background:
         Given the following "courses" exist:
-            | fullname | shortname | summary | category |
-            | Course 1 | C101      | Prove the attendance activity works | 0 |
+            | fullname | shortname | summary                             | category | timecreated   | timemodified  |
+            | Course 1 | C1        | Prove the attendance activity works | 0        | ##yesterday## | ##yesterday## |
          And the following "users" exist:
             | username    | firstname | lastname | email            | idnumber | department       | institution |
             | student1    | Student   | 1  | student1@asd.com | 1234     | computer science | University of Nottingham |
             | teacher1    | Teacher   | 1  | teacher1@asd.com | 5678     | computer science | University of Nottingham |
          And the following "course enrolments" exist:
-            | user        | course | role    |
-            | student1    | C101   | student |
-            | teacher1    | C101   | editingteacher |
+            | course | user     | role           | timestart     |
+            | C1     | student1 | student        | ##yesterday## |
+            | C1     | teacher1 | editingteacher | ##yesterday## |
 
          And I log in as "teacher1"
          And I follow "Course 1"
@@ -101,7 +101,7 @@ Feature: Visiting reports
     Scenario: Teacher take attendance of group session
         Given the following "groups" exist:
           | course | name   | idnumber |
-          | C101   | Group1 | Group1   |
+          | C1     | Group1 | Group1   |
          And the following "group members" exist:
           | group  | user     |
           | Group1 | student1 |

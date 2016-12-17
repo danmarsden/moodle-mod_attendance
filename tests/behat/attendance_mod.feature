@@ -14,16 +14,17 @@ Feature: Teachers and Students can record session attendance
 
     Background:
         Given the following "courses" exist:
-            | fullname | shortname | summary | category |
-            | Course 1 | C101      | Prove the attendance activity works | 0 |
+            | fullname | shortname | summary                             | category | timecreated   | timemodified  |
+            | Course 1 | C1        | Prove the attendance activity works | 0        | ##yesterday## | ##yesterday## |
         And the following "users" exist:
             | username    | firstname | lastname | email            | idnumber | department       | institution |
             | student1    | Sam       | Student  | student1@asd.com | 1234     | computer science | University of Nottingham |
             | teacher1    | Teacher   | One      | teacher1@asd.com | 5678     | computer science | University of Nottingham |
         And the following "course enrolments" exist:
-            | user        | course | role    |
-            | student1    | C101   | student |
-            | teacher1    | C101   | editingteacher |
+            | course | user     | role           | timestart     |
+            | C1     | student1 | student        | ##yesterday## |
+            | C1     | teacher1 | editingteacher | ##yesterday## |
+
         When I log in as "teacher1"
         And I follow "Course 1"
         And I turn editing mode on
