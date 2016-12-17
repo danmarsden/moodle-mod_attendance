@@ -849,175 +849,357 @@ class mod_attendance_renderer extends plugin_renderer_base {
         // Initilise Javascript used to (un)check all checkboxes.
         $this->page->requires->js_init_call('M.mod_attendance.init_manage');
 
-        // Check if the user should be able to bulk send messages to other users on the course.
-        $bulkmessagecapability = has_capability('moodle/course:bulkmessaging', $PAGE->context);
-
         $table = new html_table();
+        $table->attributes['class'] = 'generaltable attwidth attreport';
 
-        $table->attributes['class'] = 'generaltable attwidth';
+        $userrows = $this->get_user_rows($reportdata);
         if ($reportdata->pageparams->view == ATT_VIEW_SUMMARY) {
-            $table->attributes['class'] .= ' summaryreport';
-        }
-
-        $colclass = null;
-
-        // User picture.
-        $table->head[] = '';
-        $table->align[] = 'left';
-        $table->size[] = '1px';
-        $table->colclasses[] = $colclass;
-
-        $table->head[] = $this->construct_fullname_head($reportdata);
-        $table->align[] = 'left';
-        $table->size[] = '';
-        $table->colclasses[] = $colclass;
-        $sessionstats = array();
-
-        foreach ($reportdata->sessions as $sess) {
-            $sesstext = userdate($sess->sessdate, get_string('strftimedm', 'attendance'));
-            $sesstext .= html_writer::empty_tag('br');
-            $sesstext .= userdate($sess->sessdate, '('.get_string('strftimehm', 'attendance').')');
-            $capabilities = array(
-                'mod/attendance:takeattendances',
-                'mod/attendance:changeattendances'
-            );
-            if (is_null($sess->lasttaken) and has_any_capability($capabilities, $reportdata->att->context)) {
-                $sesstext = html_writer::link($reportdata->url_take($sess->id, $sess->groupid), $sesstext);
-            }
-            $sesstext .= html_writer::empty_tag('br');
-            if ($sess->groupid) {
-                if (empty($reportdata->groups[$sess->groupid])) {
-                    $sesstext .= get_string('deletedgroup', 'attendance');
-                } else {
-                    $sesstext .= get_string('group') . ': ' . $reportdata->groups[$sess->groupid]->name;
-                }
-
-            } else {
-                $sesstext .= get_string('commonsession', 'attendance');
-            }
-
-            $table->head[] = $sesstext;
-            $table->align[] = 'center';
-            $table->size[] = '1px';
-            $table->colclasses[] = $colclass;
+            $sessionrows = array();
+        } else {
+            $sessionrows = $this->get_session_rows($reportdata);
         }
 
         $setnumber = -1;
+        $statusetcount = 0;
         foreach ($reportdata->statuses as $sts) {
             if ($sts->setnumber != $setnumber) {
-                $colclass = empty($colclass) ? 'columncontrast' : null;
+                $statusetcount++;
                 $setnumber = $sts->setnumber;
             }
-
-            $table->head[] = $sts->acronym;
-            $table->align[] = 'center';
-            $table->size[] = '1px';
-            $table->colclasses[] = $colclass;
         }
 
-        $table->head[] = get_string('takensessions', 'attendance');
-        $table->align[] = 'center';
-        $table->size[] = '1px';
-        $colclass = empty($colclass) ? 'columncontrast' : null;
-        $table->colclasses[] = $colclass;
+        $acronymrows = $this->get_acronym_rows($reportdata, true);
+        $startwithcontrast = $statusetcount % 2 == 0;
+        $summaryrows = $this->get_summary_rows($reportdata, $startwithcontrast);
 
-        $table->head[] = get_string('points', 'attendance');
-        $table->align[] = 'center';
-        $table->size[] = '1px';
-        $table->colclasses[] = $colclass;
-
-        $table->head[] = get_string('percentage', 'attendance');
-        $table->align[] = 'center';
-        $table->size[] = '1px';
-        $table->colclasses[] = $colclass;
-
-        if ($reportdata->pageparams->view == ATT_VIEW_SUMMARY) {
-            $table->head[] = get_string('sessionstotal', 'attendance');
-            $table->align[] = 'center';
-            $table->size[] = '1px';
-            $colclass = empty($colclass) ? 'columncontrast' : null;
-            $table->colclasses[] = $colclass;
-
-            $table->head[] = get_string('pointsallsessions', 'attendance');
-            $table->align[] = 'center';
-            $table->size[] = '1px';
-            $table->colclasses[] = $colclass;
-
-            $table->head[] = get_string('percentageallsessions', 'attendance');
-            $table->align[] = 'center';
-            $table->size[] = '1px';
-            $table->colclasses[] = $colclass;
-
-            $table->head[] = get_string('maxpossiblepoints', 'attendance');
-            $table->align[] = 'center';
-            $table->size[] = '1px';
-            $colclass = empty($colclass) ? 'columncontrast' : null;
-            $table->colclasses[] = $colclass;
-
-            $table->head[] = get_string('maxpossiblepercentage', 'attendance');
-            $table->align[] = 'center';
-            $table->size[] = '1px';
-            $table->colclasses[] = $colclass;
+        // Check if the user should be able to bulk send messages to other users on the course.
+        $bulkmessagecapability = has_capability('moodle/course:bulkmessaging', $PAGE->context);
+        if ($bulkmessagecapability) {
+            $bulkmessagingrows = $this->get_bulkmessage_rows($reportdata);
         }
 
-        if ($bulkmessagecapability) { // Display the table header for bulk messaging.
-            // The checkbox must have an id of cb_selector so that the JavaScript will pick it up.
-            $table->head[] = html_writer::checkbox('cb_selector', 0, false, '', array('id' => 'cb_selector'));
-            $table->align[] = 'center';
-            $table->size[] = '1px';
+        // Extract rows from each side (left and right) and collate them into one row each
+        $sessiondetailsleft = $reportdata->pageparams->sessiondetailspos == 'left';
+        foreach ($userrows as $index => $row) {
+            $summaryrow = isset($summaryrows[$index]->cells) ? $summaryrows[$index]->cells : array();
+            $bulkmessagingrow = isset($bulkmessagingrows[$index]->cells) ? $bulkmessagingrows[$index]->cells : array();
+            $sessionrow = isset($sessionrows[$index]->cells) ? $sessionrows[$index]->cells : array();
+            if ($sessiondetailsleft) {
+                $row->cells = array_merge($row->cells, $sessionrow, $acronymrows[$index]->cells, $summaryrow, $bulkmessagingrow);
+            } else {
+                $row->cells = array_merge($row->cells, $acronymrows[$index]->cells, $summaryrow, $sessionrow, $bulkmessagingrow);
+            }
+            $table->data[] = $row;
         }
+
+        if ($bulkmessagecapability) { // Require that the user can bulk message users.
+            // Display check boxes that will allow the user to send a message to the students that have been checked.
+            $output = html_writer::empty_tag('input', array('name' => 'sesskey', 'type' => 'hidden', 'value' => sesskey()));
+            $output .= html_writer::empty_tag('input', array('name' => 'formaction', 'type' => 'hidden',
+                                                             'value' => 'messageselect.php'));
+            $output .= html_writer::empty_tag('input', array('name' => 'id', 'type' => 'hidden', 'value' => $COURSE->id));
+            $output .= html_writer::empty_tag('input', array('name' => 'returnto', 'type' => 'hidden', 'value' => s(me())));
+            $output .= html_writer::table($table).html_writer::tag('div', get_string('users').': '.count($reportdata->users));;
+            $output .= html_writer::tag('div',
+                    html_writer::empty_tag('input', array('type' => 'submit', 'value' => get_string('messageselectadd'))),
+                    array('class' => 'buttons'));
+            $url = new moodle_url('/user/action_redir.php');
+            return html_writer::tag('form', $output, array('action' => $url->out(), 'method' => 'post'));
+        } else {
+            return html_writer::table($table).html_writer::tag('div', get_string('users').': '.count($reportdata->users));
+        }
+    }
+
+    /**
+     * Build and return the rows that will make up the left part of the attendance report.
+     * This consists of student names and icons, as well as header cells for these columns.
+     *
+     * @param attendance_report_data $reportdata the report data
+     * @return array Array of html_table_row objects
+     */
+    protected function get_user_rows(attendance_report_data $reportdata) {
+        $rows = array();
+
+        $row = new html_table_row();
+        $row->cells[] = $this->build_header_cell('');
+        $row->cells[] = $this->build_header_cell(get_string('users'), false, false);
+        $rows[] = $row;
+
+        $row = new html_table_row();
+        $row->cells[] = $this->build_header_cell('');
+        $row->cells[] = $this->build_header_cell($this->construct_fullname_head($reportdata), false, false);
+        $rows[] = $row;
 
         foreach ($reportdata->users as $user) {
             $row = new html_table_row();
+            $row->cells[] = $this->build_data_cell($this->user_picture($user));
+            $text = html_writer::link($reportdata->url_view(array('studentid' => $user->id)), fullname($user));
+            $row->cells[] = $this->build_data_cell($text, false, false, null, null, false);
+            $rows[] = $row;
+        }
 
-            $row->cells[] = $this->user_picture($user);  // Show different picture if it is a temporary user.
-            $row->cells[] = html_writer::link($reportdata->url_view(array('studentid' => $user->id)), fullname($user));
-            $cellsgenerator = new user_sessions_cells_html_generator($reportdata, $user);
-            $row->cells = array_merge($row->cells, $cellsgenerator->get_cells(true));
+        $row = new html_table_row();
+        $row->cells[] = $this->build_data_cell('');
+        $text = ($reportdata->pageparams->view == ATT_VIEW_SUMMARY) ? '' : get_string('summary');
+        $row->cells[] = $this->build_data_cell($text);
+        $rows[] = $row;
 
+        return $rows;
+    }
+
+    /**
+     * Build and return the rows that will make up the summary part of the attendance report.
+     * This consists of countings for each status set acronyms, as well as header cells for these columns.
+     *
+     * @param attendance_report_data $reportdata the report data
+     * @param boolean $startwithcontrast true if the first column must start with contrast (bgcolor)
+     * @return array Array of html_table_row objects
+     */
+    protected function get_acronym_rows(attendance_report_data $reportdata, $startwithcontrast=false) {
+        $rows = array();
+
+        $summarycells = array();
+
+        $row1 = new html_table_row();
+        $row2 = new html_table_row();
+
+        $setnumber = -1;
+        $contrast = !$startwithcontrast;
+        foreach ($reportdata->statuses as $sts) {
+            if ($sts->setnumber != $setnumber) {
+                $contrast = !$contrast;
+                $setnumber = $sts->setnumber;
+                $text = attendance_get_setname($reportdata->att->id, $setnumber, false);
+                $cell = $this->build_header_cell($text, $contrast);
+                $row1->cells[] = $cell;
+            }
+            $cell->colspan++;
+            $sts->contrast = $contrast;
+            $row2->cells[] = $this->build_header_cell($sts->acronym, $contrast);
+            $summarycells[] = $this->build_data_cell('', $contrast);
+        }
+
+        $rows[] = $row1;
+        $rows[] = $row2;
+
+        foreach ($reportdata->users as $user) {
             if ($reportdata->pageparams->view == ATT_VIEW_SUMMARY) {
                 $usersummary = $reportdata->summary->get_all_sessions_summary_for($user->id);
             } else {
                 $usersummary = $reportdata->summary->get_taken_sessions_summary_for($user->id);
             }
 
+            $row = new html_table_row();
             foreach ($reportdata->statuses as $sts) {
                 if (isset($usersummary->userstakensessionsbyacronym[$sts->setnumber][$sts->acronym])) {
-                    $row->cells[] = $usersummary->userstakensessionsbyacronym[$sts->setnumber][$sts->acronym];
+                    $text = $usersummary->userstakensessionsbyacronym[$sts->setnumber][$sts->acronym];
                 } else {
-                    $row->cells[] = 0;
+                    $text = 0;
                 }
+                $row->cells[] = $this->build_data_cell($text, $sts->contrast);
             }
 
-            $row->cells[] = $usersummary->numtakensessions;
-            $row->cells[] = format_float($usersummary->takensessionspoints, 1, true, true) . ' / ' .
-                                format_float($usersummary->takensessionsmaxpoints, 1, true, true);
-            $row->cells[] = format_float($usersummary->takensessionspercentage * 100) . '%';
-
-            if ($reportdata->pageparams->view == ATT_VIEW_SUMMARY) {
-                $row->cells[] = $usersummary->numallsessions;
-                $row->cells[] = format_float($usersummary->takensessionspoints, 1, true, true) . ' / ' .
-                                format_float($usersummary->allsessionsmaxpoints, 1, true, true);
-                $row->cells[] = format_float($usersummary->allsessionspercentage * 100) . '%';
-
-                $row->cells[] = format_float($usersummary->maxpossiblepoints, 1, true, true) . ' / ' .
-                                format_float($usersummary->allsessionsmaxpoints, 1, true, true);
-                $row->cells[] = format_float($usersummary->maxpossiblepercentage * 100) . '%';
-            }
-
-            if ($bulkmessagecapability) { // Create the checkbox for bulk messaging.
-                $row->cells[] = html_writer::checkbox('user'.$user->id, 'on', false, '',
-                                                      array('class' => 'attendancesesscheckbox'));
-            }
-
-            $table->data[] = $row;
+            $rows[] = $row;
         }
 
-        if ($reportdata->pageparams->view != ATT_VIEW_SUMMARY) {
-            // Calculate the sum of statuses for each user.
-            $statrow = new html_table_row();
-            $statrow->cells[] = '';
-            $statrow->cells[] = get_string('summary');
+        $rows[] = new html_table_row($summarycells);
+
+        return $rows;
+    }
+
+    /**
+     * Build and return the rows that will make up the summary part of the attendance report.
+     * This consists of counts and percentages for taken sessions (all sessions for summary report),
+     * as well as header cells for these columns.
+     *
+     * @param attendance_report_data $reportdata the report data
+     * @param boolean $startwithcontrast true if the first column must start with contrast (bgcolor)
+     * @return array Array of html_table_row objects
+     */
+    protected function get_summary_rows(attendance_report_data $reportdata, $startwithcontrast=false) {
+        $rows = array();
+
+        $contrast = $startwithcontrast;
+        $summarycells = array();
+
+        $row1 = new html_table_row();
+        $help_icon = $this->output->help_icon('oversessionstaken', 'attendance');
+        $row1->cells[] = $this->build_header_cell(get_string('oversessionstaken', 'attendance') . $help_icon, $contrast, true, 3);
+
+        $row2 = new html_table_row();
+        $row2->cells[] = $this->build_header_cell(get_string('sessions', 'attendance'), $contrast);
+        $row2->cells[] = $this->build_header_cell(get_string('points', 'attendance'), $contrast);
+        $row2->cells[] = $this->build_header_cell(get_string('percentage', 'attendance'), $contrast);
+        $summarycells[] = $this->build_data_cell('', $contrast);
+        $summarycells[] = $this->build_data_cell('', $contrast);
+        $summarycells[] = $this->build_data_cell('', $contrast);
+
+        if ($reportdata->pageparams->view == ATT_VIEW_SUMMARY) {
+            $contrast = !$contrast;
+
+            $help_icon = $this->output->help_icon('overallsessions', 'attendance');
+            $row1->cells[] = $this->build_header_cell(get_string('overallsessions', 'attendance') . $help_icon, $contrast, true, 3);
+
+            $row2->cells[] = $this->build_header_cell(get_string('sessions', 'attendance'), $contrast);
+            $row2->cells[] = $this->build_header_cell(get_string('points', 'attendance'), $contrast);
+            $row2->cells[] = $this->build_header_cell(get_string('percentage', 'attendance'), $contrast);
+            $summarycells[] = $this->build_data_cell('', $contrast);
+            $summarycells[] = $this->build_data_cell('', $contrast);
+            $summarycells[] = $this->build_data_cell('', $contrast);
+
+            $contrast = !$contrast;
+            $help_icon = $this->output->help_icon('maxpossible', 'attendance');
+            $row1->cells[] = $this->build_header_cell(get_string('maxpossible', 'attendance') . $help_icon, $contrast, true, 2);
+
+            $row2->cells[] = $this->build_header_cell(get_string('points', 'attendance'), $contrast);
+            $row2->cells[] = $this->build_header_cell(get_string('percentage', 'attendance'), $contrast);
+            $summarycells[] = $this->build_data_cell('', $contrast);
+            $summarycells[] = $this->build_data_cell('', $contrast);
+        }
+
+        $rows[] = $row1;
+        $rows[] = $row2;
+
+        foreach ($reportdata->users as $user) {
+            if ($reportdata->pageparams->view == ATT_VIEW_SUMMARY) {
+                $usersummary = $reportdata->summary->get_all_sessions_summary_for($user->id);
+            } else {
+                $usersummary = $reportdata->summary->get_taken_sessions_summary_for($user->id);
+            }
+
+            $contrast = $startwithcontrast;
+            $row = new html_table_row();
+            $row->cells[] = $this->build_data_cell($usersummary->numtakensessions, $contrast);
+            $text = format_float($usersummary->takensessionspoints, 1, true, true) . ' / ' .
+                                format_float($usersummary->takensessionsmaxpoints, 1, true, true);
+            $row->cells[] = $this->build_data_cell($text, $contrast);
+            $row->cells[] = $this->build_data_cell(format_float($usersummary->takensessionspercentage * 100) . '%', $contrast);
+
+            if ($reportdata->pageparams->view == ATT_VIEW_SUMMARY) {
+                $contrast = !$contrast;
+                $row->cells[] = $this->build_data_cell($usersummary->numallsessions, $contrast);
+                $text = format_float($usersummary->takensessionspoints, 1, true, true) . ' / ' .
+                                format_float($usersummary->allsessionsmaxpoints, 1, true, true);
+                $row->cells[] = $this->build_data_cell($text, $contrast);
+                $row->cells[] = $this->build_data_cell(format_float($usersummary->allsessionspercentage * 100) . '%', $contrast);
+
+                $contrast = !$contrast;
+                $text = format_float($usersummary->maxpossiblepoints, 1, true, true) . ' / ' .
+                                format_float($usersummary->allsessionsmaxpoints, 1, true, true);
+                $row->cells[] = $this->build_data_cell($text, $contrast);
+                $row->cells[] = $this->build_data_cell(format_float($usersummary->maxpossiblepercentage * 100) . '%', $contrast);
+            }
+
+            $rows[] = $row;
+        }
+
+        $rows[] = new html_table_row($summarycells);
+
+        return $rows;
+    }
+
+    /**
+     * Build and return the rows that will make up the attendance report.
+     * This consists of details for each selected session, as well as header and summary cells for these columns.
+     *
+     * @param attendance_report_data $reportdata the report data
+     * @param boolean $startwithcontrast true if the first column must start with contrast (bgcolor)
+     * @return array Array of html_table_row objects
+     */
+    protected function get_session_rows(attendance_report_data $reportdata, $startwithcontrast=false) {
+        global $OUTPUT;
+
+        $rows = array();
+
+        $row = new html_table_row();
+
+        $showsessiondetails = $reportdata->pageparams->showsessiondetails;
+        $text = get_string('sessions', 'attendance');
+        $params = $reportdata->pageparams->get_significant_params();
+        if (count($reportdata->sessions) > 1) {
+            if ($showsessiondetails) {
+                $params['showsessiondetails'] = 0;
+                $url = $reportdata->att->url_report($params);
+                $text .= $OUTPUT->action_icon($url, new pix_icon('t/switch_minus',
+                            get_string('hidensessiondetails', 'attendance')), null, null);
+                $colspan = count($reportdata->sessions);
+            } else {
+                $params['showsessiondetails'] = 1;
+                $url = $reportdata->att->url_report($params);
+                $text .= $OUTPUT->action_icon($url, new pix_icon('t/switch_plus',
+                            get_string('showsessiondetails', 'attendance')), null, null);
+                $colspan = 1;
+            }
+        } else {
+            $colspan = 1;
+        }
+
+        $params = $reportdata->pageparams->get_significant_params();
+        if ($reportdata->pageparams->sessiondetailspos == 'left') {
+            $params['sessiondetailspos'] = 'right';
+            $url = $reportdata->att->url_report($params);
+            $text .= $OUTPUT->action_icon($url, new pix_icon('t/right', get_string('moveright', 'attendance')), null, null);
+        } else {
+            $params['sessiondetailspos'] = 'left';
+            $url = $reportdata->att->url_report($params);
+            $text = $OUTPUT->action_icon($url, new pix_icon('t/left', get_string('moveleft', 'attendance')), null, null) . $text;
+        }
+
+        $row->cells[] = $this->build_header_cell($text, '', true, $colspan);
+        $rows[] = $row;
+
+        $row = new html_table_row();
+        if ($showsessiondetails && !empty($reportdata->sessions)) {
+            foreach ($reportdata->sessions as $sess) {
+                $sesstext = userdate($sess->sessdate, get_string('strftimedm', 'attendance'));
+                $sesstext .= html_writer::empty_tag('br');
+                $sesstext .= userdate($sess->sessdate, '('.get_string('strftimehm', 'attendance').')');
+                $capabilities = array(
+                    'mod/attendance:takeattendances',
+                    'mod/attendance:changeattendances'
+                );
+                if (is_null($sess->lasttaken) and has_any_capability($capabilities, $reportdata->att->context)) {
+                    $sesstext = html_writer::link($reportdata->url_take($sess->id, $sess->groupid), $sesstext);
+                }
+                $sesstext .= html_writer::empty_tag('br');
+                if ($sess->groupid) {
+                    if (empty($reportdata->groups[$sess->groupid])) {
+                        $sesstext .= html_writer::tag('small', get_string('deletedgroup', 'attendance'));
+                    } else {
+                        $sesstext .= html_writer::tag('small', $reportdata->groups[$sess->groupid]->name);
+                    }
+
+                } else {
+                    $sesstext .= html_writer::tag('small', get_string('commonsession', 'attendance'));
+                }
+
+                $row->cells[] = $this->build_header_cell($sesstext, false, true, null, null, false);
+            }
+        } else {
+            $row->cells[] = $this->build_header_cell('');
+        }
+        $rows[] = $row;
+
+        foreach ($reportdata->users as $user) {
+            $row = new html_table_row();
+            if ($showsessiondetails && !empty($reportdata->sessions)) {
+                $cellsgenerator = new user_sessions_cells_html_generator($reportdata, $user);
+                foreach ($cellsgenerator->get_cells(true) as $cell) {
+                    if ($cell instanceof html_table_cell) {
+                        $cell->attributes['class'] .= ' center';
+                        $row->cells[] = $cell;
+                    } else {
+                        $row->cells[] = $this->build_data_cell($cell);
+                    }
+                }
+            } else {
+                $row->cells[] = $this->build_data_cell('');
+            }
+            $rows[] = $row;
+        }
+
+        $row = new html_table_row();
+        if ($showsessiondetails && !empty($reportdata->sessions)) {
             foreach ($reportdata->sessions as $sess) {
                 $sessionstats = array();
                 foreach ($reportdata->statuses as $status) {
@@ -1040,36 +1222,143 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 foreach ($sessionstats as $status) {
                     $statsoutput .= "$status->description: {$status->count}<br/>";
                 }
-                $cell = new html_table_cell($statsoutput);
-                $cell->style = 'white-space:nowrap;';
-                $statrow->cells[] = $cell;
+                $row->cells[] = $this->build_data_cell($statsoutput);
             }
-            foreach ($reportdata->statuses as $sts) {
-                $statrow->cells[] = '';
-            }
-            $statrow->cells[] = '';
-            $statrow->cells[] = '';
-            $statrow->cells[] = '';
-            $statrow->cells[] = '';
-            $table->data[] = $statrow;
+        } else {
+            $row->cells[] = $this->build_header_cell('');
+        }
+        $rows[] = $row;
+
+        return $rows;
+    }
+
+    /**
+     * Build and return the rows that will make up the right part of the attendance report.
+     * This consists of checkbox column for bulk message.
+     *
+     * @param attendance_report_data $reportdata the report data
+     * @return array Array of html_table_row objects
+     */
+    protected function get_bulkmessage_rows(attendance_report_data $reportdata) {
+        $rows = array();
+
+        $row = new html_table_row();
+        $row->cells[] = $this->build_header_cell('');
+        $rows[] = $row;
+
+        // Display the table header for bulk messaging.
+        // The checkbox must have an id of cb_selector so that the JavaScript will pick it up.
+        $row = new html_table_row();
+        $text = html_writer::checkbox('cb_selector', 0, false, '', array('id' => 'cb_selector'));
+        $row->cells[] = $this->build_header_cell($text);
+        $rows[] = $row;
+
+        foreach ($reportdata->users as $user) {
+            // Create the checkbox for bulk messaging.
+            $row = new html_table_row();
+            $text = html_writer::checkbox('user'.$user->id, 'on', false, '', array('class' => 'attendancesesscheckbox'));
+            $row->cells[] = $this->build_data_cell($text);
+            $rows[] = $row;
         }
 
-        if ($bulkmessagecapability) { // Require that the user can bulk message users.
-            // Display check boxes that will allow the user to send a message to the students that have been checked.
-            $output = html_writer::empty_tag('input', array('name' => 'sesskey', 'type' => 'hidden', 'value' => sesskey()));
-            $output .= html_writer::empty_tag('input', array('name' => 'formaction', 'type' => 'hidden',
-                                                             'value' => 'messageselect.php'));
-            $output .= html_writer::empty_tag('input', array('name' => 'id', 'type' => 'hidden', 'value' => $COURSE->id));
-            $output .= html_writer::empty_tag('input', array('name' => 'returnto', 'type' => 'hidden', 'value' => s(me())));
-            $output .= html_writer::table($table).html_writer::tag('div', get_string('users').': '.count($reportdata->users));;
-            $output .= html_writer::tag('div',
-                    html_writer::empty_tag('input', array('type' => 'submit', 'value' => get_string('messageselectadd'))),
-                    array('class' => 'buttons'));
-            $url = new moodle_url('/user/action_redir.php');
-            return html_writer::tag('form', $output, array('action' => $url->out(), 'method' => 'post'));
+        $row = new html_table_row();
+        $row->cells[] = $this->build_data_cell('');
+        $rows[] = $row;
+
+        return $rows;
+    }
+
+    /**
+     * Build and return a html_table_cell for header rows
+     *
+     * @param Mixed (html_table_cell or string) $cell the cell or a label for a cell
+     * @param boolean $contrast true menans the cell must be shown with bgcolor contrast
+     * @param boolean $center true means the cell text should be centered. Othersiwe it should be left-aligned.
+     * @param int $colspan how many columns should cell spans
+     * @param int $rowspan how many rows should cell spans
+     * @param boolean $nowrap true means the cell text must be shown with nowrap option
+     * @return html_table_cell a html table cell
+     */
+    protected function build_header_cell($cell, $contrast=false, $center=true, $colspan=null, $rowspan=null, $nowrap=true) {
+        $classes = array('header', 'bottom');
+        if ($center) {
+            $classes[] = 'center';
+            $classes[] = 'narrow';
         } else {
-            return html_writer::table($table).html_writer::tag('div', get_string('users').': '.count($reportdata->users));
+            $classes[] = 'left';
         }
+        if ($contrast) {
+            $classes[] = 'contrast';
+        }
+        if ($nowrap) {
+            $classes[] = 'nowrap';
+        }
+        return $this->build_cell($cell, $classes, $colspan, $rowspan, true);
+    }
+
+    /**
+     * Build and return a html_table_cell for data rows
+     *
+     * @param Mixed (html_table_cell or string) $cell the cell or a label for a cell
+     * @param boolean $contrast true menans the cell must be shown with bgcolor contrast
+     * @param boolean $center true means the cell text should be centered. Othersiwe it should be left-aligned.
+     * @param int $colspan how many columns should cell spans
+     * @param int $rowspan how many rows should cell spans
+     * @param boolean $nowrap true means the cell text must be shown with nowrap option
+     * @return html_table_cell a html table cell
+     */
+    protected function build_data_cell($cell, $contrast=false, $center=true, $colspan=null, $rowspan=null, $nowrap=true) {
+        $classes = array();
+        if ($center) {
+            $classes[] = 'center';
+            $classes[] = 'narrow';
+        } else {
+            $classes[] = 'left';
+        }
+        if ($nowrap) {
+            $classes[] = 'nowrap';
+        }
+        if ($contrast) {
+            $classes[] = 'contrast';
+        }
+        return $this->build_cell($cell, $classes, $colspan, $rowspan, false);
+    }
+
+    /**
+     * Build and return a html_table_cell for header or data rows
+     *
+     * @param Mixed (html_table_cell or string) $cell the cell or a label for a cell
+     * @param Array $classes a list of css classes
+     * @param int $colspan how many columns should cell spans
+     * @param int $rowspan how many rows should cell spans
+     * @param boolean $header true if this should be a header cell
+     * @return html_table_cell a html table cell
+     */
+    protected function build_cell($cell, $classes, $colspan=null, $rowspan=null, $header=false) {
+        if (!($cell instanceof html_table_cell)) {
+            $cell = new html_table_cell($cell);
+        }
+        $cell->header = $header;
+        $cell->scope = 'col';
+
+        if (!empty($colspan) && $colspan > 1) {
+            $cell->colspan = $colspan;
+        }
+
+        if (!empty($rowspan) && $rowspan > 1) {
+            $cell->rowspan = $rowspan;
+        }
+
+        if (!empty($classes)) {
+            $classes = implode(' ', $classes);
+            if (empty($cell->attributes['class'])) {
+                $cell->attributes['class'] = $classes;
+            } else {
+                $cell->attributes['class'] .= ' ' . $classes;
+            }
+        }
+
+        return $cell;
     }
 
     /**

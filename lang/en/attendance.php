@@ -26,6 +26,7 @@ $string['attendance:addinstance'] = 'Add a new attendance activity';
 $string['Aacronym'] = 'A';
 $string['adduser'] = 'Add user';
 $string['Afull'] = 'Absent';
+$string['allsessions'] = 'All sessions';
 $string['Eacronym'] = 'E';
 $string['Efull'] = 'Excused';
 $string['Lacronym'] = 'L';
@@ -127,6 +128,7 @@ $string['hiddensessions'] = 'Hidden sessions';
 $string['hiddensessions_help'] = 'Sessions are hidden if they are scheduled before the course start date.
 
 You can use this feature to hide older sessions instead of deleting them. Only visible sessions will appear in the Gradebook.';
+$string['hidensessiondetails'] = 'Hide session details';
 $string['identifyby'] = 'Identify student by';
 $string['includeall'] = 'Select all sessions';
 $string['includenottaken'] = 'Include not taken sessions';
@@ -135,6 +137,12 @@ $string['indetail'] = 'In detail...';
 $string['invalidsessionenddate'] = 'This date can not be earlier than the session date';
 $string['invalidaction'] = 'You must select an action';
 $string['jumpto'] = 'Jump to';
+$string['maxpossible'] = 'Maximum possible';
+$string['maxpossible_help'] = 'Shows the maximum points and percentages that each user can reach if they receive the maximum points of each session not yet taken (past and future):
+    <ul>
+    <li><strong>Points</strong>: maximum points each user can reach over all sessions.</li>
+    <li><strong>Percentage</strong>: maximum percentage each user can reach over all sessions.</li>
+    </ul>';
 $string['maxpossiblepoints'] = 'Maximum possible points';
 $string['maxpossiblepercentage'] = 'Maximum possible percentage';
 $string['mergeuser'] = 'Merge user';
@@ -147,6 +155,8 @@ Reports are available for the entire class or individual students.';
 $string['modulenameplural'] = 'Attendances';
 $string['months'] = 'Months';
 $string['moreattendance'] = 'Attendance has been successfully taken for this page';
+$string['moveleft'] = 'Move left';
+$string['moveright'] = 'Move right';
 $string['mustselectusers'] = 'Must select users to export';
 $string['myvariables'] = 'My Variables';
 $string['newdate'] = 'New date';
@@ -249,6 +259,7 @@ $string['setallstatusesto'] = 'Set status for all users to «{$a}»';
 $string['settings'] = 'Settings';
 $string['showdefaults'] = 'Show defaults';
 $string['showduration'] = 'Show duration';
+$string['showsessiondetails'] = 'Show session details';
 $string['sortedgrid'] = 'Sorted grid';
 $string['sortedlist'] = 'Sorted list';
 $string['startofperiod'] = 'Start of period';
@@ -312,6 +323,20 @@ $string['submitattendance'] = 'Submit attendance';
 $string['attendancenotset'] = 'You must set your attendance';
 $string['export'] = 'Export';
 $string['points'] = 'Points';
+$string['oversessionstaken'] = 'Over taken sessions';
+$string['oversessionstaken_help'] = 'Shows the points and percentages of each user over the taken sessions:
+    <ul>
+    <li><strong>Sessions</strong>: number of already taken sessions.</li>
+    <li><strong>Points</strong>: points due to each user based on the taken sessions.</li>
+    <li><strong>Percentage</strong>: percentage of points due to each user over the maxium possible points of the taken sessions.</li>
+    </ul>';
+$string['overallsessions'] = 'Over all sessions';
+$string['overallsessions_help'] = 'Shows the points and percentages of each user over all sessions including those not yet taken (past and future):
+    <ul>
+    <li><strong>Sessions</strong>: total number of sessions.</li>
+    <li><strong>Points</strong>: points due to each user based on all sessions.</li>
+    <li><strong>Percentage</strong>: percentage of points due to each user over the maxium possible points of all sessions.</li>
+    </ul>';
 $string['pointssessionscompleted'] = 'Points over taken sessions';
 $string['pointsallsessions'] = 'Points over all sessions';
 $string['unknowngroup'] = 'Unknown group';
