@@ -27,6 +27,8 @@ Feature: Teachers and Students can record session attendance
         When I log in as "teacher1"
         And I follow "Course 1"
         And I turn editing mode on
+        And I follow "Add a block"
+        And I follow "Administration"
         And I add a "Attendance" to section "1" and I fill the form with:
             | Name        | Attendance       |
         And I log out
@@ -76,6 +78,7 @@ Feature: Teachers and Students can record session attendance
         And I click on "Send a message" "button"
         Then I should see "Message body"
         And I should see "student1@asd.com"
+        And I follow "Course 1"
         And I expand "Reports" node
         And I follow "Logs"
         And I click on "Get these logs" "button"

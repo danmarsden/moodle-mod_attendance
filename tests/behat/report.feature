@@ -18,9 +18,11 @@ Feature: Visiting reports
          And I log in as "teacher1"
          And I follow "Course 1"
          And I turn editing mode on
-      And I add a "Attendance" to section "1" and I fill the form with:
-        | Name        | Attendance       |
+         And I add a "Attendance" to section "1" and I fill the form with:
+            | Name        | Attendance       |
          And I follow "Attendance"
+         And I follow "Add a block"
+         And I follow "Administration"
          And I follow "Add session"
          And I set the following fields to these values:
             | id_sestime_starthour | 01 |
