@@ -138,7 +138,7 @@ $string['invalidsessionenddate'] = 'This date can not be earlier than the sessio
 $string['invalidaction'] = 'You must select an action';
 $string['jumpto'] = 'Jump to';
 $string['maxpossible'] = 'Maximum possible';
-$string['maxpossible_help'] = 'Shows the maximum points and percentages that each user can reach if they receive the maximum points of each session not yet taken (past and future):
+$string['maxpossible_help'] = 'Shows the score each user can reach if they receive the maximum points in each session not yet taken (past and future):
     <ul>
     <li><strong>Points</strong>: maximum points each user can reach over all sessions.</li>
     <li><strong>Percentage</strong>: maximum percentage each user can reach over all sessions.</li>
@@ -324,18 +324,18 @@ $string['attendancenotset'] = 'You must set your attendance';
 $string['export'] = 'Export';
 $string['points'] = 'Points';
 $string['oversessionstaken'] = 'Over taken sessions';
-$string['oversessionstaken_help'] = 'Shows the points and percentages of each user over the taken sessions:
+$string['oversessionstaken_help'] = 'Shows statistics for sessions where attendance has been taken:
     <ul>
     <li><strong>Sessions</strong>: number of already taken sessions.</li>
-    <li><strong>Points</strong>: points due to each user based on the taken sessions.</li>
-    <li><strong>Percentage</strong>: percentage of points due to each user over the maxium possible points of the taken sessions.</li>
+    <li><strong>Points</strong>: points awarded based on the taken sessions.</li>
+    <li><strong>Percentage</strong>: percentage of points awarded over the maxium possible points of the taken sessions.</li>
     </ul>';
 $string['overallsessions'] = 'Over all sessions';
-$string['overallsessions_help'] = 'Shows the points and percentages of each user over all sessions including those not yet taken (past and future):
+$string['overallsessions_help'] = 'Shows statistics for all sessions including those not yet taken (past and future):
     <ul>
     <li><strong>Sessions</strong>: total number of sessions.</li>
-    <li><strong>Points</strong>: points due to each user based on all sessions.</li>
-    <li><strong>Percentage</strong>: percentage of points due to each user over the maxium possible points of all sessions.</li>
+    <li><strong>Points</strong>: points awarded based on the taken sessions.</li>
+    <li><strong>Percentage</strong>: percentage of points awarded over the maxium possible points for all sessions.</li>
     </ul>';
 $string['pointssessionscompleted'] = 'Points over taken sessions';
 $string['pointsallsessions'] = 'Points over all sessions';
