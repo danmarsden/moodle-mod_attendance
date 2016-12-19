@@ -3,16 +3,17 @@ Feature: Test the calendar related features in the attendance module
 
   Background:
     Given the following "courses" exist:
-      | fullname | shortname |
-      | Course 1 | C1        |
+      | fullname | shortname | summary                             | category | timecreated   | timemodified  |
+      | Course 1 | C1        | Prove the attendance activity works | 0        | ##yesterday## | ##yesterday## |
     And the following "users" exist:
       | username | firstname | lastname | email                |
       | teacher1 | Teacher   | 1        | teacher1@example.com |
       | student1 | Student   | 1        | student1@example.com |
     And the following "course enrolments" exist:
-      | course | user     | role           |
-      | C1     | teacher1 | editingteacher |
-      | C1     | student1 | student        |
+      | course | user        | role           | timestart     |
+      | C1     | student1    | student        | ##yesterday## |
+      | C1     | teacher1    | editingteacher | ##yesterday## |
+
     And I log in as "teacher1"
     And I follow "Course 1"
     And I turn editing mode on

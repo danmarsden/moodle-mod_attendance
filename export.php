@@ -122,6 +122,16 @@ if ($formdata = $mform->get_data()) {
         } else {
             print_error('sessionsnotfound', 'attendance', $att->url_manage());
         }
+
+        $setnumber = -1;
+        foreach ($reportdata->statuses as $sts) {
+            if ($sts->setnumber != $setnumber) {
+                $setnumber = $sts->setnumber;
+            }
+
+            $data->tabhead[] = $sts->acronym;
+        }
+
         $data->tabhead[] = get_string('takensessions', 'attendance');
         $data->tabhead[] = get_string('points', 'attendance');
         $data->tabhead[] = get_string('percentage', 'attendance');
@@ -158,6 +168,15 @@ if ($formdata = $mform->get_data()) {
             $data->table[$i] = array_merge($data->table[$i], $cellsgenerator->get_cells(isset($formdata->includeremarks)));
 
             $usersummary = $reportdata->summary->get_taken_sessions_summary_for($user->id);
+
+            foreach ($reportdata->statuses as $sts) {
+                if (isset($usersummary->userstakensessionsbyacronym[$sts->setnumber][$sts->acronym])) {
+                    $data->table[$i][] = $usersummary->userstakensessionsbyacronym[$sts->setnumber][$sts->acronym];
+                } else {
+                    $data->table[$i][] = 0;
+                }
+            }
+
             $data->table[$i][] = $usersummary->numtakensessions;
             $data->table[$i][] = format_float($usersummary->takensessionspoints, 1, true, true) . ' / ' .
                                     format_float($usersummary->takensessionsmaxpoints, 1, true, true);

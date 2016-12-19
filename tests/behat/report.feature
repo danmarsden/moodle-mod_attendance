@@ -4,23 +4,25 @@ Feature: Visiting reports
 
     Background:
         Given the following "courses" exist:
-            | fullname | shortname | summary | category |
-            | Course 1 | C101      | Prove the attendance activity works | 0 |
+            | fullname | shortname | summary                             | category | timecreated   | timemodified  |
+            | Course 1 | C1        | Prove the attendance activity works | 0        | ##yesterday## | ##yesterday## |
          And the following "users" exist:
             | username    | firstname | lastname | email            | idnumber | department       | institution |
             | student1    | Student   | 1  | student1@asd.com | 1234     | computer science | University of Nottingham |
             | teacher1    | Teacher   | 1  | teacher1@asd.com | 5678     | computer science | University of Nottingham |
          And the following "course enrolments" exist:
-            | user        | course | role    |
-            | student1    | C101   | student |
-            | teacher1    | C101   | editingteacher |
+            | course | user     | role           | timestart     |
+            | C1     | student1 | student        | ##yesterday## |
+            | C1     | teacher1 | editingteacher | ##yesterday## |
 
          And I log in as "teacher1"
          And I follow "Course 1"
          And I turn editing mode on
-      And I add a "Attendance" to section "1" and I fill the form with:
-        | Name        | Attendance       |
+         And I add a "Attendance" to section "1" and I fill the form with:
+            | Name        | Attendance       |
          And I follow "Attendance"
+         And I follow "Add a block"
+         And I follow "Administration"
          And I follow "Add session"
          And I set the following fields to these values:
             | id_sestime_starthour | 01 |
@@ -99,7 +101,7 @@ Feature: Visiting reports
     Scenario: Teacher take attendance of group session
         Given the following "groups" exist:
           | course | name   | idnumber |
-          | C101   | Group1 | Group1   |
+          | C1     | Group1 | Group1   |
          And the following "group members" exist:
           | group  | user     |
           | Group1 | student1 |
@@ -136,8 +138,8 @@ Feature: Visiting reports
          And I press "Save attendance"
 
         When I follow "Report"
-        Then "Student 1" row "Points" column of "generaltable" table should contain "3 / 4"
-         And "Student 1" row "Percentage" column of "generaltable" table should contain "75.0%"
+        Then "3 / 4" "text" should exist in the "Student 1" "table_row"
+         And "75.0%" "text" should exist in the "Student 1" "table_row"
 
         When I follow "Grades" in the user menu
          And I follow "Course 1"
@@ -181,11 +183,11 @@ Feature: Visiting reports
 
         When I follow "Report"
          And I click on "Summary" "link" in the "All" "table_row"
-        Then "Student 1" row "Total number of sessions" column of "generaltable" table should contain "3"
-         And "Student 1" row "Points over all sessions" column of "generaltable" table should contain "3 / 6"
-         And "Student 1" row "Percentage over all sessions" column of "generaltable" table should contain "50.0%"
-         And "Student 1" row "Maximum possible points" column of "generaltable" table should contain "5 / 6"
-         And "Student 1" row "Maximum possible percentage" column of "generaltable" table should contain "83.3%"
+
+        Then "3 / 6" "text" should exist in the "Student 1" "table_row"
+         And "50.0%" "text" should exist in the "Student 1" "table_row"
+         And "5 / 6" "text" should exist in the "Student 1" "table_row"
+         And "83.3%" "text" should exist in the "Student 1" "table_row"
 
          And I log out
 
@@ -194,7 +196,7 @@ Feature: Visiting reports
          And I follow "Course 1"
          And I follow "Attendance"
          And I follow "Edit settings"
-         And I set the following fields to these values:
+        Then I set the following fields to these values:
             | id_grade_modgrade_type  | Point |
             | id_grade_modgrade_point | 50   |
          And I press "Save and display"

@@ -163,6 +163,26 @@
     color: red;
 }
 
-.path-mod-attendance .columncontrast {
+.path-mod-attendance .attreport .contrast {
     background-color: #EAEAEA;
+}
+
+.path-mod-attendance .attreport .center {
+    text-align:center;
+}
+
+.path-mod-attendance .attreport .left {
+    text-align:left;
+}
+
+.path-mod-attendance .attreport .bottom {
+    vertical-align:bottom;
+}
+
+.path-mod-attendance .attreport .nowrap {
+    white-space:nowrap;
+}
+
+.path-mod-attendance .attreport .narrow {
+    width:1px;
 }

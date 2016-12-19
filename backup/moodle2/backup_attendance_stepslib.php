@@ -44,22 +44,21 @@ class backup_attendance_activity_structure_step extends backup_activity_structur
 
         // XML nodes declaration - non-user data.
         $attendance = new backup_nested_element('attendance', array('id'), array(
-            'name', 'grade'));
+            'name', 'grade', 'showsessiondetails', 'sessiondetailspos'));
 
         $statuses = new backup_nested_element('statuses');
         $status  = new backup_nested_element('status', array('id'), array(
-            'acronym', 'description', 'grade', 'visible', 'deleted'));
+            'acronym', 'description', 'grade', 'visible', 'deleted', 'setnumber'));
 
         $sessions = new backup_nested_element('sessions');
         $session  = new backup_nested_element('session', array('id'), array(
             'groupid', 'sessdate', 'duration', 'lasttaken', 'lasttakenby',
-            'timemodified', 'description', 'descriptionformat', 'caleventid'));
+            'timemodified', 'description', 'descriptionformat', 'studentscanmark', 'statusset', 'caleventid'));
 
         // XML nodes declaration - user data.
         $logs = new backup_nested_element('logs');
         $log  = new backup_nested_element('log', array('id'), array(
-            'sessionid', 'studentid', 'statusid', 'lasttaken', 'statusset',
-            'timetaken', 'takenby', 'remarks'));
+            'sessionid', 'studentid', 'statusid', 'statusset', 'timetaken', 'takenby', 'remarks'));
 
         // Build the tree in the order needed for restore.
         $attendance->add_child($statuses);
