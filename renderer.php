@@ -220,15 +220,15 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $table->width = '100%';
         $table->head = array(
                 '#',
-                get_string('sessiontypeshort', 'attendance'),
                 get_string('date'),
                 get_string('time'),
+                get_string('sessiontypeshort', 'attendance'),
                 get_string('description', 'attendance'),
                 get_string('actions'),
                 html_writer::checkbox('cb_selector', 0, false, '', array('id' => 'cb_selector'))
             );
-        $table->align = array('', '', '', '', 'center', 'center', 'center');
-        $table->size = array('1px', '', '1px', '1px', '*', '1px', '1px');
+        $table->align = array('', 'right', '', '', 'left', 'center', 'center');
+        $table->size = array('1px', '1px', '1px', '', '*', '110px', '1px');
 
         $i = 0;
         foreach ($sessdata->sessions as $key => $sess) {
@@ -237,6 +237,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $dta = $this->construct_date_time_actions($sessdata, $sess);
 
             $table->data[$sess->id][] = $i;
+            $table->data[$sess->id][] = $dta['date'];
+            $table->data[$sess->id][] = $dta['time'];
             if ($sess->groupid) {
                 if (empty($sessdata->groups[$sess->groupid])) {
                     $table->data[$sess->id][] = get_string('deletedgroup', 'attendance');
@@ -250,9 +252,6 @@ class mod_attendance_renderer extends plugin_renderer_base {
             } else {
                 $table->data[$sess->id][] = get_string('commonsession', 'attendance');
             }
-
-            $table->data[$sess->id][] = $dta['date'];
-            $table->data[$sess->id][] = $dta['time'];
             $table->data[$sess->id][] = $sess->description;
             $table->data[$sess->id][] = $dta['actions'];
             $table->data[$sess->id][] = html_writer::checkbox('sessid[]', $sess->id, false, '',
