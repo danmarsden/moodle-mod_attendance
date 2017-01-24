@@ -387,8 +387,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
     private function construct_take_session_info(attendance_take_data $takedata) {
         $sess = $takedata->sessioninfo;
         $date = userdate($sess->sessdate, get_string('strftimedate'));
-        $starttime = userdate($sess->sessdate, get_string('strftimehm', 'attendance'));
-        $endtime = userdate($sess->sessdate + $sess->duration, get_string('strftimehm', 'attendance'));
+        $starttime = attendance_strftimehm($sess->sessdate);
+        $endtime = attendance_strftimehm($sess->sessdate + $sess->duration);
         $time = html_writer::tag('nobr', $starttime . ($sess->duration > 0 ? ' - ' . $endtime : ''));
         $sessinfo = $date.' '.$time;
         $sessinfo .= html_writer::empty_tag('br');
@@ -485,9 +485,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
             $options = array();
             foreach ($takedata->sessions4copy as $sess) {
-                $start = userdate($sess->sessdate, get_string('strftimehm', 'attendance'));
-                $end = $sess->duration ? ' - '.userdate($sess->sessdate + $sess->duration,
-                                                        get_string('strftimehm', 'attendance')) : '';
+                $start = attendance_strftimehm($sess->sessdate);
+                $end = $sess->duration ? ' - '.attendance_strftimehm($sess->sessdate + $sess->duration) : '';
                 $options[$sess->id] = $start . $end;
             }
             $select = new single_select($takedata->url(array(), array('copyfrom')), 'copyfrom', $options);
@@ -1153,7 +1152,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             foreach ($reportdata->sessions as $sess) {
                 $sesstext = userdate($sess->sessdate, get_string('strftimedm', 'attendance'));
                 $sesstext .= html_writer::empty_tag('br');
-                $sesstext .= userdate($sess->sessdate, '('.get_string('strftimehm', 'attendance').')');
+                $sesstext .= attendance_strftimehm($sess->sessdate);
                 $capabilities = array(
                     'mod/attendance:takeattendances',
                     'mod/attendance:changeattendances'

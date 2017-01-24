@@ -38,7 +38,7 @@ class mod_attendance_student_attendance_form extends moodleform {
 
         // Set a title as the date and time of the session.
         $sesstiontitle = userdate($attforsession->sessdate, get_string('strftimedate')).' '
-                .userdate($attforsession->sessdate, get_string('strftimehm', 'mod_attendance'));
+                .attendance_strftimehm($attforsession->sessdate);
 
         $mform->addElement('header', 'session', $sesstiontitle);
 

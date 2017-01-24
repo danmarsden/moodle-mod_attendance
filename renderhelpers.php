@@ -217,9 +217,19 @@ class user_sessions_cells_text_generator extends user_sessions_cells_generator {
     }
 }
 
+// Used to print simple time - 1am instead of 1:00am
+function attendance_strftimehm($time) {
+    $mins = userdate($time, '%M');
+    if ($mins == '00') {
+        return userdate($time, get_string('strftimeh', 'attendance'));
+    } else {
+        return userdate($time, get_string('strftimehm', 'attendance'));
+    }
+}
+
 function construct_session_time($datetime, $duration) {
-    $starttime = userdate($datetime, get_string('strftimehm', 'attendance'));
-    $endtime = userdate($datetime + $duration, get_string('strftimehm', 'attendance'));
+    $starttime = attendance_strftimehm($datetime);
+    $endtime = attendance_strftimehm($datetime + $duration);
 
     return $starttime . ($duration > 0 ? ' - ' . $endtime : '');
 }
