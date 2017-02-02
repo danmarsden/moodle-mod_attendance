@@ -218,7 +218,7 @@ class user_sessions_cells_text_generator extends user_sessions_cells_generator {
     }
 }
 
-// Used to print simple time - 1am instead of 1:00am
+// Used to print simple time - 1am instead of 1:00am.
 function attendance_strftimehm($time) {
     $mins = userdate($time, '%M');
     if ($mins == '00') {
