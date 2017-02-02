@@ -350,7 +350,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 'type'  => 'submit',
                 'value' => get_string('save', 'attendance'));
         $table .= html_writer::tag('center', html_writer::empty_tag('input', $params));
-        $table = html_writer::tag('form', $table, array('method' => 'post', 'action' => $takedata->url_path()));
+        $table = html_writer::tag('form', $table, array('method' => 'post', 'action' => $takedata->url_path(),
+                                                        'id' => 'attendancetakeform'));
 
         foreach ($takedata->statuses as $status) {
             $sessionstats[$status->id] = 0;
@@ -498,6 +499,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
     }
 
     protected function render_attendance_take_list(attendance_take_data $takedata) {
+        global $PAGE;
         $table = new html_table();
         $table->width = '0%';
         $table->head = array(
@@ -508,11 +510,21 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $table->size = array('20px', '');
         $table->wrap[1] = 'nowrap';
         foreach ($takedata->statuses as $st) {
-            $table->head[] = html_writer::link("javascript:select_all_in(null, 'st" . $st->id . "', null);", $st->acronym,
-                                               array('title' => get_string('setallstatusesto', 'attendance', $st->description)));
+            $table->head[] = html_writer::link("#", $st->acronym, array('id' => 'checkstatus'.$st->id,
+                'title' => get_string('setallstatusesto', 'attendance', $st->description)));
             $table->align[] = 'center';
             $table->size[] = '20px';
+            // JS to select all radios of this status and prevent default behaviour of # link.
+            $PAGE->requires->js_amd_inline("
+                require(['jquery'], function($) {
+                    $('#checkstatus".$st->id."').click(function(e) {
+                        $('#attendancetakeform').find('.st".$st->id."').prop('checked', true);
+                        e.preventDefault();
+                    });
+                });");
+
         }
+
         $table->head[] = get_string('remarks', 'attendance');
         $table->align[] = 'center';
         $table->size[] = '20px';
@@ -524,13 +536,20 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $row->cells[] = html_writer::div(get_string('setallstatuses', 'attendance'), 'setallstatuses');
         foreach ($takedata->statuses as $st) {
             $attribs = array(
+                'id' => 'radiocheckstatus'.$st->id,
                 'type' => 'radio',
                 'title' => get_string('setallstatusesto', 'attendance', $st->description),
-                'onclick' => "select_all_in(null, 'st" . $st->id . "', null);",
                 'name' => 'setallstatuses',
                 'class' => "st{$st->id}",
             );
             $row->cells[] = html_writer::empty_tag('input', $attribs);
+            // Select all radio buttons of the same status.
+            $PAGE->requires->js_amd_inline("
+                require(['jquery'], function($) {
+                    $('#radiocheckstatus".$st->id."').click(function(e) {
+                        $('#attendancetakeform').find('.st".$st->id."').prop('checked', true);
+                    });
+                });");
         }
         $row->cells[] = '';
         $table->data[] = $row;
