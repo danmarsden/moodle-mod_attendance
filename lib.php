@@ -275,7 +275,7 @@ function attendance_grade_item_update($attendance, $grades=null) {
         $params = array('itemname' => $attendance->name, 'idnumber' => $attendance->cmidnumber);
     } else {
         // MDL-14303.
-        $params = array('itemname' => $attendance->name/*, 'idnumber'=>$attendance->id*/);
+        $params = array('itemname' => $attendance->name);
     }
 
     if ($attendance->grade > 0) {
