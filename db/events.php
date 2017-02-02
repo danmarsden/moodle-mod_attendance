@@ -15,17 +15,20 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information
+ * Attendance event handler definition.
  *
- * @package    mod_attendance
- * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package mod_attendance
+ * @category event
+ * @copyright 2017 Dan Marsden
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-defined('MOODLE_INTERNAL') || die();
 
-$plugin->version  = 2017020203;
-$plugin->requires = 2016111800;
-$plugin->release = '3.2.3';
-$plugin->maturity  = MATURITY_STABLE;
-$plugin->cron     = 0;
-$plugin->component = 'mod_attendance';
+// List of observers.
+$observers = array(
+
+    array(
+        'eventname'   => '\core\event\course_content_deleted',
+        'callback'    => 'mod_attendance_observer::course_content_deleted',
+    ),
+
+);
