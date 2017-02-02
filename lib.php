@@ -120,26 +120,6 @@ function attendance_delete_instance($id) {
     return true;
 }
 
-function attendance_delete_course($course, $feedback=true) {
-    global $DB;
-
-    $attids = array_keys($DB->get_records('attendance', array('course' => $course->id), '', 'id'));
-    $sessids = array_keys($DB->get_records_list('attendance_sessions', 'attendanceid', $attids, '', 'id'));
-    if (attendance_existing_calendar_events_ids($sessids)) {
-        attendance_delete_calendar_events($sessids);
-    }
-    if ($sessids) {
-        $DB->delete_records_list('attendance_log', 'sessionid', $sessids);
-    }
-    if ($attids) {
-        $DB->delete_records_list('attendance_statuses', 'attendanceid', $attids);
-        $DB->delete_records_list('attendance_sessions', 'attendanceid', $attids);
-    }
-    $DB->delete_records('attendance', array('course' => $course->id));
-
-    return true;
-}
-
 /**
  * Called by course/reset.php
  * @param $mform form passed by reference
