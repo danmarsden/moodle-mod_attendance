@@ -12,7 +12,7 @@ M.mod_attendance.init_manage = function(Y) {
                 this.set('checked', '');
             });
         }
-    }, '#cb_selector' );
+    }, '#cb_selector');
 };
 
 M.mod_attendance.set_preferences_action = function(action) {
