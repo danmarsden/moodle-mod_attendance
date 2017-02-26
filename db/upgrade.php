@@ -46,7 +46,7 @@ function xmldb_attendance_upgrade($oldversion=0) {
             $dbman->add_field($table, $field);
         }
 
-        upgrade_mod_savepoint($result, 2014112000, 'attendance');
+        upgrade_mod_savepoint(true, 2014112000, 'attendance');
     }
 
     if ($oldversion < 2014112001) {
@@ -85,7 +85,7 @@ function xmldb_attendance_upgrade($oldversion=0) {
         // Delete old capabilities.
         $DB->delete_records_select('capabilities', 'component = ?', array('mod_attforblock'));
 
-        upgrade_plugin_savepoint($result, 2014112001, 'mod', 'attendance');
+        upgrade_mod_savepoint(true, 2014112001, 'attendance');
     }
 
     if ($oldversion < 2015040501) {

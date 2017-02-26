@@ -14,11 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 /**
+ * Web Services for Attendance plugin.
  *
- * @package    local_attendance
+ * @package    mod_attendance
  * @copyright  2015 Caio Bressan Doneda
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+defined('MOODLE_INTERNAL') || die();
 
 require_once(dirname(__FILE__).'/../../../config.php');
 require_once(dirname(__FILE__).'/../locallib.php');
