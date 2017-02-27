@@ -23,7 +23,6 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once(dirname(__FILE__).'/../../../config.php');
 require_once(dirname(__FILE__).'/../locallib.php');
 require_once(dirname(__FILE__).'/structure.php');
 require_once(dirname(__FILE__).'/../../../lib/sessionlib.php');
