@@ -56,6 +56,12 @@ class mod_attendance_structure {
     /** @var int last time attendance was modified - used for global search */
     public $timemodified;
 
+    /** @var string required field for activity modules and searching */
+    public $intro;
+
+    /** @var int format of the intro (see above) */
+    public $introformat;
+
     /** current page parameters */
     public $pageparams;
 
