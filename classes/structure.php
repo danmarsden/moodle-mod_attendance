@@ -50,6 +50,15 @@ class mod_attendance_structure {
     /** @var float number (10, 5) unsigned, the maximum grade for attendance */
     public $grade;
 
+    /** @var int when was this module last modified */
+    public $timemodified;
+
+    /** @var string required field for activity modules and searching */
+    public $intro;
+
+    /** @var int format of the intro (see above) */
+    public $introformat;
+
     /** current page parameters */
     public $pageparams;
 
