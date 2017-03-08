@@ -73,13 +73,14 @@ $event->add_record_snapshot('course_modules', $cm);
 $event->add_record_snapshot('attendance', $attrecord);
 $event->trigger();
 
-// Output starts here.
+$title = get_string('attendanceforthecourse', 'attendance').' :: ' .format_string($course->fullname);
+$header = new mod_attendance_header($att, $title);
 
+// Output starts here.
 echo $output->header();
-echo $output->heading(get_string('attendanceforthecourse', 'attendance').' :: ' .format_string($course->fullname));
+echo $output->render($header);
 echo $output->render($tabs);
 echo $output->render($filtercontrols);
 echo $output->render($reportdata);
-
 echo $output->footer();
 
