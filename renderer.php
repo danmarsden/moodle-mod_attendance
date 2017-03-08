@@ -1422,7 +1422,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         return $this->output->url_select($opts, $selected, null);
     }
 
-    protected function render_attendance_preferences_data(attendance_preferences_data $prefdata) {
+    protected function render_attendance_preferences_data($prefdata) {
         $this->page->requires->js('/mod/attendance/module.js');
 
         $table = new html_table();
@@ -1438,7 +1438,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         foreach ($prefdata->statuses as $st) {
             $emptyacronym = '';
             $emptydescription = '';
-            if (array_key_exists($st->id, $prefdata->errors)) {
+            if (!empty(($prefdata->errors[$st->id]))) {
                 if (empty($prefdata->errors[$st->id]['acronym'])) {
                     $emptyacronym = $this->construct_notice(get_string('emptyacronym', 'mod_attendance'), 'notifyproblem');
                 }
@@ -1464,8 +1464,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $table->data[$i][] = $this->construct_preferences_button(get_string('add', 'attendance'),
             mod_attendance_preferences_page_params::ACTION_ADD);
 
-        $o = html_writer::tag('h1', get_string('statussetsettings', 'attendance'));
-        $o .= html_writer::table($table);
+        $o = html_writer::table($table);
         $o .= html_writer::input_hidden_params($prefdata->url(array(), false));
         // We should probably rewrite this to use mforms but for now add sesskey.
         $o .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()))."\n";
@@ -1480,59 +1479,11 @@ class mod_attendance_renderer extends plugin_renderer_base {
     }
 
     protected function render_attendance_default_statusset(attendance_default_statusset $prefdata) {
-        $this->page->requires->js('/mod/attendance/module.js');
+        return $this->render_attendance_preferences_data($prefdata);
+    }
 
-        $table = new html_table();
-        $table->width = '100%';
-        $table->head = array('#',
-            get_string('acronym', 'attendance'),
-            get_string('description'),
-            get_string('points', 'attendance'),
-            get_string('action'));
-        $table->align = array('center', 'center', 'center', 'center', 'center', 'center');
+    protected function render_attendance_pref($prefdata) {
 
-        $i = 1;
-        foreach ($prefdata->statuses as $st) {
-            $emptyacronym = '';
-            $emptydescription = '';
-            if (!empty(($prefdata->errors[$st->id]))) {
-                if (empty($prefdata->errors[$st->id]['acronym'])) {
-                    $emptyacronym = $this->construct_notice(get_string('emptyacronym', 'mod_attendance'), 'notifyproblem');
-                }
-                if (empty($prefdata->errors[$st->id]['description'])) {
-                    $emptydescription = $this->construct_notice(get_string('emptydescription', 'mod_attendance') , 'notifyproblem');
-                }
-            }
-
-            $table->data[$i][] = $i;
-            $table->data[$i][] = $this->construct_text_input('acronym['.$st->id.']', 2, 2, $st->acronym) . $emptyacronym;
-            $table->data[$i][] = $this->construct_text_input('description['.$st->id.']', 30, 30, $st->description) .
-                $emptydescription;
-            $table->data[$i][] = $this->construct_text_input('grade['.$st->id.']', 4, 4, $st->grade);
-            $table->data[$i][] = $this->construct_preferences_actions_icons($st, $prefdata);
-
-            $i++;
-        }
-
-        $table->data[$i][] = '*';
-        $table->data[$i][] = $this->construct_text_input('newacronym', 2, 2);
-        $table->data[$i][] = $this->construct_text_input('newdescription', 30, 30);
-        $table->data[$i][] = $this->construct_text_input('newgrade', 4, 4);
-        $table->data[$i][] = $this->construct_preferences_button(get_string('add', 'attendance'),
-            mod_attendance_preferences_page_params::ACTION_ADD);
-
-        $o = html_writer::table($table);
-        $o .= html_writer::input_hidden_params($prefdata->url(array(), false));
-        // We should probably rewrite this to use mforms but for now add sesskey.
-        $o .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()))."\n";
-
-        $o .= $this->construct_preferences_button(get_string('update', 'attendance'),
-            mod_attendance_preferences_page_params::ACTION_SAVE);
-        $o = html_writer::tag('form', $o, array('id' => 'preferencesform', 'method' => 'post',
-            'action' => $prefdata->url(array(), false)->out_omit_querystring()));
-        $o = $this->output->container($o, 'generalbox attwidth');
-
-        return $o;
     }
 
     private function construct_text_input($name, $size, $maxlength, $value='') {
