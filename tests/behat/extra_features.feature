@@ -149,7 +149,7 @@ Feature: Test the various new features in the attendance module
     Given I log in as "teacher1"
     And I follow "Course 1"
     And I follow "Test attendance"
-    And I follow "Settings"
+    And I follow "Status set"
     And I set the field "jump" to "New set of statuses"
     And I set the field with xpath "//*[@id='preferencesform']/table/tbody/tr[1]/td[2]/input" to "G"
     And I set the field with xpath "//*[@id='preferencesform']/table/tbody/tr[1]/td[3]/input" to "Great"

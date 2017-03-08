@@ -96,7 +96,7 @@ class attendance_tabs implements renderable {
 
         if (has_capability('mod/attendance:changepreferences', $context)) {
             $toprow[] = new tabobject(self::TAB_PREFERENCES, $this->att->url_preferences()->out(),
-                            get_string('settings', 'attendance'));
+                            get_string('statussetsettings', 'attendance'));
         }
         if (has_capability('mod/attendance:managetemporaryusers', $context)) {
             $toprow[] = new tabobject(self::TAB_TEMPORARYUSERS, $this->att->url_managetemp()->out(),

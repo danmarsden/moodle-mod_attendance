@@ -1464,7 +1464,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $table->data[$i][] = $this->construct_preferences_button(get_string('add', 'attendance'),
             mod_attendance_preferences_page_params::ACTION_ADD);
 
-        $o = html_writer::tag('h1', get_string('myvariables', 'attendance'));
+        $o = html_writer::tag('h1', get_string('statussetsettings', 'attendance'));
         $o .= html_writer::table($table);
         $o .= html_writer::input_hidden_params($prefdata->url(array(), false));
         // We should probably rewrite this to use mforms but for now add sesskey.
