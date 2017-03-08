@@ -240,3 +240,118 @@ function attendance_update_users_grade($attendance, $userids=array()) {
 
     return grade_update('mod/attendance', $course->id, 'mod', 'attendance', $attendance->id, 0, $grades);
 }
+
+/**
+ * Add an attendance status variable
+ *
+ * @param string $acronym
+ * @param string $description
+ * @param int $grade
+ */
+function attendance_add_status($acronym, $description, $grade, $attendanceid, $setnumber = 0, $context = null, $cm = null) {
+    global $DB;
+    if (empty($context)) {
+        $context = context_system::instance();
+    }
+    if ($acronym && $description) {
+        $rec = new stdClass();
+        $rec->attendanceid = $attendanceid;
+        $rec->acronym = $acronym;
+        $rec->description = $description;
+        $rec->grade = $grade;
+        $rec->setnumber = $setnumber; // Save which set it is part of.
+        $rec->deleted = 0;
+        $rec->visible = 1;
+        $id = $DB->insert_record('attendance_statuses', $rec);
+        $rec->id = $id;
+
+        $event = \mod_attendance\event\status_added::create(array(
+            'objectid' => $attendanceid,
+            'context' => $context,
+            'other' => array('acronym' => $acronym, 'description' => $description, 'grade' => $grade)));
+        if (!empty($cm)) {
+            $event->add_record_snapshot('course_modules', $cm);
+        }
+        $event->add_record_snapshot('attendance_statuses', $rec);
+        $event->trigger();
+        return true;
+    } else {
+        return false;
+    }
+}
+
+/**
+ * Remove a status variable from an attendance instance
+ *
+ * @param stdClass $status
+ */
+function attendance_remove_status($status, $context = null, $cm = null) {
+    global $DB;
+    if (empty($context)) {
+        $context = context_system::instance();
+    }
+    $DB->set_field('attendance_statuses', 'deleted', 1, array('id' => $status->id));
+    $event = \mod_attendance\event\status_removed::create(array(
+        'objectid' => $status->id,
+        'context' => $context,
+        'other' => array(
+            'acronym' => $status->acronym,
+            'description' => $status->description
+        )));
+    if (!empty($cm)) {
+        $event->add_record_snapshot('course_modules', $cm);
+    }
+    $event->add_record_snapshot('attendance_statuses', $status);
+    $event->trigger();
+}
+
+/**
+ * Update status variable for a particular Attendance module instance
+ *
+ * @param stdClass $status
+ * @param string $acronym
+ * @param string $description
+ * @param int $grade
+ * @param bool $visible
+ */
+function attendance_update_status($status, $acronym, $description, $grade, $visible, $context = null, $cm = null) {
+    global $DB;
+
+    if (empty($context)) {
+        $context = context_system::instance();
+    }
+
+    if (isset($visible)) {
+        $status->visible = $visible;
+        $updated[] = $visible ? get_string('show') : get_string('hide');
+    } else if (empty($acronym) || empty($description)) {
+        return array('acronym' => $acronym, 'description' => $description);
+    }
+
+    $updated = array();
+
+    if ($acronym) {
+        $status->acronym = $acronym;
+        $updated[] = $acronym;
+    }
+    if ($description) {
+        $status->description = $description;
+        $updated[] = $description;
+    }
+    if (isset($grade)) {
+        $status->grade = $grade;
+        $updated[] = $grade;
+    }
+    $DB->update_record('attendance_statuses', $status);
+
+    $event = \mod_attendance\event\status_updated::create(array(
+        'objectid' => $status->attendanceid,
+        'context' => $context,
+        'other' => array('acronym' => $acronym, 'description' => $description, 'grade' => $grade,
+            'updated' => implode(' ', $updated))));
+    if (!empty($cm)) {
+        $event->add_record_snapshot('course_modules', $cm);
+    }
+    $event->add_record_snapshot('attendance_statuses', $status);
+    $event->trigger();
+}

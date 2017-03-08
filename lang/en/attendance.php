@@ -365,3 +365,4 @@ $string['subnetwrong'] = 'Attendance can only be recorded from certain locations
 $string['requiresubnet_help'] = 'Attendance recording may be restricted to particular subnets by specifying a comma-separated list of partial or full IP addresses.';
 $string['defaultsettings'] = 'Default attendance settings';
 $string['defaultsettings_help'] = 'These settings define the defaults for all new attendances';
+$string['defaultstatus'] = 'Default status set';

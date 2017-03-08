@@ -506,6 +506,21 @@ class attendance_preferences_data implements renderable {
     }
 }
 
+class attendance_default_statusset implements renderable {
+    public $statuses;
+
+    public $errors;
+
+    public function __construct($statuses, $errors) {
+        $this->statuses = $statuses;
+        $this->errors = $errors;
+    }
+
+    public function url($params) {
+        return new moodle_url('/mod/attendance/defaultstatus.php', $params);
+    }
+}
+
 // Output a selector to change between status sets.
 class attendance_set_selector implements renderable {
     public $maxstatusset;
