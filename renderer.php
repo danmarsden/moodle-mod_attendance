@@ -716,6 +716,23 @@ class mod_attendance_renderer extends plugin_renderer_base {
         return $celldata;
     }
 
+    protected function render_mod_attendance_header(mod_attendance_header $header) {
+        if (!$header->should_render()) {
+            return '';
+        }
+
+        $attendance = $header->get_attendance();
+
+        $heading = format_string($header->get_title(), false, ['context' => $attendance->context]);
+        $o = $this->output->heading($heading);
+
+        $o .= $this->output->box_start('generalbox boxaligncenter', 'intro');
+        $o .= format_module_intro('attendance', $attendance, $attendance->cm->id);
+        $o .= $this->output->box_end();
+
+        return $o;
+    }
+
     protected function render_attendance_user_data(attendance_user_data $userdata) {
         $o = $this->render_user_report_tabs($userdata);
 

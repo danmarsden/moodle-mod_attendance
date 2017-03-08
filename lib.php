@@ -43,7 +43,7 @@ function attendance_supports($feature) {
         case FEATURE_GROUPMEMBERSONLY:
             return true;
         case FEATURE_MOD_INTRO:
-            return false;
+            return true;
         case FEATURE_BACKUP_MOODLE2:
             return true;
         // Artem Andreev: AFAIK it's not tested.
