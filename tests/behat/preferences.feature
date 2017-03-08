@@ -23,7 +23,7 @@ Feature: Teachers can't change status variables to have empty acronyms or descri
         And I add a "Attendance" to section "1" and I fill the form with:
             | Name        | Attendancepreftest       |
         And I follow "Attendancepreftest"
-        And I follow "Settings"
+        And I follow "Status set"
 
     @javascript
     Scenario: Teachers can add status variables
