@@ -26,7 +26,7 @@ Feature: Admin can set default status set for use in new attendance
     And I turn editing mode on
     And I add a "Attendance" to section "1" and I fill the form with:
       | Name        | Attendance1       |
-    And I click on "Save and display"
+    And I press "Save and display"
     And I should see "Attendance1"
     And I follow "Status set"
     Then I should see "customstatusdescription"
