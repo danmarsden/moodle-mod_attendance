@@ -52,6 +52,8 @@ class mod_attendance_mod_form extends moodleform_mod {
         $mform->addRule('name', null, 'required', null, 'client');
         $mform->setDefault('name', get_string('modulename', 'attendance'));
 
+        $this->standard_intro_elements();
+
         // Grade settings.
         $this->standard_grading_coursemodule_elements();
 

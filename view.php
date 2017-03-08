@@ -78,9 +78,11 @@ if (isset($pageparams->studentid) && $USER->id != $pageparams->studentid) {
 }
 
 $userdata = new attendance_user_data($att, $userid);
+$header = new mod_attendance_header($att);
 
 echo $output->header();
 
+echo $output->render($header);
 echo $output->render($userdata);
 
 echo $output->footer();
