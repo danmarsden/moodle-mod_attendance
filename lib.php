@@ -385,3 +385,27 @@ function attendance_pluginfile($course, $cm, $context, $filearea, $args, $forced
     }
     send_stored_file($file, 0, 0, true);
 }
+
+/**
+ * Print tabs on attendance settings page.
+ *
+ * @param string $selected - current selected tab.
+ *
+ */
+function attendance_print_settings_tabs($selected = 'settings') {
+    global $CFG;
+    // Print tabs for different settings pages.
+    $tabs = array();
+    $tabs[] = new tabobject('settings', $CFG->wwwroot.'/admin/settings.php?section=modsettingattendance',
+        get_string('settings', 'attendance'), get_string('settings'), false);
+
+    $tabs[] = new tabobject('defaultstatus', $CFG->wwwroot.'/mod/attendance/defaultstatus.php',
+        get_string('defaultstatus', 'attendance'), get_string('defaultstatus', 'attendance'), false);
+
+    ob_start();
+    print_tabs(array($tabs), $selected);
+    $tabmenu = ob_get_contents();
+    ob_end_clean();
+
+    return $tabmenu;
+}

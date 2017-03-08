@@ -27,6 +27,9 @@ defined('MOODLE_INTERNAL') || die;
 if ($ADMIN->fulltree) {
     require_once(dirname(__FILE__).'/lib.php');
 
+    $tabmenu = attendance_print_settings_tabs();
+    $settings->add(new admin_setting_heading('attendance_header', '', $tabmenu));
+
     // Paging options.
     $options = array(
           0 => get_string('donotusepaging', 'attendance'),

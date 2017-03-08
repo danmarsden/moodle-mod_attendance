@@ -637,7 +637,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         if ($CFG->fullnamedisplay == 'lastname firstname') {
             $fullnamehead = "$lastname / $firstname";
         } else {
-            $fullnamehead = "$firstname / $lastname";
+            $fullnamehead = "$firstname / $lastname ";
         }
 
         return $fullnamehead;
@@ -1460,6 +1460,62 @@ class mod_attendance_renderer extends plugin_renderer_base {
         return $o;
     }
 
+    protected function render_attendance_default_statusset(attendance_default_statusset $prefdata) {
+        $this->page->requires->js('/mod/attendance/module.js');
+
+        $table = new html_table();
+        $table->width = '100%';
+        $table->head = array('#',
+            get_string('acronym', 'attendance'),
+            get_string('description'),
+            get_string('points', 'attendance'),
+            get_string('action'));
+        $table->align = array('center', 'center', 'center', 'center', 'center', 'center');
+
+        $i = 1;
+        foreach ($prefdata->statuses as $st) {
+            $emptyacronym = '';
+            $emptydescription = '';
+            if (!empty(($prefdata->errors[$st->id]))) {
+                if (empty($prefdata->errors[$st->id]['acronym'])) {
+                    $emptyacronym = $this->construct_notice(get_string('emptyacronym', 'mod_attendance'), 'notifyproblem');
+                }
+                if (empty($prefdata->errors[$st->id]['description'])) {
+                    $emptydescription = $this->construct_notice(get_string('emptydescription', 'mod_attendance') , 'notifyproblem');
+                }
+            }
+
+            $table->data[$i][] = $i;
+            $table->data[$i][] = $this->construct_text_input('acronym['.$st->id.']', 2, 2, $st->acronym) . $emptyacronym;
+            $table->data[$i][] = $this->construct_text_input('description['.$st->id.']', 30, 30, $st->description) .
+                $emptydescription;
+            $table->data[$i][] = $this->construct_text_input('grade['.$st->id.']', 4, 4, $st->grade);
+            $table->data[$i][] = $this->construct_preferences_actions_icons($st, $prefdata);
+
+            $i++;
+        }
+
+        $table->data[$i][] = '*';
+        $table->data[$i][] = $this->construct_text_input('newacronym', 2, 2);
+        $table->data[$i][] = $this->construct_text_input('newdescription', 30, 30);
+        $table->data[$i][] = $this->construct_text_input('newgrade', 4, 4);
+        $table->data[$i][] = $this->construct_preferences_button(get_string('add', 'attendance'),
+            mod_attendance_preferences_page_params::ACTION_ADD);
+
+        $o = html_writer::table($table);
+        $o .= html_writer::input_hidden_params($prefdata->url(array(), false));
+        // We should probably rewrite this to use mforms but for now add sesskey.
+        $o .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()))."\n";
+
+        $o .= $this->construct_preferences_button(get_string('update', 'attendance'),
+            mod_attendance_preferences_page_params::ACTION_SAVE);
+        $o = html_writer::tag('form', $o, array('id' => 'preferencesform', 'method' => 'post',
+            'action' => $prefdata->url(array(), false)->out_omit_querystring()));
+        $o = $this->output->container($o, 'generalbox attwidth');
+
+        return $o;
+    }
+
     private function construct_text_input($name, $size, $maxlength, $value='') {
         $attributes = array(
                 'type'      => 'text',
@@ -1485,7 +1541,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
                     $prefdata->url($params),
                     new pix_icon("t/show", get_string('show')));
         }
-        if (!$st->haslogs) {
+        if (empty($st->haslogs)) {
             $params['action'] = mod_attendance_preferences_page_params::ACTION_DELETE;
             $deleteicon = $OUTPUT->action_icon(
                     $prefdata->url($params),
