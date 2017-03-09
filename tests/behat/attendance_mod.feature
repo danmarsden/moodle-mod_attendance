@@ -25,7 +25,7 @@ Feature: Teachers and Students can record session attendance
             | C1     | student1 | student        | ##yesterday## |
             | C1     | teacher1 | editingteacher | ##yesterday## |
 
-        When I log in as "teacher1"
+        And I log in as "teacher1"
         And I follow "Course 1"
         And I turn editing mode on
         And I follow "Add a block"
@@ -35,11 +35,11 @@ Feature: Teachers and Students can record session attendance
         And I log out
         And I log in as "student1"
         And I follow "Course 1"
-        Then I should see "Attendance"
+        And I should see "Attendance"
         And I log out
 
     Scenario: Students can mark their own attendance
-        When I log in as "teacher1"
+        Given I log in as "teacher1"
         And I follow "Course 1"
         And I follow "Attendance"
         And I follow "Add"
@@ -49,13 +49,13 @@ Feature: Teachers and Students can record session attendance
             | id_sestime_endhour   | 23 |
         And I click on "id_submitbutton" "button"
         And I log out
-        When I log in as "student1"
+        And I log in as "student1"
         And I follow "Course 1"
         And I follow "Attendance"
         And I follow "Submit attendance"
         And I set the field "Present" to "1"
         And I press "Save changes"
-        Then I should see "Self-recorded"
+        And I should see "Self-recorded"
         And I log out
         When I log in as "teacher1"
         And I follow "Course 1"
@@ -65,7 +65,7 @@ Feature: Teachers and Students can record session attendance
         Then "Attendance taken by student" "link" should exist
 
     Scenario: Teachers can view low grade report and send a message
-        When I log in as "teacher1"
+        Given I log in as "teacher1"
         And I follow "Course 1"
         And I follow "Attendance"
         And I follow "Add"
@@ -77,7 +77,7 @@ Feature: Teachers and Students can record session attendance
         And I follow "Low grade"
         And I set the field "cb_selector" to "1"
         And I click on "Send a message" "button"
-        Then I should see "Message body"
+        And I should see "Message body"
         And I should see "student1@asd.com"
         And I follow "Course 1"
         And I expand "Reports" node
@@ -86,7 +86,7 @@ Feature: Teachers and Students can record session attendance
         Then "Attendance report viewed" "link" should exist
 
     Scenario: Export report includes id number, department and institution
-        When I log in as "teacher1"
+        Given I log in as "teacher1"
         And I follow "Course 1"
         And I follow "Attendance"
         And I follow "Add"

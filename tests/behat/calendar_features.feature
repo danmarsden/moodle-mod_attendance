@@ -23,7 +23,7 @@ Feature: Test the calendar related features in the attendance module
     And I log out
 
   Scenario: Calendar events can be created automatically with sessions creation
-    When I log in as "teacher1"
+    Given I log in as "teacher1"
     And I follow "Course 1"
     And I follow "Test attendance"
     And I follow "Add session"
@@ -33,7 +33,7 @@ Feature: Test the calendar related features in the attendance module
     And I click on "id_submitbutton" "button"
     And I follow "Course 1"
     And I follow "Go to calendar"
-    Then I should see "Test attendance"
+    And I should see "Test attendance"
     And I log out
     And I log in as "student1"
     And I follow "Go to calendar"

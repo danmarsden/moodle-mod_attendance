@@ -21,7 +21,7 @@ Feature: Admin can set default status set for use in new attendance
 
   @javascript
   Scenario: Modified default status set added to new attendance
-    When I log in as "teacher1"
+    Given I log in as "teacher1"
     And I follow "Course 1"
     And I turn editing mode on
     And I add a "Attendance" to section "1" and I fill the form with:

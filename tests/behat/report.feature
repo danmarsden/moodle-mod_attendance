@@ -32,7 +32,7 @@ Feature: Visiting reports
          And I log out
 
     Scenario: Teacher takes attendance
-        When I log in as "teacher1"
+        Given I log in as "teacher1"
          And I follow "Course 1"
          And I follow "Attendance"
          And I follow "Edit settings"
@@ -66,7 +66,7 @@ Feature: Visiting reports
          And I log out
 
     Scenario: Teacher changes the maximum points in the attendance settings
-        When I log in as "teacher1"
+        Given I log in as "teacher1"
          And I follow "Course 1"
          And I follow "Attendance"
          And I follow "Edit settings"
@@ -148,7 +148,7 @@ Feature: Visiting reports
          And I log out
 
     Scenario: Teacher visit summary report
-        When I log in as "teacher1"
+        Given I log in as "teacher1"
          And I follow "Course 1"
          And I follow "Attendance"
          And I follow "Edit settings"
@@ -192,7 +192,7 @@ Feature: Visiting reports
          And I log out
 
     Scenario: Student visit user report
-        When I log in as "teacher1"
+        Given I log in as "teacher1"
          And I follow "Course 1"
          And I follow "Attendance"
          And I follow "Edit settings"
