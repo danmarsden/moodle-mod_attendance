@@ -21,12 +21,11 @@ Feature: Admin can set default status set for use in new attendance
 
   @javascript
   Scenario: Modified default status set added to new attendance
-    When I log in as "teacher1"
+    Given I log in as "teacher1"
     And I follow "Course 1"
     And I turn editing mode on
     And I add a "Attendance" to section "1" and I fill the form with:
       | Name        | Attendance1       |
-    And I click on "Save and display"
-    And I should see "Attendance1"
+    And I follow "Attendance1"
     And I follow "Status set"
-    Then I should see "customstatusdescription"
+    Then the field with xpath "//*[@id='preferencesform']/table/tbody/tr[2]/td[3]/input" matches value "customstatusdescription"
