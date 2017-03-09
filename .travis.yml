@@ -11,7 +11,6 @@ php:
  - 7.0
 
 matrix:
-    fast_finish: true
   allow_failures:
   - php: 5.6 # travis seems to fail on adding activity - doesn't fail when running behat locally.
 
@@ -34,9 +33,9 @@ script:
     - >
       if [ "$TASK" = 'PHP' ];
       then
-         - moodle-plugin-ci phplint
-         - moodle-plugin-ci phpcpd
-         - moodle-plugin-ci phpmd
+         moodle-plugin-ci phplint
+         moodle-plugin-ci phpcpd
+         moodle-plugin-ci phpmd
       fi
     - >
       if [ "$TASK" = 'codecheck' ];
@@ -49,7 +48,6 @@ script:
          - moodle-plugin-ci shifter
          - moodle-plugin-ci jshint
          - moodle-plugin-ci validate
+         - moodle-plugin-ci phpunit
+         - moodle-plugin-ci behat
       fi
-
-- moodle-plugin-ci phpunit
-- moodle-plugin-ci behat
