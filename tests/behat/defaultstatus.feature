@@ -28,4 +28,4 @@ Feature: Admin can set default status set for use in new attendance
       | Name        | Attendance1       |
     And I follow "Attendance1"
     And I follow "Status set"
-    Then I should see "customstatusdescription"
+    Then the field with xpath "//*[@id='preferencesform']/table/tbody/tr[2]/td[3]/input" matches value "customstatusdescription"
