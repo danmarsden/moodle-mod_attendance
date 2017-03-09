@@ -29,6 +29,10 @@ before_install:
 install:
   - moodle-plugin-ci install
 
+before_script:
+  # disable xdebug to speed up php 7.0 tests.
+    - phpenv config-rm xdebug.ini
+
 script:
     - >
       if [ "$TASK" = 'FULL' ];
