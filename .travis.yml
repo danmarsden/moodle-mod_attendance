@@ -11,13 +11,13 @@ php:
  - 7.0
 
 matrix:
-  allow_failures:
-  - php: 5.6 # travis seems to fail on adding activity - doesn't fail when running behat locally.
+   allow_failures:
+   - php: 5.6 # travis seems to fail on adding activity - doesn't fail when running behat locally.
 
 env:
  matrix:
-  - DB=pgsql MOODLE_BRANCH=master TASK=PHP
-  - DB=mysqli MOODLE_BRANCH=master TASK=codecheck
+    - DB=pgsql MOODLE_BRANCH=master TASK=FULL
+    - DB=mysqli MOODLE_BRANCH=master TASK=LIMITED
 
 before_install:
   - phpenv config-rm xdebug.ini
@@ -31,23 +31,23 @@ install:
 
 script:
     - >
-      if [ "$TASK" = 'PHP' ];
+      if [ "$TASK" = 'FULL' ];
       then
-         moodle-plugin-ci phplint
-         moodle-plugin-ci phpcpd
-         moodle-plugin-ci phpmd
+          moodle-plugin-ci phplint
+          moodle-plugin-ci phpcpd
+          moodle-plugin-ci phpmd
+          moodle-plugin-ci codechecker
+          moodle-plugin-ci csslint
+          moodle-plugin-ci shifter
+          moodle-plugin-ci jshint
+          moodle-plugin-ci validate
+          moodle-plugin-ci phpunit
+          moodle-plugin-ci behat
       fi
     - >
-      if [ "$TASK" = 'codecheck' ];
+      if [ "$TASK" = 'LIMITED' ];
       then
-         - moodle-plugin-ci phplint
-         - moodle-plugin-ci phpcpd
-         - moodle-plugin-ci phpmd
-         - moodle-plugin-ci codechecker
-         - moodle-plugin-ci csslint
-         - moodle-plugin-ci shifter
-         - moodle-plugin-ci jshint
-         - moodle-plugin-ci validate
-         - moodle-plugin-ci phpunit
-         - moodle-plugin-ci behat
+         moodle-plugin-ci phplint
+         moodle-plugin-ci phpunit
+         moodle-plugin-ci behat
       fi
