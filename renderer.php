@@ -498,6 +498,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
     }
 
     protected function render_attendance_take_list(attendance_take_data $takedata) {
+        global $PAGE, $CFG;
         $table = new html_table();
         $table->width = '0%';
         $table->head = array(
@@ -507,6 +508,15 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $table->align = array('left', 'left');
         $table->size = array('20px', '');
         $table->wrap[1] = 'nowrap';
+        // Check if extra useridentity fields need to be added.
+        $extrasearchfields = array();
+        if (!empty($CFG->showuseridentity) && has_capability('moodle/site:viewuseridentity', $takedata->att->context)) {
+            $extrasearchfields = explode(',', $CFG->showuseridentity);
+        }
+        foreach ($extrasearchfields as $field) {
+            $table->head[] = get_string($field);
+            $table->align[] = 'left';
+        }
         foreach ($takedata->statuses as $st) {
             $table->head[] = html_writer::link("javascript:select_all_in(null, 'st" . $st->id . "', null);", $st->acronym,
                                                array('title' => get_string('setallstatusesto', 'attendance', $st->description)));
@@ -521,6 +531,9 @@ class mod_attendance_renderer extends plugin_renderer_base {
         // Show a 'select all' row of radio buttons.
         $row = new html_table_row();
         $row->cells[] = '';
+        foreach ($extrasearchfields as $field) {
+            $row->cells[] = '';
+        }
         $row->cells[] = html_writer::div(get_string('setallstatuses', 'attendance'), 'setallstatuses');
         foreach ($takedata->statuses as $st) {
             $attribs = array(
@@ -549,6 +562,9 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 $fullname .= $ucdata['warning'];
             }
             $row->cells[] = $fullname;
+            foreach ($extrasearchfields as $field) {
+                $row->cells[] = $user->$field;
+            }
 
             if (array_key_exists('colspan', $ucdata)) {
                 $cell = new html_table_cell($ucdata['text']);
@@ -868,6 +884,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $table->attributes['class'] = 'generaltable attwidth attreport';
 
         $userrows = $this->get_user_rows($reportdata);
+
         if ($reportdata->pageparams->view == ATT_VIEW_SUMMARY) {
             $sessionrows = array();
         } else {
@@ -943,13 +960,23 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $row = new html_table_row();
         $row->cells[] = $this->build_header_cell('');
         $row->cells[] = $this->build_header_cell($this->construct_fullname_head($reportdata), false, false);
+
+        $extrafields = get_extra_user_fields($reportdata->att->context);
+        foreach ($extrafields as $field) {
+            $row->cells[] = $this->build_header_cell(get_string($field), false, false);
+        }
+
         $rows[] = $row;
+
 
         foreach ($reportdata->users as $user) {
             $row = new html_table_row();
             $row->cells[] = $this->build_data_cell($this->user_picture($user));
             $text = html_writer::link($reportdata->url_view(array('studentid' => $user->id)), fullname($user));
             $row->cells[] = $this->build_data_cell($text, false, false, null, null, false);
+            foreach ($extrafields as $field) {
+                $row->cells[] = $this->build_data_cell($user->$field, false, false);
+            }
             $rows[] = $row;
         }
 
