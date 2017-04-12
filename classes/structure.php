@@ -591,7 +591,7 @@ class mod_attendance_structure {
         $extrafields = get_extra_user_fields($this->context, $fields);
         $fields = array_merge($fields, $extrafields);
 
-        $userfields = user_picture::fields('u',$fields);
+        $userfields = user_picture::fields('u', $fields);
 
         if (empty($this->pageparams->sort)) {
             $this->pageparams->sort = ATT_SORT_DEFAULT;

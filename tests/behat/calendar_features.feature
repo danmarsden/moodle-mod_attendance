@@ -15,8 +15,7 @@ Feature: Test the calendar related features in the attendance module
       | C1     | teacher1    | editingteacher | ##yesterday## |
 
     And I log in as "teacher1"
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add the "Upcoming events" block
     And I add a "Attendance" to section "1" and I fill the form with:
       | Name | Test attendance |
@@ -24,14 +23,14 @@ Feature: Test the calendar related features in the attendance module
 
   Scenario: Calendar events can be created automatically with sessions creation
     Given I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test attendance"
     And I follow "Add session"
     And I set the following fields to these values:
       | id_sestime_starthour | 01 |
       | id_sestime_endhour   | 02 |
     And I click on "id_submitbutton" "button"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Go to calendar"
     And I should see "Test attendance"
     And I log out

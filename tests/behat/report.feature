@@ -16,8 +16,7 @@ Feature: Visiting reports
             | C1     | teacher1 | editingteacher | ##yesterday## |
 
          And I log in as "teacher1"
-         And I follow "Course 1"
-         And I turn editing mode on
+         And I am on "Course 1" course homepage with editing mode on
          And I add a "Attendance" to section "1" and I fill the form with:
             | Name        | Attendance       |
          And I follow "Attendance"
@@ -33,7 +32,7 @@ Feature: Visiting reports
 
     Scenario: Teacher takes attendance
         Given I log in as "teacher1"
-         And I follow "Course 1"
+         And I am on "Course 1" course homepage
          And I follow "Attendance"
          And I follow "Edit settings"
         Then I set the following fields to these values:
@@ -67,7 +66,7 @@ Feature: Visiting reports
 
     Scenario: Teacher changes the maximum points in the attendance settings
         Given I log in as "teacher1"
-         And I follow "Course 1"
+         And I am on "Course 1" course homepage
          And I follow "Attendance"
          And I follow "Edit settings"
         Then I set the following fields to these values:
@@ -107,7 +106,7 @@ Feature: Visiting reports
           | Group1 | student1 |
 
         When I log in as "teacher1"
-         And I follow "Course 1"
+         And I am on "Course 1" course homepage
          And I follow "Attendance"
          And I follow "Edit settings"
          And I set the following fields to these values:
@@ -149,7 +148,7 @@ Feature: Visiting reports
 
     Scenario: Teacher visit summary report
         Given I log in as "teacher1"
-         And I follow "Course 1"
+         And I am on "Course 1" course homepage
          And I follow "Attendance"
          And I follow "Edit settings"
          And I set the following fields to these values:
@@ -193,7 +192,7 @@ Feature: Visiting reports
 
     Scenario: Student visit user report
         Given I log in as "teacher1"
-         And I follow "Course 1"
+         And I am on "Course 1" course homepage
          And I follow "Attendance"
          And I follow "Edit settings"
         Then I set the following fields to these values:
@@ -226,7 +225,7 @@ Feature: Visiting reports
         Then I log out
 
         When I log in as "student1"
-         And I follow "Course 1"
+         And I am on "Course 1" course homepage
          And I follow "Attendance"
          And I follow "All"
 

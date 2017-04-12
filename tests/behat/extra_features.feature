@@ -21,15 +21,14 @@ Feature: Test the various new features in the attendance module
       | C1     | student3 | student        | ##yesterday## |
 
     And I log in as "teacher1"
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I add a "Attendance" to section "1" and I fill the form with:
       | Name | Test attendance |
     And I log out
 
   Scenario: A teacher can create and update temporary users
     Given I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test attendance"
     And I follow "Temporary users"
 
@@ -61,7 +60,7 @@ Feature: Test the various new features in the attendance module
 
   Scenario: A teacher can take attendance for temporary users
     Given I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test attendance"
     And I follow "Temporary users"
     And I set the following fields to these values:
@@ -124,7 +123,7 @@ Feature: Test the various new features in the attendance module
       | Group2 | student3 |
 
     And I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test attendance"
     And I follow "Add"
     And I set the following fields to these values:
@@ -147,7 +146,7 @@ Feature: Test the various new features in the attendance module
 
   Scenario: A teacher can create and use multiple status lists
     Given I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test attendance"
     And I follow "Status set"
     And I set the field "jump" to "New set of statuses"
@@ -196,7 +195,7 @@ Feature: Test the various new features in the attendance module
 
   Scenario: A teacher can use the radio buttons to set attendance values for all users
     Given I log in as "teacher1"
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Test attendance"
     And I follow "Add"
     And I set the following fields to these values:

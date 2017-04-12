@@ -26,21 +26,20 @@ Feature: Teachers and Students can record session attendance
             | C1     | teacher1 | editingteacher | ##yesterday## |
 
         And I log in as "teacher1"
-        And I follow "Course 1"
-        And I turn editing mode on
+        And I am on "Course 1" course homepage with editing mode on
         And I follow "Add a block"
         And I follow "Administration"
         And I add a "Attendance" to section "1" and I fill the form with:
             | Name        | Attendance       |
         And I log out
         And I log in as "student1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I should see "Attendance"
         And I log out
 
     Scenario: Students can mark their own attendance
         Given I log in as "teacher1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Attendance"
         And I follow "Add"
         And I set the field "Allow students to record own attendance" to "1"
@@ -50,7 +49,7 @@ Feature: Teachers and Students can record session attendance
         And I click on "id_submitbutton" "button"
         And I log out
         And I log in as "student1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Attendance"
         And I follow "Submit attendance"
         And I set the field "Present" to "1"
@@ -58,7 +57,7 @@ Feature: Teachers and Students can record session attendance
         And I should see "Self-recorded"
         And I log out
         When I log in as "teacher1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I expand "Reports" node
         And I follow "Logs"
         And I click on "Get these logs" "button"
@@ -66,7 +65,7 @@ Feature: Teachers and Students can record session attendance
 
     Scenario: Teachers can view low grade report and send a message
         Given I log in as "teacher1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Attendance"
         And I follow "Add"
         And I set the following fields to these values:
@@ -87,7 +86,7 @@ Feature: Teachers and Students can record session attendance
 
     Scenario: Export report includes id number, department and institution
         Given I log in as "teacher1"
-        And I follow "Course 1"
+        And I am on "Course 1" course homepage
         And I follow "Attendance"
         And I follow "Add"
         And I set the following fields to these values:

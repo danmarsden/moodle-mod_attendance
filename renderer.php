@@ -986,7 +986,6 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
         $rows[] = $row;
 
-
         foreach ($reportdata->users as $user) {
             $row = new html_table_row();
             $row->cells[] = $this->build_data_cell($this->user_picture($user));
