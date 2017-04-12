@@ -275,7 +275,7 @@ class attendance_take_data implements renderable {
 
     private $urlpath;
     private $urlparams;
-    private $att;
+    public $att;
 
     public function  __construct(mod_attendance_structure $att) {
         if ($att->pageparams->grouptype) {

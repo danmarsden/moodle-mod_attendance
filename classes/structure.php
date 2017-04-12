@@ -586,8 +586,12 @@ class mod_attendance_structure {
     public function get_users($groupid = 0, $page = 1) {
         global $DB, $CFG;
 
-        // Fields we need from the user table.
-        $userfields = user_picture::fields('u', array('username' , 'idnumber' , 'institution' , 'department'));
+        $fields = array('username' , 'idnumber' , 'institution' , 'department');
+        // Get user identity fields if required - doesn't return original $fields array.
+        $extrafields = get_extra_user_fields($this->context, $fields);
+        $fields = array_merge($fields, $extrafields);
+
+        $userfields = user_picture::fields('u',$fields);
 
         if (empty($this->pageparams->sort)) {
             $this->pageparams->sort = ATT_SORT_DEFAULT;
