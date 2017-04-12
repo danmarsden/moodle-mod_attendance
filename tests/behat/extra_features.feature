@@ -79,13 +79,13 @@ Feature: Test the various new features in the attendance module
 
     When I follow "Take attendance"
     # Present
-    And I click on "td.c2 input" "css_element" in the "Student 1" "table_row"
+    And I click on "td.cell.c2 input" "css_element" in the "Student 1" "table_row"
     # Late
-    And I click on "td.c3 input" "css_element" in the "Student 2" "table_row"
+    And I click on "td.cell.c3 input" "css_element" in the "Student 2" "table_row"
     # Excused
-    And I click on "td.c4 input" "css_element" in the "Temporary user 1" "table_row"
+    And I click on "td.cell.c4 input" "css_element" in the "Temporary user 1" "table_row"
     # Absent
-    And I click on "td.c5 input" "css_element" in the "Temporary user 2" "table_row"
+    And I click on "td.cell.c5 input" "css_element" in the "Temporary user 2" "table_row"
     And I press "Save attendance"
     And I follow "Report"
     Then "P" "text" should exist in the "Student 1" "table_row"
