@@ -77,7 +77,7 @@ Feature: Test the various new features in the attendance module
       | id_addmultiply | 0 |
     And I click on "submitbutton" "button"
 
-    And I click on "Take attendance"
+    And I follow "Take attendance"
     # Present
     And I click on "td.cell.c3 input" "css_element" in the "Student 1" "table_row"
     # Late
