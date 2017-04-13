@@ -77,7 +77,7 @@ Feature: Test the various new features in the attendance module
       | id_addmultiply | 0 |
     And I click on "submitbutton" "button"
 
-    When I follow "Take attendance"
+    And I click on "Take attendance"
     # Present
     And I click on "td.cell.c2 input" "css_element" in the "Student 1" "table_row"
     # Late
@@ -88,13 +88,13 @@ Feature: Test the various new features in the attendance module
     And I click on "td.cell.c5 input" "css_element" in the "Temporary user 2" "table_row"
     And I press "Save attendance"
     And I follow "Report"
-    Then "P" "text" should exist in the "Student 1" "table_row"
+    And "P" "text" should exist in the "Student 1" "table_row"
     And "L" "text" should exist in the "Student 2" "table_row"
     And "E" "text" should exist in the "Temporary user 1" "table_row"
     And "A" "text" should exist in the "Temporary user 2" "table_row"
 
-    When I follow "Temporary user 2"
-    Then I should see "Absent"
+    And I follow "Temporary user 2"
+    And I should see "Absent"
 
     # Merge user.
     When I follow "Test attendance"
@@ -104,11 +104,11 @@ Feature: Test the various new features in the attendance module
     And I press "Merge user"
     And I follow "Report"
 
-    Then "P" "text" should exist in the "Student 1" "table_row"
+    And "P" "text" should exist in the "Student 1" "table_row"
     And "L" "text" should exist in the "Student 2" "table_row"
     And "E" "text" should exist in the "Temporary user 1" "table_row"
     And "A" "text" should exist in the "Student 3" "table_row"
-    And I should not see "Temporary user 2"
+    Then I should not see "Temporary user 2"
 
   Scenario: A teacher can select a subset of users for export
     Given the following "groups" exist:
