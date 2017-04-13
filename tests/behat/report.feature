@@ -52,7 +52,7 @@ Feature: Visiting reports
         When I follow "Attendance"
         Then I click on "Take attendance" "link" in the "1am - 2am" "table_row"
          # Late
-         And I click on "td.c3 input" "css_element" in the "Student 1" "table_row"
+         And I click on "td.c4 input" "css_element" in the "Student 1" "table_row"
          And I press "Save attendance"
 
         When I follow "Report"
@@ -78,7 +78,7 @@ Feature: Visiting reports
         When I follow "Attendance"
         Then I click on "Take attendance" "link" in the "1am - 2am" "table_row"
          # Excused
-         And I click on "td.c3 input" "css_element" in the "Student 1" "table_row"
+         And I click on "td.c4 input" "css_element" in the "Student 1" "table_row"
          And I press "Save attendance"
 
         When I follow "Attendance"
@@ -119,7 +119,7 @@ Feature: Visiting reports
         When I follow "Attendance"
         Then I click on "Take attendance" "link" in the "1am - 2am" "table_row"
          # Excused
-         And I click on "td.c3 input" "css_element" in the "Student 1" "table_row"
+         And I click on "td.c4 input" "css_element" in the "Student 1" "table_row"
          And I press "Save attendance"
 
         When I follow "Add session"
@@ -134,7 +134,7 @@ Feature: Visiting reports
 
         When I click on "Take attendance" "link" in the "3am - 4am" "table_row"
          # Present
-         And I click on "td.c2 input" "css_element" in the "Student 1" "table_row"
+         And I click on "td.c3 input" "css_element" in the "Student 1" "table_row"
          And I press "Save attendance"
 
         When I follow "Report"
@@ -159,7 +159,7 @@ Feature: Visiting reports
 
         When I click on "Take attendance" "link" in the "1am - 2am" "table_row"
          # Late
-         And I click on "td.c3 input" "css_element" in the "Student 1" "table_row"
+         And I click on "td.c4 input" "css_element" in the "Student 1" "table_row"
          And I press "Save attendance"
 
         When I follow "Add session"
@@ -171,7 +171,7 @@ Feature: Visiting reports
 
         When I click on "Take attendance" "link" in the "3am - 4am" "table_row"
          # Present
-         And I click on "td.c2 input" "css_element" in the "Student 1" "table_row"
+         And I click on "td.c3 input" "css_element" in the "Student 1" "table_row"
          And I press "Save attendance"
 
         When I follow "Add session"
@@ -203,7 +203,7 @@ Feature: Visiting reports
 
         When I click on "Take attendance" "link" in the "1am - 2am" "table_row"
          # Late
-         And I click on "td.c3 input" "css_element" in the "Student 1" "table_row"
+         And I click on "td.c4 input" "css_element" in the "Student 1" "table_row"
          And I press "Save attendance"
 
         When I follow "Add session"
@@ -214,7 +214,7 @@ Feature: Visiting reports
 
         When I click on "Take attendance" "link" in the "3am - 4am" "table_row"
          # Present
-         And I click on "td.c2 input" "css_element" in the "Student 1" "table_row"
+         And I click on "td.c3 input" "css_element" in the "Student 1" "table_row"
          And I press "Save attendance"
 
         When I follow "Add session"
