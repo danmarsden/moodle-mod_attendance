@@ -27,13 +27,14 @@ env:
  global:
   - MOODLE_BRANCH=master
  matrix:
-    - DB=pgsql
-    - DB=mysqli
+  - DB=pgsql
+  - DB=mysqli
 
 before_install:
   - phpenv config-rm xdebug.ini
   - nvm install node
   - cd ../..
+  - composer selfupdate
   - composer create-project -n --no-dev --prefer-dist moodlerooms/moodle-plugin-ci ci ^2
   - export PATH="$(cd ci/bin; pwd):$(cd ci/vendor/bin; pwd):$PATH"
 
