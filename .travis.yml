@@ -1,6 +1,13 @@
 language: php
 
-sudo: required
+sudo: false
+
+addons:
+  postgresql: "9.3"
+  apt:
+    packages:
+      - oracle-java8-installer
+      - oracle-java8-set-default
 
 cache:
   directories:
@@ -9,20 +16,23 @@ cache:
 php:
  - 5.6
  - 7.0
+ - 7.1
 
 matrix:
    allow_failures:
    - php: 5.6 # travis seems to fail on adding activity - doesn't fail when running behat locally.
 
 env:
+ global:
+  - MOODLE_BRANCH=master
  matrix:
-    - DB=pgsql MOODLE_BRANCH=master TASK=FULL
-    - DB=mysqli MOODLE_BRANCH=master TASK=LIMITED
+    - DB=pgsql
+    - DB=mysqli
 
 before_install:
   - phpenv config-rm xdebug.ini
+  - nvm install node
   - cd ../..
-  - composer selfupdate
   - composer create-project -n --no-dev --prefer-dist moodlerooms/moodle-plugin-ci ci ^1
   - export PATH="$(cd ci/bin; pwd):$(cd ci/vendor/bin; pwd):$PATH"
 
@@ -30,24 +40,13 @@ install:
   - moodle-plugin-ci install
 
 script:
-    - >
-      if [ "$TASK" = 'FULL' ];
-      then
-          moodle-plugin-ci phplint
-          moodle-plugin-ci phpcpd
-          moodle-plugin-ci phpmd
-          moodle-plugin-ci codechecker
-          moodle-plugin-ci csslint
-          moodle-plugin-ci shifter
-          moodle-plugin-ci jshint
-          moodle-plugin-ci validate
-          moodle-plugin-ci phpunit
-          moodle-plugin-ci behat
-      fi
-    - >
-      if [ "$TASK" = 'LIMITED' ];
-      then
-         moodle-plugin-ci phplint
-         moodle-plugin-ci phpunit
-         moodle-plugin-ci behat
-      fi
+  - moodle-plugin-ci phplint
+  - moodle-plugin-ci phpcpd
+  - moodle-plugin-ci phpmd
+  - moodle-plugin-ci codechecker
+  - moodle-plugin-ci validate
+  - moodle-plugin-ci savepoints
+  - moodle-plugin-ci mustache
+  - moodle-plugin-ci grunt
+  - moodle-plugin-ci phpunit
+  - moodle-plugin-ci behat
