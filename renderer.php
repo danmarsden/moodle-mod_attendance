@@ -969,17 +969,18 @@ class mod_attendance_renderer extends plugin_renderer_base {
      */
     protected function get_user_rows(attendance_report_data $reportdata) {
         $rows = array();
+        $extrafields = get_extra_user_fields($reportdata->att->context);
+        $usercolspan = 1 + count($extrafields);
 
         $row = new html_table_row();
         $row->cells[] = $this->build_header_cell('');
-        $row->cells[] = $this->build_header_cell(get_string('users'), false, false);
+        $row->cells[] = $this->build_header_cell(get_string('users'), false, false, $usercolspan);
         $rows[] = $row;
 
         $row = new html_table_row();
         $row->cells[] = $this->build_header_cell('');
         $row->cells[] = $this->build_header_cell($this->construct_fullname_head($reportdata), false, false);
 
-        $extrafields = get_extra_user_fields($reportdata->att->context);
         foreach ($extrafields as $field) {
             $row->cells[] = $this->build_header_cell(get_string($field), false, false);
         }
@@ -1000,7 +1001,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $row = new html_table_row();
         $row->cells[] = $this->build_data_cell('');
         $text = ($reportdata->pageparams->view == ATT_VIEW_SUMMARY) ? '' : get_string('summary');
-        $row->cells[] = $this->build_data_cell($text);
+        $row->cells[] = $this->build_data_cell($text, false, true, $usercolspan);
         $rows[] = $row;
 
         return $rows;
