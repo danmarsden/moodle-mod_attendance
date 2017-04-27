@@ -35,7 +35,7 @@ before_install:
   - nvm install node
   - cd ../..
   - composer selfupdate
-  - composer create-project -n --no-dev --prefer-dist moodlerooms/moodle-plugin-ci ci v2
+  - composer create-project -n --no-dev --prefer-dist moodlerooms/moodle-plugin-ci ci v2.x-dev
   - export PATH="$(cd ci/bin; pwd):$(cd ci/vendor/bin; pwd):$PATH"
 
 install:
