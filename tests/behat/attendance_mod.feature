@@ -37,66 +37,66 @@ Feature: Teachers and Students can record session attendance
     And I should see "Attendance"
     And I log out
 
-    Scenario: Students can mark their own attendance
-      Given I log in as "teacher1"
-      And I am on "Course 1" course homepage
-      And I follow "Attendance"
-      And I follow "Add"
-      And I set the field "Allow students to record own attendance" to "1"
-      And I set the following fields to these values:
-        | id_sestime_starthour | 22 |
-        | id_sestime_endhour   | 23 |
-      And I click on "id_submitbutton" "button"
-      And I log out
-      And I log in as "student1"
-      And I am on "Course 1" course homepage
-      And I follow "Attendance"
-      And I follow "Submit attendance"
-      And I set the field "Present" to "1"
-      And I press "Save changes"
-      And I should see "Self-recorded"
-      And I log out
-      When I log in as "teacher1"
-      And I am on "Course 1" course homepage
-      And I expand "Reports" node
-      And I follow "Logs"
-      And I click on "Get these logs" "button"
-      Then "Attendance taken by student" "link" should exist
+  Scenario: Students can mark their own attendance
+    Given I log in as "teacher1"
+    And I am on "Course 1" course homepage
+    And I follow "Attendance"
+    And I follow "Add"
+    And I set the field "Allow students to record own attendance" to "1"
+    And I set the following fields to these values:
+      | id_sestime_starthour | 22 |
+      | id_sestime_endhour   | 23 |
+    And I click on "id_submitbutton" "button"
+    And I log out
+    And I log in as "student1"
+    And I am on "Course 1" course homepage
+    And I follow "Attendance"
+    And I follow "Submit attendance"
+    And I set the field "Present" to "1"
+    And I press "Save changes"
+    And I should see "Self-recorded"
+    And I log out
+    When I log in as "teacher1"
+    And I am on "Course 1" course homepage
+    And I expand "Reports" node
+    And I follow "Logs"
+    And I click on "Get these logs" "button"
+    Then "Attendance taken by student" "link" should exist
 
-    Scenario: Teachers can view low grade report and send a message
-      Given I log in as "teacher1"
-      And I am on "Course 1" course homepage
-      And I follow "Attendance"
-      And I follow "Add"
-      And I set the following fields to these values:
-        | id_sestime_starthour | 01 |
-        | id_sestime_endhour   | 02 |
-      And I click on "id_submitbutton" "button"
-      And I follow "Report"
-      And I follow "Low grade"
-      And I set the field "cb_selector" to "1"
-      And I click on "Send a message" "button"
-      And I should see "Message body"
-      And I should see "student1@asd.com"
-      And I follow "Course 1"
-      And I expand "Reports" node
-      And I follow "Logs"
-      And I click on "Get these logs" "button"
-      Then "Attendance report viewed" "link" should exist
+  Scenario: Teachers can view low grade report and send a message
+    Given I log in as "teacher1"
+    And I am on "Course 1" course homepage
+    And I follow "Attendance"
+    And I follow "Add"
+    And I set the following fields to these values:
+      | id_sestime_starthour | 01 |
+      | id_sestime_endhour   | 02 |
+    And I click on "id_submitbutton" "button"
+    And I follow "Report"
+    And I follow "Low grade"
+    And I set the field "cb_selector" to "1"
+    And I click on "Send a message" "button"
+    And I should see "Message body"
+    And I should see "student1@asd.com"
+    And I follow "Course 1"
+    And I expand "Reports" node
+    And I follow "Logs"
+    And I click on "Get these logs" "button"
+    Then "Attendance report viewed" "link" should exist
 
-    Scenario: Export report includes id number, department and institution
-      Given I log in as "teacher1"
-      And I am on "Course 1" course homepage
-      And I follow "Attendance"
-      And I follow "Add"
-      And I set the following fields to these values:
-        | id_sestime_starthour | 01 |
-        | id_sestime_endhour   | 02 |
-      And I click on "id_submitbutton" "button"
-      And I follow "Export"
-      Then the field "id_ident_idnumber" matches value ""
-      And the field "id_ident_institution" matches value ""
-      And the field "id_ident_department" matches value ""
+  Scenario: Export report includes id number, department and institution
+    Given I log in as "teacher1"
+    And I am on "Course 1" course homepage
+    And I follow "Attendance"
+    And I follow "Add"
+    And I set the following fields to these values:
+      | id_sestime_starthour | 01 |
+      | id_sestime_endhour   | 02 |
+    And I click on "id_submitbutton" "button"
+    And I follow "Export"
+    Then the field "id_ident_idnumber" matches value ""
+    And the field "id_ident_institution" matches value ""
+    And the field "id_ident_department" matches value ""
 
   # Removed dependency on behat_download to allow automated Travis CI tests to pass.
   # It would be good to add these back at some point.
