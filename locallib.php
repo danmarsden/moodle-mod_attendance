@@ -371,7 +371,7 @@ function attendance_random_string($length=6) {
     $string = '';
     for ($i = 0; $i < $length; $i++) {
         $rand = ord($randombytes[$i]);
-        $string .= substr($pool, ($rand%($poollen)), 1);
+        $string .= substr($pool, ($rand % ($poollen)), 1);
     }
     return $string;
 }
