@@ -1446,7 +1446,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         foreach ($prefdata->statuses as $st) {
             $emptyacronym = '';
             $emptydescription = '';
-            if (!empty(($prefdata->errors[$st->id]))) {
+            if (!empty($prefdata->errors) && !empty(($prefdata->errors[$st->id]))) {
                 if (empty($prefdata->errors[$st->id]['acronym'])) {
                     $emptyacronym = $this->construct_notice(get_string('emptyacronym', 'mod_attendance'), 'notifyproblem');
                 }
