@@ -233,5 +233,17 @@ function xmldb_attendance_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2016121305, 'attendance');
     }
 
+    if ($oldversion < 2016121306) {
+        $table = new xmldb_table('attendance_sessions');
+
+        $field = new xmldb_field('studentpassword');
+        $field->set_attributes(XMLDB_TYPE_CHAR, '50', null, null, null, '', 'studentscanmark');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        upgrade_mod_savepoint(true, 2016121306, 'attendance');
+    }
+
     return $result;
 }
