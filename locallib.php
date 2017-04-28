@@ -355,3 +355,23 @@ function attendance_update_status($status, $acronym, $description, $grade, $visi
     $event->add_record_snapshot('attendance_statuses', $status);
     $event->trigger();
 }
+
+/**
+ * Similar to core random_string function but only lowercase letters.
+ * designed to make it relatively easy to provide a simple password in class.
+ *
+ * @param int $length The length of the string to be created.
+ * @return string
+ */
+function attendance_random_string($length=6) {
+    $randombytes = random_bytes_emulate($length);
+    $pool = 'abcdefghijklmnopqrstuvwxyz';
+    $pool .= '0123456789';
+    $poollen = strlen($pool);
+    $string = '';
+    for ($i = 0; $i < $length; $i++) {
+        $rand = ord($randombytes[$i]);
+        $string .= substr($pool, ($rand%($poollen)), 1);
+    }
+    return $string;
+}
