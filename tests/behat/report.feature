@@ -159,7 +159,7 @@ Feature: Visiting reports
     And I click on "td.cell.c4 input" "css_element" in the "Student 1" "table_row"
     And I press "Save attendance"
 
-     When I follow "Add session"
+    When I follow "Add session"
     And I set the following fields to these values:
       | id_sestime_starthour | 03 |
       | id_sestime_endhour   | 04 |
