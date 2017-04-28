@@ -273,7 +273,7 @@ function construct_sessions_data_for_add($formdata) {
                     if (isset($formdata->studentscanmark)) { // Students will be able to mark their own attendance.
                         $sess->studentscanmark = 1;
                         if (!empty($formdata->randompassword)) {
-                            $sess->studentpassword = random_string(5);
+                            $sess->studentpassword = attendance_random_string();
                         } else {
                             $sess->studentpassword = $formdata->studentpassword;
                         }
@@ -305,7 +305,7 @@ function construct_sessions_data_for_add($formdata) {
             // Students will be able to mark their own attendance.
             $sess->studentscanmark = 1;
             if (!empty($formdata->randompassword)) {
-                $sess->studentpassword = random_string(5);
+                $sess->studentpassword = attendance_random_string();
             } else {
                 $sess->studentpassword = $formdata->studentpassword;
             }
