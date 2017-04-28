@@ -97,7 +97,7 @@ class mod_attendance_update_form extends moodleform {
 
             $mform->addElement('text', 'studentpassword', get_string('studentpassword', 'attendance'));
             $mform->setType('studentpassword', PARAM_TEXT);
-            $mform->addHelpButton('studentpassword', 'studentpassword', 'attendance');
+            $mform->addHelpButton('studentpassword', 'passwordgrp', 'attendance');
             $mform->disabledif('studentpassword', 'studentscanmark', 'notchecked');
         } else {
             $mform->addElement('hidden', 'studentscanmark', '0');
