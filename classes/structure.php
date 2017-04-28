@@ -395,6 +395,7 @@ class mod_attendance_structure {
             $sess->lasttaken = 0;
             $sess->lasttakenby = 0;
             $sess->studentscanmark = 0;
+            $sess->studentpassword = '';
 
             $event->add_record_snapshot('attendance_sessions', $sess);
             $event->trigger();
