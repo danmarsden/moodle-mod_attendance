@@ -237,7 +237,7 @@ function xmldb_attendance_upgrade($oldversion=0) {
         $table = new xmldb_table('attendance_sessions');
 
         $field = new xmldb_field('studentpassword');
-        $field->set_attributes(XMLDB_TYPE_CHAR, '50', null, null, null, '', 'studentscanmark');
+        $field->set_attributes(XMLDB_TYPE_CHAR, '50', null, false, null, '', 'studentscanmark');
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
