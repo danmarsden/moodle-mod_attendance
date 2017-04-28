@@ -123,11 +123,18 @@ class mod_attendance_add_form extends moodleform {
         if (!empty(get_config('attendance', 'studentscanmark'))) {
             $mform->addElement('checkbox', 'studentscanmark', '', get_string('studentscanmark', 'attendance'));
             $mform->addHelpButton('studentscanmark', 'studentscanmark', 'attendance');
+            $mgroup = array();
 
-            $mform->addElement('text', 'studentpassword', get_string('studentpassword', 'attendance'));
+            $mgroup[] = & $mform->createElement('text', 'studentpassword', get_string('studentpassword', 'attendance'));
+            $mgroup[] = & $mform->createElement('checkbox', 'randompassword', '', get_string('randompassword', 'attendance'));
+            $mform->addGroup($mgroup, 'passwordgrp', get_string('passwordgrp', 'attendance'), array(' '), false);
+
             $mform->setType('studentpassword', PARAM_TEXT);
-            $mform->addHelpButton('studentpassword', 'studentpassword', 'attendance');
             $mform->disabledif('studentpassword', 'studentscanmark', 'notchecked');
+
+            $mform->addHelpButton('passwordgrp', 'passwordgrp', 'attendance');
+            $mform->disabledif('randompassword', 'studentscanmark', 'notchecked');
+            $mform->disabledif('studentpassword', 'randompassword', 'checked');
         } else {
             $mform->addElement('hidden', 'studentscanmark', '0');
             $mform->settype('studentscanmark', PARAM_INT);
