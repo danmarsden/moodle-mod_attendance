@@ -373,3 +373,6 @@ $string['requiresubnet_help'] = 'Attendance recording may be restricted to parti
 $string['defaultsettings'] = 'Default attendance settings';
 $string['defaultsettings_help'] = 'These settings define the defaults for all new attendances';
 $string['defaultstatus'] = 'Default status set';
+
+$string['defaultsessionsettings'] = 'Default session settings';
+$string['defaultsessionsettings_help'] = 'These settings define the defaults for all new sessions';

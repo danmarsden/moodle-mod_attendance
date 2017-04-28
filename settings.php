@@ -54,4 +54,14 @@ if ($ADMIN->fulltree) {
 
     $settings->add(new admin_setting_configtext('attendance/subnet',
         get_string('requiresubnet', 'attendance'), get_string('requiresubnet_help', 'attendance'), '', PARAM_RAW));
+
+    $name = new lang_string('defaultsessionsettings', 'mod_attendance');
+    $description = new lang_string('defaultsessionsettings_help', 'mod_attendance');
+    $settings->add(new admin_setting_heading('defaultsessionsettings', $name, $description));
+
+    $settings->add(new admin_setting_configcheckbox('attendance/studentscanmark_default',
+        get_string('studentscanmark', 'attendance'), '', 0));
+
+    $settings->add(new admin_setting_configcheckbox('attendance/randompassword_default',
+        get_string('randompassword', 'attendance'), '', 0));
 }
