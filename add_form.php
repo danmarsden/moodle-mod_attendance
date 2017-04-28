@@ -48,6 +48,8 @@ class mod_attendance_add_form extends moodleform {
         $cm            = $this->_customdata['cm'];
         $modcontext    = $this->_customdata['modcontext'];
 
+        $pluginconfig = get_config('attendance');
+
         $mform->addElement('header', 'general', get_string('addsession', 'attendance'));
 
         $groupmode = groups_get_activity_groupmode($cm);
@@ -135,6 +137,13 @@ class mod_attendance_add_form extends moodleform {
             $mform->addHelpButton('passwordgrp', 'passwordgrp', 'attendance');
             $mform->disabledif('randompassword', 'studentscanmark', 'notchecked');
             $mform->disabledif('studentpassword', 'randompassword', 'checked');
+            if (isset($pluginconfig->studentscanmark_default)) {
+                $mform->setDefault('studentscanmark', $pluginconfig->studentscanmark_default);
+            }
+            if (isset($pluginconfig->randompassword_default)) {
+                $mform->setDefault('randompassword', $pluginconfig->randompassword_default);
+            }
+
         } else {
             $mform->addElement('hidden', 'studentscanmark', '0');
             $mform->settype('studentscanmark', PARAM_INT);
