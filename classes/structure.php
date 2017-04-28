@@ -395,6 +395,7 @@ class mod_attendance_structure {
             $sess->lasttaken = 0;
             $sess->lasttakenby = 0;
             $sess->studentscanmark = 0;
+
             $event->add_record_snapshot('attendance_sessions', $sess);
             $event->trigger();
         }
@@ -418,6 +419,15 @@ class mod_attendance_structure {
             array('subdirs' => false, 'maxfiles' => -1, 'maxbytes' => 0), $formdata->sdescription['text']);
         $sess->description = $description;
         $sess->descriptionformat = $formdata->sdescription['format'];
+
+        $sess->studentscanmark = 0;
+        $sess->studentpassword = '';
+
+        if (!empty(get_config('attendance', 'studentscanmark')) &&
+            !empty($formdata->studentscanmark)) {
+            $sess->studentscanmark = $formdata->studentscanmark;
+            $sess->studentpassword = $formdata->studentpassword;
+        }
 
         $sess->timemodified = time();
         $DB->update_record('attendance_sessions', $sess);

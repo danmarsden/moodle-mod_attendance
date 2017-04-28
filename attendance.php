@@ -67,6 +67,14 @@ if ($mform->is_cancelled()) {
     $url = new moodle_url('/mod/attendance/view.php', array('id' => $cm->id));
     redirect($url);
 } else if ($fromform = $mform->get_data()) {
+    // check if password required and if set correctly.
+    if (!empty($attforsession->studentpassword) &&
+        $attforsession->studentpassword !== $fromform->studentpassword) {
+
+        $url = new moodle_url('/mod/attendance/attendance.php', array('sessid' => $id, 'sesskey' => sesskey()));
+        redirect($url, get_string('incorrectpassword', 'mod_attendance'));
+    }
+
     if (!empty($fromform->status)) {
         $success = $att->take_from_student($fromform);
 

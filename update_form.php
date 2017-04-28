@@ -64,7 +64,9 @@ class mod_attendance_update_form extends moodleform {
         $data = array('sessiondate' => $sess->sessdate,
                 'sestime' => array('starthour' => $starthour, 'startminute' => $startminute,
                                    'endhour' => $endhour, 'endminute' => $endminute),
-                'sdescription' => $sess->description_editor);
+                'sdescription' => $sess->description_editor,
+                'studentscanmark' => $sess->studentscanmark,
+                'studentpassword' => $sess->studentpassword);
 
         $mform->addElement('header', 'general', get_string('changesession', 'attendance'));
 
@@ -86,6 +88,20 @@ class mod_attendance_update_form extends moodleform {
         if ($maxstatusset > 0) {
             $mform->addElement('static', 'statusset', get_string('usestatusset', 'mod_attendance'),
                 attendance_get_setname($this->_customdata['att']->id, $sess->statusset));
+        }
+
+        // Students can mark own attendance.
+        if (!empty(get_config('attendance', 'studentscanmark'))) {
+            $mform->addElement('checkbox', 'studentscanmark', '', get_string('studentscanmark', 'attendance'));
+            $mform->addHelpButton('studentscanmark', 'studentscanmark', 'attendance');
+
+            $mform->addElement('text', 'studentpassword', get_string('studentpassword', 'attendance'));
+            $mform->setType('studentpassword', PARAM_TEXT);
+            $mform->addHelpButton('studentpassword', 'studentpassword', 'attendance');
+            $mform->disabledif('studentpassword', 'studentscanmark', 'notchecked');
+        } else {
+            $mform->addElement('hidden', 'studentscanmark', '0');
+            $mform->settype('studentscanmark', PARAM_INT);
         }
 
         $mform->addElement('editor', 'sdescription', get_string('description', 'attendance'),

@@ -46,7 +46,11 @@ class mod_attendance_student_attendance_form extends moodleform {
         if (!empty($attforsession->description)) {
             $mform->addElement('html', $attforsession->description);
         }
-
+        if (!empty($attforsession->studentpassword)) {
+            $mform->addElement('text', 'studentpassword', get_string('password', 'attendance'));
+            $mform->setType('studentpassword', PARAM_TEXT);
+            $mform->addRule('studentpassword', get_string('passwordrequired', 'attendance'), 'required');
+        }
         // Create radio buttons for setting the attendance status.
         $radioarray = array();
         foreach ($statuses as $status) {
