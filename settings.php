@@ -48,6 +48,15 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configcheckbox('attendance/studentscanmark',
         get_string('studentscanmark', 'attendance'), get_string('studentscanmark_desc', 'attendance'), 1));
 
+    $settings->add(new admin_setting_configcheckbox('attendance/studentscanmarksessiontime',
+        get_string('studentscanmarksessiontime', 'attendance'),
+        get_string('studentscanmarksessiontime_desc', 'attendance'), 1));
+
+    $settings->add(new admin_setting_configtext('attendance/studentscanmarksessiontimeend',
+        get_string('studentscanmarksessiontimeend', 'attendance'),
+        get_string('studentscanmarksessiontimeend_desc', 'attendance'), '60', PARAM_INT));
+
+
     $name = new lang_string('defaultsettings', 'mod_attendance');
     $description = new lang_string('defaultsettings_help', 'mod_attendance');
     $settings->add(new admin_setting_heading('defaultsettings', $name, $description));

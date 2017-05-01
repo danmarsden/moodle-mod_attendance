@@ -39,7 +39,8 @@ $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST)
 // Require the user is logged in.
 require_login($course, true, $cm);
 
-if (empty(get_config('attendance', 'studentscanmark')) || empty($attforsession->studentscanmark)) {
+if (!attendance_can_student_mark($attforsession)) {
+    // TODO: should we add a log message here? - student has got to submit page but cannot save attendance (time ran out?)
     redirect(new moodle_url('/mod/attendance/view.php', array('id' => $cm->id)));
     exit;
 }
