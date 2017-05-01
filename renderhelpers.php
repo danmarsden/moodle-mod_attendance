@@ -33,18 +33,31 @@ require_once(dirname(__FILE__).'/renderables.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class user_sessions_cells_generator {
+    /** @var array $cells - list of table cells. */
     protected $cells = array();
 
+    /** @var stdClass $reportdata - data for report. */
     protected $reportdata;
+
+    /** @var stdClass $user - user record. */
     protected $user;
 
+    /**
+     * Set up params.
+     * @param attendance_report_data $reportdata - reportdata.
+     * @param stdClass $user - user record.
+     */
     public function  __construct(attendance_report_data $reportdata, $user) {
         $this->reportdata = $reportdata;
         $this->user = $user;
     }
 
+    /**
+     * Get cells for the table.
+     *
+     * @param boolean $remarks - include remarks cell.
+     */
     public function get_cells($remarks = false) {
-        $this->init_cells();
         foreach ($this->reportdata->sessions as $sess) {
             if (array_key_exists($sess->id, $this->reportdata->sessionslog[$this->user->id]) &&
             !empty($this->reportdata->sessionslog[$this->user->id][$sess->id]->statusid)) {
@@ -88,34 +101,63 @@ class user_sessions_cells_generator {
         return $this->cells;
     }
 
-    protected function init_cells() {
-
-    }
-
+    /**
+     * Construct status cell.
+     *
+     * @param string $text - text for the cell.
+     */
     protected function construct_existing_status_cell($text) {
         $this->cells[] = $text;
     }
 
+    /**
+     * Construct hidden status cell.
+     *
+     * @param string $text - text for the cell.
+     */
     protected function construct_hidden_status_cell($text) {
         $this->cells[] = $text;
     }
 
+    /**
+     * Construct enrolments info cell.
+     *
+     * @param string $text - text for the cell.
+     */
     protected function construct_enrolments_info_cell($text) {
         $this->cells[] = $text;
     }
 
+    /**
+     * Construct not taken cell.
+     *
+     * @param string $text - text for the cell.
+     */
     protected function construct_not_taken_cell($text) {
         $this->cells[] = $text;
     }
 
+    /**
+     * Construct remarks cell.
+     *
+     * @param string $text - text for the cell.
+     */
     protected function construct_remarks_cell($text) {
         $this->cells[] = $text;
     }
 
+    /**
+     * Construct not existing user session cell.
+     *
+     * @param string $text - text for the cell.
+     */
     protected function construct_not_existing_for_user_session_cell($text) {
         $this->cells[] = $text;
     }
 
+    /**
+     * Dummy stub method, called at the end. - override if you need/
+     */
     protected function finalize_cells() {
     }
 }
@@ -127,17 +169,33 @@ class user_sessions_cells_generator {
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class user_sessions_cells_html_generator extends user_sessions_cells_generator {
+    /** @var html_table_cell $cell */
     private $cell;
 
+    /**
+     * Construct status cell.
+     *
+     * @param string $text - text for the cell.
+     */
     protected function construct_existing_status_cell($text) {
         $this->close_open_cell_if_needed();
         $this->cells[] = html_writer::span($text, 'attendancestatus-'.$text);
     }
 
+    /**
+     * Construct hidden status cell.
+     *
+     * @param string $text - text for the cell.
+     */
     protected function construct_hidden_status_cell($text) {
         $this->cells[] = html_writer::tag('s', $text);
     }
 
+    /**
+     * Construct enrolments info cell.
+     *
+     * @param string $text - text for the cell.
+     */
     protected function construct_enrolments_info_cell($text) {
         if (is_null($this->cell)) {
             $this->cell = new html_table_cell($text);
@@ -153,6 +211,9 @@ class user_sessions_cells_html_generator extends user_sessions_cells_generator {
         }
     }
 
+    /**
+     * Close cell if needed.
+     */
     private function close_open_cell_if_needed() {
         if ($this->cell) {
             $this->cells[] = $this->cell;
@@ -160,11 +221,21 @@ class user_sessions_cells_html_generator extends user_sessions_cells_generator {
         }
     }
 
+    /**
+     * Construct not taken cell.
+     *
+     * @param string $text - text for the cell.
+     */
     protected function construct_not_taken_cell($text) {
         $this->close_open_cell_if_needed();
         $this->cells[] = $text;
     }
 
+    /**
+     * Construct remarks cell.
+     *
+     * @param string $text - text for the cell.
+     */
     protected function construct_remarks_cell($text) {
         global $OUTPUT;
 
@@ -183,11 +254,20 @@ class user_sessions_cells_html_generator extends user_sessions_cells_generator {
         $this->cells[] = $markcell;
     }
 
+    /**
+     * Construct not existing for user session cell.
+     *
+     * @param string $text - text for the cell.
+     */
     protected function construct_not_existing_for_user_session_cell($text) {
         $this->close_open_cell_if_needed();
         $this->cells[] = $text;
     }
 
+    /**
+     * Finalize cells.
+     *
+     */
     protected function finalize_cells() {
         if ($this->cell) {
             $this->cells[] = $this->cell;
@@ -202,12 +282,23 @@ class user_sessions_cells_html_generator extends user_sessions_cells_generator {
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class user_sessions_cells_text_generator extends user_sessions_cells_generator {
+    /** @var string $enrolmentsinfocelltext. */
     private $enrolmentsinfocelltext;
 
+    /**
+     * Construct hidden status cell.
+     *
+     * @param string $text - text for the cell.
+     */
     protected function construct_hidden_status_cell($text) {
         $this->cells[] = '-'.$text;
     }
 
+    /**
+     * Construct enrolments info cell.
+     *
+     * @param string $text - text for the cell.
+     */
     protected function construct_enrolments_info_cell($text) {
         if ($this->enrolmentsinfocelltext != $text) {
             $this->enrolmentsinfocelltext = $text;
@@ -218,7 +309,11 @@ class user_sessions_cells_text_generator extends user_sessions_cells_generator {
     }
 }
 
-// Used to print simple time - 1am instead of 1:00am.
+/**
+ * Used to print simple time - 1am instead of 1:00am.
+ *
+ * @param int $time - unix timestamp.
+ */
 function attendance_strftimehm($time) {
     $mins = userdate($time, '%M');
     if ($mins == '00') {
@@ -228,6 +323,12 @@ function attendance_strftimehm($time) {
     }
 }
 
+/**
+ * Used to print simple time - 1am instead of 1:00am.
+ *
+ * @param int $datetime - unix timestamp.
+ * @param int $duration - number of seconds.
+ */
 function construct_session_time($datetime, $duration) {
     $starttime = attendance_strftimehm($datetime);
     $endtime = attendance_strftimehm($datetime + $duration);
@@ -235,6 +336,13 @@ function construct_session_time($datetime, $duration) {
     return $starttime . ($duration > 0 ? ' - ' . $endtime : '');
 }
 
+/**
+ * Used to print session time.
+ *
+ * @param int $datetime - unix timestamp.
+ * @param int $duration - number of seconds duration.
+ * @return string.
+ */
 function construct_session_full_date_time($datetime, $duration) {
     $sessinfo = userdate($datetime, get_string('strftimedmyw', 'attendance'));
     $sessinfo .= ' '.construct_session_time($datetime, $duration);
@@ -242,6 +350,13 @@ function construct_session_full_date_time($datetime, $duration) {
     return $sessinfo;
 }
 
+/**
+ * Used to construct user summary.
+ *
+ * @param stdclass $usersummary - data for summary.
+ * @param int $view - ATT_VIEW_ALL|ATT_VIEW_
+ * @return string.
+ */
 function construct_user_data_stat($usersummary, $view) {
     $stattable = new html_table();
     $stattable->attributes['class'] = 'attlist';
@@ -301,6 +416,14 @@ function construct_user_data_stat($usersummary, $view) {
     return html_writer::table($stattable);
 }
 
+/**
+ * Returns html user summary
+ *
+ * @param stdclass $attendance - attendance record.
+ * @param stdclass $user - user record
+ * @return string.
+ *
+ */
 function construct_full_user_stat_html_table($attendance, $user) {
     $summary = new mod_attendance_summary($attendance->id, $user->id);
     return construct_user_data_stat($summary->get_all_sessions_summary_for($user->id), ATT_VIEW_ALL);

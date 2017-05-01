@@ -27,8 +27,19 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->libdir.'/formslib.php');
 
+/**
+ * class for displaying tempedit form.
+ *
+ * @copyright  2013 Davo Smith, Synergy Learning
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class tempedit_form extends moodleform {
 
+    /**
+     * Called to define this moodle form
+     *
+     * @return void
+     */
     public function definition() {
 
         $mform = $this->_form;
@@ -55,11 +66,20 @@ class tempedit_form extends moodleform {
         $mform->closeHeaderBefore('submit');
     }
 
+    /**
+     * Apply filter to form
+     *
+     */
     public function definition_after_data() {
         $mform = $this->_form;
         $mform->applyFilter('tname', 'trim');
     }
 
+    /**
+     * Perform validation on the form
+     * @param array $data
+     * @param array $files
+     */
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
 
