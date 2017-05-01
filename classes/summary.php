@@ -14,6 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Class that computes summary of users points
+ *
+ * @package   mod_attendance
+ * @copyright  2016 Antonio Carlos Mariani http://antonio.c.mariani@gmail.com
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot . '/mod/attendance/locallib.php');
 
@@ -47,8 +55,8 @@ class mod_attendance_summary {
     /**
      * Initializes the class
      *
-     * @param int attendance instance identifier
-     * @param array userids user instances identifier
+     * @param int $attendanceid instance identifier
+     * @param array $userids user instances identifier
      * @param int $startdate Attendance sessions startdate
      * @param int $enddate Attendance sessions enddate
      */
@@ -62,7 +70,7 @@ class mod_attendance_summary {
     /**
      * Returns true if the user has some session with points
      *
-     * @param int userid User instance id
+     * @param int $userid User instance id
      *
      * @return boolean
      */
@@ -106,7 +114,7 @@ class mod_attendance_summary {
     /**
      * Returns a summary of the points assigned to the user related to the taken sessions
      *
-     * @param int userid User instance id
+     * @param int $userid User instance id
      *
      * @return array
      */
@@ -135,7 +143,7 @@ class mod_attendance_summary {
     /**
      * Returns a summary of the points assigned to the user, both related to taken sessions and related to all sessions
      *
-     * @param int userid User instance id
+     * @param int $userid User instance id
      *
      * @return array
      */
@@ -172,7 +180,7 @@ class mod_attendance_summary {
     /**
      * Computes the summary of points for the users that have some taken session
      *
-     * @param array userids user instances identifier
+     * @param array $userids user instances identifier
      * @param int $startdate Attendance sessions startdate
      * @param int $enddate Attendance sessions enddate
      * @return  (userid, numtakensessions, points, maxpoints)
@@ -236,7 +244,7 @@ class mod_attendance_summary {
     /**
      * Computes the summary of taken sessions by acronym
      *
-     * @param array userids user instances identifier
+     * @param array $userids user instances identifier
      * @param int $startdate Attendance sessions startdate
      * @param int $enddate Attendance sessions enddate
      * @return  null

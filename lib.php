@@ -54,6 +54,11 @@ function attendance_supports($feature) {
     }
 }
 
+/**
+ * Add default set of statuses to the new attendance.
+ *
+ * @param int $attid - id of attendance instance.
+ */
 function att_add_default_statuses($attid) {
     global $DB;
 
@@ -66,6 +71,12 @@ function att_add_default_statuses($attid) {
     $statuses->close();
 }
 
+/**
+ * Add new attendance instance.
+ *
+ * @param stdClass $attendance
+ * @return bool|int
+ */
 function attendance_add_instance($attendance) {
     global $DB;
 
@@ -80,7 +91,12 @@ function attendance_add_instance($attendance) {
     return $attendance->id;
 }
 
-
+/**
+ * Update existing attendance instance.
+ *
+ * @param stdClass $attendance
+ * @return bool
+ */
 function attendance_update_instance($attendance) {
     global $DB;
 
@@ -96,7 +112,12 @@ function attendance_update_instance($attendance) {
     return true;
 }
 
-
+/**
+ * Delete existing attendance
+ *
+ * @param int $id
+ * @return bool
+ */
 function attendance_delete_instance($id) {
     global $DB;
 
@@ -122,7 +143,7 @@ function attendance_delete_instance($id) {
 
 /**
  * Called by course/reset.php
- * @param $mform form passed by reference
+ * @param moodleform $mform form passed by reference
  */
 function attendance_reset_course_form_definition(&$mform) {
     $mform->addElement('header', 'attendanceheader', get_string('modulename', 'attendance'));
@@ -141,11 +162,20 @@ function attendance_reset_course_form_definition(&$mform) {
 
 /**
  * Course reset form defaults.
+ *
+ * @param stdClass $course
+ * @return array
  */
 function attendance_reset_course_form_defaults($course) {
     return array('reset_attendance_log' => 0, 'reset_attendance_statuses' => 0, 'reset_attendance_sessions' => 0);
 }
 
+/**
+ * Reset user data within attendance.
+ *
+ * @param stdClass $data
+ * @return array
+ */
 function attendance_reset_userdata($data) {
     global $DB;
 
@@ -198,12 +228,18 @@ function attendance_reset_userdata($data) {
 
     return $status;
 }
-/*
+/**
  * Return a small object with summary information about what a
  *  user has done with a given particular instance of this module
  *  Used for user activity reports.
  *  $return->time = the time they did it
  *  $return->info = a short text description
+ *
+ * @param stdClass $course - full course record.
+ * @param stdClass $user - full user record
+ * @param stdClass $mod
+ * @param stdClass $attendance
+ * @return stdClass.
  */
 function attendance_user_outline($course, $user, $mod, $attendance) {
     global $CFG;
@@ -229,10 +265,14 @@ function attendance_user_outline($course, $user, $mod, $attendance) {
 
     return $result;
 }
-/*
+/**
  * Print a detailed representation of what a  user has done with
  * a given particular instance of this module, for user activity reports.
  *
+ * @param stdClass $course
+ * @param stdClass $user
+ * @param stdClass $mod
+ * @param stdClass $attendance
  */
 function attendance_user_complete($course, $user, $mod, $attendance) {
     global $CFG;
@@ -245,14 +285,21 @@ function attendance_user_complete($course, $user, $mod, $attendance) {
     }
 }
 
+/**
+ * Dummy function - must exist to allow quick editing of module name.
+ *
+ * @param stdClass $attendance
+ * @param int $userid
+ * @param bool $nullifnone
+ */
 function attendance_update_grades($attendance, $userid=0, $nullifnone=true) {
     // We need this function to exist so that quick editing of module name is passed to gradebook.
 }
 /**
  * Create grade item for given attendance
  *
- * @param object $attendance object with extra cmidnumber
- * @param mixed optional array/object of grade(s); 'reset' means reset grades in gradebook
+ * @param stdClass $attendance object with extra cmidnumber
+ * @param mixed $grades optional array/object of grade(s); 'reset' means reset grades in gradebook
  * @return int 0 if ok, error code otherwise
  */
 function attendance_grade_item_update($attendance, $grades=null) {
@@ -390,7 +437,6 @@ function attendance_pluginfile($course, $cm, $context, $filearea, $args, $forced
  * Print tabs on attendance settings page.
  *
  * @param string $selected - current selected tab.
- *
  */
 function attendance_print_settings_tabs($selected = 'settings') {
     global $CFG;

@@ -31,11 +31,34 @@ defined('MOODLE_INTERNAL') || die();
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mod_attendance_sessions_page_params {
+    /**
+     *  Add Session.
+     */
     const ACTION_ADD               = 1;
+
+    /**
+     *  Update Session.
+     */
     const ACTION_UPDATE            = 2;
+
+    /**
+     * Delete Session
+     */
     const ACTION_DELETE            = 3;
+
+    /**
+     *  Delete selected Sessions.
+     */
     const ACTION_DELETE_SELECTED   = 4;
+
+    /**
+     *  Change duration of a session.
+     */
     const ACTION_CHANGE_DURATION   = 5;
+
+    /**
+     *  Delete a hidden session.
+     */
     const ACTION_DELETE_HIDDEN     = 6;
 
     /** @var int view mode of taking attendance page*/
