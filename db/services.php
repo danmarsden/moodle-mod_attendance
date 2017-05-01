@@ -17,7 +17,7 @@
 /**
  * Web service local plugin attendance external functions and service definitions.
  *
- * @package    localwsattendance
+ * @package    mod_attendance
  * @copyright  2015 Caio Bressan Doneda
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

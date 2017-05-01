@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Helper functions to keep upgrade.php clean.
  *
@@ -24,6 +22,11 @@ defined('MOODLE_INTERNAL') || die();
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+defined('MOODLE_INTERNAL') || die();
+
+/**
+ * Function to help upgrade old attendance records and create calendar events.
+ */
 function attendance_upgrade_create_calendar_events() {
     global $DB;
 

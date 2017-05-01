@@ -481,3 +481,122 @@ function attendance_exporttocsv($data, $filename) {
         echo implode("\t", $row)."\n";
     }
 }
+
+/**
+ * @param $formdata moodleform - attendance form.
+ * @return array.
+ */
+function attendance_construct_sessions_data_for_add($formdata) {
+    global $CFG;
+
+    $sesstarttime = $formdata->sestime['starthour'] * HOURSECS + $formdata->sestime['startminute'] * MINSECS;
+    $sesendtime = $formdata->sestime['endhour'] * HOURSECS + $formdata->sestime['endminute'] * MINSECS;
+    $sessiondate = $formdata->sessiondate + $sesstarttime;
+    $duration = $sesendtime - $sesstarttime;
+    $now = time();
+
+    if (empty(get_config('attendance', 'studentscanmark'))) {
+        $formdata->studentscanmark = 0;
+    }
+
+    $sessions = array();
+    if (isset($formdata->addmultiply)) {
+        $startdate = $sessiondate;
+        $enddate = $formdata->sessionenddate + DAYSECS; // Because enddate in 0:0am.
+
+        if ($enddate < $startdate) {
+            return null;
+        }
+
+        // Getting first day of week.
+        $sdate = $startdate;
+        $dinfo = usergetdate($sdate);
+        if ($CFG->calendar_startwday === '0') { // Week start from sunday.
+            $startweek = $startdate - $dinfo['wday'] * DAYSECS; // Call new variable.
+        } else {
+            $wday = $dinfo['wday'] === 0 ? 7 : $dinfo['wday'];
+            $startweek = $startdate - ($wday - 1) * DAYSECS;
+        }
+
+        $wdaydesc = array(0 => 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
+
+        while ($sdate < $enddate) {
+            if ($sdate < $startweek + WEEKSECS) {
+                $dinfo = usergetdate($sdate);
+                if (isset($formdata->sdays) && array_key_exists($wdaydesc[$dinfo['wday']], $formdata->sdays)) {
+                    $sess = new stdClass();
+                    $sess->sessdate = make_timestamp($dinfo['year'], $dinfo['mon'], $dinfo['mday'],
+                        $formdata->sestime['starthour'], $formdata->sestime['startminute']);
+                    $sess->duration = $duration;
+                    $sess->descriptionitemid = $formdata->sdescription['itemid'];
+                    $sess->description = $formdata->sdescription['text'];
+                    $sess->descriptionformat = $formdata->sdescription['format'];
+                    $sess->timemodified = $now;
+                    if (isset($formdata->studentscanmark)) { // Students will be able to mark their own attendance.
+                        $sess->studentscanmark = 1;
+                        if (!empty($formdata->randompassword)) {
+                            $sess->studentpassword = attendance_random_string();
+                        } else {
+                            $sess->studentpassword = $formdata->studentpassword;
+                        }
+                    } else {
+                        $sess->studentpassword = '';
+                    }
+                    $sess->statusset = $formdata->statusset;
+
+                    attendance_fill_groupid($formdata, $sessions, $sess);
+                }
+                $sdate += DAYSECS;
+            } else {
+                $startweek += WEEKSECS * $formdata->period;
+                $sdate = $startweek;
+            }
+        }
+    } else {
+        $sess = new stdClass();
+        $sess->sessdate = $sessiondate;
+        $sess->duration = $duration;
+        $sess->descriptionitemid = $formdata->sdescription['itemid'];
+        $sess->description = $formdata->sdescription['text'];
+        $sess->descriptionformat = $formdata->sdescription['format'];
+        $sess->timemodified = $now;
+        $sess->studentscanmark = 0;
+        $sess->studentpassword = '';
+
+        if (isset($formdata->studentscanmark) && !empty($formdata->studentscanmark)) {
+            // Students will be able to mark their own attendance.
+            $sess->studentscanmark = 1;
+            if (!empty($formdata->randompassword)) {
+                $sess->studentpassword = attendance_random_string();
+            } else {
+                $sess->studentpassword = $formdata->studentpassword;
+            }
+        }
+        $sess->statusset = $formdata->statusset;
+
+        attendance_fill_groupid($formdata, $sessions, $sess);
+    }
+
+    return $sessions;
+}
+
+/**
+ * Helper function for attendance_construct_sessions_data_for_add().
+ *
+ * @param $formdata
+ * @param $sessions
+ * @param $sess
+ */
+function attendance_fill_groupid($formdata, &$sessions, $sess) {
+    if ($formdata->sessiontype == mod_attendance_structure::SESSION_COMMON) {
+        $sess = clone $sess;
+        $sess->groupid = 0;
+        $sessions[] = $sess;
+    } else {
+        foreach ($formdata->groups as $groupid) {
+            $sess = clone $sess;
+            $sess->groupid = $groupid;
+            $sessions[] = $sess;
+        }
+    }
+}

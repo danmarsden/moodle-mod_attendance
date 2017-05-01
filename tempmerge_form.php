@@ -14,13 +14,32 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Temp merge form class.
+ *
+ * @package    mod_attendance
+ * @copyright  2013 Davo Smith, Synergy Learning
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 require_once($CFG->libdir.'/formslib.php');
 
+/**
+ * Temp merge form class.
+ *
+ * @package    mod_attendance
+ * @copyright  2013 Davo Smith, Synergy Learning
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class tempmerge_form extends moodleform {
-
+    /**
+     * Called to define this moodle form
+     *
+     * @return void
+     */
     public function definition() {
         global $COURSE;
 

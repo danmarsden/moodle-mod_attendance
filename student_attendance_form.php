@@ -14,10 +14,29 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Student form class.
+ *
+ * @package    mod_attendance
+ * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir.'/formslib.php');
 
+/**
+ * Class mod_attendance_student_attendance_form
+ *
+ * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class mod_attendance_student_attendance_form extends moodleform {
+    /**
+     * Called to define this moodle form
+     *
+     * @return void
+     */
     public function definition() {
         global $USER;
 

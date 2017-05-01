@@ -14,9 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-defined('MOODLE_INTERNAL') || die();
-require_once(dirname(__FILE__) . '/upgradelib.php');
-
 /**
  * upgrade processes for this module.
  *
@@ -24,6 +21,9 @@ require_once(dirname(__FILE__) . '/upgradelib.php');
  * @copyright 2011 Artem Andreev <andreev.artem@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+defined('MOODLE_INTERNAL') || die();
+require_once(dirname(__FILE__) . '/upgradelib.php');
 
 /**
  * upgrade this attendance instance - this function could be skipped but it will be needed later
