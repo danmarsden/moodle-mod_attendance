@@ -242,6 +242,13 @@ class mod_attendance_add_form extends moodleform {
         return $errors;
     }
 
+    /**
+     * Check weekdays function.
+     * @param int $sessiondate
+     * @param int $sessionenddate
+     * @param int $sdays
+     * @return bool
+     */
     private function checkweekdays($sessiondate, $sessionenddate, $sdays) {
 
         $found = false;

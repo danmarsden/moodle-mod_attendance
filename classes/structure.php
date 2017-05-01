@@ -32,7 +32,9 @@ require_once(dirname(__FILE__) . '/calendar_helpers.php');
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mod_attendance_structure {
+    /** Common sessions */
     const SESSION_COMMON        = 0;
+    /** Group sessions */
     const SESSION_GROUP         = 1;
 
     /** @var stdclass course module record */
@@ -62,23 +64,27 @@ class mod_attendance_structure {
     /** @var int format of the intro (see above) */
     public $introformat;
 
-    /** current page parameters */
+    /** @var array current page parameters */
     public $pageparams;
 
+    /** @var string subnets (IP range) for student self selection. */
     public $subnet;
 
-    /** Define if session details should be shown in reports */
+    /** @var int Define if session details should be shown in reports */
     public $showsessiondetails;
 
-    /** Position for the session detail columns related to summary columns.*/
+    /** @var int Position for the session detail columns related to summary columns.*/
     public $sessiondetailspos;
 
+    /** @var int groupmode  */
     private $groupmode;
 
+    /** @var  array */
     private $statuses;
-    private $allstatuses; // Cache list of all statuses (not just one used by current session).
+    /** @var  array Cache list of all statuses (not just one used by current session). */
+    private $allstatuses;
 
-    // Array by sessionid.
+    /** @var array of sessionid. */
     private $sessioninfo = array();
 
     /**
@@ -91,8 +97,9 @@ class mod_attendance_structure {
      * @param stdClass $cm       Course module record as returned by {@link get_coursemodule_from_id()}
      * @param stdClass $course   Course record from {course} table
      * @param stdClass $context  The context of the workshop instance
+     * @param stdClass $pageparams
      */
-    public function __construct(stdclass $dbrecord, stdclass $cm, stdclass $course, stdclass $context=null, $pageparams=null) {
+    public function __construct(stdClass $dbrecord, stdClass $cm, stdClass $course, stdClass $context=null, $pageparams=null) {
         global $DB;
 
         foreach ($dbrecord as $field => $value) {
@@ -120,6 +127,11 @@ class mod_attendance_structure {
         }
     }
 
+    /**
+     * Get group mode.
+     *
+     * @return int
+     */
     public function get_group_mode() {
         if (is_null($this->groupmode)) {
             $this->groupmode = groups_get_activity_groupmode($this->cm, $this->course);
@@ -179,7 +191,7 @@ class mod_attendance_structure {
      * Returns today sessions suitable for copying attendance log
      *
      * Fetches data from {attendance_sessions}
-     *
+     * @param stdClass $sess
      * @return array of records or an empty array
      */
     public function get_today_sessions_for_copy($sess) {
@@ -237,6 +249,11 @@ class mod_attendance_structure {
         return $DB->get_records_select('attendance_sessions', $where, $params);
     }
 
+    /**
+     * Get filtered sessions.
+     *
+     * @return array
+     */
     public function get_filtered_sessions() {
         global $DB;
 
@@ -273,6 +290,8 @@ class mod_attendance_structure {
     }
 
     /**
+     * Get manage url.
+     * @param array $params
      * @return moodle_url of manage.php for attendance instance
      */
     public function url_manage($params=array()) {
@@ -281,6 +300,7 @@ class mod_attendance_structure {
     }
 
     /**
+     * Get manage temp users url.
      * @param array $params optional
      * @return moodle_url of tempusers.php for attendance instance
      */
@@ -290,6 +310,8 @@ class mod_attendance_structure {
     }
 
     /**
+     * Get temp delete url.
+     *
      * @param array $params optional
      * @return moodle_url of tempdelete.php for attendance instance
      */
@@ -299,6 +321,8 @@ class mod_attendance_structure {
     }
 
     /**
+     * Get temp edit url.
+     *
      * @param array $params optional
      * @return moodle_url of tempedit.php for attendance instance
      */
@@ -308,6 +332,8 @@ class mod_attendance_structure {
     }
 
     /**
+     * Get temp merge url
+     *
      * @param array $params optional
      * @return moodle_url of tempedit.php for attendance instance
      */
@@ -317,6 +343,8 @@ class mod_attendance_structure {
     }
 
     /**
+     * Get url for sessions.
+     * @param array $params
      * @return moodle_url of sessions.php for attendance instance
      */
     public function url_sessions($params=array()) {
@@ -325,6 +353,8 @@ class mod_attendance_structure {
     }
 
     /**
+     * Get url for report.
+     * @param array $params
      * @return moodle_url of report.php for attendance instance
      */
     public function url_report($params=array()) {
@@ -333,6 +363,8 @@ class mod_attendance_structure {
     }
 
     /**
+     * Get url for export.
+     *
      * @return moodle_url of export.php for attendance instance
      */
     public function url_export() {
@@ -341,6 +373,8 @@ class mod_attendance_structure {
     }
 
     /**
+     * Get preferences url
+     * @param array $params
      * @return moodle_url of attsettings.php for attendance instance
      */
     public function url_preferences($params=array()) {
@@ -353,6 +387,8 @@ class mod_attendance_structure {
     }
 
     /**
+     * Get take url.
+     * @param array $params
      * @return moodle_url of attendances.php for attendance instance
      */
     public function url_take($params=array()) {
@@ -360,11 +396,21 @@ class mod_attendance_structure {
         return new moodle_url('/mod/attendance/take.php', $params);
     }
 
+    /**
+     * Get view url.
+     * @param array $params
+     * @return moodle_url
+     */
     public function url_view($params=array()) {
         $params = array_merge(array('id' => $this->cm->id), $params);
         return new moodle_url('/mod/attendance/view.php', $params);
     }
 
+    /**
+     * Add sessions.
+     *
+     * @param array $sessions
+     */
     public function add_sessions($sessions) {
         global $DB;
 
@@ -402,6 +448,12 @@ class mod_attendance_structure {
         }
     }
 
+    /**
+     * Update session from form.
+     *
+     * @param stdClass $formdata
+     * @param int $sessionid
+     */
     public function update_session_from_form_data($formdata, $sessionid) {
         global $DB;
 
@@ -449,7 +501,7 @@ class mod_attendance_structure {
     /**
      * Used to record attendance submitted by the student.
      *
-     * @param type $mformdata
+     * @param stdClass $mformdata
      * @return boolean
      */
     public function take_from_student($mformdata) {
@@ -506,6 +558,11 @@ class mod_attendance_structure {
         return true;
     }
 
+    /**
+     * Take attendance from form data.
+     *
+     * @param stdClass $formdata
+     */
     public function take_from_form_data($formdata) {
         global $DB, $USER;
         // TODO: WARNING - $formdata is unclean - comes from direct $_POST - ideally needs a rewrite but we do some cleaning below.
@@ -592,7 +649,11 @@ class mod_attendance_structure {
     }
 
     /**
-     * MDL-27591 made this method obsolete.
+     * Get users with enrolment status (Feature request MDL-27591)
+     *
+     * @param int $groupid
+     * @param int $page
+     * @return array
      */
     public function get_users($groupid = 0, $page = 1) {
         global $DB, $CFG;
@@ -687,7 +748,12 @@ class mod_attendance_structure {
         return $users;
     }
 
-    // Convert a tempuser record into a user object.
+    /**
+     * Convert a tempuser record into a user object.
+     *
+     * @param stdClass $tempuser
+     * @return object
+     */
     protected static function tempuser_to_user($tempuser) {
         $ret = (object)array(
             'id' => $tempuser->studentid,
@@ -708,6 +774,12 @@ class mod_attendance_structure {
         return $ret;
     }
 
+    /**
+     * Get user and include extra info.
+     *
+     * @param int $userid
+     * @return mixed|object
+     */
     public function get_user($userid) {
         global $DB;
 
@@ -749,6 +821,13 @@ class mod_attendance_structure {
         return $user;
     }
 
+    /**
+     * Get possible statuses.
+     *
+     * @param bool $onlyvisible
+     * @param bool $allsets
+     * @return array
+     */
     public function get_statuses($onlyvisible = true, $allsets = false) {
         if (!isset($this->statuses)) {
             // Get the statuses for the current set only.
@@ -770,6 +849,11 @@ class mod_attendance_structure {
         return $this->statuses;
     }
 
+    /**
+     * Get session info.
+     * @param int $sessionid
+     * @return mixed
+     */
     public function get_session_info($sessionid) {
         global $DB;
 
@@ -785,6 +869,12 @@ class mod_attendance_structure {
         return $this->sessioninfo[$sessionid];
     }
 
+    /**
+     * Get sessions info
+     *
+     * @param array $sessionids
+     * @return array
+     */
     public function get_sessions_info($sessionids) {
         global $DB;
 
@@ -803,16 +893,31 @@ class mod_attendance_structure {
         return $sessions;
     }
 
+    /**
+     * Get log.
+     *
+     * @param int $sessionid
+     * @return array
+     */
     public function get_session_log($sessionid) {
         global $DB;
 
         return $DB->get_records('attendance_log', array('sessionid' => $sessionid), '', 'studentid,statusid,remarks,id');
     }
 
+    /**
+     * Update user grade.
+     * @param array $userids
+     */
     public function update_users_grade($userids) {
         attendance_update_users_grade($this, $userids);
     }
 
+    /**
+     * Get filtered log.
+     * @param int $userid
+     * @return array
+     */
     public function get_user_filtered_sessions_log($userid) {
         global $DB;
 
@@ -857,6 +962,11 @@ class mod_attendance_structure {
         return $sessions;
     }
 
+    /**
+     * Get filtered log extended.
+     * @param int $userid
+     * @return array
+     */
     public function get_user_filtered_sessions_log_extended($userid) {
         global $DB;
         // All taked sessions (including previous groups).
@@ -937,6 +1047,10 @@ class mod_attendance_structure {
         return $sessions;
     }
 
+    /**
+     * Delete sessions.
+     * @param array $sessionsids
+     */
     public function delete_sessions($sessionsids) {
         global $DB;
         if (attendance_existing_calendar_events_ids($sessionsids)) {
@@ -954,6 +1068,12 @@ class mod_attendance_structure {
         $event->trigger();
     }
 
+    /**
+     * Update duration.
+     *
+     * @param array $sessionsids
+     * @param int $duration
+     */
     public function update_sessions_duration($sessionsids, $duration) {
         global $DB;
 

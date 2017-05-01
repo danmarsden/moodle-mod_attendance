@@ -13,7 +13,6 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Class definition for mod_attendance_view_page_params
@@ -23,6 +22,8 @@ defined('MOODLE_INTERNAL') || die();
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+defined('MOODLE_INTERNAL') || die();
+
 /**
  * contains functions/constants used by attendance view page.
  *
@@ -30,17 +31,30 @@ defined('MOODLE_INTERNAL') || die();
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mod_attendance_view_page_params extends mod_attendance_page_with_filter_controls {
+    /** Only This course  */
     const MODE_THIS_COURSE  = 0;
+
+    /** All courses  */
     const MODE_ALL_COURSES  = 1;
 
+    /** @var int */
     public $studentid;
 
+    /** @var string */
     public $mode;
 
+    /**
+     * mod_attendance_view_page_params constructor.
+     */
     public function  __construct() {
         $this->defaultview = ATT_VIEW_MONTHS;
     }
 
+    /**
+     * Get params for url.
+     *
+     * @return array
+     */
     public function get_significant_params() {
         $params = array();
 

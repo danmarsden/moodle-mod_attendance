@@ -24,18 +24,28 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * base filter controls class - overridden by different views where needed.
+ * Base filter controls class - overridden by different views where needed.
  *
  * @copyright  2016 Dan Marsden http://danmarsden.com
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mod_attendance_page_with_filter_controls {
+    /** No filter. */
     const SELECTOR_NONE         = 1;
+
+    /** Filter by group. */
     const SELECTOR_GROUP        = 2;
+
+    /** Filter by session type. */
     const SELECTOR_SESS_TYPE    = 3;
 
+    /** Common. */
     const SESSTYPE_COMMON       = 0;
+
+    /** All. */
     const SESSTYPE_ALL          = -1;
+
+    /** No value. */
     const SESSTYPE_NO_VALUE     = -2;
 
     /** @var int current view mode */
@@ -50,16 +60,26 @@ class mod_attendance_page_with_filter_controls {
     /** @var int end date of displayed date range */
     public $enddate;
 
+    /** @var int type. */
     public $selectortype        = self::SELECTOR_NONE;
 
+    /** @var int default view. */
     protected $defaultview      = ATT_VIEW_WEEKS;
 
+    /** @var stdClass course module record. */
     private $cm;
 
+    /** @var array  */
     private $sessgroupslist;
 
+    /** @var int */
     private $sesstype;
 
+    /**
+     * initialise stuff.
+     *
+     * @param stdClass $cm
+     */
     public function init($cm) {
         $this->cm = $cm;
         $this->init_view();
@@ -67,6 +87,9 @@ class mod_attendance_page_with_filter_controls {
         $this->init_start_end_date();
     }
 
+    /**
+     * Initialise the view.
+     */
     private function init_view() {
         global $SESSION;
 
@@ -79,6 +102,9 @@ class mod_attendance_page_with_filter_controls {
         }
     }
 
+    /**
+     * Initialise the current date.
+     */
     private function init_curdate() {
         global $SESSION;
 
@@ -91,6 +117,9 @@ class mod_attendance_page_with_filter_controls {
         }
     }
 
+    /**
+     * Initialise the end date.
+     */
     public function init_start_end_date() {
         global $CFG;
 
@@ -132,6 +161,9 @@ class mod_attendance_page_with_filter_controls {
         }
     }
 
+    /**
+     * Calculate the session group list type.
+     */
     private function calc_sessgroupslist_sesstype() {
         global $SESSION;
 
@@ -180,6 +212,9 @@ class mod_attendance_page_with_filter_controls {
         }
     }
 
+    /**
+     * Calculate the session group list
+     */
     private function calc_sessgroupslist() {
         global $USER, $PAGE;
 
@@ -207,6 +242,11 @@ class mod_attendance_page_with_filter_controls {
         }
     }
 
+    /**
+     * Return the session groups.
+     *
+     * @return array
+     */
     public function get_sess_groups_list() {
         if (is_null($this->sessgroupslist)) {
             $this->calc_sessgroupslist_sesstype();
@@ -215,6 +255,11 @@ class mod_attendance_page_with_filter_controls {
         return $this->sessgroupslist;
     }
 
+    /**
+     * Get the current session type.
+     *
+     * @return int
+     */
     public function get_current_sesstype() {
         if (is_null($this->sesstype)) {
             $this->calc_sessgroupslist_sesstype();
@@ -223,6 +268,11 @@ class mod_attendance_page_with_filter_controls {
         return $this->sesstype;
     }
 
+    /**
+     * Set the current session type.
+     *
+     * @param int $sesstype
+     */
     public function set_current_sesstype($sesstype) {
         $this->sesstype = $sesstype;
     }

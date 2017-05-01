@@ -30,10 +30,17 @@ defined('MOODLE_INTERNAL') || die();
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mod_attendance_manage_page_params extends mod_attendance_page_with_filter_controls {
+    /**
+     * mod_attendance_manage_page_params constructor.
+     */
     public function  __construct() {
         $this->selectortype = mod_attendance_page_with_filter_controls::SELECTOR_SESS_TYPE;
     }
 
+    /**
+     * Get page params.
+     * @return array
+     */
     public function get_significant_params() {
         return array();
     }

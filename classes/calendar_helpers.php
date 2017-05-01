@@ -64,7 +64,7 @@ function attendance_create_calendar_event(&$session) {
 /**
  * Create multiple calendar events based on sessions data.
  *
- * @param array %sessionsids array of sessions ids
+ * @param array $sessionsids array of sessions ids
  */
 function attendance_create_calendar_events($sessionsids) {
     global $DB;
@@ -81,9 +81,9 @@ function attendance_create_calendar_events($sessionsids) {
 /**
  * Update calendar event duration and date
  *
- * @param $caleventid int calendar event id
- * @param $timeduration int duration of the event
- * @param $timestart int start time of the event
+ * @param int $caleventid calendar event id
+ * @param int $timeduration duration of the event
+ * @param int $timestart start time of the event
  * @return bool result of updating
  */
 function attendance_update_calendar_event($caleventid, $timeduration, $timestart) {
@@ -103,7 +103,7 @@ function attendance_update_calendar_event($caleventid, $timeduration, $timestart
 /**
  * Delete calendar events for sessions
  *
- * @param array %sessionsids array of sessions ids
+ * @param array $sessionsids array of sessions ids
  * @return bool result of updating
  */
 function attendance_delete_calendar_events($sessionsids) {

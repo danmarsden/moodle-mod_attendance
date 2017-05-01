@@ -13,6 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * Web Services for Attendance plugin.
  *
@@ -28,10 +29,17 @@ require_once(dirname(__FILE__).'/structure.php');
 require_once(dirname(__FILE__).'/../../../lib/sessionlib.php');
 require_once(dirname(__FILE__).'/../../../lib/datalib.php');
 
+/**
+ * Class attendance_handler
+ * @copyright  2015 Caio Bressan Doneda
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class attendance_handler {
     /**
      * For this user, this method searches in all the courses that this user has permission to take attendance,
      * looking for today sessions and returns the courses with the sessions.
+     * @param int $userid
+     * @return array
      */
     public static function get_courses_with_today_sessions($userid) {
         $usercourses = enrol_get_users_courses($userid);
@@ -69,6 +77,12 @@ class attendance_handler {
         return self::prepare_data($coursessessions);
     }
 
+    /**
+     * Prepare data.
+     *
+     * @param array $coursessessions
+     * @return array
+     */
     private static function prepare_data($coursessessions) {
         $courses = array();
 
@@ -82,8 +96,11 @@ class attendance_handler {
         return $courses;
     }
 
-    /*
-     ** For this session, returns all the necessary data to take an attendance
+    /**
+     * For this session, returns all the necessary data to take an attendance.
+     *
+     * @param int $sessionid
+     * @return mixed
      */
     public static function get_session($sessionid) {
         global $DB;
@@ -103,6 +120,15 @@ class attendance_handler {
         return $session;
     }
 
+    /**
+     * Update user status
+     *
+     * @param int $sessionid
+     * @param int $studentid
+     * @param int $takenbyid
+     * @param int $statusid
+     * @param int $statusset
+     */
     public static function update_user_status($sessionid, $studentid, $takenbyid, $statusid, $statusset) {
         global $DB;
 
