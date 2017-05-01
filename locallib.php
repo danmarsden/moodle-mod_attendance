@@ -375,3 +375,28 @@ function attendance_random_string($length=6) {
     }
     return $string;
 }
+
+/**
+ * Check to see if this session is open for student marking.
+ *
+ * @param stdclass $sess the session record from attendance_sessions.
+ * @return boolean
+ */
+function attendance_can_student_mark($sess) {
+    $canmark = false;
+    $attconfig = get_config('attendance');
+    if (!empty($attconfig->studentscanmark) && !empty($sess->studentscanmark)) {
+        if (empty($attconfig->studentscanmarksessiontime)) {
+            $canmark = true;
+        } else {
+            $duration = $sess->duration;
+            if (empty($duration)) {
+                $duration = $attconfig->studentscanmarksessiontimeend * 60;
+            }
+            if ($sess->sessdate < time() && time() < ($sess->sessdate + $duration)) {
+                $canmark = true;
+            }
+        }
+    }
+    return $canmark;
+}

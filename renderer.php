@@ -847,9 +847,10 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 $cell->colspan = 2;
                 $row->cells[] = $cell;
             } else {
-                if (!empty(get_config('attendance', 'studentscanmark')) && !empty($sess->studentscanmark)) {
+                if (attendance_can_student_mark($sess)) {
                     // Student can mark their own attendance.
                     // URL to the page that lets the student modify their attendance.
+
                     $url = new moodle_url('/mod/attendance/attendance.php',
                             array('sessid' => $sess->id, 'sesskey' => sesskey()));
                     $cell = new html_table_cell(html_writer::link($url, get_string('submitattendance', 'attendance')));
