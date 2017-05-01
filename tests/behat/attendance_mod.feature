@@ -46,6 +46,9 @@ Feature: Teachers and Students can record session attendance
         And I set the field "Allow students to record own attendance" to "1"
         And I set the following fields to these values:
           | sessiondate | ##5 minutes ago## |
+          | id_sestime_starthour | 00 |
+          | id_sestime_endhour   | 23 |
+          | id_sestime_endminute | 55 |
         And I click on "id_submitbutton" "button"
         And I log out
         When I log in as "student1"
