@@ -40,7 +40,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
     /**
      * Renders tabs for attendance
      *
-     * @param atttabs - tabs to display
+     * @param attendance_tabs $atttabs - tabs to display
      * @return string html code
      */
     protected function render_attendance_tabs(attendance_tabs $atttabs) {
@@ -50,7 +50,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
     /**
      * Renders filter controls for attendance
      *
-     * @param fcontrols - filter controls data to display
+     * @param attendance_filter_controls $fcontrols - filter controls data to display
      * @return string html code
      */
     protected function render_attendance_filter_controls(attendance_filter_controls $fcontrols) {
@@ -73,6 +73,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
         return $o;
     }
 
+    /**
+     * Render group selector
+     *
+     * @param attendance_filter_controls $fcontrols
+     * @return mixed|string
+     */
     protected function render_sess_group_selector(attendance_filter_controls $fcontrols) {
         switch ($fcontrols->pageparams->selectortype) {
             case mod_attendance_page_with_filter_controls::SELECTOR_SESS_TYPE:
@@ -93,6 +99,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
         return '';
     }
 
+    /**
+     * Render paging controls.
+     *
+     * @param attendance_filter_controls $fcontrols
+     * @return string
+     */
     protected function render_paging_controls(attendance_filter_controls $fcontrols) {
         $pagingcontrols = '';
 
@@ -127,6 +139,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
         return $pagingcontrols;
     }
 
+    /**
+     * Render date controls.
+     *
+     * @param attendance_filter_controls $fcontrols
+     * @return string
+     */
     protected function render_curdate_controls(attendance_filter_controls $fcontrols) {
         global $CFG;
 
@@ -173,6 +191,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
         return $curdatecontrols;
     }
 
+    /**
+     * Render view controls.
+     *
+     * @param attendance_filter_controls $fcontrols
+     * @return string
+     */
     protected function render_view_controls(attendance_filter_controls $fcontrols) {
         $views[ATT_VIEW_ALL] = get_string('all', 'attendance');
         $views[ATT_VIEW_ALLPAST] = get_string('allpast', 'attendance');
@@ -213,6 +237,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
         return $o;
     }
 
+    /**
+     * Render session manage table.
+     *
+     * @param attendance_manage_data $sessdata
+     * @return string
+     */
     protected function render_sess_manage_table(attendance_manage_data $sessdata) {
         $this->page->requires->js_init_call('M.mod_attendance.init_manage');
 
@@ -261,6 +291,13 @@ class mod_attendance_renderer extends plugin_renderer_base {
         return html_writer::table($table);
     }
 
+    /**
+     * Construct date time actions.
+     *
+     * @param attendance_manage_data $sessdata
+     * @param stdClass $sess
+     * @return array
+     */
     private function construct_date_time_actions(attendance_manage_data $sessdata, $sess) {
         $actions = '';
 
@@ -300,6 +337,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
         return array('date' => $date, 'time' => $time, 'actions' => $actions);
     }
 
+    /**
+     * Render session manage control.
+     *
+     * @param attendance_manage_data $sessdata
+     * @return string
+     */
     protected function render_sess_manage_control(attendance_manage_data $sessdata) {
         $table = new html_table();
         $table->attributes['class'] = ' ';
@@ -335,6 +378,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
         return html_writer::table($table);
     }
 
+    /**
+     * Render take data.
+     *
+     * @param attendance_take_data $takedata
+     * @return string
+     */
     protected function render_attendance_take_data(attendance_take_data $takedata) {
         $controls = $this->render_attendance_take_controls($takedata);
         $table = html_writer::start_div('no-overflow');
@@ -374,6 +423,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
         return $controls.$table.$statsoutput;
     }
 
+    /**
+     * Render take controls.
+     *
+     * @param attendance_take_data $takedata
+     * @return string
+     */
     protected function render_attendance_take_controls(attendance_take_data $takedata) {
         $table = new html_table();
         $table->attributes['class'] = ' ';
@@ -384,6 +439,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
         return $this->output->container(html_writer::table($table), 'generalbox takecontrols');
     }
 
+    /**
+     * Construct take session info.
+     *
+     * @param attendance_take_data $takedata
+     * @return string
+     */
     private function construct_take_session_info(attendance_take_data $takedata) {
         $sess = $takedata->sessioninfo;
         $date = userdate($sess->sessdate, get_string('strftimedate'));
@@ -398,6 +459,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
         return $sessinfo;
     }
 
+    /**
+     * Construct take controls.
+     *
+     * @param attendance_take_data $takedata
+     * @return string
+     */
     private function construct_take_controls(attendance_take_data $takedata) {
         global $CFG;
 
@@ -498,6 +565,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
         return $controls;
     }
 
+    /**
+     * Render take list.
+     *
+     * @param attendance_take_data $takedata
+     * @return string
+     */
     protected function render_attendance_take_list(attendance_take_data $takedata) {
         global $PAGE, $CFG;
         $table = new html_table();
@@ -602,6 +675,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
         return html_writer::table($table);
     }
 
+    /**
+     * Render take grid.
+     *
+     * @param attendance_take_data $takedata
+     * @return string
+     */
     protected function render_attendance_take_grid(attendance_take_data $takedata) {
         $table = new html_table();
         for ($i = 0; $i < $takedata->pageparams->gridcols; $i++) {
@@ -651,6 +730,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
         return html_writer::table($table);
     }
 
+    /**
+     * Construct full name.
+     *
+     * @param stdClass $data
+     * @return string
+     */
     private function construct_fullname_head($data) {
         global $CFG;
 
@@ -677,6 +762,13 @@ class mod_attendance_renderer extends plugin_renderer_base {
         return $fullnamehead;
     }
 
+    /**
+     * Construct take user controls.
+     *
+     * @param attendance_take_data $takedata
+     * @param stdClass $user
+     * @return array
+     */
     private function construct_take_user_controls(attendance_take_data $takedata, $user) {
         $celldata = array();
         if ($user->enrolmentend and $user->enrolmentend < $takedata->sessioninfo->sessdate) {
@@ -731,6 +823,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
         return $celldata;
     }
 
+    /**
+     * Render header.
+     *
+     * @param mod_attendance_header $header
+     * @return string
+     */
     protected function render_mod_attendance_header(mod_attendance_header $header) {
         if (!$header->should_render()) {
             return '';
@@ -748,6 +846,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
         return $o;
     }
 
+    /**
+     * Render user data.
+     *
+     * @param attendance_user_data $userdata
+     * @return string
+     */
     protected function render_attendance_user_data(attendance_user_data $userdata) {
         $o = $this->render_user_report_tabs($userdata);
 
@@ -764,6 +868,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
         return $o;
     }
 
+    /**
+     * Render user report tabs.
+     *
+     * @param attendance_user_data $userdata
+     * @return string
+     */
     protected function render_user_report_tabs(attendance_user_data $userdata) {
         $tabs = array();
 
@@ -781,6 +891,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
         return print_tabs(array($tabs), $userdata->pageparams->mode, null, null, true);
     }
 
+    /**
+     * Construct user data.
+     *
+     * @param attendance_user_data $userdata
+     * @return string
+     */
     private function construct_user_data(attendance_user_data $userdata) {
         $o = html_writer::tag('h2', fullname($userdata->user));
 
@@ -814,6 +930,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
         return $o;
     }
 
+    /**
+     * Construct user sessions log.
+     *
+     * @param attendance_user_data $userdata
+     * @return string
+     */
     private function construct_user_sessions_log(attendance_user_data $userdata) {
         $table = new html_table();
         $table->attributes['class'] = 'generaltable attwidth boxaligncenter';
@@ -887,12 +1009,25 @@ class mod_attendance_renderer extends plugin_renderer_base {
         return html_writer::table($table);
     }
 
+    /**
+     * Construct time for display.
+     *
+     * @param int $datetime
+     * @param int $duration
+     * @return string
+     */
     private function construct_time($datetime, $duration) {
         $time = html_writer::tag('nobr', construct_session_time($datetime, $duration));
 
         return $time;
     }
 
+    /**
+     * Render report data.
+     *
+     * @param attendance_report_data $reportdata
+     * @return string
+     */
     protected function render_attendance_report_data(attendance_report_data $reportdata) {
         global $PAGE, $COURSE;
 
@@ -1332,7 +1467,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
     /**
      * Build and return a html_table_cell for header rows
      *
-     * @param Mixed (html_table_cell or string) $cell the cell or a label for a cell
+     * @param html_table_cell|string $cell the cell or a label for a cell
      * @param boolean $contrast true menans the cell must be shown with bgcolor contrast
      * @param boolean $center true means the cell text should be centered. Othersiwe it should be left-aligned.
      * @param int $colspan how many columns should cell spans
@@ -1360,7 +1495,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
     /**
      * Build and return a html_table_cell for data rows
      *
-     * @param Mixed (html_table_cell or string) $cell the cell or a label for a cell
+     * @param html_table_cell|string $cell the cell or a label for a cell
      * @param boolean $contrast true menans the cell must be shown with bgcolor contrast
      * @param boolean $center true means the cell text should be centered. Othersiwe it should be left-aligned.
      * @param int $colspan how many columns should cell spans
@@ -1388,7 +1523,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
     /**
      * Build and return a html_table_cell for header or data rows
      *
-     * @param Mixed (html_table_cell or string) $cell the cell or a label for a cell
+     * @param html_table_cell|string $cell the cell or a label for a cell
      * @param Array $classes a list of css classes
      * @param int $colspan how many columns should cell spans
      * @param int $rowspan how many rows should cell spans
@@ -1449,6 +1584,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
         return $this->output->url_select($opts, $selected, null);
     }
 
+    /**
+     * Render preferences data.
+     *
+     * @param stdClass $prefdata
+     * @return string
+     */
     protected function render_attendance_preferences_data($prefdata) {
         $this->page->requires->js('/mod/attendance/module.js');
 
@@ -1505,14 +1646,35 @@ class mod_attendance_renderer extends plugin_renderer_base {
         return $o;
     }
 
+    /**
+     * Render default statusset.
+     *
+     * @param attendance_default_statusset $prefdata
+     * @return string
+     */
     protected function render_attendance_default_statusset(attendance_default_statusset $prefdata) {
         return $this->render_attendance_preferences_data($prefdata);
     }
 
+    /**
+     * Render preferences data.
+     *
+     * @param stdClass $prefdata
+     * @return string
+     */
     protected function render_attendance_pref($prefdata) {
 
     }
 
+    /**
+     * Construct text input.
+     *
+     * @param string $name
+     * @param integer $size
+     * @param integer $maxlength
+     * @param string $value
+     * @return string
+     */
     private function construct_text_input($name, $size, $maxlength, $value='') {
         $attributes = array(
                 'type'      => 'text',
@@ -1523,6 +1685,13 @@ class mod_attendance_renderer extends plugin_renderer_base {
         return html_writer::empty_tag('input', $attributes);
     }
 
+    /**
+     * Construct action icons.
+     *
+     * @param stdClass $st
+     * @param stdClass $prefdata
+     * @return string
+     */
     private function construct_preferences_actions_icons($st, $prefdata) {
         global $OUTPUT;
         $params = array('sesskey' => sesskey(),
@@ -1550,6 +1719,13 @@ class mod_attendance_renderer extends plugin_renderer_base {
         return $showhideicon . $deleteicon;
     }
 
+    /**
+     * Construct preferences button.
+     *
+     * @param string $text
+     * @param string $action
+     * @return string
+     */
     private function construct_preferences_button($text, $action) {
         $attributes = array(
                 'type'      => 'submit',
@@ -1570,7 +1746,13 @@ class mod_attendance_renderer extends plugin_renderer_base {
         return html_writer::tag('p', $text, $attributes);
     }
 
-    // Show different picture if it is a temporary user.
+    /**
+     * Show different picture if it is a temporary user.
+     *
+     * @param stdClass $user
+     * @param array $opts
+     * @return string
+     */
     protected function user_picture($user, array $opts = null) {
         if ($user->type == 'temporary') {
             $attrib = array(
