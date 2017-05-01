@@ -17,8 +17,8 @@
 /**
  * Prints attendance info for particular user
  *
- * @package    mod
- * @subpackage attendance
+ * @package   mod_attendance
+ * @copyright  2014 Dan Marsden
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

@@ -25,7 +25,14 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-
+/**
+ * mod_attendance data generator
+ *
+ * @package    mod_attendance
+ * @category   test
+ * @copyright  2013 Davo Smith, Synergy Learning
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class mod_attendance_generator extends testing_module_generator {
 
     /**
