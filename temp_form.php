@@ -27,9 +27,16 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->libdir.'/formslib.php');
 
+/**
+ * Class temp_form
+ * @copyright  2013 Davo Smith, Synergy Learning
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class temp_form extends moodleform {
+    /**
+     * Define form.
+     */
     public function definition() {
-
         $mform = $this->_form;
 
         $mform->addElement('hidden', 'id', 0);
@@ -49,11 +56,21 @@ class temp_form extends moodleform {
         $mform->closeHeaderBefore('submit');
     }
 
+    /**
+     * Do stuff to form after creation.
+     */
     public function definition_after_data() {
         $mform = $this->_form;
         $mform->applyFilter('tname', 'trim');
     }
 
+    /**
+     * Form validation.
+     *
+     * @param array $data
+     * @param array $files
+     * @return array
+     */
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
 
@@ -63,6 +80,4 @@ class temp_form extends moodleform {
 
         return $errors;
     }
-
 }
-

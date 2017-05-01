@@ -137,6 +137,12 @@ class mod_attendance_export_form extends moodleform {
         $mform->addElement('hidden', 'id', $cm->id);
     }
 
+    /**
+     * Validate form.
+     * @param array $data
+     * @param array $files
+     * @return array
+     */
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
 

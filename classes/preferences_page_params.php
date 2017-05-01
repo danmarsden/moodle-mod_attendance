@@ -30,19 +30,31 @@ defined('MOODLE_INTERNAL') || die();
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mod_attendance_preferences_page_params {
+    /** Add */
     const ACTION_ADD              = 1;
+    /** Delete */
     const ACTION_DELETE           = 2;
+    /** Hide */
     const ACTION_HIDE             = 3;
+    /** Show */
     const ACTION_SHOW             = 4;
+    /** Save */
     const ACTION_SAVE             = 5;
 
     /** @var int view mode of taking attendance page*/
     public $action;
 
+    /** @var int */
     public $statusid;
 
+    /** @var array */
     public $statusset;
 
+    /**
+     * Get params for this page.
+     *
+     * @return array
+     */
     public function get_significant_params() {
         $params = array();
 
