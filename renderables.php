@@ -37,24 +37,32 @@ require_once(dirname(__FILE__).'/locallib.php');
  *
  */
 class attendance_tabs implements renderable {
+    /** Sessions tab */
     const TAB_SESSIONS      = 1;
+    /** Add tab */
     const TAB_ADD           = 2;
+    /** Rerort tab */
     const TAB_REPORT        = 3;
+    /** Export tab */
     const TAB_EXPORT        = 4;
+    /** Preferences tab */
     const TAB_PREFERENCES   = 5;
+    /** Temp users tab */
     const TAB_TEMPORARYUSERS = 6; // Tab for managing temporary users.
+    /** Update tab */
     const TAB_UPDATE        = 7;
 
+    /** @var int current tab */
     public $currenttab;
 
-    /** @var attendance */
+    /** @var stdClass attendance */
     private $att;
 
     /**
      * Prepare info about sessions for attendance taking into account view parameters.
      *
-     * @param attendance $att instance
-     * @param $currenttab - one of attendance_tabs constants
+     * @param mod_attendance_structure $att
+     * @param int $currenttab - one of attendance_tabs constants
      */
     public function  __construct(mod_attendance_structure $att, $currenttab=null) {
         $this->att = $att;
@@ -113,25 +121,38 @@ class attendance_tabs implements renderable {
     }
 }
 
-
+/**
+ * Class attendance_filter_controls
+ * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class attendance_filter_controls implements renderable {
     /** @var int current view mode */
     public $pageparams;
-
+    /** @var stdclass  */
     public $cm;
-
+    /** @var int  */
     public $curdate;
-
+    /** @var int  */
     public $prevcur;
+    /** @var int  */
     public $nextcur;
+    /** @var string  */
     public $curdatetxt;
+    /** @var boolean  */
     public $reportcontrol;
-
+    /** @var string  */
     private $urlpath;
+    /** @var array  */
     private $urlparams;
-
+    /** @var mod_attendance_structure */
     public $att;
 
+    /**
+     * attendance_filter_controls constructor.
+     * @param mod_attendance_structure $att
+     * @param bool $report
+     */
     public function __construct(mod_attendance_structure $att, $report = false) {
         global $PAGE;
 
@@ -179,30 +200,57 @@ class attendance_filter_controls implements renderable {
         $this->att = $att;
     }
 
+    /**
+     * Helper function for url.
+     *
+     * @param array $params
+     * @return moodle_url
+     */
     public function url($params=array()) {
         $params = array_merge($this->urlparams, $params);
 
         return new moodle_url($this->urlpath, $params);
     }
 
+    /**
+     * Helper function for url path.
+     * @return string
+     */
     public function url_path() {
         return $this->urlpath;
     }
 
+    /**
+     * Helper function for url_params.
+     * @param array $params
+     * @return array
+     */
     public function url_params($params=array()) {
         $params = array_merge($this->urlparams, $params);
 
         return $params;
     }
 
+    /**
+     * Return groupmode.
+     * @return int
+     */
     public function get_group_mode() {
         return $this->att->get_group_mode();
     }
 
+    /**
+     * Return groupslist.
+     * @return mixed
+     */
     public function get_sess_groups_list() {
         return $this->att->pageparams->get_sess_groups_list();
     }
 
+    /**
+     * Get current session type.
+     * @return mixed
+     */
     public function get_current_sesstype() {
         return $this->att->pageparams->get_current_sesstype();
     }
@@ -220,17 +268,17 @@ class attendance_manage_data implements renderable {
 
     /** @var int number of hidden sessions (sessions before $course->startdate)*/
     public $hiddensessionscount;
-
+    /** @var array  */
     public $groups;
-
+    /** @var  int */
     public $hiddensesscount;
 
-    /** @var attendance */
+    /** @var mod_attendance_structure */
     public $att;
     /**
      * Prepare info about attendance sessions taking into account view parameters.
      *
-     * @param attendance $att instance
+     * @param mod_attendance_structure $att instance
      */
     public function __construct(mod_attendance_structure $att) {
 
@@ -243,40 +291,64 @@ class attendance_manage_data implements renderable {
         $this->att = $att;
     }
 
+    /**
+     * Helper function to return urls.
+     * @param int $sessionid
+     * @param int $grouptype
+     * @return mixed
+     */
     public function url_take($sessionid, $grouptype) {
         return url_helpers::url_take($this->att, $sessionid, $grouptype);
     }
 
     /**
      * Must be called without or with both parameters
+     *
+     * @param int $sessionid
+     * @param null $action
+     * @return mixed
      */
     public function url_sessions($sessionid=null, $action=null) {
         return url_helpers::url_sessions($this->att, $sessionid, $action);
     }
 }
 
+/**
+ * class take data.
+ *
+ * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class attendance_take_data implements renderable {
+    /** @var array  */
     public $users;
-
+    /** @var array|null|stdClass  */
     public $pageparams;
-
+    /** @var int  */
     public $groupmode;
+    /** @var stdclass  */
     public $cm;
-
+    /** @var array  */
     public $statuses;
-
+    /** @var mixed  */
     public $sessioninfo;
-
+    /** @var array  */
     public $sessionlog;
-
+    /** @var array  */
     public $sessions4copy;
-
+    /** @var bool  */
     public $updatemode;
-
+    /** @var string  */
     private $urlpath;
+    /** @var array */
     private $urlparams;
+    /** @var mod_attendance_structure  */
     public $att;
 
+    /**
+     * attendance_take_data constructor.
+     * @param mod_attendance_structure $att
+     */
     public function  __construct(mod_attendance_structure $att) {
         if ($att->pageparams->grouptype) {
             $this->users = $att->get_users($att->pageparams->grouptype, $att->pageparams->page);
@@ -314,6 +386,12 @@ class attendance_take_data implements renderable {
         $this->att = $att;
     }
 
+    /**
+     * Url function
+     * @param array $params
+     * @param array $excludeparams
+     * @return moodle_url
+     */
     public function url($params=array(), $excludeparams=array()) {
         $params = array_merge($this->urlparams, $params);
 
@@ -324,35 +402,57 @@ class attendance_take_data implements renderable {
         return new moodle_url($this->urlpath, $params);
     }
 
+    /**
+     * Url view helper.
+     * @param array $params
+     * @return mixed
+     */
     public function url_view($params=array()) {
         return url_helpers::url_view($this->att, $params);
     }
 
+    /**
+     * Url path helper.
+     * @return string
+     */
     public function url_path() {
         return $this->urlpath;
     }
 }
 
+/**
+ * Class user data.
+ *
+ * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class attendance_user_data implements renderable {
+    /** @var mixed|object  */
     public $user;
-
+    /** @var array|null|stdClass  */
     public $pageparams;
-
+    /** @var array  */
     public $statuses;
-
+    /** @var array  */
     public $summary;
-
+    /** @var attendance_filter_controls  */
     public $filtercontrols;
-
+    /** @var array  */
     public $sessionslog;
-
+    /** @var array  */
     public $groups;
-
+    /** @var array  */
     public $coursesatts;
-
+    /** @var string  */
     private $urlpath;
+    /** @var array */
     private $urlparams;
 
+    /**
+     * attendance_user_data constructor.
+     * @param mod_attendance_structure $att
+     * @param int $userid
+     */
     public function  __construct(mod_attendance_structure $att, $userid) {
         $this->user = $att->get_user($userid);
 
@@ -389,32 +489,47 @@ class attendance_user_data implements renderable {
         $this->urlparams = $params;
     }
 
+    /**
+     * url helper.
+     * @return moodle_url
+     */
     public function url() {
         return new moodle_url($this->urlpath, $this->urlparams);
     }
 }
 
+/**
+ * Class report data.
+ *
+ * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class attendance_report_data implements renderable {
+    /** @var array|null|stdClass  */
     public $pageparams;
-
+    /** @var array  */
     public $users;
-
+    /** @var array  */
     public $groups;
-
+    /** @var array  */
     public $sessions;
-
+    /** @var array  */
     public $statuses;
-    // Includes disablrd/deleted statuses.
+    /** @var array includes disablrd/deleted statuses. */
     public $allstatuses;
-
+    /** @var array  */
     public $usersgroups = array();
-
+    /** @var array  */
     public $sessionslog = array();
-
+    /** @var array|mod_attendance_summary  */
     public $summary = array();
-
+    /** @var mod_attendance_structure  */
     public $att;
 
+    /**
+     * attendance_report_data constructor.
+     * @param mod_attendance_structure $att
+     */
     public function  __construct(mod_attendance_structure $att) {
         $currenttime = time();
         if ($att->pageparams->view == ATT_VIEW_NOTPRESENT) {
@@ -463,14 +578,30 @@ class attendance_report_data implements renderable {
         $this->att = $att;
     }
 
+    /**
+     * url take helper.
+     * @param int $sessionid
+     * @param int $grouptype
+     * @return mixed
+     */
     public function url_take($sessionid, $grouptype) {
         return url_helpers::url_take($this->att, $sessionid, $grouptype);
     }
 
+    /**
+     * url view helper.
+     * @param array $params
+     * @return mixed
+     */
     public function url_view($params=array()) {
         return url_helpers::url_view($this->att, $params);
     }
 
+    /**
+     * url helper.
+     * @param array $params
+     * @return moodle_url
+     */
     public function url($params=array()) {
         $params = array_merge($params, $this->pageparams->get_significant_params());
 
@@ -479,13 +610,25 @@ class attendance_report_data implements renderable {
 
 }
 
+/**
+ * Class preferences data.
+ *
+ * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class attendance_preferences_data implements renderable {
+    /** @var array  */
     public $statuses;
-
+    /** @var mod_attendance_structure  */
     private $att;
-
+    /** @var array  */
     public $errors;
 
+    /**
+     * attendance_preferences_data constructor.
+     * @param mod_attendance_structure $att
+     * @param array $errors
+     */
     public function __construct(mod_attendance_structure $att, $errors) {
         $this->statuses = $att->get_statuses(false);
         $this->errors = $errors;
@@ -497,6 +640,12 @@ class attendance_preferences_data implements renderable {
         $this->att = $att;
     }
 
+    /**
+     * url helper function
+     * @param array $params
+     * @param bool $significantparams
+     * @return moodle_url
+     */
     public function url($params=array(), $significantparams=true) {
         if ($significantparams) {
             $params = array_merge($this->att->pageparams->get_significant_params(), $params);
@@ -506,32 +655,65 @@ class attendance_preferences_data implements renderable {
     }
 }
 
+/**
+ * Default status set
+ *
+ * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class attendance_default_statusset implements renderable {
+    /** @var array  */
     public $statuses;
-
+    /** @var array  */
     public $errors;
 
+    /**
+     * attendance_default_statusset constructor.
+     * @param array $statuses
+     * @param array $errors
+     */
     public function __construct($statuses, $errors) {
         $this->statuses = $statuses;
         $this->errors = $errors;
     }
 
+    /**
+     * url helper.
+     * @param stdClass $params
+     * @return moodle_url
+     */
     public function url($params) {
         return new moodle_url('/mod/attendance/defaultstatus.php', $params);
     }
 }
 
-// Output a selector to change between status sets.
+/**
+ * Output a selector to change between status sets.
+ *
+ * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class attendance_set_selector implements renderable {
+    /** @var int  */
     public $maxstatusset;
-
+    /** @var mod_attendance_structure  */
     private $att;
 
+    /**
+     * attendance_set_selector constructor.
+     * @param mod_attendance_structure $att
+     * @param int $maxstatusset
+     */
     public function __construct(mod_attendance_structure $att, $maxstatusset) {
         $this->att = $att;
         $this->maxstatusset = $maxstatusset;
     }
 
+    /**
+     * url helper
+     * @param array $statusset
+     * @return moodle_url
+     */
     public function url($statusset) {
         $params = array();
         $params['statusset'] = $statusset;
@@ -539,6 +721,10 @@ class attendance_set_selector implements renderable {
         return $this->att->url_preferences($params);
     }
 
+    /**
+     * get current statusset.
+     * @return int
+     */
     public function get_current_statusset() {
         if (isset($this->att->pageparams->statusset)) {
             return $this->att->pageparams->statusset;
@@ -546,12 +732,30 @@ class attendance_set_selector implements renderable {
         return 0;
     }
 
+    /**
+     * get statusset name.
+     * @param int $statusset
+     * @return string
+     */
     public function get_status_name($statusset) {
         return attendance_get_setname($this->att->id, $statusset, true);
     }
 }
 
+/**
+ * Url helpers
+ *
+ * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class url_helpers {
+    /**
+     * Url take.
+     * @param stdClass $att
+     * @param int $sessionid
+     * @param int $grouptype
+     * @return mixed
+     */
     public static function url_take($att, $sessionid, $grouptype) {
         $params = array('sessionid' => $sessionid);
         if (isset($grouptype)) {
@@ -563,6 +767,10 @@ class url_helpers {
 
     /**
      * Must be called without or with both parameters
+     * @param stdClass $att
+     * @param null $sessionid
+     * @param null $action
+     * @return mixed
      */
     public static function url_sessions($att, $sessionid=null, $action=null) {
         if (isset($sessionid) && isset($action)) {
@@ -574,6 +782,12 @@ class url_helpers {
         return $att->url_sessions($params);
     }
 
+    /**
+     * Url view helper.
+     * @param stdClass $att
+     * @param array $params
+     * @return mixed
+     */
     public static function url_view($att, $params=array()) {
         return $att->url_view($params);
     }

@@ -39,6 +39,14 @@ define('ATT_SORT_DEFAULT', 0);
 define('ATT_SORT_LASTNAME', 1);
 define('ATT_SORT_FIRSTNAME', 2);
 
+/**
+ * Get statuses,
+ *
+ * @param int $attid
+ * @param bool $onlyvisible
+ * @param int $statusset
+ * @return array
+ */
 function attendance_get_statuses($attid, $onlyvisible=true, $statusset = -1) {
     global $DB;
 
@@ -90,6 +98,12 @@ function attendance_get_setname($attid, $statusset, $includevalues = true) {
     return $statusname;
 }
 
+/**
+ * Get users courses and the relevant attendances.
+ *
+ * @param int $userid
+ * @return array
+ */
 function attendance_get_user_courses_attendances($userid) {
     global $DB;
 
@@ -181,7 +195,7 @@ function attendance_get_max_statusset($attendanceid) {
 /**
  * Returns the maxpoints for each statusset
  *
- * @param array statuses
+ * @param array $statuses
  * @return array
  */
 function attendance_get_statusset_maxpoints($statuses) {
@@ -197,7 +211,7 @@ function attendance_get_statusset_maxpoints($statuses) {
 /**
  * Update user grades
  *
- * @param mixed mod_attendance_structure|stdClass $attendance
+ * @param mod_attendance_structure|stdClass $attendance
  * @param array $userids
  */
 function attendance_update_users_grade($attendance, $userids=array()) {
@@ -247,6 +261,11 @@ function attendance_update_users_grade($attendance, $userids=array()) {
  * @param string $acronym
  * @param string $description
  * @param int $grade
+ * @param int $attendanceid
+ * @param int $setnumber
+ * @param stdClass $context
+ * @param stdClass $cm
+ * @return bool
  */
 function attendance_add_status($acronym, $description, $grade, $attendanceid, $setnumber = 0, $context = null, $cm = null) {
     global $DB;
@@ -284,6 +303,8 @@ function attendance_add_status($acronym, $description, $grade, $attendanceid, $s
  * Remove a status variable from an attendance instance
  *
  * @param stdClass $status
+ * @param stdClass $context
+ * @param stdClass $cm
  */
 function attendance_remove_status($status, $context = null, $cm = null) {
     global $DB;
@@ -313,6 +334,9 @@ function attendance_remove_status($status, $context = null, $cm = null) {
  * @param string $description
  * @param int $grade
  * @param bool $visible
+ * @param stdClass $context
+ * @param stdClass $cm
+ * @return array
  */
 function attendance_update_status($status, $acronym, $description, $grade, $visible, $context = null, $cm = null) {
     global $DB;
@@ -483,7 +507,8 @@ function attendance_exporttocsv($data, $filename) {
 }
 
 /**
- * @param $formdata moodleform - attendance form.
+ * Get session data for form.
+ * @param stdClass $formdata moodleform - attendance form.
  * @return array.
  */
 function attendance_construct_sessions_data_for_add($formdata) {
@@ -583,9 +608,9 @@ function attendance_construct_sessions_data_for_add($formdata) {
 /**
  * Helper function for attendance_construct_sessions_data_for_add().
  *
- * @param $formdata
- * @param $sessions
- * @param $sess
+ * @param stdClass $formdata
+ * @param stdClass $sessions
+ * @param stdClass $sess
  */
 function attendance_fill_groupid($formdata, &$sessions, $sess) {
     if ($formdata->sessiontype == mod_attendance_structure::SESSION_COMMON) {

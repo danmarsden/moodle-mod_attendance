@@ -26,17 +26,36 @@ defined('MOODLE_INTERNAL') || die;
 require_once("$CFG->libdir/externallib.php");
 require_once(dirname(__FILE__).'/classes/attendance_webservices_handler.php');
 
+/**
+ * Class mod_wsattendance_external
+ * @copyright  2015 Caio Bressan Doneda
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class mod_wsattendance_external extends external_api {
 
+    /**
+     * Get parameter list.
+     * @return external_function_parameters
+     */
     public static function get_courses_with_today_sessions_parameters() {
         return new external_function_parameters (
                     array('userid' => new external_value(PARAM_INT, 'User id.',  VALUE_DEFAULT, 0)));
     }
 
+    /**
+     * Get list of courses with active sessions for today.
+     * @param int $userid
+     * @return array
+     */
     public static function get_courses_with_today_sessions($userid) {
         return attendance_handler::get_courses_with_today_sessions($userid);
     }
 
+    /**
+     * Get structure of an attendance session.
+     *
+     * @return array
+     */
     private static function get_session_structure() {
         $session = array('id' => new external_value(PARAM_INT, 'Session id.'),
                          'attendanceid' => new external_value(PARAM_INT, 'Attendance id.'),
@@ -54,6 +73,10 @@ class mod_wsattendance_external extends external_api {
         return $session;
     }
 
+    /**
+     * Show structure of return.
+     * @return external_multiple_structure
+     */
     public static function get_courses_with_today_sessions_returns() {
         $todaysessions = self::get_session_structure();
 
@@ -69,15 +92,31 @@ class mod_wsattendance_external extends external_api {
         return new external_multiple_structure(new external_single_structure(($courses)));
     }
 
+    /**
+     * Get session params.
+     *
+     * @return external_function_parameters
+     */
     public static function get_session_parameters() {
         return new external_function_parameters (
                     array('sessionid' => new external_value(PARAM_INT, 'session id')));
     }
 
+    /**
+     * Get session.
+     *
+     * @param int $sessionid
+     * @return mixed
+     */
     public static function get_session($sessionid) {
         return attendance_handler::get_session($sessionid);
     }
 
+    /**
+     * Show return values of get_session.
+     *
+     * @return external_single_structure
+     */
     public static function get_session_returns() {
         $statuses = array('id' => new external_value(PARAM_INT, 'Status id.'),
                           'attendanceid' => new external_value(PARAM_INT, 'Attendance id.'),
@@ -106,6 +145,11 @@ class mod_wsattendance_external extends external_api {
         return new external_single_structure($session);
     }
 
+    /**
+     * Update user status params.
+     *
+     * @return external_function_parameters
+     */
     public static function update_user_status_parameters() {
         return new external_function_parameters(
                     array('sessionid' => new external_value(PARAM_INT, 'Session id'),
@@ -115,10 +159,23 @@ class mod_wsattendance_external extends external_api {
                           'statusset' => new external_value(PARAM_TEXT, 'Status set of session')));
     }
 
+    /**
+     * Update user status.
+     *
+     * @param int $sessionid
+     * @param int $studentid
+     * @param int $takenbyid
+     * @param int $statusid
+     * @param int $statusset
+     */
     public static function update_user_status($sessionid, $studentid, $takenbyid, $statusid, $statusset) {
         return attendance_handler::update_user_status($sessionid, $studentid, $takenbyid, $statusid, $statusset);
     }
 
+    /**
+     * Show return values.
+     * @return external_value
+     */
     public static function update_user_status_returns() {
         return new external_value(PARAM_TEXT, 'Http code');
     }
