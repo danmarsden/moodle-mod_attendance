@@ -937,6 +937,9 @@ class mod_attendance_renderer extends plugin_renderer_base {
      * @return string
      */
     private function construct_user_sessions_log(attendance_user_data $userdata) {
+        global $OUTPUT;
+        $context = context_module::instance($userdata->filtercontrols->cm->id);
+
         $table = new html_table();
         $table->attributes['class'] = 'generaltable attwidth boxaligncenter';
         $table->head = array(
@@ -951,6 +954,9 @@ class mod_attendance_renderer extends plugin_renderer_base {
         );
         $table->align = array('', '', '', 'left', 'left', 'center', 'center', 'center');
         $table->size = array('1px', '1px', '1px', '1px', '*', '*', '1px', '*');
+        if (has_capability('mod/attendance:takeattendances', $context)) {
+            $table->head[] = get_string('action');
+        }
 
         $statussetmaxpoints = attendance_get_statusset_maxpoints($userdata->statuses);
 
@@ -1001,6 +1007,15 @@ class mod_attendance_renderer extends plugin_renderer_base {
                     $row->cells[] = '? / ' . format_float($statussetmaxpoints[$sess->statusset], 1, true, true);
                     $row->cells[] = '';
                 }
+            }
+
+            if (has_capability('mod/attendance:takeattendances', $context)) {
+                $params = array('id' => $userdata->filtercontrols->cm->id,
+                    'sessionid' => $sess->id,
+                    'grouptype' => $sess->groupid);
+                $url = new moodle_url('/mod/attendance/take.php', $params);
+                $icon = $OUTPUT->pix_icon('redo', get_string('changeattendance', 'attendance'), 'attendance');
+                $row->cells[] = html_writer::link($url, $icon);
             }
 
             $table->data[] = $row;
