@@ -1,3 +1,4 @@
+/* global YUI */
 YUI().use('yui2-container', 'yui2-calendar', function(Y) {
     var YAHOO = Y.YUI2;
 
