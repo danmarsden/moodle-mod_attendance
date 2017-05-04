@@ -693,7 +693,7 @@ class mod_attendance_structure {
         );
         $allfields = get_all_user_name_fields();
         if (!empty($CFG->showuseridentity)) {
-            $allfields =  array_merge($allfields, explode(',', $CFG->showuseridentity));
+            $allfields = array_merge($allfields, explode(',', $CFG->showuseridentity));
         }
 
         foreach ($allfields as $namefield) {
