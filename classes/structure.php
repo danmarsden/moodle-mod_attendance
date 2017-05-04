@@ -678,6 +678,8 @@ class mod_attendance_structure {
 
     // Convert a tempuser record into a user object.
     protected static function tempuser_to_user($tempuser) {
+        global $CFG;
+
         $ret = (object)array(
             'id' => $tempuser->studentid,
             'firstname' => $tempuser->fullname,
@@ -689,11 +691,17 @@ class mod_attendance_structure {
             'picture' => 0,
             'type' => 'temporary',
         );
-        foreach (get_all_user_name_fields() as $namefield) {
+        $allfields = get_all_user_name_fields();
+        if (!empty($CFG->showuseridentity)) {
+            $allfields =  array_merge($allfields, explode(',', $CFG->showuseridentity));
+        }
+
+        foreach ($allfields as $namefield) {
             if (!isset($ret->$namefield)) {
                 $ret->$namefield = '';
             }
         }
+
         return $ret;
     }
 
