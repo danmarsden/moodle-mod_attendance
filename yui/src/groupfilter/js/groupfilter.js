@@ -1,4 +1,4 @@
-/*global M*/
+/* global M */
 M.mod_attendance = M.mod_attendance || {};
 M.mod_attendance.groupfilter = {
     groupmappings: null,
