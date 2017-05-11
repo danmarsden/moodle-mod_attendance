@@ -186,3 +186,6 @@
 .path-mod-attendance .attreport .narrow {
     width: 1px;
 }
+.path-mod-attendance .student-pass {
+    font-size: x-large;
+}
