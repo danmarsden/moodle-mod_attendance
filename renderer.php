@@ -1620,14 +1620,23 @@ class mod_attendance_renderer extends plugin_renderer_base {
     protected function render_attendance_preferences_data($prefdata) {
         $this->page->requires->js('/mod/attendance/module.js');
 
+        $studentscanmark = false;
+        if (!empty(get_config('attendance', 'studentscanmark'))) {
+            $studentscanmark = true;
+        }
+
         $table = new html_table();
         $table->width = '100%';
         $table->head = array('#',
                              get_string('acronym', 'attendance'),
                              get_string('description'),
-                             get_string('points', 'attendance'),
-                             get_string('action'));
+                             get_string('points', 'attendance'));
         $table->align = array('center', 'center', 'center', 'center', 'center', 'center');
+        if ($studentscanmark) {
+            $table->head[] = get_string('studentavailability', 'attendance');
+            $table->align[] = 'center';
+        }
+        $table->head[] = get_string('action');
 
         $i = 1;
         foreach ($prefdata->statuses as $st) {
@@ -1647,6 +1656,9 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $table->data[$i][] = $this->construct_text_input('description['.$st->id.']', 30, 30, $st->description) .
                                  $emptydescription;
             $table->data[$i][] = $this->construct_text_input('grade['.$st->id.']', 4, 4, $st->grade);
+            if ($studentscanmark) {
+                $table->data[$i][] = $this->construct_text_input('studentavailability['.$st->id.']', 4, 5, $st->studentavailability);
+            }
             $table->data[$i][] = $this->construct_preferences_actions_icons($st, $prefdata);
 
             $i++;
@@ -1656,6 +1668,9 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $table->data[$i][] = $this->construct_text_input('newacronym', 2, 2);
         $table->data[$i][] = $this->construct_text_input('newdescription', 30, 30);
         $table->data[$i][] = $this->construct_text_input('newgrade', 4, 4);
+        if ($studentscanmark) {
+            $table->data[$i][] = $this->construct_text_input('newstudentavailability', 4, 5);
+        }
         $table->data[$i][] = $this->construct_preferences_button(get_string('add', 'attendance'),
             mod_attendance_preferences_page_params::ACTION_ADD);
 

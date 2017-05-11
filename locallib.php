@@ -258,40 +258,31 @@ function attendance_update_users_grade($attendance, $userids=array()) {
 /**
  * Add an attendance status variable
  *
- * @param string $acronym
- * @param string $description
- * @param int $grade
- * @param int $attendanceid
- * @param int $setnumber
- * @param stdClass $context
- * @param stdClass $cm
+ * @param stdClass $status
  * @return bool
  */
-function attendance_add_status($acronym, $description, $grade, $attendanceid, $setnumber = 0, $context = null, $cm = null) {
+function attendance_add_status($status) {
     global $DB;
-    if (empty($context)) {
-        $context = context_system::instance();
+    if (empty($status->context)) {
+        $status->context = context_system::instance();
     }
-    if ($acronym && $description) {
-        $rec = new stdClass();
-        $rec->attendanceid = $attendanceid;
-        $rec->acronym = $acronym;
-        $rec->description = $description;
-        $rec->grade = $grade;
-        $rec->setnumber = $setnumber; // Save which set it is part of.
-        $rec->deleted = 0;
-        $rec->visible = 1;
-        $id = $DB->insert_record('attendance_statuses', $rec);
-        $rec->id = $id;
+
+    if (!empty($status->acronym) && !empty($status->description)) {
+        $status->deleted = 0;
+        $status->visible = 1;
+        $id = $DB->insert_record('attendance_statuses', $status);
+        $status->id = $id;
 
         $event = \mod_attendance\event\status_added::create(array(
-            'objectid' => $attendanceid,
-            'context' => $context,
-            'other' => array('acronym' => $acronym, 'description' => $description, 'grade' => $grade)));
-        if (!empty($cm)) {
-            $event->add_record_snapshot('course_modules', $cm);
+            'objectid' => $status->attendanceid,
+            'context' => $status->context,
+            'other' => array('acronym' => $status->acronym,
+                             'description' => $status->description,
+                             'grade' => $status->grade)));
+        if (!empty($status->cm)) {
+            $event->add_record_snapshot('course_modules', $status->cm);
         }
-        $event->add_record_snapshot('attendance_statuses', $rec);
+        $event->add_record_snapshot('attendance_statuses', $status);
         $event->trigger();
         return true;
     } else {
@@ -338,7 +329,7 @@ function attendance_remove_status($status, $context = null, $cm = null) {
  * @param stdClass $cm
  * @return array
  */
-function attendance_update_status($status, $acronym, $description, $grade, $visible, $context = null, $cm = null) {
+function attendance_update_status($status, $acronym, $description, $grade, $visible, $context = null, $cm = null, $studentavailability = null) {
     global $DB;
 
     if (empty($context)) {
@@ -365,6 +356,16 @@ function attendance_update_status($status, $acronym, $description, $grade, $visi
     if (isset($grade)) {
         $status->grade = $grade;
         $updated[] = $grade;
+    }
+    if (isset($studentavailability)) {
+        if (empty($studentavailability)) {
+            if ($studentavailability !== '0') {
+                $studentavailability = null;
+            }
+        }
+
+        $status->studentavailability = $studentavailability;
+        $updated[] = $studentavailability;
     }
     $DB->update_record('attendance_statuses', $status);
 

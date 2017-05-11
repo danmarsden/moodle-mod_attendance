@@ -380,3 +380,7 @@ $string['defaultstatus'] = 'Default status set';
 
 $string['defaultsessionsettings'] = 'Default session settings';
 $string['defaultsessionsettings_help'] = 'These settings define the defaults for all new sessions';
+
+$string['studentavailability'] = 'Available for students (minutes)';
+$string['somedisabledstatus'] = '(Some options have been removed as the session has started.)';
+$string['invalidstatus'] = 'You have selected an invalid status, please try again';
