@@ -38,7 +38,7 @@ Feature: Teachers and Students can record session attendance
         Then I should see "Attendance"
         And I log out
 
-    Scenario: Students can mark their own attendance
+    Scenario: Students can mark their own attendance and teacher can hide specific status from students.
         When I log in as "teacher1"
         And I follow "Course 1"
         And I follow "Attendance"
@@ -50,15 +50,29 @@ Feature: Teachers and Students can record session attendance
           | id_sestime_endminute | 55 |
         And I click on "id_submitbutton" "button"
         And I log out
-        When I log in as "student1"
+        And I log in as "student1"
         And I follow "Course 1"
         And I follow "Attendance"
         And I follow "Submit attendance"
+        And I should see "Excused"
+        And I log out
+        And I log in as "teacher1"
+        And I follow "Course 1"
+        And I follow "Attendance"
+        And I follow "Status set"
+        And I set the field with xpath "//*[@id='preferencesform']/table/tbody/tr[3]/td[5]/input" to "0"
+        And I press "Update"
+        And I log out
+        And I log in as "student1"
+        And I follow "Course 1"
+        And I follow "Attendance"
+        And I follow "Submit attendance"
+        And I should not see "Excused"
         And I set the field "Present" to "1"
         And I press "Save changes"
-        Then I should see "Self-recorded"
+        And I should see "Self-recorded"
         And I log out
-        When I log in as "teacher1"
+        And I log in as "teacher1"
         And I follow "Course 1"
         And I expand "Reports" node
         And I follow "Logs"
