@@ -84,7 +84,7 @@ class status_updated extends \core\event\base {
      */
     protected function get_legacy_logdata() {
         return array($this->courseid, 'attendance', 'status updated', $this->get_url(),
-            $this->other['updated'], $this->contextinstanceid);
+            '', $this->contextinstanceid);
     }
 
     /**
