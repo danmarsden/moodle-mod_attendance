@@ -257,8 +257,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 get_string('actions'),
                 html_writer::checkbox('cb_selector', 0, false, '', array('id' => 'cb_selector'))
             );
-        $table->align = array('', 'right', '', '', 'left', 'center', 'center');
-        $table->size = array('1px', '1px', '1px', '', '*', '110px', '1px');
+        $table->align = array('', 'right', '', '', 'left', 'right', 'center');
+        $table->size = array('1px', '1px', '1px', '', '*', '120px', '1px');
 
         $i = 0;
         foreach ($sessdata->sessions as $key => $sess) {
@@ -300,6 +300,18 @@ class mod_attendance_renderer extends plugin_renderer_base {
      */
     private function construct_date_time_actions(attendance_manage_data $sessdata, $sess) {
         $actions = '';
+        if (!empty($sess->studentpassword) &&
+            (has_capability('mod/attendance:manageattendances', $sessdata->att->context) ||
+            has_capability('mod/attendance:takeattendances', $sessdata->att->context) ||
+            has_capability('mod/attendance:changeattendances', $sessdata->att->context))) {
+
+            $icon = new pix_icon('key', '', 'attendance');
+            $attributes = array("class" => "btn-link p-a-0", "role" => "button",
+                                "data-toggle" => "popover", "data-placement" => "left", "data-html" => "true",
+                                "tabindex" => "0", "data-trigger" => "manual");
+            $attributes['data-content'] = html_writer::span($sess->studentpassword, 'student-pass');
+            $actions .= html_writer::tag('a', $this->output->render($icon), $attributes);
+        }
 
         $date = userdate($sess->sessdate, get_string('strftimedmyw', 'attendance'));
         $time = $this->construct_time($sess->sessdate, $sess->duration);
@@ -311,7 +323,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 $date = html_writer::link($url, $date, array('title' => $title));
                 $time = html_writer::link($url, $time, array('title' => $title));
 
-                $actions = $this->output->action_icon($url, new pix_icon('redo', $title, 'attendance'));
+                $actions .= $this->output->action_icon($url, new pix_icon('redo', $title, 'attendance'));
             } else {
                 $date = '<i>' . $date . '</i>';
                 $time = '<i>' . $time . '</i>';
@@ -320,7 +332,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             if (has_capability('mod/attendance:takeattendances', $sessdata->att->context)) {
                 $url = $sessdata->url_take($sess->id, $sess->groupid);
                 $title = get_string('takeattendance', 'attendance');
-                $actions = $this->output->action_icon($url, new pix_icon('t/go', $title));
+                $actions .= $this->output->action_icon($url, new pix_icon('t/go', $title));
             }
         }
 
