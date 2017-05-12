@@ -73,7 +73,7 @@ if ($mform->is_cancelled()) {
         $attforsession->studentpassword !== $fromform->studentpassword) {
 
         $url = new moodle_url('/mod/attendance/attendance.php', array('sessid' => $id, 'sesskey' => sesskey()));
-        redirect($url, get_string('incorrectpassword', 'mod_attendance'));
+        redirect($url, get_string('incorrectpassword', 'mod_attendance'), null, \core\output\notification::NOTIFY_ERROR);
     }
 
     if (!empty($fromform->status)) {
