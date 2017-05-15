@@ -1664,7 +1664,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $cells[] = $this->construct_preferences_actions_icons($st, $prefdata);
 
             $table->data[$i] = new html_table_row($cells);
-            $table->data[$i]->style = "statusrow".$i;
+            $table->data[$i]->id = "statusrow".$i;
             $i++;
         }
 
