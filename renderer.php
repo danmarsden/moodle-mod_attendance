@@ -1633,7 +1633,9 @@ class mod_attendance_renderer extends plugin_renderer_base {
                              get_string('points', 'attendance'));
         $table->align = array('center', 'center', 'center', 'center', 'center', 'center');
         if ($studentscanmark) {
-            $table->head[] = get_string('studentavailability', 'attendance');
+            $table->head[] = get_string('studentavailability', 'attendance').
+                $this->output->help_icon('studentavailability', 'attendance');
+
             $table->align[] = 'center';
         }
         $table->head[] = get_string('action');

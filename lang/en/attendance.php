@@ -382,5 +382,8 @@ $string['defaultsessionsettings'] = 'Default session settings';
 $string['defaultsessionsettings_help'] = 'These settings define the defaults for all new sessions';
 
 $string['studentavailability'] = 'Available for students (minutes)';
+$string['studentavailability_help'] = 'When students are marking their own attendance, the number of minutes after session starts that this status is available.
+ <br/>If empty, this status will always be available, If set to 0 it will always be hidden to students.';
+
 $string['somedisabledstatus'] = '(Some options have been removed as the session has started.)';
 $string['invalidstatus'] = 'You have selected an invalid status, please try again';
