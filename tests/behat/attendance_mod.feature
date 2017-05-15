@@ -59,7 +59,7 @@ Feature: Teachers and Students can record session attendance
     And I am on "Course 1" course homepage
     And I follow "Attendance"
     And I follow "Status set"
-    And I set the field with xpath "//tr[@id='statusrow2']//td[@class='c4']/input" to "0"
+    And I set the field with xpath "//*[@id='preferencesform']/table/tbody/tr[3]/td[5]/input" to "0"
     And I press "Update"
     And I log out
     And I log in as "student1"
