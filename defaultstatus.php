@@ -108,7 +108,8 @@ switch ($action) {
 
         foreach ($acronym as $id => $v) {
             $status = $statuses[$id];
-            $errors[$id] = attendance_update_status($status, $acronym[$id], $description[$id], $grade[$id], null, null, null, $studentavailability[$id]);
+            $errors[$id] = attendance_update_status($status, $acronym[$id], $description[$id], $grade[$id],
+                                             null, null, null, $studentavailability[$id]);
         }
         echo $OUTPUT->notification(get_string('eventstatusupdated', 'attendance'), 'success');
 
