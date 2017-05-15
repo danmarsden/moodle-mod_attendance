@@ -1650,17 +1650,19 @@ class mod_attendance_renderer extends plugin_renderer_base {
                     $emptydescription = $this->construct_notice(get_string('emptydescription', 'mod_attendance') , 'notifyproblem');
                 }
             }
-
-            $table->data[$i][] = $i;
-            $table->data[$i][] = $this->construct_text_input('acronym['.$st->id.']', 2, 2, $st->acronym) . $emptyacronym;
-            $table->data[$i][] = $this->construct_text_input('description['.$st->id.']', 30, 30, $st->description) .
+            $cells = array();
+            $cells[] = $i;
+            $cells[] = $this->construct_text_input('acronym['.$st->id.']', 2, 2, $st->acronym) . $emptyacronym;
+            $cells[] = $this->construct_text_input('description['.$st->id.']', 30, 30, $st->description) .
                                  $emptydescription;
-            $table->data[$i][] = $this->construct_text_input('grade['.$st->id.']', 4, 4, $st->grade);
+            $cells[] = $this->construct_text_input('grade['.$st->id.']', 4, 4, $st->grade);
             if ($studentscanmark) {
-                $table->data[$i][] = $this->construct_text_input('studentavailability['.$st->id.']', 4, 5, $st->studentavailability);
+                $cells[] = $this->construct_text_input('studentavailability['.$st->id.']', 4, 5, $st->studentavailability);
             }
-            $table->data[$i][] = $this->construct_preferences_actions_icons($st, $prefdata);
+            $cells[] = $this->construct_preferences_actions_icons($st, $prefdata);
 
+            $table->data[$i] = new html_table_row($cells);
+            $table->data[$i]->style = "statusrow".$i;
             $i++;
         }
 
