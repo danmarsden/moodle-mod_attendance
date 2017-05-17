@@ -66,7 +66,8 @@ class mod_attendance_update_form extends moodleform {
                                    'endhour' => $endhour, 'endminute' => $endminute),
                 'sdescription' => $sess->description_editor,
                 'studentscanmark' => $sess->studentscanmark,
-                'studentpassword' => $sess->studentpassword);
+                'studentpassword' => $sess->studentpassword,
+                'subnet' => $sess->subnet);
 
         $mform->addElement('header', 'general', get_string('changesession', 'attendance'));
 
@@ -99,9 +100,16 @@ class mod_attendance_update_form extends moodleform {
             $mform->setType('studentpassword', PARAM_TEXT);
             $mform->addHelpButton('studentpassword', 'passwordgrp', 'attendance');
             $mform->disabledif('studentpassword', 'studentscanmark', 'notchecked');
+
+            $mform->addElement('text', 'subnet', get_string('requiresubnet', 'attendance'));
+            $mform->setType('subnet', PARAM_TEXT);
+            $mform->addHelpButton('subnet', 'requiresubnet', 'attendance');
+            $mform->disabledif('subnet', 'studentscanmark', 'notchecked');
         } else {
             $mform->addElement('hidden', 'studentscanmark', '0');
             $mform->settype('studentscanmark', PARAM_INT);
+            $mform->addElement('hidden', 'subnet', '0');
+            $mform->settype('subnet', PARAM_TEXT);
         }
 
         $mform->addElement('editor', 'sdescription', get_string('description', 'attendance'),
