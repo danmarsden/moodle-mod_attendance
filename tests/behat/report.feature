@@ -126,7 +126,7 @@ Feature: Visiting reports
       | id_sessiontype_1     | 1  |
       | id_groups            | Group1 |
     And I click on "id_submitbutton" "button"
-    Then I should see "3AM -  4AM"
+    Then I should see "3AM - 4AM"
     And "Group: Group1" "text" should exist in the "3AM - 4AM" "table_row"
 
     When I click on "Take attendance" "link" in the "3AM - 4AM" "table_row"
@@ -164,7 +164,7 @@ Feature: Visiting reports
       | id_sestime_starthour | 03 |
       | id_sestime_endhour   | 04 |
     And I click on "id_submitbutton" "button"
-    Then I should see "3AM -  4AM"
+    Then I should see "3AM - 4AM"
 
     When I click on "Take attendance" "link" in the "3AM - 4AM" "table_row"
     # Present
@@ -176,7 +176,7 @@ Feature: Visiting reports
       | id_sestime_starthour | 05 |
       | id_sestime_endhour   | 06 |
     And I click on "id_submitbutton" "button"
-    Then I should see "5AM -  6AM"
+    Then I should see "5AM - 6AM"
 
     When I follow "Report"
     And I click on "Summary" "link" in the "All" "table_row"
