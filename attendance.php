@@ -46,7 +46,7 @@ if (!attendance_can_student_mark($attforsession)) {
 }
 
 // Check if subnet is set and if the user is in the allowed range.
-if (!empty($attendance->subnet) && !address_in_subnet(getremoteaddr(), $attendance->subnet)) {
+if (!empty($attforsession->subnet) && !address_in_subnet(getremoteaddr(), $attforsession->subnet)) {
     notice(get_string('subnetwrong', 'attendance'));
     exit; // Notice calls this anyway.
 }

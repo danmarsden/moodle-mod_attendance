@@ -143,10 +143,17 @@ class mod_attendance_add_form extends moodleform {
             if (isset($pluginconfig->randompassword_default)) {
                 $mform->setDefault('randompassword', $pluginconfig->randompassword_default);
             }
+            $mform->addElement('text', 'subnet', get_string('requiresubnet', 'attendance'));
+            $mform->setType('subnet', PARAM_TEXT);
+            $mform->addHelpButton('subnet', 'requiresubnet', 'attendance');
+            $mform->disabledif('subnet', 'studentscanmark', 'notchecked');
+            $mform->setDefault('subnet', $this->_customdata['att']->subnet);
 
         } else {
             $mform->addElement('hidden', 'studentscanmark', '0');
             $mform->settype('studentscanmark', PARAM_INT);
+            $mform->addElement('hidden', 'subnet', '');
+            $mform->setType('subnet', PARAM_TEXT);
         }
 
         $mform->addElement('editor', 'sdescription', get_string('description', 'attendance'), array('rows' => 1, 'columns' => 80),
