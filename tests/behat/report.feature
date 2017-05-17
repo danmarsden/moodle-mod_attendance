@@ -50,7 +50,7 @@ Feature: Visiting reports
          And "-" "text" should exist in the "Student 1" "table_row"
 
         When I follow "Attendance"
-        Then I click on "Take attendance" "link" in the "1am - 2am" "table_row"
+        Then I click on "Take attendance" "link" in the "1AM - 2AM" "table_row"
          # Late
          And I click on "td.c4 input" "css_element" in the "Student 1" "table_row"
          And I press "Save attendance"
@@ -76,7 +76,7 @@ Feature: Visiting reports
          And I press "Save and display"
 
         When I follow "Attendance"
-        Then I click on "Take attendance" "link" in the "1am - 2am" "table_row"
+        Then I click on "Take attendance" "link" in the "1AM - 2AM" "table_row"
          # Excused
          And I click on "td.c4 input" "css_element" in the "Student 1" "table_row"
          And I press "Save attendance"
@@ -117,7 +117,7 @@ Feature: Visiting reports
          And I press "Save and display"
 
         When I follow "Attendance"
-        Then I click on "Take attendance" "link" in the "1am - 2am" "table_row"
+        Then I click on "Take attendance" "link" in the "1AM - 2AM" "table_row"
          # Excused
          And I click on "td.c4 input" "css_element" in the "Student 1" "table_row"
          And I press "Save attendance"
@@ -129,10 +129,10 @@ Feature: Visiting reports
             | id_sessiontype_1     | 1  |
             | id_groups            | Group1 |
          And I click on "id_submitbutton" "button"
-        Then I should see "3am -  4am"
-         And "Group: Group1" "text" should exist in the "3am - 4am" "table_row"
+        Then I should see "3AM -  4AM"
+         And "Group: Group1" "text" should exist in the "3AM - 4AM" "table_row"
 
-        When I click on "Take attendance" "link" in the "3am - 4am" "table_row"
+        When I click on "Take attendance" "link" in the "3AM - 4AM" "table_row"
          # Present
          And I click on "td.c3 input" "css_element" in the "Student 1" "table_row"
          And I press "Save attendance"
@@ -157,7 +157,7 @@ Feature: Visiting reports
             | id_grade_modgrade_point | 50   |
          And I press "Save and display"
 
-        When I click on "Take attendance" "link" in the "1am - 2am" "table_row"
+        When I click on "Take attendance" "link" in the "1AM - 2AM" "table_row"
          # Late
          And I click on "td.c4 input" "css_element" in the "Student 1" "table_row"
          And I press "Save attendance"
@@ -167,9 +167,9 @@ Feature: Visiting reports
             | id_sestime_starthour | 03 |
             | id_sestime_endhour   | 04 |
          And I click on "id_submitbutton" "button"
-        Then I should see "3am -  4am"
+        Then I should see "3AM - 4AM"
 
-        When I click on "Take attendance" "link" in the "3am - 4am" "table_row"
+        When I click on "Take attendance" "link" in the "3AM - 4AM" "table_row"
          # Present
          And I click on "td.c3 input" "css_element" in the "Student 1" "table_row"
          And I press "Save attendance"
@@ -179,7 +179,7 @@ Feature: Visiting reports
             | id_sestime_starthour | 05 |
             | id_sestime_endhour   | 06 |
          And I click on "id_submitbutton" "button"
-        Then I should see "5am -  6am"
+        Then I should see "5AM - 6AM"
 
         When I follow "Report"
          And I click on "Summary" "link" in the "All" "table_row"
@@ -201,7 +201,7 @@ Feature: Visiting reports
             | id_grade_modgrade_point | 50   |
          And I press "Save and display"
 
-        When I click on "Take attendance" "link" in the "1am - 2am" "table_row"
+        When I click on "Take attendance" "link" in the "1AM - 2AM" "table_row"
          # Late
          And I click on "td.c4 input" "css_element" in the "Student 1" "table_row"
          And I press "Save attendance"
@@ -212,7 +212,7 @@ Feature: Visiting reports
             | id_sestime_endhour   | 04 |
          And I click on "id_submitbutton" "button"
 
-        When I click on "Take attendance" "link" in the "3am - 4am" "table_row"
+        When I click on "Take attendance" "link" in the "3AM - 4AM" "table_row"
          # Present
          And I click on "td.c3 input" "css_element" in the "Student 1" "table_row"
          And I press "Save attendance"
