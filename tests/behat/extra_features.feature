@@ -181,14 +181,14 @@ Feature: Test the various new features in the attendance module
       | id_sestime_endhour        | 13 |
     And I click on "submitbutton" "button"
 
-    When I click on "Take attendance" "link" in the "10am" "table_row"
+    When I click on "Take attendance" "link" in the "10AM" "table_row"
     Then "Set status for all users to «Present»" "link" should exist
     And "Set status for all users to «Late»" "link" should exist
     And "Set status for all users to «Excused»" "link" should exist
     And "Set status for all users to «Absent»" "link" should exist
 
     When I follow "Sessions"
-    And I click on "Take attendance" "link" in the "12pm" "table_row"
+    And I click on "Take attendance" "link" in the "12PM" "table_row"
     Then "Set status for all users to «Great»" "link" should exist
     And "Set status for all users to «OK»" "link" should exist
     And "Set status for all users to «Bad»" "link" should exist
