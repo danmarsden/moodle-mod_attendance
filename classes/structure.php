@@ -440,8 +440,15 @@ class mod_attendance_structure {
             $sess->description = $description;
             $sess->lasttaken = 0;
             $sess->lasttakenby = 0;
-            $sess->studentscanmark = 0;
-            $sess->studentpassword = '';
+            if (!isset($sess->studentscanmark)) {
+                $sess->studentscanmark = 0;
+            }
+            if (!isset($sess->studentpassword)) {
+                $sess->studentpassword = '';
+            }
+            if (!isset($sess->subnet)) {
+                $sess->subnet = '';
+            }
 
             $event->add_record_snapshot('attendance_sessions', $sess);
             $event->trigger();
