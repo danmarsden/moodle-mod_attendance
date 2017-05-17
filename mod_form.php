@@ -61,9 +61,9 @@ class mod_attendance_mod_form extends moodleform_mod {
 
         $mform->addElement('header', 'security', get_string('extrarestrictions', 'attendance'));
         // IP address.
-        $mform->addElement('text', 'subnet', get_string('requiresubnet', 'attendance'), array('size' => '164'));
+        $mform->addElement('text', 'subnet', get_string('defaultsubnet', 'attendance'), array('size' => '164'));
         $mform->setType('subnet', PARAM_TEXT);
-        $mform->addHelpButton('subnet', 'requiresubnet', 'attendance');
+        $mform->addHelpButton('subnet', 'defaultsubnet', 'attendance');
         $mform->setDefault('subnet', $attendanceconfig->subnet);
 
         $this->add_action_buttons();

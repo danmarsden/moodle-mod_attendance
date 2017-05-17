@@ -475,11 +475,13 @@ class mod_attendance_structure {
 
         $sess->studentscanmark = 0;
         $sess->studentpassword = '';
+        $sess->subnet = '';
 
         if (!empty(get_config('attendance', 'studentscanmark')) &&
             !empty($formdata->studentscanmark)) {
             $sess->studentscanmark = $formdata->studentscanmark;
             $sess->studentpassword = $formdata->studentpassword;
+            $sess->subnet = $formdata->subnet;
         }
 
         $sess->timemodified = time();

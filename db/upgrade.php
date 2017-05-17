@@ -260,5 +260,33 @@ function xmldb_attendance_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2017051101, 'attendance');
     }
 
+    if ($oldversion < 2017051103) {
+        $table = new xmldb_table('attendance_sessions');
+        $newfield = $table->add_field('subnet', XMLDB_TYPE_CHAR, '255', null, null, null, null, 'studentpassword');
+        if (!$dbman->field_exists($table, $newfield)) {
+            $dbman->add_field($table, $newfield);
+        }
+        upgrade_mod_savepoint(true, 2017051103, 'attendance');
+    }
+
+    if ($oldversion < 2017051104) {
+        // The meaning of the subnet in the attendance table has changed - it is now the "default" value - find all existing
+        // Attendance with subnet set and set the session subnet for these.
+        $attendances = $DB->get_recordset_select('attendance', 'subnet IS NOT NULL');
+        foreach ($attendances as $attendance) {
+            if (!empty($attendance->subnet)) {
+                // Get all sessions for this attendance.
+                $sessions = $DB->get_recordset('attendance_sessions', array('attendanceid' => $attendance->id));
+                foreach ($sessions as $session) {
+                    $session->subnet = $attendance->subnet;
+                    $DB->update_record('attendance_sessions', $session);
+                }
+                $sessions->close();
+            }
+        }
+        $attendances->close();
+
+        upgrade_mod_savepoint(true, 2017051104, 'attendance');
+    }
     return $result;
 }

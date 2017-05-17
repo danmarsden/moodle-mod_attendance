@@ -560,6 +560,7 @@ function attendance_construct_sessions_data_for_add($formdata) {
                     $sess->timemodified = $now;
                     if (isset($formdata->studentscanmark)) { // Students will be able to mark their own attendance.
                         $sess->studentscanmark = 1;
+                        $sess->subnet = $formdata->subnet;
                         if (!empty($formdata->randompassword)) {
                             $sess->studentpassword = attendance_random_string();
                         } else {
@@ -567,6 +568,7 @@ function attendance_construct_sessions_data_for_add($formdata) {
                         }
                     } else {
                         $sess->studentpassword = '';
+                        $sess->subnet = '';
                     }
                     $sess->statusset = $formdata->statusset;
 
@@ -587,6 +589,7 @@ function attendance_construct_sessions_data_for_add($formdata) {
         $sess->descriptionformat = $formdata->sdescription['format'];
         $sess->timemodified = $now;
         $sess->studentscanmark = 0;
+        $sess->subnet = '';
         $sess->studentpassword = '';
 
         if (isset($formdata->studentscanmark) && !empty($formdata->studentscanmark)) {
@@ -597,6 +600,7 @@ function attendance_construct_sessions_data_for_add($formdata) {
             } else {
                 $sess->studentpassword = $formdata->studentpassword;
             }
+            $sess->subnet = $formdata->subnet;
         }
         $sess->statusset = $formdata->statusset;
 
