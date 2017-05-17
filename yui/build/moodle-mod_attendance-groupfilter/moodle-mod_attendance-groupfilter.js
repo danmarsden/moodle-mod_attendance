@@ -1,6 +1,7 @@
 YUI.add('moodle-mod_attendance-groupfilter', function (Y, NAME) {
 
 /* global M */
+// eslint-disable-next-line camelcase
 M.mod_attendance = M.mod_attendance || {};
 M.mod_attendance.groupfilter = {
     groupmappings: null,

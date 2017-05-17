@@ -1,4 +1,5 @@
 /* global YUI */
+// eslint-disable-next-line new-cap
 YUI().use('yui2-container', 'yui2-calendar', function(Y) {
     var YAHOO = Y.YUI2;
 
