@@ -97,6 +97,14 @@ class mod_attendance_student_attendance_form extends moodleform {
         $mform->addRule('statusarray', get_string('attendancenotset', 'attendance'), 'required', '', 'client', false, false);
         $this->add_action_buttons();
     }
+
+    /**
+     * Validate Form.
+     *
+     * @param array $data
+     * @param array $files
+     * @return array
+     */
     public function validation($data, $files) {
         $errors = array();
         // Check if this status is allowed to be set.
