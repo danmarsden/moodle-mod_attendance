@@ -327,9 +327,11 @@ function attendance_remove_status($status, $context = null, $cm = null) {
  * @param bool $visible
  * @param stdClass $context
  * @param stdClass $cm
+ * @param int $studentavailability
  * @return array
  */
-function attendance_update_status($status, $acronym, $description, $grade, $visible, $context = null, $cm = null, $studentavailability = null) {
+function attendance_update_status($status, $acronym, $description, $grade, $visible,
+                                  $context = null, $cm = null, $studentavailability = null) {
     global $DB;
 
     if (empty($context)) {
