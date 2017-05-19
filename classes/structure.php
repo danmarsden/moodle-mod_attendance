@@ -70,6 +70,12 @@ class mod_attendance_structure {
     /** @var string subnets (IP range) for student self selection. */
     public $subnet;
 
+    /** @var string subnets (IP range) for student self selection. */
+    public $automark;
+
+    /** @var boolean flag set when automarking is complete. */
+    public $automarkcompleted;
+
     /** @var int Define if session details should be shown in reports */
     public $showsessiondetails;
 
@@ -416,6 +422,10 @@ class mod_attendance_structure {
 
         foreach ($sessions as $sess) {
             $sess->attendanceid = $this->id;
+            $sess->automarkcompleted = 0;
+            if (!isset($sess->automark)) {
+                $sess->automark = 0;
+            }
 
             $sess->id = $DB->insert_record('attendance_sessions', $sess);
             $description = file_save_draft_area_files($sess->descriptionitemid,
@@ -483,12 +493,17 @@ class mod_attendance_structure {
         $sess->studentscanmark = 0;
         $sess->studentpassword = '';
         $sess->subnet = '';
+        $sess->automark = 0;
+        $sess->automarkcompleted = 0;
 
         if (!empty(get_config('attendance', 'studentscanmark')) &&
             !empty($formdata->studentscanmark)) {
             $sess->studentscanmark = $formdata->studentscanmark;
             $sess->studentpassword = $formdata->studentpassword;
             $sess->subnet = $formdata->subnet;
+            if (!empty($formdata->automark)) {
+                $sess->automark = $formdata->automark;
+            }
         }
 
         $sess->timemodified = time();
@@ -751,7 +766,7 @@ class mod_attendance_structure {
         // Add the 'temporary' users to this list.
         $tempusers = $DB->get_records('attendance_tempusers', array('courseid' => $this->course->id));
         foreach ($tempusers as $tempuser) {
-            $users[] = self::tempuser_to_user($tempuser);
+            $users[$tempuser->studentid] = self::tempuser_to_user($tempuser);
         }
 
         return $users;

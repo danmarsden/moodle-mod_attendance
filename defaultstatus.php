@@ -101,6 +101,7 @@ switch ($action) {
         $description    = required_param_array('description', PARAM_TEXT);
         $grade          = required_param_array('grade', PARAM_RAW);
         $studentavailability = required_param_array('studentavailability', PARAM_RAW);
+        $unmarkedstatus = optional_param('setunmarked', null, PARAM_INT);
         foreach ($grade as &$val) {
             $val = unformat_float($val);
         }
@@ -108,8 +109,12 @@ switch ($action) {
 
         foreach ($acronym as $id => $v) {
             $status = $statuses[$id];
+            $setunmarked = false;
+            if ($unmarkedstatus == $id) {
+                $setunmarked = true;
+            }
             $errors[$id] = attendance_update_status($status, $acronym[$id], $description[$id], $grade[$id],
-                                             null, null, null, $studentavailability[$id]);
+                                             null, null, null, $studentavailability[$id], $setunmarked);
         }
         echo $OUTPUT->notification(get_string('eventstatusupdated', 'attendance'), 'success');
 

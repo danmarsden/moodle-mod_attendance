@@ -1635,7 +1635,10 @@ class mod_attendance_renderer extends plugin_renderer_base {
         if ($studentscanmark) {
             $table->head[] = get_string('studentavailability', 'attendance').
                 $this->output->help_icon('studentavailability', 'attendance');
+            $table->align[] = 'center';
 
+            $table->head[] = get_string('setunmarked', 'attendance').
+                $this->output->help_icon('setunmarked', 'attendance');
             $table->align[] = 'center';
         }
         $table->head[] = get_string('action');
@@ -1659,7 +1662,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
                                  $emptydescription;
             $cells[] = $this->construct_text_input('grade['.$st->id.']', 4, 4, $st->grade);
             if ($studentscanmark) {
+                $checked = '';
+                if ($st->setunmarked) {
+                    $checked = ' checked ';
+                }
                 $cells[] = $this->construct_text_input('studentavailability['.$st->id.']', 4, 5, $st->studentavailability);
+                $cells[] = '<input type="radio" name="setunmarked" value="'.$st->id.'"'.$checked.'>';
             }
             $cells[] = $this->construct_preferences_actions_icons($st, $prefdata);
 
