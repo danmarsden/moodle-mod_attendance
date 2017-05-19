@@ -67,7 +67,9 @@ class mod_attendance_update_form extends moodleform {
                 'sdescription' => $sess->description_editor,
                 'studentscanmark' => $sess->studentscanmark,
                 'studentpassword' => $sess->studentpassword,
-                'subnet' => $sess->subnet);
+                'subnet' => $sess->subnet,
+                'automark' => $sess->automark,
+                'automarkcompleted' => 0);
 
         $mform->addElement('header', 'general', get_string('changesession', 'attendance'));
 
@@ -91,10 +93,22 @@ class mod_attendance_update_form extends moodleform {
                 attendance_get_setname($this->_customdata['att']->id, $sess->statusset));
         }
 
+        $mform->addElement('editor', 'sdescription', get_string('description', 'attendance'),
+                           array('rows' => 1, 'columns' => 80), $defopts);
+        $mform->setType('sdescription', PARAM_RAW);
+
         // Students can mark own attendance.
         if (!empty(get_config('attendance', 'studentscanmark'))) {
+            $mform->addElement('header', 'headerstudentmarking', get_string('studentmarking', 'attendance'), true);
+            $mform->setExpanded('headerstudentmarking');
+
             $mform->addElement('checkbox', 'studentscanmark', '', get_string('studentscanmark', 'attendance'));
             $mform->addHelpButton('studentscanmark', 'studentscanmark', 'attendance');
+
+            $mform->addElement('checkbox', 'automark', get_string('automark', 'attendance'));
+            $mform->setType('automark', PARAM_INT);
+            $mform->addHelpButton('automark', 'automark', 'attendance');
+            $mform->disabledif('automark', 'studentscanmark', 'notchecked');
 
             $mform->addElement('text', 'studentpassword', get_string('studentpassword', 'attendance'));
             $mform->setType('studentpassword', PARAM_TEXT);
@@ -105,16 +119,20 @@ class mod_attendance_update_form extends moodleform {
             $mform->setType('subnet', PARAM_TEXT);
             $mform->addHelpButton('subnet', 'requiresubnet', 'attendance');
             $mform->disabledif('subnet', 'studentscanmark', 'notchecked');
+
+            $mform->addElement('hidden', 'automarkcompleted', '0');
+            $mform->settype('automarkcompleted', PARAM_INT);
+
         } else {
             $mform->addElement('hidden', 'studentscanmark', '0');
             $mform->settype('studentscanmark', PARAM_INT);
             $mform->addElement('hidden', 'subnet', '0');
             $mform->settype('subnet', PARAM_TEXT);
+            $mform->addElement('hidden', 'automark', '0');
+            $mform->settype('automark', PARAM_INT);
+            $mform->addElement('hidden', 'automarkcompleted', '0');
+            $mform->settype('automarkcompleted', PARAM_INT);
         }
-
-        $mform->addElement('editor', 'sdescription', get_string('description', 'attendance'),
-                           array('rows' => 1, 'columns' => 80), $defopts);
-        $mform->setType('sdescription', PARAM_RAW);
 
         $mform->setDefaults($data);
 

@@ -389,3 +389,10 @@ $string['studentavailability_help'] = 'When students are marking their own atten
 
 $string['somedisabledstatus'] = '(Some options have been removed as the session has started.)';
 $string['invalidstatus'] = 'You have selected an invalid status, please try again';
+$string['setunmarked'] = 'Automatically set when not marked';
+$string['setunmarked_help'] = 'If enabled in the session, set this status if a student has not marked their own attendance.';
+$string['automark'] = 'Automatically set status on close of session.';
+$string['automark_help'] = 'When session closes, automatically set status for unreported students as configured by status set.';
+$string['studentmarking'] = 'Student recording';
+$string['automarktask'] = 'Check for closed attendance sessions that require auto marking';
+$string['autorecorded'] = 'system auto recorded';
