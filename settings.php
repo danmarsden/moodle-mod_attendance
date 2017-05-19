@@ -71,6 +71,9 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configcheckbox('attendance/studentscanmark_default',
         get_string('studentscanmark', 'attendance'), '', 0));
 
+    $settings->add(new admin_setting_configcheckbox('attendance/automark_default',
+        get_string('automark', 'attendance'), '', 0));
+
     $settings->add(new admin_setting_configcheckbox('attendance/randompassword_default',
         get_string('randompassword', 'attendance'), '', 0));
 }

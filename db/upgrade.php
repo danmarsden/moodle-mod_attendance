@@ -285,5 +285,35 @@ function xmldb_attendance_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2017050204, 'attendance');
     }
 
+    if ($oldversion < 2017050206) {
+        // Define field setunmarked to be added to attendance_statuses.
+        $table = new xmldb_table('attendance_statuses');
+        $field = new xmldb_field('setunmarked', XMLDB_TYPE_INTEGER, '2', null, null, null, null, 'studentavailability');
+
+        // Conditionally launch add field setunmarked.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field setunmarked to be added to attendance_statuses.
+        $table = new xmldb_table('attendance_sessions');
+        $field = new xmldb_field('automark', XMLDB_TYPE_INTEGER, '1', null, true, null, '0', 'subnet');
+
+        // Conditionally launch add field automark.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('automarkcompleted', XMLDB_TYPE_INTEGER, '1', null, true, null, '0', 'automark');
+
+        // Conditionally launch add field automarkcompleted.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Attendance savepoint reached.
+        upgrade_mod_savepoint(true, 2017050206, 'attendance');
+    }
+
     return $result;
 }

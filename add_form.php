@@ -121,10 +121,23 @@ class mod_attendance_add_form extends moodleform {
             $mform->setType('statusset', PARAM_INT);
         }
 
+        $mform->addElement('editor', 'sdescription', get_string('description', 'attendance'), array('rows' => 1, 'columns' => 80),
+                            array('maxfiles' => EDITOR_UNLIMITED_FILES, 'noclean' => true, 'context' => $modcontext));
+        $mform->setType('sdescription', PARAM_RAW);
+
         // Students can mark own attendance.
         if (!empty(get_config('attendance', 'studentscanmark'))) {
+            $mform->addElement('header', 'headerstudentmarking', get_string('studentmarking', 'attendance'), true);
+            $mform->setExpanded('headerstudentmarking');
             $mform->addElement('checkbox', 'studentscanmark', '', get_string('studentscanmark', 'attendance'));
             $mform->addHelpButton('studentscanmark', 'studentscanmark', 'attendance');
+
+            $mform->addElement('checkbox', 'automark', get_string('automark', 'attendance'));
+            $mform->setType('automark', PARAM_INT);
+            $mform->addHelpButton('automark', 'automark', 'attendance');
+            $mform->disabledif('automark', 'studentscanmark', 'notchecked');
+            $mform->setDefault('automark', $this->_customdata['att']->automark);
+
             $mgroup = array();
 
             $mgroup[] = & $mform->createElement('text', 'studentpassword', get_string('studentpassword', 'attendance'));
@@ -143,6 +156,9 @@ class mod_attendance_add_form extends moodleform {
             if (isset($pluginconfig->randompassword_default)) {
                 $mform->setDefault('randompassword', $pluginconfig->randompassword_default);
             }
+            if (isset($pluginconfig->automark_default)) {
+                $mform->setDefault('automark', $pluginconfig->automark_default);
+            }
             $mform->addElement('text', 'subnet', get_string('requiresubnet', 'attendance'));
             $mform->setType('subnet', PARAM_TEXT);
             $mform->addHelpButton('subnet', 'requiresubnet', 'attendance');
@@ -152,13 +168,11 @@ class mod_attendance_add_form extends moodleform {
         } else {
             $mform->addElement('hidden', 'studentscanmark', '0');
             $mform->settype('studentscanmark', PARAM_INT);
+            $mform->addElement('hidden', 'automark', '0');
+            $mform->setType('automark', PARAM_INT);
             $mform->addElement('hidden', 'subnet', '');
             $mform->setType('subnet', PARAM_TEXT);
         }
-
-        $mform->addElement('editor', 'sdescription', get_string('description', 'attendance'), array('rows' => 1, 'columns' => 80),
-                            array('maxfiles' => EDITOR_UNLIMITED_FILES, 'noclean' => true, 'context' => $modcontext));
-        $mform->setType('sdescription', PARAM_RAW);
 
         // For multiple sessions.
 

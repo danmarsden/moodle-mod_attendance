@@ -48,13 +48,13 @@ class backup_attendance_activity_structure_step extends backup_activity_structur
 
         $statuses = new backup_nested_element('statuses');
         $status  = new backup_nested_element('status', array('id'), array(
-            'acronym', 'description', 'grade', 'studentavailability', 'visible', 'deleted', 'setnumber'));
+            'acronym', 'description', 'grade', 'studentavailability', 'setunmarked', 'visible', 'deleted', 'setnumber'));
 
         $sessions = new backup_nested_element('sessions');
         $session  = new backup_nested_element('session', array('id'), array(
             'groupid', 'sessdate', 'duration', 'lasttaken', 'lasttakenby',
             'timemodified', 'description', 'descriptionformat', 'studentscanmark', 'studentpassword',
-            'subnet', 'statusset', 'caleventid'));
+            'subnet', 'automark', 'automarkcompleted', 'statusset', 'caleventid'));
 
         // XML nodes declaration - user data.
         $logs = new backup_nested_element('logs');
