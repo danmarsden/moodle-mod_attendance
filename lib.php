@@ -190,6 +190,10 @@ function attendance_reset_userdata($data) {
             $DB->delete_records_select('attendance_log', "sessionid $sql", $params);
             list($sql, $params) = $DB->get_in_or_equal($attids);
             $DB->set_field_select('attendance_sessions', 'lasttaken', 0, "attendanceid $sql", $params);
+            if (empty($data->reset_attendance_sessions)) {
+                // If sessions are being retained, clear automarkcompleted value.
+                $DB->set_field_select('attendance_sessions', 'automarkcompleted', 0, "attendanceid $sql", $params);
+            }
 
             $status[] = array(
                 'component' => get_string('modulenameplural', 'attendance'),
