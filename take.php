@@ -40,6 +40,9 @@ $pageparams->perpage    = optional_param('perpage', get_config('attendance', 're
 $cm             = get_coursemodule_from_id('attendance', $id, 0, false, MUST_EXIST);
 $course         = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
 $att            = $DB->get_record('attendance', array('id' => $cm->instance), '*', MUST_EXIST);
+// Check this is a valid session for this attendance.
+$session        = $DB->get_record('attendance_sessions', array('id' => $pageparams->sessionid, 'attendanceid' => $att->id),
+                                  '*', MUST_EXIST);
 
 require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
