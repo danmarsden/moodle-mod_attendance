@@ -235,7 +235,7 @@ class mod_attendance_summary {
                    {$joingroup}
                   WHERE ats.attendanceid = :attid
                     AND ats.sessdate >= :cstartdate
-                    AND ats.lasttakenby != 0
+                    AND ats.lasttaken != 0
                     {$where}
                 GROUP BY atl.studentid";
         $this->userspoints = $DB->get_records_sql($sql, $params);
@@ -293,7 +293,7 @@ class mod_attendance_summary {
                   {$joingroup}
                  WHERE ats.attendanceid = :attid
                    AND ats.sessdate >= :cstartdate
-                   AND ats.lasttakenby != 0
+                   AND ats.lasttaken != 0
                    {$where}
               GROUP BY atl.studentid, sts.setnumber, sts.acronym";
         $this->userstakensessionsbyacronym = array();
