@@ -649,3 +649,51 @@ function attendance_fill_groupid($formdata, &$sessions, $sess) {
         }
     }
 }
+
+/**
+ * Generates a summary of points for the courses selected.
+ *
+ * @param array $courseids optional list of courses to return
+ * @param string $orderby - optional order by param
+ * @return stdClass
+ */
+function attendance_course_users_points($courseids = array(), $orderby = '') {
+    global $DB;
+
+    $where = '';
+    $params = array();
+    $where .= ' AND ats.sessdate < :enddate ';
+    $params['enddate'] = time();
+
+    $joingroup = 'LEFT JOIN {groups_members} gm ON (gm.userid = atl.studentid AND gm.groupid = ats.groupid)';
+    $where .= ' AND (ats.groupid = 0 or gm.id is NOT NULL)';
+
+    if (!empty($courseids)) {
+        list($insql, $inparams) = $DB->get_in_or_equal($courseids, SQL_PARAMS_NAMED);
+        $where .= ' AND c.id ' . $insql;
+        $params = array_merge($params, $inparams);
+    }
+
+    $sql = "SELECT courseid, coursename, sum(points) / sum(maxpoints) as percentage FROM (
+SELECT a.id, a.course as courseid, c.fullname as coursename, atl.studentid AS userid, COUNT(DISTINCT ats.id) AS numtakensessions,
+                        SUM(stg.grade) AS points, SUM(stm.maxgrade) AS maxpoints
+                   FROM mdl_attendance_sessions ats
+                   JOIN mdl_attendance a ON a.id = ats.attendanceid
+                   JOIN mdl_course c ON c.id = a.course
+                   JOIN mdl_attendance_log atl ON (atl.sessionid = ats.id)
+                   JOIN mdl_attendance_statuses stg ON (stg.id = atl.statusid AND stg.deleted = 0 AND stg.visible = 1)
+                   JOIN (SELECT attendanceid, setnumber, MAX(grade) AS maxgrade
+                           FROM mdl_attendance_statuses
+                          WHERE deleted = 0
+                            AND visible = 1
+                         GROUP BY attendanceid, setnumber) stm
+                     ON (stm.setnumber = ats.statusset AND stm.attendanceid = ats.attendanceid)
+                  {$joingroup}
+                  WHERE ats.sessdate >= c.startdate
+                    AND ats.lasttaken != 0
+                    {$where}
+                GROUP BY a.id, a.course, c.fullname, atl.studentid
+                ) p GROUP by courseid, coursename {$orderby}";
+
+    return $DB->get_records_sql($sql, $params);
+}
