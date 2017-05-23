@@ -132,4 +132,13 @@ $capabilities = array(
             'manager' => CAP_ALLOW
         )
     ),
+    // Allow access to site level reports.
+    'mod/attendance:viewsummaryreports' => array(
+        'riskbitmask' => RISK_PERSONAL,
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_COURSECAT,
+        'archetypes' => array(
+            'manager' => CAP_ALLOW
+        )
+    ),
 );
