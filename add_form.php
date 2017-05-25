@@ -164,6 +164,7 @@ class mod_attendance_add_form extends moodleform {
             $mform->addHelpButton('subnet', 'requiresubnet', 'attendance');
             $mform->disabledif('subnet', 'studentscanmark', 'notchecked');
             $mform->setDefault('subnet', $this->_customdata['att']->subnet);
+            $mform->setAdvanced('subnet');
 
         } else {
             $mform->addElement('hidden', 'studentscanmark', '0');

@@ -119,6 +119,7 @@ class mod_attendance_update_form extends moodleform {
             $mform->setType('subnet', PARAM_TEXT);
             $mform->addHelpButton('subnet', 'requiresubnet', 'attendance');
             $mform->disabledif('subnet', 'studentscanmark', 'notchecked');
+            $mform->setAdvanced('subnet');
 
             $mform->addElement('hidden', 'automarkcompleted', '0');
             $mform->settype('automarkcompleted', PARAM_INT);
