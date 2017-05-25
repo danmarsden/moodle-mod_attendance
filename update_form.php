@@ -49,6 +49,7 @@ class mod_attendance_update_form extends moodleform {
         if (!$sess = $DB->get_record('attendance_sessions', array('id' => $sessionid) )) {
             error('No such session in this course');
         }
+        $attendancesubnet = $DB->get_field('attendance', 'subnet', array('id' => $sess->attendanceid));
         $defopts = array('maxfiles' => EDITOR_UNLIMITED_FILES, 'noclean' => true, 'context' => $modcontext);
         $sess = file_prepare_standard_editor($sess, 'description', $defopts, $modcontext, 'mod_attendance', 'session', $sess->id);
 
@@ -70,6 +71,11 @@ class mod_attendance_update_form extends moodleform {
                 'subnet' => $sess->subnet,
                 'automark' => $sess->automark,
                 'automarkcompleted' => 0);
+        if ($sess->subnet == $attendancesubnet) {
+            $data['usedefaultsubnet'] = 1;
+        } else {
+            $data['usedefaultsubnet'] = 0;
+        }
 
         $mform->addElement('header', 'general', get_string('changesession', 'attendance'));
 
@@ -115,11 +121,21 @@ class mod_attendance_update_form extends moodleform {
             $mform->addHelpButton('studentpassword', 'passwordgrp', 'attendance');
             $mform->disabledif('studentpassword', 'studentscanmark', 'notchecked');
 
-            $mform->addElement('text', 'subnet', get_string('requiresubnet', 'attendance'));
+
+            $mgroup2 = array();
+            $mgroup2[] = & $mform->createElement('text', 'subnet', get_string('requiresubnet', 'attendance'));
+            $mform->setDefault('subnet', $this->_customdata['att']->subnet);
+            $mgroup2[] = & $mform->createElement('checkbox', 'usedefaultsubnet', get_string('usedefaultsubnet', 'attendance'));
+            $mform->setDefault('usedefaultsubnet', 1);
             $mform->setType('subnet', PARAM_TEXT);
-            $mform->addHelpButton('subnet', 'requiresubnet', 'attendance');
+
+            $mform->addGroup($mgroup2, 'subnetgrp', get_string('requiresubnet', 'attendance'), array(' '), false);
+            $mform->setAdvanced('subnetgrp');
+            $mform->addHelpButton('subnetgrp', 'requiresubnet', 'attendance');
+
+            $mform->disabledif('usedefaultsubnet', 'studentscanmark', 'notchecked');
             $mform->disabledif('subnet', 'studentscanmark', 'notchecked');
-            $mform->setAdvanced('subnet');
+            $mform->disabledif('subnet', 'usedefaultsubnet', 'checked');
 
             $mform->addElement('hidden', 'automarkcompleted', '0');
             $mform->settype('automarkcompleted', PARAM_INT);
