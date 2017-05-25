@@ -121,15 +121,14 @@ class mod_attendance_update_form extends moodleform {
             $mform->addHelpButton('studentpassword', 'passwordgrp', 'attendance');
             $mform->disabledif('studentpassword', 'studentscanmark', 'notchecked');
 
-
-            $mgroup2 = array();
-            $mgroup2[] = & $mform->createElement('text', 'subnet', get_string('requiresubnet', 'attendance'));
+            $mgroup = array();
+            $mgroup[] = & $mform->createElement('text', 'subnet', get_string('requiresubnet', 'attendance'));
             $mform->setDefault('subnet', $this->_customdata['att']->subnet);
-            $mgroup2[] = & $mform->createElement('checkbox', 'usedefaultsubnet', get_string('usedefaultsubnet', 'attendance'));
+            $mgroup[] = & $mform->createElement('checkbox', 'usedefaultsubnet', get_string('usedefaultsubnet', 'attendance'));
             $mform->setDefault('usedefaultsubnet', 1);
             $mform->setType('subnet', PARAM_TEXT);
 
-            $mform->addGroup($mgroup2, 'subnetgrp', get_string('requiresubnet', 'attendance'), array(' '), false);
+            $mform->addGroup($mgroup, 'subnetgrp', get_string('requiresubnet', 'attendance'), array(' '), false);
             $mform->setAdvanced('subnetgrp');
             $mform->addHelpButton('subnetgrp', 'requiresubnet', 'attendance');
 
