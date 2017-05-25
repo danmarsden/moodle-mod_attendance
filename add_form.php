@@ -159,13 +159,20 @@ class mod_attendance_add_form extends moodleform {
             if (isset($pluginconfig->automark_default)) {
                 $mform->setDefault('automark', $pluginconfig->automark_default);
             }
-            $mform->addElement('text', 'subnet', get_string('requiresubnet', 'attendance'));
-            $mform->setType('subnet', PARAM_TEXT);
-            $mform->addHelpButton('subnet', 'requiresubnet', 'attendance');
-            $mform->disabledif('subnet', 'studentscanmark', 'notchecked');
+            $mgroup2 = array();
+            $mgroup2[] = & $mform->createElement('text', 'subnet', get_string('requiresubnet', 'attendance'));
             $mform->setDefault('subnet', $this->_customdata['att']->subnet);
-            $mform->setAdvanced('subnet');
+            $mgroup2[] = & $mform->createElement('checkbox', 'usedefaultsubnet', get_string('usedefaultsubnet', 'attendance'));
+            $mform->setDefault('usedefaultsubnet', 1);
+            $mform->setType('subnet', PARAM_TEXT);
 
+            $mform->addGroup($mgroup2, 'subnetgrp', get_string('requiresubnet', 'attendance'), array(' '), false);
+            $mform->setAdvanced('subnetgrp');
+            $mform->addHelpButton('subnetgrp', 'requiresubnet', 'attendance');
+
+            $mform->disabledif('usedefaultsubnet', 'studentscanmark', 'notchecked');
+            $mform->disabledif('subnet', 'studentscanmark', 'notchecked');
+            $mform->disabledif('subnet', 'usedefaultsubnet', 'checked');
         } else {
             $mform->addElement('hidden', 'studentscanmark', '0');
             $mform->settype('studentscanmark', PARAM_INT);

@@ -520,9 +520,10 @@ function attendance_exporttocsv($data, $filename) {
 /**
  * Get session data for form.
  * @param stdClass $formdata moodleform - attendance form.
+ * $param mod_attendance_structure $att - used to get attendance level subnet.
  * @return array.
  */
-function attendance_construct_sessions_data_for_add($formdata) {
+function attendance_construct_sessions_data_for_add($formdata, mod_attendance_structure $att) {
     global $CFG;
 
     $sesstarttime = $formdata->sestime['starthour'] * HOURSECS + $formdata->sestime['startminute'] * MINSECS;
@@ -570,7 +571,11 @@ function attendance_construct_sessions_data_for_add($formdata) {
                     $sess->timemodified = $now;
                     if (isset($formdata->studentscanmark)) { // Students will be able to mark their own attendance.
                         $sess->studentscanmark = 1;
-                        $sess->subnet = $formdata->subnet;
+                        if (!empty($formdata->usedefaultsubnet)) {
+                            $sess->subnet = $att->subnet;
+                        } else {
+                            $sess->subnet = $formdata->subnet;
+                        }
                         $sess->automark = $formdata->automark;
                         $sess->automarkcompleted = 0;
                         if (!empty($formdata->randompassword)) {
@@ -616,7 +621,12 @@ function attendance_construct_sessions_data_for_add($formdata) {
             } else {
                 $sess->studentpassword = $formdata->studentpassword;
             }
-            $sess->subnet = $formdata->subnet;
+            if (!empty($formdata->usedefaultsubnet)) {
+                $sess->subnet = $att->subnet;
+            } else {
+                $sess->subnet = $formdata->subnet;
+            }
+
             if (!empty($formdata->automark)) {
                 $sess->automark = $formdata->automark;
             }

@@ -500,7 +500,12 @@ class mod_attendance_structure {
             !empty($formdata->studentscanmark)) {
             $sess->studentscanmark = $formdata->studentscanmark;
             $sess->studentpassword = $formdata->studentpassword;
-            $sess->subnet = $formdata->subnet;
+            if (!empty($formdata->usedefaultsubnet)) {
+                $sess->subnet = $this->subnet;
+            } else {
+                $sess->subnet = $formdata->subnet;
+            }
+
             if (!empty($formdata->automark)) {
                 $sess->automark = $formdata->automark;
             }
