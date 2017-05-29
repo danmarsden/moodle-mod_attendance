@@ -400,3 +400,4 @@ $string['autorecorded'] = 'system auto recorded';
 $string['coursesummary'] = 'Course summary report';
 $string['averageattendance'] = 'Average attendance';
 $string['usedefaultsubnet'] = 'Use default';
+$string['categoryreport'] = 'Course category report';
