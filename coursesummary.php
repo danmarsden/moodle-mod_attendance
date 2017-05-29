@@ -36,10 +36,12 @@ require_login();
 if (empty($category)) {
     $context = context_system::instance();
     $courses = array(); // Show all courses.
+    $PAGE->set_context(context_system::instance());
 } else {
     $context = context_coursecat::instance($category);
     $coursecat = coursecat::get($category);
     $courses = $coursecat->get_courses(array('recursive' => true, 'idonly' => true));
+    $PAGE->set_category_by_id($category);
 }
 // Check permissions.
 require_capability('mod/attendance:viewsummaryreports', $context);
@@ -47,7 +49,7 @@ require_capability('mod/attendance:viewsummaryreports', $context);
 $exportfilename = 'attendancecoursesummary.csv';
 
 $PAGE->set_url('/mod/attendance/coursesummary.php', array('category' => $category));
-$PAGE->set_context(context_system::instance());
+
 $PAGE->set_heading($SITE->fullname);
 
 $table = new flexible_table('attendancecoursesummary');
