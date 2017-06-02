@@ -26,6 +26,7 @@ defined('MOODLE_INTERNAL') || die;
 
 if ($ADMIN->fulltree) {
     require_once(dirname(__FILE__).'/lib.php');
+    require_once(dirname(__FILE__).'/locallib.php');
 
     $tabmenu = attendance_print_settings_tabs();
     $settings->add(new admin_setting_heading('attendance_header', '', $tabmenu));
@@ -56,6 +57,18 @@ if ($ADMIN->fulltree) {
         get_string('studentscanmarksessiontimeend', 'attendance'),
         get_string('studentscanmarksessiontimeend_desc', 'attendance'), '60', PARAM_INT));
 
+    $options = array(
+        ATT_VIEW_ALL => get_string('all', 'attendance'),
+        ATT_VIEW_ALLPAST => get_string('allpast', 'attendance'),
+        ATT_VIEW_NOTPRESENT => get_string('lowgrade', 'attendance'),
+        ATT_VIEW_MONTHS => get_string('months', 'attendance'),
+        ATT_VIEW_WEEKS => get_string('weeks', 'attendance'),
+        ATT_VIEW_DAYS => get_string('days', 'attendance')
+    );
+
+    $settings->add(new admin_setting_configselect('attendance/defaultview',
+        get_string('defaultview', 'attendance'),
+            get_string('defaultview_desc', 'attendance'), ATT_VIEW_WEEKS, $options));
 
     $name = new lang_string('defaultsettings', 'mod_attendance');
     $description = new lang_string('defaultsettings_help', 'mod_attendance');

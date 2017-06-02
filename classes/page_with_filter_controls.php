@@ -64,7 +64,7 @@ class mod_attendance_page_with_filter_controls {
     public $selectortype        = self::SELECTOR_NONE;
 
     /** @var int default view. */
-    protected $defaultview      = ATT_VIEW_WEEKS;
+    protected $defaultview;
 
     /** @var stdClass course module record. */
     private $cm;
@@ -82,6 +82,9 @@ class mod_attendance_page_with_filter_controls {
      */
     public function init($cm) {
         $this->cm = $cm;
+        if (empty($this->defaultview)) {
+            $this->defaultview = get_config('attendance', 'defaultview');
+        }
         $this->init_view();
         $this->init_curdate();
         $this->init_start_end_date();
