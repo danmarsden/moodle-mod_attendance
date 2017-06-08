@@ -85,7 +85,8 @@ class mod_attendance_student_attendance_form extends moodleform {
         // Create radio buttons for setting the attendance status.
         $radioarray = array();
         foreach ($statuses as $status) {
-            $radioarray[] =& $mform->createElement('radio', 'status', '', $status->description, $status->id, array());
+            $name = html_writer::span($status->description, 'statusdesc');
+            $radioarray[] =& $mform->createElement('radio', 'status', '', $name, $status->id, array());
         }
         if ($disabledduetotime) {
             $warning = html_writer::span(get_string('somedisabledstatus', 'attendance'), 'somedisabledstatus');
@@ -93,7 +94,8 @@ class mod_attendance_student_attendance_form extends moodleform {
         }
 
         // Add the radio buttons as a control with the user's name in front.
-        $mform->addGroup($radioarray, 'statusarray', $USER->firstname.' '.$USER->lastname.':', array(''), false);
+        $radiogroup = $mform->addGroup($radioarray, 'statusarray', $USER->firstname.' '.$USER->lastname.':', array(''), false);
+        $radiogroup->setAttributes(array('class' => 'statusgroup'));
         $mform->addRule('statusarray', get_string('attendancenotset', 'attendance'), 'required', '', 'client', false, false);
         $this->add_action_buttons();
     }

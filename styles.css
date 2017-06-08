@@ -189,3 +189,6 @@
 .path-mod-attendance .student-pass {
     font-size: x-large;
 }
+#page-mod-attendance-sessions .statusgroup .statusdesc {
+    margin-right: 12px;
+}
