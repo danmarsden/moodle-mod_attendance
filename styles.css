@@ -177,3 +177,6 @@
 .path-mod-attendance .summaryreport .c7 {
     background-color: #EAEAEA;
 }
+#page-mod-attendance-sessions .statusgroup .statusdesc {
+    margin-right: 12px;
+}
