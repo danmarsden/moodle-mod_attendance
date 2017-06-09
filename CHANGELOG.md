@@ -1,4 +1,5 @@
 ### [Unreleased]
+- New Feature: Allow automatic marking using site logs.
 - Improvement: Allow default view for teachers to be set at admin level.
 
 ### Date:		2017-May-23

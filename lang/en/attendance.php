@@ -62,8 +62,12 @@ $string['attendancesuccess'] = 'Attendance has been successfully taken';
 $string['attendanceupdated'] = 'Attendance successfully updated';
 $string['attforblockdirstillexists'] = 'old mod/attforblock directory still exists - you must delete this directory on your server before running this upgrade.';
 $string['attrecords'] = 'Attendances records';
-$string['automark'] = 'Automatically set status on close of session.';
-$string['automark_help'] = 'When session closes, automatically set status for unreported students as configured by status set.';
+$string['automark'] = 'Automatic marking';
+$string['automarkall'] = 'Yes';
+$string['automarkclose'] = 'Set unmarked at end of session';
+$string['automark_help'] = 'Allows marking to be completed automatically.
+If "Yes" students will be automatically marked depending on their first access to the course.
+If "Set unmarked at end of session" any students who have not marked their attendance will be set to the unmarked status selected.';
 $string['automarktask'] = 'Check for closed attendance sessions that require auto marking';
 $string['autorecorded'] = 'system auto recorded';
 $string['averageattendance'] = 'Average attendance';
@@ -201,6 +205,7 @@ $string['newdate'] = 'New date';
 $string['newduration'] = 'New duration';
 $string['newstatusset'] = 'New set of statuses';
 $string['noattendanceusers'] = 'It is not possible to export any data as there are no students enrolled in the course.';
+$string['noautomark'] = 'Disabled';
 $string['noattforuser'] = 'No attendance records exist for the user';
 $string['nodescription'] = 'Regular class session';
 $string['nogroups'] = 'You can\'t add group sessions. No groups exists in course.';
