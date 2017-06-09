@@ -525,7 +525,7 @@ class mod_attendance_structure {
             'objectid' => $this->id,
             'context' => $this->context,
             'other' => array('info' => $info, 'sessionid' => $sessionid,
-                             'action' => mod_attendance_sessions_page_params::ACTION_UPDATE)));
+                'action' => mod_attendance_sessions_page_params::ACTION_UPDATE)));
         $event->add_record_snapshot('course_modules', $this->cm);
         $event->add_record_snapshot('attendance_sessions', $sess);
         $event->trigger();
@@ -1162,5 +1162,42 @@ class mod_attendance_structure {
         }
 
         return null;
+    }
+
+    /**
+     * Gets the status to use when auto-marking.
+     *
+     * @param int $time the time the user first accessed the course.
+     * @param int $sessionid the related sessionid to check.
+     * @return int the statusid to assign to this user.
+     */
+    public function get_automark_status($time, $sessionid) {
+        $statuses = $this->get_statuses();
+        // Statuses are returned highest grade first, find the first high grade we can assign to this user.
+
+        // Get status to use when unmarked.
+        $session = $this->sessioninfo[$sessionid];
+        $duration = $session->duration;
+        if (empty($duration)) {
+            $duration = get_config('attendance', 'studentscanmarksessiontimeend') * 60;
+        }
+        if ($time > $session->sessdate + $duration) {
+            // This session closed after the users access - use the unmarked state.
+            foreach ($statuses as $status) {
+                if (!empty($status->setunmarked)) {
+                    return $status->id;
+                }
+            }
+        } else {
+            foreach ($statuses as $status) {
+                if ($status->studentavailability !== '0' &&
+                    $this->sessioninfo[$sessionid]->sessdate + ($status->studentavailability * 60) > $time) {
+
+                    // Found first status we could set.
+                    return $status->id;
+                }
+            }
+        }
+        return;
     }
 }

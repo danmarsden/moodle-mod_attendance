@@ -44,13 +44,22 @@ class auto_mark extends \core\task\scheduled_task {
         $cachecm = array();
         $cacheatt = array();
         $cachecourse = array();
+        $now = time(); // Store current time to use in queries so they all match nicely.
+
         $sessions = $DB->get_recordset_select('attendance_sessions',
-            'automark = 1 AND automarkcompleted = 0 AND sessdate < ? ', array(time()));
+            'automark > 0 AND automarkcompleted < 2 AND sessdate < ? ', array($now));
 
         foreach ($sessions as $session) {
-            // Would be nice to change duration field to a timestamp so we don't need this step.
-            if ($session->sessdate + $session->duration < time()) {
+            if ($session->sessdate + $session->duration < $now || // If session is over.
+                // OR if session is currently open and automark is set to do all.
+                ($session->sessdate < $now && $session->automark == 1)) {
+
+                $userfirstaccess = array();
                 $donesomething = false; // Only trigger grades/events when an update actually occurs.
+                $sessionover = false; // Is this session over?
+                if ($session->sessdate + $session->duration < $now) {
+                    $sessionover = true;
+                }
 
                 // Store cm/att/course in cachefields so we don't make unnecessary db calls.
                 // Would probably be nice to grab this stuff outside of the loop.
@@ -84,6 +93,42 @@ class auto_mark extends \core\task\scheduled_task {
                 }
                 $pageparams->sessionid  = $session->id;
 
+                if ($session->automark == 1) {
+                    $userfirstacess = array();
+                    // If set to do full automarking, get all users that have accessed course during session open.
+                    $id = $DB->sql_concat('userid', 'ip'); // Users may access from multiple ip, make the first field unique.
+                    $sql = "SELECT $id, userid, ip, min(timecreated) as timecreated
+                             FROM {logstore_standard_log}
+                            WHERE courseid = ? AND timecreated > ? AND timecreated < ?
+                         GROUP BY userid, ip";
+
+                    $timestart = $session->sessdate;
+                    if (empty($session->lasttakenby) && $session->lasttaken > $timestart) {
+                        // If the last time session was taken it was done automatically, use the last time taken
+                        // as the start time for the logs we are interested in to help with performance.
+                        $timestart = $session->lasttaken;
+                    }
+                    $duration = $session->duration;
+                    if (empty($duration)) {
+                        $duration = get_config('attendance', 'studentscanmarksessiontimeend') * 60;
+                    }
+                    $timeend = $timestart + $duration;
+                    $logusers = $DB->get_recordset_sql($sql, array($courseid, $timestart, $timeend));
+                    // Check if user access is in allowed subnet.
+                    foreach ($logusers as $loguser) {
+                        if (!empty($session->subnet) && !address_in_subnet($loguser->ip, $session->subnet)) {
+                            // This record isn't in the right subnet.
+                            continue;
+                        }
+                        if (empty($userfirstaccess[$loguser->userid]) ||
+                            $userfirstaccess[$loguser->userid] > $loguser->timecreated) {
+                            // Users may have accessed from mulitple ip addresses, find the earliest access.
+                            $userfirstaccess[$loguser->userid] = $loguser->timecreated;
+                        }
+                    }
+                    $logusers->close();
+                }
+
                 // Get all unmarked students.
                 $att = new \mod_attendance_structure($cacheatt[$session->attendanceid],
                     $cachecm[$session->attendanceid], $cachecourse[$courseid], $context, $pageparams);
@@ -95,15 +140,23 @@ class auto_mark extends \core\task\scheduled_task {
 
                 foreach ($existinglog as $log) {
                     if (empty($log->statusid)) {
-                        // Status needs updating.
-                        $existinglog->statusid = $setunmarked;
-                        $existinglog->timetaken = time();
-                        $existinglog->takenby = 0;
-                        $existinglog->remarks = get_string('autorecorded', 'attendance');
+                        if ($sessionover || !empty($userfirstaccess[$log->studentid])) {
+                            // Status needs updating.
+                            if ($sessionover) {
+                                $log->statusid = $setunmarked;
+                            } else if (!empty($userfirstaccess[$log->studentid])) {
+                                $log->statusid = $att->get_automark_status($userfirstaccess[$log->studentid], $session->id);
+                            }
+                            if (!empty($log->statusid)) {
+                                $log->timetaken = $now;
+                                $log->takenby = 0;
+                                $log->remarks = get_string('autorecorded', 'attendance');
 
-                        $DB->update_record('attendance_log', $existinglog);
-                        $updated++;
-                        $donesomething = true;
+                                $DB->update_record('attendance_log', $log);
+                                $updated++;
+                                $donesomething = true;
+                            }
+                        }
                     }
                     unset($users[$log->studentid]);
                 }
@@ -111,8 +164,7 @@ class auto_mark extends \core\task\scheduled_task {
                 mtrace($updated . " session status updated");
 
                 $newlog = new \stdClass();
-                $newlog->statusid = $setunmarked;
-                $newlog->timetaken = time();
+                $newlog->timetaken = $now;
                 $newlog->takenby = 0;
                 $newlog->sessionid = $session->id;
                 $newlog->remarks = get_string('autorecorded', 'attendance');
@@ -120,17 +172,31 @@ class auto_mark extends \core\task\scheduled_task {
 
                 $added = 0;
                 foreach ($users as $user) {
-                    $newlog->studentid = $user->id;
-                    $DB->insert_record('attendance_log', $newlog);
-                    $added++;
-                    $donesomething = true;
+                    if ($sessionover || !empty($userfirstaccess[$user->id])) {
+                        if ($sessionover) {
+                            $newlog->statusid = $setunmarked;
+                        } else if (!empty($userfirstaccess[$user->id])) {
+                            $newlog->statusid = $att->get_automark_status($userfirstaccess[$user->id], $session->id);
+                        }
+                        if (!empty($newlog->statusid)) {
+                            $newlog->studentid = $user->id;
+                            $DB->insert_record('attendance_log', $newlog);
+                            $added++;
+                            $donesomething = true;
+                        }
+                    }
                 }
                 mtrace($added . " session status inserted");
 
                 // Update lasttaken time and automarkcompleted for this session.
-                $session->lasttaken = $newlog->timetaken;
+                $session->lasttaken = $now;
                 $session->lasttakenby = 0;
-                $session->automarkcompleted = 1;
+                if ($sessionover) {
+                    $session->automarkcompleted = 2;
+                } else {
+                    $session->automarkcompleted = 1;
+                }
+
                 $DB->update_record('attendance_sessions', $session);
 
                 if ($donesomething) {

@@ -84,8 +84,13 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configcheckbox('attendance/studentscanmark_default',
         get_string('studentscanmark', 'attendance'), '', 0));
 
-    $settings->add(new admin_setting_configcheckbox('attendance/automark_default',
-        get_string('automark', 'attendance'), '', 0));
+    $options = array(
+        ATTENDANCE_AUTOMARK_DISABLED => get_string('noautomark', 'attendance'),
+        ATTENDANCE_AUTOMARK_ALL => get_string('automarkall', 'attendance'),
+        ATTENDANCE_AUTOMARK_CLOSE => get_string('automarkclose', 'attendance'));
+
+    $settings->add(new admin_setting_configselect('attendance/automark_default',
+        get_string('automark', 'attendance'), '', 0, $options));
 
     $settings->add(new admin_setting_configcheckbox('attendance/randompassword_default',
         get_string('randompassword', 'attendance'), '', 0));

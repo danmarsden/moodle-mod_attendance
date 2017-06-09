@@ -39,6 +39,9 @@ define('ATT_SORT_DEFAULT', 0);
 define('ATT_SORT_LASTNAME', 1);
 define('ATT_SORT_FIRSTNAME', 2);
 
+define('ATTENDANCE_AUTOMARK_DISABLED', 0);
+define('ATTENDANCE_AUTOMARK_ALL', 1);
+define('ATTENDANCE_AUTOMARK_CLOSE', 2);
 /**
  * Get statuses,
  *
@@ -618,7 +621,7 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
             $sess->studentscanmark = 1;
             if (!empty($formdata->randompassword)) {
                 $sess->studentpassword = attendance_random_string();
-            } else {
+            } else if (!empty($formdata->studentpassword)) {
                 $sess->studentpassword = $formdata->studentpassword;
             }
             if (!empty($formdata->usedefaultsubnet)) {
