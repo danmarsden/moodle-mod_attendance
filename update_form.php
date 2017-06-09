@@ -111,7 +111,12 @@ class mod_attendance_update_form extends moodleform {
             $mform->addElement('checkbox', 'studentscanmark', '', get_string('studentscanmark', 'attendance'));
             $mform->addHelpButton('studentscanmark', 'studentscanmark', 'attendance');
 
-            $mform->addElement('checkbox', 'automark', get_string('automark', 'attendance'));
+            $options2 = array(
+                ATTENDANCE_AUTOMARK_DISABLED => get_string('noautomark', 'attendance'),
+                ATTENDANCE_AUTOMARK_ALL => get_string('automarkall', 'attendance'),
+                ATTENDANCE_AUTOMARK_CLOSE => get_string('automarkclose', 'attendance'));
+
+            $mform->addElement('select', 'automark', get_string('automark', 'attendance'), $options2);
             $mform->setType('automark', PARAM_INT);
             $mform->addHelpButton('automark', 'automark', 'attendance');
             $mform->disabledif('automark', 'studentscanmark', 'notchecked');
@@ -120,6 +125,8 @@ class mod_attendance_update_form extends moodleform {
             $mform->setType('studentpassword', PARAM_TEXT);
             $mform->addHelpButton('studentpassword', 'passwordgrp', 'attendance');
             $mform->disabledif('studentpassword', 'studentscanmark', 'notchecked');
+            $mform->disabledif('studentpassword', 'automark', 'eq', ATTENDANCE_AUTOMARK_ALL);
+            $mform->disabledif('randompassword', 'automark', 'eq', ATTENDANCE_AUTOMARK_ALL);
 
             $mgroup = array();
             $mgroup[] = & $mform->createElement('text', 'subnet', get_string('requiresubnet', 'attendance'));

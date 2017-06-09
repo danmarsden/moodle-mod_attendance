@@ -315,5 +315,21 @@ function xmldb_attendance_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2016121311, 'attendance');
     }
 
+    if ($oldversion < 2016121314) {
+        // Automark values changed.
+        $default = get_config('attendance', 'automark_default');
+        if (!empty($default)) { // Change default if set.
+            set_config('automark_default', 2, 'attendance');
+        }
+        // Update any sessions set to use automark = 1.
+        $sql = "UPDATE {attendance_sessions} SET automark = 2 WHERE automark = 1";
+        $DB->execute($sql);
+
+        // Update automarkcompleted to 2 if already complete.
+        $sql = "UPDATE {attendance_sessions} SET automarkcompleted = 2 WHERE automarkcompleted = 1";
+        $DB->execute($sql);
+
+        upgrade_mod_savepoint(true, 2016121314, 'attendance');
+    }
     return $result;
 }

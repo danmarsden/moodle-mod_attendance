@@ -132,7 +132,12 @@ class mod_attendance_add_form extends moodleform {
             $mform->addElement('checkbox', 'studentscanmark', '', get_string('studentscanmark', 'attendance'));
             $mform->addHelpButton('studentscanmark', 'studentscanmark', 'attendance');
 
-            $mform->addElement('checkbox', 'automark', get_string('automark', 'attendance'));
+            $options = array(
+                ATTENDANCE_AUTOMARK_DISABLED => get_string('noautomark', 'attendance'),
+                ATTENDANCE_AUTOMARK_ALL => get_string('automarkall', 'attendance'),
+                ATTENDANCE_AUTOMARK_CLOSE => get_string('automarkclose', 'attendance'));
+
+            $mform->addElement('select', 'automark', get_string('automark', 'attendance'), $options);
             $mform->setType('automark', PARAM_INT);
             $mform->addHelpButton('automark', 'automark', 'attendance');
             $mform->disabledif('automark', 'studentscanmark', 'notchecked');
@@ -150,6 +155,8 @@ class mod_attendance_add_form extends moodleform {
             $mform->addHelpButton('passwordgrp', 'passwordgrp', 'attendance');
             $mform->disabledif('randompassword', 'studentscanmark', 'notchecked');
             $mform->disabledif('studentpassword', 'randompassword', 'checked');
+            $mform->disabledif('studentpassword', 'automark', 'eq', ATTENDANCE_AUTOMARK_ALL);
+            $mform->disabledif('randompassword', 'automark', 'eq', ATTENDANCE_AUTOMARK_ALL);
             if (isset($pluginconfig->studentscanmark_default)) {
                 $mform->setDefault('studentscanmark', $pluginconfig->studentscanmark_default);
             }
