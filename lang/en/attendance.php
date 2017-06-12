@@ -68,7 +68,7 @@ $string['automarkclose'] = 'Set unmarked at end of session';
 $string['automark_help'] = 'Allows marking to be completed automatically.
 If "Yes" students will be automatically marked depending on their first access to the course.
 If "Set unmarked at end of session" any students who have not marked their attendance will be set to the unmarked status selected.';
-$string['automarktask'] = 'Check for closed attendance sessions that require auto marking';
+$string['automarktask'] = 'Check for attendance sessions that require auto marking';
 $string['autorecorded'] = 'system auto recorded';
 $string['averageattendance'] = 'Average attendance';
 $string['calclose'] = 'Close';
