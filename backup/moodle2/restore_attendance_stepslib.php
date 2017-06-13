@@ -128,7 +128,11 @@ class restore_attendance_activity_structure_step extends restore_activity_struct
         }
 
         $newitemid = $DB->insert_record('attendance_sessions', $data);
+        $data->id = $newitemid;
         $this->set_mapping('attendance_session', $oldid, $newitemid, true);
+
+        // Create Calendar event.
+        attendance_create_calendar_event($data);
     }
 
     /**
