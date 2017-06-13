@@ -513,8 +513,12 @@ class mod_attendance_structure {
 
         $sess->timemodified = time();
         $DB->update_record('attendance_sessions', $sess);
-
-        attendance_update_calendar_event($sess->caleventid, $sess->duration, $sess->sessdate);
+        if (empty($sess->caleventid)) {
+             // This shouldn't really happen, but just in case to prevent fatal error.
+            attendance_create_calendar_event($sess);
+        } else {
+            attendance_update_calendar_event($sess->caleventid, $sess->duration, $sess->sessdate);
+        }
 
         $info = construct_session_full_date_time($sess->sessdate, $sess->duration);
         $event = \mod_attendance\event\session_updated::create(array(
