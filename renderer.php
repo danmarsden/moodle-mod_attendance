@@ -942,7 +942,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $average = format_float($totalpercentage / $totalattendance).'%';
             $col = new html_table_cell(get_string('averageattendance', 'mod_attendance'));
             $col->attributes['class'] = 'averageattendance';
-            $row->cells = array($col, '', '','', $average);
+            $row->cells = array($col, '', '', '', $average);
             $table->data[] = $row;
 
             $o .= html_writer::table($table);
