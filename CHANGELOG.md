@@ -1,6 +1,8 @@
 ### [Unreleased]
 - New Feature: Allow automatic marking using site logs.
 - Improvement: Allow default view for teachers to be set at admin level.
+- Improvement: All courses user report now displays as table.
+- Bug fix: Restored attendances do not create calendar events correctly.
 
 ### Date:		2017-May-23
 ### Release:	2017052301
