@@ -27,6 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 require_once(dirname(__FILE__).'/locallib.php');
 require_once(dirname(__FILE__).'/renderables.php');
 require_once(dirname(__FILE__).'/renderhelpers.php');
+require_once($CFG->libdir.'/tablelib.php');
 
 /**
  * Attendance module renderer class
@@ -892,6 +893,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
      * @return string
      */
     private function construct_user_data(attendance_user_data $userdata) {
+        global $PAGE;
         $o = html_writer::tag('h2', fullname($userdata->user));
 
         if ($userdata->pageparams->mode == mod_attendance_view_page_params::MODE_THIS_COURSE) {
@@ -905,20 +907,45 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $o .= $this->construct_user_sessions_log($userdata);
         } else {
             $prevcid = 0;
+            $table = new html_table();
+            $table->head  = array(get_string('course'),
+                get_string('pluginname', 'mod_attendance'),
+                get_string('sessionscompleted', 'attendance'),
+                get_string('pointssessionscompleted', 'attendance'),
+                get_string('percentagesessionscompleted', 'attendance'));
+            $table->align = array('left', 'left', 'center', 'center', 'center');
+            $totalattendance = 0;
+            $totalpercentage = 0;
             foreach ($userdata->coursesatts as $ca) {
-                if ($prevcid != $ca->courseid) {
-                    $o .= html_writer::empty_tag('hr');
-                    $prevcid = $ca->courseid;
-
-                    $o .= html_writer::tag('h3', $ca->coursefullname);
-                }
-
+                $row = new html_table_row();
+                $courseurl = new moodle_url('/course/view.php', array('id' => $ca->courseid));
+                $row->cells[] = html_writer::link($courseurl, $ca->coursefullname);
+                $attendanceurl = new moodle_url('/mod/attendance/view.php', array('id' => $ca->cmid,
+                                                                                      'studentid' => $userdata->user->id,
+                                                                                      'view' => ATT_VIEW_ALL));
+                $row->cells[] = html_writer::link($attendanceurl, $ca->attname);
                 if (isset($userdata->summary[$ca->attid])) {
-                    $o .= html_writer::tag('h4', $ca->attname);
                     $usersummary = $userdata->summary[$ca->attid]->get_all_sessions_summary_for($userdata->user->id);
-                    $o .= construct_user_data_stat($usersummary, ATT_VIEW_ALL);
+
+                    $row->cells[] = $usersummary->numtakensessions;
+                    $row->cells[] = format_float($usersummary->takensessionspoints, 1, true, true) . ' / ' .
+                        format_float($usersummary->takensessionsmaxpoints, 1, true, true);
+                    $row->cells[] = format_float($usersummary->takensessionspercentage * 100) . '%';
+                }
+                $table->data[] = $row;
+                if ($usersummary->numtakensessions > 0) {
+                    $totalattendance++;
+                    $totalpercentage = $totalpercentage + format_float($usersummary->takensessionspercentage * 100);
                 }
             }
+            $row = new html_table_row();
+            $average = format_float($totalpercentage / $totalattendance).'%';
+            $col = new html_table_cell(get_string('averageattendance', 'mod_attendance'));
+            $col->attributes['class'] = 'averageattendance';
+            $row->cells = array($col, '', '','', $average);
+            $table->data[] = $row;
+
+            $o .= html_writer::table($table);
         }
 
         return $o;
