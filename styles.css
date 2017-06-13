@@ -192,3 +192,7 @@
 #page-mod-attendance-sessions .statusgroup .statusdesc {
     margin-right: 12px;
 }
+
+#page-mod-attendance-view .averageattendance {
+    font-weight: bold;
+}
