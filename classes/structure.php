@@ -578,7 +578,7 @@ class mod_attendance_structure {
 
         if ($page) {
             $usersperpage = $this->pageparams->perpage;
-            if (!empty($CFG->enablegroupmembersonly) and $this->cm->groupmembersonly) {
+            if (!empty($this->cm->groupingid)) {
                 $startusers = ($page - 1) * $usersperpage;
                 if ($groupid == 0) {
                     $groups = array_keys(groups_get_all_groups($this->cm->course, 0, $this->cm->groupingid, 'g.id'));
@@ -595,7 +595,7 @@ class mod_attendance_structure {
                     $orderby, $startusers, $usersperpage);
             }
         } else {
-            if (!empty($CFG->enablegroupmembersonly) and $this->cm->groupmembersonly) {
+            if (!empty($this->cm->groupingid)) {
                 if ($groupid == 0) {
                     $groups = array_keys(groups_get_all_groups($this->cm->course, 0, $this->cm->groupingid, 'g.id'));
                 } else {
