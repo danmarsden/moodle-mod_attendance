@@ -228,9 +228,9 @@ Feature: Visiting reports
         When I log in as "student1"
          And I follow "Course 1"
          And I follow "Attendance"
-         And I follow "All"
+         And I click on "All" "link" in the ".attfiltercontrols" "css_element"
 
-        Then "2" "text" should exist in the "Taken sessions" "table_row"
+      Then "2" "text" should exist in the "Taken sessions" "table_row"
          And "3 / 4" "text" should exist in the "Points over taken sessions:" "table_row"
          And "75.0%" "text" should exist in the "Percentage over taken sessions:" "table_row"
          And "3" "text" should exist in the "Total number of sessions:" "table_row"
