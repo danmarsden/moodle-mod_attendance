@@ -491,7 +491,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             }
         }
 
-        if (!empty($CFG->enablegroupmembersonly) and $takedata->cm->groupmembersonly) {
+        if (!empty($takedata->cm->groupingid)) {
             if ($group == 0) {
                 $groups = array_keys(groups_get_all_groups($takedata->cm->course, 0, $takedata->cm->groupingid, 'g.id'));
             } else {
