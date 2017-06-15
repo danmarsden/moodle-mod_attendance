@@ -479,7 +479,6 @@ class mod_attendance_renderer extends plugin_renderer_base {
      * @return string
      */
     private function construct_take_controls(attendance_take_data $takedata) {
-        global $CFG;
 
         $controls = '';
         $context = context_module::instance($takedata->cm->id);
