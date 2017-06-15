@@ -340,5 +340,37 @@ function xmldb_attendance_upgrade($oldversion=0) {
 
         upgrade_mod_savepoint(true, 2017060900, 'attendance');
     }
+
+    // Add new notification table.
+    if ($oldversion < 2017061600) {
+
+        // Define table attendance_notification to be created.
+        $table = new xmldb_table('attendance_notification');
+
+        // Adding fields to table attendance_notification.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('notifylevel', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('idnumber', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('warningpercent', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('warnafter', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('emailuser', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('emailsubject', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('emailcontent', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL, null, null);
+        $table->add_field('emailcontentformat', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('thirdpartyemails', XMLDB_TYPE_TEXT, null, null, null, null, null);
+
+        // Adding keys to table attendance_notification.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        $table->add_key('level_id', XMLDB_KEY_UNIQUE, array('notifylevel', 'idnumber'));
+
+        // Conditionally launch create table for attendance_notification.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Attendance savepoint reached.
+        upgrade_mod_savepoint(true, 2017061600, 'attendance');
+    }
+
     return $result;
 }
