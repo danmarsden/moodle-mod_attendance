@@ -80,10 +80,13 @@ class mod_attendance_add_notification_form extends moodleform {
         $mform->addElement('hidden', 'idnumber', 0); // Default options use 0 as the idnumber.
         $mform->setType('idnumber', PARAM_INT);
 
-        $mform->addElement('hidden', 'notid', 0); // When adding no id is set.
+        $mform->addElement('hidden', 'notid', 0); // id of notification record.
         $mform->setType('notid', PARAM_INT);
 
-        if (!empty($this->_customdata)) {
+        $mform->addElement('hidden', 'id', $this->_customdata['id']); // id of course module record if setting attendance level.
+        $mform->setType('id', PARAM_INT);
+
+        if (!empty($this->_customdata['notid'])) {
             $btnstring = get_string('update', 'attendance');
         } else {
             $btnstring = get_string('add', 'attendance');

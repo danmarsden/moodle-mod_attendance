@@ -393,6 +393,20 @@ class mod_attendance_structure {
     }
 
     /**
+     * Get preferences url
+     * @param array $params
+     * @return moodle_url of attsettings.php for attendance instance
+     */
+    public function url_notifications($params=array()) {
+        // Add the statusset params.
+        if (isset($this->pageparams->statusset) && !isset($params['statusset'])) {
+            $params['statusset'] = $this->pageparams->statusset;
+        }
+        $params = array_merge(array('id' => $this->cm->id), $params);
+        return new moodle_url('/mod/attendance/notifications.php', $params);
+    }
+
+    /**
      * Get take url.
      * @param array $params
      * @return moodle_url of attendances.php for attendance instance

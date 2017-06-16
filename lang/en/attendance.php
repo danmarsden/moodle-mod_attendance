@@ -235,6 +235,7 @@ $string['nosessionexists'] = 'No Session exists for this course';
 $string['nosessionsselected'] = 'No sessions selected';
 $string['notificationdeleted'] = 'Notification deleted';
 $string['notificationdesc'] = 'These notifications will be automatically added to any new attendance activities.';
+$string['notifications'] = 'Notifications set';
 $string['notificationupdated'] = 'Updated notifications';
 $string['notfound'] = 'Attendance activity not found in this course!';
 $string['notmember'] = 'not&nbsp;member';

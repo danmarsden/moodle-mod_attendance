@@ -70,6 +70,24 @@ function att_add_default_statuses($attid) {
 }
 
 /**
+ * Add default set of notifications to the new attendance.
+ *
+ * @param int $attid - id of attendance instance.
+ */
+function attendance_add_default_notifications($attid) {
+    global $DB;
+
+    $notifications = $DB->get_recordset('attendance_notification',
+        array('idnumber' => 0, 'notifylevel' => ATTENDANCE_NOTIFYLEVEL_ATTENDANCE), 'id');
+    foreach ($notifications as $n) {
+        $rec = $n;
+        $rec->idnumber = $attid;
+        $DB->insert_record('attendance_notification', $rec);
+    }
+    $notifications->close();
+}
+
+/**
  * Add new attendance instance.
  *
  * @param stdClass $attendance
@@ -83,6 +101,7 @@ function attendance_add_instance($attendance) {
     $attendance->id = $DB->insert_record('attendance', $attendance);
 
     att_add_default_statuses($attendance->id);
+    attendance_add_default_notifications($attendance->id);
 
     attendance_grade_item_update($attendance);
 
@@ -450,7 +469,7 @@ function attendance_print_settings_tabs($selected = 'settings') {
     $tabs[] = new tabobject('defaultstatus', $CFG->wwwroot.'/mod/attendance/defaultstatus.php',
         get_string('defaultstatus', 'attendance'), get_string('defaultstatus', 'attendance'), false);
 
-    $tabs[] = new tabobject('defaultnotifications', $CFG->wwwroot.'/mod/attendance/defaultnotifications.php',
+    $tabs[] = new tabobject('defaultnotifications', $CFG->wwwroot.'/mod/attendance/notifications.php',
         get_string('defaultnotifications', 'attendance'), get_string('defaultnotifications', 'attendance'), false);
 
     $tabs[] = new tabobject('coursesummary', $CFG->wwwroot.'/mod/attendance/coursesummary.php',
