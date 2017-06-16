@@ -450,6 +450,9 @@ function attendance_print_settings_tabs($selected = 'settings') {
     $tabs[] = new tabobject('defaultstatus', $CFG->wwwroot.'/mod/attendance/defaultstatus.php',
         get_string('defaultstatus', 'attendance'), get_string('defaultstatus', 'attendance'), false);
 
+    $tabs[] = new tabobject('defaultnotifications', $CFG->wwwroot.'/mod/attendance/defaultnotifications.php',
+        get_string('defaultnotifications', 'attendance'), get_string('defaultnotifications', 'attendance'), false);
+
     $tabs[] = new tabobject('coursesummary', $CFG->wwwroot.'/mod/attendance/coursesummary.php',
         get_string('coursesummary', 'attendance'), get_string('coursesummary', 'attendance'), false);
 

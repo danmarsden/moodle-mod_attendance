@@ -361,7 +361,7 @@ function xmldb_attendance_upgrade($oldversion=0) {
 
         // Adding keys to table attendance_notification.
         $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
-        $table->add_key('level_id', XMLDB_KEY_UNIQUE, array('notifylevel', 'idnumber'));
+        $table->add_key('level_id', XMLDB_KEY_UNIQUE, array('notifylevel', 'idnumber, warningpercent'));
 
         // Conditionally launch create table for attendance_notification.
         if (!$dbman->table_exists($table)) {

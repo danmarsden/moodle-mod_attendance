@@ -128,7 +128,7 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="level_id" TYPE="unique" FIELDS="notifylevel, idnumber"/>
+        <KEY NAME="level_id" TYPE="unique" FIELDS="notifylevel, idnumber, warningpercent"/>
       </KEYS>
     </TABLE>
   </TABLES>

@@ -98,4 +98,33 @@ if ($ADMIN->fulltree) {
 
     $settings->add(new admin_setting_configcheckbox('attendance/randompassword_default',
         get_string('randompassword', 'attendance'), '', 0));
+
+    $name = new lang_string('defaultnotificationsettings', 'mod_attendance');
+    $description = new lang_string('defaultnotificationsettings_help', 'mod_attendance');
+    $settings->add(new admin_setting_heading('defaultnotificationsettings', $name, $description));
+
+    $options = array();
+    for ($i = 1; $i <= 100; $i++) {
+        $options[$i] = "$i%";
+    }
+    $settings->add(new admin_setting_configselect('attendance/warningpercent',
+        get_string('warningpercent', 'attendance'), get_string('warningpercent_help', 'attendance'), 70, $options));
+
+    $options = array();
+    for ($i = 1; $i <= 50; $i++) {
+        $options[$i] = "$i";
+    }
+    $settings->add(new admin_setting_configselect('attendance/warnafter',
+        get_string('warnafter', 'attendance'), get_string('warnafter_help', 'attendance'), 5, $options));
+
+    $settings->add(new admin_setting_configcheckbox('attendance/emailuser',
+        get_string('emailuser', 'attendance'), get_string('emailuser_help', 'attendance'), 1));
+
+    $settings->add(new admin_setting_configtext('attendance/emailsubject',
+        get_string('emailsubject', 'attendance'), get_string('emailsubject_help', 'attendance'), get_string('emailsubject_default', 'attendance'), PARAM_RAW));
+
+
+    $settings->add(new admin_setting_configtextarea('attendance/emailcontent',
+        get_string('emailcontent', 'attendance'), get_string('emailcontent_help', 'attendance'), get_string('emailcontent_default', 'attendance'), PARAM_RAW));
+
 }
