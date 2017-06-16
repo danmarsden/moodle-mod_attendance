@@ -74,14 +74,15 @@ function att_add_default_statuses($attid) {
  *
  * @param int $attid - id of attendance instance.
  */
-function attendance_add_default_notifications($attid) {
-    global $DB;
+function attendance_add_default_notifications($cmid) {
+    global $DB, $CFG;
+    require_once($CFG->dirroot.'/mod/attendance/locallib.php');
 
     $notifications = $DB->get_recordset('attendance_notification',
         array('idnumber' => 0, 'notifylevel' => ATTENDANCE_NOTIFYLEVEL_ATTENDANCE), 'id');
     foreach ($notifications as $n) {
         $rec = $n;
-        $rec->idnumber = $attid;
+        $rec->idnumber = $cmid;
         $DB->insert_record('attendance_notification', $rec);
     }
     $notifications->close();
@@ -101,7 +102,8 @@ function attendance_add_instance($attendance) {
     $attendance->id = $DB->insert_record('attendance', $attendance);
 
     att_add_default_statuses($attendance->id);
-    attendance_add_default_notifications($attendance->id);
+
+    attendance_add_default_notifications($attendance->coursemodule);
 
     attendance_grade_item_update($attendance);
 
@@ -136,7 +138,8 @@ function attendance_update_instance($attendance) {
  * @return bool
  */
 function attendance_delete_instance($id) {
-    global $DB;
+    global $DB, $CFG;
+    require_once($CFG->dirroot.'/mod/attendance/locallib.php');
 
     if (! $attendance = $DB->get_record('attendance', array('id' => $id))) {
         return false;
@@ -150,6 +153,8 @@ function attendance_delete_instance($id) {
         $DB->delete_records('attendance_sessions', array('attendanceid' => $id));
     }
     $DB->delete_records('attendance_statuses', array('attendanceid' => $id));
+
+    $DB->delete_records('attendance_notification', array('idnumber' => $id, 'notifylevel' => ATTENDANCE_NOTIFYLEVEL_ATTENDANCE));
 
     $DB->delete_records('attendance', array('id' => $id));
 
