@@ -36,6 +36,7 @@ class mod_attendance_add_notification_form extends moodleform {
      * Form definition
      */
     public function definition() {
+        global $COURSE;
         $mform = $this->_form;
 
         // Load global defaults.
@@ -73,6 +74,17 @@ class mod_attendance_add_notification_form extends moodleform {
         $mform->setDefault('emailcontent', array('text' => format_text($config->emailcontent)));
         $mform->setType('emailcontent', PARAM_RAW);
 
+        $users = get_users_by_capability(context_course::instance($COURSE->id), 'mod/attendance:viewreports');
+        $options = array();
+        foreach ($users as $user) {
+            $options[$user->id] = fullname($user);
+        }
+
+        $select = $mform->addElement('searchableselector', 'thirdpartyemails', get_string('thirdpartyemails', 'mod_attendance'), $options);
+        $mform->setType('thirdpartyemails', PARAM_TEXT);
+        $mform->addHelpButton('thirdpartyemails', 'thirdpartyemails', 'mod_attendance');
+        $select->setMultiple(true);
+
         // Need to set hidden elements when adding default options.
         $mform->addElement('hidden', 'notifylevel', ATTENDANCE_NOTIFYLEVEL_ATTENDANCE);
         $mform->setType('notifylevel', PARAM_INT);
@@ -93,16 +105,5 @@ class mod_attendance_add_notification_form extends moodleform {
         }
         $this->add_action_buttons(true, $btnstring);
 
-    }
-
-    /**
-     * Perform validation on the form
-     * @param array $data
-     * @param array $files
-     */
-    public function validation($data, $files) {
-        $errors = parent::validation($data, $files);
-
-        return $errors;
     }
 }
