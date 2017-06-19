@@ -238,6 +238,7 @@ $string['notificationdeleted'] = 'Notification deleted';
 $string['notificationdesc'] = 'These notifications will be automatically added to any new attendance activities.';
 $string['notifications'] = 'Notifications set';
 $string['notificationupdated'] = 'Updated notifications';
+$string['notifytask'] = 'Send notifications to users';
 $string['notfound'] = 'Attendance activity not found in this course!';
 $string['notmember'] = 'not&nbsp;member';
 $string['noupgradefromthisversion'] = 'The Attendance module cannot upgrade from the version of attforblock you have installed. - please delete attforblock or upgrade it to the latest version before isntalling the new attendance module';
