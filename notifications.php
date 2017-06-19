@@ -89,7 +89,10 @@ if ($data = $mform->get_data()) {
         $notify->emailsubject = $data->emailsubject;
         $notify->emailcontent = $data->emailcontent['text'];
         $notify->emailcontentformat = $data->emailcontent['format'];
-        $notify->thirdpartyemails = implode(',', $data->thirdpartyemails);
+        $notify->thirdpartyemails = '';
+        if (!empty($data->thirdpartyemails)) {
+            $notify->thirdpartyemails = implode(',', $data->thirdpartyemails);
+        }
         $DB->insert_record('attendance_notification', $notify);
         echo $OUTPUT->notification(get_string('notificationupdated', 'mod_attendance'), 'success');
 
@@ -109,7 +112,10 @@ if ($data = $mform->get_data()) {
             $notify->emailsubject = $data->emailsubject;
             $notify->emailcontentformat = $data->emailcontent['format'];
             $notify->emailcontent = $data->emailcontent['text'];
-            $notify->thirdpartyemails = implode(',', $data->thirdpartyemails);
+            $notify->thirdpartyemails = '';
+            if (!empty($data->thirdpartyemails)) {
+                $notify->thirdpartyemails = implode(',', $data->thirdpartyemails);
+            }
             $DB->update_record('attendance_notification', $notify);
             echo $OUTPUT->notification(get_string('notificationupdated', 'mod_attendance'), 'success');
         }
