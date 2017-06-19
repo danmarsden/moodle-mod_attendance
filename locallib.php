@@ -690,13 +690,13 @@ function attendance_course_users_points($courseids = array(), $orderby = '') {
     $sql = "SELECT courseid, coursename, sum(points) / sum(maxpoints) as percentage FROM (
 SELECT a.id, a.course as courseid, c.fullname as coursename, atl.studentid AS userid, COUNT(DISTINCT ats.id) AS numtakensessions,
                         SUM(stg.grade) AS points, SUM(stm.maxgrade) AS maxpoints
-                   FROM mdl_attendance_sessions ats
-                   JOIN mdl_attendance a ON a.id = ats.attendanceid
-                   JOIN mdl_course c ON c.id = a.course
-                   JOIN mdl_attendance_log atl ON (atl.sessionid = ats.id)
-                   JOIN mdl_attendance_statuses stg ON (stg.id = atl.statusid AND stg.deleted = 0 AND stg.visible = 1)
+                   FROM {attendance_sessions} ats
+                   JOIN {attendance} a ON a.id = ats.attendanceid
+                   JOIN {course} c ON c.id = a.course
+                   JOIN {attendance_log} atl ON (atl.sessionid = ats.id)
+                   JOIN {attendance_statuses} stg ON (stg.id = atl.statusid AND stg.deleted = 0 AND stg.visible = 1)
                    JOIN (SELECT attendanceid, setnumber, MAX(grade) AS maxgrade
-                           FROM mdl_attendance_statuses
+                           FROM {attendance_statuses}
                           WHERE deleted = 0
                             AND visible = 1
                          GROUP BY attendanceid, setnumber) stm
