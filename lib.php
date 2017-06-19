@@ -480,6 +480,9 @@ function attendance_print_settings_tabs($selected = 'settings') {
     $tabs[] = new tabobject('coursesummary', $CFG->wwwroot.'/mod/attendance/coursesummary.php',
         get_string('coursesummary', 'attendance'), get_string('coursesummary', 'attendance'), false);
 
+    $tabs[] = new tabobject('atrisk', $CFG->wwwroot.'/mod/attendance/atrisk.php',
+        get_string('atriskreport', 'attendance'), get_string('atriskreport', 'attendance'), false);
+
     ob_start();
     print_tabs(array($tabs), $selected);
     $tabmenu = ob_get_contents();

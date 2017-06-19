@@ -52,7 +52,9 @@ class attendance_tabs implements renderable {
     /** Update tab */
     const TAB_UPDATE        = 7;
     /** Notifications tab */
-    const TAB_NOTIFICATIONS   = 8;
+    const TAB_NOTIFICATIONS = 8;
+    /** At-risk tab */
+    const TAB_ATRISK        = 9;
     /** @var int current tab */
     public $currenttab;
 
@@ -96,6 +98,11 @@ class attendance_tabs implements renderable {
         if (has_capability('mod/attendance:viewreports', $context)) {
             $toprow[] = new tabobject(self::TAB_REPORT, $this->att->url_report()->out(),
                             get_string('report', 'attendance'));
+        }
+
+        if (has_capability('mod/attendance:viewreports', $context)) {
+            $toprow[] = new tabobject(self::TAB_ATRISK, $this->att->url_atrisk()->out(),
+                get_string('atriskreport', 'attendance'));
         }
 
         if (has_capability('mod/attendance:export', $context)) {

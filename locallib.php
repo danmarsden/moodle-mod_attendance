@@ -716,25 +716,57 @@ SELECT a.id, a.course as courseid, c.fullname as coursename, atl.studentid AS us
     return $DB->get_records_sql($sql, $params);
 }
 
-// TEMP place to save sql in progress.
-function attendance_get_users_to_notify() {
-    $sql = "SELECT a.id, atl.studentid AS userid, n.id as notifyid, n.warningpercent, COUNT(DISTINCT ats.id) AS numtakensessions,
-                        SUM(stg.grade) AS points, SUM(stm.maxgrade) AS maxpoints, SUM(stg.grade) / SUM(stm.maxgrade) AS percent
-                   FROM mdl_attendance_sessions ats
-                   JOIN mdl_attendance a ON a.id = ats.attendanceid
-                   JOIN mdl_course_modules cm ON cm.instance = a.id
-                   JOIN mdl_modules md ON md.id = cm.module AND md.name = 'attendance'
-                   JOIN mdl_attendance_log atl ON (atl.sessionid = ats.id)
-                   JOIN mdl_attendance_statuses stg ON (stg.id = atl.statusid AND stg.deleted = 0 AND stg.visible = 1)
-                   JOIN mdl_attendance_notification n ON n.idnumber = cm.id AND n.notifylevel = 0
+/**
+ * Generates a list of users flagged at-risk.
+ *
+ * @param array $courseids optional list of courses to return
+ * @param array $sincetime optional allows a list to be calculated for cron processing.
+ * @return stdClass
+ */
+function attendance_get_users_to_notify($courseids = array(), $orderby = '', $sincetime = 0) {
+    global $DB;
+
+    $joingroup = 'LEFT JOIN {groups_members} gm ON (gm.userid = atl.studentid AND gm.groupid = ats.groupid)';
+    $where = ' AND (ats.groupid = 0 or gm.id is NOT NULL)';
+    $params = array();
+
+    if (!empty($courseids)) {
+        list($insql, $inparams) = $DB->get_in_or_equal($courseids, SQL_PARAMS_NAMED);
+        $where .= ' AND c.id ' . $insql;
+        $params = array_merge($params, $inparams);
+    }
+
+    $unames = get_all_user_name_fields(true);
+    $unames2 = get_all_user_name_fields(true,'u');
+
+    $idfield = $DB->sql_concat('cmid', 'userid');
+    $sql = "SELECT {$idfield} as uniqueid, {$unames}, id as aid, cmid, cid as courseid, aname, coursename, userid, MIN(warningpercent), numtakensessions, points, maxpoints, percent 
+              FROM (
+                    SELECT a.id, {$unames2}, a.name as aname, cm.id as cmid, c.id as cid, c.fullname as coursename, atl.studentid AS userid,
+                     n.id as notifyid, n.warningpercent, COUNT(DISTINCT ats.id) AS numtakensessions,
+                     SUM(stg.grade) AS points, SUM(stm.maxgrade) AS maxpoints, SUM(stg.grade) / SUM(stm.maxgrade) AS percent
+                   FROM {attendance_sessions} ats
+                   JOIN {attendance} a ON a.id = ats.attendanceid
+                   JOIN {course_modules} cm ON cm.instance = a.id
+                   JOIN {course} c on c.id = cm.course
+                   JOIN {modules} md ON md.id = cm.module AND md.name = 'attendance'
+                   JOIN {attendance_log} atl ON (atl.sessionid = ats.id)
+                   JOIN {user} u ON (u.id = atl.studentid)
+                   JOIN {attendance_statuses} stg ON (stg.id = atl.statusid AND stg.deleted = 0 AND stg.visible = 1)
+                   JOIN {attendance_notification} n ON n.idnumber = cm.id AND n.notifylevel = 0
                    JOIN (SELECT attendanceid, setnumber, MAX(grade) AS maxgrade
-                           FROM mdl_attendance_statuses
+                           FROM {attendance_statuses}
                           WHERE deleted = 0
                             AND visible = 1
                          GROUP BY attendanceid, setnumber) stm
                      ON (stm.setnumber = ats.statusset AND stm.attendanceid = ats.attendanceid)
-                  WHERE ats.sessdate >= 0
+                  {$joingroup}
+                  WHERE ats.sessdate >= {$sincetime} {$where}
                     AND ats.lasttaken != 0
-                GROUP BY a.id, a.course, atl.studentid, n.id, n.warningpercent
-                HAVING n.warnafter <= COUNT(DISTINCT ats.id) AND n.warningpercent > ((SUM(stg.grade) / SUM(stm.maxgrade)) * 100)";
+                GROUP BY a.id, a.name, a.course, c.fullname, atl.studentid, n.id, n.warningpercent, cm.id, c.id, {$unames2}
+                HAVING n.warnafter <= COUNT(DISTINCT ats.id) AND n.warningpercent > ((SUM(stg.grade) / SUM(stm.maxgrade)) * 100)) as m
+         GROUP BY id, cmid, cid, aname, userid, numtakensessions, points, maxpoints, percent, coursename, {$unames} {$orderby}";
+
+    return $DB->get_records_sql($sql, $params);
+
 }

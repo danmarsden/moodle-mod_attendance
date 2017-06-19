@@ -40,6 +40,7 @@ $string['all'] = 'All';
 $string['allcourses'] = 'All courses';
 $string['allpast'] = 'All past';
 $string['allsessions'] = 'All sessions';
+$string['atriskreport'] = 'At-risk report';
 $string['attendance:addinstance'] = 'Add a new attendance activity';
 $string['attendance:canbelisted'] = 'Appears in the roster';
 $string['attendance:changeattendances'] = 'Changing Attendances';
