@@ -715,3 +715,26 @@ SELECT a.id, a.course as courseid, c.fullname as coursename, atl.studentid AS us
 
     return $DB->get_records_sql($sql, $params);
 }
+
+// TEMP place to save sql in progress.
+function attendance_get_users_to_notify() {
+    $sql = "SELECT a.id, atl.studentid AS userid, n.id as notifyid, n.warningpercent, COUNT(DISTINCT ats.id) AS numtakensessions,
+                        SUM(stg.grade) AS points, SUM(stm.maxgrade) AS maxpoints, SUM(stg.grade) / SUM(stm.maxgrade) AS percent
+                   FROM mdl_attendance_sessions ats
+                   JOIN mdl_attendance a ON a.id = ats.attendanceid
+                   JOIN mdl_course_modules cm ON cm.instance = a.id
+                   JOIN mdl_modules md ON md.id = cm.module AND md.name = 'attendance'
+                   JOIN mdl_attendance_log atl ON (atl.sessionid = ats.id)
+                   JOIN mdl_attendance_statuses stg ON (stg.id = atl.statusid AND stg.deleted = 0 AND stg.visible = 1)
+                   JOIN mdl_attendance_notification n ON n.idnumber = cm.id AND n.notifylevel = 0
+                   JOIN (SELECT attendanceid, setnumber, MAX(grade) AS maxgrade
+                           FROM mdl_attendance_statuses
+                          WHERE deleted = 0
+                            AND visible = 1
+                         GROUP BY attendanceid, setnumber) stm
+                     ON (stm.setnumber = ats.statusset AND stm.attendanceid = ats.attendanceid)
+                  WHERE ats.sessdate >= 0
+                    AND ats.lasttaken != 0
+                GROUP BY a.id, a.course, atl.studentid, n.id, n.warningpercent
+                HAVING n.warnafter <= COUNT(DISTINCT ats.id) AND n.warningpercent > ((SUM(stg.grade) / SUM(stm.maxgrade)) * 100)";
+}
