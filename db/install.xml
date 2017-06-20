@@ -116,7 +116,6 @@
     <TABLE NAME="attendance_notification" COMMENT="Notification configuration">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="notifylevel" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false" COMMENT="Type of notification."/>
         <FIELD NAME="idnumber" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="attendance id or other id relating to this notification."/>
         <FIELD NAME="warningpercent" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Percentage that triggers this notification."/>
         <FIELD NAME="warnafter" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Start warning after this number of taken sessions."/>
@@ -128,7 +127,7 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="level_id" TYPE="unique" FIELDS="notifylevel, idnumber, warningpercent"/>
+        <KEY NAME="level_id" TYPE="unique" FIELDS="idnumber, warningpercent"/>
       </KEYS>
     </TABLE>
     <TABLE NAME="attendance_notification_sent" COMMENT="Notifications sent to users.">

@@ -87,9 +87,6 @@ class mod_attendance_add_notification_form extends moodleform {
         $select->setMultiple(true);
 
         // Need to set hidden elements when adding default options.
-        $mform->addElement('hidden', 'notifylevel', ATTENDANCE_NOTIFYLEVEL_ATTENDANCE);
-        $mform->setType('notifylevel', PARAM_INT);
-
         $mform->addElement('hidden', 'idnumber', 0); // Default options use 0 as the idnumber.
         $mform->setType('idnumber', PARAM_INT);
 

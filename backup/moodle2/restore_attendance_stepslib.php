@@ -114,7 +114,6 @@ class restore_attendance_activity_structure_step extends restore_activity_struct
         $data = (object)$data;
 
         $data->idnumber = $this->get_new_parentid('attendance');
-        $data->notifylevel = 0; // 0 = ATTENDANCE_NOTIFYLEVEL_ATTENDANCE.
 
         $DB->insert_record('attendance_notification', $data);
     }

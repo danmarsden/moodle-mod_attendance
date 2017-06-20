@@ -43,10 +43,6 @@ define('ATTENDANCE_AUTOMARK_DISABLED', 0);
 define('ATTENDANCE_AUTOMARK_ALL', 1);
 define('ATTENDANCE_AUTOMARK_CLOSE', 2);
 
-// Notification types.
-define('ATTENDANCE_NOTIFYLEVEL_ATTENDANCE', 0);
-define('ATTENDANCE_NOTIFYLEVEL_COURSE', 1);
-define('ATTENDANCE_NOTIFYLEVEL_SITE', 2);
 /**
  * Get statuses,
  *
@@ -758,7 +754,7 @@ function attendance_get_users_to_notify($courseids = array(), $orderby = '', $si
                    JOIN {attendance_log} atl ON (atl.sessionid = ats.id)
                    JOIN {user} u ON (u.id = atl.studentid)
                    JOIN {attendance_statuses} stg ON (stg.id = atl.statusid AND stg.deleted = 0 AND stg.visible = 1)
-                   JOIN {attendance_notification} n ON n.idnumber = cm.id AND n.notifylevel = 0
+                   JOIN {attendance_notification} n ON n.idnumber = cm.id
                    LEFT JOIN {attendance_notification_sent} ns ON ns.notifyid = n.id AND ns.userid = atl.studentid
                    JOIN (SELECT attendanceid, setnumber, MAX(grade) AS maxgrade
                            FROM {attendance_statuses}

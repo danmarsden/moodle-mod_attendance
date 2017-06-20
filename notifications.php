@@ -76,7 +76,6 @@ if ($data = $mform->get_data()) {
     if (empty($data->notid)) {
         // Insert new record.
         $notify = new stdClass();
-        $notify->notifylevel = ATTENDANCE_NOTIFYLEVEL_ATTENDANCE;
         if (empty($id)) {
             $notify->idnumber = 0;
         } else {
@@ -104,7 +103,6 @@ if ($data = $mform->get_data()) {
         } else {
             $notify = new stdClass();
             $notify->id = $data->notid;
-            $notify->notifylevel = $data->notifylevel;
             $notify->idnumber = $data->idnumber;
             $notify->warningpercent = $data->warningpercent;
             $notify->warnafter = $data->warnafter;
@@ -134,7 +132,6 @@ if ($action == 'delete' && !empty($notid)) {
         if (!empty($id)) {
             // Add id/level to array.
             $params['idnumber'] = $cm->id;
-            $params['notifylevel'] = ATTENDANCE_NOTIFYLEVEL_ATTENDANCE;
         }
         $DB->delete_records('attendance_notification', $params);
         echo $OUTPUT->notification(get_string('notificationdeleted', 'mod_attendance'), 'success');
@@ -157,11 +154,11 @@ if ($action == 'update' && !empty($notid)) {
         echo $OUTPUT->box(get_string('notificationdesc', 'mod_attendance'), 'generalbox', 'notice');
 
         $existingnotifications = $DB->get_records('attendance_notification',
-            array('notifylevel' => ATTENDANCE_NOTIFYLEVEL_ATTENDANCE, 'idnumber' => 0),
+            array('idnumber' => 0),
             'warningpercent');
     } else {
         $existingnotifications = $DB->get_records('attendance_notification',
-            array('notifylevel' => ATTENDANCE_NOTIFYLEVEL_ATTENDANCE, 'idnumber' => $cm->id),
+            array('idnumber' => $cm->id),
             'warningpercent');
     }
     if (!empty($existingnotifications)) {

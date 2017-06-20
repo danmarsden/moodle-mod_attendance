@@ -85,7 +85,7 @@ class backup_attendance_activity_structure_step extends backup_activity_structur
         $status->set_source_table('attendance_statuses', array('attendanceid' => backup::VAR_PARENTID));
 
         $notification->set_source_table('attendance_notification',
-            array('idnumber' => backup::VAR_PARENTID, 'notifylevel' => 0)); // 0 = ATTENDANCE_NOTIFYLEVEL_ATTENDANCE.
+            array('idnumber' => backup::VAR_PARENTID));
 
         $session->set_source_table('attendance_sessions', array('attendanceid' => backup::VAR_PARENTID));
 

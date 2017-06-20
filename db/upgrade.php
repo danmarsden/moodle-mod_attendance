@@ -349,7 +349,6 @@ function xmldb_attendance_upgrade($oldversion=0) {
 
         // Adding fields to table attendance_notification.
         $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
-        $table->add_field('notifylevel', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, null);
         $table->add_field('idnumber', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
         $table->add_field('warningpercent', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
         $table->add_field('warnafter', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
@@ -361,7 +360,7 @@ function xmldb_attendance_upgrade($oldversion=0) {
 
         // Adding keys to table attendance_notification.
         $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
-        $table->add_key('level_id', XMLDB_KEY_UNIQUE, array('notifylevel', 'idnumber, warningpercent'));
+        $table->add_key('level_id', XMLDB_KEY_UNIQUE, array('idnumber, warningpercent'));
 
         // Conditionally launch create table for attendance_notification.
         if (!$dbman->table_exists($table)) {

@@ -79,7 +79,7 @@ function attendance_add_default_notifications($cmid) {
     require_once($CFG->dirroot.'/mod/attendance/locallib.php');
 
     $notifications = $DB->get_recordset('attendance_notification',
-        array('idnumber' => 0, 'notifylevel' => ATTENDANCE_NOTIFYLEVEL_ATTENDANCE), 'id');
+        array('idnumber' => 0), 'id');
     foreach ($notifications as $n) {
         $rec = $n;
         $rec->idnumber = $cmid;
@@ -154,7 +154,7 @@ function attendance_delete_instance($id) {
     }
     $DB->delete_records('attendance_statuses', array('attendanceid' => $id));
 
-    $DB->delete_records('attendance_notification', array('idnumber' => $id, 'notifylevel' => ATTENDANCE_NOTIFYLEVEL_ATTENDANCE));
+    $DB->delete_records('attendance_notification', array('idnumber' => $id));
 
     $DB->delete_records('attendance', array('id' => $id));
 
