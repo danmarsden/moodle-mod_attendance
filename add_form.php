@@ -168,7 +168,12 @@ class mod_attendance_add_form extends moodleform {
             }
             $mgroup2 = array();
             $mgroup2[] = & $mform->createElement('text', 'subnet', get_string('requiresubnet', 'attendance'));
-            $mform->setDefault('subnet', $this->_customdata['att']->subnet);
+            if (empty(get_config('attendance', 'subnetactivitylevel'))) {
+                $mform->setDefault('subnet', get_config('attendance', 'subnet'));
+            } else {
+                $mform->setDefault('subnet', $this->_customdata['att']->subnet);
+            }
+
             $mgroup2[] = & $mform->createElement('checkbox', 'usedefaultsubnet', get_string('usedefaultsubnet', 'attendance'));
             $mform->setDefault('usedefaultsubnet', 1);
             $mform->setType('subnet', PARAM_TEXT);
