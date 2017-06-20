@@ -785,3 +785,40 @@ function attendance_get_users_to_notify($courseids = array(), $orderby = '', $si
     return $DB->get_records_sql($sql, $params);
 
 }
+
+/**
+ * Template variables into place in supplied email content.
+ *
+ * @param object $record db record of details
+ * @return array - the content of the fields after templating.
+ */
+function attendance_template_variables($record) {
+    $templatevars = array(
+        '/%coursename%/' => $record->coursename,
+        '/%courseid%/' => $record->courseid,
+        '/%userfirstname%/' => $record->firstname,
+        '/%userlastname%/' => $record->lastname,
+        '/%userid%/' => $record->userid,
+        '/%warningpercent%/' => $record->warningpercent,
+        '/%attendancename%/' => $record->aname,
+        '/%cmid%/' => $record->cmid,
+        '/%numtakensessions%/' => $record->numtakensessions,
+        '/%points%/' => $record->points,
+        '/%maxpoints%/' => $record->maxpoints,
+        '/%precent%/' => $record->percent,
+    );
+    $extrauserfields = get_all_user_name_fields();
+    foreach ($extrauserfields as $extra) {
+        $templatevars['/%'.$extra.'%/'] = $record->$extra;
+    }
+    $patterns = array_keys($templatevars); // The placeholders which are to be replaced.
+    $replacements = array_values($templatevars); // The values which are to be templated in for the placeholders.
+    // Array to describe which fields in reengagement object should have a template replacement.
+    $replacementfields = array('emailsubject', 'emailcontent');
+
+    // Replace %variable% with relevant value everywhere it occurs in reengagement->field.
+    foreach ($replacementfields as $field) {
+        $record->$field = preg_replace($patterns, $replacements, $record->$field);
+    }
+    return $record;
+}

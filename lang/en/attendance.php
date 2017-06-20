@@ -140,8 +140,8 @@ $string['downloadtext'] = 'Download in text format';
 $string['duration'] = 'Duration';
 $string['editsession'] = 'Edit Session';
 $string['edituser'] = 'Edit user';
-$string['emailcontent_default'] = 'Hi %firstname%,
-Your attendance in %coursename% %attendance% has dropped below %warningpercent% and is currently %actualpercent% - we hope you are ok!
+$string['emailcontent_default'] = 'Hi %userfirstname%,
+Your attendance in %coursename% %attendancename% has dropped below %warningpercent% and is currently %percent% - we hope you are ok!
 
 To get the most out of this course you should improve your attendance, please get in touch if you require any further support.';
 $string['emailcontent'] = 'Email content';

@@ -52,8 +52,11 @@ class notify extends \core\task\scheduled_task {
         foreach($records as $record) {
             // Only send one notification to this user from each attendance in this run. - flag any higher percent notifications as sent.
             if (empty($sentnotifications[$record->userid]) || !in_array($record->aid, $sentnotifications[$record->userid])) {
+                // Convert variables in emailcontent.
+                $record = attendance_template_variables($record);
                 $user = $DB->get_record('user', array('id' => $record->userid));
                 $from = \core_user::get_noreply_user();
+
                 $emailcontent = format_text($record->emailcontent, $record->emailcontentformat);
 
                 email_to_user($user, $from, $record->emailsubject, $emailcontent, $emailcontent);
