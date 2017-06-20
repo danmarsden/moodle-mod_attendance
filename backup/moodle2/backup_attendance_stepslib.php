@@ -50,8 +50,8 @@ class backup_attendance_activity_structure_step extends backup_activity_structur
         $status  = new backup_nested_element('status', array('id'), array(
             'acronym', 'description', 'grade', 'studentavailability', 'setunmarked', 'visible', 'deleted', 'setnumber'));
 
-        $notifications = new backup_nested_element('notifications');
-        $notification  = new backup_nested_element('notification', array('id'), array(
+        $warnings = new backup_nested_element('warnings');
+        $warning  = new backup_nested_element('warning', array('id'), array(
             'warningpercent', 'warnafter', 'emailuser', 'emailsubject', 'emailcontent', 'emailcontentformat', 'thirdpartyemails'));
 
         $sessions = new backup_nested_element('sessions');
@@ -69,8 +69,8 @@ class backup_attendance_activity_structure_step extends backup_activity_structur
         $attendance->add_child($statuses);
         $statuses->add_child($status);
 
-        $attendance->add_child($notifications);
-        $notifications->add_child($notification);
+        $attendance->add_child($warnings);
+        $warnings->add_child($warning);
 
         $attendance->add_child($sessions);
         $sessions->add_child($session);
@@ -84,7 +84,7 @@ class backup_attendance_activity_structure_step extends backup_activity_structur
 
         $status->set_source_table('attendance_statuses', array('attendanceid' => backup::VAR_PARENTID));
 
-        $notification->set_source_table('attendance_notification',
+        $warning->set_source_table('attendance_warning',
             array('idnumber' => backup::VAR_PARENTID));
 
         $session->set_source_table('attendance_sessions', array('attendanceid' => backup::VAR_PARENTID));

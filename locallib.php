@@ -733,7 +733,7 @@ function attendance_get_users_to_notify($courseids = array(), $orderby = '', $si
         $params = array_merge($params, $inparams);
     }
     if ($allfornotify) {
-        // Exclude notifications that have already been sent.
+        // Exclude warnings that have already been sent.
         $where .= ' AND ns.id IS NULL ';
     }
 
@@ -754,8 +754,8 @@ function attendance_get_users_to_notify($courseids = array(), $orderby = '', $si
                    JOIN {attendance_log} atl ON (atl.sessionid = ats.id)
                    JOIN {user} u ON (u.id = atl.studentid)
                    JOIN {attendance_statuses} stg ON (stg.id = atl.statusid AND stg.deleted = 0 AND stg.visible = 1)
-                   JOIN {attendance_notification} n ON n.idnumber = cm.id
-                   LEFT JOIN {attendance_notification_sent} ns ON ns.notifyid = n.id AND ns.userid = atl.studentid
+                   JOIN {attendance_warning} n ON n.idnumber = cm.id
+                   LEFT JOIN {attendance_warning_done} ns ON ns.notifyid = n.id AND ns.userid = atl.studentid
                    JOIN (SELECT attendanceid, setnumber, MAX(grade) AS maxgrade
                            FROM {attendance_statuses}
                           WHERE deleted = 0

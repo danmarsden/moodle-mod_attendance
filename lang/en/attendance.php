@@ -33,7 +33,7 @@ $string['Pfull'] = 'Present';
 $string['acronym'] = 'Acronym';
 $string['add'] = 'Add';
 $string['addmultiplesessions'] = 'Multiple sessions';
-$string['addnotification'] = 'Add notification';
+$string['addwarning'] = 'Add warning';
 $string['addsession'] = 'Add session';
 $string['adduser'] = 'Add user';
 $string['all'] = 'All';
@@ -106,9 +106,9 @@ The sessions begin on the date of the base session and continue until the \'repe
 $string['createonesession'] = 'Create one session for the course';
 $string['days'] = 'Days';
 $string['defaultdisplaymode'] = 'Default display mode';
-$string['defaultnotifications'] = 'Default notifications set';
-$string['defaultnotificationsettings'] = 'Default notification settings';
-$string['defaultnotificationsettings_help'] = 'These settings define the defaults for all new notifications';
+$string['defaultwarnings'] = 'Default warning set';
+$string['defaultwarningsettings'] = 'Default warning settings';
+$string['defaultwarningsettings_help'] = 'These settings define the defaults for all new warnings';
 $string['defaults'] = 'Defaults';
 $string['defaultsessionsettings'] = 'Default session settings';
 $string['defaultsessionsettings_help'] = 'These settings define the defaults for all new sessions';
@@ -120,7 +120,7 @@ $string['defaultsubnet_help'] = 'Attendance recording may be restricted to parti
 $string['defaultview'] = 'Default view on login';
 $string['defaultview_desc'] = 'This is the default view shown to teachers on first login.';
 $string['delete'] = 'Delete';
-$string['deletenotificationconfirm'] = 'Are you sure you want to delete this notification?';
+$string['deletewarningconfirm'] = 'Are you sure you want to delete this warning?';
 $string['deletedgroup'] = 'The group associated with this session has been deleted';
 $string['deletehiddensessions'] = 'Delete all hidden sessions';
 $string['deletelogs'] = 'Delete attendance data';
@@ -145,7 +145,7 @@ Your attendance in %coursename% %attendancename% has dropped below %warningperce
 
 To get the most out of this course you should improve your attendance, please get in touch if you require any further support.';
 $string['emailcontent'] = 'Email content';
-$string['emailcontent_help'] = 'When a notification is sent to a student, it takes the email content from this field. The following wildcards can be used:
+$string['emailcontent_help'] = 'When a warning is sent to a student, it takes the email content from this field. The following wildcards can be used:
 <ul>
 <li>%coursename%</li>
 <li>%userfirstname%</li>
@@ -161,7 +161,7 @@ $string['emailcontent_help'] = 'When a notification is sent to a student, it tak
 </ul>';
 
 $string['emailsubject'] = 'Email subject';
-$string['emailsubject_help'] = 'When a notification is sent to a student, it takes the email subject from this field.';
+$string['emailsubject_help'] = 'When a warning is sent to a student, it takes the email subject from this field.';
 $string['emailsubject_default'] = 'Attendance warning';
 $string['emailuser'] = 'Email user';
 $string['emailuser_help'] = 'If checked, a warning will be sent to the student.';
@@ -249,11 +249,11 @@ $string['noofdayspresent'] = 'No of days present';
 $string['nosessiondayselected'] = 'No Session day selected';
 $string['nosessionexists'] = 'No Session exists for this course';
 $string['nosessionsselected'] = 'No sessions selected';
-$string['notificationdeleted'] = 'Notification deleted';
-$string['notificationdesc'] = 'These notifications will be automatically added to any new attendance activities. If more than one notification is triggered at exactly the same time, only the notification with the lower warning threshold will be sent.';
-$string['notifications'] = 'Notifications set';
-$string['notificationupdated'] = 'Updated notifications';
-$string['notifytask'] = 'Send notifications to users';
+$string['warningdeleted'] = 'Warning deleted';
+$string['warningdesc'] = 'These warnings will be automatically added to any new attendance activities. If more than one warning is triggered at exactly the same time, only the warning with the lower warning threshold will be sent.';
+$string['warnings'] = 'Warnings set';
+$string['warningupdated'] = 'Updated warnings';
+$string['notifytask'] = 'Send warnings to users';
 $string['notfound'] = 'Attendance activity not found in this course!';
 $string['notmember'] = 'not&nbsp;member';
 $string['noupgradefromthisversion'] = 'The Attendance module cannot upgrade from the version of attforblock you have installed. - please delete attforblock or upgrade it to the latest version before isntalling the new attendance module';
@@ -422,9 +422,9 @@ $string['tempusermerge'] = 'Merge temporary user';
 $string['tempusers'] = 'Temporary users';
 $string['tempusersedit'] = 'Edit temporary user';
 $string['tempuserslist'] = 'Temporary users';
-$string['thirdpartyemailsubject'] = 'Attendance notification';
+$string['thirdpartyemailsubject'] = 'Attendance warning';
 $string['thirdpartyemailtext'] = '{$a->firstname} {$a->lastname} attendance within {$a->coursename} {$a->aname} is lower than {$a->warningpercent} ({$a->percent})';
-$string['thirdpartyemailtextfooter'] = 'You are receiving this notification because the teacher of this course has added your email to the notification recipient’s list';
+$string['thirdpartyemailtextfooter'] = 'You are receiving this because the teacher of this course has added your email to the recipient’s list';
 $string['thirdpartyemails'] = 'Notify other users';
 $string['thirdpartyemails_help'] = 'List of other users who will be notified. (requires the capability mod/attendance:viewreports)';
 $string['thiscourse'] = 'This course';
@@ -447,7 +447,7 @@ $string['viewmode'] = 'View mode';
 $string['warnafter'] = 'Number of sessions taken before warning';
 $string['warnafter_help'] = 'Warnings will only be triggered when the user has had their attendance taken for at least this number of sessions.';
 $string['warningpercent'] = 'Warn if percentage falls under';
-$string['warningpercent_help'] = 'A notification will be triggered when the overall percentage falls below this number.';
+$string['warningpercent_help'] = 'A warning will be triggered when the overall percentage falls below this number.';
 $string['warningthreshold'] = 'Warning threshold';
 $string['week'] = 'week(s)';
 $string['weeks'] = 'Weeks';

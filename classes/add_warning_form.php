@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Contains class mod_attendance_add_notification_form
+ * Contains class mod_attendance_add_warning_form
  *
  * @package   mod_attendance
  * @copyright 2017 Dan Marsden
@@ -25,13 +25,13 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Class mod_attendance_add_notification_form
+ * Class mod_attendance_add_warning_form
  *
  * @package   mod_attendance
  * @copyright 2017 Dan Marsden
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_attendance_add_notification_form extends moodleform {
+class mod_attendance_add_warning_form extends moodleform {
     /**
      * Form definition
      */
@@ -91,7 +91,7 @@ class mod_attendance_add_notification_form extends moodleform {
         $mform->addElement('hidden', 'idnumber', 0); // Default options use 0 as the idnumber.
         $mform->setType('idnumber', PARAM_INT);
 
-        $mform->addElement('hidden', 'notid', 0); // The id of notification record.
+        $mform->addElement('hidden', 'notid', 0); // The id of warning record.
         $mform->setType('notid', PARAM_INT);
 
         $mform->addElement('hidden', 'id', $this->_customdata['id']); // The id of course module record if attendance level.

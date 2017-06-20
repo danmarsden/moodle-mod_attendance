@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Attendance task - Send notifications.
+ * Attendance task - Send warnings.
  *
  * @package    mod_attendance
  * @copyright  2017 onwards Dan Marsden http://danmarsden.com
@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/mod/attendance/locallib.php');
 /**
- * Send notifications class.
+ * Task class
  *
  * @package    mod_attendance
  * @copyright  2017 onwards Dan Marsden http://danmarsden.com
@@ -59,7 +59,7 @@ class notify extends \core\task\scheduled_task {
             }
 
             if (!empty($record->emailuser)) {
-                // Only send one notification to this user from each attendance in this run. - flag any higher percent notifications as sent.
+                // Only send one warning to this user from each attendance in this run. - flag any higher percent notifications as sent.
                 if (empty($sentnotifications[$record->userid]) || !in_array($record->aid, $sentnotifications[$record->userid])) {
                     // Convert variables in emailcontent.
                     $record = attendance_template_variables($record);
@@ -74,7 +74,7 @@ class notify extends \core\task\scheduled_task {
                     $numsentusers++;
                 }
             }
-            // Only send one notification to this user from each attendance in this run. - flag any higher percent notifications as sent.
+            // Only send one warning to this user from each attendance in this run. - flag any higher percent notifications as sent.
             if (!empty($record->thirdpartyemails)) {
                 $sendto = explode(',', $record->thirdpartyemails);
                 $record->percent = round($record->percent * 100)."%";
@@ -92,7 +92,7 @@ class notify extends \core\task\scheduled_task {
             $notify->userid = $record->userid;
             $notify->notifyid = $record->notifyid;
             $notify->timesent = $now;
-            $DB->insert_record('attendance_notification_sent', $notify);
+            $DB->insert_record('attendance_warning_done', $notify);
         }
         if (!empty($numsentusers)) {
             mtrace($numsentusers ." user emails sent");

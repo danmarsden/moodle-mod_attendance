@@ -70,22 +70,22 @@ function att_add_default_statuses($attid) {
 }
 
 /**
- * Add default set of notifications to the new attendance.
+ * Add default set of warnings to the new attendance.
  *
  * @param int $attid - id of attendance instance.
  */
-function attendance_add_default_notifications($cmid) {
+function attendance_add_default_warnings($cmid) {
     global $DB, $CFG;
     require_once($CFG->dirroot.'/mod/attendance/locallib.php');
 
-    $notifications = $DB->get_recordset('attendance_notification',
+    $warnings = $DB->get_recordset('attendance_warning',
         array('idnumber' => 0), 'id');
-    foreach ($notifications as $n) {
+    foreach ($warnings as $n) {
         $rec = $n;
         $rec->idnumber = $cmid;
-        $DB->insert_record('attendance_notification', $rec);
+        $DB->insert_record('attendance_warning', $rec);
     }
-    $notifications->close();
+    $warnings->close();
 }
 
 /**
@@ -103,7 +103,7 @@ function attendance_add_instance($attendance) {
 
     att_add_default_statuses($attendance->id);
 
-    attendance_add_default_notifications($attendance->coursemodule);
+    attendance_add_default_warnings($attendance->coursemodule);
 
     attendance_grade_item_update($attendance);
 
@@ -154,7 +154,7 @@ function attendance_delete_instance($id) {
     }
     $DB->delete_records('attendance_statuses', array('attendanceid' => $id));
 
-    $DB->delete_records('attendance_notification', array('idnumber' => $id));
+    $DB->delete_records('attendance_warning', array('idnumber' => $id));
 
     $DB->delete_records('attendance', array('id' => $id));
 
@@ -474,8 +474,8 @@ function attendance_print_settings_tabs($selected = 'settings') {
     $tabs[] = new tabobject('defaultstatus', $CFG->wwwroot.'/mod/attendance/defaultstatus.php',
         get_string('defaultstatus', 'attendance'), get_string('defaultstatus', 'attendance'), false);
 
-    $tabs[] = new tabobject('defaultnotifications', $CFG->wwwroot.'/mod/attendance/notifications.php',
-        get_string('defaultnotifications', 'attendance'), get_string('defaultnotifications', 'attendance'), false);
+    $tabs[] = new tabobject('defaultwarnings', $CFG->wwwroot.'/mod/attendance/warnings.php',
+        get_string('defaultwarnings', 'attendance'), get_string('defaultwarnings', 'attendance'), false);
 
     $tabs[] = new tabobject('coursesummary', $CFG->wwwroot.'/mod/attendance/coursesummary.php',
         get_string('coursesummary', 'attendance'), get_string('coursesummary', 'attendance'), false);

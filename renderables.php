@@ -51,8 +51,8 @@ class attendance_tabs implements renderable {
     const TAB_TEMPORARYUSERS = 6; // Tab for managing temporary users.
     /** Update tab */
     const TAB_UPDATE        = 7;
-    /** Notifications tab */
-    const TAB_NOTIFICATIONS = 8;
+    /** Warnings tab */
+    const TAB_WARNINGS = 8;
     /** At-risk tab */
     const TAB_ATRISK        = 9;
     /** @var int current tab */
@@ -114,8 +114,8 @@ class attendance_tabs implements renderable {
             $toprow[] = new tabobject(self::TAB_PREFERENCES, $this->att->url_preferences()->out(),
                             get_string('statussetsettings', 'attendance'));
 
-            $toprow[] = new tabobject(self::TAB_NOTIFICATIONS, $this->att->url_notifications()->out(),
-                get_string('notifications', 'attendance'));
+            $toprow[] = new tabobject(self::TAB_WARNINGS, $this->att->url_warnings()->out(),
+                get_string('warnings', 'attendance'));
 
         }
         if (has_capability('mod/attendance:managetemporaryusers', $context)) {

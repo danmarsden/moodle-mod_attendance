@@ -113,29 +113,29 @@
         <INDEX NAME="studentid" UNIQUE="true" FIELDS="studentid"/>
       </INDEXES>
     </TABLE>
-    <TABLE NAME="attendance_notification" COMMENT="Notification configuration">
+    <TABLE NAME="attendance_warning" COMMENT="Warning configuration">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="idnumber" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="attendance id or other id relating to this notification."/>
-        <FIELD NAME="warningpercent" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Percentage that triggers this notification."/>
+        <FIELD NAME="idnumber" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="attendance id or other id relating to this warning."/>
+        <FIELD NAME="warningpercent" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Percentage that triggers this warning."/>
         <FIELD NAME="warnafter" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Start warning after this number of taken sessions."/>
         <FIELD NAME="emailuser" TYPE="int" LENGTH="4" NOTNULL="true" SEQUENCE="false" COMMENT="Should the user be notified at this level."/>
         <FIELD NAME="emailsubject" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Email subject line for emails going to user"/>
         <FIELD NAME="emailcontent" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="The html-formatted text that should be sent to the user"/>
         <FIELD NAME="emailcontentformat" TYPE="int" LENGTH="4" NOTNULL="true" SEQUENCE="false" COMMENT="Format of the emailcontent field"/>
-        <FIELD NAME="thirdpartyemails" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="list of extra users to receive notifications"/>
+        <FIELD NAME="thirdpartyemails" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="list of extra users to receive warnings"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
         <KEY NAME="level_id" TYPE="unique" FIELDS="idnumber, warningpercent"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="attendance_notification_sent" COMMENT="Notifications sent to users.">
+    <TABLE NAME="attendance_warning_done" COMMENT="Warnings processed">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="notifyid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="id of notification"/>
+        <FIELD NAME="notifyid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="id of warning"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="user id of user"/>
-        <FIELD NAME="timesent" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Time notification sent to user."/>
+        <FIELD NAME="timesent" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Time warning sent to user."/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
