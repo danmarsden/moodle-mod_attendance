@@ -32,5 +32,13 @@ $tasks = array(
         'hour' => '*',
         'day' => '*',
         'dayofweek' => '*',
+        'month' => '*'),
+    array(
+        'classname' => 'mod_attendance\task\notify',
+        'blocking' => 0,
+        'minute' => '30',
+        'hour' => '1',
+        'day' => '*',
+        'dayofweek' => '*',
         'month' => '*')
 );

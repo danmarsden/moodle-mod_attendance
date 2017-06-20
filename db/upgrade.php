@@ -372,5 +372,31 @@ function xmldb_attendance_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2017061600, 'attendance');
     }
 
+    if ($oldversion < 2017062000) {
+
+        // Define table attendance_notification_sent to be created.
+        $table = new xmldb_table('attendance_notification_sent');
+
+        // Adding fields to table attendance_notification_sent.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('notifyid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('timesent', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+
+        // Adding keys to table attendance_notification_sent.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+
+        // Adding indexes to table attendance_notification_sent.
+        $table->add_index('notifyid_userid', XMLDB_INDEX_UNIQUE, array('notifyid', 'userid'));
+
+        // Conditionally launch create table for attendance_notification_sent.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Attendance savepoint reached.
+        upgrade_mod_savepoint(true, 2017062000, 'attendance');
+    }
+
     return $result;
 }

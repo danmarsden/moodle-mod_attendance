@@ -46,17 +46,32 @@ class notify extends \core\task\scheduled_task {
         if (empty($lastrun)) {
             $lastrun = 0;
         }
+        $orderby = 'ORDER BY cm.id, atl.studentid, n.warningpercent ASC';
+        $records = attendance_get_users_to_notify(array(), $orderby, $lastrun, true);
+        $sentnotifications = array();
+        foreach($records as $record) {
+            // Only send one notification to this user from each attendance in this run. - flag any higher percent notifications as sent.
+            if (empty($sentnotifications[$record->userid]) || !in_array($record->aid, $sentnotifications[$record->userid])) {
+                $user = $DB->get_record('user', array('id' => $record->userid));
+                $from = \core_user::get_noreply_user();
+                $emailcontent = format_text($record->emailcontent, $record->emailcontentformat);
 
-        $sql = "SELECT a.id, 
-                  FROM {attendance} a
-                  JOIN {attendance_sessions} s ON s.attendanceid = a.id
-                  JOIN {attendance_notifications} n ON n.idnumber = a.id AND n.notifylevel = ".ATTENDANCE_NOTIFYLEVEL_ATTENDANCE."
-                  WHERE s.sessdate > ? AND s.sessdate < ?";
-        $attendances = $DB->get_recordset_sql($sql, array($lastrun, $now));
+                email_to_user($user, $from, $record->emailsubject, $emailcontent, $emailcontent);
 
-        foreach ($attendances as $attendance) {
+                if (empty($sentnotifications[$record->userid])) {
+                    $sentnotifications[$record->userid] = array();
+                }
 
+                $sentnotifications[$record->userid][] = $record->aid;
+            }
+
+            $notify = new \stdClass();
+            $notify->userid = $record->userid;
+            $notify->notifyid = $record->notifyid;
+            $notify->timesent = $now;
+            $DB->insert_record('attendance_notification_sent', $notify);
         }
+
         set_config('notifylastrun', $now, 'mod_attendance');
     }
 }

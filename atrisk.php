@@ -85,12 +85,13 @@ if (!$table->is_downloading($download, $exportfilename)) {
 
 }
 
-$table->define_columns(array('course', 'attendance', 'userid', 'numtakensessions', 'percent'));
+$table->define_columns(array('course', 'attendance', 'userid', 'numtakensessions', 'percent', 'timesent'));
 $table->define_headers(array(get_string('course'),
     get_string('pluginname', 'attendance'),
     get_string('user'),
     get_string('takensessions', 'attendance'),
-    get_string('averageattendance', 'attendance')));
+    get_string('averageattendance', 'attendance'),
+    get_string('timesent', 'attendance')));
 $table->sortable(true);
 $table->no_sorting('course');
 $table->set_attribute('cellspacing', '0');
@@ -124,8 +125,13 @@ foreach ($records as $record) {
     $attendancename = html_writer::link($url, $record->aname);
 
     $username = html_writer::link($url, fullname($record));
+    $percent = round($record->percent * 100)."%";
+    $timesent = "-";
+    if (!empty($record->timesent)) {
+        $timesent = userdate($record->timesent);
+    }
 
-    $table->add_data(array($name, $attendancename, $username, $record->numtakensessions, round($record->percent * 100)."%"));
+    $table->add_data(array($name, $attendancename, $username, $record->numtakensessions, $percent, $timesent));
 }
 $table->finish_output();
 

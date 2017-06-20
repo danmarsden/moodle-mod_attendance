@@ -412,6 +412,7 @@ $string['thirdpartyemails'] = 'Notify other users';
 $string['thirdpartyemails_help'] = 'List of other users who will be notified. (requires the capability mod/attendance:viewreports)';
 $string['thiscourse'] = 'This course';
 $string['time'] = 'Time';
+$string['timesent'] = 'Notifcation sent';
 $string['timeahead'] = 'Multiple sessions that exceed one year cannot be created, please adjust the start and end dates.';
 $string['to'] = 'to:';
 $string['tuseremail'] = 'Email';
