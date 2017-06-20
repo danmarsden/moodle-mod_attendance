@@ -91,7 +91,7 @@ $table->define_headers(array(get_string('course'),
     get_string('user'),
     get_string('takensessions', 'attendance'),
     get_string('averageattendance', 'attendance'),
-    get_string('timesent', 'attendance')));
+    get_string('triggered', 'attendance')));
 $table->sortable(true);
 $table->no_sorting('course');
 $table->set_attribute('cellspacing', '0');

@@ -46,26 +46,47 @@ class notify extends \core\task\scheduled_task {
         if (empty($lastrun)) {
             $lastrun = 0;
         }
+
         $orderby = 'ORDER BY cm.id, atl.studentid, n.warningpercent ASC';
         $records = attendance_get_users_to_notify(array(), $orderby, $lastrun, true);
         $sentnotifications = array();
+        $thirdpartynotifications = array();
+        $numsentusers = 0;
+        $numsentthird = 0;
         foreach($records as $record) {
-            // Only send one notification to this user from each attendance in this run. - flag any higher percent notifications as sent.
-            if (empty($sentnotifications[$record->userid]) || !in_array($record->aid, $sentnotifications[$record->userid])) {
-                // Convert variables in emailcontent.
-                $record = attendance_template_variables($record);
-                $user = $DB->get_record('user', array('id' => $record->userid));
-                $from = \core_user::get_noreply_user();
+            if (empty($sentnotifications[$record->userid])) {
+                $sentnotifications[$record->userid] = array();
+            }
 
-                $emailcontent = format_text($record->emailcontent, $record->emailcontentformat);
+            if (!empty($record->emailuser)) {
+                // Only send one notification to this user from each attendance in this run. - flag any higher percent notifications as sent.
+                if (empty($sentnotifications[$record->userid]) || !in_array($record->aid, $sentnotifications[$record->userid])) {
+                    // Convert variables in emailcontent.
+                    $record = attendance_template_variables($record);
+                    $user = $DB->get_record('user', array('id' => $record->userid));
+                    $from = \core_user::get_noreply_user();
 
-                email_to_user($user, $from, $record->emailsubject, $emailcontent, $emailcontent);
+                    $emailcontent = format_text($record->emailcontent, $record->emailcontentformat);
 
-                if (empty($sentnotifications[$record->userid])) {
-                    $sentnotifications[$record->userid] = array();
+                    email_to_user($user, $from, $record->emailsubject, $emailcontent, $emailcontent);
+
+                    $sentnotifications[$record->userid][] = $record->aid;
+                    $numsentusers++;
+
                 }
-
-                $sentnotifications[$record->userid][] = $record->aid;
+            }
+            // Only send one notification to this user from each attendance in this run. - flag any higher percent notifications as sent.
+            if (!empty($record->thirdpartyemails)) {
+                $sendto = explode(',', $record->thirdpartyemails);
+                $record->percent = round($record->percent * 100)."%";
+                foreach ($sendto as $senduser) {
+                    if (empty($thirdpartynotifications[$senduser])) {
+                        $thirdpartynotifications[$senduser] = array();
+                    }
+                    if (!isset($thirdpartynotifications[$senduser][$record->aid.'_'.$record->userid])) {
+                        $thirdpartynotifications[$senduser][$record->aid.'_'.$record->userid] = get_string('thirdpartyemailtext', 'attendance', $record);
+                    }
+                }
             }
 
             $notify = new \stdClass();
@@ -73,6 +94,26 @@ class notify extends \core\task\scheduled_task {
             $notify->notifyid = $record->notifyid;
             $notify->timesent = $now;
             $DB->insert_record('attendance_notification_sent', $notify);
+        }
+        if (!empty($numsentusers)) {
+            mtrace($numsentusers ." user emails sent");
+        }
+        if (!empty($thirdpartynotifications)) {
+            foreach ($thirdpartynotifications as $sendid => $notifications) {
+                $user = $DB->get_record('user', array('id' => $sendid));
+                $from = \core_user::get_noreply_user();
+
+                $emailcontent = implode("\n", $notifications);
+                $emailcontent .= "\n\n".get_string('thirdpartyemailtextfooter', 'attendance');
+                $emailcontent = format_text($emailcontent);
+                $emailsubject = get_string('thirdpartyemailsubject', 'attendance');
+
+                email_to_user($user, $from, $emailsubject, $emailcontent, $emailcontent);
+                $numsentthird++;
+            }
+            if (!empty($numsentthird)) {
+                mtrace($numsentthird ." thirdparty emails sent");
+            }
         }
 
         set_config('notifylastrun', $now, 'mod_attendance');
