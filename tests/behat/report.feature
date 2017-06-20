@@ -30,7 +30,7 @@ Feature: Visiting reports
     And I follow "Notifications set"
     And I press "Add notification"
     And I set the following fields to these values:
-      | id_warningpercent | 70 |
+      | id_warningpercent | 84 |
       | id_warnafter   | 2 |
     And I click on "id_submitbutton" "button"
     And I log out
