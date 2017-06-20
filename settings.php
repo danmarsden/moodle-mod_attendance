@@ -74,6 +74,10 @@ if ($ADMIN->fulltree) {
         get_string('defaultview', 'attendance'),
             get_string('defaultview_desc', 'attendance'), ATT_VIEW_WEEKS, $options));
 
+    $settings->add(new admin_setting_configcheckbox('attendance/enablewarnings',
+        get_string('enablewarnings', 'attendance'),
+        get_string('enablewarnings_desc', 'attendance'), 0));
+
     $name = new lang_string('defaultsettings', 'mod_attendance');
     $description = new lang_string('defaultsettings_help', 'mod_attendance');
     $settings->add(new admin_setting_heading('defaultsettings', $name, $description));

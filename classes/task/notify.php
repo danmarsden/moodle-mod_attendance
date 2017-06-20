@@ -40,7 +40,9 @@ class notify extends \core\task\scheduled_task {
     }
     public function execute() {
         global $DB;
-
+        if (empty(get_config('attendance', 'enablewarnings'))) {
+            return; // Warnings not enabled.
+        }
         $now = time(); // Store current time to use in queries so they all match nicely.
         $lastrun = get_config('mod_attendance', 'notifylastrun');
         if (empty($lastrun)) {

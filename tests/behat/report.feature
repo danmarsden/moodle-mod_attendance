@@ -150,8 +150,12 @@ Feature: Visiting reports
 
     And I log out
 
-  Scenario: Teacher visit summary reports
-    Given I log in as "teacher1"
+  Scenario: Teacher visit summary report and at-risk report
+    Given I log in as "admin"
+    And the following config values are set as admin:
+      | enablewarnings | 1 | attendance
+    And I log out
+    And I log in as "teacher1"
     And I am on "Course 1" course homepage
     And I follow "Attendance"
     And I follow "Edit settings"

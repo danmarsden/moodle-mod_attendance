@@ -100,7 +100,8 @@ class attendance_tabs implements renderable {
                             get_string('report', 'attendance'));
         }
 
-        if (has_capability('mod/attendance:viewreports', $context)) {
+        if (has_capability('mod/attendance:viewreports', $context) &&
+            get_config('attendance', 'enablewarnings')) {
             $toprow[] = new tabobject(self::TAB_ATRISK, $this->att->url_atrisk()->out(),
                 get_string('atriskreport', 'attendance'));
         }
@@ -114,9 +115,10 @@ class attendance_tabs implements renderable {
             $toprow[] = new tabobject(self::TAB_PREFERENCES, $this->att->url_preferences()->out(),
                             get_string('statussetsettings', 'attendance'));
 
-            $toprow[] = new tabobject(self::TAB_WARNINGS, $this->att->url_warnings()->out(),
-                get_string('warnings', 'attendance'));
-
+            if (get_config('attendance', 'enablewarnings')) {
+                $toprow[] = new tabobject(self::TAB_WARNINGS, $this->att->url_warnings()->out(),
+                    get_string('warnings', 'attendance'));
+            }
         }
         if (has_capability('mod/attendance:managetemporaryusers', $context)) {
             $toprow[] = new tabobject(self::TAB_TEMPORARYUSERS, $this->att->url_managetemp()->out(),
