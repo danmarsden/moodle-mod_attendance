@@ -446,6 +446,7 @@ $string['versionforprinting'] = 'version for printing';
 $string['viewmode'] = 'View mode';
 $string['warnafter'] = 'Number of sessions taken before warning';
 $string['warnafter_help'] = 'Warnings will only be triggered when the user has had their attendance taken for at least this number of sessions.';
+$string['warningfailed'] = 'You cannot create a warning that uses the same percentage and number of sessions.';
 $string['warningpercent'] = 'Warn if percentage falls under';
 $string['warningpercent_help'] = 'A warning will be triggered when the overall percentage falls below this number.';
 $string['warningthreshold'] = 'Warning threshold';

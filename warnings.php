@@ -92,8 +92,14 @@ if ($data = $mform->get_data()) {
         if (!empty($data->thirdpartyemails)) {
             $notify->thirdpartyemails = implode(',', $data->thirdpartyemails);
         }
-        $DB->insert_record('attendance_warning', $notify);
-        echo $OUTPUT->notification(get_string('warningupdated', 'mod_attendance'), 'success');
+        $existingrecord = $DB->record_exists('attendance_warning', array('idnumber' => $notify->idnumber,
+                                                                         'warningpercent' => $notify->warningpercent));
+        if (empty($existingrecord)) {
+            $DB->insert_record('attendance_warning', $notify);
+            echo $OUTPUT->notification(get_string('warningupdated', 'mod_attendance'), 'success');
+        } else {
+            echo $OUTPUT->notification(get_string('warningfailed', 'mod_attendance'), 'warning');
+        }
 
     } else {
         $notify = $DB->get_record('attendance_warning', array('id' => $data->notid));
@@ -114,8 +120,14 @@ if ($data = $mform->get_data()) {
             if (!empty($data->thirdpartyemails)) {
                 $notify->thirdpartyemails = implode(',', $data->thirdpartyemails);
             }
-            $DB->update_record('attendance_warning', $notify);
-            echo $OUTPUT->notification(get_string('warningupdated', 'mod_attendance'), 'success');
+            $existingrecord = $DB->get_record('attendance_warning', array('idnumber' => $notify->idnumber,
+                'warningpercent' => $notify->warningpercent));
+            if (empty($existingrecord) || $existingrecord->id == $notify->id) {
+                $DB->update_record('attendance_warning', $notify);
+                echo $OUTPUT->notification(get_string('warningupdated', 'mod_attendance'), 'success');
+            } else {
+                echo $OUTPUT->notification(get_string('warningfailed', 'mod_attendance'), 'error');
+            }
         }
     }
 }
