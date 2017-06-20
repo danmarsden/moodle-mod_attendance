@@ -57,6 +57,10 @@ if ($ADMIN->fulltree) {
         get_string('studentscanmarksessiontimeend', 'attendance'),
         get_string('studentscanmarksessiontimeend_desc', 'attendance'), '60', PARAM_INT));
 
+    $settings->add(new admin_setting_configcheckbox('attendance/subnetactivitylevel',
+        get_string('subnetactivitylevel', 'attendance'),
+        get_string('subnetactivitylevel_desc', 'attendance'), 1));
+
     $options = array(
         ATT_VIEW_ALL => get_string('all', 'attendance'),
         ATT_VIEW_ALLPAST => get_string('allpast', 'attendance'),
