@@ -28,7 +28,7 @@ Feature: Visiting reports
       | id_sestime_endhour   | 02 |
     And I click on "id_submitbutton" "button"
     And I follow "Notifications set"
-    And I follow "Add notification"
+    And I press "Add notification"
     And I set the following fields to these values:
       | id_warning_percent | 70 |
       | id_warnafter   | 2 |
