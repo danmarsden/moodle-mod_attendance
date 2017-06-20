@@ -121,10 +121,12 @@ if ($ADMIN->fulltree) {
         get_string('emailuser', 'attendance'), get_string('emailuser_help', 'attendance'), 1));
 
     $settings->add(new admin_setting_configtext('attendance/emailsubject',
-        get_string('emailsubject', 'attendance'), get_string('emailsubject_help', 'attendance'), get_string('emailsubject_default', 'attendance'), PARAM_RAW));
+        get_string('emailsubject', 'attendance'), get_string('emailsubject_help', 'attendance'),
+        get_string('emailsubject_default', 'attendance'), PARAM_RAW));
 
 
     $settings->add(new admin_setting_configtextarea('attendance/emailcontent',
-        get_string('emailcontent', 'attendance'), get_string('emailcontent_help', 'attendance'), get_string('emailcontent_default', 'attendance'), PARAM_RAW));
+        get_string('emailcontent', 'attendance'), get_string('emailcontent_help', 'attendance'),
+        get_string('emailcontent_default', 'attendance'), PARAM_RAW));
 
 }

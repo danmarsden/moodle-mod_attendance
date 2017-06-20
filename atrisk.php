@@ -121,7 +121,8 @@ foreach ($records as $record) {
     } else {
         $name = $record->coursename;
     }
-    $url = new moodle_url('/mod/attendance/view.php', array('studentid' => $record->userid, 'id' => $record->cmid, 'view' => ATT_VIEW_ALL));
+    $url = new moodle_url('/mod/attendance/view.php', array('studentid' => $record->userid,
+                                                                'id' => $record->cmid, 'view' => ATT_VIEW_ALL));
     $attendancename = html_writer::link($url, $record->aname);
 
     $username = html_writer::link($url, fullname($record));

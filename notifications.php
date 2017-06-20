@@ -177,7 +177,8 @@ if ($action == 'update' && !empty($notid)) {
             $url->params(array('action' => 'update', 'notid' => $notification->id, 'id' => $id));
             $actionbuttons .= $OUTPUT->action_icon($url, new pix_icon('t/edit',
                 get_string('update', 'attendance')), null, null);
-            $table->data[] = array($notification->warningpercent, $notification->warnafter, $notification->emailsubject, $actionbuttons);
+            $table->data[] = array($notification->warningpercent, $notification->warnafter,
+                                   $notification->emailsubject, $actionbuttons);
         }
         echo html_writer::table($table);
     }

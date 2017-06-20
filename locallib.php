@@ -742,11 +742,12 @@ function attendance_get_users_to_notify($courseids = array(), $orderby = '', $si
     }
 
     $unames = get_all_user_name_fields(true);
-    $unames2 = get_all_user_name_fields(true,'u');
+    $unames2 = get_all_user_name_fields(true, 'u');
 
     $idfield = $DB->sql_concat('cm.id', 'atl.studentid', 'n.id');
-    $sql = "SELECT {$idfield} as uniqueid, a.id as aid, {$unames2}, a.name as aname, cm.id as cmid, c.id as courseid, c.fullname as coursename, atl.studentid AS userid,
-                     n.id as notifyid, n.warningpercent, n.emailsubject, n.emailcontent, n.emailcontentformat, n.emailuser, n.thirdpartyemails, ns.timesent,
+    $sql = "SELECT {$idfield} as uniqueid, a.id as aid, {$unames2}, a.name as aname, cm.id as cmid, c.id as courseid,
+                    c.fullname as coursename, atl.studentid AS userid, n.id as notifyid, n.warningpercent, n.emailsubject,
+                    n.emailcontent, n.emailcontentformat, n.emailuser, n.thirdpartyemails, ns.timesent,
                      COUNT(DISTINCT ats.id) AS numtakensessions, SUM(stg.grade) AS points, SUM(stm.maxgrade) AS maxpoints,
                       SUM(stg.grade) / SUM(stm.maxgrade) AS percent
                    FROM {attendance_sessions} ats
@@ -768,9 +769,11 @@ function attendance_get_users_to_notify($courseids = array(), $orderby = '', $si
                   {$joingroup}
                   WHERE ats.sessdate >= {$sincetime} {$where}
                     AND ats.lasttaken != 0
-                GROUP BY uniqueid, a.id, a.name, a.course, c.fullname, atl.studentid, n.id, n.warningpercent, n.emailsubject, n.emailcontent, n.emailcontentformat,
+                GROUP BY uniqueid, a.id, a.name, a.course, c.fullname, atl.studentid, n.id, n.warningpercent,
+                         n.emailsubject, n.emailcontent, n.emailcontentformat,
                          n.emailuser, n.thirdpartyemails, ns.timesent, cm.id, c.id, {$unames2}
-                HAVING n.warnafter <= COUNT(DISTINCT ats.id) AND n.warningpercent > ((SUM(stg.grade) / SUM(stm.maxgrade)) * 100) {$orderby}";
+                HAVING n.warnafter <= COUNT(DISTINCT ats.id) AND n.warningpercent > ((SUM(stg.grade) / SUM(stm.maxgrade)) * 100)
+                      {$orderby}";
 
     if (!$allfornotify) {
         $idfield = $DB->sql_concat('cmid', 'userid');

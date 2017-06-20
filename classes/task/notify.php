@@ -42,7 +42,7 @@ class notify extends \core\task\scheduled_task {
         global $DB;
 
         $now = time(); // Store current time to use in queries so they all match nicely.
-        $lastrun = get_config('mod_attendance','notifylastrun');
+        $lastrun = get_config('mod_attendance', 'notifylastrun');
         if (empty($lastrun)) {
             $lastrun = 0;
         }
@@ -53,7 +53,7 @@ class notify extends \core\task\scheduled_task {
         $thirdpartynotifications = array();
         $numsentusers = 0;
         $numsentthird = 0;
-        foreach($records as $record) {
+        foreach ($records as $record) {
             if (empty($sentnotifications[$record->userid])) {
                 $sentnotifications[$record->userid] = array();
             }
@@ -72,7 +72,6 @@ class notify extends \core\task\scheduled_task {
 
                     $sentnotifications[$record->userid][] = $record->aid;
                     $numsentusers++;
-
                 }
             }
             // Only send one notification to this user from each attendance in this run. - flag any higher percent notifications as sent.

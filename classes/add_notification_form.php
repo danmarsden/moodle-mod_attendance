@@ -80,7 +80,8 @@ class mod_attendance_add_notification_form extends moodleform {
             $options[$user->id] = fullname($user);
         }
 
-        $select = $mform->addElement('searchableselector', 'thirdpartyemails', get_string('thirdpartyemails', 'mod_attendance'), $options);
+        $select = $mform->addElement('searchableselector', 'thirdpartyemails',
+            get_string('thirdpartyemails', 'mod_attendance'), $options);
         $mform->setType('thirdpartyemails', PARAM_TEXT);
         $mform->addHelpButton('thirdpartyemails', 'thirdpartyemails', 'mod_attendance');
         $select->setMultiple(true);
@@ -92,10 +93,10 @@ class mod_attendance_add_notification_form extends moodleform {
         $mform->addElement('hidden', 'idnumber', 0); // Default options use 0 as the idnumber.
         $mform->setType('idnumber', PARAM_INT);
 
-        $mform->addElement('hidden', 'notid', 0); // id of notification record.
+        $mform->addElement('hidden', 'notid', 0); // The id of notification record.
         $mform->setType('notid', PARAM_INT);
 
-        $mform->addElement('hidden', 'id', $this->_customdata['id']); // id of course module record if setting attendance level.
+        $mform->addElement('hidden', 'id', $this->_customdata['id']); // The id of course module record if attendance level.
         $mform->setType('id', PARAM_INT);
 
         if (!empty($this->_customdata['notid'])) {
