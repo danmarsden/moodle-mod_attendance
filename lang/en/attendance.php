@@ -145,12 +145,26 @@ Your attendance in %coursename% %attendancename% has dropped below %warningperce
 
 To get the most out of this course you should improve your attendance, please get in touch if you require any further support.';
 $string['emailcontent'] = 'Email content';
-$string['emailcontent_help'] = 'When a notification is sent to a student, it takes the email content from this field.';
+$string['emailcontent_help'] = 'When a notification is sent to a student, it takes the email content from this field. The following wildcards can be used:
+<ul>
+<li>%coursename%</li>
+<li>%userfirstname%</li>
+<li>%userlastname%</li>
+<li>%userid%</li>
+<li>%warningpercent%</li>
+<li>%attendancename%</li>
+<li>%cmid%</li>
+<li>%numtakensessions%</li>
+<li>%points%</li>
+<li>%maxpoints%</li>
+<li>%precent%</li>
+</ul>';
+
 $string['emailsubject'] = 'Email subject';
 $string['emailsubject_help'] = 'When a notification is sent to a student, it takes the email subject from this field.';
 $string['emailsubject_default'] = 'Attendance warning';
 $string['emailuser'] = 'Email user';
-$string['emailuser_help'] = 'If not checked, the warning will not be sent to the student and will only be sent to the extra users configured.';
+$string['emailuser_help'] = 'If checked, a warning will be sent to the student.';
 $string['emptyacronym'] = 'Empty acronyms are not allowed. Status record not updated.';
 $string['emptydescription'] = 'Empty descriptions are not allowed. Status record not updated.';
 $string['endofperiod'] = 'End of period';
@@ -236,7 +250,7 @@ $string['nosessiondayselected'] = 'No Session day selected';
 $string['nosessionexists'] = 'No Session exists for this course';
 $string['nosessionsselected'] = 'No sessions selected';
 $string['notificationdeleted'] = 'Notification deleted';
-$string['notificationdesc'] = 'These notifications will be automatically added to any new attendance activities.';
+$string['notificationdesc'] = 'These notifications will be automatically added to any new attendance activities. If more than one notification is triggered at exactly the same time, only the notification with the lower warning threshold will be sent.';
 $string['notifications'] = 'Notifications set';
 $string['notificationupdated'] = 'Updated notifications';
 $string['notifytask'] = 'Send notifications to users';
@@ -434,6 +448,7 @@ $string['warnafter'] = 'Number of sessions taken before warning';
 $string['warnafter_help'] = 'Warnings will only be triggered when the user has had their attendance taken for at least this number of sessions.';
 $string['warningpercent'] = 'Warn if percentage falls under';
 $string['warningpercent_help'] = 'A notification will be triggered when the overall percentage falls below this number.';
+$string['warningthreshold'] = 'Warning threshold';
 $string['week'] = 'week(s)';
 $string['weeks'] = 'Weeks';
 $string['youcantdo'] = 'You can\'t do anything';

@@ -27,6 +27,12 @@ Feature: Visiting reports
       | id_sestime_starthour | 01 |
       | id_sestime_endhour   | 02 |
     And I click on "id_submitbutton" "button"
+    And I follow "Notifications set"
+    And I follow "Add notification"
+    And I set the following fields to these values:
+      | id_warning_percent | 70 |
+      | id_warnafter   | 2 |
+    And I click on "id_submitbutton" "button"
     And I log out
 
   Scenario: Teacher takes attendance
@@ -144,7 +150,7 @@ Feature: Visiting reports
 
     And I log out
 
-  Scenario: Teacher visit summary report
+  Scenario: Teacher visit summary reports
     Given I log in as "teacher1"
     And I am on "Course 1" course homepage
     And I follow "Attendance"
@@ -185,6 +191,9 @@ Feature: Visiting reports
     And "50.0%" "text" should exist in the "Student 1" "table_row"
     And "5 / 6" "text" should exist in the "Student 1" "table_row"
     And "83.3%" "text" should exist in the "Student 1" "table_row"
+
+    And I follow "At-risk report"
+    And I should see "Student 1"
 
     And I log out
 

@@ -163,7 +163,7 @@ if ($action == 'update' && !empty($notid)) {
     }
     if (!empty($existingnotifications)) {
         $table = new html_table();
-        $table->head = array(get_string('percentage', 'mod_attendance'),
+        $table->head = array(get_string('warningthreshold', 'mod_attendance'),
             get_string('numsessions', 'mod_attendance'),
             get_string('emailsubject', 'mod_attendance'),
             '');

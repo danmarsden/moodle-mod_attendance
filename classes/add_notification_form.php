@@ -73,6 +73,7 @@ class mod_attendance_add_notification_form extends moodleform {
         $mform->addElement('editor', 'emailcontent', get_string('emailcontent', 'mod_attendance'), null, null);
         $mform->setDefault('emailcontent', array('text' => format_text($config->emailcontent)));
         $mform->setType('emailcontent', PARAM_RAW);
+        $mform->addHelpButton('emailcontent', 'emailcontent', 'mod_attendance');
 
         $users = get_users_by_capability(context_course::instance($COURSE->id), 'mod/attendance:viewreports');
         $options = array();
