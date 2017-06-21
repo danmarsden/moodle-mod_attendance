@@ -51,7 +51,10 @@ class attendance_tabs implements renderable {
     const TAB_TEMPORARYUSERS = 6; // Tab for managing temporary users.
     /** Update tab */
     const TAB_UPDATE        = 7;
-
+    /** Warnings tab */
+    const TAB_WARNINGS = 8;
+    /** At-risk tab */
+    const TAB_ATRISK        = 9;
     /** @var int current tab */
     public $currenttab;
 
@@ -97,6 +100,12 @@ class attendance_tabs implements renderable {
                             get_string('report', 'attendance'));
         }
 
+        if (has_capability('mod/attendance:viewreports', $context) &&
+            get_config('attendance', 'enablewarnings')) {
+            $toprow[] = new tabobject(self::TAB_ATRISK, $this->att->url_atrisk()->out(),
+                get_string('atriskreport', 'attendance'));
+        }
+
         if (has_capability('mod/attendance:export', $context)) {
             $toprow[] = new tabobject(self::TAB_EXPORT, $this->att->url_export()->out(),
                             get_string('export', 'attendance'));
@@ -105,6 +114,11 @@ class attendance_tabs implements renderable {
         if (has_capability('mod/attendance:changepreferences', $context)) {
             $toprow[] = new tabobject(self::TAB_PREFERENCES, $this->att->url_preferences()->out(),
                             get_string('statussetsettings', 'attendance'));
+
+            if (get_config('attendance', 'enablewarnings')) {
+                $toprow[] = new tabobject(self::TAB_WARNINGS, $this->att->url_warnings()->out(),
+                    get_string('warnings', 'attendance'));
+            }
         }
         if (has_capability('mod/attendance:managetemporaryusers', $context)) {
             $toprow[] = new tabobject(self::TAB_TEMPORARYUSERS, $this->att->url_managetemp()->out(),

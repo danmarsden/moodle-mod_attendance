@@ -14,6 +14,8 @@ Feature: Visiting reports
       | course | user     | role           | timestart     |
       | C1     | student1 | student        | ##yesterday## |
       | C1     | teacher1 | editingteacher | ##yesterday## |
+    And the following config values are set as admin:
+      | enablewarnings | 1 | attendance |
 
     And I log in as "teacher1"
     And I am on "Course 1" course homepage with editing mode on
@@ -26,6 +28,12 @@ Feature: Visiting reports
     And I set the following fields to these values:
       | id_sestime_starthour | 01 |
       | id_sestime_endhour   | 02 |
+    And I click on "id_submitbutton" "button"
+    And I follow "Warnings set"
+    And I press "Add warning"
+    And I set the following fields to these values:
+      | id_warningpercent | 84 |
+      | id_warnafter   | 2 |
     And I click on "id_submitbutton" "button"
     And I log out
 
@@ -144,7 +152,7 @@ Feature: Visiting reports
 
     And I log out
 
-  Scenario: Teacher visit summary report
+  Scenario: Teacher visit summary report and at-risk report
     Given I log in as "teacher1"
     And I am on "Course 1" course homepage
     And I follow "Attendance"
@@ -185,6 +193,9 @@ Feature: Visiting reports
     And "50.0%" "text" should exist in the "Student 1" "table_row"
     And "5 / 6" "text" should exist in the "Student 1" "table_row"
     And "83.3%" "text" should exist in the "Student 1" "table_row"
+
+    And I follow "At-risk report"
+    And I should see "Student 1"
 
     And I log out
 

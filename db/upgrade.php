@@ -340,5 +340,62 @@ function xmldb_attendance_upgrade($oldversion=0) {
 
         upgrade_mod_savepoint(true, 2017060900, 'attendance');
     }
+
+    // Add new warning table.
+    if ($oldversion < 2017061600) {
+
+        // Define table attendance_warning to be created.
+        $table = new xmldb_table('attendance_warning');
+
+        // Adding fields to table attendance_warning.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('idnumber', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('warningpercent', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('warnafter', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('emailuser', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('emailsubject', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('emailcontent', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL, null, null);
+        $table->add_field('emailcontentformat', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('thirdpartyemails', XMLDB_TYPE_TEXT, null, null, null, null, null);
+
+        // Adding keys to table attendance_warning.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        $table->add_key('level_id', XMLDB_KEY_UNIQUE, array('idnumber, warningpercent'));
+
+        // Conditionally launch create table for attendance_warning.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Attendance savepoint reached.
+        upgrade_mod_savepoint(true, 2017061600, 'attendance');
+    }
+
+    if ($oldversion < 2017062000) {
+
+        // Define table attendance_warning_done to be created.
+        $table = new xmldb_table('attendance_warning_done');
+
+        // Adding fields to table attendance_warning_done.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('notifyid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('timesent', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+
+        // Adding keys to table attendance_warning_done.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+
+        // Adding indexes to table attendance_warning_done.
+        $table->add_index('notifyid_userid', XMLDB_INDEX_UNIQUE, array('notifyid', 'userid'));
+
+        // Conditionally launch create table for attendance_warning_done.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Attendance savepoint reached.
+        upgrade_mod_savepoint(true, 2017062000, 'attendance');
+    }
+
     return $result;
 }

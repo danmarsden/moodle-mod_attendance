@@ -1,5 +1,6 @@
 ### [Unreleased]
 - New Feature: Allow automatic marking using site logs.
+- New Feature: Warn users when attendance drops below threshold.
 - Improvement: Allow default view for teachers to be set at admin level.
 - Improvement: All courses user report now displays as table.
 - Bug fix: Restored attendances do not create calendar events correctly.

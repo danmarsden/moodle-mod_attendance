@@ -70,6 +70,25 @@ function att_add_default_statuses($attid) {
 }
 
 /**
+ * Add default set of warnings to the new attendance.
+ *
+ * @param int $attid - id of attendance instance.
+ */
+function attendance_add_default_warnings($cmid) {
+    global $DB, $CFG;
+    require_once($CFG->dirroot.'/mod/attendance/locallib.php');
+
+    $warnings = $DB->get_recordset('attendance_warning',
+        array('idnumber' => 0), 'id');
+    foreach ($warnings as $n) {
+        $rec = $n;
+        $rec->idnumber = $cmid;
+        $DB->insert_record('attendance_warning', $rec);
+    }
+    $warnings->close();
+}
+
+/**
  * Add new attendance instance.
  *
  * @param stdClass $attendance
@@ -83,6 +102,8 @@ function attendance_add_instance($attendance) {
     $attendance->id = $DB->insert_record('attendance', $attendance);
 
     att_add_default_statuses($attendance->id);
+
+    attendance_add_default_warnings($attendance->coursemodule);
 
     attendance_grade_item_update($attendance);
 
@@ -117,7 +138,8 @@ function attendance_update_instance($attendance) {
  * @return bool
  */
 function attendance_delete_instance($id) {
-    global $DB;
+    global $DB, $CFG;
+    require_once($CFG->dirroot.'/mod/attendance/locallib.php');
 
     if (! $attendance = $DB->get_record('attendance', array('id' => $id))) {
         return false;
@@ -131,6 +153,8 @@ function attendance_delete_instance($id) {
         $DB->delete_records('attendance_sessions', array('attendanceid' => $id));
     }
     $DB->delete_records('attendance_statuses', array('attendanceid' => $id));
+
+    $DB->delete_records('attendance_warning', array('idnumber' => $id));
 
     $DB->delete_records('attendance', array('id' => $id));
 
@@ -450,9 +474,18 @@ function attendance_print_settings_tabs($selected = 'settings') {
     $tabs[] = new tabobject('defaultstatus', $CFG->wwwroot.'/mod/attendance/defaultstatus.php',
         get_string('defaultstatus', 'attendance'), get_string('defaultstatus', 'attendance'), false);
 
+    if (get_config('attendance', 'enablewarnings')) {
+        $tabs[] = new tabobject('defaultwarnings', $CFG->wwwroot . '/mod/attendance/warnings.php',
+            get_string('defaultwarnings', 'attendance'), get_string('defaultwarnings', 'attendance'), false);
+    }
+
     $tabs[] = new tabobject('coursesummary', $CFG->wwwroot.'/mod/attendance/coursesummary.php',
         get_string('coursesummary', 'attendance'), get_string('coursesummary', 'attendance'), false);
 
+    if (get_config('attendance', 'enablewarnings')) {
+        $tabs[] = new tabobject('atrisk', $CFG->wwwroot . '/mod/attendance/atrisk.php',
+            get_string('atriskreport', 'attendance'), get_string('atriskreport', 'attendance'), false);
+    }
     ob_start();
     print_tabs(array($tabs), $selected);
     $tabmenu = ob_get_contents();
