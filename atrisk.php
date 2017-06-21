@@ -23,6 +23,7 @@
  */
 
 require_once('../../config.php');
+require_once($CFG->libdir.'/adminlib.php');
 require_once($CFG->dirroot.'/mod/attendance/lib.php');
 require_once($CFG->dirroot.'/mod/attendance/locallib.php');
 require_once($CFG->libdir.'/tablelib.php');
@@ -47,10 +48,9 @@ if (!empty($category)) {
     $context = context_module::instance($cm->id);
     require_login($course, false, $cm);
 } else {
+    admin_externalpage_setup('managemodules');
     $context = context_system::instance();
     $courses = array(); // Show all courses.
-    $PAGE->set_context($context);
-    require_login();
 }
 // Check permissions.
 require_capability('mod/attendance:viewreports', $context);
