@@ -1,5 +1,5 @@
-### Date:		2017-June-14
-### Release:    3.3.8
+### Date:		2017-June-22
+### Release:    3.3.9
 - New Feature: Allow automatic marking using site logs.
 - New Feature: Warn users when attendance drops below threshold.
 - Improvement: Allow default view for teachers to be set at admin level.
