@@ -14,6 +14,8 @@ Feature: Visiting reports
       | course | user     | role           | timestart     |
       | C1     | student1 | student        | ##yesterday## |
       | C1     | teacher1 | editingteacher | ##yesterday## |
+    And the following config values are set as admin:
+      | enablewarnings | 1 | attendance |
 
     And I log in as "teacher1"
     And I am on "Course 1" course homepage with editing mode on
@@ -151,11 +153,7 @@ Feature: Visiting reports
     And I log out
 
   Scenario: Teacher visit summary report and at-risk report
-    Given I log in as "admin"
-    And the following config values are set as admin:
-      | enablewarnings | 1 | attendance |
-    And I log out
-    And I log in as "teacher1"
+    Given I log in as "teacher1"
     And I am on "Course 1" course homepage
     And I follow "Attendance"
     And I follow "Edit settings"
