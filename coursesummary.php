@@ -23,6 +23,7 @@
  */
 
 require_once('../../config.php');
+require_once($CFG->libdir.'/adminlib.php');
 require_once($CFG->dirroot.'/mod/attendance/lib.php');
 require_once($CFG->dirroot.'/mod/attendance/locallib.php');
 require_once($CFG->libdir.'/tablelib.php');
@@ -31,17 +32,21 @@ require_once($CFG->libdir.'/coursecatlib.php');
 $category = optional_param('category', 0, PARAM_INT);
 $download = optional_param('download', '', PARAM_ALPHA);
 $sort = optional_param('tsort', '', PARAM_ALPHA);
+$fromcourse = optional_param('fromcourse', 0, PARAM_INT);
 
-require_login();
+if (empty($fromcourse)) {
+    admin_externalpage_setup('managemodules');
+} else {
+    require_login($fromcourse);
+}
+
 if (empty($category)) {
     $context = context_system::instance();
     $courses = array(); // Show all courses.
-    $PAGE->set_context(context_system::instance());
 } else {
     $context = context_coursecat::instance($category);
     $coursecat = coursecat::get($category);
     $courses = $coursecat->get_courses(array('recursive' => true, 'idonly' => true));
-    $PAGE->set_category_by_id($category);
 }
 // Check permissions.
 require_capability('mod/attendance:viewsummaryreports', $context);
@@ -57,7 +62,11 @@ $table->define_baseurl($PAGE->url);
 
 if (!$table->is_downloading($download, $exportfilename)) {
     echo $OUTPUT->header();
-    echo $OUTPUT->heading(get_string('coursesummary', 'mod_attendance'));
+    $heading = get_string('coursesummary', 'mod_attendance');
+    if (!empty($category)) {
+        $heading .= " (".$coursecat->name.")";
+    }
+    echo $OUTPUT->heading($heading);
     if (empty($category)) {
         // Only show tabs if displaying via the admin page.
         $tabmenu = attendance_print_settings_tabs('coursesummary');
