@@ -153,7 +153,7 @@ Feature: Visiting reports
   Scenario: Teacher visit summary report and at-risk report
     Given I log in as "admin"
     And the following config values are set as admin:
-      | enablewarnings | 1 | attendance
+      | enablewarnings | 1 | attendance |
     And I log out
     And I log in as "teacher1"
     And I am on "Course 1" course homepage
