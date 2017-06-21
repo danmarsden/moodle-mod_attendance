@@ -34,7 +34,9 @@ $download = optional_param('download', '', PARAM_ALPHA);
 $sort = optional_param('tsort', '', PARAM_ALPHA);
 $fromcourse = optional_param('fromcourse', 0, PARAM_INT);
 
+$admin = false;
 if (empty($fromcourse)) {
+    $admin = true;
     admin_externalpage_setup('managemodules');
 } else {
     require_login($fromcourse);
@@ -67,11 +69,18 @@ if (!$table->is_downloading($download, $exportfilename)) {
         $heading .= " (".$coursecat->name.")";
     }
     echo $OUTPUT->heading($heading);
-    if (empty($category)) {
+    if ($admin) {
         // Only show tabs if displaying via the admin page.
         $tabmenu = attendance_print_settings_tabs('coursesummary');
         echo $tabmenu;
     }
+    $url = new moodle_url('/mod/attendance/coursesummary.php', array('category' => $category, 'fromcourse' => $fromcourse));
+
+    if ($admin) {
+        $options = coursecat::make_categories_list('mod/attendance:viewsummaryreports');
+        echo $OUTPUT->single_select($url, 'category', $options, $category);
+    }
+
 }
 
 $table->define_columns(array('course', 'percentage'));
