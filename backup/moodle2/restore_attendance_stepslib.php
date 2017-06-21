@@ -49,6 +49,9 @@ class restore_attendance_activity_structure_step extends restore_activity_struct
         $paths[] = new restore_path_element('attendance_status',
                        '/activity/attendance/statuses/status');
 
+        $paths[] = new restore_path_element('attendance_warning',
+            '/activity/attendance/warnings/warning');
+
         $paths[] = new restore_path_element('attendance_session',
                        '/activity/attendance/sessions/session');
 
@@ -98,6 +101,21 @@ class restore_attendance_activity_structure_step extends restore_activity_struct
 
         $newitemid = $DB->insert_record('attendance_statuses', $data);
         $this->set_mapping('attendance_status', $oldid, $newitemid);
+    }
+
+    /**
+     * Process attendance warning restore
+     * @param object $data The data in object form
+     * @return void
+     */
+    protected function process_attendance_warning($data) {
+        global $DB;
+
+        $data = (object)$data;
+
+        $data->idnumber = $this->get_new_parentid('attendance');
+
+        $DB->insert_record('attendance_warning', $data);
     }
 
     /**
