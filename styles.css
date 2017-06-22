@@ -186,8 +186,9 @@
 .path-mod-attendance .attreport .narrow {
     width: 1px;
 }
-.path-mod-attendance .student-pass {
+.path-mod-attendance .student-password {
     font-size: x-large;
+    text-align: center;
 }
 #page-mod-attendance-sessions .statusgroup .statusdesc {
     margin-right: 12px;
