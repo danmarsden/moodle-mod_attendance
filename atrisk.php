@@ -32,7 +32,7 @@ require_once($CFG->libdir.'/coursecatlib.php');
 $category = optional_param('category', 0, PARAM_INT);
 $attendancecm = optional_param('id', 0, PARAM_INT);
 $download = optional_param('download', '', PARAM_ALPHA);
-$sort = optional_param('tsort', '', PARAM_ALPHA);
+$sort = optional_param('tsort', 'timesent', PARAM_ALPHA);
 
 if (!empty($category)) {
     $context = context_coursecat::instance($category);
