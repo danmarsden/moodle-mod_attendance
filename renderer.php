@@ -293,6 +293,15 @@ class mod_attendance_renderer extends plugin_renderer_base {
     }
 
     /**
+     * Implementation of user image rendering.
+     *
+     * @param help_icon $helpicon A help icon instance
+     * @return string HTML fragment
+     */
+    protected function render_attendance_password_icon(attendance_password_icon $helpicon) {
+        return $this->render_from_template('attendance/attendance_password_icon', $helpicon->export_for_template($this));
+    }
+    /**
      * Construct date time actions.
      *
      * @param attendance_manage_data $sessdata
@@ -306,12 +315,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
             has_capability('mod/attendance:takeattendances', $sessdata->att->context) ||
             has_capability('mod/attendance:changeattendances', $sessdata->att->context))) {
 
-            $icon = new pix_icon('key', '', 'attendance');
-            $attributes = array("class" => "btn-link p-a-0", "role" => "button",
-                                "data-toggle" => "popover", "data-placement" => "left", "data-html" => "true",
-                                "tabindex" => "0", "data-trigger" => "manual");
-            $attributes['data-content'] = html_writer::span($sess->studentpassword, 'student-pass');
-            $actions .= html_writer::tag('a', $this->output->render($icon), $attributes);
+            $icon = new attendance_password_icon($sess->studentpassword, $sess->id);
+            $actions .= $this->render($icon);
         }
 
         $date = userdate($sess->sessdate, get_string('strftimedmyw', 'attendance'));

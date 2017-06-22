@@ -809,3 +809,61 @@ class url_helpers {
         return $att->url_view($params);
     }
 }
+
+/**
+ * Data structure representing an attendance password icon.
+ * copied from help_icon class
+ *
+ * @copyright 2017 Dan Marsden
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class attendance_password_icon implements renderable, templatable {
+
+    /**
+     * @var string text to show
+     */
+    public $text;
+
+    /**
+     * @var string Extra descriptive text next to the icon
+     */
+    public $linktext = null;
+
+    /**
+     * Constructor
+     *
+     * @param string $identifier string for help page title,
+     *  string with _help suffix is used for the actual help text.
+     *  string with _link suffix is used to create a link to further info (if it exists)
+     * @param string $component
+     */
+    public function __construct($text, $sessionid) {
+        $this->text  = $text;
+        $this->sessionid = $sessionid;
+    }
+
+    /**
+     * Export this data so it can be used as the context for a mustache template.
+     *
+     * @param renderer_base $output Used to do a final render of any components that need to be rendered for export.
+     * @return array
+     */
+    public function export_for_template(renderer_base $output) {
+
+        $title = get_string('password', 'attendance');
+
+        $data = new stdClass();
+        $data->heading = '';
+        $data->text = $this->text;
+
+        $data->alt = $title;
+        $data->icon = (new pix_icon('key', '', 'attendance'))->export_for_template($output);
+        $data->linktext = '';
+        $data->title = $title;
+        $data->url = (new moodle_url('/mod/attendance/password.php', [
+            'session' => $this->sessionid]))->out(false);
+
+        $data->ltr = !right_to_left();
+        return $data;
+    }
+}
