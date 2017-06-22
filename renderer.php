@@ -166,6 +166,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $params = array(
                     'title' => get_string('calshow', 'attendance'),
                     'id'    => 'show',
+                    'class' => 'btn btn-secondary',
                     'type'  => 'button');
             $buttonform = html_writer::tag('button', $fcontrols->curdatetxt, $params);
             foreach ($fcontrols->url_params(array('curdate' => '')) as $name => $value) {
@@ -375,6 +376,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 $attributes = array(
                         'type'  => 'submit',
                         'name'  => 'deletehiddensessions',
+                        'class' => 'btn btn-secondary',
                         'value' => get_string('deletehiddensessions', 'attendance'));
                 $table->data[1][] = html_writer::empty_tag('input', $attributes);
             }
@@ -386,7 +388,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $attributes = array(
                     'type'  => 'submit',
                     'name'  => 'ok',
-                    'value' => get_string('ok'));
+                    'value' => get_string('ok'),
+                    'class' => 'btn btn-secondary');
             $controls .= html_writer::empty_tag('input', $attributes);
         } else {
             $controls = get_string('youcantdo', 'attendance'); // You can't do anything.
@@ -415,6 +418,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $table .= html_writer::end_div();
         $params = array(
                 'type'  => 'submit',
+                'class' => 'btn btn-primary',
                 'value' => get_string('save', 'attendance'));
         $table .= html_writer::tag('center', html_writer::empty_tag('input', $params));
         $table = html_writer::tag('form', $table, array('method' => 'post', 'action' => $takedata->url_path(),
@@ -1146,7 +1150,9 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $output .= html_writer::empty_tag('input', array('name' => 'returnto', 'type' => 'hidden', 'value' => s(me())));
             $output .= html_writer::table($table).html_writer::tag('div', get_string('users').': '.count($reportdata->users));;
             $output .= html_writer::tag('div',
-                    html_writer::empty_tag('input', array('type' => 'submit', 'value' => get_string('messageselectadd'))),
+                    html_writer::empty_tag('input', array('type' => 'submit',
+                                                                   'value' => get_string('messageselectadd'),
+                                                                   'class' => 'btn btn-secondary')),
                     array('class' => 'buttons'));
             $url = new moodle_url('/user/action_redir.php');
             return html_writer::tag('form', $output, array('action' => $url->out(), 'method' => 'post'));
@@ -1816,6 +1822,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $attributes = array(
                 'type'      => 'submit',
                 'value'     => $text,
+                'class'     => 'btn btn-secondary',
                 'onclick'   => 'M.mod_attendance.set_preferences_action('.$action.')');
         return html_writer::empty_tag('input', $attributes);
     }
