@@ -874,17 +874,26 @@ class mod_attendance_renderer extends plugin_renderer_base {
      * @return string
      */
     protected function render_attendance_user_data(attendance_user_data $userdata) {
+        global $USER;
+
         $o = $this->render_user_report_tabs($userdata);
 
-        $table = new html_table();
+        if ($USER->id == $userdata->user->id) {
 
-        $table->attributes['class'] = 'userinfobox';
-        $table->colclasses = array('left side', '');
-        // Show different picture if it is a temporary user.
-        $table->data[0][] = $this->user_picture($userdata->user, array('size' => 100));
-        $table->data[0][] = $this->construct_user_data($userdata);
+            $o .= $this->construct_user_data($userdata);
 
-        $o .= html_writer::table($table);
+        } else {
+
+            $table = new html_table();
+
+            $table->attributes['class'] = 'userinfobox';
+            $table->colclasses = array('left side', '');
+            // Show different picture if it is a temporary user.
+            $table->data[0][] = $this->user_picture($userdata->user, array('size' => 100));
+            $table->data[0][] = $this->construct_user_data($userdata);
+
+            $o .= html_writer::table($table);
+        }
 
         return $o;
     }
@@ -919,18 +928,18 @@ class mod_attendance_renderer extends plugin_renderer_base {
      * @return string
      */
     private function construct_user_data(attendance_user_data $userdata) {
-        global $PAGE;
-        $o = html_writer::tag('h2', fullname($userdata->user));
+        global $USER;
+        $o = '';
+        if ($USER->id <> $userdata->user->id) {
+            $o = html_writer::tag('h2', fullname($userdata->user));
+        }
 
         if ($userdata->pageparams->mode == mod_attendance_view_page_params::MODE_THIS_COURSE) {
-            $o .= html_writer::empty_tag('hr');
-
-            $o .= construct_user_data_stat($userdata->summary->get_all_sessions_summary_for($userdata->user->id),
-                                                                                            $userdata->pageparams->view);
-
             $o .= $this->render_attendance_filter_controls($userdata->filtercontrols);
-
             $o .= $this->construct_user_sessions_log($userdata);
+            $o .= html_writer::empty_tag('hr');
+            $o .= construct_user_data_stat($userdata->summary->get_all_sessions_summary_for($userdata->user->id),
+                $userdata->pageparams->view);
         } else {
             $prevcid = 0;
             $table = new html_table();
@@ -984,25 +993,38 @@ class mod_attendance_renderer extends plugin_renderer_base {
      * @return string
      */
     private function construct_user_sessions_log(attendance_user_data $userdata) {
-        global $OUTPUT;
+        global $OUTPUT, $USER;
         $context = context_module::instance($userdata->filtercontrols->cm->id);
+
+        $shortform = false;
+        if ($USER->id == $userdata->user->id) {
+            // This is a user viewing their own stuff - hide non-relevant columns.
+            $shortform = true;
+        }
 
         $table = new html_table();
         $table->attributes['class'] = 'generaltable attwidth boxaligncenter';
-        $table->head = array(
-            '#',
-            get_string('sessiontypeshort', 'attendance'),
-            get_string('date'),
-            get_string('time'),
-            get_string('description', 'attendance'),
-            get_string('status', 'attendance'),
-            get_string('points', 'attendance'),
-            get_string('remarks', 'attendance')
-        );
-        $table->align = array('', '', '', 'left', 'left', 'center', 'center', 'center');
-        $table->size = array('1px', '1px', '1px', '1px', '*', '*', '1px', '*');
+        $table->head = array();
+        $table->align = array();
+        $table->size = array();
+        if (!$shortform) {
+            $table->head[] = get_string('sessiontypeshort', 'attendance');
+            $table->align[] = '';
+            $table->size[] = '1px';
+        }
+        $table->head[] = get_string('date');
+        $table->head[] = get_string('description', 'attendance');
+        $table->head[] = get_string('status', 'attendance');
+        $table->head[] = get_string('points', 'attendance');
+        $table->head[] = get_string('remarks', 'attendance');
+
+        $table->align = array_merge($table->align, array('', 'left', 'center', 'center', 'center'));
+        $table->size = array_merge($table->size, array('1px', '*', '*', '1px', '*'));
+
         if (has_capability('mod/attendance:takeattendances', $context)) {
             $table->head[] = get_string('action');
+            $table->align[] = '';
+            $table->size[] = '';
         }
 
         $statussetmaxpoints = attendance_get_statusset_maxpoints($userdata->statuses);
@@ -1012,16 +1034,17 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $i++;
 
             $row = new html_table_row();
-            $row->cells[] = $i;
-            if ($sess->groupid) {
-                $sessiontypeshort = get_string('group') . ': ' . $userdata->groups[$sess->groupid]->name;
-            } else {
-                $sessiontypeshort = get_string('commonsession', 'attendance');
-            }
+            if (!$shortform) {
+                if ($sess->groupid) {
+                    $sessiontypeshort = get_string('group') . ': ' . $userdata->groups[$sess->groupid]->name;
+                } else {
+                    $sessiontypeshort = get_string('commonsession', 'attendance');
+                }
 
-            $row->cells[] = html_writer::tag('nobr', $sessiontypeshort);
-            $row->cells[] = userdate($sess->sessdate, get_string('strftimedmyw', 'attendance'));
-            $row->cells[] = $this->construct_time($sess->sessdate, $sess->duration);
+                $row->cells[] = html_writer::tag('nobr', $sessiontypeshort);
+            }
+            $row->cells[] = userdate($sess->sessdate, get_string('strftimedmyw', 'attendance')) .
+             " ". $this->construct_time($sess->sessdate, $sess->duration);
             $row->cells[] = $sess->description;
             if (isset($sess->statusid)) {
                 $status = $userdata->statuses[$sess->statusid];
@@ -1032,12 +1055,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
             } else if ($sess->sessdate < $userdata->user->enrolmentstart) {
                 $cell = new html_table_cell(get_string('enrolmentstart', 'attendance',
                                             userdate($userdata->user->enrolmentstart, '%d.%m.%Y')));
-                $cell->colspan = 2;
+                $cell->colspan = 3;
                 $row->cells[] = $cell;
             } else if ($userdata->user->enrolmentend and $sess->sessdate > $userdata->user->enrolmentend) {
                 $cell = new html_table_cell(get_string('enrolmentend', 'attendance',
                                             userdate($userdata->user->enrolmentend, '%d.%m.%Y')));
-                $cell->colspan = 2;
+                $cell->colspan = 3;
                 $row->cells[] = $cell;
             } else {
                 if (attendance_can_student_mark($sess)) {
@@ -1047,7 +1070,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
                     $url = new moodle_url('/mod/attendance/attendance.php',
                             array('sessid' => $sess->id, 'sesskey' => sesskey()));
                     $cell = new html_table_cell(html_writer::link($url, get_string('submitattendance', 'attendance')));
-                    $cell->colspan = 2;
+                    $cell->colspan = 3;
                     $row->cells[] = $cell;
                 } else { // Student cannot mark their own attendace.
                     $row->cells[] = '?';
