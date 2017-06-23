@@ -491,7 +491,7 @@ class attendance_user_data implements renderable {
                 // Check to make sure the user can view this cm.
                 $modinfo = get_fast_modinfo($ca->courseid);
                 if (!$modinfo->instances['attendance'][$ca->attid]->uservisible) {
-                    unset($this->courseatts[$atid]);
+                    unset($this->coursesatts[$atid]);
                     continue;
                 } else {
                     $this->coursesatts[$atid]->cmid = $modinfo->instances['attendance'][$ca->attid]->get_course_module_record()->id;
