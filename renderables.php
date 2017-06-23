@@ -374,7 +374,7 @@ class attendance_user_data implements renderable {
             foreach ($this->coursesatts as $atid => $ca) {
                 // Check to make sure the user can view this cm.
                 if (!get_fast_modinfo($ca->courseid)->instances['attendance'][$ca->attid]->uservisible) {
-                    unset($this->courseatts[$atid]);
+                    unset($this->coursesatts[$atid]);
                     continue;
                 }
                 $this->statuses[$ca->attid] = attendance_get_statuses($ca->attid);
