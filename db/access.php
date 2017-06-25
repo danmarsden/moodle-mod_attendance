@@ -141,4 +141,16 @@ $capabilities = array(
             'manager' => CAP_ALLOW
         )
     ),
+    // Users that can receive extra warning e-mails.
+    'mod/attendance:warningemails' => array(
+        'riskbitmask' => RISK_DATALOSS,
+
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+            'teacher' => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW
+        )
+    )
 );

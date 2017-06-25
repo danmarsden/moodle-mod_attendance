@@ -52,6 +52,7 @@ $string['attendance:takeattendances'] = 'Taking Attendances';
 $string['attendance:view'] = 'Viewing Attendances';
 $string['attendance:viewreports'] = 'Viewing Reports';
 $string['attendance:viewsummaryreports'] = 'View course summary reports';
+$string['attendance:warningemails'] = 'Can be subscribed to emails with at-risk users';
 $string['attendance_already_submitted'] = 'You may not self register attendance that has already been set.';
 $string['attendancedata'] = 'Attendance data';
 $string['attendanceforthecourse'] = 'Attendance for the course';
