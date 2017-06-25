@@ -80,12 +80,18 @@ class notify extends \core\task\scheduled_task {
             if (!empty($record->thirdpartyemails)) {
                 $sendto = explode(',', $record->thirdpartyemails);
                 $record->percent = round($record->percent * 100)."%";
+                $context = context_module::instance($record->cmid);
                 foreach ($sendto as $senduser) {
-                    if (empty($thirdpartynotifications[$senduser])) {
-                        $thirdpartynotifications[$senduser] = array();
-                    }
-                    if (!isset($thirdpartynotifications[$senduser][$record->aid.'_'.$record->userid])) {
-                        $thirdpartynotifications[$senduser][$record->aid.'_'.$record->userid] = get_string('thirdpartyemailtext', 'attendance', $record);
+                    // Check user is allowed to receive warningemails.
+                    if (has_capability('mod/attendance:warningemails', $context, $senduser)) {
+                        if (empty($thirdpartynotifications[$senduser])) {
+                            $thirdpartynotifications[$senduser] = array();
+                        }
+                        if (!isset($thirdpartynotifications[$senduser][$record->aid . '_' . $record->userid])) {
+                            $thirdpartynotifications[$senduser][$record->aid . '_' . $record->userid] = get_string('thirdpartyemailtext', 'attendance', $record);
+                        }
+                    } else {
+                        mtrace("user".$senduser. "does not have capablity in cm".$record->cmid);
                     }
                 }
             }
