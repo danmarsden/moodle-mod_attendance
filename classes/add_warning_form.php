@@ -75,7 +75,7 @@ class mod_attendance_add_warning_form extends moodleform {
         $mform->setType('emailcontent', PARAM_RAW);
         $mform->addHelpButton('emailcontent', 'emailcontent', 'mod_attendance');
 
-        $users = get_users_by_capability(context_course::instance($COURSE->id), 'mod/attendance:viewreports');
+        $users = get_users_by_capability(context_course::instance($COURSE->id), 'mod/attendance:warningemails');
         $options = array();
         foreach ($users as $user) {
             $options[$user->id] = fullname($user);
