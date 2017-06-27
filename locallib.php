@@ -763,8 +763,7 @@ function attendance_get_users_to_notify($courseids = array(), $orderby = '', $si
                          GROUP BY attendanceid, setnumber) stm
                      ON (stm.setnumber = ats.statusset AND stm.attendanceid = ats.attendanceid)
                   {$joingroup}
-                  WHERE (ats.sessdate + ats.duration) >= {$sincetime} {$where}
-                    AND ats.lasttaken != 0
+                  WHERE ats.lasttaken >= {$sincetime} {$where}
                 GROUP BY uniqueid, a.id, a.name, a.course, c.fullname, atl.studentid, n.id, n.warningpercent,
                          n.emailsubject, n.emailcontent, n.emailcontentformat, n.warnafter,
                          n.emailuser, n.thirdpartyemails, ns.timesent, cm.id, c.id, {$unames2}
