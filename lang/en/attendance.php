@@ -158,7 +158,7 @@ $string['emailcontent_help'] = 'When a warning is sent to a student, it takes th
 <li>%numtakensessions%</li>
 <li>%points%</li>
 <li>%maxpoints%</li>
-<li>%precent%</li>
+<li>%percent%</li>
 </ul>';
 
 $string['emailsubject'] = 'Email subject';
