@@ -1778,7 +1778,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 'name'      => $name,
                 'size'      => $size,
                 'maxlength' => $maxlength,
-                'value'     => $value);
+                'value'     => $value,
+                'class' => 'form-control');
         return html_writer::empty_tag('input', $attributes);
     }
 
