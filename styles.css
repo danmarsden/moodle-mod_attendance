@@ -197,3 +197,8 @@
 #page-mod-attendance-view .averageattendance {
     font-weight: bold;
 }
+
+#page-mod-attendance-preferences .form-control {
+    width: inherit;
+    display: inherit;
+}
