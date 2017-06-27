@@ -48,6 +48,9 @@ class notify extends \core\task\scheduled_task {
         if (empty($lastrun)) {
             $lastrun = 0;
         }
+        if (!empty($lastrun)) {
+            mtrace("Get warnings to send for sessions that have ended since: ".userdate($lastrun));
+        }
 
         $orderby = 'ORDER BY cm.id, atl.studentid, n.warningpercent ASC';
         $records = attendance_get_users_to_notify(array(), $orderby, $lastrun, true);
