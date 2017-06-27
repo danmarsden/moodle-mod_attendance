@@ -804,7 +804,7 @@ function attendance_template_variables($record) {
         '/%numtakensessions%/' => $record->numtakensessions,
         '/%points%/' => $record->points,
         '/%maxpoints%/' => $record->maxpoints,
-        '/%precent%/' => $record->percent,
+        '/%percent%/' => $record->percent,
     );
     $extrauserfields = get_all_user_name_fields();
     foreach ($extrauserfields as $extra) {
