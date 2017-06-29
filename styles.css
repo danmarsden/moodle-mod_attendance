@@ -202,3 +202,37 @@
     width: inherit;
     display: inherit;
 }
+
+@media (max-width: 767px) {
+    .path-mod-attendance .remarkscol {
+        display: none;
+    }
+
+    .path-mod-attendance .statusgroup .form-check-inline {
+        display: block;
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    #page-mod-attendance-view .colatt {
+        display: none;
+    }
+}
+@media (max-width: 480px) {
+    .path-mod-attendance .desccol {
+        display: none;
+    }
+
+    .path-mod-attendance .pointscol {
+        display: none;
+    }
+
+    .path-mod-attendance .attfiltercontrols #currentdate {
+        display: none;
+    }
+
+    #page-mod-attendance-view .colsessionscompleted,
+    #page-mod-attendance-view .colpointssessionscompleted {
+        display: none;
+    }
+}
