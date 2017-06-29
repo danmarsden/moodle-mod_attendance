@@ -1047,7 +1047,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $row->cells[] = userdate($sess->sessdate, get_string('strftimedmyw', 'attendance')) .
              " ". $this->construct_time($sess->sessdate, $sess->duration);
             $row->cells[] = $sess->description;
-            if (isset($sess->statusid)) {
+            if (!empty($sess->statusid)) {
                 $status = $userdata->statuses[$sess->statusid];
                 $row->cells[] = $status->description;
                 $row->cells[] = format_float($status->grade, 1, true, true) . ' / ' .
