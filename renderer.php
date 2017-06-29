@@ -950,6 +950,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 get_string('pointssessionscompleted', 'attendance'),
                 get_string('percentagesessionscompleted', 'attendance'));
             $table->align = array('left', 'left', 'center', 'center', 'center');
+            $table->colclasses = array('colcourse', 'colatt', 'colsessionscompleted', 'colpointssessionscompleted', 'colpercentagesessionscompleted');
             $totalattendance = 0;
             $totalpercentage = 0;
             foreach ($userdata->coursesatts as $ca) {
@@ -1008,10 +1009,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $table->head = array();
         $table->align = array();
         $table->size = array();
+        $table->colclasses = array();
         if (!$shortform) {
             $table->head[] = get_string('sessiontypeshort', 'attendance');
             $table->align[] = '';
             $table->size[] = '1px';
+            $table->colclasses[] = '';
         }
         $table->head[] = get_string('date');
         $table->head[] = get_string('description', 'attendance');
@@ -1020,6 +1023,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $table->head[] = get_string('remarks', 'attendance');
 
         $table->align = array_merge($table->align, array('', 'left', 'center', 'center', 'center'));
+        $table->colclasses = array_merge($table->colclasses, array('datecol', 'desccol', 'statuscol', 'pointscol', 'remarkscol'));
         $table->size = array_merge($table->size, array('1px', '*', '*', '1px', '*'));
 
         if (has_capability('mod/attendance:takeattendances', $context)) {
