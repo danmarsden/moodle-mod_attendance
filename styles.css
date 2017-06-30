@@ -218,6 +218,7 @@
         display: none;
     }
 }
+
 @media (max-width: 480px) {
     .path-mod-attendance .desccol {
         display: none;
