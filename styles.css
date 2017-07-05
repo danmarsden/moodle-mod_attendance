@@ -217,6 +217,11 @@
     #page-mod-attendance-view .colatt {
         display: none;
     }
+
+    .path-mod-attendance .attfiltercontrols,
+    .path-mod-attendance .attwidth {
+        width: 100%;
+    }
 }
 
 @media (max-width: 480px) {
