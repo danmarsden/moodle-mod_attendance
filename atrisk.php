@@ -57,7 +57,7 @@ require_capability('mod/attendance:viewreports', $context);
 
 $exportfilename = 'attendanceatrisk.csv';
 
-$PAGE->set_url('/mod/attendance/atrisk.php', array('category' => $category));
+$PAGE->set_url('/mod/attendance/atrisk.php', array('category' => $category, 'id' => $attendancecm));
 
 $PAGE->set_heading($SITE->fullname);
 
@@ -85,7 +85,7 @@ if (!$table->is_downloading($download, $exportfilename)) {
 
 }
 
-$table->define_columns(array('course', 'attendance', 'userid', 'numtakensessions', 'percent', 'timesent'));
+$table->define_columns(array('coursename', 'aname', 'userid', 'numtakensessions', 'percent', 'timesent'));
 $table->define_headers(array(get_string('course'),
     get_string('pluginname', 'attendance'),
     get_string('user'),
@@ -93,7 +93,6 @@ $table->define_headers(array(get_string('course'),
     get_string('averageattendance', 'attendance'),
     get_string('triggered', 'attendance')));
 $table->sortable(true);
-$table->no_sorting('course');
 $table->set_attribute('cellspacing', '0');
 $table->set_attribute('class', 'generaltable generalbox');
 $table->show_download_buttons_at(array(TABLE_P_BOTTOM));
