@@ -351,7 +351,6 @@ function xmldb_attendance_upgrade($oldversion=0) {
 
         // Adding keys to table attendance_warning.
         $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
-        $table->add_key('level_id', XMLDB_KEY_UNIQUE, array('idnumber, warningpercent'));
 
         // Conditionally launch create table for attendance_warning.
         if (!$dbman->table_exists($table)) {
@@ -380,6 +379,19 @@ function xmldb_attendance_upgrade($oldversion=0) {
 
         // Attendance savepoint reached.
         upgrade_mod_savepoint(true, 2016121315, 'attendance');
+    }
+
+    if ($oldversion < 2016121317) {
+        // Fix key.
+        $table = new xmldb_table('attendance_warning');
+        if ($table->getkey('level_id')) {
+            $table->deleteKey('level_id');
+        }
+        $key = new xmldb_key('level_id', XMLDB_KEY_UNIQUE, array('idnumber, warningpercent, warnafter'));
+        $dbman->add_key($table, $key);
+
+        // Attendance savepoint reached.
+        upgrade_mod_savepoint(true, 2016121317, 'attendance');
     }
 
     return $result;
