@@ -15,9 +15,7 @@ cache:
     - $HOME/.npm
 
 php:
- - 5.6
- - 7.1
-
+  - 7.1
 env:
  global:
   - MOODLE_BRANCH=master
