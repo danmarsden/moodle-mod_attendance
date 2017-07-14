@@ -127,7 +127,7 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="level_id" TYPE="unique" FIELDS="idnumber, warningpercent"/>
+        <KEY NAME="level_id" TYPE="unique" FIELDS="idnumber, warningpercent, warnafter"/>
       </KEYS>
     </TABLE>
     <TABLE NAME="attendance_warning_done" COMMENT="Warnings processed">
