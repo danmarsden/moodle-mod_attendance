@@ -716,15 +716,15 @@ SELECT a.id, a.course as courseid, c.fullname as coursename, atl.studentid AS us
  * Generates a list of users flagged at-risk.
  *
  * @param array $courseids optional list of courses to return
- * @param array $sincetime optional allows a list to be calculated for cron processing.
  * @param bool $allfornotify get notification list for scheduled task.
  * @return stdClass
  */
-function attendance_get_users_to_notify($courseids = array(), $orderby = '', $sincetime = 0, $allfornotify = false) {
+function attendance_get_users_to_notify($courseids = array(), $orderby = '', $allfornotify = false) {
     global $DB;
 
     $joingroup = 'LEFT JOIN {groups_members} gm ON (gm.userid = atl.studentid AND gm.groupid = ats.groupid)';
     $where = ' AND (ats.groupid = 0 or gm.id is NOT NULL)';
+    $having = '';
     $params = array();
 
     if (!empty($courseids)) {
@@ -733,8 +733,8 @@ function attendance_get_users_to_notify($courseids = array(), $orderby = '', $si
         $params = array_merge($params, $inparams);
     }
     if ($allfornotify) {
-        // Exclude warnings that have already been sent.
-        $where .= ' AND ns.id IS NULL ';
+        // Exclude warnings that have already sent the max num.
+        $having .= ' AND n.maxwarn > COUNT(DISTINCT ns.id) ';
     }
 
     $unames = get_all_user_name_fields(true);
@@ -743,8 +743,9 @@ function attendance_get_users_to_notify($courseids = array(), $orderby = '', $si
     $idfield = $DB->sql_concat('cm.id', 'atl.studentid', 'n.id');
     $sql = "SELECT {$idfield} as uniqueid, a.id as aid, {$unames2}, a.name as aname, cm.id as cmid, c.id as courseid,
                     c.fullname as coursename, atl.studentid AS userid, n.id as notifyid, n.warningpercent, n.emailsubject,
-                    n.emailcontent, n.emailcontentformat, n.emailuser, n.thirdpartyemails, ns.timesent, n.warnafter,
+                    n.emailcontent, n.emailcontentformat, n.emailuser, n.thirdpartyemails, n.warnafter, n.maxwarn,
                      COUNT(DISTINCT ats.id) AS numtakensessions, SUM(stg.grade) AS points, SUM(stm.maxgrade) AS maxpoints,
+                      COUNT(DISTINCT ns.id) as nscount, MAX(ns.timesent) as timesent,
                       SUM(stg.grade) / SUM(stm.maxgrade) AS percent
                    FROM {attendance_sessions} ats
                    JOIN {attendance} a ON a.id = ats.attendanceid
@@ -763,21 +764,22 @@ function attendance_get_users_to_notify($courseids = array(), $orderby = '', $si
                          GROUP BY attendanceid, setnumber) stm
                      ON (stm.setnumber = ats.statusset AND stm.attendanceid = ats.attendanceid)
                   {$joingroup}
-                  WHERE ats.lasttaken >= {$sincetime} {$where}
+                  WHERE 1 = 1 {$where}
                 GROUP BY uniqueid, a.id, a.name, a.course, c.fullname, atl.studentid, n.id, n.warningpercent,
-                         n.emailsubject, n.emailcontent, n.emailcontentformat, n.warnafter,
-                         n.emailuser, n.thirdpartyemails, ns.timesent, cm.id, c.id, {$unames2}
+                         n.emailsubject, n.emailcontent, n.emailcontentformat, n.warnafter, n.maxwarn,
+                         n.emailuser, n.thirdpartyemails, cm.id, c.id, {$unames2}, ns.userid
                 HAVING n.warnafter <= COUNT(DISTINCT ats.id) AND n.warningpercent > ((SUM(stg.grade) / SUM(stm.maxgrade)) * 100)
+                {$having}
                       {$orderby}";
 
     if (!$allfornotify) {
         $idfield = $DB->sql_concat('cmid', 'userid');
         // Only show one record per attendance for teacher reports.
-        $sql = "SELECT {$idfield} as id, {$unames}, aid, cmid, courseid, aname, coursename, userid, MIN(warningpercent),
-                        numtakensessions, points, maxpoints, percent, timesent
+        $sql = "SELECT DISTINCT {$idfield} as id, {$unames}, aid, cmid, courseid, aname, coursename, userid,
+                        numtakensessions, percent, MAX(timesent) as timesent
               FROM ({$sql}) as m
-         GROUP BY id, aid, cmid, courseid, aname, userid, numtakensessions, points, maxpoints,
-                  percent, coursename, timesent, {$unames} {$orderby}";
+         GROUP BY id, aid, cmid, courseid, aname, userid, numtakensessions,
+                  percent, coursename, {$unames} {$orderby}";
     }
 
     return $DB->get_records_sql($sql, $params);

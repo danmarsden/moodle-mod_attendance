@@ -60,6 +60,11 @@ class mod_attendance_add_warning_form extends moodleform {
         $mform->setType('warnafter', PARAM_INT);
         $mform->setDefault('warnafter', $config->warnafter);
 
+        $mform->addElement('select', 'maxwarn', get_string('maxwarn', 'mod_attendance'), $options);
+        $mform->addHelpButton('maxwarn', 'maxwarn', 'mod_attendance');
+        $mform->setType('maxwarn', PARAM_INT);
+        $mform->setDefault('maxwarn', $config->maxwarn);
+
         $mform->addElement('checkbox', 'emailuser', get_string('emailuser', 'mod_attendance'));
         $mform->addHelpButton('emailuser', 'emailuser', 'mod_attendance');
         $mform->setDefault('emailuser', $config->emailuser);

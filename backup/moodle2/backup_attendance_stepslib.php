@@ -51,8 +51,8 @@ class backup_attendance_activity_structure_step extends backup_activity_structur
             'acronym', 'description', 'grade', 'studentavailability', 'setunmarked', 'visible', 'deleted', 'setnumber'));
 
         $warnings = new backup_nested_element('warnings');
-        $warning  = new backup_nested_element('warning', array('id'), array(
-            'warningpercent', 'warnafter', 'emailuser', 'emailsubject', 'emailcontent', 'emailcontentformat', 'thirdpartyemails'));
+        $warning  = new backup_nested_element('warning', array('id'), array('warningpercent', 'warnafter',
+            'maxwarn', 'emailuser', 'emailsubject', 'emailcontent', 'emailcontentformat', 'thirdpartyemails'));
 
         $sessions = new backup_nested_element('sessions');
         $session  = new backup_nested_element('session', array('id'), array(

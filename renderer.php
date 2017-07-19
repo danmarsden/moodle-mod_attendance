@@ -932,7 +932,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 get_string('pointssessionscompleted', 'attendance'),
                 get_string('percentagesessionscompleted', 'attendance'));
             $table->align = array('left', 'left', 'center', 'center', 'center');
-            $table->colclasses = array('colcourse', 'colatt', 'colsessionscompleted', 'colpointssessionscompleted', 'colpercentagesessionscompleted');
+            $table->colclasses = array('colcourse', 'colatt', 'colsessionscompleted',
+                                       'colpointssessionscompleted', 'colpercentagesessionscompleted');
             $totalattendance = 0;
             $totalpercentage = 0;
             foreach ($userdata->coursesatts as $ca) {

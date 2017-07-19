@@ -647,14 +647,21 @@ class mod_attendance_structure {
                 $sesslog[$sid]->takenby = $USER->id;
             }
         }
-
+        // Get existing session log.
         $dbsesslog = $this->get_session_log($this->pageparams->sessionid);
         foreach ($sesslog as $log) {
             // Don't save a record if no statusid or remark.
             if (!empty($log->statusid) || !empty($log->remarks)) {
                 if (array_key_exists($log->studentid, $dbsesslog)) {
-                    $log->id = $dbsesslog[$log->studentid]->id;
-                    $DB->update_record('attendance_log', $log);
+                    // Check if anything important has changed before updating record.
+                    // Don't update timetaken/takenby records if nothing has changed.
+                    if ($dbsesslog[$log->studentid]->remarks <> $log->remarks ||
+                        $dbsesslog[$log->studentid]->statusid <> $log->statusid ||
+                        $dbsesslog[$log->studentid]->statusset <> $log->statusset) {
+
+                        $log->id = $dbsesslog[$log->studentid]->id;
+                        $DB->update_record('attendance_log', $log);
+                    }
                 } else {
                     $DB->insert_record('attendance_log', $log, false);
                 }
@@ -664,6 +671,7 @@ class mod_attendance_structure {
         $session = $this->get_session_info($this->pageparams->sessionid);
         $session->lasttaken = $now;
         $session->lasttakenby = $USER->id;
+
         $DB->update_record('attendance_sessions', $session);
 
         if ($this->grade != 0) {
@@ -967,7 +975,7 @@ class mod_attendance_structure {
     public function get_session_log($sessionid) {
         global $DB;
 
-        return $DB->get_records('attendance_log', array('sessionid' => $sessionid), '', 'studentid,statusid,remarks,id');
+        return $DB->get_records('attendance_log', array('sessionid' => $sessionid), '', 'studentid,statusid,remarks,id,statusset');
     }
 
     /**
