@@ -44,16 +44,14 @@ class notify extends \core\task\scheduled_task {
             return; // Warnings not enabled.
         }
         $now = time(); // Store current time to use in queries so they all match nicely.
-        $lastrun = get_config('mod_attendance', 'notifylastrun');
-        if (empty($lastrun)) {
-            $lastrun = 0;
-        }
-        if (!empty($lastrun)) {
-            mtrace("Get warnings to send for sessions that have ended since: ".userdate($lastrun));
-        }
 
         $orderby = 'ORDER BY cm.id, atl.studentid, n.warningpercent ASC';
-        $records = attendance_get_users_to_notify(array(), $orderby, $lastrun, true);
+
+        // Get records for attendance sessions that have been updated since last time this task ran.
+        // Note: this returns all users for these sessions - even if the users attendance wasn't changed
+        // since last time we ran, before sending a notification we check to see if the users have
+        // updated attendance logs since last time they were notified.
+        $records = attendance_get_users_to_notify(array(), $orderby, true);
         $sentnotifications = array();
         $thirdpartynotifications = array();
         $numsentusers = 0;
@@ -64,8 +62,22 @@ class notify extends \core\task\scheduled_task {
             }
 
             if (!empty($record->emailuser)) {
-                // Only send one warning to this user from each attendance in this run. - flag any higher percent notifications as sent.
+                // Only send one warning to this user from each attendance in this run.
+                // Flag any higher percent notifications as sent.
                 if (empty($sentnotifications[$record->userid]) || !in_array($record->aid, $sentnotifications[$record->userid])) {
+
+                    // If has previously been sent a warning, check to see if this user has
+                    // attendance updated since the last time the notification was sent.
+                    if (!empty($record->timesent)) {
+                        $sql = "SELECT *
+                              FROM {attendance_log} l
+                              JOIN {attendance_sessions} s ON s.id = l.sessionid
+                             WHERE s.attendanceid = ? AND studentid = ? AND timetaken > ?";
+                        if (!$DB->record_exists_sql($sql, array($record->aid, $record->userid, $record->timesent))) {
+                            continue; // Skip this record and move to the next user.
+                        }
+                    }
+
                     // Convert variables in emailcontent.
                     $record = attendance_template_variables($record);
                     $user = $DB->get_record('user', array('id' => $record->userid));
@@ -91,14 +103,14 @@ class notify extends \core\task\scheduled_task {
                             $thirdpartynotifications[$senduser] = array();
                         }
                         if (!isset($thirdpartynotifications[$senduser][$record->aid . '_' . $record->userid])) {
-                            $thirdpartynotifications[$senduser][$record->aid . '_' . $record->userid] = get_string('thirdpartyemailtext', 'attendance', $record);
+                            $thirdpartynotifications[$senduser][$record->aid . '_' . $record->userid]
+                                = get_string('thirdpartyemailtext', 'attendance', $record);
                         }
                     } else {
                         mtrace("user".$senduser. "does not have capablity in cm".$record->cmid);
                     }
                 }
             }
-
             $notify = new \stdClass();
             $notify->userid = $record->userid;
             $notify->notifyid = $record->notifyid;
@@ -125,7 +137,5 @@ class notify extends \core\task\scheduled_task {
                 mtrace($numsentthird ." thirdparty emails sent");
             }
         }
-
-        set_config('notifylastrun', $now, 'mod_attendance');
     }
 }

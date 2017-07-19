@@ -399,5 +399,27 @@ function xmldb_attendance_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2017050213, 'attendance');
     }
 
+    if ($oldversion < 2017050214) {
+        // Define field setunmarked to be added to attendance_statuses.
+        $table = new xmldb_table('attendance_warning');
+        $field = new xmldb_field('maxwarn', XMLDB_TYPE_INTEGER, '10', null, true, null, '1', 'warnafter');
+
+        // Conditionally launch add field automark.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field setunmarked to be added to attendance_statuses.
+        $table = new xmldb_table('attendance_warning_done');
+
+        $index = new xmldb_index('notifyid_userid', XMLDB_INDEX_UNIQUE, array('notifyid', 'userid'));
+        $dbman->drop_index($table, $index);
+
+        $index = new xmldb_index('notifyid', XMLDB_INDEX_NOTUNIQUE, array('notifyid', 'userid'));
+        $dbman->add_index($table, $index);
+
+        // Attendance savepoint reached.
+        upgrade_mod_savepoint(true, 2017050214, 'attendance');
+    }
     return $result;
 }
