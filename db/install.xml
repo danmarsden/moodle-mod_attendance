@@ -119,6 +119,7 @@
         <FIELD NAME="idnumber" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="attendance id or other id relating to this warning."/>
         <FIELD NAME="warningpercent" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Percentage that triggers this warning."/>
         <FIELD NAME="warnafter" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Start warning after this number of taken sessions."/>
+        <FIELD NAME="maxwarn" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Maximum number of warnings to send."/>
         <FIELD NAME="emailuser" TYPE="int" LENGTH="4" NOTNULL="true" SEQUENCE="false" COMMENT="Should the user be notified at this level."/>
         <FIELD NAME="emailsubject" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Email subject line for emails going to user"/>
         <FIELD NAME="emailcontent" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="The html-formatted text that should be sent to the user"/>
@@ -141,7 +142,7 @@
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
       <INDEXES>
-        <INDEX NAME="notifyid_userid" UNIQUE="true" FIELDS="notifyid, userid"/>
+        <INDEX NAME="notifyid_userid" UNIQUE="false" FIELDS="notifyid, userid"/>
       </INDEXES>
     </TABLE>
   </TABLES>

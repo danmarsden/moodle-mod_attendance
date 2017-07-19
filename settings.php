@@ -125,6 +125,9 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configselect('attendance/warnafter',
         get_string('warnafter', 'attendance'), get_string('warnafter_help', 'attendance'), 5, $options));
 
+    $settings->add(new admin_setting_configselect('attendance/maxwarn',
+        get_string('maxwarn', 'attendance'), get_string('maxwarn_help', 'attendance'), 1, $options));
+
     $settings->add(new admin_setting_configcheckbox('attendance/emailuser',
         get_string('emailuser', 'attendance'), get_string('emailuser_help', 'attendance'), 1));
 

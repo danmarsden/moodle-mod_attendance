@@ -84,6 +84,7 @@ if ($data = $mform->get_data()) {
 
         $notify->warningpercent = $data->warningpercent;
         $notify->warnafter = $data->warnafter;
+        $notify->maxwarn = $data->maxwarn;
         $notify->emailuser = empty($data->emailuser) ? 0 : $data->emailuser;
         $notify->emailsubject = $data->emailsubject;
         $notify->emailcontent = $data->emailcontent['text'];
@@ -113,6 +114,7 @@ if ($data = $mform->get_data()) {
             $notify->idnumber = $data->idnumber;
             $notify->warningpercent = $data->warningpercent;
             $notify->warnafter = $data->warnafter;
+            $notify->maxwarn = $data->maxwarn;
             $notify->emailuser = empty($data->emailuser) ? 0 : $data->emailuser;
             $notify->emailsubject = $data->emailsubject;
             $notify->emailcontentformat = $data->emailcontent['format'];

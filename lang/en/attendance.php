@@ -227,6 +227,8 @@ $string['maxpossible_help'] = 'Shows the score each user can reach if they recei
     </ul>';
 $string['maxpossiblepercentage'] = 'Maximum possible percentage';
 $string['maxpossiblepoints'] = 'Maximum possible points';
+$string['maxwarn'] = 'Maximum number of e-mail warnings';
+$string['maxwarn_help'] = 'The maximum number of times a warning should be sent (only one warning per session is sent)';
 $string['mergeuser'] = 'Merge user';
 $string['modulename'] = 'Attendance';
 $string['modulename_help'] = 'The attendance activity module enables a teacher to take attendance during class and students to view their own attendance record.
