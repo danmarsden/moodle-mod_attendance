@@ -32,12 +32,17 @@ require_once(dirname(__FILE__).'/../../../calendar/lib.php');
  * @return bool result of calendar event creation
  */
 function attendance_create_calendar_event(&$session) {
+    global $DB;
+
     // We don't want to create multiple calendar events for 1 session.
     if ($session->caleventid) {
         return $session->caleventid;
     }
+    if (empty(get_config('attendance', 'enablecalendar'))) {
+        // Calendar events are not used.
+        return true;
+    }
 
-    global $DB;
     $attendance = $DB->get_record('attendance', array('id' => $session->attendanceid));
 
     $caleventdata = new stdClass();
@@ -68,6 +73,12 @@ function attendance_create_calendar_event(&$session) {
  */
 function attendance_create_calendar_events($sessionsids) {
     global $DB;
+
+    if (empty(get_config('attendance', 'enablecalendar'))) {
+        // Calendar events are not used.
+        return true;
+    }
+
     $sessions = $DB->get_recordset_list('attendance_sessions', 'id', $sessionsids);
 
     foreach ($sessions as $session) {
@@ -87,6 +98,12 @@ function attendance_create_calendar_events($sessionsids) {
  * @return bool result of updating
  */
 function attendance_update_calendar_event($caleventid, $timeduration, $timestart) {
+
+    if (empty(get_config('attendance', 'enablecalendar'))) {
+        // Calendar events are not used.
+        return true;
+    }
+
     $caleventdata = new stdClass();
     $caleventdata->timeduration   = $timeduration;
     $caleventdata->timestart      = $timestart;
