@@ -486,6 +486,10 @@ function attendance_print_settings_tabs($selected = 'settings') {
         $tabs[] = new tabobject('atrisk', $CFG->wwwroot . '/mod/attendance/atrisk.php',
             get_string('atriskreport', 'attendance'), get_string('atriskreport', 'attendance'), false);
     }
+
+    $tabs[] = new tabobject('resetcalendar', $CFG->wwwroot.'/mod/attendance/resetcalendar.php',
+        get_string('resetcalendar', 'attendance'), get_string('resetcalendar', 'attendance'), false);
+
     ob_start();
     print_tabs(array($tabs), $selected);
     $tabmenu = ob_get_contents();
