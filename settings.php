@@ -74,6 +74,10 @@ if ($ADMIN->fulltree) {
         get_string('defaultview', 'attendance'),
             get_string('defaultview_desc', 'attendance'), ATT_VIEW_WEEKS, $options));
 
+    $settings->add(new admin_setting_configcheckbox('attendance/enablecalendar',
+        get_string('enablecalendar', 'attendance'),
+        get_string('enablecalendar_desc', 'attendance'), 1));
+
     $settings->add(new admin_setting_configcheckbox('attendance/enablewarnings',
         get_string('enablewarnings', 'attendance'),
         get_string('enablewarnings_desc', 'attendance'), 0));
