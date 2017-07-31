@@ -74,6 +74,14 @@ if ($ADMIN->fulltree) {
         get_string('defaultview', 'attendance'),
             get_string('defaultview_desc', 'attendance'), ATT_VIEW_WEEKS, $options));
 
+    $settings->add(new admin_setting_configcheckbox('attendance/multisessionexpanded',
+        get_string('multisessionexpanded', 'attendance'),
+        get_string('multisessionexpanded_desc', 'attendance'), 0));
+
+    $settings->add(new admin_setting_configcheckbox('attendance/studentrecordingexpanded',
+        get_string('studentrecordingexpanded', 'attendance'),
+        get_string('studentrecordingexpanded_desc', 'attendance'), 1));
+
     $settings->add(new admin_setting_configcheckbox('attendance/enablecalendar',
         get_string('enablecalendar', 'attendance'),
         get_string('enablecalendar_desc', 'attendance'), 1));

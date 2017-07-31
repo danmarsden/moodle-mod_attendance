@@ -125,10 +125,53 @@ class mod_attendance_add_form extends moodleform {
                             array('maxfiles' => EDITOR_UNLIMITED_FILES, 'noclean' => true, 'context' => $modcontext));
         $mform->setType('sdescription', PARAM_RAW);
 
+        // For multiple sessions.
+        $mform->addElement('header', 'headeraddmultiplesessions', get_string('addmultiplesessions', 'attendance'));
+        if (!empty($pluginconfig->multisessionexpanded)) {
+            $mform->setExpanded('headeraddmultiplesessions');
+        }
+        $mform->addElement('checkbox', 'addmultiply', '', get_string('repeatasfollows', 'attendance'));
+        $mform->addHelpButton('addmultiply', 'createmultiplesessions', 'attendance');
+
+        $sdays = array();
+        if ($CFG->calendar_startwday === '0') { // Week start from sunday.
+            $sdays[] =& $mform->createElement('checkbox', 'Sun', '', get_string('sunday', 'calendar'));
+        }
+        $sdays[] =& $mform->createElement('checkbox', 'Mon', '', get_string('monday', 'calendar'));
+        $sdays[] =& $mform->createElement('checkbox', 'Tue', '', get_string('tuesday', 'calendar'));
+        $sdays[] =& $mform->createElement('checkbox', 'Wed', '', get_string('wednesday', 'calendar'));
+        $sdays[] =& $mform->createElement('checkbox', 'Thu', '', get_string('thursday', 'calendar'));
+        $sdays[] =& $mform->createElement('checkbox', 'Fri', '', get_string('friday', 'calendar'));
+        $sdays[] =& $mform->createElement('checkbox', 'Sat', '', get_string('saturday', 'calendar'));
+        if ($CFG->calendar_startwday !== '0') { // Week start from sunday.
+            $sdays[] =& $mform->createElement('checkbox', 'Sun', '', get_string('sunday', 'calendar'));
+        }
+        $mform->addGroup($sdays, 'sdays', get_string('repeaton', 'attendance'), array('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'), true);
+        $mform->disabledIf('sdays', 'addmultiply', 'notchecked');
+
+        $period = array(1 => 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+            21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36);
+        $periodgroup = array();
+        $periodgroup[] =& $mform->createElement('select', 'period', '', $period, false, true);
+        $periodgroup[] =& $mform->createElement('static', 'perioddesc', '', get_string('week', 'attendance'));
+        $mform->addGroup($periodgroup, 'periodgroup', get_string('repeatevery', 'attendance'), array(' '), false);
+        $mform->disabledIf('periodgroup', 'addmultiply', 'notchecked');
+
+        $mform->addElement('date_selector', 'sessionenddate', get_string('repeatuntil', 'attendance'));
+        $mform->disabledIf('sessionenddate', 'addmultiply', 'notchecked');
+
+        $mform->addElement('hidden', 'coursestartdate', $course->startdate);
+        $mform->setType('coursestartdate', PARAM_INT);
+
+        $mform->addElement('hidden', 'previoussessiondate', 0);
+        $mform->setType('previoussessiondate', PARAM_INT);
+
         // Students can mark own attendance.
         if (!empty(get_config('attendance', 'studentscanmark'))) {
             $mform->addElement('header', 'headerstudentmarking', get_string('studentmarking', 'attendance'), true);
-            $mform->setExpanded('headerstudentmarking');
+            if (!empty($pluginconfig->studentrecordingexpanded)) {
+                $mform->setExpanded('headerstudentmarking');
+            }
             $mform->addElement('checkbox', 'studentscanmark', '', get_string('studentscanmark', 'attendance'));
             $mform->addHelpButton('studentscanmark', 'studentscanmark', 'attendance');
 
@@ -193,46 +236,6 @@ class mod_attendance_add_form extends moodleform {
             $mform->addElement('hidden', 'subnet', '');
             $mform->setType('subnet', PARAM_TEXT);
         }
-
-        // For multiple sessions.
-
-        $mform->addElement('header', 'headeraddmultiplesessions', get_string('addmultiplesessions', 'attendance'));
-
-        $mform->addElement('checkbox', 'addmultiply', '', get_string('repeatasfollows', 'attendance'));
-        $mform->addHelpButton('addmultiply', 'createmultiplesessions', 'attendance');
-
-        $sdays = array();
-        if ($CFG->calendar_startwday === '0') { // Week start from sunday.
-            $sdays[] =& $mform->createElement('checkbox', 'Sun', '', get_string('sunday', 'calendar'));
-        }
-        $sdays[] =& $mform->createElement('checkbox', 'Mon', '', get_string('monday', 'calendar'));
-        $sdays[] =& $mform->createElement('checkbox', 'Tue', '', get_string('tuesday', 'calendar'));
-        $sdays[] =& $mform->createElement('checkbox', 'Wed', '', get_string('wednesday', 'calendar'));
-        $sdays[] =& $mform->createElement('checkbox', 'Thu', '', get_string('thursday', 'calendar'));
-        $sdays[] =& $mform->createElement('checkbox', 'Fri', '', get_string('friday', 'calendar'));
-        $sdays[] =& $mform->createElement('checkbox', 'Sat', '', get_string('saturday', 'calendar'));
-        if ($CFG->calendar_startwday !== '0') { // Week start from sunday.
-            $sdays[] =& $mform->createElement('checkbox', 'Sun', '', get_string('sunday', 'calendar'));
-        }
-        $mform->addGroup($sdays, 'sdays', get_string('repeaton', 'attendance'), array('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'), true);
-        $mform->disabledIf('sdays', 'addmultiply', 'notchecked');
-
-        $period = array(1 => 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-                        21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36);
-        $periodgroup = array();
-        $periodgroup[] =& $mform->createElement('select', 'period', '', $period, false, true);
-        $periodgroup[] =& $mform->createElement('static', 'perioddesc', '', get_string('week', 'attendance'));
-        $mform->addGroup($periodgroup, 'periodgroup', get_string('repeatevery', 'attendance'), array(' '), false);
-        $mform->disabledIf('periodgroup', 'addmultiply', 'notchecked');
-
-        $mform->addElement('date_selector', 'sessionenddate', get_string('repeatuntil', 'attendance'));
-        $mform->disabledIf('sessionenddate', 'addmultiply', 'notchecked');
-
-        $mform->addElement('hidden', 'coursestartdate', $course->startdate);
-        $mform->setType('coursestartdate', PARAM_INT);
-
-        $mform->addElement('hidden', 'previoussessiondate', 0);
-        $mform->setType('previoussessiondate', PARAM_INT);
 
         $this->add_action_buttons(true, get_string('add', 'attendance'));
     }
