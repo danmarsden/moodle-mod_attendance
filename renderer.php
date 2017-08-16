@@ -944,13 +944,19 @@ class mod_attendance_renderer extends plugin_renderer_base {
                                                                                       'studentid' => $userdata->user->id,
                                                                                       'view' => ATT_VIEW_ALL));
                 $row->cells[] = html_writer::link($attendanceurl, $ca->attname);
+                $usersummary = new stdClass();
                 if (isset($userdata->summary[$ca->attid])) {
                     $usersummary = $userdata->summary[$ca->attid]->get_all_sessions_summary_for($userdata->user->id);
 
                     $row->cells[] = $usersummary->numtakensessions;
                     $row->cells[] = format_float($usersummary->takensessionspoints, 1, true, true) . ' / ' .
                         format_float($usersummary->takensessionsmaxpoints, 1, true, true);
-                    $row->cells[] = format_float($usersummary->takensessionspercentage * 100) . '%';
+                    if (empty($usersummary->numtakensessions)) {
+                        $row->cells[] = '-';
+                    } else {
+                        $row->cells[] = format_float($usersummary->takensessionspercentage * 100) . '%';
+                    }
+
                 }
                 $table->data[] = $row;
                 if ($usersummary->numtakensessions > 0) {
