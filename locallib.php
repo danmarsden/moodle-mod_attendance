@@ -713,7 +713,7 @@ SELECT a.id, a.course as courseid, c.fullname as coursename, atl.studentid AS us
 }
 
 /**
- * Generates a list of users flagged at-risk.
+ * Generates a list of users flagged absent.
  *
  * @param array $courseids optional list of courses to return
  * @param bool $allfornotify get notification list for scheduled task.
