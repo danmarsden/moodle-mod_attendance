@@ -35,7 +35,7 @@ $context = context_system::instance();
 // Check permissions.
 require_capability('mod/attendance:viewreports', $context);
 
-$exportfilename = 'attendanceatrisk.csv';
+$exportfilename = 'attendance-absentee.csv';
 
 $PAGE->set_url('/mod/attendance/resetcalendar.php');
 

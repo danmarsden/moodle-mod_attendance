@@ -373,9 +373,9 @@ class mod_attendance_structure {
      * @param array $params
      * @return moodle_url of report.php for attendance instance
      */
-    public function url_atrisk($params=array()) {
+    public function url_absentee($params=array()) {
         $params = array_merge(array('id' => $this->cm->id), $params);
-        return new moodle_url('/mod/attendance/atrisk.php', $params);
+        return new moodle_url('/mod/attendance/absentee.php', $params);
     }
 
     /**
