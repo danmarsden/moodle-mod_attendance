@@ -152,7 +152,7 @@ Feature: Visiting reports
 
     And I log out
 
-  Scenario: Teacher visit summary report and at-risk report
+  Scenario: Teacher visit summary report and absentee report
     Given I log in as "teacher1"
     And I am on "Course 1" course homepage
     And I follow "Attendance"
@@ -194,7 +194,7 @@ Feature: Visiting reports
     And "5 / 6" "text" should exist in the "Student 1" "table_row"
     And "83.3%" "text" should exist in the "Student 1" "table_row"
 
-    And I follow "At-risk report"
+    And I follow "Absentee report"
     And I should see "Student 1"
 
     And I log out
