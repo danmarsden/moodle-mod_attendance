@@ -483,8 +483,8 @@ function attendance_print_settings_tabs($selected = 'settings') {
         get_string('coursesummary', 'attendance'), get_string('coursesummary', 'attendance'), false);
 
     if (get_config('attendance', 'enablewarnings')) {
-        $tabs[] = new tabobject('atrisk', $CFG->wwwroot . '/mod/attendance/atrisk.php',
-            get_string('atriskreport', 'attendance'), get_string('atriskreport', 'attendance'), false);
+        $tabs[] = new tabobject('absentee', $CFG->wwwroot . '/mod/attendance/absentee.php',
+            get_string('absenteereport', 'attendance'), get_string('absenteereport', 'attendance'), false);
     }
 
     $tabs[] = new tabobject('resetcalendar', $CFG->wwwroot.'/mod/attendance/resetcalendar.php',

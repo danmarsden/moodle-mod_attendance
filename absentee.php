@@ -55,13 +55,13 @@ if (!empty($category)) {
 // Check permissions.
 require_capability('mod/attendance:viewreports', $context);
 
-$exportfilename = 'attendanceatrisk.csv';
+$exportfilename = 'attendance-absentee.csv';
 
-$PAGE->set_url('/mod/attendance/atrisk.php', array('category' => $category, 'id' => $attendancecm));
+$PAGE->set_url('/mod/attendance/absentee.php', array('category' => $category, 'id' => $attendancecm));
 
 $PAGE->set_heading($SITE->fullname);
 
-$table = new flexible_table('attendanceatrisk');
+$table = new flexible_table('attendanceabsentee');
 $table->define_baseurl($PAGE->url);
 
 if (!$table->is_downloading($download, $exportfilename)) {
@@ -69,16 +69,16 @@ if (!$table->is_downloading($download, $exportfilename)) {
         $pageparams = new mod_attendance_sessions_page_params();
         $att = new mod_attendance_structure($att, $cm, $course, $context, $pageparams);
         $output = $PAGE->get_renderer('mod_attendance');
-        $tabs = new attendance_tabs($att, attendance_tabs::TAB_ATRISK);
+        $tabs = new attendance_tabs($att, attendance_tabs::TAB_ABSENTEE);
         echo $output->header();
         echo $output->heading(get_string('attendanceforthecourse', 'attendance').' :: ' .format_string($course->fullname));
         echo $output->render($tabs);
     } else {
         echo $OUTPUT->header();
-        echo $OUTPUT->heading(get_string('atriskreport', 'mod_attendance'));
+        echo $OUTPUT->heading(get_string('absenteereport', 'mod_attendance'));
         if (empty($category)) {
             // Only show tabs if displaying via the admin page.
-            $tabmenu = attendance_print_settings_tabs('atrisk');
+            $tabmenu = attendance_print_settings_tabs('absentee');
             echo $tabmenu;
         }
     }
