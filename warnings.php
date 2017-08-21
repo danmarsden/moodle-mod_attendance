@@ -79,7 +79,7 @@ if ($data = $mform->get_data()) {
         if (empty($id)) {
             $notify->idnumber = 0;
         } else {
-            $notify->idnumber = $cm->id;
+            $notify->idnumber = $att->id;
         }
 
         $notify->warningpercent = $data->warningpercent;
@@ -105,7 +105,7 @@ if ($data = $mform->get_data()) {
 
     } else {
         $notify = $DB->get_record('attendance_warning', array('id' => $data->notid));
-        if (!empty($id) && $data->idnumber != $id) {
+        if (!empty($id) && $data->idnumber != $att->id) {
             // Someone is trying to update a record for a different attendance.
             print_error('invalidcoursemodule');
         } else {
@@ -146,7 +146,7 @@ if ($action == 'delete' && !empty($notid)) {
         $params = array('id' => $notid);
         if (!empty($id)) {
             // Add id/level to array.
-            $params['idnumber'] = $cm->id;
+            $params['idnumber'] = $id;
         }
         $DB->delete_records('attendance_warning', $params);
         echo $OUTPUT->notification(get_string('warningdeleted', 'mod_attendance'), 'success');
@@ -173,7 +173,7 @@ if ($action == 'update' && !empty($notid)) {
             'warningpercent');
     } else {
         $existingnotifications = $DB->get_records('attendance_warning',
-            array('idnumber' => $cm->id),
+            array('idnumber' => $att->id),
             'warningpercent');
     }
     if (!empty($existingnotifications)) {

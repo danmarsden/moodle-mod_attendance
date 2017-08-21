@@ -434,5 +434,24 @@ function xmldb_attendance_upgrade($oldversion=0) {
         // Attendance savepoint reached.
         upgrade_mod_savepoint(true, 2017071802, 'attendance');
     }
+
+    if ($oldversion < 2017082200) {
+        // Warnings idnumber field should use attendanceid instead of cmid.
+        $sql = "SELECT cm.id, cm.instance
+                  FROM {course_modules} cm
+                  JOIN {modules} md ON md.id = cm.module AND md.name = 'attendance'";
+        $idnumbers = $DB->get_records_sql_menu($sql);
+        $warnings = $DB->get_recordset('attendance_warning');
+        foreach ($warnings as $warning) {
+            if (!empty($warning->idnumber) && !empty($idnumbers[$warning->idnumber])) {
+                $warning->idnumber = $idnumbers[$warning->idnumber];
+                $DB->update_record("attendance_warning", $warning);
+            }
+        }
+        $warnings->close();
+
+        // Attendance savepoint reached.
+        upgrade_mod_savepoint(true, 2017082200, 'attendance');
+    }
     return $result;
 }
