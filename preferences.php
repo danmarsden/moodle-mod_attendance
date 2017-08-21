@@ -159,6 +159,7 @@ $setselector = new attendance_set_selector($att, $maxstatusset);
 echo $output->header();
 echo $output->heading(get_string('attendanceforthecourse', 'attendance').' :: '. format_string($course->fullname));
 echo $output->render($tabs);
+echo $OUTPUT->box(get_string('preferences_desc', 'attendance'), 'generalbox attendancedesc', 'notice');
 echo $output->render($setselector);
 echo $output->render($prefdata);
 
