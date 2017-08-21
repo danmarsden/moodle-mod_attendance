@@ -72,9 +72,9 @@ function att_add_default_statuses($attid) {
 /**
  * Add default set of warnings to the new attendance.
  *
- * @param int $attid - id of attendance instance.
+ * @param int $id - id of attendance instance.
  */
-function attendance_add_default_warnings($cmid) {
+function attendance_add_default_warnings($id) {
     global $DB, $CFG;
     require_once($CFG->dirroot.'/mod/attendance/locallib.php');
 
@@ -82,7 +82,7 @@ function attendance_add_default_warnings($cmid) {
         array('idnumber' => 0), 'id');
     foreach ($warnings as $n) {
         $rec = $n;
-        $rec->idnumber = $cmid;
+        $rec->idnumber = $id;
         $DB->insert_record('attendance_warning', $rec);
     }
     $warnings->close();
@@ -103,7 +103,7 @@ function attendance_add_instance($attendance) {
 
     att_add_default_statuses($attendance->id);
 
-    attendance_add_default_warnings($attendance->coursemodule);
+    attendance_add_default_warnings($attendance->id);
 
     attendance_grade_item_update($attendance);
 
