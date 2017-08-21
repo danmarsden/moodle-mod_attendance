@@ -166,16 +166,17 @@ if ($action == 'update' && !empty($notid)) {
     $mform->display();
 } else {
     if (empty($id)) {
-        echo $OUTPUT->box(get_string('warningdesc', 'mod_attendance'), 'generalbox', 'notice');
-
-        $existingnotifications = $DB->get_records('attendance_warning',
-            array('idnumber' => 0),
-            'warningpercent');
+        $warningdesc = get_string('warningdesc', 'mod_attendance');
+        $idnumber = 0;
     } else {
-        $existingnotifications = $DB->get_records('attendance_warning',
-            array('idnumber' => $att->id),
-            'warningpercent');
+        $warningdesc = get_string('warningdesc_course', 'mod_attendance');
+        $idnumber = $att->id;
     }
+    echo $OUTPUT->box($warningdesc, 'generalbox attendancedesc', 'notice');
+    $existingnotifications = $DB->get_records('attendance_warning',
+        array('idnumber' => $idnumber),
+        'warningpercent');
+
     if (!empty($existingnotifications)) {
         $table = new html_table();
         $table->head = array(get_string('warningthreshold', 'mod_attendance'),
