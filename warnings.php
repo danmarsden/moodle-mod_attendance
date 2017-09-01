@@ -144,9 +144,9 @@ if ($action == 'delete' && !empty($notid)) {
     } else {
         require_sesskey();
         $params = array('id' => $notid);
-        if (!empty($id)) {
+        if (!empty($att)) {
             // Add id/level to array.
-            $params['idnumber'] = $id;
+            $params['idnumber'] = $att->id;
         }
         $DB->delete_records('attendance_warning', $params);
         echo $OUTPUT->notification(get_string('warningdeleted', 'mod_attendance'), 'success');
