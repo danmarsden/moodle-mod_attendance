@@ -93,7 +93,7 @@ class mod_attendance_add_form extends moodleform {
                 }
                 $select = &$mform->addElement('select', 'groups', get_string('groups', 'group'), $selectgroups);
                 $select->setMultiple(true);
-                $mform->disabledIf('groups', 'sessiontype', 'neq', mod_attendance_structure::SESSION_GROUP);
+                $mform->disabledIf('groups', 'sessiontype', 'eq', mod_attendance_structure::SESSION_COMMON);
             } else {
                 if ($groupmode == VISIBLEGROUPS) {
                     $mform->updateElementAttr($radio, array('disabled' => 'disabled'));
