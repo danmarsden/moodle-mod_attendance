@@ -317,10 +317,35 @@ class user_sessions_cells_text_generator extends user_sessions_cells_generator {
 function attendance_strftimehm($time) {
     $mins = userdate($time, '%M');
     if ($mins == '00') {
-        return userdate($time, get_string('strftimeh', 'attendance'));
+        $format = get_string('strftimeh', 'attendance');
     } else {
-        return userdate($time, get_string('strftimehm', 'attendance'));
+        $format = get_string('strftimehm', 'attendance');
     }
+
+    $userdate = userdate($time, $format);
+
+    // Some Lang packs use %p to suffix with AM/PM but not all strftime support this.
+    // Check if %p is in use and make sure it's being respected.
+    if (stripos($format, '%p')) {
+        // Check if $userdate did something with %p by checking userdate against the same format without %p
+        $formatwithoutp = str_ireplace('%p', '', $format);
+        if (userdate($time, $formatwithoutp) == $userdate) {
+            // The date is the same with and without %p - we have a problem.
+            if (userdate($time, '%H') > 11) {
+                $userdate .= 'pm';
+            } else {
+                $userdate .= 'am';
+            }
+        }
+        // Some locales and O/S don't respect correct intended case of %p vs %P
+        // This can cause problems with behat which expects AM vs am.
+        if (strpos($format, '%p')) { // Should be upper case according to PHP spec.
+            $userdate = str_replace('am', 'AM', $userdate);
+            $userdate = str_replace('pm', 'PM', $userdate);
+        }
+    }
+
+    return $userdate;
 }
 
 /**
