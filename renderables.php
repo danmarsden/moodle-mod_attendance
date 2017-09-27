@@ -812,7 +812,6 @@ class url_helpers {
 
 /**
  * Data structure representing an attendance password icon.
- * copied from help_icon class
  *
  * @copyright 2017 Dan Marsden
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -835,7 +834,7 @@ class attendance_password_icon implements renderable, templatable {
      * @param string $identifier string for help page title,
      *  string with _help suffix is used for the actual help text.
      *  string with _link suffix is used to create a link to further info (if it exists)
-     * @param string $component
+     * @param string $sessionid
      */
     public function __construct($text, $sessionid) {
         $this->text  = $text;

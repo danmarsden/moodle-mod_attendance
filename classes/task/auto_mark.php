@@ -34,10 +34,19 @@ require_once($CFG->dirroot . '/mod/attendance/locallib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class auto_mark extends \core\task\scheduled_task {
+    /**
+     * Returns localised general event name.
+     *
+     * @return string
+     */
     public function get_name() {
         // Shown in admin screens.
         return get_string('automarktask', 'mod_attendance');
     }
+
+    /**
+     * Execte the task.
+     */
     public function execute() {
         global $DB;
         // Create some cache vars - might be nice to restructure this and make a smaller number of sql calls.
