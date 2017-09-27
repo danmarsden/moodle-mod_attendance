@@ -34,10 +34,19 @@ require_once($CFG->dirroot . '/mod/attendance/locallib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class notify extends \core\task\scheduled_task {
+    /**
+     * Returns localised general event name.
+     *
+     * @return string
+     */
     public function get_name() {
         // Shown in admin screens.
         return get_string('notifytask', 'mod_attendance');
     }
+
+    /**
+     * Execute the task.
+     */
     public function execute() {
         global $DB;
         if (empty(get_config('attendance', 'enablewarnings'))) {

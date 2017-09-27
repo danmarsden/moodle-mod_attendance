@@ -20,8 +20,8 @@
  * Use {@link core_renderer::help_icon()} or {@link addHelpButton()} to display
  * the help icon.
  *
- * @copyright 2002 onwards Martin Dougiamas
- * @package   core
+ * @copyright  2017 Dan Marsden
+ * @package    mod_attendance
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
