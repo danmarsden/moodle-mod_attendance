@@ -524,7 +524,7 @@ function attendance_exporttocsv($data, $filename) {
 /**
  * Get session data for form.
  * @param stdClass $formdata moodleform - attendance form.
- * $param mod_attendance_structure $att - used to get attendance level subnet.
+ * @param mod_attendance_structure $att - used to get attendance level subnet.
  * @return array.
  */
 function attendance_construct_sessions_data_for_add($formdata, mod_attendance_structure $att) {
@@ -716,6 +716,7 @@ SELECT a.id, a.course as courseid, c.fullname as coursename, atl.studentid AS us
  * Generates a list of users flagged absent.
  *
  * @param array $courseids optional list of courses to return
+ * @param string $orderby how to order results.
  * @param bool $allfornotify get notification list for scheduled task.
  * @return stdClass
  */
