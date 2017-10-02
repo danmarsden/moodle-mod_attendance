@@ -1,11 +1,10 @@
 language: php
 
-dist: precise
-
-sudo: true
+sudo: false
 
 addons:
   postgresql: "9.3"
+  firefox: "47.0.1"
   apt:
     packages:
       - oracle-java8-installer
