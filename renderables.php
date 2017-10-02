@@ -831,7 +831,7 @@ class attendance_password_icon implements renderable, templatable {
     /**
      * Constructor
      *
-     * @param string $identifier string for help page title,
+     * @param string $text string for help page title,
      *  string with _help suffix is used for the actual help text.
      *  string with _link suffix is used to create a link to further info (if it exists)
      * @param string $sessionid
