@@ -1,6 +1,9 @@
 language: php
 
-sudo: true
+sudo: false
+
+addons:
+  firefox: "47.0.1"
 
 cache:
   directories:
