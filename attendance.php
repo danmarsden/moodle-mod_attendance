@@ -39,7 +39,8 @@ $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST)
 // Require the user is logged in.
 require_login($course, true, $cm);
 
-if (empty(get_config('attendance', 'studentscanmark')) || empty($attforsession->studentscanmark)) {
+$canmark = get_config('attendance', 'studentscanmark');
+if (empty($canmark) || empty($attforsession->studentscanmark)) {
     redirect(new moodle_url('/mod/attendance/view.php', array('id' => $cm->id)));
     exit;
 }
