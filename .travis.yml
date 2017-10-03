@@ -13,10 +13,6 @@ php:
  - 5.6
  - 7.0
 
-matrix:
-  allow_failures:
-  - php: 5.6 # travis seems to fail on adding activity - doesn't fail when running behat locally.
-
 env:
  matrix:
   - DB=pgsql MOODLE_BRANCH=MOODLE_31_STABLE
@@ -26,7 +22,7 @@ before_install:
   - phpenv config-rm xdebug.ini
   - cd ../..
   - composer selfupdate
-  - composer create-project -n --no-dev moodlerooms/moodle-plugin-ci ci ^1
+  - composer create-project -n --no-dev --prefer-dist moodlerooms/moodle-plugin-ci ci ^1
   - export PATH="$(cd ci/bin; pwd):$(cd ci/vendor/bin; pwd):$PATH"
 
 install:
@@ -37,6 +33,9 @@ script:
   - moodle-plugin-ci phpcpd
   - moodle-plugin-ci phpmd
   - moodle-plugin-ci codechecker
+  - moodle-plugin-ci csslint
+  - moodle-plugin-ci shifter
+  - moodle-plugin-ci jshint
   - moodle-plugin-ci validate
   - moodle-plugin-ci phpunit
   - moodle-plugin-ci behat
