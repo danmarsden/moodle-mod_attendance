@@ -61,7 +61,7 @@ $errors = array();
 if (!empty($att->pageparams->action)) {
     require_sesskey();
 }
-
+$notification = '';
 // TODO: combine this with the stuff in defaultstatus.php to avoid code duplication.
 switch ($att->pageparams->action) {
     case mod_attendance_preferences_page_params::ACTION_ADD:
@@ -83,7 +83,7 @@ switch ($att->pageparams->action) {
 
         $status = attendance_add_status($newstatus);
         if (!$status) {
-            print_error('cantaddstatus', 'attendance', $this->url_preferences());
+            $notification = $OUTPUT->notification(get_string('cantaddstatus', 'attendance'), 'error');
         }
 
         if ($pageparams->statusset > $maxstatusset) {
@@ -157,6 +157,9 @@ $setselector = new attendance_set_selector($att, $maxstatusset);
 // Output starts here.
 
 echo $output->header();
+if (!empty($notification)) {
+    echo $notification;
+}
 echo $output->heading(get_string('attendanceforthecourse', 'attendance').' :: '. format_string($course->fullname));
 echo $output->render($tabs);
 echo $OUTPUT->box(get_string('preferences_desc', 'attendance'), 'generalbox attendancedesc', 'notice');
