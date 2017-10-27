@@ -27,8 +27,10 @@ Feature: Test the calendar related features in the attendance module
     And I follow "Test attendance"
     And I follow "Add session"
     And I set the following fields to these values:
-      | id_sestime_starthour | 01 |
-      | id_sestime_endhour   | 02 |
+      | id_sestime_starthour   | 23 |
+      | id_sestime_startminute | 00 |
+      | id_sestime_endhour     | 23 |
+      | id_sestime_endminute   | 55 |
     And I click on "id_submitbutton" "button"
     And I am on "Course 1" course homepage
     And I follow "Go to calendar"
