@@ -490,6 +490,9 @@ function attendance_print_settings_tabs($selected = 'settings') {
     $tabs[] = new tabobject('resetcalendar', $CFG->wwwroot.'/mod/attendance/resetcalendar.php',
         get_string('resetcalendar', 'attendance'), get_string('resetcalendar', 'attendance'), false);
 
+    $tabs[] = new tabobject('importsessions', $CFG->wwwroot . '/mod/attendance/import/sessions.php',
+        get_string('importsessions', 'attendance'), get_string('importsessions', 'attendance'), false);
+
     ob_start();
     print_tabs(array($tabs), $selected);
     $tabmenu = ob_get_contents();
