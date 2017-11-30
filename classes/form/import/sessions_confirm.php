@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * Import attendance sessions.
@@ -27,7 +27,7 @@ namespace mod_attendance\form\import;
 defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
 
 use moodleform;
-require_once ($CFG->libdir . '/formslib.php');
+require_once($CFG->libdir . '/formslib.php');
 
 /**
  * Import attendance sessions.
@@ -37,14 +37,12 @@ require_once ($CFG->libdir . '/formslib.php');
  * @copyright 2017 Catalyst IT
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class sessions_confirm extends moodleform
-{
+class sessions_confirm extends moodleform {
 
     /**
      * Define the form - called by parent constructor
      */
-    public function definition()
-    {
+    public function definition() {
         $importer = $this->_customdata;
 
         $mform = $this->_form;

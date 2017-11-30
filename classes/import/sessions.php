@@ -8,12 +8,15 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 namespace mod_attendance\import;
+
+defined('MOODLE_INTERNAL') || die();
 
 use csv_import_reader;
 use mod_attendance_notifyqueue;
@@ -28,8 +31,7 @@ use stdClass;
  * @copyright 2017 Catalyst IT
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class sessions
-{
+class sessions {
 
     /** @var string $error The errors message from reading the xml */
     protected $error = '';
@@ -56,8 +58,7 @@ class sessions
      *
      * @param string $msg
      */
-    public function fail($msg)
-    {
+    public function fail($msg) {
         $this->error = $msg;
         return false;
     }
@@ -67,8 +68,7 @@ class sessions
      *
      * @return string The import id.
      */
-    public function get_importid()
-    {
+    public function get_importid() {
         return $this->importid;
     }
 
@@ -77,8 +77,7 @@ class sessions
      *
      * @return array The headers (lang strings)
      */
-    public static function list_required_headers()
-    {
+    public static function list_required_headers() {
         return array(
             get_string('course', 'attendance'),
             get_string('groups', 'attendance'),
@@ -101,8 +100,7 @@ class sessions
      *
      * @return array The found headers (names from import)
      */
-    public function list_found_headers()
-    {
+    public function list_found_headers() {
         return $this->foundheaders;
     }
 
@@ -112,8 +110,7 @@ class sessions
      * @param
      *            data array The mapping data.
      */
-    protected function read_mapping_data($data)
-    {
+    protected function read_mapping_data($data) {
         if ($data) {
             return array(
                 'course' => $data->header0,
@@ -158,8 +155,7 @@ class sessions
      *            index The column index we want
      * @return string The column data.
      */
-    protected function get_column_data($row, $index)
-    {
+    protected function get_column_data($row, $index) {
         if ($index < 0) {
             return '';
         }
@@ -182,11 +178,11 @@ class sessions
      * @param bool $useprogressbar
      *            Whether progress bar should be displayed, to avoid html output on CLI.
      */
-    public function __construct($text = null, $encoding = null, $delimiter = null, $importid = 0, $mappingdata = null, $useprogressbar = false)
-    {
+    public function __construct($text = null, $encoding = null, $delimiter = null, $importid = 0,
+                                $mappingdata = null, $useprogressbar = false) {
         global $CFG;
 
-        require_once ($CFG->libdir . '/csvlib.class.php');
+        require_once($CFG->libdir . '/csvlib.class.php');
 
         $type = 'sessions';
 
@@ -318,8 +314,7 @@ class sessions
      *
      * @return array of errors from parsing the xml.
      */
-    public function get_error()
-    {
+    public function get_error() {
         return $this->error;
     }
 
@@ -328,12 +323,12 @@ class sessions
      *
      * @return void
      */
-    public function import()
-    {
+    public function import() {
         global $DB;
 
         // Count of sessions added.
         $okcount = 0;
+        $groupids = array();
 
         foreach ($this->sessions as $session) {
             // Check course shortname matches.
@@ -354,7 +349,8 @@ class sessions
                         foreach ($session->groups as $groupname) {
                             $gid = groups_get_group_by_name($course->id, $groupname);
                             if ($gid === false) {
-                                \mod_attendance_notifyqueue::notify_problem(get_string('sessionunknowngroup', 'attendance', $groupname));
+                                \mod_attendance_notifyqueue::notify_problem(get_string('sessionunknowngroup',
+                                                                            'attendance', $groupname));
                             } else {
                                 $groupids[] = $gid;
                             }
@@ -368,7 +364,7 @@ class sessions
                     ), 'id', 'id');
 
                     foreach ($activities as $activity) {
-                        // Build the session data
+                        // Build the session data.
                         $cm = get_coursemodule_from_instance('attendance', $activity->id, $course->id);
                         $att = new mod_attendance_structure($activity, $cm, $course);
                         $sessions = attendance_construct_sessions_data_for_add($session, $att);
@@ -391,7 +387,8 @@ class sessions
                     }
                     $activities->close();
                 } else {
-                    mod_attendance_notifyqueue::notify_problem(get_string('error:coursehasnoattendance', 'attendance', $session->course));
+                    mod_attendance_notifyqueue::notify_problem(get_string('error:coursehasnoattendance',
+                        'attendance', $session->course));
                 }
             } else {
                 mod_attendance_notifyqueue::notify_problem(get_string('error:coursenotfound', 'attendance', $session->course));
@@ -423,8 +420,7 @@ class sessions
      * @param stdClass $session
      * @return boolean
      */
-    private function session_exists(stdClass $session)
-    {
+    private function session_exists(stdClass $session) {
         global $DB;
 
         $check = clone $session;
@@ -441,4 +437,3 @@ class sessions
         return false;
     }
 }
-

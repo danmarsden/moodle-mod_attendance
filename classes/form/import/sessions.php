@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * This file contains the form for importing sessions from a file.
@@ -24,11 +24,13 @@
  */
 namespace mod_attendance\form\import;
 
+defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
+
 use core_text;
 use csv_import_reader;
 use moodleform;
-require_once ($CFG->libdir . '/formslib.php');
-require_once ($CFG->libdir . '/csvlib.class.php');
+require_once($CFG->libdir . '/formslib.php');
+require_once($CFG->libdir . '/csvlib.class.php');
 
 /**
  * Import attendance sessions.
@@ -38,14 +40,12 @@ require_once ($CFG->libdir . '/csvlib.class.php');
  * @copyright 2017 Catalyst IT
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class sessions extends moodleform
-{
+class sessions extends moodleform {
 
     /**
      * Define the form - called by parent constructor
      */
-    public function definition()
-    {
+    public function definition() {
         global $CFG;
 
         $mform = $this->_form;
@@ -78,8 +78,7 @@ class sessions extends moodleform
      *
      * @param string $msg
      */
-    public function set_import_error($msg)
-    {
+    public function set_import_error($msg) {
         $mform = $this->_form;
 
         $mform->setElementError('importfile', $msg);
