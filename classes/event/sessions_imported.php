@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * This file contains an event for when an attendance sessions is imported.
@@ -40,14 +40,12 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright 2017 Catalyst IT
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class sessions_imported extends \core\event\base
-{
+class sessions_imported extends \core\event\base {
 
     /**
      * Init method.
      */
-    protected function init()
-    {
+    protected function init() {
         $this->data['crud'] = 'c';
         $this->data['edulevel'] = self::LEVEL_OTHER;
         $this->data['objecttable'] = 'attendance_sessions';
@@ -58,8 +56,7 @@ class sessions_imported extends \core\event\base
      *
      * @return string
      */
-    public function get_description()
-    {
+    public function get_description() {
         return 'User with id ' . $this->userid . ' imported ' . $this->other['count'] . ' sessions';
     }
 
@@ -68,8 +65,7 @@ class sessions_imported extends \core\event\base
      *
      * @return string
      */
-    public static function get_name()
-    {
+    public static function get_name() {
         return get_string('eventsessionsimported', 'mod_attendance');
     }
 
@@ -78,8 +74,7 @@ class sessions_imported extends \core\event\base
      *
      * @return \moodle_url
      */
-    public function get_url()
-    {
+    public function get_url() {
         return new \moodle_url('/mod/attendance/import/sessions.php');
     }
 
@@ -88,8 +83,7 @@ class sessions_imported extends \core\event\base
      *
      * @return array of parameters for object mapping.
      */
-    public static function get_objectid_mapping()
-    {
+    public static function get_objectid_mapping() {
         return array(
             'db' => 'attendance',
             'restore' => 'attendance'
