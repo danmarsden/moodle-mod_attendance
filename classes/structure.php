@@ -653,7 +653,11 @@ class mod_attendance_structure {
         $record->studentid = $USER->id;
         $record->statusid = $mformdata->status;
         $record->statusset = $statuses;
-        $record->remarks = get_string('set_by_student', 'mod_attendance');
+        // START UCLA MOD: CCLE-7023 - Add timestamp to the attendance report.
+        // $record->remarks = get_string('set_by_student', 'mod_attendance');
+        $record->remarks = get_string('set_by_student', 'mod_attendance') .
+                " (" . userdate($now, get_string('strftimetime', 'langconfig')) . ")";
+        // END UCLA MOD: CCLE-7023.
         $record->sessionid = $mformdata->sessid;
         $record->timetaken = $now;
         $record->takenby = $USER->id;
