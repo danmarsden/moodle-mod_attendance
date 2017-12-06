@@ -101,6 +101,9 @@ if ($ADMIN->fulltree) {
     $description = new lang_string('defaultsessionsettings_help', 'mod_attendance');
     $settings->add(new admin_setting_heading('defaultsessionsettings', $name, $description));
 
+    $settings->add(new admin_setting_configcheckbox('attendance/absenteereport_default',
+        get_string('includeabsentee', 'attendance'), '', 1));
+
     $settings->add(new admin_setting_configcheckbox('attendance/studentscanmark_default',
         get_string('studentscanmark', 'attendance'), '', 0));
 
