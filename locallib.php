@@ -765,7 +765,7 @@ function attendance_get_users_to_notify($courseids = array(), $orderby = '', $al
                          GROUP BY attendanceid, setnumber) stm
                      ON (stm.setnumber = ats.statusset AND stm.attendanceid = ats.attendanceid)
                   {$joingroup}
-                  WHERE 1 = 1 {$where}
+                  WHERE ats.absenteereport = 1 {$where}
                 GROUP BY uniqueid, a.id, a.name, a.course, c.fullname, atl.studentid, n.id, n.warningpercent,
                          n.emailsubject, n.emailcontent, n.emailcontentformat, n.warnafter, n.maxwarn,
                          n.emailuser, n.thirdpartyemails, cm.id, c.id, {$unames2}, ns.userid

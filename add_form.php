@@ -125,6 +125,17 @@ class mod_attendance_add_form extends moodleform {
                             array('maxfiles' => EDITOR_UNLIMITED_FILES, 'noclean' => true, 'context' => $modcontext));
         $mform->setType('sdescription', PARAM_RAW);
 
+        // If warnings allow selector for reporting.
+        if (!empty(get_config('attendance', 'enablewarnings'))) {
+            $mform->addElement('checkbox', 'absenteereport', '', get_string('includeabsentee', 'attendance'));
+            $mform->addHelpButton('absenteereport', 'includeabsentee', 'attendance');
+            if (isset($pluginconfig->absenteereport_default)) {
+                $mform->setDefault('absenteereport', $pluginconfig->absenteereport_default);
+            }
+        } else {
+            $mform->addElement('hidden', 'absenteereport', 1);
+            $mform->setType('absenteereport', PARAM_INT);
+        }
         // For multiple sessions.
         $mform->addElement('header', 'headeraddmultiplesessions', get_string('addmultiplesessions', 'attendance'));
         if (!empty($pluginconfig->multisessionexpanded)) {
