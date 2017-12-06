@@ -498,3 +498,5 @@ $string['warningthreshold'] = 'Warning threshold';
 $string['week'] = 'week(s)';
 $string['weeks'] = 'Weeks';
 $string['youcantdo'] = 'You can\'t do anything';
+$string['includeabsentee'] = 'Include session when calculating absentee report';
+$string['includeabsentee_help'] = 'If checked this session will be included in the absentee report calculations.';
