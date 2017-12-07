@@ -477,6 +477,9 @@ class mod_attendance_structure {
             if (!isset($sess->studentscanmark)) {
                 $sess->studentscanmark = 0;
             }
+            if (!isset($sess->autoassignstatus)) {
+                $sess->autoassignstatus = 0;
+            }
             if (!isset($sess->studentpassword)) {
                 $sess->studentpassword = '';
             }
@@ -515,15 +518,19 @@ class mod_attendance_structure {
         $sess->descriptionformat = $formdata->sdescription['format'];
 
         $sess->studentscanmark = 0;
+        $sess->autoassignstatus = 0;
         $sess->studentpassword = '';
         $sess->subnet = '';
         $sess->automark = 0;
         $sess->automarkcompleted = 0;
-
+        if (!empty($formdata->autoassignstatus)) {
+            $sess->autoassignstatus = $formdata->autoassignstatus;
+        }
         if (!empty(get_config('attendance', 'studentscanmark')) &&
             !empty($formdata->studentscanmark)) {
             $sess->studentscanmark = $formdata->studentscanmark;
             $sess->studentpassword = $formdata->studentpassword;
+            $sess->autoassignstatus = $formdata->autoassignstatus;
             if (!empty($formdata->usedefaultsubnet)) {
                 $sess->subnet = $this->subnet;
             } else {
@@ -537,6 +544,7 @@ class mod_attendance_structure {
 
         $sess->timemodified = time();
         $DB->update_record('attendance_sessions', $sess);
+
         if (empty($sess->caleventid)) {
              // This shouldn't really happen, but just in case to prevent fatal error.
             attendance_create_calendar_event($sess);
@@ -1058,7 +1066,7 @@ class mod_attendance_structure {
         $id = $DB->sql_concat(':value', 'ats.id');
         if ($this->get_group_mode()) {
             $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description,
-                           al.statusid, al.remarks, ats.studentscanmark
+                           al.statusid, al.remarks, ats.studentscanmark, ats.autoassignstatus
                       FROM {attendance_sessions} ats
                 RIGHT JOIN {attendance_log} al
                         ON ats.id = al.sessionid AND al.studentid = :uid
@@ -1067,7 +1075,7 @@ class mod_attendance_structure {
                   ORDER BY ats.sessdate ASC";
         } else {
             $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, ats.statusset,
-                           al.statusid, al.remarks, ats.studentscanmark
+                           al.statusid, al.remarks, ats.studentscanmark, ats.autoassignstatus
                       FROM {attendance_sessions} ats
                 RIGHT JOIN {attendance_log} al
                         ON ats.id = al.sessionid AND al.studentid = :uid
@@ -1096,9 +1104,9 @@ class mod_attendance_structure {
         } else {
             $where = "ats.attendanceid = :aid AND ats.sessdate >= :csdate AND ats.groupid $gsql";
         }
-
+        //James
         $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, ats.statusset,
-                       al.statusid, al.remarks, ats.studentscanmark
+                       al.statusid, al.remarks, ats.studentscanmark, ats.autoassignstatus
                   FROM {attendance_sessions} ats
              LEFT JOIN {attendance_log} al
                     ON ats.id = al.sessionid AND al.studentid = :uid
