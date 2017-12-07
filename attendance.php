@@ -75,6 +75,31 @@ if ($mform->is_cancelled()) {
         $url = new moodle_url('/mod/attendance/attendance.php', array('sessid' => $id, 'sesskey' => sesskey()));
         redirect($url, get_string('incorrectpassword', 'mod_attendance'), null, \core\output\notification::NOTIFY_ERROR);
     }
+    if ($attforsession->autoassignstatus) {
+        // Find the status to set here.
+        $statuses = $att->get_statuses();
+        $highestavailablegrade = 0;
+        $highestavailablestatus;
+        foreach ($statuses as $status) {
+            if ($status->studentavailability === '0') {
+                // This status is never available to students.
+                continue;
+            }
+            if (!empty($status->studentavailability)) {
+                $toolateforstatus = (($attforsession->sessdate + ($status->studentavailability * 60)) < time());
+                if ($toolateforstatus) {
+                    continue;
+                }
+            }
+            // This status is available to the student.
+            if ($status->grade > $highestavailablegrade) {
+                // This is the most favourable grade so far; save it.
+                $highestavailablegrade = $status->grade;
+                $highestavailablestatus = $status;
+            }
+        }
+        $fromform->status = $highestavailablestatus->id;
+    }
 
     if (!empty($fromform->status)) {
         $success = $att->take_from_student($fromform);
@@ -84,7 +109,7 @@ if ($mform->is_cancelled()) {
             // Redirect back to the view page for the block.
             redirect($url);
         } else {
-            print_error ('attendance_already_submitted', 'mod_attendance', $url);
+            print_error('attendance_already_submitted', 'mod_attendance', $url);
         }
     }
 

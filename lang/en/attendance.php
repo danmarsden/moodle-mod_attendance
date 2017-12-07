@@ -108,6 +108,8 @@ The sessions begin on the date of the base session and continue until the \'repe
   * <strong>Repeat every</strong>: This allows for a frequency setting. If your class will meet every week, select 1; if it will meet every other week, select 2; every 3rd week, select 3, etc.
   * <strong>Repeat until</strong>: Select the last day of class (the last day you want to take attendance).
 ';
+$string['autoassignstatus'] = 'Automatically select highest status available';
+$string['autoassignstatus_help'] = 'If this is selected, students will automatically be assigned the highest available grade.';
 $string['createonesession'] = 'Create one session for the course';
 $string['csvdelimiter'] = 'CSV delimiter';
 $string['date'] = 'Date';

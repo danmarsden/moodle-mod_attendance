@@ -82,21 +82,23 @@ class mod_attendance_student_attendance_form extends moodleform {
             $mform->setType('studentpassword', PARAM_TEXT);
             $mform->addRule('studentpassword', get_string('passwordrequired', 'attendance'), 'required');
         }
-        // Create radio buttons for setting the attendance status.
-        $radioarray = array();
-        foreach ($statuses as $status) {
-            $name = html_writer::span($status->description, 'statusdesc');
-            $radioarray[] =& $mform->createElement('radio', 'status', '', $name, $status->id, array());
-        }
-        if ($disabledduetotime) {
-            $warning = html_writer::span(get_string('somedisabledstatus', 'attendance'), 'somedisabledstatus');
-            $radioarray[] =& $mform->createElement('static', '', '', $warning);
-        }
+        if (!$attforsession->autoassignstatus) {
 
-        // Add the radio buttons as a control with the user's name in front.
-        $radiogroup = $mform->addGroup($radioarray, 'statusarray', $USER->firstname.' '.$USER->lastname.':', array(''), false);
-        $radiogroup->setAttributes(array('class' => 'statusgroup'));
-        $mform->addRule('statusarray', get_string('attendancenotset', 'attendance'), 'required', '', 'client', false, false);
+            // Create radio buttons for setting the attendance status.
+            $radioarray = array();
+            foreach ($statuses as $status) {
+                $name = html_writer::span($status->description, 'statusdesc');
+                $radioarray[] =& $mform->createElement('radio', 'status', '', $name, $status->id, array());
+            }
+            if ($disabledduetotime) {
+                $warning = html_writer::span(get_string('somedisabledstatus', 'attendance'), 'somedisabledstatus');
+                $radioarray[] =& $mform->createElement('static', '', '', $warning);
+             }
+            // Add the radio buttons as a control with the user's name in front.
+            $radiogroup = $mform->addGroup($radioarray, 'statusarray', $USER->firstname.' '.$USER->lastname.':', array(''), false);
+            $radiogroup->setAttributes(array('class' => 'statusgroup'));
+            $mform->addRule('statusarray', get_string('attendancenotset', 'attendance'), 'required', '', 'client', false, false);
+        }
         $this->add_action_buttons();
     }
 
@@ -109,9 +111,11 @@ class mod_attendance_student_attendance_form extends moodleform {
      */
     public function validation($data, $files) {
         $errors = array();
-        // Check if this status is allowed to be set.
-        if (empty($data['status'])) {
-            $errors['statusarray'] = get_string('invalidstatus', 'attendance');
+        if (!($this->_customdata['session']->autoassignstatus)) {
+            // Check if this status is allowed to be set.
+            if (empty($data['status'])) {
+                $errors['statusarray'] = get_string('invalidstatus', 'attendance');
+            }
         }
 
         return $errors;
