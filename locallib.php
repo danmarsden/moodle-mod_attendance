@@ -616,6 +616,7 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
         $sess->studentpassword = '';
         $sess->automark = 0;
         $sess->automarkcompleted = 0;
+        $sess->absenteereport = 1;
 
         if (isset($formdata->studentscanmark) && !empty($formdata->studentscanmark)) {
             // Students will be able to mark their own attendance.
