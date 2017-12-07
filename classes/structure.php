@@ -1104,7 +1104,6 @@ class mod_attendance_structure {
         } else {
             $where = "ats.attendanceid = :aid AND ats.sessdate >= :csdate AND ats.groupid $gsql";
         }
-        //James
         $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, ats.statusset,
                        al.statusid, al.remarks, ats.studentscanmark, ats.autoassignstatus
                   FROM {attendance_sessions} ats
