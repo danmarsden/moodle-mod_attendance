@@ -69,6 +69,7 @@ class mod_wsattendance_external extends external_api {
                          'descriptionformat' => new external_value(PARAM_INT, 'Session description format.'),
                          'studentscanmark' => new external_value(PARAM_INT, 'Students can mark their own presence.'),
                          'absenteereport' => new external_value(PARAM_INT, 'Session included in absetee reports.'),
+                         'autoassignstatus' => new external_value(PARAM_INT, 'Automatically assign a status to students.'),
                          'statusset' => new external_value(PARAM_INT, 'Session statusset.'));
 
         return $session;

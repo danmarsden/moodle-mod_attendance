@@ -539,6 +539,9 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
     if (empty(get_config('attendance', 'studentscanmark'))) {
         $formdata->studentscanmark = 0;
     }
+    if (empty(get_config('attendance', 'autoassignstatus'))) {
+        $formdata->autoassignstatus = 0;
+    }
 
     $sessions = array();
     if (isset($formdata->addmultiply)) {
@@ -581,6 +584,9 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
                             $sess->subnet = $formdata->subnet;
                         }
                         $sess->automark = $formdata->automark;
+                        if (isset($formdata->autoassignstatus)) {
+                            $sess->autoassignstatus = 1;
+                        }
                         $sess->automarkcompleted = 0;
                         if (!empty($formdata->randompassword)) {
                             $sess->studentpassword = attendance_random_string();
@@ -612,6 +618,7 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
         $sess->descriptionformat = $formdata->sdescription['format'];
         $sess->timemodified = $now;
         $sess->studentscanmark = 0;
+        $sess->autoassignstatus = 0;
         $sess->subnet = '';
         $sess->studentpassword = '';
         $sess->automark = 0;
@@ -621,6 +628,9 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
         if (isset($formdata->studentscanmark) && !empty($formdata->studentscanmark)) {
             // Students will be able to mark their own attendance.
             $sess->studentscanmark = 1;
+            if (isset($formdata->autoassignstatus) && !empty($formdata->autoassignstatus)) {
+                $sess->autoassignstatus = 1;
+            }
             if (!empty($formdata->randompassword)) {
                 $sess->studentpassword = attendance_random_string();
             } else if (!empty($formdata->studentpassword)) {

@@ -118,6 +118,9 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configcheckbox('attendance/randompassword_default',
         get_string('randompassword', 'attendance'), '', 0));
 
+    $settings->add(new admin_setting_configcheckbox('attendance/autoassignstatus',
+        get_string('autoassignstatus', 'attendance'), '', 0));
+
     $name = new lang_string('defaultwarningsettings', 'mod_attendance');
     $description = new lang_string('defaultwarningsettings_help', 'mod_attendance');
     $settings->add(new admin_setting_heading('defaultwarningsettings', $name, $description));
