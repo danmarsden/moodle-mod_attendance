@@ -539,9 +539,6 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
     if (empty(get_config('attendance', 'studentscanmark'))) {
         $formdata->studentscanmark = 0;
     }
-    if (empty(get_config('attendance', 'autoassignstatus'))) {
-        $formdata->autoassignstatus = 0;
-    }
 
     $sessions = array();
     if (isset($formdata->addmultiply)) {
@@ -833,4 +830,40 @@ function attendance_template_variables($record) {
         $record->$field = preg_replace($patterns, $replacements, $record->$field);
     }
     return $record;
+}
+
+/**
+ * Find highest available status for a user.
+ *
+ * @param mod_attendance_structure $att attendance structure
+ * @param stdclass $attforsession attendance_session record.
+ * @return bool/int
+ */
+function attendance_session_get_highest_status(mod_attendance_structure $att, $attforsession) {
+    // Find the status to set here.
+    $statuses = $att->get_statuses();
+    $highestavailablegrade = 0;
+    $highestavailablestatus = new stdClass();
+    foreach ($statuses as $status) {
+        if ($status->studentavailability === '0') {
+            // This status is never available to students.
+            continue;
+        }
+        if (!empty($status->studentavailability)) {
+            $toolateforstatus = (($attforsession->sessdate + ($status->studentavailability * 60)) < time());
+            if ($toolateforstatus) {
+                continue;
+            }
+        }
+        // This status is available to the student.
+        if ($status->grade > $highestavailablegrade) {
+            // This is the most favourable grade so far; save it.
+            $highestavailablegrade = $status->grade;
+            $highestavailablestatus = $status;
+        }
+    }
+    if (empty($highestavailablestatus)) {
+        return false;
+    }
+    return $highestavailablestatus->id;
 }
