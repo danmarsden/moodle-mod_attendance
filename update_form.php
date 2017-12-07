@@ -130,6 +130,8 @@ class mod_attendance_update_form extends moodleform {
             $mform->disabledif('randompassword', 'automark', 'eq', ATTENDANCE_AUTOMARK_ALL);
             $mform->addElement('checkbox', 'autoassignstatus', '', get_string('autoassignstatus', 'attendance'));
             $mform->addHelpButton('autoassignstatus', 'autoassignstatus', 'attendance');
+            $mform->disabledif('autoassignstatus', 'studentscanmark', 'notchecked');
+
             $mgroup = array();
             $mgroup[] = & $mform->createElement('text', 'subnet', get_string('requiresubnet', 'attendance'));
             $mform->setDefault('subnet', $this->_customdata['att']->subnet);
