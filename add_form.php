@@ -211,8 +211,11 @@ class mod_attendance_add_form extends moodleform {
             $mform->disabledif('studentpassword', 'randompassword', 'checked');
             $mform->disabledif('studentpassword', 'automark', 'eq', ATTENDANCE_AUTOMARK_ALL);
             $mform->disabledif('randompassword', 'automark', 'eq', ATTENDANCE_AUTOMARK_ALL);
+
             $mform->addElement('checkbox', 'autoassignstatus', '', get_string('autoassignstatus', 'attendance'));
             $mform->addHelpButton('autoassignstatus', 'autoassignstatus', 'attendance');
+            $mform->disabledif('autoassignstatus', 'studentscanmark', 'notchecked');
+
             if (isset($pluginconfig->autoassignstatus)) {
                 $mform->setDefault('autoassignstatus', $pluginconfig->autoassignstatus);
             }

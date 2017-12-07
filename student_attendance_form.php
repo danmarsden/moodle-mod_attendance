@@ -93,7 +93,7 @@ class mod_attendance_student_attendance_form extends moodleform {
             if ($disabledduetotime) {
                 $warning = html_writer::span(get_string('somedisabledstatus', 'attendance'), 'somedisabledstatus');
                 $radioarray[] =& $mform->createElement('static', '', '', $warning);
-             }
+            }
             // Add the radio buttons as a control with the user's name in front.
             $radiogroup = $mform->addGroup($radioarray, 'statusarray', $USER->firstname.' '.$USER->lastname.':', array(''), false);
             $radiogroup->setAttributes(array('class' => 'statusgroup'));

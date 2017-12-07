@@ -327,7 +327,7 @@ function attendance_strftimehm($time) {
     // Some Lang packs use %p to suffix with AM/PM but not all strftime support this.
     // Check if %p is in use and make sure it's being respected.
     if (stripos($format, '%p')) {
-        // Check if $userdate did something with %p by checking userdate against the same format without %p
+        // Check if $userdate did something with %p by checking userdate against the same format without %p.
         $formatwithoutp = str_ireplace('%p', '', $format);
         if (userdate($time, $formatwithoutp) == $userdate) {
             // The date is the same with and without %p - we have a problem.

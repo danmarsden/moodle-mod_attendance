@@ -57,6 +57,26 @@ $att = new mod_attendance_structure($attendance, $cm, $course, $PAGE->context, $
 // Require that a session key is passed to this page.
 require_sesskey();
 
+// Check to see if autoassignstatus is in use and no password required.
+if ($attforsession->autoassignstatus && empty($attforsession->studentpassword)) {
+    $statusid = attendance_session_get_highest_status($att, $attforsession);
+    $url = new moodle_url('/mod/attendance/view.php', array('id' => $cm->id));
+    if (empty($statusid)) {
+        print_error('attendance_no_status', 'mod_attendance', $url);
+    }
+    $take = new stdClass();
+    $take->status = $statusid;
+    $take->sessid = $attforsession->id;
+    $success = $att->take_from_student($take);
+
+    if ($success) {
+        // Redirect back to the view page.
+        redirect($url, get_string('studentmarked', 'attendance'));
+    } else {
+        print_error('attendance_already_submitted', 'mod_attendance', $url);
+    }
+}
+
 // Create the form.
 $mform = new mod_attendance_student_attendance_form(null,
         array('course' => $course, 'cm' => $cm, 'modcontext' => $PAGE->context, 'session' => $attforsession, 'attendance' => $att));
@@ -76,29 +96,11 @@ if ($mform->is_cancelled()) {
         redirect($url, get_string('incorrectpassword', 'mod_attendance'), null, \core\output\notification::NOTIFY_ERROR);
     }
     if ($attforsession->autoassignstatus) {
-        // Find the status to set here.
-        $statuses = $att->get_statuses();
-        $highestavailablegrade = 0;
-        $highestavailablestatus;
-        foreach ($statuses as $status) {
-            if ($status->studentavailability === '0') {
-                // This status is never available to students.
-                continue;
-            }
-            if (!empty($status->studentavailability)) {
-                $toolateforstatus = (($attforsession->sessdate + ($status->studentavailability * 60)) < time());
-                if ($toolateforstatus) {
-                    continue;
-                }
-            }
-            // This status is available to the student.
-            if ($status->grade > $highestavailablegrade) {
-                // This is the most favourable grade so far; save it.
-                $highestavailablegrade = $status->grade;
-                $highestavailablestatus = $status;
-            }
+        $fromform->status = attendance_session_get_highest_status($att, $attforsession);
+        if (empty($fromform->status)) {
+            $url = new moodle_url('/mod/attendance/view.php', array('id' => $cm->id));
+            print_error('attendance_no_status', 'mod_attendance', $url);
         }
-        $fromform->status = $highestavailablestatus->id;
     }
 
     if (!empty($fromform->status)) {
@@ -106,8 +108,8 @@ if ($mform->is_cancelled()) {
 
         $url = new moodle_url('/mod/attendance/view.php', array('id' => $cm->id));
         if ($success) {
-            // Redirect back to the view page for the block.
-            redirect($url);
+            // Redirect back to the view page.
+            redirect($url, get_string('studentmarked', 'attendance'));
         } else {
             print_error('attendance_already_submitted', 'mod_attendance', $url);
         }
@@ -126,3 +128,4 @@ $output = $PAGE->get_renderer('mod_attendance');
 echo $output->header();
 $mform->display();
 echo $output->footer();
+

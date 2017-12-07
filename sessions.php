@@ -99,7 +99,6 @@ switch ($att->pageparams->action) {
         }
 
         if ($formdata = $mform->get_data()) {
-            error_log(var_export($formdata, true));
             if (empty($formdata->autoassignstatus)) {
                 $formdata->autoassignstatus = 0;
             }
