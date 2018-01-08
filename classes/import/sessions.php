@@ -328,9 +328,9 @@ class sessions {
 
         // Count of sessions added.
         $okcount = 0;
-        $groupids = array();
 
         foreach ($this->sessions as $session) {
+            $groupids = array();
             // Check course shortname matches.
             if ($DB->record_exists('course', array(
                 'shortname' => $session->course
