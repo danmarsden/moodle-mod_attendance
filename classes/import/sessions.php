@@ -122,16 +122,13 @@ class sessions {
                 'from' => $data->header3,
                 'to' => $data->header4,
                 'description' => $data->header5,
-                'repeaton' => $data->header6,
-                'repeatevery' => $data->header7,
-                'repeatuntil' => $data->header8,
-                'studentscanmark' => $data->header9,
-                'passwordgrp' => $data->header10,
-                'randompassword' => $data->header11,
-                'subnet' => $data->header12,
-                'automark' => $data->header13,
-                'autoassignstatus' => $data->header14,
-                'absenteereport' => $data->header15
+                'studentscanmark' => $data->header6,
+                'passwordgrp' => $data->header7,
+                'randompassword' => $data->header8,
+                'subnet' => $data->header9,
+                'automark' => $data->header10,
+                'autoassignstatus' => $data->header11,
+                'absenteereport' => $data->header12
             );
         } else {
             return array(
@@ -141,16 +138,13 @@ class sessions {
                 'from' => 3,
                 'to' => 4,
                 'description' => 5,
-                'repeaton' => 6,
-                'repeatevery' => 7,
-                'repeatuntil' => 8,
-                'studentscanmark' => 9,
-                'passwordgrp' => 10,
-                'randompassword' => 11,
-                'subnet' => 12,
-                'automark' => 13,
-                'autoassignstatus' => 14,
-                'absenteereport' => 15
+                'studentscanmark' => 6,
+                'passwordgrp' => 7,
+                'randompassword' => 8,
+                'subnet' => 9,
+                'automark' => 10,
+                'autoassignstatus' => 11,
+                'absenteereport' => 12
             );
         }
     }
@@ -279,10 +273,6 @@ class sessions {
             $session->sdescription['text'] = '<p>' . $this->get_column_data($row, $mapping['description']) . '</p>';
             $session->sdescription['format'] = FORMAT_HTML;
             $session->sdescription['itemid'] = 0;
-
-            $session->repeaton = $this->get_column_data($row, $mapping['repeaton']);
-            $session->repeatevery = $this->get_column_data($row, $mapping['repeatevery']);
-            $session->repeatuntil = $this->get_column_data($row, $mapping['repeatuntil']);
             $session->passwordgrp = $this->get_column_data($row, $mapping['passwordgrp']);
             $session->subnet = $this->get_column_data($row, $mapping['subnet']);
             // Set session subnet restriction. Use the default activity level subnet if there isn't one set for this session.
