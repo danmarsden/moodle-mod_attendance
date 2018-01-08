@@ -91,7 +91,10 @@ class sessions {
             get_string('studentscanmark', 'attendance'),
             get_string('passwordgrp', 'attendance'),
             get_string('randompassword', 'attendance'),
-            get_string('subnet', 'attendance')
+            get_string('subnet', 'attendance'),
+            get_string('automark', 'attendance'),
+            get_string('autoassignstatus', 'attendance'),
+            get_string('absenteereport', 'attendance')
         );
     }
 
@@ -125,7 +128,10 @@ class sessions {
                 'studentscanmark' => $data->header9,
                 'passwordgrp' => $data->header10,
                 'randompassword' => $data->header11,
-                'subnet' => $data->header12
+                'subnet' => $data->header12,
+                'automark' => $data->header13,
+                'autoassignstatus' => $data->header14,
+                'absenteereport' => $data->header15
             );
         } else {
             return array(
@@ -141,7 +147,10 @@ class sessions {
                 'studentscanmark' => 9,
                 'passwordgrp' => 10,
                 'randompassword' => 11,
-                'subnet' => 12
+                'subnet' => 12,
+                'automark' => 13,
+                'autoassignstatus' => 14,
+                'absenteereport' => 15
             );
         }
     }
@@ -183,6 +192,8 @@ class sessions {
         global $CFG;
 
         require_once($CFG->libdir . '/csvlib.class.php');
+
+        $pluginconfig = get_config('attendance');
 
         $type = 'sessions';
 
@@ -272,18 +283,40 @@ class sessions {
             $session->repeaton = $this->get_column_data($row, $mapping['repeaton']);
             $session->repeatevery = $this->get_column_data($row, $mapping['repeatevery']);
             $session->repeatuntil = $this->get_column_data($row, $mapping['repeatuntil']);
-            $session->studentscanmark = $this->get_column_data($row, $mapping['studentscanmark']);
             $session->passwordgrp = $this->get_column_data($row, $mapping['passwordgrp']);
-            $session->randompassword = $this->get_column_data($row, $mapping['randompassword']);
-
-            // Set session subnet restriction. Use the default activity level subnet if there isn't one set for this session.
             $session->subnet = $this->get_column_data($row, $mapping['subnet']);
+            // Set session subnet restriction. Use the default activity level subnet if there isn't one set for this session.
             if (empty($session->subnet)) {
                 $session->usedefaultsubnet = '1';
             } else {
                 $session->usedefaultsubnet = '';
             }
 
+            if ($mapping['studentscanmark'] == -1) {
+                $session->studentscanmark = $pluginconfig->studentscanmark_default;
+            } else {
+                $session->studentscanmark = $this->get_column_data($row, $mapping['studentscanmark']);
+            }
+            if ($mapping['randompassword'] == -1) {
+                $session->randompassword = $pluginconfig->randompassword_default;
+            } else {
+                $session->randompassword = $this->get_column_data($row, $mapping['randompassword']);
+            }
+            if ($mapping['automark'] == -1) {
+                $session->automark = $pluginconfig->automark_default;
+            } else {
+                $session->automark = $this->get_column_data($row, $mapping['automark']);
+            }
+            if ($mapping['autoassignstatus'] == -1) {
+                $session->autoassignstatus = $pluginconfig->autoassignstatus;
+            } else {
+                $session->autoassignstatus = $this->get_column_data($row, $mapping['autoassignstatus']);
+            }
+            if ($mapping['absenteereport'] == -1) {
+                $session->absenteereport = $pluginconfig->absenteereport_default;
+            } else {
+                $session->absenteereport = $this->get_column_data($row, $mapping['absenteereport']);
+            }
             $session->statusset = 0;
 
             $sessions[] = $session;
