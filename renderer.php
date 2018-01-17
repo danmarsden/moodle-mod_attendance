@@ -961,7 +961,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 $attendanceurl = new moodle_url('/mod/attendance/view.php', array('id' => $ca->cmid,
                                                                                       'studentid' => $userdata->user->id,
                                                                                       'view' => ATT_VIEW_ALL));
-                $row->cells[] = html_writer::link($attendanceurl, $ca->attname);
+                $attendanceurl = html_writer::link($attendanceurl, $ca->attname);
+                if (empty($ca->attgrade)) {
+                    $attendanceurl .= " ". html_writer::span(get_string('ungraded', 'mod_attendance'),
+                                                        'ungraded');
+                }
+                $row->cells[] = $attendanceurl;
                 $usersummary = new stdClass();
                 if (isset($userdata->summary[$ca->attid])) {
                     $usersummary = $userdata->summary[$ca->attid]->get_all_sessions_summary_for($userdata->user->id);
@@ -977,16 +982,25 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
                 }
                 $table->data[] = $row;
-                if ($usersummary->numtakensessions > 0) {
+                if ($usersummary->numtakensessions > 0 && !empty($ca->attgrade)) {
                     $totalattendance++;
                     $totalpercentage = $totalpercentage + format_float($usersummary->takensessionspercentage * 100);
                 }
             }
             $row = new html_table_row();
-            $average = format_float($totalpercentage / $totalattendance).'%';
-            $col = new html_table_cell(get_string('averageattendance', 'mod_attendance'));
+            if (empty($totalattendance)) {
+                $average = '-';
+            } else {
+                $average = format_float($totalpercentage / $totalattendance).'%';
+            }
+
+            $col = new html_table_cell(get_string('averageattendancegraded', 'mod_attendance'));
             $col->attributes['class'] = 'averageattendance';
-            $row->cells = array($col, '', '', '', $average);
+            $col->colspan = 4;
+
+            $col2 = new html_table_cell($average);
+            $col2->style = 'text-align: center';
+            $row->cells = array($col, $col2);
             $table->data[] = $row;
 
             $o .= html_writer::table($table);
