@@ -190,6 +190,10 @@
     font-size: x-large;
     text-align: center;
 }
+.path-mod-attendance .ungraded {
+    font-size: smaller;
+    font-style: italic;
+}
 #page-mod-attendance-sessions .statusgroup .statusdesc {
     margin-right: 12px;
 }
