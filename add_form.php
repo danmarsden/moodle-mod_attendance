@@ -204,13 +204,11 @@ class mod_attendance_add_form extends moodleform {
             $mform->addGroup($mgroup, 'passwordgrp', get_string('passwordgrp', 'attendance'), array(' '), false);
 
             $mform->setType('studentpassword', PARAM_TEXT);
-            $mform->hideif('studentpassword', 'studentscanmark', 'notchecked');
-
             $mform->addHelpButton('passwordgrp', 'passwordgrp', 'attendance');
-            $mform->hideif('randompassword', 'studentscanmark', 'notchecked');
+
+            $mform->hideif('passwordgrp', 'studentscanmark', 'notchecked');
             $mform->hideif('studentpassword', 'randompassword', 'checked');
-            $mform->hideif('studentpassword', 'automark', 'eq', ATTENDANCE_AUTOMARK_ALL);
-            $mform->hideif('randompassword', 'automark', 'eq', ATTENDANCE_AUTOMARK_ALL);
+            $mform->hideif('passwordgrp', 'automark', 'eq', ATTENDANCE_AUTOMARK_ALL);
 
             $mform->addElement('checkbox', 'autoassignstatus', '', get_string('autoassignstatus', 'attendance'));
             $mform->addHelpButton('autoassignstatus', 'autoassignstatus', 'attendance');
@@ -244,8 +242,7 @@ class mod_attendance_add_form extends moodleform {
             $mform->setAdvanced('subnetgrp');
             $mform->addHelpButton('subnetgrp', 'requiresubnet', 'attendance');
 
-            $mform->hideif('usedefaultsubnet', 'studentscanmark', 'notchecked');
-            $mform->hideif('subnet', 'studentscanmark', 'notchecked');
+            $mform->hideif('subnetgrp', 'studentscanmark', 'notchecked');
             $mform->hideif('subnet', 'usedefaultsubnet', 'checked');
         } else {
             $mform->addElement('hidden', 'studentscanmark', '0');
