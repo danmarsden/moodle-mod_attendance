@@ -126,16 +126,24 @@ class restore_attendance_activity_structure_step extends restore_activity_struct
     protected function process_attendance_session($data) {
         global $DB;
 
+        $userinfo = $this->get_setting_value('userinfo'); // Are we including userinfo?
+
         $data = (object)$data;
         $oldid = $data->id;
 
         $data->attendanceid = $this->get_new_parentid('attendance');
         $data->groupid = $this->get_mappingid('group', $data->groupid);
         $data->sessdate = $this->apply_date_offset($data->sessdate);
-        $data->lasttaken = $this->apply_date_offset($data->lasttaken);
-        $data->lasttakenby = $this->get_mappingid('user', $data->lasttakenby);
         $data->timemodified = $this->apply_date_offset($data->timemodified);
         $data->caleventid = $this->get_mappingid('event', $data->caleventid);
+
+        if ($userinfo) {
+            $data->lasttaken = $this->apply_date_offset($data->lasttaken);
+            $data->lasttakenby = $this->get_mappingid('user', $data->lasttakenby);
+        } else {
+            $data->lasttaken = 0;
+            $data->lasttakenby = 0;
+        }
 
         $newitemid = $DB->insert_record('attendance_sessions', $data);
         $data->id = $newitemid;
