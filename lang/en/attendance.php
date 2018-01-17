@@ -74,6 +74,7 @@ If "Set unmarked at end of session" any students who have not marked their atten
 $string['automarktask'] = 'Check for attendance sessions that require auto marking';
 $string['autorecorded'] = 'system auto recorded';
 $string['averageattendance'] = 'Average attendance';
+$string['averageattendancegraded'] = 'Average attendance excluding ungraded';
 $string['calclose'] = 'Close';
 $string['caleventcreated'] = 'Calendar event for session successfully created';
 $string['caleventdeleted'] = 'Calendar event for session successfully deleted';
@@ -481,6 +482,7 @@ $string['to'] = 'to:';
 $string['triggered'] = 'First notified';
 $string['tuseremail'] = 'Email';
 $string['tusername'] = 'Full name';
+$string['ungraded'] = '(ungraded)';
 $string['unknowngroup'] = 'Unknown group';
 $string['update'] = 'Update';
 $string['usedefaultsubnet'] = 'Use default';
