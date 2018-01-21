@@ -399,6 +399,10 @@ class sessions {
                     foreach ($activities as $activity) {
                         // Build the session data.
                         $cm = get_coursemodule_from_instance('attendance', $activity->id, $course->id);
+                        if (!empty($cm->deletioninprogress)) {
+                            // Don't do anything if this attendance is in recycle bin.
+                            continue;
+                        }
                         $att = new mod_attendance_structure($activity, $cm, $course);
                         $sessions = attendance_construct_sessions_data_for_add($session, $att);
 
