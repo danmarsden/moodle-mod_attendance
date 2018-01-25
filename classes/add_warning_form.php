@@ -52,7 +52,7 @@ class mod_attendance_add_warning_form extends moodleform {
         $mform->setDefault('warningpercent', $config->warningpercent);
 
         $options = array();
-        for ($i = 1; $i <= 50; $i++) {
+        for ($i = 1; $i <= ATTENDANCE_MAXWARNAFTER; $i++) {
             $options[$i] = "$i";
         }
         $mform->addElement('select', 'warnafter', get_string('warnafter', 'mod_attendance'), $options);
