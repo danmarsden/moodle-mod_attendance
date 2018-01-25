@@ -112,10 +112,7 @@ class mod_attendance_update_form extends moodleform {
             $mform->addElement('checkbox', 'studentscanmark', '', get_string('studentscanmark', 'attendance'));
             $mform->addHelpButton('studentscanmark', 'studentscanmark', 'attendance');
 
-            $options2 = array(
-                ATTENDANCE_AUTOMARK_DISABLED => get_string('noautomark', 'attendance'),
-                ATTENDANCE_AUTOMARK_ALL => get_string('automarkall', 'attendance'),
-                ATTENDANCE_AUTOMARK_CLOSE => get_string('automarkclose', 'attendance'));
+            $options2 = attendance_get_automarkoptions();
 
             $mform->addElement('select', 'automark', get_string('automark', 'attendance'), $options2);
             $mform->setType('automark', PARAM_INT);
