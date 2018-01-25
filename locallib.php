@@ -43,6 +43,9 @@ define('ATTENDANCE_AUTOMARK_DISABLED', 0);
 define('ATTENDANCE_AUTOMARK_ALL', 1);
 define('ATTENDANCE_AUTOMARK_CLOSE', 2);
 
+// Max number of sessions available in the warnings set form to trigger warnings.
+define('ATTENDANCE_MAXWARNAFTER', 100);
+
 /**
  * Get statuses,
  *
