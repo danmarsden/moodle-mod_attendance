@@ -124,7 +124,7 @@ if ($data = $mform->get_data()) {
                 $notify->thirdpartyemails = implode(',', $data->thirdpartyemails);
             }
             $existingrecord = $DB->get_record('attendance_warning', array('idnumber' => $notify->idnumber,
-                'warningpercent' => $notify->warningpercent));
+                'warningpercent' => $notify->warningpercent, 'warnafter' => $notify->warnafter));
             if (empty($existingrecord) || $existingrecord->id == $notify->id) {
                 $DB->update_record('attendance_warning', $notify);
                 echo $OUTPUT->notification(get_string('warningupdated', 'mod_attendance'), 'success');
