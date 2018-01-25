@@ -870,3 +870,18 @@ function attendance_session_get_highest_status(mod_attendance_structure $att, $a
     }
     return $highestavailablestatus->id;
 }
+
+/**
+ * Get available automark options.
+ *
+ * @return array
+ */
+function attendance_get_automarkoptions() {
+    $options = array();
+    $options[ATTENDANCE_AUTOMARK_DISABLED] = get_string('noautomark', 'attendance');
+    if (strpos(get_config('tool_log', 'enabled_stores'), 'logstore_standard') !== false) {
+        $options[ATTENDANCE_AUTOMARK_ALL] = get_string('automarkall', 'attendance');
+    }
+    $options[ATTENDANCE_AUTOMARK_CLOSE] = get_string('automarkclose', 'attendance');
+    return $options;
+}
