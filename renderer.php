@@ -703,6 +703,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
      * @return string
      */
     protected function render_attendance_take_grid(attendance_take_data $takedata) {
+        global $PAGE;
         $table = new html_table();
         for ($i = 0; $i < $takedata->pageparams->gridcols; $i++) {
             $table->align[] = 'center';
@@ -712,8 +713,16 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $table->headspan = $takedata->pageparams->gridcols;
         $head = array();
         foreach ($takedata->statuses as $st) {
-            $head[] = html_writer::link("javascript:select_all_in(null, 'st" . $st->id . "', null);", $st->acronym,
-                                        array('title' => get_string('setallstatusesto', 'attendance', $st->description)));
+            $head[] = html_writer::link("#", $st->acronym, array('id' => 'checkstatus'.$st->id,
+                                              'title' => get_string('setallstatusesto', 'attendance', $st->description)));
+            // JS to select all radios of this status and prevent default behaviour of # link.
+            $PAGE->requires->js_amd_inline("
+                 require(['jquery'], function($) {
+                     $('#checkstatus".$st->id."').click(function(e) {
+                         $('#attendancetakeform').find('.st".$st->id."').prop('checked', true);
+                         e.preventDefault();
+                     });
+                 });");
         }
         $table->head[] = implode('&nbsp;&nbsp;', $head);
 
