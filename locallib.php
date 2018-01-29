@@ -760,6 +760,7 @@ function attendance_get_users_to_notify($courseids = array(), $orderby = '', $al
                       COUNT(DISTINCT ns.id) as nscount, MAX(ns.timesent) as timesent,
                       SUM(stg.grade) / SUM(stm.maxgrade) AS percent
                    FROM {attendance_sessions} ats
+                   JOIN {attendance_sessions} ats2 ON ats2.id = ats.id AND ats2.absenteereport = 1
                    JOIN {attendance} a ON a.id = ats.attendanceid
                    JOIN {course_modules} cm ON cm.instance = a.id
                    JOIN {course} c on c.id = cm.course
@@ -776,7 +777,7 @@ function attendance_get_users_to_notify($courseids = array(), $orderby = '', $al
                          GROUP BY attendanceid, setnumber) stm
                      ON (stm.setnumber = ats.statusset AND stm.attendanceid = ats.attendanceid)
                   {$joingroup}
-                  WHERE ats.absenteereport = 1 {$where}
+                  WHERE {$where}
                 GROUP BY uniqueid, a.id, a.name, a.course, c.fullname, atl.studentid, n.id, n.warningpercent,
                          n.emailsubject, n.emailcontent, n.emailcontentformat, n.warnafter, n.maxwarn,
                          n.emailuser, n.thirdpartyemails, cm.id, c.id, {$unames2}, ns.userid
