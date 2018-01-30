@@ -735,7 +735,7 @@ function attendance_get_users_to_notify($courseids = array(), $orderby = '', $al
     global $DB;
 
     $joingroup = 'LEFT JOIN {groups_members} gm ON (gm.userid = atl.studentid AND gm.groupid = ats.groupid)';
-    $where = ' AND (ats.groupid = 0 or gm.id is NOT NULL)';
+    $where = ' (ats.groupid = 0 or gm.id is NOT NULL)';
     $having = '';
     $params = array();
 
