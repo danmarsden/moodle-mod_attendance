@@ -924,7 +924,6 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $o .= construct_user_data_stat($userdata->summary->get_all_sessions_summary_for($userdata->user->id),
                 $userdata->pageparams->view);
         } else {
-            $prevcid = 0;
             $table = new html_table();
             $table->head  = array(get_string('course'),
                 get_string('pluginname', 'mod_attendance'),
@@ -934,6 +933,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $table->align = array('left', 'left', 'center', 'center', 'center');
             $table->colclasses = array('colcourse', 'colatt', 'colsessionscompleted',
                                        'colpointssessionscompleted', 'colpercentagesessionscompleted');
+
+            $table2 = clone($table); // Duplicate table for ungraded sessions.
             $totalattendance = 0;
             $totalpercentage = 0;
             foreach ($userdata->coursesatts as $ca) {
@@ -943,12 +944,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 $attendanceurl = new moodle_url('/mod/attendance/view.php', array('id' => $ca->cmid,
                                                                                       'studentid' => $userdata->user->id,
                                                                                       'view' => ATT_VIEW_ALL));
-                $attendanceurl = html_writer::link($attendanceurl, $ca->attname);
-                if (empty($ca->attgrade)) {
-                    $attendanceurl .= " ". html_writer::span(get_string('ungraded', 'mod_attendance'),
-                                                        'ungraded');
-                }
-                $row->cells[] = $attendanceurl;
+                $row->cells[] = html_writer::link($attendanceurl, $ca->attname);
                 $usersummary = new stdClass();
                 if (isset($userdata->summary[$ca->attid])) {
                     $usersummary = $userdata->summary[$ca->attid]->get_all_sessions_summary_for($userdata->user->id);
@@ -963,10 +959,14 @@ class mod_attendance_renderer extends plugin_renderer_base {
                     }
 
                 }
-                $table->data[] = $row;
-                if ($usersummary->numtakensessions > 0 && !empty($ca->attgrade)) {
-                    $totalattendance++;
-                    $totalpercentage = $totalpercentage + format_float($usersummary->takensessionspercentage * 100);
+                if (empty($ca->attgrade)) {
+                    $table2->data[] = $row;
+                } else {
+                    $table->data[] = $row;
+                    if ($usersummary->numtakensessions > 0) {
+                        $totalattendance++;
+                        $totalpercentage = $totalpercentage + format_float($usersummary->takensessionspercentage * 100);
+                    }
                 }
             }
             $row = new html_table_row();
@@ -985,7 +985,20 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $row->cells = array($col, $col2);
             $table->data[] = $row;
 
-            $o .= html_writer::table($table);
+            if (!empty($table2->data) && !empty($table->data)) {
+                // Print graded header if both tables are being shown.
+                $o .= html_writer::div("<h3>".get_string('graded', 'mod_attendance')."</h3>");
+            }
+            if (!empty($table->data)) {
+                // don't bother printing the table if no sessions are being shown.
+                $o .= html_writer::table($table);
+            }
+
+            if (!empty($table2->data)) {
+                // Don't print this if it doesn't contain any data.
+                $o .= html_writer::div("<h3>".get_string('ungraded', 'mod_attendance')."</h3>");
+                $o .= html_writer::table($table2);
+            }
         }
 
         return $o;
