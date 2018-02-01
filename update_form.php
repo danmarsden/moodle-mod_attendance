@@ -71,6 +71,7 @@ class mod_attendance_update_form extends moodleform {
                 'autoassignstatus' => $sess->autoassignstatus,
                 'subnet' => $sess->subnet,
                 'automark' => $sess->automark,
+                'absenteereport' => $sess->absenteereport,
                 'automarkcompleted' => 0);
         if ($sess->subnet == $attendancesubnet) {
             $data['usedefaultsubnet'] = 1;
@@ -103,6 +104,12 @@ class mod_attendance_update_form extends moodleform {
         $mform->addElement('editor', 'sdescription', get_string('description', 'attendance'),
                            array('rows' => 1, 'columns' => 80), $defopts);
         $mform->setType('sdescription', PARAM_RAW);
+
+        // If warnings allow selector for reporting.
+        if (!empty(get_config('attendance', 'enablewarnings'))) {
+            $mform->addElement('checkbox', 'absenteereport', '', get_string('includeabsentee', 'attendance'));
+            $mform->addHelpButton('absenteereport', 'includeabsentee', 'attendance');
+        }
 
         // Students can mark own attendance.
         if (!empty(get_config('attendance', 'studentscanmark'))) {
