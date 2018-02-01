@@ -537,6 +537,12 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
     $sesendtime = $formdata->sestime['endhour'] * HOURSECS + $formdata->sestime['endminute'] * MINSECS;
     $sessiondate = $formdata->sessiondate + $sesstarttime;
     $duration = $sesendtime - $sesstarttime;
+    if (empty(get_config('attendance', 'enablewarnings'))) {
+        $absenteereport = get_config('attendance', 'absenteereport_default');
+    } else {
+        $absenteereport = empty($formdata->absenteereport) ? 0 : 1;
+    }
+
     $now = time();
 
     if (empty(get_config('attendance', 'studentscanmark'))) {
@@ -576,6 +582,8 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
                     $sess->description = $formdata->sdescription['text'];
                     $sess->descriptionformat = $formdata->sdescription['format'];
                     $sess->timemodified = $now;
+                    $sess->absenteereport = $absenteereport;
+                    $sess->studentpassword = '';
                     if (isset($formdata->studentscanmark)) { // Students will be able to mark their own attendance.
                         $sess->studentscanmark = 1;
                         if (!empty($formdata->usedefaultsubnet)) {
@@ -590,11 +598,10 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
                         $sess->automarkcompleted = 0;
                         if (!empty($formdata->randompassword)) {
                             $sess->studentpassword = attendance_random_string();
-                        } else {
+                        } else if (!empty($formdata->studentpassword)) {
                             $sess->studentpassword = $formdata->studentpassword;
                         }
                     } else {
-                        $sess->studentpassword = '';
                         $sess->subnet = '';
                         $sess->automark = 0;
                         $sess->automarkcompleted = 0;
@@ -623,7 +630,7 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
         $sess->studentpassword = '';
         $sess->automark = 0;
         $sess->automarkcompleted = 0;
-        $sess->absenteereport = 1;
+        $sess->absenteereport = $absenteereport;
 
         if (isset($formdata->studentscanmark) && !empty($formdata->studentscanmark)) {
             // Students will be able to mark their own attendance.

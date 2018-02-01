@@ -523,6 +523,9 @@ class mod_attendance_structure {
         $sess->subnet = '';
         $sess->automark = 0;
         $sess->automarkcompleted = 0;
+        if (!empty(get_config('attendance', 'enablewarnings'))) {
+            $sess->absenteereport = empty($formdata->absenteereport) ? 0 : 1;
+        }
         if (!empty($formdata->autoassignstatus)) {
             $sess->autoassignstatus = $formdata->autoassignstatus;
         }
