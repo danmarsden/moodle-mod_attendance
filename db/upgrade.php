@@ -441,7 +441,7 @@ function xmldb_attendance_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2017050216, 'attendance');
     }
 
-    if ($oldversion < 2017050219) {
+    if ($oldversion < 2017050222) {
         $table = new xmldb_table('attendance_sessions');
 
         $field = new xmldb_field('absenteereport');
@@ -450,10 +450,10 @@ function xmldb_attendance_upgrade($oldversion=0) {
             $dbman->add_field($table, $field);
         }
 
-        upgrade_mod_savepoint(true, 2017050219, 'attendance');
+        upgrade_mod_savepoint(true, 2017050222, 'attendance');
     }
 
-    if ($oldversion < 2017050220) {
+    if ($oldversion < 2017050223) {
         $table = new xmldb_table('attendance_sessions');
 
         $field = new xmldb_field('autoassignstatus');
@@ -462,7 +462,7 @@ function xmldb_attendance_upgrade($oldversion=0) {
             $dbman->add_field($table, $field);
         }
 
-        upgrade_mod_savepoint(true, 2017050220, 'attendance');
+        upgrade_mod_savepoint(true, 2017050223, 'attendance');
     }
 
     return $result;
