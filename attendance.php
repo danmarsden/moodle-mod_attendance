@@ -47,7 +47,8 @@ if (!attendance_can_student_mark($attforsession)) {
 
 // Check if subnet is set and if the user is in the allowed range.
 if (!empty($attforsession->subnet) && !address_in_subnet(getremoteaddr(), $attforsession->subnet)) {
-    notice(get_string('subnetwrong', 'attendance'));
+    $url = new moodle_url('/mod/attendance/view.php', array('id' => $cm->id));
+    notice(get_string('subnetwrong', 'attendance'), $url);
     exit; // Notice calls this anyway.
 }
 
