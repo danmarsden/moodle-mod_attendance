@@ -990,7 +990,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 $o .= html_writer::div("<h3>".get_string('graded', 'mod_attendance')."</h3>");
             }
             if (!empty($table->data)) {
-                // don't bother printing the table if no sessions are being shown.
+                // Don't bother printing the table if no sessions are being shown.
                 $o .= html_writer::table($table);
             }
 
