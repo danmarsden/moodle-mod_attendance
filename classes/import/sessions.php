@@ -14,6 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Import attendance sessions class.
+ *
+ * @package   mod_attendance
+ * @author Chris Wharton <chriswharton@catalyst.net.nz>
+ * @copyright 2017 Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 namespace mod_attendance\import;
 
 defined('MOODLE_INTERNAL') || die();
@@ -39,12 +48,16 @@ class sessions {
     /** @var array $sessions The sessions info */
     protected $sessions = array();
 
+    /** @var array $mappings The mappings info */
     protected $mappings = array();
 
+    /** @var int The id of the csv import */
     protected $importid = 0;
 
+    /** @var csv_import_reader|null  $importer */
     protected $importer = null;
 
+    /** @var array $foundheaders */
     protected $foundheaders = array();
 
     /** @var bool $useprogressbar Control whether importing should use progress bars or not. */
@@ -110,8 +123,7 @@ class sessions {
     /**
      * Read the data from the mapping form.
      *
-     * @param
-     *            data array The mapping data.
+     * @param array $data The mapping data.
      */
     protected function read_mapping_data($data) {
         if ($data) {
@@ -152,10 +164,8 @@ class sessions {
     /**
      * Get the a column from the imported data.
      *
-     * @param
-     *            array The imported raw row
-     * @param
-     *            index The column index we want
+     * @param array $row The imported raw row
+     * @param int $index The column index we want
      * @return string The column data.
      */
     protected function get_column_data($row, $index) {
@@ -168,18 +178,12 @@ class sessions {
     /**
      * Constructor - parses the raw text for sanity.
      *
-     * @param string $text
-     *            The raw csv text.
-     * @param string $encoding
-     *            The encoding of the csv file.
-     * @param
-     *            string delimiter The specified delimiter for the file.
-     * @param
-     *            string importid The id of the csv import.
-     * @param
-     *            array mappingdata The mapping data from the import form.
-     * @param bool $useprogressbar
-     *            Whether progress bar should be displayed, to avoid html output on CLI.
+     * @param string $text The raw csv text.
+     * @param string $encoding The encoding of the csv file.
+     * @param string $delimiter The specified delimiter for the file.
+     * @param string $importid The id of the csv import.
+     * @param array $mappingdata The mapping data from the import form.
+     * @param bool $useprogressbar Whether progress bar should be displayed, to avoid html output on CLI.
      */
     public function __construct($text = null, $encoding = null, $delimiter = null, $importid = 0,
                                 $mappingdata = null, $useprogressbar = false) {
