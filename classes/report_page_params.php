@@ -35,6 +35,8 @@ class mod_attendance_report_page_params extends mod_attendance_page_with_filter_
     /** @var int */
     public $sort;
     /** @var int */
+    public $showextrauserdetails;
+    /** @var int */
     public $showsessiondetails;
     /** @var int */
     public $sessiondetailspos;
@@ -71,6 +73,10 @@ class mod_attendance_report_page_params extends mod_attendance_page_with_filter_
 
         if ($this->sort != ATT_SORT_DEFAULT) {
             $params['sort'] = $this->sort;
+        }
+
+        if (empty($this->showextrauserdetails)) {
+            $params['showextrauserdetails'] = 0;
         }
 
         if (empty($this->showsessiondetails)) {
