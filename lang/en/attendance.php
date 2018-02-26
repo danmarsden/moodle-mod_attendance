@@ -418,6 +418,7 @@ $string['setunmarked'] = 'Automatically set when not marked';
 $string['setunmarked_help'] = 'If enabled in the session, set this status if a student has not marked their own attendance.';
 $string['showdefaults'] = 'Show defaults';
 $string['showduration'] = 'Show duration';
+$string['showextrauserdetails'] = 'Show extra user details';
 $string['showsessiondetails'] = 'Show session details';
 $string['somedisabledstatus'] = '(Some options have been removed as the session has started.)';
 $string['sortedgrid'] = 'Sorted grid';
