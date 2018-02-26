@@ -186,6 +186,11 @@
 .path-mod-attendance .attreport .narrow {
     width: 1px;
 }
+
+.path-mod-attendance .attreport img.userpicture {
+    max-width: inherit;
+}
+
 .path-mod-attendance .student-password {
     font-size: x-large;
     text-align: center;
