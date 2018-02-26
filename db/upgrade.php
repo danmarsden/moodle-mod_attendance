@@ -487,6 +487,5 @@ function xmldb_attendance_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2017112005, 'attendance');
     }
 
-    
     return $result;
 }
