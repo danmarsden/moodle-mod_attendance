@@ -224,6 +224,7 @@ $string['hiddensessions_help'] = 'Sessions are hidden if they are scheduled befo
 
 You can use this feature to hide older sessions instead of deleting them. Only visible sessions will appear in the Gradebook.';
 $string['hiddensessionsdeleted'] = 'All hidden sessions were delete';
+$string['hideextrauserdetails'] = 'Hide extra user details';
 $string['hidensessiondetails'] = 'Hide session details';
 $string['import'] = 'Import';
 $string['importfile'] = 'Import file';

@@ -480,7 +480,7 @@ function xmldb_attendance_upgrade($oldversion=0) {
 
     if ($oldversion < 2018022204) {
         $table = new xmldb_table('attendance');
-        $field = new xmldb_field('showextrauserdetails', XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '1', 'subnet');
+        $field = new xmldb_field('showextrauserdetails', XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '1', 'showsessiondetails');
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
