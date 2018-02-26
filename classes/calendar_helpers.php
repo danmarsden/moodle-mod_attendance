@@ -52,9 +52,14 @@ function attendance_create_calendar_event(&$session) {
     $caleventdata->instance       = $session->attendanceid;
     $caleventdata->timestart      = $session->sessdate;
     $caleventdata->timeduration   = $session->duration;
+    $caleventdata->description    = $session->description;
     $caleventdata->eventtype      = 'attendance';
     $caleventdata->timemodified   = time();
     $caleventdata->modulename     = 'attendance';
+
+    if (!empty($session->groupid)) {
+        $caleventdata->name .= " (". get_string('group', 'group') ." ". groups_get_group_name($session->groupid) .")";
+    }
 
     $calevent = new stdClass();
     if ($calevent = calendar_event::create($caleventdata, false)) {
