@@ -1212,13 +1212,31 @@ class mod_attendance_renderer extends plugin_renderer_base {
      * @return array Array of html_table_row objects
      */
     protected function get_user_rows(attendance_report_data $reportdata) {
+        global $OUTPUT;
         $rows = array();
         $extrafields = get_extra_user_fields($reportdata->att->context);
+        $showextrauserdetails = $reportdata->pageparams->showextrauserdetails;
+        $params = $reportdata->pageparams->get_significant_params();
+        $text = get_string('users');
+        if ($extrafields) {
+            if ($showextrauserdetails) {
+                $params['showextrauserdetails'] = 0;
+                $url = $reportdata->att->url_report($params);
+                $text .= $OUTPUT->action_icon($url, new pix_icon('t/switch_minus',
+                            get_string('hideextrauserdetails', 'attendance')), null, null);
+            } else {
+                $params['showextrauserdetails'] = 1;
+                $url = $reportdata->att->url_report($params);
+                $text .= $OUTPUT->action_icon($url, new pix_icon('t/switch_plus',
+                            get_string('showextrauserdetails', 'attendance')), null, null);
+                $extrafields = array();
+            }
+        }
         $usercolspan = 1 + count($extrafields);
 
         $row = new html_table_row();
         $row->cells[] = $this->build_header_cell('');
-        $row->cells[] = $this->build_header_cell(get_string('users'), false, false, $usercolspan);
+        $row->cells[] = $this->build_header_cell($text, false, false, $usercolspan);
         $rows[] = $row;
 
         $row = new html_table_row();

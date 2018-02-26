@@ -76,6 +76,9 @@ class mod_attendance_structure {
     /** @var boolean flag set when automarking is complete. */
     public $automarkcompleted;
 
+    /** @var int Define if extra user details should be shown in reports */
+    public $showextrauserdetails;
+
     /** @var int Define if session details should be shown in reports */
     public $showsessiondetails;
 
@@ -125,6 +128,9 @@ class mod_attendance_structure {
 
         $this->pageparams = $pageparams;
 
+        if (isset($pageparams->showextrauserdetails) && $pageparams->showextrauserdetails != $this->showextrauserdetails) {
+            $DB->set_field('attendance', 'showextrauserdetails', $pageparams->showextrauserdetails, array('id' => $this->id));
+        }
         if (isset($pageparams->showsessiondetails) && $pageparams->showsessiondetails != $this->showsessiondetails) {
             $DB->set_field('attendance', 'showsessiondetails', $pageparams->showsessiondetails, array('id' => $this->id));
         }
