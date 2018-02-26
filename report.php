@@ -46,6 +46,7 @@ $context = context_module::instance($cm->id);
 require_capability('mod/attendance:viewreports', $context);
 
 $pageparams->init($cm);
+$pageparams->showextrauserdetails = optional_param('showextrauserdetails', $attrecord->showextrauserdetails, PARAM_INT);
 $pageparams->showsessiondetails = optional_param('showsessiondetails', $attrecord->showsessiondetails, PARAM_INT);
 $pageparams->sessiondetailspos = optional_param('sessiondetailspos', $attrecord->sessiondetailspos, PARAM_TEXT);
 
