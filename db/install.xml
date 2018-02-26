@@ -16,6 +16,7 @@
         <FIELD NAME="subnet" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Default subnet used when creating sessions."/>
         <FIELD NAME="sessiondetailspos" TYPE="char" LENGTH="5" NOTNULL="true" DEFAULT="left" SEQUENCE="false" COMMENT="Position for the session detail columns related to summary columns."/>
         <FIELD NAME="showsessiondetails" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="Define if session details should be shown in reports."/>
+        <FIELD NAME="showextrauserdetails" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="Define if extra user details should be shown in reports."/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="Primary key for attendance"/>
