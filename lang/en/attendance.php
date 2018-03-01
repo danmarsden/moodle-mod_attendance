@@ -272,6 +272,7 @@ $string['mustselectusers'] = 'Must select users to export';
 $string['newdate'] = 'New date';
 $string['newduration'] = 'New duration';
 $string['newstatusset'] = 'New set of statuses';
+$string['noabsentstatusset'] = 'The status set in use does not have a status to use when not marked.';
 $string['noattendanceusers'] = 'It is not possible to export any data as there are no students enrolled in the course.';
 $string['noautomark'] = 'Disabled';
 $string['noattforuser'] = 'No attendance records exist for the user';

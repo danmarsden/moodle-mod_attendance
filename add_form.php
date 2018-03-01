@@ -262,6 +262,7 @@ class mod_attendance_add_form extends moodleform {
      * @param array $files
      */
     public function validation($data, $files) {
+        global $DB;
         $errors = parent::validation($data, $files);
 
         $sesstarttime = $data['sestime']['starthour'] * HOURSECS + $data['sestime']['startminute'] * MINSECS;
@@ -297,6 +298,19 @@ class mod_attendance_add_form extends moodleform {
             $errors['sessiondate'] = get_string('priorto', 'attendance',
                 userdate($data['coursestartdate'], get_string('strftimedmy', 'attendance')));
             $this->_form->setConstant('previoussessiondate', $data['sessiondate']);
+        }
+
+        if ($data['automark'] == ATTENDANCE_AUTOMARK_CLOSE) {
+            $cm            = $this->_customdata['cm'];
+            // Check that the selected statusset has a status to use when unmarked.
+            $sql = 'SELECT id
+            FROM {attendance_statuses}
+            WHERE deleted = 0 AND (attendanceid = 0 or attendanceid = ?)
+            AND setnumber = ? AND setunmarked = 1';
+            $params = array($cm->instance, $data['statusset']);
+            if (!$DB->record_exists_sql($sql, $params)) {
+                $errors['automark'] = get_string('noabsentstatusset', 'attendance');
+            }
         }
 
         return $errors;
