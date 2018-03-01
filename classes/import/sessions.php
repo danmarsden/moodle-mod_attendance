@@ -134,13 +134,16 @@ class sessions {
                 'from' => $data->header3,
                 'to' => $data->header4,
                 'description' => $data->header5,
-                'studentscanmark' => $data->header6,
-                'passwordgrp' => $data->header7,
-                'randompassword' => $data->header8,
-                'subnet' => $data->header9,
-                'automark' => $data->header10,
-                'autoassignstatus' => $data->header11,
-                'absenteereport' => $data->header12
+                'repeaton' => $data->header6,
+                'repeatevery' => $data->header7,
+                'repeatuntil' => $data->header8,
+                'studentscanmark' => $data->header9,
+                'passwordgrp' => $data->header10,
+                'randompassword' => $data->header11,
+                'subnet' => $data->header12,
+                'automark' => $data->header13,
+                'autoassignstatus' => $data->header14,
+                'absenteereport' => $data->header15
             );
         } else {
             return array(
@@ -150,13 +153,16 @@ class sessions {
                 'from' => 3,
                 'to' => 4,
                 'description' => 5,
-                'studentscanmark' => 6,
-                'passwordgrp' => 7,
-                'randompassword' => 8,
-                'subnet' => 9,
-                'automark' => 10,
-                'autoassignstatus' => 11,
-                'absenteereport' => 12
+                'repeaton' => 6,
+                'repeatevery' => 7,
+                'repeatuntil' => 8,
+                'studentscanmark' => 9,
+                'passwordgrp' => 10,
+                'randompassword' => 11,
+                'subnet' => 12,
+                'automark' => 13,
+                'autoassignstatus' => 14,
+                'absenteereport' => 15
             );
         }
     }
