@@ -52,7 +52,7 @@ class mod_attendance_notifyqueue {
      * @param string $message a text with a message
      */
     public static function notify_problem($message) {
-        self::queue_message($message, \core\output\notification::NOTIFY_PROBLEM);
+        self::queue_message($message, \core\output\notification::NOTIFY_ERROR);
     }
 
     /**
@@ -61,7 +61,7 @@ class mod_attendance_notifyqueue {
      * @param string $message a text with a message
      */
     public static function notify_message($message) {
-        self::queue_message($message, \core\output\notification::NOTIFY_MESSAGE);
+        self::queue_message($message, \core\output\notification::NOTIFY_INFO);
     }
 
     /**
@@ -79,7 +79,7 @@ class mod_attendance_notifyqueue {
      * @param string $message a text with a message
      * @param string $messagetype one of the \core\output\notification messages ('message', 'suceess' or 'problem')
      */
-    private static function queue_message($message, $messagetype=\core\output\notification::NOTIFY_MESSAGE) {
+    private static function queue_message($message, $messagetype=\core\output\notification::NOTIFY_INFO) {
         global $SESSION;
 
         if (!isset($SESSION->mod_attendance_notifyqueue)) {
