@@ -44,7 +44,7 @@ class backup_attendance_activity_structure_step extends backup_activity_structur
 
         // XML nodes declaration - non-user data.
         $attendance = new backup_nested_element('attendance', array('id'), array(
-            'name', 'grade'));
+            'name', 'intro', 'introformat', 'grade'));
 
         $statuses = new backup_nested_element('statuses');
         $status  = new backup_nested_element('status', array('id'), array(
@@ -53,7 +53,8 @@ class backup_attendance_activity_structure_step extends backup_activity_structur
         $sessions = new backup_nested_element('sessions');
         $session  = new backup_nested_element('session', array('id'), array(
             'groupid', 'sessdate', 'duration', 'lasttaken', 'lasttakenby',
-            'timemodified', 'description', 'descriptionformat', 'caleventid'));
+            'timemodified', 'description', 'descriptionformat', 'studentscanmark',
+            'statusset', 'caleventid'));
 
         // XML nodes declaration - user data.
         $logs = new backup_nested_element('logs');
