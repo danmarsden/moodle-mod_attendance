@@ -78,6 +78,10 @@ if ($ADMIN->fulltree) {
         get_string('multisessionexpanded', 'attendance'),
         get_string('multisessionexpanded_desc', 'attendance'), 0));
 
+    $settings->add(new admin_setting_configcheckbox('attendance/showsessiondescriptiononreport',
+        get_string('showsessiondescriptiononreport', 'attendance'),
+        get_string('showsessiondescriptiononreport_desc', 'attendance'), 0));
+
     $settings->add(new admin_setting_configcheckbox('attendance/studentrecordingexpanded',
         get_string('studentrecordingexpanded', 'attendance'),
         get_string('studentrecordingexpanded_desc', 'attendance'), 1));
