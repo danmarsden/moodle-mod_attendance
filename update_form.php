@@ -99,6 +99,9 @@ class mod_attendance_update_form extends moodleform {
         if ($maxstatusset > 0) {
             $mform->addElement('static', 'statusset', get_string('usestatusset', 'mod_attendance'),
                 attendance_get_setname($this->_customdata['att']->id, $sess->statusset));
+        } else {
+            $mform->addElement('hidden', 'statusset', $maxstatusset);
+            $mform->setType('statusset', PARAM_INT);
         }
 
         $mform->addElement('editor', 'sdescription', get_string('description', 'attendance'),
