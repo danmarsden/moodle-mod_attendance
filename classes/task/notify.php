@@ -106,6 +106,10 @@ class notify extends \core\task\scheduled_task {
                 $record->percent = round($record->percent * 100)."%";
                 $context = \context_module::instance($record->cmid);
                 foreach ($sendto as $senduser) {
+                    if (empty($senduser)) {
+                        // Probably an extra comma in the thirdpartyusers field.
+                        continue;
+                    }
                     // Check user is allowed to receive warningemails.
                     if (has_capability('mod/attendance:warningemails', $context, $senduser)) {
                         if (empty($thirdpartynotifications[$senduser])) {
