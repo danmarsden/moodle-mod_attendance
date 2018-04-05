@@ -626,6 +626,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         // Show a 'select all' row of radio buttons.
         $row = new html_table_row();
         $row->cells[] = '';
+        $row->attributes['class'] = 'setallstatusesrow';
         foreach ($extrasearchfields as $field) {
             $row->cells[] = '';
         }
