@@ -425,6 +425,7 @@ function attendance_random_string($length=6) {
  * @return boolean
  */
 function attendance_can_student_mark($sess) {
+    global $DB, $USER, $OUTPUT;
     $canmark = false;
     $attconfig = get_config('attendance');
     if (!empty($attconfig->studentscanmark) && !empty($sess->studentscanmark)) {
@@ -438,6 +439,31 @@ function attendance_can_student_mark($sess) {
             if ($sess->sessdate < time() && time() < ($sess->sessdate + $duration)) {
                 $canmark = true;
             }
+        }
+    }
+    // Check if another student has marked attendance from this IP address recently.
+    if ($canmark && !empty($sess->preventsharedip)) {
+        $time = time() - ($sess->preventsharediptime * 60);
+        $sql = 'sessionid = ? AND studentid <> ? AND timetaken > ? AND ipaddress = ?';
+        $params = array($sess->id, $USER->id, $time, getremoteaddr());
+        $record = $DB->get_record_select('attendance_log', $sql, $params);
+        if (!empty($record)) {
+            // Trigger an ip_shared event.
+            $attendanceid = $DB->get_field('attendance_sessions', 'attendanceid', array('id' => $record->sessionid));
+            $cm = get_coursemodule_from_instance('attendance', $attendanceid);
+            $event = \mod_attendance\event\session_ip_shared::create(array(
+                'objectid' => 0,
+                'context' => \context_module::instance($cm->id),
+                'other' => array(
+                    'sessionid' => $record->sessionid,
+                    'otheruser' => $record->studentid
+                )
+            ));
+
+            $event->trigger();
+
+            echo $OUTPUT->notification(get_string('preventsharederror', 'attendance'));
+            return false;
         }
     }
     return $canmark;
@@ -601,10 +627,18 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
                         } else if (!empty($formdata->studentpassword)) {
                             $sess->studentpassword = $formdata->studentpassword;
                         }
+                        if (!empty($formdata->preventsharedip)) {
+                            $sess->preventsharedip = $formdata->preventsharedip;
+                        }
+                        if (!empty($formdata->preventsharediptime)) {
+                            $sess->preventsharediptime = $formdata->preventsharediptime;
+                        }
                     } else {
                         $sess->subnet = '';
                         $sess->automark = 0;
                         $sess->automarkcompleted = 0;
+                        $sess->preventsharedip = 0;
+                        $sess->preventsharediptime = '';
                     }
                     $sess->statusset = $formdata->statusset;
 
@@ -651,6 +685,12 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
 
             if (!empty($formdata->automark)) {
                 $sess->automark = $formdata->automark;
+            }
+            if (!empty($formdata->preventsharedip)) {
+                $sess->preventsharedip = $formdata->preventsharedip;
+            }
+            if (!empty($formdata->preventsharediptime)) {
+                $sess->preventsharediptime = $formdata->preventsharediptime;
             }
         }
         $sess->statusset = $formdata->statusset;
