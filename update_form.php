@@ -72,7 +72,9 @@ class mod_attendance_update_form extends moodleform {
                 'subnet' => $sess->subnet,
                 'automark' => $sess->automark,
                 'absenteereport' => $sess->absenteereport,
-                'automarkcompleted' => 0);
+                'automarkcompleted' => 0,
+                'preventsharedip' => $sess->preventsharedip,
+                'preventsharediptime' => $sess->preventsharediptime);
         if ($sess->subnet == $attendancesubnet) {
             $data['usedefaultsubnet'] = 1;
         } else {
@@ -157,6 +159,21 @@ class mod_attendance_update_form extends moodleform {
             $mform->addElement('hidden', 'automarkcompleted', '0');
             $mform->settype('automarkcompleted', PARAM_INT);
 
+            $mgroup3 = array();
+            $mgroup3[] = & $mform->createElement('checkbox', 'preventsharedip', '');
+            $mgroup3[] = & $mform->createElement('text', 'preventsharediptime',
+                get_string('preventsharediptime', 'attendance'), '', 'test');
+            $mgroup3[] = & $mform->createElement('static', 'preventsharediptimedesc', '',
+                get_string('preventsharedipminutes', 'attendance'));
+            $mform->addGroup($mgroup3, 'preventsharedgroup',
+                get_string('preventsharedip', 'attendance'), array(' '), false);
+            $mform->addHelpButton('preventsharedgroup', 'preventsharedip', 'attendance');
+            $mform->setAdvanced('preventsharedgroup');
+            $mform->setType('preventsharediptime', PARAM_INT);
+            $mform->disabledif('preventsharedgroup', 'studentscanmark', 'notchecked');
+            $mform->disabledif('preventsharedip', 'studentscanmark', 'notchecked');
+            $mform->disabledif('preventsharediptime', 'studentscanmark', 'notchecked');
+            $mform->disabledIf('preventsharediptime', 'preventsharedip', 'notchecked');
         } else {
             $mform->addElement('hidden', 'studentscanmark', '0');
             $mform->settype('studentscanmark', PARAM_INT);
@@ -203,6 +220,11 @@ class mod_attendance_update_form extends moodleform {
             }
         }
 
+        if (!empty($data['studentscanmark']) && !empty($data['preventsharedip']) &&
+                empty($data['preventsharediptime'])) {
+            $errors['preventsharedgroup'] = get_string('iptimemissing', 'attendance');
+
+        }
         return $errors;
     }
 }
