@@ -480,11 +480,35 @@ function xmldb_attendance_upgrade($oldversion=0) {
 
     if ($oldversion < 2018022204) {
         $table = new xmldb_table('attendance');
-        $field = new xmldb_field('showextrauserdetails', XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '1', 'showsessiondetails');
+        $field = new xmldb_field('showextrauserdetails', XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED,
+            XMLDB_NOTNULL, null, '1', 'showsessiondetails');
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
         upgrade_mod_savepoint(true, 2018022204, 'attendance');
+    }
+
+    if ($oldversion < 2018050100) {
+        $table = new xmldb_table('attendance_sessions');
+        $field = new xmldb_field('preventsharedip', XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED,
+            XMLDB_NOTNULL, null, '0', 'absenteereport');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        $field = new xmldb_field('preventsharediptime', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED,
+            null, null, null, 'preventsharedip');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $table = new xmldb_table('attendance_log');
+        $field = new xmldb_field('ipaddress', XMLDB_TYPE_CHAR, '45', null,
+            null, null, '', 'remarks');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        upgrade_mod_savepoint(true, 2018050100, 'attendance');
     }
 
     return $result;
