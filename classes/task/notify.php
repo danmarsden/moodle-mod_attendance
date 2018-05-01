@@ -91,11 +91,13 @@ class notify extends \core\task\scheduled_task {
                     $record = attendance_template_variables($record);
                     $user = $DB->get_record('user', array('id' => $record->userid));
                     $from = \core_user::get_noreply_user();
+                    $oldforcelang = force_current_language($user->lang);
 
                     $emailcontent = format_text($record->emailcontent, $record->emailcontentformat);
+                    $emailsubject = format_text($record->emailsubject);
+                    email_to_user($user, $from, $emailsubject, $emailcontent, $emailcontent);
 
-                    email_to_user($user, $from, $record->emailsubject, $emailcontent, $emailcontent);
-
+                    force_current_language($oldforcelang);
                     $sentnotifications[$record->userid][] = $record->aid;
                     $numsentusers++;
                 }
@@ -137,6 +139,7 @@ class notify extends \core\task\scheduled_task {
             foreach ($thirdpartynotifications as $sendid => $notifications) {
                 $user = $DB->get_record('user', array('id' => $sendid));
                 $from = \core_user::get_noreply_user();
+                $oldforcelang = force_current_language($user->lang);
 
                 $emailcontent = implode("\n", $notifications);
                 $emailcontent .= "\n\n".get_string('thirdpartyemailtextfooter', 'attendance');
@@ -144,6 +147,7 @@ class notify extends \core\task\scheduled_task {
                 $emailsubject = get_string('thirdpartyemailsubject', 'attendance');
 
                 email_to_user($user, $from, $emailsubject, $emailcontent, $emailcontent);
+                force_current_language($oldforcelang);
                 $numsentthird++;
             }
             if (!empty($numsentthird)) {
