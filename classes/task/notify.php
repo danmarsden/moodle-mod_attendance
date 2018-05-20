@@ -94,7 +94,7 @@ class notify extends \core\task\scheduled_task {
                     $oldforcelang = force_current_language($user->lang);
 
                     $emailcontent = format_text($record->emailcontent, $record->emailcontentformat);
-                    $emailsubject = format_text($record->emailsubject);
+                    $emailsubject = format_text($record->emailsubject, FORMAT_HTML);
                     email_to_user($user, $from, $emailsubject, $emailcontent, $emailcontent);
 
                     force_current_language($oldforcelang);
