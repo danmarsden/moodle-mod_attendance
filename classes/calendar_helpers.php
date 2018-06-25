@@ -38,8 +38,8 @@ function attendance_create_calendar_event(&$session) {
     if ($session->caleventid) {
         return $session->caleventid;
     }
-    if (empty(get_config('attendance', 'enablecalendar'))) {
-        // Calendar events are not used.
+    if (empty(get_config('attendance', 'enablecalendar')) || $session->calendarevent === 0) {
+        // Calendar events are not used, or event not required for this session.
         return true;
     }
 
@@ -98,18 +98,42 @@ function attendance_create_calendar_events($sessionsids) {
 /**
  * Update calendar event duration and date
  *
- * @param int $caleventid calendar event id
- * @param int $timeduration duration of the event
- * @param int $timestart start time of the event
+ * @param stdClass $session Session data
  * @return bool result of updating
  */
-function attendance_update_calendar_event($caleventid, $timeduration, $timestart) {
+function attendance_update_calendar_event($session) {
+    global $DB;
+
+    $caleventid = $session->caleventid;
+    $timeduration = $session->duration;
+    $timestart = $session->sessdate;
 
     if (empty(get_config('attendance', 'enablecalendar'))) {
         // Calendar events are not used.
         return true;
     }
 
+    // Should there even be an event?
+    if ($session->calendarevent == 0) {
+        if ($session->caleventid != 0) {
+            // There is an existing event we should delete
+            // (calendarevent option just got turned off)
+            $DB->delete_records_list('event', 'id', array($caleventid));
+            $session->caleventid = 0;
+            $DB->update_record('attendance_sessions', $session);
+            return true;
+        } else {
+            // This should be the common case when session does not want event
+            return true;
+        }
+    }
+
+    // Do we need new event (calendarevent option has just been turned on)?
+    if ($session->caleventid == 0) {
+        return attendance_create_calendar_event($session);
+    }
+
+    // Boring update
     $caleventdata = new stdClass();
     $caleventdata->timeduration   = $timeduration;
     $caleventdata->timestart      = $timestart;

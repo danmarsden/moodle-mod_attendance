@@ -511,5 +511,15 @@ function xmldb_attendance_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2018050100, 'attendance');
     }
 
+    if ($oldversion < 2018072700) {
+        $table = new xmldb_table('attendance_sessions');
+        $field = new xmldb_field('calendarevent', XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED,
+            XMLDB_NOTNULL, null, '1', 'caleventid');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        upgrade_mod_savepoint(true, 2018072700, 'attendance');
+    }
+
     return $result;
 }
