@@ -86,6 +86,7 @@ class attendance_webservices_tests extends advanced_testcase {
         $session->statusset = 0;
         $session->groupid = 0;
         $session->absenteereport = 1;
+        $session->calendarevent = 0;
 
         // Creating two sessions.
         $this->sessions[] = $session;

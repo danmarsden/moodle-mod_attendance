@@ -62,19 +62,22 @@ class mod_attendance_update_form extends moodleform {
         $endhour = floor($endtime / HOURSECS);
         $endminute = floor(($endtime - $endhour * HOURSECS) / MINSECS);
 
-        $data = array('sessiondate' => $sess->sessdate,
-                'sestime' => array('starthour' => $starthour, 'startminute' => $startminute,
-                                   'endhour' => $endhour, 'endminute' => $endminute),
-                'sdescription' => $sess->description_editor,
-                'studentscanmark' => $sess->studentscanmark,
-                'studentpassword' => $sess->studentpassword,
-                'autoassignstatus' => $sess->autoassignstatus,
-                'subnet' => $sess->subnet,
-                'automark' => $sess->automark,
-                'absenteereport' => $sess->absenteereport,
-                'automarkcompleted' => 0,
-                'preventsharedip' => $sess->preventsharedip,
-                'preventsharediptime' => $sess->preventsharediptime);
+        $data = array(
+            'sessiondate' => $sess->sessdate,
+            'sestime' => array('starthour' => $starthour, 'startminute' => $startminute,
+            'endhour' => $endhour, 'endminute' => $endminute),
+            'sdescription' => $sess->description_editor,
+            'calendarevent' => $sess->calendarevent,
+            'studentscanmark' => $sess->studentscanmark,
+            'studentpassword' => $sess->studentpassword,
+            'autoassignstatus' => $sess->autoassignstatus,
+            'subnet' => $sess->subnet,
+            'automark' => $sess->automark,
+            'absenteereport' => $sess->absenteereport,
+            'automarkcompleted' => 0,
+            'preventsharedip' => $sess->preventsharedip,
+            'preventsharediptime' => $sess->preventsharediptime
+        );
         if ($sess->subnet == $attendancesubnet) {
             $data['usedefaultsubnet'] = 1;
         } else {
@@ -109,6 +112,11 @@ class mod_attendance_update_form extends moodleform {
         $mform->addElement('editor', 'sdescription', get_string('description', 'attendance'),
                            array('rows' => 1, 'columns' => 80), $defopts);
         $mform->setType('sdescription', PARAM_RAW);
+
+        $mform->addElement('checkbox', 'calendarevent', '', get_string('calendarevent', 'attendance'));
+        $mform->addHelpButton('calendarevent', 'calendarevent', 'attendance');
+        // XXX - this should be modified to use a different config setting if we keep enablecalendar's current meaning
+        // $mform->setDefault('calendarevent', get_config('attendance', 'enablecalendar'));
 
         // If warnings allow selector for reporting.
         if (!empty(get_config('attendance', 'enablewarnings'))) {
@@ -185,7 +193,6 @@ class mod_attendance_update_form extends moodleform {
         }
 
         $mform->setDefaults($data);
-
         $this->add_action_buttons(true);
     }
 

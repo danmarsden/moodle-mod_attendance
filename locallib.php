@@ -575,6 +575,11 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
         $formdata->studentscanmark = 0;
     }
 
+    $calendarevent = 0;
+    if (isset($formdata->calendarevent)) { // Calendar event should be created
+        $calendarevent = 1;
+    }
+
     $sessions = array();
     if (isset($formdata->addmultiply)) {
         $startdate = $sessiondate;
@@ -607,6 +612,7 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
                     $sess->descriptionitemid = $formdata->sdescription['itemid'];
                     $sess->description = $formdata->sdescription['text'];
                     $sess->descriptionformat = $formdata->sdescription['format'];
+                    $sess->calendarevent = $calendarevent;
                     $sess->timemodified = $now;
                     $sess->absenteereport = $absenteereport;
                     $sess->studentpassword = '';
@@ -657,6 +663,7 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
         $sess->descriptionitemid = $formdata->sdescription['itemid'];
         $sess->description = $formdata->sdescription['text'];
         $sess->descriptionformat = $formdata->sdescription['format'];
+        $sess->calendarevent = $calendarevent;
         $sess->timemodified = $now;
         $sess->studentscanmark = 0;
         $sess->autoassignstatus = 0;
