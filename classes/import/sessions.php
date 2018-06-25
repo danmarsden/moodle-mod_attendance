@@ -109,7 +109,8 @@ class sessions {
             get_string('autoassignstatus', 'attendance'),
             get_string('absenteereport', 'attendance'),
             get_string('preventsharedip', 'attendance'),
-            get_string('preventsharediptime', 'attendance')
+            get_string('preventsharediptime', 'attendance'),
+            get_string('calendarevent', 'attendance')
         );
     }
 
@@ -148,6 +149,7 @@ class sessions {
                 'absenteereport' => $data->header15,
                 'preventsharedip' => $data->header16,
                 'preventsharediptime' => $data->header17,
+                'calendarevent' => $data->header18
             );
         } else {
             return array(
@@ -168,7 +170,8 @@ class sessions {
                 'autoassignstatus' => 14,
                 'absenteereport' => 15,
                 'preventsharedip' => 16,
-                'preventsharediptime' => 17
+                'preventsharediptime' => 17,
+                'calendarevent' => 18
             );
         }
     }

@@ -93,7 +93,6 @@ switch ($att->pageparams->action) {
         $url = $att->url_sessions(array('action' => mod_attendance_sessions_page_params::ACTION_UPDATE, 'sessionid' => $sessionid));
         $formparams['sessionid'] = $sessionid;
         $mform = new mod_attendance_update_form($url, $formparams);
-
         if ($mform->is_cancelled()) {
             redirect($att->url_manage());
         }
