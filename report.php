@@ -56,6 +56,7 @@ $PAGE->set_url($att->url_report());
 $PAGE->set_pagelayout('report');
 $PAGE->set_title($course->shortname. ": ".$att->name.' - '.get_string('report', 'attendance'));
 $PAGE->set_heading($course->fullname);
+$PAGE->force_settings_menu(true);
 $PAGE->set_cacheable(true);
 $PAGE->navbar->add(get_string('report', 'attendance'));
 
