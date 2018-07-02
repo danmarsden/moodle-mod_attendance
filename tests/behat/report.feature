@@ -22,8 +22,6 @@ Feature: Visiting reports
     And I add a "Attendance" to section "1" and I fill the form with:
       | Name        | Attendance       |
     And I follow "Attendance"
-    And I follow "Add a block"
-    And I follow "Administration"
     And I follow "Add session"
     And I set the following fields to these values:
       | id_sestime_starthour | 01 |
@@ -41,7 +39,7 @@ Feature: Visiting reports
     Given I log in as "teacher1"
     And I am on "Course 1" course homepage
     And I follow "Attendance"
-    And I follow "Edit settings"
+    And I navigate to "Edit settings" in current page administration
     Then I set the following fields to these values:
       | id_grade_modgrade_type  | Point |
       | id_grade_modgrade_point | 50   |
@@ -75,7 +73,7 @@ Feature: Visiting reports
     Given I log in as "teacher1"
     And I am on "Course 1" course homepage
     And I follow "Attendance"
-    And I follow "Edit settings"
+    And I navigate to "Edit settings" in current page administration
     Then I set the following fields to these values:
       | id_grade_modgrade_type  | Point |
       | id_grade_modgrade_point | 50   |
@@ -88,7 +86,7 @@ Feature: Visiting reports
     And I press "Save attendance"
 
     When I follow "Attendance"
-    And I follow "Edit settings"
+    And I navigate to "Edit settings" in current page administration
     Then I set the following fields to these values:
       | id_grade_modgrade_type  | Point |
       | id_grade_modgrade_point | 70   |
@@ -114,7 +112,7 @@ Feature: Visiting reports
     When I log in as "teacher1"
     And I am on "Course 1" course homepage
     And I follow "Attendance"
-    And I follow "Edit settings"
+    And I navigate to "Edit settings" in current page administration
     And I set the following fields to these values:
       | id_grade_modgrade_type  | Point |
       | id_grade_modgrade_point | 50   |
@@ -156,7 +154,7 @@ Feature: Visiting reports
     Given I log in as "teacher1"
     And I am on "Course 1" course homepage
     And I follow "Attendance"
-    And I follow "Edit settings"
+    And I navigate to "Edit settings" in current page administration
     And I set the following fields to these values:
        | id_grade_modgrade_type  | Point |
        | id_grade_modgrade_point | 50   |
@@ -203,7 +201,7 @@ Feature: Visiting reports
     Given I log in as "teacher1"
     And I am on "Course 1" course homepage
     And I follow "Attendance"
-    And I follow "Edit settings"
+    And I navigate to "Edit settings" in current page administration
     Then I set the following fields to these values:
       | id_grade_modgrade_type  | Point |
       | id_grade_modgrade_point | 50   |
