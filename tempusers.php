@@ -42,6 +42,7 @@ require_capability('mod/attendance:managetemporaryusers', $context);
 
 $PAGE->set_title($course->shortname.": ".$att->name.' - '.get_string('tempusers', 'attendance'));
 $PAGE->set_heading($course->fullname);
+$PAGE->force_settings_menu(true);
 $PAGE->set_cacheable(true);
 $PAGE->navbar->add(get_string('tempusers', 'attendance'));
 
