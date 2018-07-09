@@ -146,7 +146,7 @@ function attendance_update_calendar_event($session) {
         return false;
     }
 }
-    
+
 /**
  * Delete calendar events for sessions
  *
