@@ -95,7 +95,7 @@ function attendance_get_setname($attid, $statusset, $includevalues = true) {
         if ($statusesout) {
             if (count($statusesout) > 6) {
                 $statusesout = array_slice($statusesout, 0, 6);
-                $statusesout[] = '&helip;';
+                $statusesout[] = '...';
             }
             $statusesout = implode(' ', $statusesout);
             $statusname .= ' ('.$statusesout.')';
