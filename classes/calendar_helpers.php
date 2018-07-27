@@ -116,14 +116,13 @@ function attendance_update_calendar_event($session) {
     // Should there even be an event?
     if ($session->calendarevent == 0) {
         if ($session->caleventid != 0) {
-            // There is an existing event we should delete
-            // (calendarevent option just got turned off)
+            // There is an existing event we should delete, calendarevent just got turned off.
             $DB->delete_records_list('event', 'id', array($caleventid));
             $session->caleventid = 0;
             $DB->update_record('attendance_sessions', $session);
             return true;
         } else {
-            // This should be the common case when session does not want event
+            // This should be the common case when session does not want event.
             return true;
         }
     }

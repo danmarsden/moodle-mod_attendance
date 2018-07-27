@@ -518,7 +518,7 @@ function xmldb_attendance_upgrade($oldversion=0) {
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
             if (empty(get_config('attendance', 'enablecalendar'))) {
-                // Calendar disabled on this site, set calendarevent for existing records to 0;
+                // Calendar disabled on this site, set calendarevent for existing records to 0.
                 $DB->execute("UPDATE {attendance_sessions} set calendarevent = 0");
             }
         }

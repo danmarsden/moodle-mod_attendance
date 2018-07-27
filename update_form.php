@@ -171,7 +171,8 @@ class mod_attendance_update_form extends moodleform {
 
             $mgroup3 = array();
             $options = attendance_get_sharedipoptions();
-            $mgroup3[] = & $mform->createElement('select', 'preventsharedip', get_string('preventsharedip', 'attendance'), $options);
+            $mgroup3[] = & $mform->createElement('select', 'preventsharedip',
+                get_string('preventsharedip', 'attendance'), $options);
             $mgroup3[] = & $mform->createElement('text', 'preventsharediptime',
                 get_string('preventsharediptime', 'attendance'), '', 'test');
             $mform->addGroup($mgroup3, 'preventsharedgroup',
