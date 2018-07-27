@@ -517,6 +517,10 @@ function xmldb_attendance_upgrade($oldversion=0) {
             XMLDB_NOTNULL, null, '1', 'caleventid');
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
+            if (empty(get_config('attendance', 'enablecalendar'))) {
+                // Calendar disabled on this site, set calendarevent for existing records to 0;
+                $DB->execute("UPDATE {attendance_sessions} set calendarevent = 0");
+            }
         }
         upgrade_mod_savepoint(true, 2018072700, 'attendance');
     }

@@ -125,10 +125,16 @@ class mod_attendance_add_form extends moodleform {
                             array('maxfiles' => EDITOR_UNLIMITED_FILES, 'noclean' => true, 'context' => $modcontext));
         $mform->setType('sdescription', PARAM_RAW);
 
-        $mform->addElement('checkbox', 'calendarevent', '', get_string('calendarevent', 'attendance'));
-        $mform->addHelpButton('calendarevent', 'calendarevent', 'attendance');
-        // XXX - this should be modified to use a different config setting if we keep enablecalendar's current meaning
-        $mform->setDefault('calendarevent', get_config('attendance', 'enablecalendar'));
+        if (!empty($pluginconfig->enablecalendar)) {
+            $mform->addElement('checkbox', 'calendarevent', '', get_string('calendarevent', 'attendance'));
+            $mform->addHelpButton('calendarevent', 'calendarevent', 'attendance');
+            if (isset($pluginconfig->calendarevent_default)) {
+                $mform->setDefault('calendarevent', $pluginconfig->calendarevent_default);
+            }
+        } else {
+            $mform->addElement('hidden', 'calendarevent', 0);
+            $mform->setType('calendarevent', PARAM_INT);
+        }
 
         // If warnings allow selector for reporting.
         if (!empty(get_config('attendance', 'enablewarnings'))) {
