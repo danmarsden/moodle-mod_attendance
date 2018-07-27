@@ -1216,7 +1216,9 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $output = html_writer::empty_tag('input', array('name' => 'sesskey', 'type' => 'hidden', 'value' => sesskey()));
             $output .= html_writer::empty_tag('input', array('name' => 'id', 'type' => 'hidden', 'value' => $COURSE->id));
             $output .= html_writer::empty_tag('input', array('name' => 'returnto', 'type' => 'hidden', 'value' => s(me())));
-            $output .= html_writer::table($table).html_writer::tag('div', get_string('users').': '.count($reportdata->users));;
+            $output .= html_writer::start_div('attendancereporttable');
+            $output .= html_writer::table($table).html_writer::tag('div', get_string('users').': '.count($reportdata->users));
+            $output .= html_writer::end_div();
             $output .= html_writer::tag('div',
                     html_writer::empty_tag('input', array('type' => 'submit',
                                                                    'value' => get_string('messageselectadd'),
@@ -1231,7 +1233,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
     /**
      * Build and return the rows that will make up the left part of the attendance report.
-     * This consists of student names and icons, as well as header cells for these columns.
+     * This consists of student names, as well as header cells for these columns.
      *
      * @param attendance_report_data $reportdata the report data
      * @return array Array of html_table_row objects
@@ -1257,16 +1259,21 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 $extrafields = array();
             }
         }
-        $usercolspan = 1 + count($extrafields);
+        $usercolspan = count($extrafields);
 
         $row = new html_table_row();
-        $row->cells[] = $this->build_header_cell('');
-        $row->cells[] = $this->build_header_cell($text, false, false, $usercolspan);
+        $cell = $this->build_header_cell($text, false, false);
+        $cell->attributes['class'] = $cell->attributes['class'] . ' headcol';
+        $row->cells[] = $cell;
+        if (!empty($usercolspan)) {
+            $row->cells[] = $this->build_header_cell('', false, false, $usercolspan);
+        }
         $rows[] = $row;
 
         $row = new html_table_row();
-        $row->cells[] = $this->build_header_cell('');
-        $row->cells[] = $this->build_header_cell($this->construct_fullname_head($reportdata), false, false);
+        $cell = $this->build_header_cell($this->construct_fullname_head($reportdata), false, false);
+        $cell->attributes['class'] = $cell->attributes['class'] . ' headcol';
+        $row->cells[] = $cell;
 
         foreach ($extrafields as $field) {
             $row->cells[] = $this->build_header_cell(get_string($field), false, false);
@@ -1276,9 +1283,11 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
         foreach ($reportdata->users as $user) {
             $row = new html_table_row();
-            $row->cells[] = $this->build_data_cell($this->user_picture($user));
             $text = html_writer::link($reportdata->url_view(array('studentid' => $user->id)), fullname($user));
-            $row->cells[] = $this->build_data_cell($text, false, false, null, null, false);
+            $cell = $this->build_data_cell($text, false, false, null, null, false);
+            $cell->attributes['class'] = $cell->attributes['class'] . ' headcol';
+            $row->cells[] = $cell;
+
             foreach ($extrafields as $field) {
                 $row->cells[] = $this->build_data_cell($user->$field, false, false);
             }
@@ -1286,9 +1295,13 @@ class mod_attendance_renderer extends plugin_renderer_base {
         }
 
         $row = new html_table_row();
-        $row->cells[] = $this->build_data_cell('');
         $text = ($reportdata->pageparams->view == ATT_VIEW_SUMMARY) ? '' : get_string('summary');
-        $row->cells[] = $this->build_data_cell($text, false, true, $usercolspan);
+        $cell = $this->build_data_cell($text, false, true, $usercolspan);
+        $cell->attributes['class'] = $cell->attributes['class'] . ' headcol';
+        $row->cells[] = $cell;
+        if (!empty($usercolspan)) {
+            $row->cells[] = $this->build_header_cell('', false, false, $usercolspan);
+        }
         $rows[] = $row;
 
         return $rows;
