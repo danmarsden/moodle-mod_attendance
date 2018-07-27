@@ -266,3 +266,8 @@
     top: auto;
     border-top-width: 1px;
 }
+
+#page-mod-attendance-report .attendancereporttable .headcol input[type='checkbox'] {
+    margin-right: 4px;
+
+}
