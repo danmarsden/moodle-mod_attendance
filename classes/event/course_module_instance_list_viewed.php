@@ -43,7 +43,7 @@ class course_module_instance_list_viewed extends \core\event\course_module_insta
         $params = array(
             'context' => \context_course::instance($course->id)
         );
-        $event = \mod_attendance\event\course_module_instance_list_viewed::create($params);
+        $event = self::create($params);
         $event->add_record_snapshot('course', $course);
         return $event;
     }
