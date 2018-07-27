@@ -30,11 +30,64 @@ $course = $DB->get_record('course', array('id' => $id), '*', MUST_EXIST);
 require_login($course);
 
 $PAGE->set_url('/mod/attendance/index.php', array('id' => $id));
+$PAGE->set_pagelayout('incourse');
 
-// TODO: check if this is correct behaviour - other modules list all the instances of the module in the course.
-if ($att = get_all_instances_in_course('attendance', $course, null, true)) {
-    $att = array_pop($att);
-    redirect("view.php?id=$att->coursemodule");
-} else {
-    print_error('notfound', 'attendance');
+\mod_attendance\event\course_module_instance_list_viewed::create_from_course($course)->trigger();
+
+// Print the header.
+$strplural = get_string("modulename", "attendance");
+$PAGE->navbar->add($strplural);
+$PAGE->set_title($strplural);
+$PAGE->set_heading($course->fullname);
+echo $OUTPUT->header();
+echo $OUTPUT->heading(format_string($strplural));
+
+$context = context_course::instance($course->id);
+
+require_capability('mod/attendance:view', $context);
+
+if (! $atts = get_all_instances_in_course("attendance", $course)) {
+    $url = new moodle_url('/course/view.php', array('id'=>$course->id));
+    notice(get_string('thereareno', 'moodle', $strplural), $url);
+    die;
 }
+
+$usesections = course_format_uses_sections($course->format);
+
+// Print the list of instances,
+
+$timenow = time();
+$strname  = get_string("name");
+
+$table = new html_table();
+
+if ($usesections) {
+    $strsectionname = get_string('sectionname', 'format_'.$course->format);
+    $table->head  = array ($strsectionname, $strname);
+    $table->align = array ("center", "left");
+} else {
+    $table->head  = array ($strname);
+    $table->align = array ("left");
+}
+
+foreach ($atts as $att) {
+    //get the responses of each feedback
+    $viewurl = new moodle_url('/mod/attendance/view.php', array('id'=>$att->coursemodule));
+
+    $dimmedclass = $att->visible ? '' : 'class="dimmed"';
+    $link = '<a '.$dimmedclass.' href="'.$viewurl->out().'">'.$att->name.'</a>';
+
+    if ($usesections) {
+        $tabledata = array (get_section_name($course, $att->section), $link);
+    } else {
+        $tabledata = array ($link);
+    }
+
+    $table->data[] = $tabledata;
+}
+
+echo "<br />";
+
+echo html_writer::table($table);
+
+echo $OUTPUT->footer();
