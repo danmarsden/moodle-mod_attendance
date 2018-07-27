@@ -47,14 +47,14 @@ $context = context_course::instance($course->id);
 require_capability('mod/attendance:view', $context);
 
 if (! $atts = get_all_instances_in_course("attendance", $course)) {
-    $url = new moodle_url('/course/view.php', array('id'=>$course->id));
+    $url = new moodle_url('/course/view.php', array('id' => $course->id));
     notice(get_string('thereareno', 'moodle', $strplural), $url);
     die;
 }
 
 $usesections = course_format_uses_sections($course->format);
 
-// Print the list of instances,
+// Print the list of instances.
 
 $timenow = time();
 $strname  = get_string("name");
@@ -71,8 +71,8 @@ if ($usesections) {
 }
 
 foreach ($atts as $att) {
-    //get the responses of each feedback
-    $viewurl = new moodle_url('/mod/attendance/view.php', array('id'=>$att->coursemodule));
+    // Get the responses of each attendance.
+    $viewurl = new moodle_url('/mod/attendance/view.php', array('id' => $att->coursemodule));
 
     $dimmedclass = $att->visible ? '' : 'class="dimmed"';
     $link = '<a '.$dimmedclass.' href="'.$viewurl->out().'">'.$att->name.'</a>';
