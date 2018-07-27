@@ -170,18 +170,17 @@ class mod_attendance_update_form extends moodleform {
             $mform->settype('automarkcompleted', PARAM_INT);
 
             $mgroup3 = array();
-            $mgroup3[] = & $mform->createElement('checkbox', 'preventsharedip', '');
+            $options = attendance_get_sharedipoptions();
+            $mgroup3[] = & $mform->createElement('select', 'preventsharedip', get_string('preventsharedip', 'attendance'), $options);
             $mgroup3[] = & $mform->createElement('text', 'preventsharediptime',
                 get_string('preventsharediptime', 'attendance'), '', 'test');
-            $mgroup3[] = & $mform->createElement('static', 'preventsharediptimedesc', '',
-                get_string('preventsharedipminutes', 'attendance'));
             $mform->addGroup($mgroup3, 'preventsharedgroup',
                 get_string('preventsharedip', 'attendance'), array(' '), false);
             $mform->addHelpButton('preventsharedgroup', 'preventsharedip', 'attendance');
             $mform->setAdvanced('preventsharedgroup');
             $mform->setType('preventsharediptime', PARAM_INT);
             $mform->hideif('preventsharedgroup', 'studentscanmark', 'notchecked');
-            $mform->disabledIf('preventsharediptime', 'preventsharedip', 'notchecked');
+            $mform->hideIf('preventsharediptime', 'preventsharedip', 'noteq', ATTENDANCE_SHAREDIP_MINUTES);
         } else {
             $mform->addElement('hidden', 'studentscanmark', '0');
             $mform->settype('studentscanmark', PARAM_INT);
