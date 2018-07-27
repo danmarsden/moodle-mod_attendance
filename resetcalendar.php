@@ -47,9 +47,9 @@ $tabmenu = attendance_print_settings_tabs('resetcalendar');
 echo $tabmenu;
 
 if (get_config('attendance', 'enablecalendar')) {
-    // Check to see if all sessions have calendar events.
+    // Check to see if all sessions that need them have calendar events.
     if ($action == 'create' && confirm_sesskey()) {
-        $sessions = $DB->get_recordset('attendance_sessions',  array('caleventid' => 0));
+        $sessions = $DB->get_recordset('attendance_sessions',  array('caleventid' => 0, 'calendarevent' => 1));
         foreach ($sessions as $session) {
             attendance_create_calendar_event($session);
             if ($session->caleventid) {
@@ -59,7 +59,7 @@ if (get_config('attendance', 'enablecalendar')) {
         $sessions->close();
         echo $OUTPUT->notification(get_string('eventscreated', 'mod_attendance'), 'notifysuccess');
     } else {
-        if ($DB->record_exists('attendance_sessions', array('caleventid' => 0))) {
+        if ($DB->record_exists('attendance_sessions', array('caleventid' => 0, 'calendarevent' => 1))) {
             $createurl = new moodle_url('/mod/attendance/resetcalendar.php', array('action' => 'create'));
             $returnurl = new moodle_url('/admin/settings.php', array('section' => 'modsettingattendance'));
 
