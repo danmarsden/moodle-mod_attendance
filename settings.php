@@ -64,7 +64,7 @@ if ($ADMIN->fulltree) {
     $options = array(
         ATT_VIEW_ALL => get_string('all', 'attendance'),
         ATT_VIEW_ALLPAST => get_string('allpast', 'attendance'),
-        ATT_VIEW_NOTPRESENT => get_string('lowgrade', 'attendance'),
+        ATT_VIEW_NOTPRESENT => get_string('below', 'attendance', 'X'),
         ATT_VIEW_MONTHS => get_string('months', 'attendance'),
         ATT_VIEW_WEEKS => get_string('weeks', 'attendance'),
         ATT_VIEW_DAYS => get_string('days', 'attendance')
