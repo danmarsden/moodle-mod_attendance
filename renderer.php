@@ -202,12 +202,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
     protected function render_view_controls(attendance_filter_controls $fcontrols) {
         $views[ATT_VIEW_ALL] = get_string('all', 'attendance');
         $views[ATT_VIEW_ALLPAST] = get_string('allpast', 'attendance');
-        if ($fcontrols->reportcontrol  && $fcontrols->att->grade > 0) {
-            $views[ATT_VIEW_NOTPRESENT] = get_string('lowgrade', 'attendance');
-        }
         $views[ATT_VIEW_MONTHS] = get_string('months', 'attendance');
         $views[ATT_VIEW_WEEKS] = get_string('weeks', 'attendance');
         $views[ATT_VIEW_DAYS] = get_string('days', 'attendance');
+        if ($fcontrols->reportcontrol  && $fcontrols->att->grade > 0) {
+            $views[ATT_VIEW_NOTPRESENT] = get_string('lowgrade', 'attendance');
+        }
         if ($fcontrols->reportcontrol) {
             $views[ATT_VIEW_SUMMARY] = get_string('summary', 'attendance');
         }
