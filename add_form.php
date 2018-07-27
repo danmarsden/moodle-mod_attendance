@@ -242,10 +242,10 @@ class mod_attendance_add_form extends moodleform {
             $mform->hideif('subnetgrp', 'studentscanmark', 'notchecked');
             $mform->hideif('subnet', 'usedefaultsubnet', 'checked');
 
-
             $mgroup3 = array();
             $options = attendance_get_sharedipoptions();
-            $mgroup3[] = & $mform->createElement('select', 'preventsharedip', get_string('preventsharedip', 'attendance'), $options);
+            $mgroup3[] = & $mform->createElement('select', 'preventsharedip',
+                get_string('preventsharedip', 'attendance'), $options);
             $mgroup3[] = & $mform->createElement('text', 'preventsharediptime',
                 get_string('preventsharediptime', 'attendance'), '', 'test');
             $mform->addGroup($mgroup3, 'preventsharedgroup', get_string('preventsharedip', 'attendance'), array(' '), false);
