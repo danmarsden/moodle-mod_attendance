@@ -96,6 +96,10 @@ class mod_attendance_structure {
     /** @var array of sessionid. */
     private $sessioninfo = array();
 
+    /** @var float number [0..1], the threshold for student to be shown at low grade report */
+    private $lowgradethreshold;
+
+
     /**
      * Initializes the attendance API instance using the data from DB
      *
@@ -1270,5 +1274,25 @@ class mod_attendance_structure {
             }
         }
         return;
+    }
+
+    /**
+     * Gets the lowgrade threshold to use.
+     *
+     */
+    public function get_lowgrade_threshold() {
+        if (!isset($this->lowgradethreshold)) {
+            $this->lowgradethreshold = 1;
+
+            if ($this->grade > 0) {
+                $gradeitem = grade_item::fetch(array('courseid' => $this->course->id, 'itemtype' => 'mod',
+                    'itemmodule' => 'attendance', 'iteminstance' => $this->id));
+                if ($gradeitem->gradepass > 0 && $gradeitem->grademax != $gradeitem->grademin) {
+                    $this->lowgradethreshold = ($gradeitem->gradepass - $gradeitem->grademin) / ($gradeitem->grademax - $gradeitem->grademin);
+                }
+            }
+        }
+
+        return $this->lowgradethreshold;
     }
 }
