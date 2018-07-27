@@ -548,11 +548,6 @@ class attendance_report_data implements renderable {
      * @param mod_attendance_structure $att
      */
     public function  __construct(mod_attendance_structure $att) {
-        $currenttime = time();
-        if ($att->pageparams->view == ATT_VIEW_NOTPRESENT) {
-            $att->pageparams->enddate = $currenttime;
-        }
-
         $this->pageparams = $att->pageparams;
 
         $this->users = $att->get_users($att->pageparams->group, $att->pageparams->page);
@@ -582,8 +577,9 @@ class attendance_report_data implements renderable {
         foreach ($this->users as $key => $user) {
             $usersummary = $this->summary->get_taken_sessions_summary_for($user->id);
             if ($att->pageparams->view != ATT_VIEW_NOTPRESENT ||
-                    $usersummary->takensessionspoints < $usersummary->takensessionsmaxpoints ||
-                    $usersummary->takensessionsmaxpoints == 0) {
+                attendance_calc_fraction($usersummary->takensessionspoints, $usersummary->takensessionsmaxpoints) <
+                $att->get_lowgrade_threshold()) {
+
                 $this->usersgroups[$user->id] = groups_get_all_groups($att->course->id, $user->id);
 
                 $this->sessionslog[$user->id] = $att->get_user_filtered_sessions_log($user->id);

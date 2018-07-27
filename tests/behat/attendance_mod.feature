@@ -78,7 +78,7 @@ Feature: Teachers and Students can record session attendance
     And I click on "Get these logs" "button"
     Then "Attendance taken by student" "link" should exist
 
-  Scenario: Teachers can view low grade report and send a message
+  Scenario: Teachers can view below % report and send a message
     Given I log in as "teacher1"
     And I am on "Course 1" course homepage
     And I follow "Attendance"
@@ -88,7 +88,7 @@ Feature: Teachers and Students can record session attendance
       | id_sestime_endhour   | 02 |
     And I click on "id_submitbutton" "button"
     And I follow "Report"
-    And I follow "Low grade"
+    And I follow "Below"
     And I set the field "cb_selector" to "1"
     And I click on "Send a message" "button"
     And I should see "Message body"

@@ -247,7 +247,7 @@ $string['invalidsessionendtime'] = 'The end time must be greater than start time
 $string['invalidstatus'] = 'You have selected an invalid status, please try again';
 $string['iptimemissing'] = 'Invalid minutes to release';
 $string['jumpto'] = 'Jump to';
-$string['lowgrade'] = 'Low grade';
+$string['below'] = 'Below {$a}%';
 $string['maxpossible'] = 'Maximum possible';
 $string['maxpossible_help'] = 'Shows the score each user can reach if they receive the maximum points in each session not yet taken (past and future):
     <ul>

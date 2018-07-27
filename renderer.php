@@ -206,7 +206,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $views[ATT_VIEW_WEEKS] = get_string('weeks', 'attendance');
         $views[ATT_VIEW_DAYS] = get_string('days', 'attendance');
         if ($fcontrols->reportcontrol  && $fcontrols->att->grade > 0) {
-            $views[ATT_VIEW_NOTPRESENT] = get_string('lowgrade', 'attendance');
+            $a = $fcontrols->att->get_lowgrade_threshold() * 100;
+            $views[ATT_VIEW_NOTPRESENT] = get_string('below', 'attendance', $a);
         }
         if ($fcontrols->reportcontrol) {
             $views[ATT_VIEW_SUMMARY] = get_string('summary', 'attendance');

@@ -154,6 +154,7 @@ class mod_attendance_page_with_filter_controls {
                 $this->enddate = time();
                 break;
             case ATT_VIEW_ALL:
+            case ATT_VIEW_NOTPRESENT:
                 $this->startdate = 0;
                 $this->enddate = 0;
                 break;
