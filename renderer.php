@@ -1193,20 +1193,16 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
         // Check if the user should be able to bulk send messages to other users on the course.
         $bulkmessagecapability = has_capability('moodle/course:bulkmessaging', $PAGE->context);
-        if ($bulkmessagecapability) {
-            $bulkmessagingrows = $this->get_bulkmessage_rows($reportdata);
-        }
 
         // Extract rows from each part and collate them into one row each.
         $sessiondetailsleft = $reportdata->pageparams->sessiondetailspos == 'left';
         foreach ($userrows as $index => $row) {
             $summaryrow = isset($summaryrows[$index]->cells) ? $summaryrows[$index]->cells : array();
-            $bulkmessagingrow = isset($bulkmessagingrows[$index]->cells) ? $bulkmessagingrows[$index]->cells : array();
             $sessionrow = isset($sessionrows[$index]->cells) ? $sessionrows[$index]->cells : array();
             if ($sessiondetailsleft) {
-                $row->cells = array_merge($row->cells, $sessionrow, $acronymrows[$index]->cells, $summaryrow, $bulkmessagingrow);
+                $row->cells = array_merge($row->cells, $sessionrow, $acronymrows[$index]->cells, $summaryrow);
             } else {
-                $row->cells = array_merge($row->cells, $acronymrows[$index]->cells, $summaryrow, $sessionrow, $bulkmessagingrow);
+                $row->cells = array_merge($row->cells, $acronymrows[$index]->cells, $summaryrow, $sessionrow);
             }
             $table->data[] = $row;
         }
@@ -1239,8 +1235,10 @@ class mod_attendance_renderer extends plugin_renderer_base {
      * @return array Array of html_table_row objects
      */
     protected function get_user_rows(attendance_report_data $reportdata) {
-        global $OUTPUT;
+        global $OUTPUT, $PAGE;
         $rows = array();
+
+        $bulkmessagecapability = has_capability('moodle/course:bulkmessaging', $PAGE->context);
         $extrafields = get_extra_user_fields($reportdata->att->context);
         $showextrauserdetails = $reportdata->pageparams->showextrauserdetails;
         $params = $reportdata->pageparams->get_significant_params();
@@ -1271,7 +1269,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $rows[] = $row;
 
         $row = new html_table_row();
-        $cell = $this->build_header_cell($this->construct_fullname_head($reportdata), false, false);
+        $text = '';
+        if ($bulkmessagecapability) {
+            $text .= html_writer::checkbox('cb_selector', 0, false, '', array('id' => 'cb_selector'));
+        }
+        $text .= $this->construct_fullname_head($reportdata);
+        $cell = $this->build_header_cell($text, false, false);
         $cell->attributes['class'] = $cell->attributes['class'] . ' headcol';
         $row->cells[] = $cell;
 
@@ -1283,7 +1286,11 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
         foreach ($reportdata->users as $user) {
             $row = new html_table_row();
-            $text = html_writer::link($reportdata->url_view(array('studentid' => $user->id)), fullname($user));
+            $text = '';
+            if ($bulkmessagecapability) {
+                $text .= html_writer::checkbox('user'.$user->id, 'on', false, '', array('class' => 'attendancesesscheckbox'));
+            }
+            $text .= html_writer::link($reportdata->url_view(array('studentid' => $user->id)), fullname($user));
             $cell = $this->build_data_cell($text, false, false, null, null, false);
             $cell->attributes['class'] = $cell->attributes['class'] . ' headcol';
             $row->cells[] = $cell;
@@ -1596,42 +1603,6 @@ class mod_attendance_renderer extends plugin_renderer_base {
         } else {
             $row->cells[] = $this->build_header_cell('');
         }
-        $rows[] = $row;
-
-        return $rows;
-    }
-
-    /**
-     * Build and return the rows that will make up the right part of the attendance report.
-     * This consists of checkbox column for bulk message.
-     *
-     * @param attendance_report_data $reportdata the report data
-     * @return array Array of html_table_row objects
-     */
-    protected function get_bulkmessage_rows(attendance_report_data $reportdata) {
-        $rows = array();
-
-        $row = new html_table_row();
-        $row->cells[] = $this->build_header_cell('');
-        $rows[] = $row;
-
-        // Display the table header for bulk messaging.
-        // The checkbox must have an id of cb_selector so that the JavaScript will pick it up.
-        $row = new html_table_row();
-        $text = html_writer::checkbox('cb_selector', 0, false, '', array('id' => 'cb_selector'));
-        $row->cells[] = $this->build_header_cell($text);
-        $rows[] = $row;
-
-        foreach ($reportdata->users as $user) {
-            // Create the checkbox for bulk messaging.
-            $row = new html_table_row();
-            $text = html_writer::checkbox('user'.$user->id, 'on', false, '', array('class' => 'attendancesesscheckbox'));
-            $row->cells[] = $this->build_data_cell($text);
-            $rows[] = $row;
-        }
-
-        $row = new html_table_row();
-        $row->cells[] = $this->build_data_cell('');
         $rows[] = $row;
 
         return $rows;
