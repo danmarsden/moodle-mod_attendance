@@ -253,18 +253,20 @@ class mod_attendance_add_form extends moodleform {
             $mform->hideif('subnetgrp', 'studentscanmark', 'notchecked');
             $mform->hideif('subnet', 'usedefaultsubnet', 'checked');
 
+
             $mgroup3 = array();
-            $mgroup3[] = & $mform->createElement('checkbox', 'preventsharedip', '');
+            $options = attendance_get_sharedipoptions();
+            $mgroup3[] = & $mform->createElement('select', 'preventsharedip', get_string('preventsharedip', 'attendance'), $options);
             $mgroup3[] = & $mform->createElement('text', 'preventsharediptime',
                 get_string('preventsharediptime', 'attendance'), '', 'test');
-            $mgroup3[] = & $mform->createElement('static', 'preventsharediptimedesc', '',
-                get_string('preventsharedipminutes', 'attendance'));
             $mform->addGroup($mgroup3, 'preventsharedgroup', get_string('preventsharedip', 'attendance'), array(' '), false);
             $mform->addHelpButton('preventsharedgroup', 'preventsharedip', 'attendance');
             $mform->setAdvanced('preventsharedgroup');
+            $mform->setType('preventsharedip', PARAM_INT);
             $mform->setType('preventsharediptime', PARAM_INT);
             $mform->hideif('preventsharedgroup', 'studentscanmark', 'notchecked');
-            $mform->disabledIf('preventsharediptime', 'preventsharedip', 'notchecked');
+            $mform->hideIf('preventsharediptime', 'preventsharedip', 'noteq', ATTENDANCE_SHAREDIP_MINUTES);
+
             if (isset($pluginconfig->preventsharedip)) {
                 $mform->setDefault('preventsharedip', $pluginconfig->preventsharedip);
             }
