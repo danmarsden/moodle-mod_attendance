@@ -122,8 +122,10 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configcheckbox('attendance/autoassignstatus',
         get_string('autoassignstatus', 'attendance'), '', 0));
 
-    $settings->add(new admin_setting_configcheckbox('attendance/preventsharedip',
-        get_string('preventsharedip', 'attendance'), '', 0));
+    $options = attendance_get_sharedipoptions();
+    $settings->add(new admin_setting_configselect('attendance/preventsharedip',
+        get_string('preventsharedip', 'attendance'),
+        '', ATTENDANCE_SHAREDIP_DISABLED, $options));
 
     $settings->add(new admin_setting_configtext('attendance/preventsharediptime',
         get_string('preventsharediptime', 'attendance'), get_string('preventsharediptime_help', 'attendance'), '', PARAM_RAW));

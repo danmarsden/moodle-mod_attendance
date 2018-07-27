@@ -43,6 +43,10 @@ define('ATTENDANCE_AUTOMARK_DISABLED', 0);
 define('ATTENDANCE_AUTOMARK_ALL', 1);
 define('ATTENDANCE_AUTOMARK_CLOSE', 2);
 
+define('ATTENDANCE_SHAREDIP_DISABLED', 0);
+define('ATTENDANCE_SHAREDIP_MINUTES', 1);
+define('ATTENDANCE_SHAREDIP_FORCE', 2);
+
 // Max number of sessions available in the warnings set form to trigger warnings.
 define('ATTENDANCE_MAXWARNAFTER', 100);
 
@@ -443,10 +447,18 @@ function attendance_can_student_mark($sess) {
     }
     // Check if another student has marked attendance from this IP address recently.
     if ($canmark && !empty($sess->preventsharedip)) {
-        $time = time() - ($sess->preventsharediptime * 60);
-        $sql = 'sessionid = ? AND studentid <> ? AND timetaken > ? AND ipaddress = ?';
-        $params = array($sess->id, $USER->id, $time, getremoteaddr());
-        $record = $DB->get_record_select('attendance_log', $sql, $params);
+        if ($sess->preventsharedip == ATTENDANCE_SHAREDIP_MINUTES) {
+            $time = time() - ($sess->preventsharediptime * 60);
+            $sql = 'sessionid = ? AND studentid <> ? AND timetaken > ? AND ipaddress = ?';
+            $params = array($sess->id, $USER->id, $time, getremoteaddr());
+            $record = $DB->get_record_select('attendance_log', $sql, $params);
+        } else {
+            // Assume ATTENDANCE_SHAREDIP_FORCED.
+            $sql = 'sessionid = ? AND studentid <> ? ipaddress = ?';
+            $params = array($sess->id, $USER->id, getremoteaddr());
+            $record = $DB->get_record_select('attendance_log', $sql, $params);
+        }
+
         if (!empty($record)) {
             // Trigger an ip_shared event.
             $attendanceid = $DB->get_field('attendance_sessions', 'attendanceid', array('id' => $record->sessionid));
@@ -930,5 +942,19 @@ function attendance_get_automarkoptions() {
         $options[ATTENDANCE_AUTOMARK_ALL] = get_string('automarkall', 'attendance');
     }
     $options[ATTENDANCE_AUTOMARK_CLOSE] = get_string('automarkclose', 'attendance');
+    return $options;
+}
+
+/**
+ * Get available sharedip options.
+ *
+ * @return array
+ */
+function attendance_get_sharedipoptions() {
+    $options = array();
+    $options[ATTENDANCE_SHAREDIP_DISABLED] = get_string('no');
+    $options[ATTENDANCE_SHAREDIP_FORCE] = get_string('yes');
+    $options[ATTENDANCE_SHAREDIP_MINUTES] = get_string('setperiod', 'attendance');
+
     return $options;
 }
