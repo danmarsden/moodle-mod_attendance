@@ -239,6 +239,7 @@ $string['importsessions'] = 'Import Sessions';
 $string['identifyby'] = 'Identify student by';
 $string['includeall'] = 'Select all sessions';
 $string['includenottaken'] = 'Include not taken sessions';
+$string['includeqrcode'] = 'Include QR code';
 $string['includeremarks'] = 'Include remarks';
 $string['incorrectpassword'] = 'You have entered an incorrect password and your attendance has not been recorded, please enter the correct password.';
 $string['indetail'] = 'In detail...';
