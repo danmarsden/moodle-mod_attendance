@@ -44,7 +44,14 @@ $PAGE->set_pagelayout('popup');
 
 $PAGE->set_context(context_system::instance());
 
-$data->heading = '';
-$data->text = html_writer::span($session->studentpassword, 'student-password');
+$data->heading = get_string('passwordgrp', 'attendance');
+if (isset($session->includeqrcode)) {
+    $studentattendancepage = '/mod/attendance/password.php?session=' . $session->id;
+    $data->text = html_writer::tag('p', html_writer::span($session->studentpassword, 'student-password') . 
+        html_writer::empty_tag('br') . get_string('qrcode', 'attendance') . ' ' . 
+        html_writer::link($CFG->wwwroot . $studentattendancepage));
+} else {
+    $data->text = html_writer::span($session->studentpassword, 'student-password');
+}
 
 echo json_encode($data);

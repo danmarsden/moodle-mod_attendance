@@ -31,7 +31,6 @@ $pageparams = new mod_attendance_sessions_page_params();
 // Check that the required parameters are present.
 $id = required_param('sessid', PARAM_INT);
 $password = required_param('studentpassword', PARAM_TEXT);
-$sesskey = sesskey();
 
 $attforsession = $DB->get_record('attendance_sessions', array('id' => $id), '*', MUST_EXIST);
 $attendance = $DB->get_record('attendance', array('id' => $attforsession->attendanceid), '*', MUST_EXIST);
@@ -82,8 +81,7 @@ if ($attforsession->autoassignstatus && empty($attforsession->studentpassword)) 
 
 // Create the form.
 $mform = new mod_attendance_student_attendance_form(null,
-        array('course' => $course, 'cm' => $cm, 'modcontext' => $PAGE->context, 'session' => $attforsession, 'attendance' => $att,
-                'studentpassword' => $password));
+        array('course' => $course, 'cm' => $cm, 'modcontext' => $PAGE->context, 'session' => $attforsession, 'attendance' => $att));
 
 /*
 $PAGE->set_url($att->url_sessions());
@@ -98,11 +96,19 @@ if ($mform->is_cancelled()) {
 
     // Check if password required and if set correctly.
     if (!empty($attforsession->studentpassword) &&
-        $attforsession->studentpassword !== $fromform->studentpassword) {
+        $attforsession->studentpassword !== $password) {
 
+        // For debugging, change null_progress_trace to html_progress_trace below.
+        $trace = new html_progress_trace();
+        $trace->output('Required password: ' . $attforsession->studentpassword . '; Received password: ' . $password);
+        $trace->finished();
         $url = new moodle_url('/mod/attendance/attendance.php', array('sessid' => $id, 'sesskey' => sesskey()));
-        redirect($url, get_string('incorrectpassword', 'mod_attendance'), null, \core\output\notification::NOTIFY_ERROR);
+        redirect($url, get_string('incorrectpassword', 'mod_attendance'), 3, \core\output\notification::NOTIFY_ERROR);
     }
+    // Set the password and session id in the form, because they are saved in the attendance log.
+    $fromform->studentpassword = $password;
+    $fromform->sessid = $attforsession->id;
+
     // if ($attforsession->autoassignstatus) {
         $fromform->status = attendance_session_get_highest_status($att, $attforsession);
         if (empty($fromform->status)) {
@@ -123,11 +129,11 @@ if ($mform->is_cancelled()) {
         }
     }
 
+/*
     // The form did not validate correctly so we will set it to display the data they submitted.
     $mform->set_data($fromform);
-// }
+}
 
-/*
 $PAGE->set_title($course->shortname. ": ".$att->name);
 $PAGE->set_heading($course->fullname);
 $PAGE->set_cacheable(true);

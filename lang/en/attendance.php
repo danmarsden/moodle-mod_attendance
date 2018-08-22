@@ -342,6 +342,7 @@ $string['preventsharediptime_help'] = 'Allow an IP address to be re-used for tak
 $string['preventsharederror'] = 'Self-marking has been disabled for a session because this device appears to have been used to record attendance for another student.';
 $string['priorto'] = 'The session date is prior to the course start date ({$a}) so that the new sessions scheduled before this date will be hidden (not accessible). You can change the course start date at any time (see course settings) in order to have access to earlier sessions.<br><br>Please change the session date or just click the "Add session" button again to confirm?';
 $string['processingfile'] = 'Processing file';
+$string['qrcode'] = 'QR Code';
 $string['randompassword'] = 'Random password';
 $string['remark'] = 'Remark for: {$a}';
 $string['remarks'] = 'Remarks';
