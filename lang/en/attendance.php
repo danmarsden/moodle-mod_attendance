@@ -436,6 +436,7 @@ $string['setunmarked_help'] = 'If enabled in the session, set this status if a s
 $string['showdefaults'] = 'Show defaults';
 $string['showduration'] = 'Show duration';
 $string['showextrauserdetails'] = 'Show extra user details';
+$string['showqrcode'] = 'Show QR Code';
 $string['showsessiondetails'] = 'Show session details';
 $string['showsessiondescriptiononreport'] = 'Show session description in report';
 $string['showsessiondescriptiononreport_desc'] = 'Show the session description in the attendance report listing.';

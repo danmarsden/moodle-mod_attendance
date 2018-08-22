@@ -98,12 +98,8 @@ if ($mform->is_cancelled()) {
     if (!empty($attforsession->studentpassword) &&
         $attforsession->studentpassword !== $password) {
 
-        // For debugging, change null_progress_trace to html_progress_trace below.
-        $trace = new html_progress_trace();
-        $trace->output('Required password: ' . $attforsession->studentpassword . '; Received password: ' . $password);
-        $trace->finished();
         $url = new moodle_url('/mod/attendance/attendance.php', array('sessid' => $id, 'sesskey' => sesskey()));
-        redirect($url, get_string('incorrectpassword', 'mod_attendance'), 3, \core\output\notification::NOTIFY_ERROR);
+        redirect($url, get_string('incorrectpassword', 'mod_attendance'), null, \core\output\notification::NOTIFY_ERROR);
     }
     // Set the password and session id in the form, because they are saved in the attendance log.
     $fromform->studentpassword = $password;
