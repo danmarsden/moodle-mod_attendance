@@ -53,7 +53,7 @@ echo html_writer::tag('h2', get_string('passwordgrp', 'attendance'));
 echo html_writer::span($session->studentpassword, 'student-password');
 if (isset($session->includeqrcode) && $session->includeqrcode == 1) {
     $qrcodeurl = '/mod/attendance/attendance_qr.php?studentpassword=' . $session->studentpassword . '&sessid=' . $session->id;
-    $code = new QrCode(urlencode($CFG->wwwroot . $qrcodeurl));
+    $code = new QrCode($CFG->wwwroot . $qrcodeurl);
     $code->setSize(500);
     echo html_writer::tag('h3', get_string('qrcode', 'attendance'));
     echo html_writer::img('data:image/png;base64,' . base64_encode($code->get()));
