@@ -209,6 +209,7 @@ class mod_attendance_add_form extends moodleform {
 
             $mgroup[] = & $mform->createElement('text', 'studentpassword', get_string('studentpassword', 'attendance'));
             $mgroup[] = & $mform->createElement('checkbox', 'randompassword', '', get_string('randompassword', 'attendance'));
+            $mgroup[] = & $mform->createElement('checkbox', 'includeqrcode', '', get_string('includeqrcode', 'attendance'));
             $mform->addGroup($mgroup, 'passwordgrp', get_string('passwordgrp', 'attendance'), array(' '), false);
 
             $mform->setType('studentpassword', PARAM_TEXT);
@@ -230,6 +231,9 @@ class mod_attendance_add_form extends moodleform {
             }
             if (isset($pluginconfig->randompassword_default)) {
                 $mform->setDefault('randompassword', $pluginconfig->randompassword_default);
+            }
+            if (isset($pluginconfig->includeqrcode_default)) {
+                $mform->setDefault('includeqrcode', $pluginconfig->includeqrcode_default);
             }
             if (isset($pluginconfig->automark_default)) {
                 $mform->setDefault('automark', $pluginconfig->automark_default);
