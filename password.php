@@ -67,7 +67,7 @@ if (isset($session->includeqrcode) && $session->includeqrcode == 1) {
     } else {
         // Otherwise try using an external API service to create the QR code instead.
         try {
-            $qrcode = file_get_contents('https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=' . urlencode($CFG->wwwroot . $qrcodeurl));
+            $qrcode = file_get_contents('https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=' . urlencode($qrcodeurl));
             if ($qrcode === false) {
                 echo html_writer::tag('p', get_string('qrcodemissing', 'attendance'));
             } else {
