@@ -394,14 +394,13 @@ function construct_user_data_stat($usersummary, $view) {
     $row = new html_table_row();
     $row->attributes['class'] = 'normal';
     $row->cells[] = get_string('pointssessionscompleted', 'attendance') . ':';
-    $row->cells[] = format_float($usersummary->takensessionspoints, 1, true, true) . ' / ' .
-                        format_float($usersummary->takensessionsmaxpoints, 1, true, true);
+    $row->cells[] = $usersummary->pointssessionscompleted;
     $stattable->data[] = $row;
 
     $row = new html_table_row();
     $row->attributes['class'] = 'normal';
     $row->cells[] = get_string('percentagesessionscompleted', 'attendance') . ':';
-    $row->cells[] = format_float($usersummary->takensessionspercentage * 100) . '%';
+    $row->cells[] = $usersummary->percentagesessionscompleted;
     $stattable->data[] = $row;
 
     if ($view == ATT_VIEW_ALL) {
@@ -414,27 +413,25 @@ function construct_user_data_stat($usersummary, $view) {
         $row = new html_table_row();
         $row->attributes['class'] = 'highlight';
         $row->cells[] = get_string('pointsallsessions', 'attendance') . ':';
-        $row->cells[] = format_float($usersummary->takensessionspoints, 1, true, true) . ' / ' .
-                            format_float($usersummary->allsessionsmaxpoints, 1, true, true);
+        $row->cells[] = $usersummary->pointsallsessions;
         $stattable->data[] = $row;
 
         $row = new html_table_row();
         $row->attributes['class'] = 'highlight';
         $row->cells[] = get_string('percentageallsessions', 'attendance') . ':';
-        $row->cells[] = format_float($usersummary->allsessionspercentage * 100) . '%';
+        $row->cells[] = $usersummary->allsessionspercentage;
         $stattable->data[] = $row;
 
         $row = new html_table_row();
         $row->attributes['class'] = 'normal';
         $row->cells[] = get_string('maxpossiblepoints', 'attendance') . ':';
-        $row->cells[] = format_float($usersummary->maxpossiblepoints, 1, true, true) . ' / ' .
-                            format_float($usersummary->allsessionsmaxpoints, 1, true, true);
+        $row->cells[] = $usersummary->maxpossiblepoints;
         $stattable->data[] = $row;
 
         $row = new html_table_row();
         $row->attributes['class'] = 'normal';
         $row->cells[] = get_string('maxpossiblepercentage', 'attendance') . ':';
-        $row->cells[] = format_float($usersummary->maxpossiblepercentage * 100) . '%';
+        $row->cells[] = $usersummary->maxpossiblepercentage;
         $stattable->data[] = $row;
     }
 

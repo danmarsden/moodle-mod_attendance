@@ -137,6 +137,11 @@ class mod_attendance_summary {
             $usersummary->userstakensessionsbyacronym = array();
         }
 
+        $usersummary->pointssessionscompleted = format_float($usersummary->takensessionspoints, 1, true, true) . ' / ' .
+            format_float($usersummary->takensessionsmaxpoints, 1, true, true);
+
+        $usersummary->percentagesessionscompleted = format_float($usersummary->takensessionspercentage * 100) . '%';
+
         return $usersummary;
     }
 
@@ -168,11 +173,25 @@ class mod_attendance_summary {
         }
         $usersummary->allsessionspercentage = attendance_calc_fraction($usersummary->takensessionspoints,
                                                                        $usersummary->allsessionsmaxpoints);
+        $usersummary->allsessionspercentage = format_float($usersummary->allsessionspercentage * 100) . '%';
 
         $deltapoints = $usersummary->allsessionsmaxpoints - $usersummary->takensessionsmaxpoints;
+
         $usersummary->maxpossiblepoints = $usersummary->takensessionspoints + $deltapoints;
-        $usersummary->maxpossiblepercentage = attendance_calc_fraction($usersummary->maxpossiblepoints,
+        $usersummary->maxpossiblepoints = format_float($usersummary->maxpossiblepoints, 1, true, true) . ' / ' .
+            format_float($usersummary->allsessionsmaxpoints, 1, true, true);
+
+        $usersummary->maxpossiblepercentage = attendance_calc_fraction(($usersummary->takensessionspoints + $deltapoints),
                                                                        $usersummary->allsessionsmaxpoints);
+        $usersummary->maxpossiblepercentage = format_float($usersummary->maxpossiblepercentage * 100) . '%';
+
+        $usersummary->pointssessionscompleted = format_float($usersummary->takensessionspoints, 1, true, true) . ' / ' .
+            format_float($usersummary->takensessionsmaxpoints, 1, true, true);
+
+        $usersummary->percentagesessionscompleted = format_float($usersummary->takensessionspercentage * 100) . '%';
+
+        $usersummary->pointsallsessions = format_float($usersummary->takensessionspoints, 1, true, true) . ' / ' .
+            format_float($usersummary->allsessionsmaxpoints, 1, true, true);
 
         return $usersummary;
     }

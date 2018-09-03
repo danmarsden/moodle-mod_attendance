@@ -181,8 +181,7 @@ if ($formdata = $mform->get_data()) {
             }
 
             $data->table[$i][] = $usersummary->numtakensessions;
-            $data->table[$i][] = format_float($usersummary->takensessionspoints, 1, true, true) . ' / ' .
-                                    format_float($usersummary->takensessionsmaxpoints, 1, true, true);
+            $data->table[$i][] = $usersummary->pointssessionscompleted;
             $data->table[$i][] = format_float($usersummary->takensessionspercentage * 100);
 
             $i++;
