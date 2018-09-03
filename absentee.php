@@ -27,7 +27,6 @@ require_once($CFG->libdir.'/adminlib.php');
 require_once($CFG->dirroot.'/mod/attendance/lib.php');
 require_once($CFG->dirroot.'/mod/attendance/locallib.php');
 require_once($CFG->libdir.'/tablelib.php');
-require_once($CFG->libdir.'/coursecatlib.php');
 
 $category = optional_param('category', 0, PARAM_INT);
 $attendancecm = optional_param('id', 0, PARAM_INT);

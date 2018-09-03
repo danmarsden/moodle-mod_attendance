@@ -545,3 +545,12 @@ $string['privacy:metadata:timesent'] = 'Timestamp when warning was sent.';
 $string['privacy:metadata:attendancelog'] = 'Log of user attendances recorded.';
 $string['privacy:metadata:attendancesessions'] = 'Sessions to which attendance will be recorded.';
 $string['privacy:metadata:attendancewarningdone'] = 'Log of warnings sent to users over their attendance record.';
+
+$string['coursemessage'] = 'Message course users';
+$string['addedrecip'] = 'Added {$a} new recipient';
+$string['addedrecips'] = 'Added {$a} new recipients';
+$string['keepsearching'] = 'Keep searching';
+$string['formattexttype'] = 'Formatting';
+$string['currentlyselectedusers'] = 'Currently selected users';
+$string['usemessageform'] = 'or use the form below to send a message to the selected students';
+$string['backtoparticipants'] = 'Back to participants list';

@@ -10,12 +10,12 @@
                 <?php print_string("messagebody"); ?>:
             </b></td>
             <td align="left">
-                <?php print_textarea(true, 15, 65, 1, 1, "messagebody", $messagebody); ?>
+                <?php echo $OUTPUT->print_textarea("messagebody", "edit-messagebody", $messagebody, 15, 65); ?>
             </td>
         </tr>
 
         <tr valign="top">
-            <td align="right"><label for="menuformat"><b><?php print_string("formattexttype"); ?>:</b></label></td>
+            <td align="right"><label for="menuformat"><b><?php print_string("formattexttype", 'mod_attendance'); ?>:</b></label></td>
             <td>
                 <?php
         print_string('formathtml');
@@ -30,7 +30,7 @@
         </td></tr>
     </table>
     <?php echo $OUTPUT->box_end(); ?>
-    <table align="center"><tr><th colspan="4" scope="row"><?php print_string('currentlyselectedusers'); ?></th></tr>
+    <table align="center"><tr><th colspan="4" scope="row"><?php print_string('currentlyselectedusers', 'mod_attendance'); ?></th></tr>
         <?php
     if (count($SESSION->emailto[$id])) {
         foreach ($SESSION->emailto[$id] as $user) {

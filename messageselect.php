@@ -24,7 +24,8 @@
 require_once('../../config.php');
 require_once($CFG->dirroot.'/message/lib.php');
 $id = required_param('id', PARAM_INT);
-$messagebody = optional_param('messagebody', '', PARAM_CLEANHTML);
+$messagebody = optional_param_array('messagebody', '', PARAM_CLEANHTML);
+
 $send = optional_param('send', '', PARAM_BOOL);
 $preview = optional_param('preview', '', PARAM_BOOL);
 $edit = optional_param('edit', '', PARAM_BOOL);
@@ -32,9 +33,7 @@ $returnto = optional_param('returnto', '', PARAM_LOCALURL);
 $format = optional_param('format', FORMAT_MOODLE, PARAM_INT);
 $deluser = optional_param('deluser', 0, PARAM_INT);
 $url = new moodle_url('/user/messageselect.php', array('id' => $id));
-if ($messagebody !== '') {
-    $url->param('messagebody', $messagebody);
-}
+
 if ($send !== '') {
     $url->param('send', $send);
 }
@@ -52,6 +51,9 @@ if ($format !== FORMAT_MOODLE) {
 }
 if ($deluser !== 0) {
     $url->param('deluser', $deluser);
+}
+if (!empty($messagebody['text'])) {
+    $messagebody = $messagebody['text'];
 }
 $PAGE->set_url($url);
 if (!$course = $DB->get_record('course', array('id' => $id))) {
@@ -97,7 +99,7 @@ if ($course->id == SITEID) {
     $strtitle = get_string('sitemessage');
     $PAGE->set_pagelayout('admin');
 } else {
-    $strtitle = get_string('coursemessage');
+    $strtitle = get_string('coursemessage', 'mod_attendance');
     $PAGE->set_pagelayout('incourse');
 }
 $link = null;
@@ -113,9 +115,9 @@ echo $OUTPUT->header();
 
 if ($count) {
     if ($count == 1) {
-        $heading = get_string('addedrecip', 'moodle', $count);
+        $heading = get_string('addedrecip', 'mod_attendance', $count);
     } else {
-        $heading = get_string('addedrecips', 'moodle', $count);
+        $heading = get_string('addedrecips', 'mod_attendance', $count);
     }
     echo $OUTPUT->heading($heading);
 }
@@ -162,8 +164,8 @@ if (!empty($messagebody) && !$edit && !$deluser && ($preview || $send)) {
         echo $OUTPUT->notification(get_string('nousersyet'));
     }
 }
-echo '<p align="center"><a href="'.$returnto.'">'.get_string("keepsearching").'</a>'.
-    ((count($SESSION->emailto[$id])) ? ', '.get_string('usemessageform') : '').'</p>';
+echo '<p align="center"><a href="'.$returnto.'">'.get_string("keepsearching", 'mod_attendance').'</a>'.
+    ((count($SESSION->emailto[$id])) ? ', '.get_string('usemessageform', 'mod_attendance') : '').'</p>';
 if ((!empty($send) || !empty($preview) || !empty($edit)) && (empty($messagebody))) {
     echo $OUTPUT->notification(get_string('allfieldsrequired'));
 }
