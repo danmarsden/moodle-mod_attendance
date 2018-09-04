@@ -25,7 +25,9 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use Endroid\QrCode\QrCode;
 require_once(dirname(__FILE__).'/../../config.php');
+require_once(dirname(__FILE__).'/../../local/qrlinks/thirdparty/QrCode/src/QrCode.php');
 
 $session = required_param('session', PARAM_INT);
 $session = $DB->get_record('attendance_sessions', array('id' => $session), '*', MUST_EXIST);
@@ -47,5 +49,13 @@ $PAGE->set_context(context_system::instance());
 $PAGE->set_title(get_string('password', 'attendance'));
 
 echo $OUTPUT->header();
+echo html_writer::tag('h2', get_string('passwordgrp', 'attendance'));
 echo html_writer::span($session->studentpassword, 'student-password');
+if (isset($session->includeqrcode) && $session->includeqrcode == 1) {
+    $qrcodeurl = '/mod/attendance/attendance_qr.php?studentpassword=' . $session->studentpassword . '&sessid=' . $session->id;
+    $code = new QrCode(urlencode($CFG->wwwroot . $qrcodeurl));
+    $code->setSize(500);
+    echo html_writer::tag('h3', get_string('qrcode', 'attendance'));
+    echo html_writer::img('data:image/png;base64,' . base64_encode($code->get()));
+}
 echo $OUTPUT->footer();
