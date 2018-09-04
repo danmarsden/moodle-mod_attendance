@@ -285,8 +285,7 @@ function attendance_user_outline($course, $user, $mod, $attendance) {
         $summary = new mod_attendance_summary($attendance->id, $user->id);
         $usersummary = $summary->get_all_sessions_summary_for($user->id);
 
-        $result->info = format_float($usersummary->takensessionspoints, 1, true, true) . ' / ' .
-                        format_float($usersummary->allsessionsmaxpoints, 1, true, true);
+        $result->info = $usersummary->pointsallsessions;
     }
 
     return $result;

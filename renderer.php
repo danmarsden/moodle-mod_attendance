@@ -978,12 +978,11 @@ class mod_attendance_renderer extends plugin_renderer_base {
                     $usersummary = $userdata->summary[$ca->attid]->get_all_sessions_summary_for($userdata->user->id);
 
                     $row->cells[] = $usersummary->numtakensessions;
-                    $row->cells[] = format_float($usersummary->takensessionspoints, 1, true, true) . ' / ' .
-                        format_float($usersummary->takensessionsmaxpoints, 1, true, true);
+                    $row->cells[] = $usersummary->pointssessionscompleted;
                     if (empty($usersummary->numtakensessions)) {
                         $row->cells[] = '-';
                     } else {
-                        $row->cells[] = format_float($usersummary->takensessionspercentage * 100) . '%';
+                        $row->cells[] = $usersummary->percentagesessionscompleted;
                     }
 
                 }
@@ -1438,24 +1437,20 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $contrast = $startwithcontrast;
             $row = new html_table_row();
             $row->cells[] = $this->build_data_cell($usersummary->numtakensessions, $contrast);
-            $text = format_float($usersummary->takensessionspoints, 1, true, true) . ' / ' .
-                                format_float($usersummary->takensessionsmaxpoints, 1, true, true);
-            $row->cells[] = $this->build_data_cell($text, $contrast);
+            $row->cells[] = $this->build_data_cell($usersummary->pointssessionscompleted, $contrast);
             $row->cells[] = $this->build_data_cell(format_float($usersummary->takensessionspercentage * 100) . '%', $contrast);
 
             if ($reportdata->pageparams->view == ATT_VIEW_SUMMARY) {
                 $contrast = !$contrast;
                 $row->cells[] = $this->build_data_cell($usersummary->numallsessions, $contrast);
-                $text = format_float($usersummary->takensessionspoints, 1, true, true) . ' / ' .
-                                format_float($usersummary->allsessionsmaxpoints, 1, true, true);
+                $text = $usersummary->pointsallsessions;
                 $row->cells[] = $this->build_data_cell($text, $contrast);
-                $row->cells[] = $this->build_data_cell(format_float($usersummary->allsessionspercentage * 100) . '%', $contrast);
+                $row->cells[] = $this->build_data_cell($usersummary->allsessionspercentage, $contrast);
 
                 $contrast = !$contrast;
-                $text = format_float($usersummary->maxpossiblepoints, 1, true, true) . ' / ' .
-                                format_float($usersummary->allsessionsmaxpoints, 1, true, true);
+                $text = $usersummary->maxpossiblepoints;
                 $row->cells[] = $this->build_data_cell($text, $contrast);
-                $row->cells[] = $this->build_data_cell(format_float($usersummary->maxpossiblepercentage * 100) . '%', $contrast);
+                $row->cells[] = $this->build_data_cell($usersummary->maxpossiblepercentage, $contrast);
             }
 
             $rows[] = $row;
