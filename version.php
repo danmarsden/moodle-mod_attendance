@@ -23,9 +23,12 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version  = 2018072701;
+$plugin->version  = 2018082301;
 $plugin->requires = 2018050800; // Requires 3.5.
-$plugin->release = '3.5.1';
+$plugin->release = '3.5.2';
 $plugin->maturity  = MATURITY_ALPHA;
 $plugin->cron     = 0;
 $plugin->component = 'mod_attendance';
+$plugin->dependencies = [
+    'local_qrlinks' => 2016080301,
+];
