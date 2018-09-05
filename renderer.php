@@ -1111,7 +1111,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 $cell->colspan = 3;
                 $row->cells[] = $cell;
             } else {
-                if (attendance_can_student_mark($sess)) {
+                list($canmark, $reason) = attendance_can_student_mark($sess, false);
+                if ($canmark) {
                     // Student can mark their own attendance.
                     // URL to the page that lets the student modify their attendance.
 
@@ -1150,7 +1151,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
      * @return string
      */
     private function construct_time($datetime, $duration) {
-        $time = html_writer::tag('nobr', construct_session_time($datetime, $duration));
+        $time = html_writer::tag('nobr', attendance_construct_session_time($datetime, $duration));
 
         return $time;
     }

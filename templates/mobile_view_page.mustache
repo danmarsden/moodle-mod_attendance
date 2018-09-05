@@ -49,6 +49,17 @@
 {{=<% %>=}}
 <div>
     <core-course-module-description description="<% attendance.intro %>" component="mod_attendance" componentId="<% cmid %>"></core-course-module-description>
+    <%#sessions%>
+    <ion-item>
+        <h2><% time %></h2>
+        <h3><% currentstatus %></h3>
+        <%#sessid%>
+        <button ion-button core-site-plugins-new-content component="mod_attendance" method="<% attendancefunction %>" [args]="{cmid: <% cmid %>, courseid: <% courseid %>, sessid: <% sessid %>}">
+            {{ 'plugin.mod_attendance.submitattendance' | translate }}
+        </button>
+        <%/sessid%>
+    </ion-item>
+    <%/sessions%>
     <ion-item>
     <ion-grid>
         <ion-row>
