@@ -466,8 +466,9 @@ class attendance_user_data implements renderable {
      * attendance_user_data constructor.
      * @param mod_attendance_structure $att
      * @param int $userid
+     * @param boolean $mobile - this is called by the mobile code, don't generate everything.
      */
-    public function  __construct(mod_attendance_structure $att, $userid) {
+    public function  __construct(mod_attendance_structure $att, $userid, $mobile = false) {
         $this->user = $att->get_user($userid);
 
         $this->pageparams = $att->pageparams;
@@ -475,10 +476,12 @@ class attendance_user_data implements renderable {
         if ($this->pageparams->mode == mod_attendance_view_page_params::MODE_THIS_COURSE) {
             $this->statuses = $att->get_statuses(true, true);
 
-            $this->summary = new mod_attendance_summary($att->id, array($userid), $att->pageparams->startdate,
-                                                        $att->pageparams->enddate);
+            if (!$mobile) {
+                $this->summary = new mod_attendance_summary($att->id, array($userid), $att->pageparams->startdate,
+                    $att->pageparams->enddate);
 
-            $this->filtercontrols = new attendance_filter_controls($att);
+                $this->filtercontrols = new attendance_filter_controls($att);
+            }
 
             $this->sessionslog = $att->get_user_filtered_sessions_log_extended($userid);
 

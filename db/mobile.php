@@ -46,6 +46,17 @@ $addons = [
             ['percentageallsessions', 'attendance'],
             ['maxpossiblepoints', 'attendance'],
             ['maxpossiblepercentage', 'attendance'],
+            ['submitattendance', 'attendance'],
+            ['strftimeh', 'attendance'],
+            ['strftimehm', 'attendance'],
+            ['attendancesuccess', 'attendance'],
+            ['attendance_no_status', 'attendance'],
+            ['attendance_already_submitted', 'attendance'],
+            ['somedisabledstatus', 'attendance'],
+            ['invalidstatus', 'attendance'],
+            ['preventsharederror', 'attendance'],
+            ['closed', 'attendance'],
+            ['subnetwrong', 'attendance']
         ]
     ]
 ];

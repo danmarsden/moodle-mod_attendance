@@ -426,15 +426,18 @@ function attendance_random_string($length=6) {
  * Check to see if this session is open for student marking.
  *
  * @param stdclass $sess the session record from attendance_sessions.
- * @return boolean
+ * @param boolean $log - if student cannot mark, generate log event.
+ * @return array (boolean, string reason for failure)
  */
-function attendance_can_student_mark($sess) {
+function attendance_can_student_mark($sess, $log = true) {
     global $DB, $USER, $OUTPUT;
     $canmark = false;
+    $reason = 'closed';
     $attconfig = get_config('attendance');
     if (!empty($attconfig->studentscanmark) && !empty($sess->studentscanmark)) {
         if (empty($attconfig->studentscanmarksessiontime)) {
             $canmark = true;
+            $reason = '';
         } else {
             $duration = $sess->duration;
             if (empty($duration)) {
@@ -442,6 +445,7 @@ function attendance_can_student_mark($sess) {
             }
             if ($sess->sessdate < time() && time() < ($sess->sessdate + $duration)) {
                 $canmark = true;
+                $reason = '';
             }
         }
     }
@@ -460,25 +464,26 @@ function attendance_can_student_mark($sess) {
         }
 
         if (!empty($record)) {
-            // Trigger an ip_shared event.
-            $attendanceid = $DB->get_field('attendance_sessions', 'attendanceid', array('id' => $record->sessionid));
-            $cm = get_coursemodule_from_instance('attendance', $attendanceid);
-            $event = \mod_attendance\event\session_ip_shared::create(array(
-                'objectid' => 0,
-                'context' => \context_module::instance($cm->id),
-                'other' => array(
-                    'sessionid' => $record->sessionid,
-                    'otheruser' => $record->studentid
-                )
-            ));
+            $canmark = false;
+            $reason = 'preventsharederror';
+            if ($log) {
+                // Trigger an ip_shared event.
+                $attendanceid = $DB->get_field('attendance_sessions', 'attendanceid', array('id' => $record->sessionid));
+                $cm = get_coursemodule_from_instance('attendance', $attendanceid);
+                $event = \mod_attendance\event\session_ip_shared::create(array(
+                    'objectid' => 0,
+                    'context' => \context_module::instance($cm->id),
+                    'other' => array(
+                        'sessionid' => $record->sessionid,
+                        'otheruser' => $record->studentid
+                    )
+                ));
 
-            $event->trigger();
-
-            echo $OUTPUT->notification(get_string('preventsharederror', 'attendance'));
-            return false;
+                $event->trigger();
+            }
         }
     }
-    return $canmark;
+    return array($canmark, $reason);
 }
 
 /**
@@ -972,4 +977,71 @@ function attendance_get_sharedipoptions() {
     $options[ATTENDANCE_SHAREDIP_MINUTES] = get_string('setperiod', 'attendance');
 
     return $options;
+}
+
+/**
+ * Used to print simple time - 1am instead of 1:00am.
+ *
+ * @param int $time - unix timestamp.
+ */
+function attendance_strftimehm($time) {
+    $mins = userdate($time, '%M');
+
+    if ($mins == '00') {
+        $format = get_string('strftimeh', 'attendance');
+    } else {
+        $format = get_string('strftimehm', 'attendance');
+    }
+
+    $userdate = userdate($time, $format);
+
+    // Some Lang packs use %p to suffix with AM/PM but not all strftime support this.
+    // Check if %p is in use and make sure it's being respected.
+    if (stripos($format, '%p')) {
+        // Check if $userdate did something with %p by checking userdate against the same format without %p.
+        $formatwithoutp = str_ireplace('%p', '', $format);
+        if (userdate($time, $formatwithoutp) == $userdate) {
+            // The date is the same with and without %p - we have a problem.
+            if (userdate($time, '%H') > 11) {
+                $userdate .= 'pm';
+            } else {
+                $userdate .= 'am';
+            }
+        }
+        // Some locales and O/S don't respect correct intended case of %p vs %P
+        // This can cause problems with behat which expects AM vs am.
+        if (strpos($format, '%p')) { // Should be upper case according to PHP spec.
+            $userdate = str_replace('am', 'AM', $userdate);
+            $userdate = str_replace('pm', 'PM', $userdate);
+        }
+    }
+
+    return $userdate;
+}
+
+/**
+ * Used to print simple time - 1am instead of 1:00am.
+ *
+ * @param int $datetime - unix timestamp.
+ * @param int $duration - number of seconds.
+ */
+function attendance_construct_session_time($datetime, $duration) {
+    $starttime = attendance_strftimehm($datetime);
+    $endtime = attendance_strftimehm($datetime + $duration);
+
+    return $starttime . ($duration > 0 ? ' - ' . $endtime : '');
+}
+
+/**
+ * Used to print session time.
+ *
+ * @param int $datetime - unix timestamp.
+ * @param int $duration - number of seconds duration.
+ * @return string.
+ */
+function construct_session_full_date_time($datetime, $duration) {
+    $sessinfo = userdate($datetime, get_string('strftimedmyw', 'attendance'));
+    $sessinfo .= ' '.attendance_construct_session_time($datetime, $duration);
+
+    return $sessinfo;
 }
