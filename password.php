@@ -54,7 +54,7 @@ echo html_writer::span($session->studentpassword, 'student-password');
 echo html_writer::tag('h3', $plugininfos['qrlinks']);
 
 if (isset($session->includeqrcode) && $session->includeqrcode == 1) {
-    $qrcodeurl = $CFG->wwwroot . '/mod/attendance/attendance_qr.php?studentpassword=' . $session->studentpassword . '&sessid=' . $session->id;
+    $qrcodeurl = $CFG->wwwroot . '/mod/attendance/attendance.php?studentpassword=' . $session->studentpassword . '&sessid=' . $session->id;
     echo html_writer::tag('h3', get_string('qrcode', 'attendance'));
 
     // If the local_qrlinks plugin is installed, use it to create the QR code.
@@ -72,6 +72,7 @@ if (isset($session->includeqrcode) && $session->includeqrcode == 1) {
                 echo html_writer::tag('p', get_string('qrcodemissing', 'attendance'));
             } else {
                 echo html_writer::img('data:image/png;base64,' . base64_encode($qrcode));
+                echo html_writer::tag('p', get_string('qrcodewarning', 'attendance'));
             }
         } catch (Exception $e) {
                 echo html_writer::tag('p', get_string('qrcodemissing', 'attendance'));

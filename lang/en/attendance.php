@@ -344,6 +344,7 @@ $string['priorto'] = 'The session date is prior to the course start date ({$a}) 
 $string['processingfile'] = 'Processing file';
 $string['qrcode'] = 'QR Code';
 $string['qrcodemissing'] = 'QR Code not available. Please ask your administrator to install the <a href="https://moodle.org/plugins/local_qrlinks">QR Links</a> plugin.';
+$string['qrcodewarning'] = 'Local QR code generator not available. Using web-based 3rd-party service <a href="https://goqr.me/">goQR.me</a> instead.';
 $string['randompassword'] = 'Random password';
 $string['remark'] = 'Remark for: {$a}';
 $string['remarks'] = 'Remarks';
