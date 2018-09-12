@@ -59,7 +59,7 @@ class backup_attendance_activity_structure_step extends backup_activity_structur
             'groupid', 'sessdate', 'duration', 'lasttaken', 'lasttakenby', 'timemodified',
             'description', 'descriptionformat', 'studentscanmark', 'studentpassword', 'autoassignstatus',
             'subnet', 'automark', 'automarkcompleted', 'statusset', 'absenteereport', 'preventsharedip',
-            'preventsharediptime', 'caleventid'));
+            'preventsharediptime', 'caleventid', 'calendarevent', 'includeqrcode'));
 
         // XML nodes declaration - user data.
         $logs = new backup_nested_element('logs');
