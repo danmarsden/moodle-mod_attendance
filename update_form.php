@@ -99,12 +99,11 @@ class mod_attendance_update_form extends moodleform {
         // Show which status set is in use.
         $maxstatusset = attendance_get_max_statusset($this->_customdata['att']->id);
         if ($maxstatusset > 0) {
-            $mform->addElement('static', 'statusset', get_string('usestatusset', 'mod_attendance'),
+            $mform->addElement('static', 'statussetstring', get_string('usestatusset', 'mod_attendance'),
                 attendance_get_setname($this->_customdata['att']->id, $sess->statusset));
-        } else {
-            $mform->addElement('hidden', 'statusset', $maxstatusset);
-            $mform->setType('statusset', PARAM_INT);
         }
+        $mform->addElement('hidden', 'statusset', $sess->statusset);
+        $mform->setType('statusset', PARAM_INT);
 
         $mform->addElement('editor', 'sdescription', get_string('description', 'attendance'),
                            array('rows' => 1, 'columns' => 80), $defopts);
