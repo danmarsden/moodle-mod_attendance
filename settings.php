@@ -30,9 +30,6 @@ if ($ADMIN->fulltree) {
 
     $tabmenu = attendance_print_settings_tabs();
 
-    if (empty($plugininfos['qrlinks'])) {
-        $tabmenu = '<div class="alert alert-warning">'.get_string('qrcodeadminwarning', 'mod_attendance').'</div>'.$tabmenu;
-    }
     $settings->add(new admin_setting_heading('attendance_header', '', $tabmenu));
 
     $plugininfos = core_plugin_manager::instance()->get_plugins_of_type('local');
