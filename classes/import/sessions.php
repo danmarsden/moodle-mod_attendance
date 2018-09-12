@@ -110,7 +110,8 @@ class sessions {
             get_string('absenteereport', 'attendance'),
             get_string('preventsharedip', 'attendance'),
             get_string('preventsharediptime', 'attendance'),
-            get_string('calendarevent', 'attendance')
+            get_string('calendarevent', 'attendance'),
+            get_string('includeqrcode', 'attendance'),
         );
     }
 
@@ -149,7 +150,8 @@ class sessions {
                 'absenteereport' => $data->header15,
                 'preventsharedip' => $data->header16,
                 'preventsharediptime' => $data->header17,
-                'calendarevent' => $data->header18
+                'calendarevent' => $data->header18,
+                'includeqrcode' => $data->header19
             );
         } else {
             return array(
@@ -171,7 +173,8 @@ class sessions {
                 'absenteereport' => 15,
                 'preventsharedip' => 16,
                 'preventsharediptime' => 17,
-                'calendarevent' => 18
+                'calendarevent' => 18,
+                'includeqrcode' => 19
             );
         }
     }
@@ -335,6 +338,12 @@ class sessions {
                 $session->preventsharediptime = $pluginconfig->preventsharediptime;
             } else {
                 $session->preventsharediptime = $this->get_column_data($row, $mapping['preventsharediptime']);
+            }
+
+            if ($mapping['includeqrcode'] == -1) {
+                $session->includeqrcode = $pluginconfig->includeqrcode_default;
+            } else {
+                $session->includeqrcode = $this->get_column_data($row, $mapping['includeqrcode']);
             }
 
             $session->statusset = 0;

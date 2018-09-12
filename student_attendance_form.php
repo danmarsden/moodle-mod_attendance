@@ -44,6 +44,7 @@ class mod_attendance_student_attendance_form extends moodleform {
 
         $attforsession = $this->_customdata['session'];
         $attblock = $this->_customdata['attendance'];
+        $password = $this->_customdata['password'];
 
         $statuses = $attblock->get_statuses();
         // Check if user has access to all statuses.
@@ -81,6 +82,7 @@ class mod_attendance_student_attendance_form extends moodleform {
             $mform->addElement('text', 'studentpassword', get_string('password', 'attendance'));
             $mform->setType('studentpassword', PARAM_TEXT);
             $mform->addRule('studentpassword', get_string('passwordrequired', 'attendance'), 'required');
+            $mform->setDefault('studentpassword', $password);
         }
         if (!$attforsession->autoassignstatus) {
 

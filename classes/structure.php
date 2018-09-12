@@ -504,7 +504,9 @@ class mod_attendance_structure {
             if (!isset($sess->preventsharediptime)) {
                 $sess->preventsharediptime = '';
             }
-
+            if (!isset($sess->includeqrcode)) {
+                $sess->includeqrcode = 0;
+            }
             $event->add_record_snapshot('attendance_sessions', $sess);
             $event->trigger();
         }
@@ -544,6 +546,7 @@ class mod_attendance_structure {
         $sess->automarkcompleted = 0;
         $sess->preventsharedip = 0;
         $sess->preventsharediptime = '';
+        $sess->includeqrcode = 0;
         if (!empty(get_config('attendance', 'enablewarnings'))) {
             $sess->absenteereport = empty($formdata->absenteereport) ? 0 : 1;
         }
@@ -569,6 +572,9 @@ class mod_attendance_structure {
             }
             if (!empty($formdata->preventsharediptime)) {
                 $sess->preventsharediptime = $formdata->preventsharediptime;
+            }
+            if (!empty($formdata->includeqrcode)) {
+                $sess->includeqrcode = $formdata->includeqrcode;
             }
 
         }
