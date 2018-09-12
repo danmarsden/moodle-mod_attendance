@@ -343,9 +343,6 @@ $string['preventsharederror'] = 'Self-marking has been disabled for a session be
 $string['priorto'] = 'The session date is prior to the course start date ({$a}) so that the new sessions scheduled before this date will be hidden (not accessible). You can change the course start date at any time (see course settings) in order to have access to earlier sessions.<br><br>Please change the session date or just click the "Add session" button again to confirm?';
 $string['processingfile'] = 'Processing file';
 $string['qrcode'] = 'QR Code';
-$string['qrcodemissing'] = 'QR Code not available. Please ask your administrator to install the <a href="https://moodle.org/plugins/local_qrlinks">QR Links</a> plugin.';
-$string['qrcodewarning'] = 'This QR code was generated using the 3rd-party service <a href="http://goqr.me/?refer=moodle-mod_attendance">goQR.me</a>.';
-$string['qrcodeadminwarning'] = 'Warning: QR codes for student self-marking will be generated using the external service <a href="http://goqr.me/?refer=moodle-mod_attendance">goQR.me</a>. Install the <a href="https://moodle.org/plugins/local_qrlinks">QR Links</a> plugin to generate them locally.';
 $string['randompassword'] = 'Random password';
 $string['remark'] = 'Remark for: {$a}';
 $string['remarks'] = 'Remarks';
