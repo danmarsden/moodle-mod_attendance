@@ -30,7 +30,7 @@ $pageparams = new mod_attendance_sessions_page_params();
 
 // Check that the required parameters are present.
 $id = required_param('sessid', PARAM_INT);
-$password = optional_param('studentpassword', '', PARAM_TEXT);
+$password = required_param('studentpassword', PARAM_TEXT);
 
 $attforsession = $DB->get_record('attendance_sessions', array('id' => $id), '*', MUST_EXIST);
 $attendance = $DB->get_record('attendance', array('id' => $attforsession->attendanceid), '*', MUST_EXIST);
@@ -83,7 +83,15 @@ if ($attforsession->autoassignstatus && empty($attforsession->studentpassword)) 
 $mform = new mod_attendance_student_attendance_form(null,
         array('course' => $course, 'cm' => $cm, 'modcontext' => $PAGE->context, 'session' => $attforsession, 'attendance' => $att));
 
-if ($password !== '') {
+/*
+$PAGE->set_url($att->url_sessions());
+
+if ($mform->is_cancelled()) {
+    // The user cancelled the form, so redirect them to the view page.
+    $url = new moodle_url('/mod/attendance/view.php', array('id' => $cm->id));
+    redirect($url);
+} else if ($fromform = $mform->get_data()) {
+*/
     $fromform = $mform->get_data();
 
     // Check if password required and if set correctly.
@@ -97,11 +105,13 @@ if ($password !== '') {
     $fromform->studentpassword = $password;
     $fromform->sessid = $attforsession->id;
 
-    $fromform->status = attendance_session_get_highest_status($att, $attforsession);
-    if (empty($fromform->status)) {
-        $url = new moodle_url('/mod/attendance/view.php', array('id' => $cm->id));
-        print_error('attendance_no_status', 'mod_attendance', $url);
-    }
+    // if ($attforsession->autoassignstatus) {
+        $fromform->status = attendance_session_get_highest_status($att, $attforsession);
+        if (empty($fromform->status)) {
+            $url = new moodle_url('/mod/attendance/view.php', array('id' => $cm->id));
+            print_error('attendance_no_status', 'mod_attendance', $url);
+        }
+    // }
 
     if (!empty($fromform->status)) {
         $success = $att->take_from_student($fromform);
@@ -114,52 +124,19 @@ if ($password !== '') {
             print_error('attendance_already_submitted', 'mod_attendance', $url);
         }
     }
-} else {
-    $PAGE->set_url($att->url_sessions());
 
-    if ($mform->is_cancelled()) {
-        // The user cancelled the form, so redirect them to the view page.
-        $url = new moodle_url('/mod/attendance/view.php', array('id' => $cm->id));
-        redirect($url);
-    } else if ($fromform = $mform->get_data()) {
-        // Check if password required and if set correctly.
-        if (!empty($attforsession->studentpassword) &&
-            $attforsession->studentpassword !== $fromform->studentpassword) {
-
-            $url = new moodle_url('/mod/attendance/attendance.php', array('sessid' => $id, 'sesskey' => sesskey()));
-            redirect($url, get_string('incorrectpassword', 'mod_attendance'), null, \core\output\notification::NOTIFY_ERROR);
-        }
-        if ($attforsession->autoassignstatus) {
-            $fromform->status = attendance_session_get_highest_status($att, $attforsession);
-            if (empty($fromform->status)) {
-                $url = new moodle_url('/mod/attendance/view.php', array('id' => $cm->id));
-                print_error('attendance_no_status', 'mod_attendance', $url);
-            }
-        }
-
-        if (!empty($fromform->status)) {
-            $success = $att->take_from_student($fromform);
-
-            $url = new moodle_url('/mod/attendance/view.php', array('id' => $cm->id));
-            if ($success) {
-                // Redirect back to the view page.
-                redirect($url, get_string('studentmarked', 'attendance'));
-            } else {
-                print_error('attendance_already_submitted', 'mod_attendance', $url);
-            }
-        }
-
-        // The form did not validate correctly so we will set it to display the data they submitted.
-        $mform->set_data($fromform);
-    }
-
-    $PAGE->set_title($course->shortname. ": ".$att->name);
-    $PAGE->set_heading($course->fullname);
-    $PAGE->set_cacheable(true);
-    $PAGE->navbar->add($att->name);
-
-    $output = $PAGE->get_renderer('mod_attendance');
-    echo $output->header();
-    $mform->display();
-    echo $output->footer();
+/*
+    // The form did not validate correctly so we will set it to display the data they submitted.
+    $mform->set_data($fromform);
 }
+
+$PAGE->set_title($course->shortname. ": ".$att->name);
+$PAGE->set_heading($course->fullname);
+$PAGE->set_cacheable(true);
+$PAGE->navbar->add($att->name);
+
+$output = $PAGE->get_renderer('mod_attendance');
+echo $output->header();
+$mform->display();
+echo $output->footer();
+*/
