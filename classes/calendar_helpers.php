@@ -132,7 +132,7 @@ function attendance_update_calendar_event($session) {
         return attendance_create_calendar_event($session);
     }
 
-    // Boring update
+    // Boring update.
     $caleventdata = new stdClass();
     $caleventdata->timeduration   = $timeduration;
     $caleventdata->timestart      = $timestart;
