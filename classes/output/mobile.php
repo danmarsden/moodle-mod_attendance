@@ -90,12 +90,15 @@ class mobile {
 
         $data['sessions'] = array();
 
-        $userdata = new \attendance_user_data($att, $USER->id, true);
-
-        $sessions = $DB->get_records_select('attendance_sessions',
-            'attendanceid = ? AND sessdate > ? ORDER BY sessdate', array($attendance->id, $time));
+        if ($isteacher) {
+            $sessions = array(); // Support for teacher marking not implemented yet.
+        } else {
+            $sessions = $DB->get_records_select('attendance_sessions',
+                'attendanceid = ? AND sessdate > ? ORDER BY sessdate', array($attendance->id, $time));
+        }
 
         if (!empty($sessions)) {
+            $userdata = new \attendance_user_data($att, $USER->id, true);
             foreach ($sessions as $sess) {
                 if (!$isteacher && empty($userdata->sessionslog['c'.$sess->id])) {
                     // This session isn't viewable to this student - probably a group session.
