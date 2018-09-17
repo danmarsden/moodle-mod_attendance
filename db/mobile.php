@@ -56,7 +56,9 @@ $addons = [
             ['invalidstatus', 'attendance'],
             ['preventsharederror', 'attendance'],
             ['closed', 'attendance'],
-            ['subnetwrong', 'attendance']
+            ['subnetwrong', 'attendance'],
+            ['enterpassword', 'attendance'],
+            ['incorrectpasswordshort', 'attendance']
         ]
     ]
 ];

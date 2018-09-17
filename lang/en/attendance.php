@@ -243,6 +243,7 @@ $string['includenottaken'] = 'Include not taken sessions';
 $string['includeqrcode'] = 'Include QR code';
 $string['includeremarks'] = 'Include remarks';
 $string['incorrectpassword'] = 'You have entered an incorrect password and your attendance has not been recorded, please enter the correct password.';
+$string['incorrectpasswordshort'] = 'Incorrect password, attendance not recorded.';
 $string['indetail'] = 'In detail...';
 $string['invalidaction'] = 'You must select an action';
 $string['invalidemails'] = 'You must specify addresses of existing user accounts, could not find: {$a}';
@@ -324,6 +325,7 @@ $string['oversessionstaken_help'] = 'Shows statistics for sessions where attenda
     </ul>';
 $string['participant'] = 'Participant';
 $string['password'] = 'Password';
+$string['enterpassword'] = 'Enter password';
 $string['passwordgrp'] = 'Student password';
 $string['passwordgrp_help'] = 'If set students will be required to enter this password before they can set their own attendance status for the session. If empty, no password is required.';
 $string['passwordrequired'] = 'You must enter the session password before you can submit your attendance';

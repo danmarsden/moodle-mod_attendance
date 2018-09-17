@@ -51,6 +51,14 @@
             </ion-item>
         <%/messages%>
     <%/showmessage%>
+    <%#showpassword%>
+    <ion-list [(ngModel)]="studentpass">
+    <ion-item>
+        <ion-label>{{ 'plugin.mod_attendance.enterpassword' | translate }}:</ion-label>
+        <ion-input type="text" name="studentpass"></ion-input>
+    </ion-item>
+    </ion-list>
+    <%/showpassword%>
     <%#showstatuses%>
     <ion-list radio-group [(ngModel)]="status">
         <%#statuses%>
@@ -60,7 +68,7 @@
         </ion-item>
         <%/statuses%>
     </ion-list>
-    <button ion-button core-site-plugins-new-content component="mod_attendance" method="mobile_view_activity" [args]="{cmid: <% cmid %>, courseid: <% courseid %>, sessid: <% sessid %>, status: status}">
+    <button ion-button core-site-plugins-new-content component="mod_attendance" method="mobile_view_activity" [args]="{cmid: <% cmid %>, courseid: <% courseid %>, sessid: <% sessid %>, status: status, studentpass: studentpass}">
         {{ 'plugin.mod_attendance.submitattendance' | translate }}
     </button>
     <%/showstatuses%>
