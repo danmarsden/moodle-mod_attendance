@@ -49,6 +49,13 @@
 {{=<% %>=}}
 <div>
     <core-course-module-description description="<% attendance.intro %>" component="mod_attendance" componentId="<% cmid %>"></core-course-module-description>
+    <%#showmessage%>
+    <%#messages%>
+    <ion-item>
+        {{ 'plugin.mod_attendance.<% string %>' | translate }}
+    </ion-item>
+    <%/messages%>
+    <%/showmessage%>
     <%#sessions%>
     <ion-item>
         <h2><% time %></h2>
