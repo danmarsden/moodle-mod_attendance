@@ -43,12 +43,11 @@ class mobile {
 
         require_once($CFG->dirroot.'/mod/attendance/locallib.php');
 
-        $args = (object) $args;
-        $cmid = $args->cmid;
-        $courseid = $args->courseid;
-        $takenstatus = empty($args->status) ? '' : $args->status;
-        $sessid = empty($args->sessid) ? '' : $args->sessid;
-        $password = empty($args->studentpass) ? '' : $args->studentpass;
+        $cmid = $args['cmid'];
+        $courseid = $args['courseid'];
+        $takenstatus = empty($args['status']) ? '' : $args['status'];
+        $sessid = empty($args['sessid']) ? '' : $args['sessid'];
+        $password = empty($args['studentpass']) ? '' : $args['studentpass'];
 
         // Capabilities check.
         $cm = get_coursemodule_from_id('attendance', $cmid);
@@ -70,7 +69,7 @@ class mobile {
         $isteacher = false;
         if (has_capability('mod/attendance:takeattendances', $context)) {
             $isteacher = true;
-            $data['attendancefunction'] = 'mobile_take_attendance_all';
+            $data['attendancefunction'] = 'mobile_teacher_form';
         }
 
         // Add stats for this use to output.
@@ -84,18 +83,30 @@ class mobile {
 
         $att = new \mod_attendance_structure($attendance, $cm, $course, $context, $pageparams);
 
+        if ($isteacher) {
+            $keys = array_keys($args);
+            $userkeys = preg_grep("/status\d+/", $keys);
+            if (!empty($userkeys)) { // If this is a post from the teacher form.
+                // Build data to pass to take_from_form_data.
+                foreach ($userkeys as $uk) {
+                    $userid = str_replace('status', '', $uk);
+                    $status = $args[$uk];
+
+                }
+                // Call take_from_form_data function.
+                // $att->take_from_form_data($formdata);
+
+            }
+        }
+
         // Get list of sessions within the next 24hrs and in last 6hrs.
         // TODO: provide way of adjusting which sessions to show in app.
         $time = time() - (6 * 60 * 60);
 
         $data['sessions'] = array();
 
-        if ($isteacher) {
-            $sessions = array(); // Support for teacher marking not implemented yet.
-        } else {
-            $sessions = $DB->get_records_select('attendance_sessions',
-                'attendanceid = ? AND sessdate > ? ORDER BY sessdate', array($attendance->id, $time));
-        }
+        $sessions = $DB->get_records_select('attendance_sessions',
+            'attendanceid = ? AND sessdate > ? ORDER BY sessdate', array($attendance->id, $time));
 
         if (!empty($sessions)) {
             $userdata = new \attendance_user_data($att, $USER->id, true);
@@ -205,6 +216,7 @@ class mobile {
             'otherdata' => ''
         ];
     }
+
     /**
      * Returns the form to take attendance for the mobile app.
      *
@@ -305,4 +317,76 @@ class mobile {
             'otherdata' => ''
         ];
     }
+
+    /**
+     * Returns the form to take attendance for the mobile app.
+     *
+     * @param  array $args Arguments from tool_mobile_get_content WS
+     * @return array HTML, javascript and other data
+     */
+    public static function mobile_teacher_form($args) {
+        global $OUTPUT, $DB, $CFG;
+
+        require_once($CFG->dirroot.'/mod/attendance/locallib.php');
+
+        $args = (object) $args;
+        $cmid = $args->cmid;
+        $courseid = $args->courseid;
+        $sessid = $args->sessid;
+
+        // Capabilities check.
+        $cm = get_coursemodule_from_id('attendance', $cmid);
+
+        require_login($courseid, false , $cm, true, true);
+
+        $context = \context_module::instance($cm->id);
+        require_capability('mod/attendance:takeattendances', $context);
+
+        $attendance    = $DB->get_record('attendance', array('id' => $cm->instance), '*', MUST_EXIST);
+        $course        = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
+
+        $pageparams = new \mod_attendance_sessions_page_params();
+        $pageparams->sessionid = $sessid;
+        $att = new \mod_attendance_structure($attendance, $cm, $course, $context, $pageparams);
+
+        $data = array(); // Data to pass to renderer.
+        $data['attendance'] = $attendance;
+        $data['cmid'] = $cmid;
+        $data['courseid'] = $courseid;
+        $data['sessid'] = $sessid;
+        $data['messages'] = array();
+        $data['showmessage'] = false;
+        $data['statuses'] = array();
+        $data['args'] = ''; // Stores list of userid status args that should be added to form post.
+
+        $statuses = $att->get_statuses();
+        foreach ($statuses as $status) {
+            $data['statuses'][] = array('stid' => $status->id, 'acronym' => $status->acronym,
+                'description' => $status->description);
+        }
+        // TODO: Add support for group marking (non-editing teachers etc).
+        $data['users'] = array();
+        $users = $att->get_users(0, 0);
+        foreach ($users as $user) {
+            $data['users'][] = array('userid' => $user->id, 'fullname' => $user->fullname);
+            $data['args'] .= ', status'. $user->id. ': status'. $user->id;
+        }
+
+        if (!empty($data['messages'])) {
+            $data['showmessage'] = true;
+        }
+
+        return [
+            'templates' => [
+                [
+                    'id' => 'main',
+                    'html' => $OUTPUT->render_from_template('mod_attendance/mobile_teacher_form', $data),
+                    'cache-view' => false
+                ],
+            ],
+            'javascript' => '',
+            'otherdata' => ''
+        ];
+    }
+
 }

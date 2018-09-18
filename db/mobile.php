@@ -33,7 +33,11 @@ $addons = [
                     'class' => '',
                 ],
                 'delegate' => 'CoreCourseModuleDelegate',
-                'method' => 'mobile_view_activity'
+                'method' => 'mobile_view_activity',
+                'styles' => [
+                    'url' => '/mod/attendance/mobilestyles.css',
+                    'version' => 7
+                ]
             ]
         ],
         'lang' => [ // Language strings that are used in all the handlers.
@@ -59,6 +63,6 @@ $addons = [
             ['subnetwrong', 'attendance'],
             ['enterpassword', 'attendance'],
             ['incorrectpasswordshort', 'attendance']
-        ]
+        ],
     ]
 ];
