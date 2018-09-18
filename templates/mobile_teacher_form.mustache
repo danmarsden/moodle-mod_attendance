@@ -44,7 +44,7 @@
     }
 }}
 {{=<% %>=}}
-<div>
+<div class="attendance_teacher_form">
     <core-course-module-description description="<% attendance.intro %>" component="mod_attendance" componentId="<% cmid %>"></core-course-module-description>
     <%#showmessage%>
         <%#messages%>
@@ -53,28 +53,22 @@
             </ion-item>
         <%/messages%>
     <%/showmessage%>
-    <%#showpassword%>
-    <ion-list [(ngModel)]="studentpass">
+    <%#users%>
     <ion-item>
-        <ion-label>{{ 'plugin.mod_attendance.enterpassword' | translate }}:</ion-label>
-        <ion-input type="text" name="studentpass"></ion-input>
+        <h2><% fullname %></h2>
     </ion-item>
-    </ion-list>
-    <%/showpassword%>
-    <%#showstatuses%>
-    <ion-list radio-group [(ngModel)]="status">
+
+    <ion-list radio-group [(ngModel)]="status<% userid %>">
         <%#statuses%>
         <ion-item>
-            <ion-label><% description %></ion-label>
+            <ion-label><% acronym %></ion-label>
             <ion-radio value="<% stid %>"></ion-radio>
         </ion-item>
         <%/statuses%>
     </ion-list>
-    <button ion-button core-site-plugins-new-content component="mod_attendance" method="mobile_view_activity" [args]="{cmid: <% cmid %>, courseid: <% courseid %>, sessid: <% sessid %>, status: status, studentpass: studentpass}">
+    <%/users%>
+    <button ion-button core-site-plugins-new-content component="mod_attendance" method="mobile_view_activity" [args]="{cmid: <% cmid %>, courseid: <% courseid %>, sessid: <% sessid %> <% args %>}">
         {{ 'plugin.mod_attendance.submitattendance' | translate }}
     </button>
-    <%/showstatuses%>
-    <%#disabledduetotime%>
-    {{ 'plugin.mod_attendance.somedisabledstatus' | translate }}
-    <%/disabledduetotime%>
+
 </div>

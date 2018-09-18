@@ -843,6 +843,7 @@ class mod_attendance_structure {
             $enrolments = $DB->get_records_sql($sql, $params);
 
             foreach ($users as $user) {
+                $users[$user->id]->fullname = fullname($user);
                 $users[$user->id]->enrolmentstatus = $enrolments[$user->id]->status;
                 $users[$user->id]->enrolmentstart = $enrolments[$user->id]->mintime;
                 $users[$user->id]->enrolmentend = $enrolments[$user->id]->maxtime;
