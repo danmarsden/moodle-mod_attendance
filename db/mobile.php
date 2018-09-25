@@ -62,7 +62,8 @@ $addons = [
             ['closed', 'attendance'],
             ['subnetwrong', 'attendance'],
             ['enterpassword', 'attendance'],
-            ['incorrectpasswordshort', 'attendance']
+            ['incorrectpasswordshort', 'attendance'],
+            ['attendancesuccess', 'attendance']
         ],
     ]
 ];
