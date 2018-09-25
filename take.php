@@ -61,6 +61,28 @@ if (!empty($pageparams->grouptype) && !array_key_exists($pageparams->grouptype, 
 
 if (($formdata = data_submitted()) && confirm_sesskey()) {
     $att->take_from_form_data($formdata);
+
+    $group = 0;
+    if ($att->pageparams->grouptype != mod_attendance_structure::SESSION_COMMON) {
+        $group = $att->pageparams->grouptype;
+    } else {
+        if ($att->pageparams->group) {
+            $group = $att->pageparams->group;
+        }
+    }
+
+    $totalusers = count_enrolled_users(context_module::instance($cm->id), 'mod/attendance:canbelisted', $group);
+    $usersperpage = $att->pageparams->perpage;
+
+    if (!empty($att->pageparams->page) && $att->pageparams->page && $totalusers && $usersperpage) {
+        $numberofpages = ceil($totalusers / $usersperpage);
+        if ($att->pageparams->page < $numberofpages) {
+            $params['page'] = $att->pageparams->page + 1;
+            redirect($att->url_take($params), get_string('moreattendance', 'attendance'));
+        }
+    }
+
+    redirect($att->url_manage(), get_string('attendancesuccess', 'attendance'));
 }
 
 $PAGE->set_url($att->url_take());
