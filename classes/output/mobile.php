@@ -75,7 +75,10 @@ class mobile {
         // Add stats for this use to output.
         $pageparams = new \mod_attendance_view_page_params();
         $pageparams->studentid = $USER->id;
-        if (!empty($takenstatus) && !empty($sessid)) {
+        $pageparams->group = groups_get_activity_group($cm, true);
+        if (!empty($sessid) && (!empty($takenstatus) || $isteacher)) {
+            $session = $DB->get_record('attendance_sessions', array('id' => $sessid));
+            $pageparams->grouptype = $session->groupid;
             $pageparams->sessionid = $sessid;
         }
         $pageparams->mode = \mod_attendance_view_page_params::MODE_THIS_COURSE;
@@ -88,14 +91,16 @@ class mobile {
             $userkeys = preg_grep("/status\d+/", $keys);
             if (!empty($userkeys)) { // If this is a post from the teacher form.
                 // Build data to pass to take_from_form_data.
+                $formdata = new \stdClass();
                 foreach ($userkeys as $uk) {
                     $userid = str_replace('status', '', $uk);
                     $status = $args[$uk];
-
+                    $formdata->{'remarks'.$userid} = '';
+                    $formdata->{'user'.$userid} = $status;
                 }
-                // Call take_from_form_data function.
-                // $att->take_from_form_data($formdata);
-
+                $att->take_from_form_data($formdata);
+                $data['showmessage'] = true;
+                $data['messages'][]['string'] = 'attendancesuccess';
             }
         }
 

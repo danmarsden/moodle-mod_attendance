@@ -67,7 +67,7 @@
         <%/statuses%>
     </ion-list>
     <%/users%>
-    <button ion-button core-site-plugins-new-content component="mod_attendance" method="mobile_view_activity" [args]="{cmid: <% cmid %>, courseid: <% courseid %>, sessid: <% sessid %> <% args %>}">
+    <button ion-button core-site-plugins-new-content component="mod_attendance" method="mobile_view_activity" [args]="{cmid: <% cmid %>, courseid: <% courseid %>, sessid: <% sessid %><% args %>}">
         {{ 'plugin.mod_attendance.submitattendance' | translate }}
     </button>
 
