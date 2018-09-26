@@ -1,4 +1,20 @@
 .attendance_teacher_form .item-radio {
     display: inline-block;
+    margin-top: 10px;
+    margin-left: 5px;
+    padding: 0;
     width: 70px;
+}
+.attendance_teacher_form .item-inner {
+    padding: 0;
+}
+.attendance_teacher_form .radiolabel .item-inner {
+    text-align: center;
+}
+.attendance_teacher_form .item-inner .input-wrapper label,
+.attendance_teacher_form .radio {
+    margin: 0;
+}
+.attendance_teacher_form .radio .radio-icon {
+    display: none;
 }
