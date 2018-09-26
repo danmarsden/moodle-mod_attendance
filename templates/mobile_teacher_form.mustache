@@ -41,6 +41,7 @@
         "cmid": "25",
         "courseid": "4",
         "sessid": "43"
+        "args" : ", status4: CONTENT_OTHERDATA.status4"
     }
 }}
 {{=<% %>=}}
@@ -64,7 +65,7 @@
         </span>
     </ion-item>
 
-    <ion-list radio-group [(ngModel)]="status<% userid %>">
+    <ion-list radio-group [(ngModel)]="CONTENT_OTHERDATA.status<% userid %>">
         <%#statuses%>
         <span class="radiolabel">
         <ion-item>

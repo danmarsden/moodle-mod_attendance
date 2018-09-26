@@ -365,6 +365,15 @@ class mobile {
         $data['args'] = ''; // Stores list of userid status args that should be added to form post.
 
         $statuses = $att->get_statuses();
+        $otherdata = array();
+        $existinglog = $DB->get_records('attendance_log',
+            array('sessionid' => $sessid), '', 'studentid,statusid');
+        foreach ($existinglog as $log) {
+            if (!empty($log->statusid)) {
+                $otherdata['status'.$log->studentid] = $log->statusid;
+            }
+        }
+
         foreach ($statuses as $status) {
             $data['statuses'][] = array('stid' => $status->id, 'acronym' => $status->acronym,
                 'description' => $status->description);
@@ -374,7 +383,8 @@ class mobile {
         $users = $att->get_users(0, 0);
         foreach ($users as $user) {
             $data['users'][] = array('userid' => $user->id, 'fullname' => $user->fullname);
-            $data['args'] .= ', status'. $user->id. ': status'. $user->id;
+            // Generate args to use in submission button here.
+            $data['args'] .= ', status'. $user->id. ': CONTENT_OTHERDATA.status'. $user->id;
         }
 
         if (!empty($data['messages'])) {
@@ -390,7 +400,7 @@ class mobile {
                 ],
             ],
             'javascript' => '',
-            'otherdata' => ''
+            'otherdata' => $otherdata
         ];
     }
 
