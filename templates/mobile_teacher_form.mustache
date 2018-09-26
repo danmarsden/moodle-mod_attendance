@@ -45,25 +45,33 @@
 }}
 {{=<% %>=}}
 <div class="attendance_teacher_form">
+    <span class="description">
     <core-course-module-description description="<% attendance.intro %>" component="mod_attendance" componentId="<% cmid %>"></core-course-module-description>
+    </span>
     <%#showmessage%>
         <%#messages%>
-            <ion-item>
-                {{ 'plugin.mod_attendance.<% string %>' | translate }}
-            </ion-item>
+            <span class="messages">
+                <ion-item>
+                    {{ 'plugin.mod_attendance.<% string %>' | translate }}
+                </ion-item>
+            </span>
         <%/messages%>
     <%/showmessage%>
     <%#users%>
     <ion-item>
-        <h2><% fullname %></h2>
+        <span class="studentname">
+            <h2><% fullname %></h2>
+        </span>
     </ion-item>
 
     <ion-list radio-group [(ngModel)]="status<% userid %>">
         <%#statuses%>
+        <span class="radiolabel">
         <ion-item>
             <ion-label><% acronym %></ion-label>
             <ion-radio value="<% stid %>"></ion-radio>
         </ion-item>
+        </span>
         <%/statuses%>
     </ion-list>
     <%/users%>
