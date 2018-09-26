@@ -43,7 +43,8 @@
             "pointssessionscompleted": "2",
             "percentagesessionscompleted": "2"
         },
-        "cmid": "25"
+        "cmid": "25",
+        "timestamp": "1234"
     }
 }}
 {{=<% %>=}}
@@ -61,7 +62,7 @@
         <h2><% time %></h2>
         <h3><% currentstatus %></h3>
         <%#sessid%>
-        <button ion-button core-site-plugins-new-content component="mod_attendance" method="<% attendancefunction %>" [args]="{cmid: <% cmid %>, courseid: <% courseid %>, sessid: <% sessid %>}">
+        <button ion-button core-site-plugins-new-content component="mod_attendance" method="<% attendancefunction %>" [args]="{cmid: <% cmid %>, courseid: <% courseid %>, sessid: <% sessid %>, timestamp: <% timestamp %>}">
             {{ 'plugin.mod_attendance.submitattendance' | translate }}
         </button>
         <%/sessid%>

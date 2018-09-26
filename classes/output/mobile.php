@@ -64,6 +64,7 @@ class mobile {
         $data['cmid'] = $cmid;
         $data['courseid'] = $courseid;
         $data['attendance'] = $attendance;
+        $data['timestamp'] = time(); // Used to prevent attendance session marking page to be cached.
 
         $data['attendancefunction'] = 'mobile_user_form';
         $isteacher = false;
