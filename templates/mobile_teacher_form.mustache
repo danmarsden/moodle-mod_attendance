@@ -40,8 +40,8 @@
         },
         "cmid": "25",
         "courseid": "4",
-        "sessid": "43"
-        "args" : ", status4: CONTENT_OTHERDATA.status4"
+        "sessid": "43",
+        "btnargs" : ""
     }
 }}
 {{=<% %>=}}
@@ -59,25 +59,27 @@
         <%/messages%>
     <%/showmessage%>
     <%#users%>
-    <ion-item>
-        <span class="studentname">
-            <h2><% fullname %></h2>
-        </span>
-    </ion-item>
-
-    <ion-list radio-group [(ngModel)]="CONTENT_OTHERDATA.status<% userid %>">
-        <%#statuses%>
-        <span class="radiolabel">
         <ion-item>
-            <ion-label><% acronym %></ion-label>
-            <ion-radio value="<% stid %>"></ion-radio>
+            <span class="studentname">
+                <h2><% fullname %></h2>
+            </span>
         </ion-item>
-        </span>
-        <%/statuses%>
-    </ion-list>
+
+        <ion-list radio-group [(ngModel)]="CONTENT_OTHERDATA.status<% userid %>">
+            <%#statuses%>
+            <span class="radiolabel">
+                <ion-item>
+                    <ion-label><% acronym %></ion-label>
+                    <ion-radio value="<% stid %>"></ion-radio>
+                </ion-item>
+            </span>
+            <%/statuses%>
+        </ion-list>
     <%/users%>
-    <button ion-button core-site-plugins-new-content component="mod_attendance" method="mobile_view_activity" [args]="{cmid: <% cmid %>, courseid: <% courseid %>, sessid: <% sessid %><% args %>}">
-        {{ 'plugin.mod_attendance.submitattendance' | translate }}
-    </button>
+    <ion-item>
+        <button ion-button core-site-plugins-new-content component="mod_attendance" method="mobile_view_activity" [args]="{cmid: <% cmid %>, courseid: <% courseid %>, sessid: <% sessid %><% btnargs %>}">
+            {{ 'plugin.mod_attendance.submitattendance' | translate }}
+        </button>
+    </ion-item>
 
 </div>

@@ -362,7 +362,7 @@ class mobile {
         $data['messages'] = array();
         $data['showmessage'] = false;
         $data['statuses'] = array();
-        $data['args'] = ''; // Stores list of userid status args that should be added to form post.
+        $data['btnargs'] = ''; // Stores list of userid status args that should be added to form post.
 
         $statuses = $att->get_statuses();
         $otherdata = array();
@@ -384,7 +384,7 @@ class mobile {
         foreach ($users as $user) {
             $data['users'][] = array('userid' => $user->id, 'fullname' => $user->fullname);
             // Generate args to use in submission button here.
-            $data['args'] .= ', status'. $user->id. ': CONTENT_OTHERDATA.status'. $user->id;
+            $data['btnargs'] .= ', status'. $user->id. ': CONTENT_OTHERDATA.status'. $user->id;
         }
 
         if (!empty($data['messages'])) {
