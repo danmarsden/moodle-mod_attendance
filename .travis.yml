@@ -21,6 +21,7 @@ php:
 env:
  global:
   - MOODLE_BRANCH=MOODLE_35_STABLE
+  - MUSTACHE_IGNORE_NAMES=mobile_teacher_form.mustache
  matrix:
   - DB=pgsql
   - DB=mysqli
