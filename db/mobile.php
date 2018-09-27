@@ -36,7 +36,7 @@ $addons = [
                 'method' => 'mobile_view_activity',
                 'styles' => [
                     'url' => '/mod/attendance/mobilestyles.css',
-                    'version' => 19
+                    'version' => 21
                 ]
             ]
         ],
