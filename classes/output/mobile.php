@@ -77,17 +77,27 @@ class mobile {
         $pageparams = new \mod_attendance_view_page_params();
         $pageparams->studentid = $USER->id;
         $pageparams->group = groups_get_activity_group($cm, true);
+        $canseegroupsession = true;
         if (!empty($sessid) && (!empty($takenstatus) || $isteacher)) {
             $session = $DB->get_record('attendance_sessions', array('id' => $sessid));
             $pageparams->grouptype = $session->groupid;
             $pageparams->sessionid = $sessid;
+
+            if ($isteacher && !empty($session->groupid)) {
+                $allowedgroups = groups_get_activity_allowed_groups($cm);
+                if (!array_key_exists($session->groupid, $allowedgroups)) {
+                    $canseegroupsession = false;
+                }
+            }
         }
         $pageparams->mode = \mod_attendance_view_page_params::MODE_THIS_COURSE;
         $pageparams->view = 5; // Show all sessions for this course?
 
         $att = new \mod_attendance_structure($attendance, $cm, $course, $context, $pageparams);
 
-        if ($isteacher) {
+        // Check if this teacher is allowed to view/mark this group session.
+
+        if ($isteacher && $canseegroupsession) {
             $keys = array_keys($args);
             $userkeys = preg_grep("/status\d+/", $keys);
             if (!empty($userkeys)) { // If this is a post from the teacher form.
@@ -120,6 +130,14 @@ class mobile {
                 if (!$isteacher && empty($userdata->sessionslog['c'.$sess->id])) {
                     // This session isn't viewable to this student - probably a group session.
                     continue;
+                }
+
+                // Check if this teacher is allowed to view this group session.
+                if ($isteacher && !empty($sess->groupid)) {
+                    $allowedgroups = groups_get_activity_allowed_groups($cm);
+                    if (!array_key_exists($sess->groupid, $allowedgroups)) {
+                        continue;
+                    }
                 }
                 list($canmark, $reason) = attendance_can_student_mark($sess, false);
 
@@ -381,7 +399,7 @@ class mobile {
         }
         // TODO: Add support for group marking (non-editing teachers etc).
         $data['users'] = array();
-        $users = $att->get_users(0, 0);
+        $users = $att->get_users($att->get_session_info($sessid)->groupid, 0);
         foreach ($users as $user) {
             $data['users'][] = array('userid' => $user->id, 'fullname' => $user->fullname);
             // Generate args to use in submission button here.
