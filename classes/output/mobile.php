@@ -139,7 +139,11 @@ class mobile {
                         continue;
                     }
                 }
-                list($canmark, $reason) = attendance_can_student_mark($sess, false);
+                list($canmark, $reason) = attendance_can_student_mark($sess);
+                if ($reason == 'preventsharederror') {
+                    $data['showmessage'] = true;
+                    $data['messages'][]['string'] = 'preventsharederror'; // Lang string to show as a message.
+                }
 
                 if ($isteacher || $canmark) {
                     $html = array('time' => attendance_construct_session_time($sess->sessdate, $sess->duration));
