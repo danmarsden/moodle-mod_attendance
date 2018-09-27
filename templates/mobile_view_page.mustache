@@ -48,13 +48,15 @@
     }
 }}
 {{=<% %>=}}
-<div>
+<div class="attendance_mobile_view_page">
     <core-course-module-description description="<% attendance.intro %>" component="mod_attendance" componentId="<% cmid %>"></core-course-module-description>
     <%#showmessage%>
     <%#messages%>
-    <ion-item>
-        {{ 'plugin.mod_attendance.<% string %>' | translate }}
-    </ion-item>
+    <span class="messages">
+        <ion-item>
+            {{ 'plugin.mod_attendance.<% string %>' | translate }}
+        </ion-item>
+    </span>
     <%/messages%>
     <%/showmessage%>
     <%#sessions%>
