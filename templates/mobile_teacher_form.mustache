@@ -59,22 +59,26 @@
         <%/messages%>
     <%/showmessage%>
     <%#users%>
-        <ion-item>
-            <span class="studentname">
-                <h2><% fullname %></h2>
-            </span>
-        </ion-item>
-
-        <ion-list radio-group [(ngModel)]="CONTENT_OTHERDATA.status<% userid %>">
-            <%#statuses%>
-            <span class="radiolabel">
+    <span class="attendance_user_row">
+    <!-- User and status of the submission. -->
+    <span ion-item text-wrap title="<% fullname %>">
+        <ion-avatar item-start>
+            <img src="<% profileimageurl %>" core-external-content role="presentation" onError="this.src='assets/img/user-avatar.png'">
+        </ion-avatar>
+        <h2><% fullname %></h2>
+        <ng-container *ngTemplateOutlet="submissionStatus"></ng-container>
+    </span>
+    <ion-list radio-group [(ngModel)]="CONTENT_OTHERDATA.status<% userid %>">
+        <%#statuses%>
+        <span class="radiolabel">
                 <ion-item>
                     <ion-label><% acronym %></ion-label>
                     <ion-radio value="<% stid %>"></ion-radio>
                 </ion-item>
             </span>
-            <%/statuses%>
-        </ion-list>
+        <%/statuses%>
+    </ion-list>
+    </span>
     <%/users%>
     <ion-item>
         <button ion-button core-site-plugins-new-content component="mod_attendance" method="mobile_view_activity" [args]="{cmid: <% cmid %>, courseid: <% courseid %>, sessid: <% sessid %><% btnargs %>}">
