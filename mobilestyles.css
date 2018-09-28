@@ -24,3 +24,7 @@
 .attendance_mobile_view_page .messages .label {
     white-space: normal;
 }
+
+.attendance_mobile_teacher_form .attendance_user_row {
+    padding-bottom: 5px;
+}

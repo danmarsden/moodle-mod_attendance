@@ -353,7 +353,7 @@ class mobile {
      * @return array HTML, javascript and other data
      */
     public static function mobile_teacher_form($args) {
-        global $OUTPUT, $DB, $CFG;
+        global $OUTPUT, $DB, $CFG, $PAGE;
 
         require_once($CFG->dirroot.'/mod/attendance/locallib.php');
 
@@ -405,7 +405,10 @@ class mobile {
         $data['users'] = array();
         $users = $att->get_users($att->get_session_info($sessid)->groupid, 0);
         foreach ($users as $user) {
-            $data['users'][] = array('userid' => $user->id, 'fullname' => $user->fullname);
+            $userpicture = new \user_picture($user);
+            $userpicture->size = 1; // Size f1.
+            $profileimageurl = $userpicture->get_url($PAGE)->out(false);
+            $data['users'][] = array('userid' => $user->id, 'fullname' => $user->fullname, 'profileimageurl' => $profileimageurl);
             // Generate args to use in submission button here.
             $data['btnargs'] .= ', status'. $user->id. ': CONTENT_OTHERDATA.status'. $user->id;
         }
