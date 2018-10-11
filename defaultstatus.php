@@ -100,7 +100,8 @@ switch ($action) {
         $acronym        = required_param_array('acronym', PARAM_TEXT);
         $description    = required_param_array('description', PARAM_TEXT);
         $grade          = required_param_array('grade', PARAM_RAW);
-        $studentavailability = optional_param_array('studentavailability', '0', PARAM_RAW);
+        // Default must be an array !
+        $studentavailability = optional_param_array('studentavailability', array_fill(0, count($acronym), 0), PARAM_RAW);
         $unmarkedstatus = optional_param('setunmarked', null, PARAM_INT);
         foreach ($grade as &$val) {
             $val = unformat_float($val);
@@ -114,6 +115,8 @@ switch ($action) {
                 $setunmarked = true;
             }
             if (!isset($studentavailability[$id])) {
+                // If $studentavailability was a string '0', this will change it to '0 0', then '0 0 0'.
+                // Getting '0 0 0'[$id] may return ' ', which is not valid for the DB.
                 $studentavailability[$id] = 0;
             }
             $errors[$id] = attendance_update_status($status, $acronym[$id], $description[$id], $grade[$id],
