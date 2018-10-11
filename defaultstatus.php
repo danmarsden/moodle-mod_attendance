@@ -113,7 +113,7 @@ switch ($action) {
             if ($unmarkedstatus == $id) {
                 $setunmarked = true;
             }
-            if (!isset($studentavailability[$id])) {
+            if (!isset($studentavailability[$id]) || !is_numeric($studentavailability[$id])) {
                 $studentavailability[$id] = 0;
             }
             $errors[$id] = attendance_update_status($status, $acronym[$id], $description[$id], $grade[$id],
