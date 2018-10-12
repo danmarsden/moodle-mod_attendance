@@ -428,7 +428,6 @@ class mod_attendance_renderer extends plugin_renderer_base {
         foreach ($takedata->statuses as $status) {
             $sessionstats[$status->id] = 0;
         }
-
         // Calculate the sum of statuses for each user.
         $sessionstats[] = array();
         foreach ($takedata->sessionlog as $userlog) {
