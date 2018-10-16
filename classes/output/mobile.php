@@ -32,6 +32,17 @@ defined('MOODLE_INTERNAL') || die();
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mobile {
+
+    /*
+     * Subnet warning. - constants used to prevent warnings from showing multiple times.
+     */
+    const MESSAGE_SUBNET = 10;
+
+    /*
+     * Prevent shared warning. used to prevent warnings from showing multiple times.
+     */
+    const MESSAGE_PREVENTSHARED = 30;
+
     /**
      * Returns the initial page when viewing the activity for the mobile app.
      *
@@ -142,7 +153,7 @@ class mobile {
                 list($canmark, $reason) = attendance_can_student_mark($sess);
                 if (!$isteacher && $reason == 'preventsharederror') {
                     $data['showmessage'] = true;
-                    $data['messages'][]['string'] = 'preventsharederror'; // Lang string to show as a message.
+                    $data['messages'][self::MESSAGE_PREVENTSHARED]['string'] = 'preventsharederror'; // Lang string to show as a message.
                 }
 
                 if ($isteacher || $canmark) {
@@ -163,7 +174,7 @@ class mobile {
                         if (!$isteacher) {
                             if (!empty($sess->subnet) && !address_in_subnet(getremoteaddr(), $sess->subnet)) {
                                 $data['showmessage'] = true;
-                                $data['messages'][]['string'] = 'subnetwrong'; // Lang string to show as a message.
+                                $data['messages'][self::MESSAGE_SUBNET]['string'] = 'subnetwrong'; // Lang string to show as a message.
                                 $html['sessid'] = null; // Unset sessid as we cannot record session on this ip.
                             } else if ($sess->autoassignstatus && empty($sess->studentpassword)) {
                                 $statusid = attendance_session_get_highest_status($att, $sess);
@@ -295,7 +306,7 @@ class mobile {
             $data['messages'][]['string'] = $reason; // Lang string to show as a message.
             $data['showstatuses'] = false; // Hide all statuses.
         } else if (!empty($attforsession->subnet) && !address_in_subnet(getremoteaddr(), $attforsession->subnet)) {
-            $data['messages'][]['string'] = 'subnetwrong'; // Lang string to show as a message.
+            $data['messages'][self::MESSAGE_SUBNET]['string'] = 'subnetwrong'; // Lang string to show as a message.
             $data['showstatuses'] = false; // Hide all statuses.
         } else if ($attforsession->autoassignstatus && empty($attforsession->studentpassword)) {
             // This shouldn't happen as the main function should handle this scenario.
