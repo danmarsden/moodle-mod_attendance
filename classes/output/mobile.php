@@ -140,7 +140,7 @@ class mobile {
                     }
                 }
                 list($canmark, $reason) = attendance_can_student_mark($sess);
-                if ($reason == 'preventsharederror') {
+                if (!$isteacher && $reason == 'preventsharederror') {
                     $data['showmessage'] = true;
                     $data['messages'][]['string'] = 'preventsharederror'; // Lang string to show as a message.
                 }
