@@ -157,11 +157,11 @@ class mobile {
                 }
 
                 if ($isteacher || $canmark) {
-                    $html = array('time' => strip_tags(construct_session_full_date_time($sess->sessdate, $sess->duration)));
+                    $html = array('time' => strip_tags(construct_session_full_date_time($sess->sessdate, $sess->duration)),
+                        'groupname' => '');
                     if (!empty($sess->groupid)) {
                         // TODO In-efficient way to get group name - we should get all groups in one query.
-                        $groupname = $DB->get_field('groups', 'name', array('id' => $sess->groupid));
-                        $html['time'] .= ' ('.$groupname.')';
+                        $html['groupname'] = $DB->get_field('groups', 'name', array('id' => $sess->groupid));
                     }
 
                     // Check if Status already recorded.
