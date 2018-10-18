@@ -62,6 +62,7 @@
     <%#sessions%>
     <ion-item>
         <h2><% time %></h2>
+        <h3><% groupname %></h3>
         <h3><% currentstatus %></h3>
         <%#sessid%>
         <button ion-button core-site-plugins-new-content component="mod_attendance" method="<% attendancefunction %>" [args]="{cmid: <% cmid %>, courseid: <% courseid %>, sessid: <% sessid %>, timestamp: <% timestamp %>}">
