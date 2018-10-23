@@ -77,6 +77,9 @@ if (($formdata = data_submitted()) && confirm_sesskey()) {
     if (!empty($att->pageparams->page) && $att->pageparams->page && $totalusers && $usersperpage) {
         $numberofpages = ceil($totalusers / $usersperpage);
         if ($att->pageparams->page < $numberofpages) {
+            $params = array(
+                'sessionid' => $att->pageparams->sessionid,
+                'grouptype' => $att->pageparams->grouptype);
             $params['page'] = $att->pageparams->page + 1;
             redirect($att->url_take($params), get_string('moreattendance', 'attendance'));
         }
