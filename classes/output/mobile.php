@@ -410,9 +410,9 @@ class mobile {
 
         foreach ($statuses as $status) {
             $data['statuses'][] = array('stid' => $status->id, 'acronym' => $status->acronym,
-                'description' => $status->description);
+                'description' => $status->description, 'selectall' => '');
         }
-        // TODO: Add support for group marking (non-editing teachers etc).
+
         $data['users'] = array();
         $users = $att->get_users($att->get_session_info($sessid)->groupid, 0);
         foreach ($users as $user) {
@@ -422,8 +422,15 @@ class mobile {
             $data['users'][] = array('userid' => $user->id, 'fullname' => $user->fullname, 'profileimageurl' => $profileimageurl);
             // Generate args to use in submission button here.
             $data['btnargs'] .= ', status'. $user->id. ': CONTENT_OTHERDATA.status'. $user->id;
+            // Really Hacky way to do a select-all. This really needs to be moved into a JS function within the app.
+            foreach ($statuses as $status) {
+                foreach ($data['statuses'] as $id => $st) { // Statuses not ordered by statusid.
+                    if ($st['stid'] == $status->id) { // Find the item that we need to add to.
+                        $data['statuses'][$id]['selectall'] .= "CONTENT_OTHERDATA.status".$user->id."=".$status->id.";";
+                    }
+                }
+            }
         }
-
         if (!empty($data['messages'])) {
             $data['showmessage'] = true;
         }
