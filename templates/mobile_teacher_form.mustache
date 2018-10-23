@@ -58,6 +58,22 @@
             </span>
         <%/messages%>
     <%/showmessage%>
+    <span class="attendance_selectall">
+                <ion-item>
+                    {{ 'plugin.mod_attendance.setallstatuses' | translate }}
+                </ion-item>
+    <ion-list radio-group>
+        <%#statuses%>
+
+        <span class="radiolabel">
+                <ion-item>
+                    <ion-label><% acronym %></ion-label>
+                    <ion-radio (ionSelect)="<% selectall %>" value="<% stid %>"></ion-radio>
+                </ion-item>
+            </span>
+        <%/statuses%>
+    </ion-list>
+    </span>
     <%#users%>
     <span class="attendance_user_row">
     <!-- User and status of the submission. -->
