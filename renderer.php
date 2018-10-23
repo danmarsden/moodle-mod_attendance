@@ -433,7 +433,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $sessionstats[] = array();
         foreach ($takedata->sessionlog as $userlog) {
             foreach ($takedata->statuses as $status) {
-                if ($userlog->statusid == $status->id) {
+                if ($userlog->statusid == $status->id && in_array($userlog->studentid, array_keys($takedata->users))) {
                     $sessionstats[$status->id]++;
                 }
             }
@@ -569,7 +569,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $controls .= $this->output->render($select);
         }
 
-        if (count($takedata->sessions4copy) > 0) {
+        if (isset($takedata->sessions4copy) && count($takedata->sessions4copy) > 0) {
             $controls .= html_writer::empty_tag('br');
             $controls .= html_writer::empty_tag('br');
 
