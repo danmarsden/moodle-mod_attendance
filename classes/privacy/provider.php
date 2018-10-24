@@ -118,6 +118,46 @@ final class provider implements
     }
 
     /**
+     * Get the list of users who have data within a context.
+     *
+     * @param   userlist    $userlist   The userlist containing the list of users who have data in this context/plugin combination.
+     */
+    public static function get_users_in_context(userlist $userlist) {
+        $context = $userlist->get_context();
+
+        if (!is_a($context, \context_module::class)) {
+            return;
+        }
+
+        $sql = "SELECT al.studentid
+                 FROM {course_modules} cm
+                 JOIN {modules} m ON cm.module = m.id AND m.name = 'attendance'
+                 JOIN {attendance} a ON cm.instance = a.id
+                 JOIN {attendance_sessions} asess ON asess.attendanceid = a.id
+                 JOIN {context} ctx ON cm.id = ctx.instanceid AND ctx.contextlevel = :contextlevel
+                 JOIN {attendance_log} al ON asess.id = al.sessionid
+                 WHERE ctx.id = :contextid";
+
+        $params = [
+            'contextlevel' => CONTEXT_MODULE,
+            'contextid'    => $context->id,
+        ];
+
+        $userlist->add_from_sql('userid', $sql, $params);
+
+        $sql = "SELECT al.takenby
+                 FROM {course_modules} cm
+                 JOIN {modules} m ON cm.module = m.id AND m.name = 'attendance'
+                 JOIN {attendance} a ON cm.instance = a.id
+                 JOIN {attendance_sessions} asess ON asess.attendanceid = a.id
+                 JOIN {context} ctx ON cm.id = ctx.instanceid AND ctx.contextlevel = :contextlevel
+                 JOIN {attendance_log} al ON asess.id = al.sessionid
+                 WHERE ctx.id = :contextid";
+
+        $userlist->add_from_sql('userid', $sql, $params);
+
+    }
+    /**
      * Delete all data for all users in the specified context.
      *
      * @param context $context The specific context to delete data for.
@@ -177,6 +217,52 @@ final class provider implements
             self::delete_user_from_sessions($userid, $sessionids);
             self::delete_user_from_attendance_warnings_log($userid, $attendanceid);
         }
+    }
+
+    /**
+     * Delete multiple users within a single context.
+     *
+     * @param   approved_userlist       $userlist The approved context and user information to delete information for.
+     */
+    public static function delete_data_for_users(approved_userlist $userlist) {
+        global $DB;
+        $context = $userlist->get_context();
+
+        if (!is_a($context, \context_module::class)) {
+            return;
+        }
+
+        // Prepare SQL to gather all completed IDs.
+        $userids = $userlist->get_userids();
+        list($insql, $inparams) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
+
+        // Delete records where user was marked as attending.
+        $DB->delete_records_select(
+            'attendance_log',
+            "studentid $insql",
+            $inparams
+        );
+
+        // Delete all warnings.
+        $DB->delete_records_select(
+            'attendance_warning_done',
+            "notifyid $insql",
+            $inparams
+        );
+        $DB->delete_records_select(
+            'attendance_warning_done',
+            "userid $insql",
+            $inparams
+        );
+
+        // Now for teachers remove relation for marking.
+        $DB->set_field_select(
+            'attendance_log',
+            'takenby',
+            2,
+            "takenby $insql",
+            $inparams);
+
     }
 
     /**
