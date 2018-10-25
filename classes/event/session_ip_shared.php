@@ -15,8 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file contains an event for when self-marking is blocked because
- * another student used the same IP address to self-mark.
+ * Event for when self-marking is blocked because another student used the same IP address to self-mark.
  *
  * @package mod_attendance
  * @author Dan Marsden <dan@danmarsden.com>
