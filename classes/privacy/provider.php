@@ -28,7 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 use context;
 use context_module;
 use core_privacy\local\metadata\collection;
-use core_privacy\local\request\{writer, transform, helper, contextlist, approved_contextlist};
+use core_privacy\local\request\{writer, transform, helper, contextlist, approved_contextlist, approved_userlist, userlist};
 use stdClass;
 
 /**
@@ -39,6 +39,7 @@ use stdClass;
  */
 final class provider implements
     \core_privacy\local\request\plugin\provider,
+    \core_privacy\local\request\core_userlist_provider,
     \core_privacy\local\metadata\provider
 {
 
