@@ -244,6 +244,18 @@ final class provider implements
             $inparams
         );
 
+        // Get list of warning_done records and check if this user is set in thirdpartyusers.
+        foreach ($userids as $userid) {
+            $sql = 'SELECT DISTINCT w.*
+                FROM {attendance_warning} w 
+                JOIN {attendance_warning_done} d ON d.notifyid = w.id AND d.userid = ?';
+            $warnings = $DB->get_records_sql($sql, array($userid));
+            if (!empty($warnings)) {
+                attendance_remove_user_from_thirdpartyemails($warnings, $userid);
+            }
+
+        }
+
         $DB->delete_records_select(
             'attendance_warning_done',
             "userid $insql",
