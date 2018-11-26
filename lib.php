@@ -499,3 +499,32 @@ function attendance_print_settings_tabs($selected = 'settings') {
 
     return $tabmenu;
 }
+
+/**
+ * Helper function to remove a user from the thirdpartyemails record of the attendance_warning table.
+ *
+ * @param array $warnings - list of warnings to parse.
+ * @param int $userid - User id of user to remove.
+ */
+function attendance_remove_user_from_thirdpartyemails($warnings, $userid) {
+    global $DB;
+
+    // Update the third party emails list for all the relevant warnings.
+    $updatedwarnings = array_map(
+        function(stdClass $warning) use ($userid) : stdClass {
+            $warning->thirdpartyemails = implode(',', array_diff(explode(',', $warning->thirdpartyemails), [$userid]));
+            return $warning;
+        },
+        array_filter(
+            $warnings,
+            function (stdClass $warning) use ($userid) : bool {
+                return in_array($userid, explode(',', $warning->thirdpartyemails));
+            }
+        )
+    );
+
+    // Sadly need to update each individually, no way to bulk update as all the thirdpartyemails field can be different.
+    foreach ($updatedwarnings as $updatedwarning) {
+        $DB->update_record('attendance_warning', $updatedwarning);
+    }
+}

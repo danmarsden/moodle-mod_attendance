@@ -244,12 +244,6 @@ final class provider implements
             $inparams
         );
 
-        // Delete all warnings.
-        $DB->delete_records_select(
-            'attendance_warning_done',
-            "notifyid $insql",
-            $inparams
-        );
         $DB->delete_records_select(
             'attendance_warning_done',
             "userid $insql",
@@ -423,7 +417,8 @@ final class provider implements
      * @param int $attendanceid The id of the attendance instance to remove the relevant warnings from.
      */
     private static function delete_user_from_attendance_warnings_log(int $userid, int $attendanceid) {
-        global $DB;
+        global $DB, $CFG;
+        require_once($CFG->dirroot.'/mod/attendance/lib.php');
 
         // Get all warnings because the user could have their ID listed in the thirdpartyemails column as a comma delimited string.
         $warnings = $DB->get_records(
@@ -435,24 +430,7 @@ final class provider implements
             return;
         }
 
-        // Update the third party emails list for all the relevant warnings.
-        $updatedwarnings = array_map(
-            function(stdClass $warning) use ($userid) : stdClass {
-                $warning->thirdpartyemails = implode(',', array_diff(explode(',', $warning->thirdpartyemails), [$userid]));
-                return $warning;
-            },
-            array_filter(
-                $warnings,
-                function (stdClass $warning) use ($userid) : bool {
-                    return in_array($userid, explode(',', $warning->thirdpartyemails));
-                }
-            )
-        );
-
-        // Sadly need to update each individually, no way to bulk update as all the thirdpartyemails field can be different.
-        foreach ($updatedwarnings as $updatedwarning) {
-            $DB->update_record('attendance_warning', $updatedwarning);
-        }
+        attendance_remove_user_from_thirdpartyemails($warnings, $userid);
 
         // Delete any record of the user being notified.
         list($warningssql, $warningsparams) = $DB->get_in_or_equal(array_keys($warnings), SQL_PARAMS_NAMED);
@@ -530,6 +508,7 @@ final class provider implements
      *
      * @param string $path The path in the export (relative to the current context).
      * @param array $attendances Array of attendances to export the logs for.
+     */
      */
     private static function export_attendance_logs(string $path, array $attendances) {
         $attendancesbycontextid = self::group_by_property($attendances, 'contextid');
