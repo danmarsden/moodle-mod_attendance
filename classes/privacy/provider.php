@@ -247,7 +247,7 @@ final class provider implements
         // Get list of warning_done records and check if this user is set in thirdpartyusers.
         foreach ($userids as $userid) {
             $sql = 'SELECT DISTINCT w.*
-                FROM {attendance_warning} w 
+                FROM {attendance_warning} w
                 JOIN {attendance_warning_done} d ON d.notifyid = w.id AND d.userid = ?';
             $warnings = $DB->get_records_sql($sql, array($userid));
             if (!empty($warnings)) {
@@ -520,7 +520,6 @@ final class provider implements
      *
      * @param string $path The path in the export (relative to the current context).
      * @param array $attendances Array of attendances to export the logs for.
-     */
      */
     private static function export_attendance_logs(string $path, array $attendances) {
         $attendancesbycontextid = self::group_by_property($attendances, 'contextid');
