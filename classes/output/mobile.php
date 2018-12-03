@@ -33,12 +33,12 @@ defined('MOODLE_INTERNAL') || die();
  */
 class mobile {
 
-    /*
+    /**
      * Subnet warning. - constants used to prevent warnings from showing multiple times.
      */
     const MESSAGE_SUBNET = 10;
 
-    /*
+    /**
      * Prevent shared warning. used to prevent warnings from showing multiple times.
      */
     const MESSAGE_PREVENTSHARED = 30;
@@ -153,7 +153,8 @@ class mobile {
                 list($canmark, $reason) = attendance_can_student_mark($sess);
                 if (!$isteacher && $reason == 'preventsharederror') {
                     $data['showmessage'] = true;
-                    $data['messages'][self::MESSAGE_PREVENTSHARED]['string'] = 'preventsharederror'; // Lang string to show as a message.
+                    // Lang string to show as a message.
+                    $data['messages'][self::MESSAGE_PREVENTSHARED]['string'] = 'preventsharederror';
                 }
 
                 if ($isteacher || $canmark) {
@@ -174,7 +175,8 @@ class mobile {
                         if (!$isteacher) {
                             if (!empty($sess->subnet) && !address_in_subnet(getremoteaddr(), $sess->subnet)) {
                                 $data['showmessage'] = true;
-                                $data['messages'][self::MESSAGE_SUBNET]['string'] = 'subnetwrong'; // Lang string to show as a message.
+                                // Lang string to show as a message.
+                                $data['messages'][self::MESSAGE_SUBNET]['string'] = 'subnetwrong';
                                 $html['sessid'] = null; // Unset sessid as we cannot record session on this ip.
                             } else if ($sess->autoassignstatus && empty($sess->studentpassword)) {
                                 $statusid = attendance_session_get_highest_status($att, $sess);
