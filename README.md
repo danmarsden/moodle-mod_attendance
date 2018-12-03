@@ -6,7 +6,7 @@ The Attendance module was previously developed by
     Dmitry Pupinin, Novosibirsk, Russia,
     Artem Andreev, Taganrog, Russia.
 
-#PURPOSE
+# PURPOSE
 The Attendance module allows teachers to maintain a record of attendance, replacing or supplementing a paper-based attendance register.
 It is primarily used in blended-learning environments where students are required to attend classes, lectures and tutorials and allows
 the teacher to track and optionally provide a grade for the students attendance.
