@@ -622,8 +622,10 @@ class mod_attendance_structure {
         $record->takenby = $USER->id;
         $record->ipaddress = getremoteaddr(null);
 
-        $dbsesslog = $this->get_session_log($mformdata->sessid);
-        if (array_key_exists($record->studentid, $dbsesslog)) {
+        $existingattendance = $DB->record_exists('attendance_log',
+            array('sessionid' => $mformdata->sessid, 'studentid' => $USER->id));
+
+        if ($existingattendance) {
             // Already recorded do not save.
             return false;
         }
