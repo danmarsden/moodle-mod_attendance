@@ -1290,9 +1290,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $row = new html_table_row();
             $text = '';
             if ($bulkmessagecapability) {
-                $text .= html_writer::checkbox('user'.$user->id, 'on', false, '', array('class' => 'attendancesesscheckbox'));
+                $text .= html_writer::checkbox('user'.$user->id, 'on', false, html_writer::link($reportdata->url_view(array('studentid' => $user->id)), fullname($user)), array('class' => 'attendancesesscheckbox'));
             }
-            $text .= html_writer::link($reportdata->url_view(array('studentid' => $user->id)), fullname($user));
             $cell = $this->build_data_cell($text, false, false, null, null, false);
             $cell->attributes['class'] = $cell->attributes['class'] . ' headcol';
             $row->cells[] = $cell;

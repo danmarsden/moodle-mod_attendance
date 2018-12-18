@@ -266,6 +266,10 @@
     border-top-width: 1px;
 }
 
+#page-mod-attendance-report .attendancereporttable .headcol label{
+    width: 80%;
+}
+
 #page-mod-attendance-report .attendancereporttable .headcol input[type='checkbox'] {
     margin-right: 4px;
 
@@ -273,6 +277,11 @@
 
 .attendancereporttable img.icon {
     padding-left: 5px;
+}
+
+.attendancereporttable .attendancesesscheckbox {
+    vertical-align: top;
+    height: 20px;
 }
 
 /* CSS for old clean based themes with docks etc. */

@@ -59,6 +59,7 @@ $PAGE->set_heading($course->fullname);
 $PAGE->force_settings_menu(true);
 $PAGE->set_cacheable(true);
 $PAGE->navbar->add(get_string('report', 'attendance'));
+$PAGE->requires->js_call_amd('mod_attendance/adjustHeight', 'init');
 
 $output = $PAGE->get_renderer('mod_attendance');
 $tabs = new attendance_tabs($att, attendance_tabs::TAB_REPORT);
