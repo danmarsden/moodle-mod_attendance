@@ -426,7 +426,9 @@ function xmldb_attendance_upgrade($oldversion=0) {
         $table = new xmldb_table('attendance_warning_done');
 
         $index = new xmldb_index('notifyid_userid', XMLDB_INDEX_UNIQUE, array('notifyid', 'userid'));
-        $dbman->drop_index($table, $index);
+        if ($dbman->index_exists($table, $index)) {
+            $dbman->drop_index($table, $index);
+        }
 
         $index = new xmldb_index('notifyid', XMLDB_INDEX_NOTUNIQUE, array('notifyid', 'userid'));
         $dbman->add_index($table, $index);
