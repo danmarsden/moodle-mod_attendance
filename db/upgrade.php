@@ -513,5 +513,19 @@ function xmldb_attendance_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2017112007, 'attendance');
     }
 
+    if ($oldversion < 2017112008) {
+
+        // Changing precision of field statusset on table attendance_log to (1333).
+        $table = new xmldb_table('attendance_log');
+        $field = new xmldb_field('statusset', XMLDB_TYPE_CHAR, '1333', null, null, null, null, 'statusid');
+
+        // Launch change of precision for field statusset.
+        $dbman->change_field_precision($table, $field);
+
+        // Attendance savepoint reached.
+        upgrade_mod_savepoint(true, 2017112008, 'attendance');
+    }
+
+
     return $result;
 }
