@@ -138,6 +138,7 @@ $string['defaultview_desc'] = 'This is the default view shown to teachers on fir
 $string['delete'] = 'Delete';
 $string['deletewarningconfirm'] = 'Are you sure you want to delete this warning?';
 $string['deletedgroup'] = 'The group associated with this session has been deleted';
+$string['deletecheckfull'] = 'Are you absolutely sure you want to completely delete the {$a}, including all user data?';
 $string['deletehiddensessions'] = 'Delete all hidden sessions';
 $string['deletelogs'] = 'Delete attendance data';
 $string['deleteselected'] = 'Delete selected';
