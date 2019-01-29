@@ -114,6 +114,7 @@ function attendance_update_calendar_event($caleventid, $timeduration, $timestart
     $caleventdata->timeduration   = $timeduration;
     $caleventdata->timestart      = $timestart;
     $caleventdata->timemodified   = time();
+    $caleventdata->description    = $session->description;
 
     $calendarevent = calendar_event::load($caleventid);
     if ($calendarevent) {
