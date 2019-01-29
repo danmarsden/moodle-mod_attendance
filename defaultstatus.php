@@ -76,7 +76,7 @@ switch ($action) {
             break;
         }
 
-        $message = get_string('deletecheckfull', '', get_string('variable', 'attendance'));
+        $message = get_string('deletecheckfull', 'attendance', get_string('variable', 'attendance'));
         $message .= str_repeat(html_writer::empty_tag('br'), 2);
         $message .= $status->acronym.': '.
             ($status->description ? $status->description : get_string('nodescription', 'attendance'));
