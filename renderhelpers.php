@@ -74,7 +74,7 @@ class user_sessions_cells_generator {
                     $this->construct_remarks_cell($this->reportdata->sessionslog[$this->user->id][$sess->id]->remarks);
                 }
             } else {
-                if ($this->user->enrolmentstart > $sess->sessdate) {
+                if ($this->user->enrolmentstart > ($sess->sessdate + $sess->duration)) {
                     $starttext = get_string('enrolmentstart', 'attendance', userdate($this->user->enrolmentstart, '%d.%m.%Y'));
                     $this->construct_enrolments_info_cell($starttext);
                 } else if ($this->user->enrolmentend and $this->user->enrolmentend < $sess->sessdate) {
