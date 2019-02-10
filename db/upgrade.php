@@ -377,7 +377,7 @@ function xmldb_attendance_upgrade($oldversion=0) {
 
             // Adding keys to table attendance_warning.
             $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
-            $table->add_key('level_id', XMLDB_KEY_UNIQUE, array('idnumber, warningpercent, warnafter'));
+            $table->add_key('level_id', XMLDB_KEY_UNIQUE, array('idnumber', 'warningpercent', 'warnafter'));
 
             // Conditionally launch create table for attendance_warning.
             $dbman->create_table($table);
@@ -392,7 +392,7 @@ function xmldb_attendance_upgrade($oldversion=0) {
                     $DB->execute("DROP INDEX ". $name);
                 }
             }
-            $index = new xmldb_key('level_id', XMLDB_KEY_UNIQUE, array('idnumber, warningpercent', 'warnafter'));
+            $index = new xmldb_key('level_id', XMLDB_KEY_UNIQUE, array('idnumber', 'warningpercent', 'warnafter'));
             $dbman->add_key($table, $index);
         }
         // Attendance savepoint reached.
