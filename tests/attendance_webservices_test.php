@@ -149,7 +149,7 @@ class attendance_webservices_tests extends advanced_testcase {
         $group->courseid = $this->course->id;
         $group = $this->getDataGenerator()->create_group($group);
 
-        for ($i=0; $i < 5; $i++) {
+        for ($i = 0; $i < 5; $i++) {
             $member = new stdClass;
             $member->groupid = $group->id;
             $member->userid = $this->students[$i]->id;
