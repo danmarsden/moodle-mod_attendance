@@ -12,3 +12,6 @@ It is primarily used in blended-learning environments where students are require
 the teacher to track and optionally provide a grade for the students attendance.
 
 Sessions can be configured to allow students to record their own attendance and a range of different reports are available.
+
+# DOCUMENTATION
+https://docs.moodle.org/en/Attendance_activity
