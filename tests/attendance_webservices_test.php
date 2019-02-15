@@ -144,7 +144,7 @@ class attendance_webservices_tests extends advanced_testcase {
     public function test_get_session_with_group() {
         $this->resetAfterTest(true);
 
-        // Create a group in our course, and add some students to it
+        // Create a group in our course, and add some students to it.
         $group = new stdClass();
         $group->courseid = $this->course->id;
         $group = $this->getDataGenerator()->create_group($group);
@@ -156,10 +156,10 @@ class attendance_webservices_tests extends advanced_testcase {
             $this->getDataGenerator()->create_group_member($member);
         }
 
-        // Add a session that's identical to the first, but with a group
+        // Add a session that's identical to the first, but with a group.
         $session = $this->sessions[0];
         $session->groupid = $group->id;
-        $session->sessdate += 3600; // make sure it appears second in the list
+        $session->sessdate += 3600; // Make sure it appears second in the list.
         $this->attendance->add_sessions($this->sessions);
 
         $courseswithsessions = attendance_handler::get_courses_with_today_sessions($this->teacher->id);
