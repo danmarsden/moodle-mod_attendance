@@ -51,7 +51,9 @@ class attendance_handler {
             $context = context_course::instance($attendance->course);
             if (has_capability('mod/attendance:takeattendances', $context, $userid)) {
                 $course = $usercourses[$attendance->course];
-                $course->attendance_instance = array();
+                if (!isset($course->attendance_instance)) {
+                    $course->attendance_instance = array();
+                }
 
                 $att = new stdClass();
                 $att->id = $attendance->id;
