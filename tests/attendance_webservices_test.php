@@ -46,6 +46,8 @@ class attendance_webservices_tests extends advanced_testcase {
     /** @var stdClass */
     protected $teacher;
     /** @var array */
+    protected $students;
+    /** @var array */
     protected $sessions;
 
     /**
@@ -96,9 +98,11 @@ class attendance_webservices_tests extends advanced_testcase {
 
     /** Creating 10 students and 1 teacher. */
     protected function create_and_enrol_users() {
+        $this->students = array();
         for ($i = 0; $i < 10; $i++) {
             $student = $this->getDataGenerator()->create_user();
             $this->getDataGenerator()->enrol_user($student->id, $this->course->id, 5); // Enrol as student.
+            $this->students[] = $student;
         }
 
         $this->teacher = $this->getDataGenerator()->create_user();
@@ -135,6 +139,40 @@ class attendance_webservices_tests extends advanced_testcase {
         $this->assertEquals($this->attendance->id, $sessioninfo->attendanceid);
         $this->assertEquals($session->id, $sessioninfo->id);
         $this->assertEquals(count($sessioninfo->users), 10);
+    }
+
+    public function test_get_session_with_group() {
+        $this->resetAfterTest(true);
+
+        // Create a group in our course, and add some students to it.
+        $group = new stdClass();
+        $group->courseid = $this->course->id;
+        $group = $this->getDataGenerator()->create_group($group);
+
+        for ($i = 0; $i < 5; $i++) {
+            $member = new stdClass;
+            $member->groupid = $group->id;
+            $member->userid = $this->students[$i]->id;
+            $this->getDataGenerator()->create_group_member($member);
+        }
+
+        // Add a session that's identical to the first, but with a group.
+        $session = $this->sessions[0];
+        $session->groupid = $group->id;
+        $session->sessdate += 3600; // Make sure it appears second in the list.
+        $this->attendance->add_sessions($this->sessions);
+
+        $courseswithsessions = attendance_handler::get_courses_with_today_sessions($this->teacher->id);
+
+        $course = array_pop($courseswithsessions);
+        $attendanceinstance = array_pop($course->attendance_instances);
+        $session = array_pop($attendanceinstance['today_sessions']);
+
+        $sessioninfo = attendance_handler::get_session($session->id);
+
+        $this->assertEquals($session->id, $sessioninfo->id);
+        $this->assertEquals($group->id, $sessioninfo->groupid);
+        $this->assertEquals(count($sessioninfo->users), 5);
     }
 
     public function test_update_user_status() {

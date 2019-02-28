@@ -144,7 +144,7 @@ final class provider implements
             'contextid'    => $context->id,
         ];
 
-        $userlist->add_from_sql('userid', $sql, $params);
+        $userlist->add_from_sql('studentid', $sql, $params);
 
         $sql = "SELECT al.takenby
                  FROM {course_modules} cm
@@ -155,7 +155,7 @@ final class provider implements
                  JOIN {attendance_log} al ON asess.id = al.sessionid
                  WHERE ctx.id = :contextid";
 
-        $userlist->add_from_sql('userid', $sql, $params);
+        $userlist->add_from_sql('takenby', $sql, $params);
 
     }
     /**
