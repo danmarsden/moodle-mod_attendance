@@ -123,14 +123,14 @@ class attendance_webservices_tests extends advanced_testcase {
     public function test_get_courses_with_today_sessions_multiple_instances() {
         $this->resetAfterTest(true);
 
-        // Make another attendance
+        // Make another attendance.
         $second = $this->create_attendance();
 
-        // Just add the same session
-        $secondSession = clone $this->sessions[0];
-        $secondSession->sessdate += 3600;
+        // Just add the same session.
+        $secondsession = clone $this->sessions[0];
+        $secondsession->sessdate += 3600;
 
-        $second->add_sessions([$secondSession]);
+        $second->add_sessions([$secondsession]);
 
         $courseswithsessions = attendance_handler::get_courses_with_today_sessions($this->teacher->id);
         $this->assertTrue(is_array($courseswithsessions));
