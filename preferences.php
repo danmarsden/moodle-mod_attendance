@@ -70,7 +70,7 @@ switch ($att->pageparams->action) {
         $newdescription     = optional_param('newdescription', null, PARAM_TEXT);
         $newgrade           = optional_param('newgrade', 0, PARAM_RAW);
         $newstudentavailability = optional_param('newstudentavailability', null, PARAM_INT);
-        $newgrade = unformat_float($newgrade);
+        $newgrade = empty($newgrade) ? 0 : unformat_float($newgrade);
 
         $newstatus = new stdClass();
         $newstatus->attendanceid = $att->id;
