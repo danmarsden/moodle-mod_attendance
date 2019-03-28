@@ -340,6 +340,12 @@ class sessions {
                 $session->preventsharediptime = $this->get_column_data($row, $mapping['preventsharediptime']);
             }
 
+            if ($mapping['calendarevent'] == -1) {
+                $session->calendarevent = $pluginconfig->calendarevent_default;
+            } else {
+                $session->calendarevent = $this->get_column_data($row, $mapping['calendarevent']);
+            }
+
             if ($mapping['includeqrcode'] == -1) {
                 $session->includeqrcode = $pluginconfig->includeqrcode_default;
             } else {
