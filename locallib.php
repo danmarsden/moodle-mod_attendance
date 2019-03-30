@@ -27,6 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/gradelib.php');
 require_once(dirname(__FILE__).'/renderhelpers.php');
 
+define('CHANGE_PASSWORD_INTERVAL', 15);
 define('ATT_VIEW_DAYS', 1);
 define('ATT_VIEW_WEEKS', 2);
 define('ATT_VIEW_MONTHS', 3);

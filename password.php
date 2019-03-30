@@ -25,9 +25,14 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+/**
+* @copyright  2019 Aggelos Bellos
+* @package    mod_attendance
+* @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+*/
+
 require_once(dirname(__FILE__).'/../../config.php');
 require_once(dirname(__FILE__).'/locallib.php');
-require_once($CFG->libdir.'/tcpdf/tcpdf_barcodes_2d.php'); // Used for generating qrcode.
 
 $session = required_param('session', PARAM_INT);
 $session = $DB->get_record('attendance_sessions', array('id' => $session), '*', MUST_EXIST);
@@ -52,12 +57,45 @@ echo $OUTPUT->header();
 echo html_writer::tag('h2', get_string('passwordgrp', 'attendance'));
 echo html_writer::span($session->studentpassword, 'student-password');
 
-if (isset($session->includeqrcode) && $session->includeqrcode == 1) {
-    $qrcodeurl = $CFG->wwwroot . '/mod/attendance/attendance.php?qrpass=' . $session->studentpassword . '&sessid=' . $session->id;
-    echo html_writer::tag('h3', get_string('qrcode', 'attendance'));
+echo html_writer::tag('span', ' - Password changes in: ', [
+    'class' => 'student-password'
+]);
 
-    $barcode = new TCPDF2DBarcode($qrcodeurl, 'QRCODE');
-    $image = $barcode->getBarcodePngData(15, 15);
-    echo html_writer::img('data:image/png;base64,' . base64_encode($image), get_string('qrcode', 'attendance'));
+echo html_writer::tag('span', CHANGE_PASSWORD_INTERVAL, [
+    'class' => 'student-password password-timer'
+]);
+
+echo html_writer::tag('span', ' seconds', [
+    'class' => 'student-password'
+]);
+
+if (isset($session->includeqrcode) && $session->includeqrcode == 1) {
+    
+    $qrcodeurl = $CFG->wwwroot . '/mod/attendance/attendance.php?qrpass=' . $session->studentpassword . '&sessid=' . $session->id;
+    
+    echo html_writer::tag('h3', get_string('qrcode', 'attendance'));
+    // load requered js
+    echo html_writer::tag('script', '', 
+        [
+            'src' => 'js/qrcode/qrcode.min.js',
+            'type' => 'text/javascript'
+        ]
+    );
+    echo html_writer::tag('script', '', 
+        [
+            'src' => 'js/password/PasswordManager.js',
+            'type' => 'text/javascript'
+        ]
+    );
+
+    echo html_writer::tag('div', '', ['id' => 'qrcode']); // div to display qr code
+    // js to start the password manager
+    echo '
+    <script type="text/javascript">
+        let pwManager = new PasswordManager();
+        pwManager.start("' . $session->id . '", document.getElementById("qrcode"), "' . $session->studentpassword . '", ' . CHANGE_PASSWORD_INTERVAL . ');
+    </script>';
+
 }
+
 echo $OUTPUT->footer();
