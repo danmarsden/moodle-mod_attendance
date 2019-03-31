@@ -344,6 +344,12 @@ class sessions {
                 $session->includeqrcode = $pluginconfig->includeqrcode_default;
             } else {
                 $session->includeqrcode = $this->get_column_data($row, $mapping['includeqrcode']);
+
+                if ($session->includeqrcode == 1 && $session->studentscanmark != 1) {
+                    \mod_attendance_notifyqueue::notify_problem(get_string('error:qrcode', 'attendance'));
+                    continue;
+                }
+
             }
 
             $session->statusset = 0;
