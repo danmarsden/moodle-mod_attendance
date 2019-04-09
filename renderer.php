@@ -403,6 +403,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
     /**
      * Render take data.
      *
+     * @copyright 2019 Jonathan Chan <jonathan.chan@sta.uwi.edu>
+     * @copyright based on work by 2011 Artem Andreev <andreev.artem@gmail.com>
      * @param attendance_take_data $takedata
      * @return string
      */
@@ -425,6 +427,17 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $table .= html_writer::tag('center', html_writer::empty_tag('input', $params));
         $table = html_writer::tag('form', $table, array('method' => 'post', 'action' => $takedata->url_path(),
                                                         'id' => 'attendancetakeform'));
+
+        $table .= html_writer::empty_tag('br');
+
+        $table .= '<center>';
+        $urlparams = array('id' => $takedata->cm->id,
+                           'sessionid' => $takedata->pageparams->sessionid,
+                           'grouptype' => $takedata->pageparams->grouptype);
+        $url = new moodle_url('/mod/attendance/upload_attendance.php', $urlparams);
+        $table .= '<a href="' . $url . '" class="btn btn-primary" >' . get_string('uploadattendance','attendance') . '</a>';
+
+        $table .= '</center>';
 
         foreach ($takedata->statuses as $status) {
             $sessionstats[$status->id] = 0;
@@ -798,11 +811,14 @@ class mod_attendance_renderer extends plugin_renderer_base {
     /**
      * Construct take user controls.
      *
+     * @copyright 2019 Jonathan Chan <jonathan.chan@sta.uwi.edu>
+     * @copyright based on work by 2011 Artem Andreev <andreev.artem@gmail.com>
      * @param attendance_take_data $takedata
      * @param stdClass $user
      * @return array
      */
     private function construct_take_user_controls(attendance_take_data $takedata, $user) {
+        global $PAGE;
         $celldata = array();
         if ($user->enrolmentend and $user->enrolmentend < $takedata->sessioninfo->sessdate) {
             $celldata['text'] = get_string('enrolmentend', 'attendance', userdate($user->enrolmentend, '%d.%m.%Y'));
@@ -819,8 +835,16 @@ class mod_attendance_renderer extends plugin_renderer_base {
             }
 
             $celldata['text'] = array();
+
+            foreach ($takedata->statuses as $status){
+                if ($status->description == 'Excused'){
+                    $excused = $status->id;
+                }
+            }
+
             foreach ($takedata->statuses as $st) {
                 $params = array(
+                        'id'    => 'radiocheckstatususer'.$user->id.'st'.$st->id,
                         'type'  => 'radio',
                         'name'  => 'user'.$user->id,
                         'class' => 'st'.$st->id,
@@ -831,6 +855,14 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
                 $input = html_writer::empty_tag('input', $params);
 
+                // When the user checks an excused radio button, the "remarks" field is automatically made a required element.
+                $PAGE->requires->js_amd_inline("
+                require(['jquery'], function($) {
+                    $('#radiocheckstatususer".$user->id."st".$excused."').click(function(e) {
+                        $('#attendancetakeform').find('#remarks".$user->id."').prop('required', true);
+                    });
+                });");
+
                 if ($takedata->pageparams->viewmode == mod_attendance_take_page_params::SORTED_GRID) {
                     $input = html_writer::tag('nobr', $input . $st->acronym);
                 }
@@ -838,9 +870,11 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 $celldata['text'][] = $input;
             }
             $params = array(
+                    'id'    => 'remarks'.$user->id,
                     'type'  => 'text',
                     'name'  => 'remarks'.$user->id,
                     'maxlength' => 255);
+
             if (array_key_exists($user->id, $takedata->sessionlog)) {
                 $params['value'] = $takedata->sessionlog[$user->id]->remarks;
             }
