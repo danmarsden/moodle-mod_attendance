@@ -85,9 +85,6 @@ class mod_attendance_structure {
     /** @var int Position for the session detail columns related to summary columns.*/
     public $sessiondetailspos;
 
-    /** @var boolean flag set when user attempts to change student's attendance from P,L or E to A */
-    public $attemptedfraud;
-
     /** @var int groupmode  */
     private $groupmode;
 
@@ -680,22 +677,6 @@ class mod_attendance_structure {
         global $DB, $USER;
         // TODO: WARNING - $formdata is unclean - comes from direct $_POST - ideally needs a rewrite but we do some cleaning below.
         // This whole function could do with a nice clean up.
-
-        //Prime variables with the corresponding attendance status id.
-        $statuses = $this->get_statuses();
-
-        foreach ($statuses as $status){
-            if ($status->description == 'Present'){
-                $present = $status->id;
-            } elseif ($status->description == 'Late'){
-                $late = $status->id;
-            } elseif ($status->description == 'Absent'){
-                $absent = $status->id;
-            } else {
-                $excused = $status->id;
-            }
-        }
-
         $statuses = implode(',', array_keys( (array)$this->get_statuses() ));
         $now = time();
         $sesslog = array();
@@ -730,15 +711,9 @@ class mod_attendance_structure {
                     if ($dbsesslog[$log->studentid]->remarks <> $log->remarks ||
                         $dbsesslog[$log->studentid]->statusid <> $log->statusid ||
                         $dbsesslog[$log->studentid]->statusset <> $log->statusset) {
-                        // To prevent users from changing the attendance of studentswho are marked as P,L or E,
-                        // only allow the students with attendance status A to be changed to either P,L, or E.
-                        if ($dbsesslog[$log->studentid]->statusid == $absent){
 
-                            $log->id = $dbsesslog[$log->studentid]->id;
-                            $DB->update_record('attendance_log', $log);
-                        } else {
-                            $this->attemptedfraud = true;
-                        }
+                        $log->id = $dbsesslog[$log->studentid]->id;
+                        $DB->update_record('attendance_log', $log);
                     }
                 } else {
                     $DB->insert_record('attendance_log', $log, false);
@@ -1313,26 +1288,5 @@ class mod_attendance_structure {
         }
 
         return $this->lowgradethreshold;
-    }
-
-    /**
-     * Lookup this student's id number and return the student's user id.
-     *
-     * @copyright  2019 Jonathan Chan <jonathan.chan@sta.uwi.edu>
-     * @param int $idnumber The idnumber to lookup
-     * @return int The user id or false if they don't exist
-     */
-    public function get_user_id_from_idnumber($idnumber) {
-        global $DB;
-
-        // Search for a record.
-        if ($record = $DB->get_record('user',
-                                      array('idnumber'=>$idnumber),
-                                      'id',
-                                      IGNORE_MISSING)) {
-            return $record->id;
-        }
-
-        return false;
     }
 }
