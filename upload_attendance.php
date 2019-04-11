@@ -115,7 +115,7 @@ if ($mform->is_cancelled()) {
             $missing .= get_string('scandatecolempty', 'attendance');
         }
         if (!empty($missing)) {
-            $missing .= get_string('missing','attendance');
+            $missing .= get_string('missing', 'attendance');
             redirect($thisurl, $missing, null, \core\output\notification::NOTIFY_ERROR);
         }
         
@@ -144,7 +144,7 @@ if ($mform->is_cancelled()) {
             $err .= get_string('scantimeerr', 'attendance'); 
         }
         
-        if (!empty($err)){
+        if (!empty($err)) {
             redirect($thisurl, $err, null, \core\output\notification::NOTIFY_ERROR);
         }
 
@@ -197,7 +197,7 @@ if ($mform->is_cancelled()) {
                 if (($scantime >= $sessioninfo->sessdate - 1800) && 
                     ($scantime <= $sessioninfo->sessdate + 900)) {
                     $sesslog[$sid]->statusid = $present;
-                } elseif (($scantime > $sessioninfo->sessdate + 900) && 
+                } else if (($scantime > $sessioninfo->sessdate + 900) && 
                           ($scantime <= $sessioninfo->sessdate + $sessioninfo->duration)) {
                     $sesslog[$sid]->statusid = $late;
                 }                
@@ -209,20 +209,19 @@ if ($mform->is_cancelled()) {
     $dbsesslog = $att->get_session_log($att->pageparams->sessionid);
 
     foreach ($sesslog as $log) {
-        // Don't save a record if no statusid or remark.
+        // Only save new records or remarked records
         if (!empty($log->statusid) || !empty($log->remarks)) {
             if (array_key_exists($log->studentid, $dbsesslog)) {
-                // Check if anything important has changed before updating record.
-                // Don't update timetaken/takenby records if nothing has changed.
+                // Update records only if something important was changed.
                 if ($dbsesslog[$log->studentid]->remarks <> $log->remarks ||
                         $dbsesslog[$log->studentid]->statusid <> $log->statusid ||
                         $dbsesslog[$log->studentid]->statusset <> $log->statusset) {
                     // To prevent users from changing the attendance of students who are marked as P,L or E,
                     // only allow the students with attendance status A to be changed to either P,L, or E.
-                    if ($dbsesslog[$log->studentid]->statusid == $absent){
-
+                    if ($dbsesslog[$log->studentid]->statusid == $absent) {
+                        
                         $log->id = $dbsesslog[$log->studentid]->id;
-                        $DB->update_record('attendance_log', $log);   
+                        $DB->update_record('attendance_log', $log);                        
                     } else {
                         $att->attemptedfraud = true;
                     }

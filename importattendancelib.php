@@ -197,7 +197,7 @@ class attendance_importer {
             if (empty($record[$this->encodingindex])) {
                 $this->encodingcolempty = true;
             }
-            if (empty($record[$this->scantimeindex])){
+            if (empty($record[$this->scantimeindex])) {
                 $this->scantimecolempty = true;
             }
             if (empty($record[$this->scandateindex])) {
@@ -265,7 +265,7 @@ class attendance_importer {
         
         if ($this->idnumcolempty == true     || $this->encodingcolempty == true  || $this->scantimecolempty == true  ||
             $this->scandatecolempty == true  || $this->scantimeformaterr == true || $this->scandateformaterr == true ||
-            $this->incompatsessdate == true  || $this->multipledays == true      || $this->scantimeerr == true){
+            $this->incompatsessdate == true  || $this->multipledays == true      || $this->scantimeerr == true) {
             return false;
         }
         

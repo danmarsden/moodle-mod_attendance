@@ -684,7 +684,7 @@ class mod_attendance_structure {
         // Prime variables with the corresponding attendance status id.
         $statuses = $this->get_statuses();
 
-        foreach ($statuses as $status) {        
+        foreach ($statuses as $status) {
             if ($status->description == 'Present') {
                 $present = $status->id;
             }
@@ -735,7 +735,7 @@ class mod_attendance_structure {
                         $dbsesslog[$log->studentid]->statusset <> $log->statusset) {
                         // To prevent users from changing the attendance of studentswho are marked as P,L or E,
                         // only allow the students with attendance status A to be changed to either P,L, or E.
-                        if ($dbsesslog[$log->studentid]->statusid == $absent){
+                        if ($dbsesslog[$log->studentid]->statusid == $absent) {
 
                             $log->id = $dbsesslog[$log->studentid]->id;
                             $DB->update_record('attendance_log', $log);

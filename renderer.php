@@ -435,7 +435,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
                            'sessionid' => $takedata->pageparams->sessionid,
                            'grouptype' => $takedata->pageparams->grouptype);
         $url = new moodle_url('/mod/attendance/upload_attendance.php', $urlparams);
-        $table .= '<a href="' . $url . '" class="btn btn-primary" >' . get_string('uploadattendance','attendance') . '</a>';
+        $table .= '<a href="' . $url . '" class="btn btn-primary" >' . get_string('uploadattendance', 'attendance') . '</a>';
 
         $table .= '</center>';
 
