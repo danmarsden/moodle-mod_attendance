@@ -13,11 +13,10 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
 /**
  * This file contains the form used to upload a csv attendance file to automatically update attendance records.
- * 
- * @package   mod_attendance 
+ *
+ * @package   mod_attendance
  * @copyright 2019 Jonathan Chan <jonathan.chan@sta.uwi.edu>
  * @copyright based on work by 2012 NetSpot {@link http://www.netspot.com.au}
  * @license   http://www.gnu.org/copyleft/gpl.html GNUGv3 or later */
@@ -28,7 +27,7 @@ require_once($CFG->libdir.'/formslib.php');
 
 /**
  * Class for displaying the csv upload form.
- * 
+ *
  * @package   mod_attendance
  * @copyright 2019 Jonathan Chan <jonathan.chan@sta.uwi.edu>
  * @copyright based on work by 2012 NetSpot {@link http://www.netspot.com.au}
@@ -37,7 +36,7 @@ require_once($CFG->libdir.'/formslib.php');
 class csv_upload_form extends moodleform {
     /**
      * Form definition
-     */    
+     */
     public function definition() {
         global $COURSE;
         $mform = $this->_form;
@@ -47,14 +46,14 @@ class csv_upload_form extends moodleform {
             'maxbytes' => $COURSE->maxbytes,
             'accepted_types' => 'csv',
             'maxfiles' => 1);
-        
+
         $mform->addElement('filepicker', 'attendancefile', get_string('uploadafile'), null, $fileoptions);
         $mform->addRule('attendancefile', get_string('uploadnofilefound'), 'required', null, 'client');
         $mform->addHelpButton('attendancefile', 'attendancefile', 'attendance');
         $encodings = core_text::get_encodings();
         $mform->addElement('select', 'encoding', get_string('encoding', 'grades'), $encodings);
         $mform->addHelpButton('encoding', 'encoding', 'grades');
-        
+
         $radio = array();
         $radio[] = $mform->createElement('radio', 'separator', null, get_string('septab', 'grades'), 'tab');
         $radio[] = $mform->createElement('radio', 'separator', null, get_string('sepcomma', 'grades'), 'comma');
