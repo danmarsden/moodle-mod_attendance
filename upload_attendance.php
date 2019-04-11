@@ -15,8 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file creates a page for the "csv_upload_form" and processes the uploaded csv attendance file to automatically 
- * update student attendance records.  
+ * This file creates a page for the "csv_upload_form" and processes the uploaded csv attendance file to automatically
+ * update student attendance records.
  *
  * @package   mod_attendance
  * @copyright 2019 Jonathan Chan <jonathan.chan@sta.uwi.edu>
@@ -24,14 +24,13 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-global $DB;
-
-
 require_once(dirname(__FILE__).'/../../config.php');
 require_once(dirname(__FILE__).'/locallib.php');
 require_once(dirname(__FILE__).'/csv_upload_form.php');
 require_once(dirname(__FILE__).'/importattendancelib.php');
 require_once($CFG->libdir . '/csvlib.class.php');
+
+global $DB;
 
 $pageparams = new mod_attendance_take_page_params();
 
@@ -65,9 +64,9 @@ $PAGE->navbar->add($att->name);
 
 
 $mform = new csv_upload_form(null,
-                             array('cm'=>$cm->id,
-                                   'sessionid'=>$pageparams->sessionid,
-                                   'grouptype'=>$pageparams->grouptype));
+                             array('cm' => $cm->id,
+                                   'sessionid' => $pageparams->sessionid,
+                                   'grouptype' => $pageparams->grouptype));
 
 $o = '';
 
@@ -85,10 +84,10 @@ if ($mform->is_cancelled()) {
     
     $importid = csv_import_reader::get_new_iid('attendance');
 
-    $attimporter = new attendance_importer($importid, $att, $data->encoding, $data->separator); 
+    $attimporter = new attendance_importer($importid, $att, $data->encoding, $data->separator);
     $attimporter->parsecsv($csvdata);
     
-    // An error message is displayed if something is wrong with the the uploaded file during the precheck.  
+    // An error message is displayed if something is wrong with the the uploaded file during the precheck.
     if (!$attimporter->init()) {
         $thisurl = new moodle_url('/mod/attendance/upload_attendance.php',
                             array('id' => $cm->id,
@@ -98,52 +97,51 @@ if ($mform->is_cancelled()) {
         $missing = '';
         $err = '';
         
-        // Action error flags here.
-        
-        if ($attimporter->idnumcolempty == true){
+        // Action error flags here.        
+        if ($attimporter->idnumcolempty == true) {
             $attimporter->idnumcolempty = false;
-            $missing .= get_string('idnumcolempty','attendance');
+            $missing .= get_string('idnumcolempty', 'attendance');
         }
-        if ($attimporter->encodingcolempty == true){
+        if ($attimporter->encodingcolempty == true) {
             $attimporter->encodingcolempty = false;
-            $missing .= get_string('encodingcolempty','attendance');
+            $missing .= get_string('encodingcolempty', 'attendance');
         }
-        if ($attimporter->scantimecolempty == true){
+        if ($attimporter->scantimecolempty == true) {
             $attimporter->scantimecolempty = false;
-            $missing .= get_string('scantimecolempty','attendance');
+            $missing .= get_string('scantimecolempty', 'attendance');
         }
-        if ($attimporter->scandatecolempty == true){
+        if ($attimporter->scandatecolempty == true) {
             $attimporter->scandatecolempty = false;
-            $missing .= get_string('scandatecolempty','attendance');
-        }        
-        if (!empty($missing)){
+            $missing .= get_string('scandatecolempty', 'attendance');
+        }
+        if (!empty($missing)) {
             $missing .= get_string('missing','attendance');
             redirect($thisurl, $missing, null, \core\output\notification::NOTIFY_ERROR);
         }
         
         if ($attimporter->scantimeformaterr == true) {
             $attimporter->scantimeformaterr = false;
-            $err .= get_string('scantimeformaterr','attendance');
+            $err .= get_string('scantimeformaterr', 'attendance');
         }
         
         if ($attimporter->scandateformaterr == true) {
             $attimporter->scandateformaterr = false;
-            $err .= get_string('scandateformaterr','attendance');
+            $err .= get_string('scandateformaterr', 'attendance');
         }
         
         if ($attimporter->incompatsessdate == true) {
             $attimporter->incompatsessdate = false;
-            $err .= get_string('incompatsessdate','attendance');
+            $err .= get_string('incompatsessdate', 'attendance');
         }
         
         if ($attimporter->multipledays == true) {
             $attimporter->multipledays = false;
-            $err .= get_string('multipledays','attendance');
+            $err .= get_string('multipledays', 'attendance');
         }
         
         if ($attimporter->scantimeerr == true) {
             $attimporter->scantimeerr = false;
-            $err .= get_string('scantimeerr','attendance'); 
+            $err .= get_string('scantimeerr', 'attendance'); 
         }
         
         if (!empty($err)){
@@ -157,26 +155,29 @@ if ($mform->is_cancelled()) {
     // Prime status variables with the corresponding attendance status id.
     $statuses = $att->get_statuses();
 
-    foreach ($statuses as $status){
-        if ($status->description == 'Present'){
+    foreach ($statuses as $status) {        
+        if ($status->description == 'Present') {
             $present = $status->id;
-        } elseif ($status->description == 'Late'){
+        }
+        if ($status->description == 'Late') {
             $late = $status->id;
-        } elseif ($status->description == 'Absent'){
-            $absent = $status->id;
-        } else {
+        }
+        if ($status->description == 'Excused') {
             $excused = $status->id;
-        } 
+        }
+        if ($status->description == 'Absent') {
+            $absent = $status->id;
+        }
     }
     
-    $sessioninfo = $att->get_session_info($att->pageparams->sessionid);    
+    $sessioninfo = $att->get_session_info($att->pageparams->sessionid);
     $statuses = implode(',', array_keys( (array)$att->get_statuses() ));
     $validusers = $att->get_users($att->pageparams->grouptype, 0);
     $now = time();
     $sesslog = array();
     
     // For loop generating the data to insert into the attendance_log database.
-    foreach ($validusers as $student){
+    foreach ($validusers as $student) {
         
         $sid = $student->id;
         $sesslog[$sid] = new stdClass();
@@ -189,15 +190,15 @@ if ($mform->is_cancelled()) {
         $sesslog[$sid]->statusid = $absent;
 
         // While loop to set the student's attendance status based on scantime and presence in the csv file.
-        while ($record = $attimporter->next()){
+        while ($record = $attimporter->next()) {
             $userid = $record->user->id;
-            if ($sid == $userid){   
+            if ($sid == $userid) {   
                 $scantime = $record->scantime;
                 if (($scantime >= $sessioninfo->sessdate - 1800) && 
                     ($scantime <= $sessioninfo->sessdate + 900)) {
                     $sesslog[$sid]->statusid = $present;
                 } elseif (($scantime > $sessioninfo->sessdate + 900) && 
-                          ($scantime <= $sessioninfo->sessdate + $sessioninfo->duration)){
+                          ($scantime <= $sessioninfo->sessdate + $sessioninfo->duration)) {
                     $sesslog[$sid]->statusid = $late;
                 }                
             }
@@ -214,8 +215,8 @@ if ($mform->is_cancelled()) {
                 // Check if anything important has changed before updating record.
                 // Don't update timetaken/takenby records if nothing has changed.
                 if ($dbsesslog[$log->studentid]->remarks <> $log->remarks ||
-                    $dbsesslog[$log->studentid]->statusid <> $log->statusid ||
-                    $dbsesslog[$log->studentid]->statusset <> $log->statusset) {
+                        $dbsesslog[$log->studentid]->statusid <> $log->statusid ||
+                        $dbsesslog[$log->studentid]->statusset <> $log->statusset) {
                     // To prevent users from changing the attendance of students who are marked as P,L or E,
                     // only allow the students with attendance status A to be changed to either P,L, or E.
                     if ($dbsesslog[$log->studentid]->statusid == $absent){
@@ -256,7 +257,7 @@ if ($mform->is_cancelled()) {
     
     // If the user tries to change the attendance of a student who is P, L or E, they will be unable to do so and be
     // directed to the manual input page where they will be presented with a warning message.
-    if ($att->attemptedfraud == true){
+    if ($att->attemptedfraud == true) {
         $att->attemptedfraud = false;
         $params = array(
                 'sessionid' => $att->pageparams->sessionid,
@@ -269,9 +270,9 @@ if ($mform->is_cancelled()) {
     return;
 }
 
-//output starts here
+// Output starts here.
 echo $output->header();
 echo $output->heading(get_string('attendanceforthecourse', 'attendance').' :: ' .format_string($course->fullname));
-$mform->display();  
+$mform->display();
 
 echo $output->footer();

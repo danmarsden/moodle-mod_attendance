@@ -681,18 +681,21 @@ class mod_attendance_structure {
         // TODO: WARNING - $formdata is unclean - comes from direct $_POST - ideally needs a rewrite but we do some cleaning below.
         // This whole function could do with a nice clean up.
 
-        //Prime variables with the corresponding attendance status id.
+        // Prime variables with the corresponding attendance status id.
         $statuses = $this->get_statuses();
 
-        foreach ($statuses as $status){
-            if ($status->description == 'Present'){
+        foreach ($statuses as $status) {        
+            if ($status->description == 'Present') {
                 $present = $status->id;
-            } elseif ($status->description == 'Late'){
+            }
+            if ($status->description == 'Late') {
                 $late = $status->id;
-            } elseif ($status->description == 'Absent'){
-                $absent = $status->id;
-            } else {
+            }
+            if ($status->description == 'Excused') {
                 $excused = $status->id;
+            }
+            if ($status->description == 'Absent') {
+                $absent = $status->id;
             }
         }
 
@@ -1327,7 +1330,7 @@ class mod_attendance_structure {
 
         // Search for a record.
         if ($record = $DB->get_record('user',
-                                      array('idnumber'=>$idnumber),
+                                      array('idnumber' => $idnumber),
                                       'id',
                                       IGNORE_MISSING)) {
             return $record->id;

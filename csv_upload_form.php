@@ -15,8 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file contains the form used to upload a csv attendance file to automatically update attendance records.  
- *
+ * This file contains the form used to upload a csv attendance file to automatically update attendance records.
+ * 
  * @package   mod_attendance
  * @copyright 2019 Jonathan Chan <jonathan.chan@sta.uwi.edu>
  * @copyright based on work by 2012 NetSpot {@link http://www.netspot.com.au}
@@ -36,7 +36,9 @@ require_once($CFG->libdir.'/formslib.php');
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class csv_upload_form extends moodleform {
-    
+    /**
+     * Form definition
+     */
     public function definition() {
         global $COURSE;
 
@@ -45,10 +47,10 @@ class csv_upload_form extends moodleform {
 
         $mform->addElement('header', 'uploadattendance', get_string('uploadattendance', 'attendance'));
 
-        $fileoptions = array('subdirs'=>0,
-                                'maxbytes'=>$COURSE->maxbytes,
-                                'accepted_types'=>'csv',
-                                'maxfiles'=>1,);
+        $fileoptions = array('subdirs' => 0,
+                                'maxbytes' => $COURSE->maxbytes,
+                                'accepted_types' => 'csv',
+                                'maxfiles' => 1);
 
         $mform->addElement('filepicker', 'attendancefile', get_string('uploadafile'), null, $fileoptions);
         $mform->addRule('attendancefile', get_string('uploadnofilefound'), 'required', null, 'client');

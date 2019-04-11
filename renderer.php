@@ -836,8 +836,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
             $celldata['text'] = array();
 
-            foreach ($takedata->statuses as $status){
-                if ($status->description == 'Excused'){
+            foreach ($takedata->statuses as $status) {
+                if ($status->description == 'Excused') {
                     $excused = $status->id;
                 }
             }
