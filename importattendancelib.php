@@ -133,8 +133,6 @@ class attendance_importer {
         }
         $this->csvreader->init();
           
-        $columns = $this->csvreader->get_columns();
-
         $sessioninfo = $this->att->get_session_info($this->att->pageparams->sessionid);
         
         $filename = $CFG->tempdir.'/csvimport/'.'attendance'.'/'.$USER->id.'/'.$this->importid;

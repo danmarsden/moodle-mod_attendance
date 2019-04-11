@@ -38,7 +38,7 @@ require_once($CFG->libdir.'/formslib.php');
 class csv_upload_form extends moodleform {
     
     public function definition() {
-        global $COURSE, $USER;
+        global $COURSE;
 
         $mform = $this->_form;
         $params = $this->_customdata;
@@ -74,7 +74,5 @@ class csv_upload_form extends moodleform {
         $mform->addElement('hidden', 'grouptype', $params['grouptype']);
         $mform->setType('grouptype', PARAM_INT);
         $this->add_action_buttons(true, get_string('uploadattendance', 'attendance'));
-
     }
-
 }
