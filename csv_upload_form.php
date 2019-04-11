@@ -13,13 +13,15 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
- * This file contains the form used to upload a csv attendance file to automatically update attendance records.
+ * This file contains the form used to upload a csv attendance file to automatically update attendance records.  
  *
  * @package   mod_attendance
  * @copyright 2019 Jonathan Chan <jonathan.chan@sta.uwi.edu>
  * @copyright based on work by 2012 NetSpot {@link http://www.netspot.com.au}
- * @license   http://www.gnu.org/copyleft/gpl.html GNUGv3 or later */
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
 
@@ -31,25 +33,27 @@ require_once($CFG->libdir.'/formslib.php');
  * @package   mod_attendance
  * @copyright 2019 Jonathan Chan <jonathan.chan@sta.uwi.edu>
  * @copyright based on work by 2012 NetSpot {@link http://www.netspot.com.au}
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later */
-
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class csv_upload_form extends moodleform {
-    /**
-     * Form definition
-     */
+    
     public function definition() {
-        global $COURSE;
+        global $COURSE, $USER;
+
         $mform = $this->_form;
         $params = $this->_customdata;
+
         $mform->addElement('header', 'uploadattendance', get_string('uploadattendance', 'attendance'));
-        $fileoptions = array('subdirs' => 0,
-            'maxbytes' => $COURSE->maxbytes,
-            'accepted_types' => 'csv',
-            'maxfiles' => 1);
+
+        $fileoptions = array('subdirs'=>0,
+                                'maxbytes'=>$COURSE->maxbytes,
+                                'accepted_types'=>'csv',
+                                'maxfiles'=>1,);
 
         $mform->addElement('filepicker', 'attendancefile', get_string('uploadafile'), null, $fileoptions);
         $mform->addRule('attendancefile', get_string('uploadnofilefound'), 'required', null, 'client');
         $mform->addHelpButton('attendancefile', 'attendancefile', 'attendance');
+
         $encodings = core_text::get_encodings();
         $mform->addElement('select', 'encoding', get_string('encoding', 'grades'), $encodings);
         $mform->addHelpButton('encoding', 'encoding', 'grades');
@@ -62,6 +66,7 @@ class csv_upload_form extends moodleform {
         $mform->addGroup($radio, 'separator', get_string('separator', 'grades'), ' ', false);
         $mform->addHelpButton('separator', 'separator', 'grades');
         $mform->setDefault('separator', 'comma');
+
         $mform->addElement('hidden', 'id', $params['cm']);
         $mform->setType('id', PARAM_INT);
         $mform->addElement('hidden', 'sessionid', $params['sessionid']);
@@ -69,6 +74,7 @@ class csv_upload_form extends moodleform {
         $mform->addElement('hidden', 'grouptype', $params['grouptype']);
         $mform->setType('grouptype', PARAM_INT);
         $this->add_action_buttons(true, get_string('uploadattendance', 'attendance'));
-    }
-}
 
+    }
+
+}
