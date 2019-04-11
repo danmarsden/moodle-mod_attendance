@@ -15,8 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file contains the forms to create and edit an instance of this module 
- * 
+ * This file contains the forms to create and edit an instance of this module
+ *
  * @package   mod_attendance
  * @copyright 2019 Jonathan Chan <jonathan.chan@sta.uwi.edu>
  * @copyright based on work by 2012 NetSpot {@link http://www.netspot.com.au}
@@ -26,7 +26,7 @@ defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
 
 /**
  * Class for the CSV file importer.
- * 
+ *
  * @package   mod_attendance
  * @copyright 2019 Jonathan Chan <jonathan.chan@sta.uwi.edu>
  * @copyright based on work by 2012 NetSpot {@link http://www.netspot.com.au}
@@ -35,22 +35,22 @@ defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
 class attendance_importer {
     /** @var string $importid - unique id for this import operation - must be passed between requests */
     public $importid;
-    
+
     /** @var csv_import_reader $csvreader - the csv importer class */
     private $csvreader;
-    
+
     /** @var mod_attendance_structure $att - the mod_attendance_structure class */
     private $att;
-    
+
     /** @var int $idnumindex the column index containing the student's id number */
     private $idnumindex = 0;
-    
+
     /** @var int $encodingindex the column index containing the student's id number */
     private $encodingindex = 1;
-    
+
     /** @var int $gradeindex the column index containing the grades */
     private $scantimeindex = 2;
-    
+
     /** @var int $modifiedindex the column index containing the last modified time */
     private $scandateindex = 3;
 
