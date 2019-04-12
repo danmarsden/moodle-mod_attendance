@@ -403,8 +403,6 @@ class mod_attendance_renderer extends plugin_renderer_base {
     /**
      * Render take data.
      *
-     * @copyright 2019 Jonathan Chan <jonathan.chan@sta.uwi.edu>
-     * @copyright based on work by 2011 Artem Andreev <andreev.artem@gmail.com>
      * @param attendance_take_data $takedata
      * @return string
      */
@@ -811,8 +809,6 @@ class mod_attendance_renderer extends plugin_renderer_base {
     /**
      * Construct take user controls.
      *
-     * @copyright 2019 Jonathan Chan <jonathan.chan@sta.uwi.edu>
-     * @copyright based on work by 2011 Artem Andreev <andreev.artem@gmail.com>
      * @param attendance_take_data $takedata
      * @param stdClass $user
      * @return array

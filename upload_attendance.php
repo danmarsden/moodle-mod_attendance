@@ -26,8 +26,6 @@
 
 require_once(dirname(__FILE__).'/../../config.php');
 require_once(dirname(__FILE__).'/locallib.php');
-require_once(dirname(__FILE__).'/csv_upload_form.php');
-require_once(dirname(__FILE__).'/importattendancelib.php');
 require_once($CFG->libdir . '/csvlib.class.php');
 
 global $DB;
@@ -63,10 +61,10 @@ $PAGE->set_cacheable(true);
 $PAGE->navbar->add($att->name);
 
 
-$mform = new csv_upload_form(null,
-                             array('cm' => $cm->id,
-                                   'sessionid' => $pageparams->sessionid,
-                                   'grouptype' => $pageparams->grouptype));
+$mform = new \mod_attendance\import\csv_upload_form(null,
+                                                    array('cm' => $cm->id,
+                                                          'sessionid' => $pageparams->sessionid,
+                                                          'grouptype' => $pageparams->grouptype));
 
 $o = '';
 
@@ -83,7 +81,7 @@ if ($mform->is_cancelled()) {
         ($csvdata = $mform->get_file_content('attendancefile'))) {
     $importid = csv_import_reader::get_new_iid('attendance');
 
-    $attimporter = new attendance_importer($importid, $att, $data->encoding, $data->separator);
+    $attimporter = new \mod_attendance\import\attendance_importer($importid, $att, $data->encoding, $data->separator);
     $attimporter->parsecsv($csvdata);
 
     // An error message is displayed if something is wrong with the uploaded file during the precheck.

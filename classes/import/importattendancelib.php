@@ -21,6 +21,7 @@
  * @copyright 2019 Jonathan Chan <jonathan.chan@sta.uwi.edu>
  * @copyright based on work by 2012 NetSpot {@link http://www.netspot.com.au}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later */
+namespace mod_attendance\import;
 
 defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
 

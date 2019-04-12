@@ -1321,7 +1321,6 @@ class mod_attendance_structure {
     /**
      * Lookup this student's id number and return the student's user id.
      *
-     * @copyright  2019 Jonathan Chan <jonathan.chan@sta.uwi.edu>
      * @param int $idnumber The idnumber to lookup
      * @return int The user id or false if they don't exist
      */
