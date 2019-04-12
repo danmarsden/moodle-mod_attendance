@@ -21,9 +21,10 @@
  * @copyright 2019 Jonathan Chan <jonathan.chan@sta.uwi.edu>
  * @copyright based on work by 2012 NetSpot {@link http://www.netspot.com.au}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later */
-namespace mod_attendance\import;
 
-defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
+defined('MOODLE_INTERNAL') || die();
+
+require_once($CFG->libdir . '/csvlib.class.php');
 
 /**
  * Class for the CSV file importer.
@@ -33,7 +34,7 @@ defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
  * @copyright based on work by 2012 NetSpot {@link http://www.netspot.com.au}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later */
 
-class attendance_importer {
+class mod_attendance_importer {
     /** @var string $importid - unique id for this import operation - must be passed between requests */
     public $importid;
 

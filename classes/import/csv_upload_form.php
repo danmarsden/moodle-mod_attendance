@@ -25,6 +25,8 @@ namespace mod_attendance\import;
 
 defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
 
+use core_text;
+use moodleform;
 require_once($CFG->libdir.'/formslib.php');
 
 /**

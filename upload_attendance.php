@@ -81,7 +81,7 @@ if ($mform->is_cancelled()) {
         ($csvdata = $mform->get_file_content('attendancefile'))) {
     $importid = csv_import_reader::get_new_iid('attendance');
 
-    $attimporter = new \mod_attendance\import\attendance_importer($importid, $att, $data->encoding, $data->separator);
+    $attimporter = new mod_attendance_importer($importid, $att, $data->encoding, $data->separator);
     $attimporter->parsecsv($csvdata);
 
     // An error message is displayed if something is wrong with the uploaded file during the precheck.
