@@ -27,6 +27,10 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/gradelib.php');
 require_once(dirname(__FILE__).'/renderhelpers.php');
 
+define('ATT_DISABLED', 1);
+define('ATT_AUTOMARK_ONLY', 2);
+define('ATT_AUTOMARK_STUDENTSCANMARK', 3);
+
 define('ATT_VIEW_DAYS', 1);
 define('ATT_VIEW_WEEKS', 2);
 define('ATT_VIEW_MONTHS', 3);
@@ -429,62 +433,62 @@ function attendance_random_string($length=6) {
  * @param boolean $log - if student cannot mark, generate log event.
  * @return array (boolean, string reason for failure)
  */
-function attendance_can_student_mark($sess, $log = true) {
-    global $DB, $USER, $OUTPUT;
-    $canmark = false;
-    $reason = 'closed';
-    $attconfig = get_config('attendance');
-    if (!empty($attconfig->studentscanmark) && !empty($sess->studentscanmark)) {
-        if (empty($attconfig->studentscanmarksessiontime)) {
-            $canmark = true;
-            $reason = '';
-        } else {
-            $duration = $sess->duration;
-            if (empty($duration)) {
-                $duration = $attconfig->studentscanmarksessiontimeend * 60;
-            }
-            if ($sess->sessdate < time() && time() < ($sess->sessdate + $duration)) {
-                $canmark = true;
-                $reason = '';
-            }
-        }
-    }
-    // Check if another student has marked attendance from this IP address recently.
-    if ($canmark && !empty($sess->preventsharedip)) {
-        if ($sess->preventsharedip == ATTENDANCE_SHAREDIP_MINUTES) {
-            $time = time() - ($sess->preventsharediptime * 60);
-            $sql = 'sessionid = ? AND studentid <> ? AND timetaken > ? AND ipaddress = ?';
-            $params = array($sess->id, $USER->id, $time, getremoteaddr());
-            $record = $DB->get_record_select('attendance_log', $sql, $params);
-        } else {
-            // Assume ATTENDANCE_SHAREDIP_FORCED.
-            $sql = 'sessionid = ? AND studentid <> ? ipaddress = ?';
-            $params = array($sess->id, $USER->id, getremoteaddr());
-            $record = $DB->get_record_select('attendance_log', $sql, $params);
-        }
+ function attendance_can_student_mark($sess, $log = true) {
+     global $DB, $USER, $OUTPUT;
+     $canmark = false;
+     $reason = 'closed';
+     $attconfig = get_config('attendance');
+     if ($attconfig->automark_studentscanmark == ATT_AUTOMARK_STUDENTSCANMARK && !empty($sess->studentscanmark)) {
+         if (empty($attconfig->studentscanmarksessiontime)) {
+             $canmark = true;
+             $reason = '';
+         } else {
+             $duration = $sess->duration;
+             if (empty($duration)) {
+                 $duration = $attconfig->studentscanmarksessiontimeend * 60;
+             }
+             if ($sess->sessdate < time() && time() < ($sess->sessdate + $duration)) {
+                 $canmark = true;
+                 $reason = '';
+             }
+         }
+     }
+     // Check if another student has marked attendance from this IP address recently.
+     if ($canmark && !empty($sess->preventsharedip)) {
+         if ($sess->preventsharedip == ATTENDANCE_SHAREDIP_MINUTES) {
+             $time = time() - ($sess->preventsharediptime * 60);
+             $sql = 'sessionid = ? AND studentid <> ? AND timetaken > ? AND ipaddress = ?';
+             $params = array($sess->id, $USER->id, $time, getremoteaddr());
+             $record = $DB->get_record_select('attendance_log', $sql, $params);
+         } else {
+             // Assume ATTENDANCE_SHAREDIP_FORCED.
+             $sql = 'sessionid = ? AND studentid <> ? ipaddress = ?';
+             $params = array($sess->id, $USER->id, getremoteaddr());
+             $record = $DB->get_record_select('attendance_log', $sql, $params);
+         }
 
-        if (!empty($record)) {
-            $canmark = false;
-            $reason = 'preventsharederror';
-            if ($log) {
-                // Trigger an ip_shared event.
-                $attendanceid = $DB->get_field('attendance_sessions', 'attendanceid', array('id' => $record->sessionid));
-                $cm = get_coursemodule_from_instance('attendance', $attendanceid);
-                $event = \mod_attendance\event\session_ip_shared::create(array(
-                    'objectid' => 0,
-                    'context' => \context_module::instance($cm->id),
-                    'other' => array(
-                        'sessionid' => $record->sessionid,
-                        'otheruser' => $record->studentid
-                    )
-                ));
+         if (!empty($record)) {
+             $canmark = false;
+             $reason = 'preventsharederror';
+             if ($log) {
+                 // Trigger an ip_shared event.
+                 $attendanceid = $DB->get_field('attendance_sessions', 'attendanceid', array('id' => $record->sessionid));
+                 $cm = get_coursemodule_from_instance('attendance', $attendanceid);
+                 $event = \mod_attendance\event\session_ip_shared::create(array(
+                     'objectid' => 0,
+                     'context' => \context_module::instance($cm->id),
+                     'other' => array(
+                         'sessionid' => $record->sessionid,
+                         'otheruser' => $record->studentid
+                     )
+                 ));
 
-                $event->trigger();
-            }
-        }
-    }
-    return array($canmark, $reason);
-}
+                 $event->trigger();
+             }
+         }
+     }
+     return array($canmark, $reason);
+ }
 
 /**
  * Generate worksheet for Attendance export
@@ -588,7 +592,7 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
 
     $now = time();
 
-    if (empty(get_config('attendance', 'studentscanmark'))) {
+    if (get_config('attendance', 'studentscanmark') == ATT_DISABLED) {
         $formdata->studentscanmark = 0;
     }
 

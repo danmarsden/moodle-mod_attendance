@@ -128,62 +128,63 @@ class mod_attendance_update_form extends moodleform {
         }
 
         // Students can mark own attendance.
-        if (!empty(get_config('attendance', 'studentscanmark'))) {
+        if (get_config('attendance', 'automark_studentscanmark') != ATT_DISABLED) {
             $mform->addElement('header', 'headerstudentmarking', get_string('studentmarking', 'attendance'), true);
             $mform->setExpanded('headerstudentmarking');
-
-            $mform->addElement('checkbox', 'studentscanmark', '', get_string('studentscanmark', 'attendance'));
-            $mform->addHelpButton('studentscanmark', 'studentscanmark', 'attendance');
 
             $options2 = attendance_get_automarkoptions();
 
             $mform->addElement('select', 'automark', get_string('automark', 'attendance'), $options2);
             $mform->setType('automark', PARAM_INT);
             $mform->addHelpButton('automark', 'automark', 'attendance');
-            $mform->hideif('automark', 'studentscanmark', 'notchecked');
 
-            $mform->addElement('text', 'studentpassword', get_string('studentpassword', 'attendance'));
-            $mform->setType('studentpassword', PARAM_TEXT);
-            $mform->addHelpButton('studentpassword', 'passwordgrp', 'attendance');
-            $mform->hideif('studentpassword', 'studentscanmark', 'notchecked');
-            $mform->hideif('studentpassword', 'automark', 'eq', ATTENDANCE_AUTOMARK_ALL);
-            $mform->hideif('randompassword', 'automark', 'eq', ATTENDANCE_AUTOMARK_ALL);
-            $mform->addElement('checkbox', 'includeqrcode', '', get_string('includeqrcode', 'attendance'));
-            $mform->hideif('includeqrcode', 'studentscanmark', 'notchecked');
-            $mform->addElement('checkbox', 'autoassignstatus', '', get_string('autoassignstatus', 'attendance'));
-            $mform->addHelpButton('autoassignstatus', 'autoassignstatus', 'attendance');
-            $mform->hideif('autoassignstatus', 'studentscanmark', 'notchecked');
+            if (get_config('attendance', 'automark_studentscanmark') == ATT_AUTOMARK_STUDENTSCANMARK) {
+                $mform->addElement('checkbox', 'studentscanmark', '', get_string('studentscanmark', 'attendance'));
+                $mform->addHelpButton('studentscanmark', 'studentscanmark', 'attendance');
 
-            $mgroup = array();
-            $mgroup[] = & $mform->createElement('text', 'subnet', get_string('requiresubnet', 'attendance'));
-            $mform->setDefault('subnet', $this->_customdata['att']->subnet);
-            $mgroup[] = & $mform->createElement('checkbox', 'usedefaultsubnet', get_string('usedefaultsubnet', 'attendance'));
-            $mform->setDefault('usedefaultsubnet', 1);
-            $mform->setType('subnet', PARAM_TEXT);
+                $mform->addElement('text', 'studentpassword', get_string('studentpassword', 'attendance'));
+                $mform->setType('studentpassword', PARAM_TEXT);
+                $mform->addHelpButton('studentpassword', 'passwordgrp', 'attendance');
+                $mform->hideif('studentpassword', 'studentscanmark', 'notchecked');
+                $mform->hideif('studentpassword', 'automark', 'eq', ATTENDANCE_AUTOMARK_ALL);
+                $mform->hideif('randompassword', 'automark', 'eq', ATTENDANCE_AUTOMARK_ALL);
+                $mform->addElement('checkbox', 'includeqrcode', '', get_string('includeqrcode', 'attendance'));
+                $mform->hideif('includeqrcode', 'studentscanmark', 'notchecked');
+                $mform->addElement('checkbox', 'autoassignstatus', '', get_string('autoassignstatus', 'attendance'));
+                $mform->addHelpButton('autoassignstatus', 'autoassignstatus', 'attendance');
+                $mform->hideif('autoassignstatus', 'studentscanmark', 'notchecked');
 
-            $mform->addGroup($mgroup, 'subnetgrp', get_string('requiresubnet', 'attendance'), array(' '), false);
-            $mform->setAdvanced('subnetgrp');
-            $mform->addHelpButton('subnetgrp', 'requiresubnet', 'attendance');
+                $mgroup = array();
+                $mgroup[] = & $mform->createElement('text', 'subnet', get_string('requiresubnet', 'attendance'));
+                $mform->setDefault('subnet', $this->_customdata['att']->subnet);
+                $mgroup[] = & $mform->createElement('checkbox', 'usedefaultsubnet', get_string('usedefaultsubnet', 'attendance'));
+                $mform->setDefault('usedefaultsubnet', 1);
+                $mform->setType('subnet', PARAM_TEXT);
 
-            $mform->hideif('subnetgrp', 'studentscanmark', 'notchecked');
-            $mform->hideif('subnet', 'usedefaultsubnet', 'checked');
+                $mform->addGroup($mgroup, 'subnetgrp', get_string('requiresubnet', 'attendance'), array(' '), false);
+                $mform->setAdvanced('subnetgrp');
+                $mform->addHelpButton('subnetgrp', 'requiresubnet', 'attendance');
 
-            $mform->addElement('hidden', 'automarkcompleted', '0');
-            $mform->settype('automarkcompleted', PARAM_INT);
+                $mform->hideif('subnetgrp', 'studentscanmark', 'notchecked');
+                $mform->hideif('subnet', 'usedefaultsubnet', 'checked');
 
-            $mgroup3 = array();
-            $options = attendance_get_sharedipoptions();
-            $mgroup3[] = & $mform->createElement('select', 'preventsharedip',
-                get_string('preventsharedip', 'attendance'), $options);
-            $mgroup3[] = & $mform->createElement('text', 'preventsharediptime',
-                get_string('preventsharediptime', 'attendance'), '', 'test');
-            $mform->addGroup($mgroup3, 'preventsharedgroup',
-                get_string('preventsharedip', 'attendance'), array(' '), false);
-            $mform->addHelpButton('preventsharedgroup', 'preventsharedip', 'attendance');
-            $mform->setAdvanced('preventsharedgroup');
-            $mform->setType('preventsharediptime', PARAM_INT);
-            $mform->hideif('preventsharedgroup', 'studentscanmark', 'notchecked');
-            $mform->hideIf('preventsharediptime', 'preventsharedip', 'noteq', ATTENDANCE_SHAREDIP_MINUTES);
+                $mform->addElement('hidden', 'automarkcompleted', '0');
+                $mform->settype('automarkcompleted', PARAM_INT);
+
+                $mgroup3 = array();
+                $options = attendance_get_sharedipoptions();
+                $mgroup3[] = & $mform->createElement('select', 'preventsharedip',
+                    get_string('preventsharedip', 'attendance'), $options);
+                $mgroup3[] = & $mform->createElement('text', 'preventsharediptime',
+                    get_string('preventsharediptime', 'attendance'), '', 'test');
+                $mform->addGroup($mgroup3, 'preventsharedgroup',
+                    get_string('preventsharedip', 'attendance'), array(' '), false);
+                $mform->addHelpButton('preventsharedgroup', 'preventsharedip', 'attendance');
+                $mform->setAdvanced('preventsharedgroup');
+                $mform->setType('preventsharediptime', PARAM_INT);
+                $mform->hideif('preventsharedgroup', 'studentscanmark', 'notchecked');
+                $mform->hideIf('preventsharediptime', 'preventsharedip', 'noteq', ATTENDANCE_SHAREDIP_MINUTES);
+            }
         } else {
             $mform->addElement('hidden', 'studentscanmark', '0');
             $mform->settype('studentscanmark', PARAM_INT);
