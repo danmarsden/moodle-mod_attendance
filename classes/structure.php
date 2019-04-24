@@ -558,6 +558,9 @@ class mod_attendance_structure {
         if (!empty($formdata->autoassignstatus)) {
             $sess->autoassignstatus = $formdata->autoassignstatus;
         }
+        if (!empty($formdata->automark)) {
+            $sess->automark = $formdata->automark;
+        }
         if (get_config('attendance', 'automark_studentscanmark') == ATT_AUTOMARK_STUDENTSCANMARK &&
             !empty($formdata->studentscanmark)) {
             $sess->studentscanmark = $formdata->studentscanmark;
@@ -569,9 +572,6 @@ class mod_attendance_structure {
                 $sess->subnet = $formdata->subnet;
             }
 
-            if (!empty($formdata->automark)) {
-                $sess->automark = $formdata->automark;
-            }
             if (!empty($formdata->preventsharedip)) {
                 $sess->preventsharedip = $formdata->preventsharedip;
             }

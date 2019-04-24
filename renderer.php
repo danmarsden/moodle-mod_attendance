@@ -1735,8 +1735,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
     protected function render_attendance_preferences_data($prefdata) {
         $this->page->requires->js('/mod/attendance/module.js');
 
+        $automark = false;
         $studentscanmark = false;
-        if (!empty(get_config('attendance', 'studentscanmark'))) {
+        if (get_config('attendance', 'automark_studentscanmark') == ATT_AUTOMARK_ONLY) {
+            $automark = true;
+        }
+        if (get_config('attendance', 'automark_studentscanmark') == ATT_AUTOMARK_STUDENTSCANMARK) {
             $studentscanmark = true;
         }
 
@@ -1747,6 +1751,11 @@ class mod_attendance_renderer extends plugin_renderer_base {
                              get_string('description'),
                              get_string('points', 'attendance'));
         $table->align = array('center', 'center', 'center', 'center', 'center', 'center');
+        if ($automark) {
+            $table->head[] = get_string('setunmarked', 'attendance').
+                $this->output->help_icon('setunmarked', 'attendance');
+            $table->align[] = 'center';
+        }
         if ($studentscanmark) {
             $table->head[] = get_string('studentavailability', 'attendance').
                 $this->output->help_icon('studentavailability', 'attendance');
@@ -1776,6 +1785,13 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $cells[] = $this->construct_text_input('description['.$st->id.']', 30, 30, $st->description) .
                                  $emptydescription;
             $cells[] = $this->construct_text_input('grade['.$st->id.']', 4, 4, $st->grade);
+            if ($automark) {
+                $checked = '';
+                if ($st->setunmarked) {
+                    $checked = ' checked ';
+                }
+                $cells[] = '<input type="radio" name="setunmarked" value="'.$st->id.'"'.$checked.'>';
+            }            
             if ($studentscanmark) {
                 $checked = '';
                 if ($st->setunmarked) {
