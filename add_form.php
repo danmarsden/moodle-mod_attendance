@@ -336,11 +336,11 @@ class mod_attendance_add_form extends moodleform {
         if ($addmulti && ceil(($data['sessionenddate'] - $data['sessiondate']) / YEARSECS) > 1) {
             $errors['sessionenddate'] = get_string('timeahead', 'attendance');
         }
-
-        if ($data['sessiondate'] < $data['coursestartdate'] && $data['sessiondate'] != $data['previoussessiondate']) {
+        $sessstart = $data['sessiondate'] + $sesstarttime;
+        if ($sessstart < $data['coursestartdate'] && $sessstart != $data['previoussessiondate']) {
             $errors['sessiondate'] = get_string('priorto', 'attendance',
-                userdate($data['coursestartdate'], get_string('strftimedmy', 'attendance')));
-            $this->_form->setConstant('previoussessiondate', $data['sessiondate']);
+                userdate($data['coursestartdate'], get_string('strftimedmyhm', 'attendance')));
+            $this->_form->setConstant('previoussessiondate', $sessstart);
         }
 
         if (!empty($data['studentscanmark']) && $data['automark'] == ATTENDANCE_AUTOMARK_CLOSE) {
