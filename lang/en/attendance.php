@@ -200,6 +200,7 @@ $string['error:sessioncourseinvalid'] = 'A session course is invalid! Skipping.'
 $string['error:sessiondateinvalid'] = 'A session date is invalid! Skipping.';
 $string['error:sessionendinvalid'] = 'A session end time is invalid! Skipping.';
 $string['error:sessionstartinvalid'] = 'A session start time is invalid! Skipping.';
+$string['error:qrcode'] = 'Allow students to record own attendance must be enabled to use QR code! Skipping.';
 $string['errorgroupsnotselected'] = 'Select one or more groups';
 $string['errorinaddingsession'] = 'Error in adding session';
 $string['erroringeneratingsessions'] = 'Error in generating sessions ';
