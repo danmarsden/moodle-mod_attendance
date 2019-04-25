@@ -558,30 +558,31 @@ class mod_attendance_structure {
         if (!empty($formdata->autoassignstatus)) {
             $sess->autoassignstatus = $formdata->autoassignstatus;
         }
-        if (!empty(get_config('attendance', 'studentscanmark')) &&
+        $studentscanmark = get_config('attendance', 'studentscanmark');
+
+        if (!empty($studentscanmark) &&
             !empty($formdata->studentscanmark)) {
             $sess->studentscanmark = $formdata->studentscanmark;
             $sess->studentpassword = $formdata->studentpassword;
             $sess->autoassignstatus = $formdata->autoassignstatus;
-            if (!empty($formdata->usedefaultsubnet)) {
-                $sess->subnet = $this->subnet;
-            } else {
-                $sess->subnet = $formdata->subnet;
-            }
-
-            if (!empty($formdata->automark)) {
-                $sess->automark = $formdata->automark;
-            }
-            if (!empty($formdata->preventsharedip)) {
-                $sess->preventsharedip = $formdata->preventsharedip;
-            }
-            if (!empty($formdata->preventsharediptime)) {
-                $sess->preventsharediptime = $formdata->preventsharediptime;
-            }
             if (!empty($formdata->includeqrcode)) {
                 $sess->includeqrcode = $formdata->includeqrcode;
             }
+        }
+        if (!empty($formdata->usedefaultsubnet)) {
+            $sess->subnet = $this->subnet;
+        } else {
+            $sess->subnet = $formdata->subnet;
+        }
 
+        if (!empty($formdata->automark)) {
+            $sess->automark = $formdata->automark;
+        }
+        if (!empty($formdata->preventsharedip)) {
+            $sess->preventsharedip = $formdata->preventsharedip;
+        }
+        if (!empty($formdata->preventsharediptime)) {
+            $sess->preventsharediptime = $formdata->preventsharediptime;
         }
 
         $sess->timemodified = time();
