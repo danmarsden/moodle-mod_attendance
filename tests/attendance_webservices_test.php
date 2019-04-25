@@ -54,8 +54,6 @@ class attendance_webservices_tests extends advanced_testcase {
      * Setup class.
      */
     public function setUp() {
-        global $DB;
-
         $this->category = $this->getDataGenerator()->create_category();
         $this->course = $this->getDataGenerator()->create_course(array('category' => $this->category->id));
 
@@ -83,6 +81,9 @@ class attendance_webservices_tests extends advanced_testcase {
         $this->attendance->add_sessions($this->sessions);
     }
 
+    /**
+     * Create new attendance activity.
+     */
     private function create_attendance() {
         global $DB;
         $att = $this->getDataGenerator()->create_module('attendance', array('course' => $this->course->id));
