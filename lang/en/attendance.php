@@ -73,10 +73,10 @@ $string['attrecords'] = 'Attendances records';
 $string['automark'] = 'Automatic marking';
 $string['automarkall'] = 'Yes';
 $string['automarkclose'] = 'Set unmarked at end of session';
+$string['automarktask'] = 'Check for attendance sessions that require auto marking';
 $string['automark_help'] = 'Allows marking to be completed automatically.
 If "Yes" students will be automatically marked depending on their first access to the course.
 If "Set unmarked at end of session" any students who have not marked their attendance will be set to the unmarked status selected.';
-$string['automarktask'] = 'Check for attendance sessions that require auto marking';
 $string['autorecorded'] = 'system auto recorded';
 $string['averageattendance'] = 'Average attendance';
 $string['averageattendancegraded'] = 'Average attendance';
@@ -158,6 +158,9 @@ $string['downloadexcel'] = 'Download in Excel format';
 $string['downloadooo'] = 'Download in OpenOffice format';
 $string['downloadtext'] = 'Download in text format';
 $string['duration'] = 'Duration';
+$string['earliestscantime'] = 'Earliest Scan time (minutes)';
+$string['earliestscantime_desc'] = 'This determines how many minutes before the start of a session the earliest scan can occur. This only applies when uploading an attendance file.';
+$string['earliestscantime_help'] = 'This determines how many minutes before the start of a session the earliest scan can occur. This only applies when uploading an attendance file.';
 $string['editsession'] = 'Edit Session';
 $string['edituser'] = 'Edit user';
 $string['emailcontent_default'] = 'Hi %userfirstname%,
@@ -248,7 +251,7 @@ $string['includeall'] = 'Select all sessions';
 $string['includenottaken'] = 'Include not taken sessions';
 $string['includeqrcode'] = 'Include QR code';
 $string['includeremarks'] = 'Include remarks';
-$string['incompatsessdate'] = 'The uploaded file contains records with scan dates that do not match the session date. Please ensure the uploaded file ONLY contains records that match the session date before re-uploading. <br><br>';
+$string['incompatsessdate'] = 'The uploaded file contains records with scan dates that do not match the session date. Either the wrong file was uploaded or the scanner is uncalibrated. Please ensure the uploaded file ONLY contains records that match the session date before re-uploading. <br><br>';
 $string['incorrectpassword'] = 'You have entered an incorrect password and your attendance has not been recorded, please enter the correct password.';
 $string['incorrectpasswordshort'] = 'Incorrect password, attendance not recorded.';
 $string['indetail'] = 'In detail...';
@@ -418,7 +421,7 @@ $string['scandatecolempty'] = 'The scan date column is missing. <br>';
 $string['scandateformaterr'] = 'The scan date column is not formatted properly. Please ensure the scan dates are in the format m/d/y, before re-uploading the file.  <br><br>';
 $string['scantimecolempty'] = 'The scan time column is missing. <br>';
 $string['scantimeformaterr'] = 'The scan time column is not formatted properly. Please ensure the scan times are in the format H:M:S A, before re-uploading the file.  <br><br>';
-$string['scantimeerr'] = 'The uploaded file contains multiple records with scan times that do not fall within the session time. This may be because: <br>
+$string['scantimeerr'] = 'The majority of the class was not classified as {$a}. This may be because: <br>
 - the wrong file was uploaded for this session time <br>
 - the scanner was uncalibrated <br>
 - the scanner was affected by Daylight Savings Time (DST). <br>
@@ -486,7 +489,7 @@ $string['studentavailability'] = 'Available for students (minutes)';
 $string['studentavailability_help'] = 'When students are marking their own attendance, the number of minutes after session starts that this status is available.
  <br/>If empty, this status will always be available, If set to 0 it will always be hidden to students.';
 $string['studentid'] = 'Student ID';
-$string['studentmarking'] = 'Student recording';
+$string['studentmarking'] = 'Student marking';
 $string['studentpassword'] = 'Student password';
 $string['studentrecordingexpanded'] = 'Student recording expanded';
 $string['studentrecordingexpanded_desc'] = 'Show the "Student recording" settings as expanded by default when creating new sessions.';

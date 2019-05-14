@@ -114,6 +114,7 @@ if ($mform->is_cancelled()) {
         if (!empty($missing)) {
             $missing .= get_string('missing', 'attendance');
             redirect($thisurl, $missing, null, \core\output\notification::NOTIFY_ERROR);
+            return;
         }
         if ($attimporter->scantimeformaterr == true) {
             $attimporter->scantimeformaterr = false;
@@ -123,17 +124,18 @@ if ($mform->is_cancelled()) {
             $attimporter->scandateformaterr = false;
             $err .= get_string('scandateformaterr', 'attendance');
         }
-        if ($attimporter->incompatsessdate == true) {
-            $attimporter->incompatsessdate = false;
-            $err .= get_string('incompatsessdate', 'attendance');
-        }
         if ($attimporter->multipledays == true) {
             $attimporter->multipledays = false;
             $err .= get_string('multipledays', 'attendance');
-        }
-        if ($attimporter->scantimeerr == true) {
-            $attimporter->scantimeerr = false;
-            $err .= get_string('scantimeerr', 'attendance');
+        } else {
+            if ($attimporter->incompatsessdate == true) {
+                $attimporter->incompatsessdate = false;
+                $err .= get_string('incompatsessdate', 'attendance');
+            }
+            if ($attimporter->scantimeerr == true) {
+                $attimporter->scantimeerr = false;
+                $err .= get_string('scantimeerr', 'attendance', $attimporter->highestgradedstatus->description);
+            }
         }
         if (!empty($err)) {
             redirect($thisurl, $err, null, \core\output\notification::NOTIFY_ERROR);
@@ -141,118 +143,8 @@ if ($mform->is_cancelled()) {
         return;
     }
 
-    // Processing the csv file data starts here.
-    // Prime status variables with the corresponding attendance status id.
-    $statuses = $att->get_statuses();
-
-    foreach ($statuses as $status) {
-        if ($status->description == 'Present') {
-            $present = $status->id;
-        }
-        if ($status->description == 'Late') {
-            $late = $status->id;
-        }
-        if ($status->description == 'Excused') {
-            $excused = $status->id;
-        }
-        if ($status->description == 'Absent') {
-            $absent = $status->id;
-        }
-    }
-
-    $sessioninfo = $att->get_session_info($att->pageparams->sessionid);
-    $statuses = implode(',', array_keys( (array)$att->get_statuses() ));
-    $validusers = $att->get_users($att->pageparams->grouptype, 0);
-    $now = time();
-    $sesslog = array();
-
-    // For loop generating the data to insert into the attendance_log database.
-    foreach ($validusers as $student) {
-
-        $sid = $student->id;
-        $sesslog[$sid] = new stdClass();
-        $sesslog[$sid]->studentid = $sid;
-        $sesslog[$sid]->statusset = $statuses;
-        $sesslog[$sid]->remarks = '';
-        $sesslog[$sid]->sessionid = $pageparams->sessionid;
-        $sesslog[$sid]->timetaken = $now;
-        $sesslog[$sid]->takenby = $USER->id;
-        $sesslog[$sid]->statusid = $absent;
-
-        // While loop to set the student's attendance status based on scantime and presence in the csv file.
-        while ($record = $attimporter->next()) {
-            $userid = $record->user->id;
-            if ($sid == $userid) {
-                $scantime = $record->scantime;
-                if (($scantime >= $sessioninfo->sessdate - 1800) &&
-                    ($scantime <= $sessioninfo->sessdate + 900)) {
-                    $sesslog[$sid]->statusid = $present;
-                } else if (($scantime > $sessioninfo->sessdate + 900) &&
-                          ($scantime <= $sessioninfo->sessdate + $sessioninfo->duration)) {
-                    $sesslog[$sid]->statusid = $late;
-                }
-            }
-        }
-        $attimporter->restart();
-    }
-
-    $dbsesslog = $att->get_session_log($att->pageparams->sessionid);
-
-    foreach ($sesslog as $log) {
-        // Only save new records or remarked records.
-        if (!empty($log->statusid) || !empty($log->remarks)) {
-            if (array_key_exists($log->studentid, $dbsesslog)) {
-                // Update records only if something important was changed.
-                if ($dbsesslog[$log->studentid]->remarks <> $log->remarks ||
-                        $dbsesslog[$log->studentid]->statusid <> $log->statusid ||
-                        $dbsesslog[$log->studentid]->statusset <> $log->statusset) {
-                    // To prevent users from changing the attendance of students who are marked as P,L or E,
-                    // only allow the students with attendance status A to be changed to either P,L, or E.
-                    if ($dbsesslog[$log->studentid]->statusid == $absent) {
-
-                        $log->id = $dbsesslog[$log->studentid]->id;
-                        $DB->update_record('attendance_log', $log);
-                    } else {
-                        $att->attemptedfraud = true;
-                    }
-                }
-            } else {
-                $DB->insert_record('attendance_log', $log, false);
-            }
-        }
-    }
-
-    $session = $att->get_session_info($att->pageparams->sessionid);
-    $session->lasttaken = $now;
-    $session->lasttakenby = $USER->id;
-
-    $DB->update_record('attendance_sessions', $session);
-
-    if ($att->grade != 0) {
-        $att->update_users_grade(array_keys($sesslog));
-    }
-
-    // Create url for link in log screen.
-    $params = array(
-        'sessionid' => $att->pageparams->sessionid,
-        'grouptype' => $att->pageparams->grouptype);
-    $event = \mod_attendance\event\attendance_taken::create(array(
-        'objectid' => $att->id,
-        'context' => $att->context,
-        'other' => $params));
-    $event->add_record_snapshot('course_modules', $att->cm);
-    $event->add_record_snapshot('attendance_sessions', $session);
-    $event->trigger();
-
-    // If the user tries to change the attendance of a student who is P, L or E, they will be unable to do so and be
-    // directed to the manual input page where they will be presented with a warning message.
-    if ($att->attemptedfraud == true) {
-        $att->attemptedfraud = false;
-        $params = array(
-                'sessionid' => $att->pageparams->sessionid,
-                'grouptype' => $att->pageparams->grouptype);
-        redirect($att->url_take($params), get_string('attemptedfraud', 'attendance'));
-    }
+    // Processing the csv file data here.
+    $att->take_from_form_data($attimporter, $fromcsv = true, $att, $session);
 
     redirect($att->url_manage(), get_string('attendancesuccess', 'attendance'));
 

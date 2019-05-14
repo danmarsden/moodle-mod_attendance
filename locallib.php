@@ -27,6 +27,10 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/gradelib.php');
 require_once(dirname(__FILE__).'/renderhelpers.php');
 
+define('ATT_DISABLED', 1);
+define('ATT_AUTOMARK_ONLY', 2);
+define('ATT_AUTOMARK_STUDENTSCANMARK', 3);
+
 define('ATT_VIEW_DAYS', 1);
 define('ATT_VIEW_WEEKS', 2);
 define('ATT_VIEW_MONTHS', 3);
@@ -434,7 +438,7 @@ function attendance_can_student_mark($sess, $log = true) {
     $canmark = false;
     $reason = 'closed';
     $attconfig = get_config('attendance');
-    if (!empty($attconfig->studentscanmark) && !empty($sess->studentscanmark)) {
+    if ($attconfig->automark_studentscanmark == ATT_AUTOMARK_STUDENTSCANMARK && !empty($sess->studentscanmark)) {
         if (empty($attconfig->studentscanmarksessiontime)) {
             $canmark = true;
             $reason = '';
@@ -634,18 +638,26 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
                     $sess->absenteereport = $absenteereport;
                     $sess->studentpassword = '';
                     $sess->includeqrcode = 0;
+                    if (!empty($formdata->usedefaultsubnet)) {
+                        $sess->subnet = $att->subnet;
+                    } else {
+                        $sess->subnet = $formdata->subnet;
+                    }
+                    $sess->automark = $formdata->automark;
+                    $sess->automarkcompleted = 0;
+                    if (!empty($formdata->preventsharedip)) {
+                        $sess->preventsharedip = $formdata->preventsharedip;
+                    }
+                    if (!empty($formdata->preventsharediptime)) {
+                        $sess->preventsharediptime = $formdata->preventsharediptime;
+                    }
+
                     if (isset($formdata->studentscanmark)) { // Students will be able to mark their own attendance.
                         $sess->studentscanmark = 1;
-                        if (!empty($formdata->usedefaultsubnet)) {
-                            $sess->subnet = $att->subnet;
-                        } else {
-                            $sess->subnet = $formdata->subnet;
-                        }
-                        $sess->automark = $formdata->automark;
                         if (isset($formdata->autoassignstatus)) {
                             $sess->autoassignstatus = 1;
                         }
-                        $sess->automarkcompleted = 0;
+
                         if (!empty($formdata->randompassword)) {
                             $sess->studentpassword = attendance_random_string();
                         } else if (!empty($formdata->studentpassword)) {
@@ -654,20 +666,9 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
                         if (!empty($formdata->includeqrcode)) {
                             $sess->includeqrcode = $formdata->includeqrcode;
                         }
-                        if (!empty($formdata->preventsharedip)) {
-                            $sess->preventsharedip = $formdata->preventsharedip;
-                        }
-                        if (!empty($formdata->preventsharediptime)) {
-                            $sess->preventsharediptime = $formdata->preventsharediptime;
-                        }
-                    } else {
-                        $sess->subnet = '';
-                        $sess->automark = 0;
-                        $sess->automarkcompleted = 0;
-                        $sess->preventsharedip = 0;
-                        $sess->preventsharediptime = '';
                     }
                     $sess->statusset = $formdata->statusset;
+                    $sess->earliestscantime = $formdata->earliestscantime;
 
                     attendance_fill_groupid($formdata, $sessions, $sess);
                 }
@@ -695,6 +696,22 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
         $sess->absenteereport = $absenteereport;
         $sess->includeqrcode = 0;
 
+        if (!empty($formdata->usedefaultsubnet)) {
+            $sess->subnet = $att->subnet;
+        } else {
+            $sess->subnet = $formdata->subnet;
+        }
+
+        if (!empty($formdata->automark)) {
+            $sess->automark = $formdata->automark;
+        }
+        if (!empty($formdata->preventsharedip)) {
+            $sess->preventsharedip = $formdata->preventsharedip;
+        }
+        if (!empty($formdata->preventsharediptime)) {
+            $sess->preventsharediptime = $formdata->preventsharediptime;
+        }
+
         if (isset($formdata->studentscanmark) && !empty($formdata->studentscanmark)) {
             // Students will be able to mark their own attendance.
             $sess->studentscanmark = 1;
@@ -709,23 +726,9 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
             if (!empty($formdata->includeqrcode)) {
                 $sess->includeqrcode = $formdata->includeqrcode;
             }
-            if (!empty($formdata->usedefaultsubnet)) {
-                $sess->subnet = $att->subnet;
-            } else {
-                $sess->subnet = $formdata->subnet;
-            }
-
-            if (!empty($formdata->automark)) {
-                $sess->automark = $formdata->automark;
-            }
-            if (!empty($formdata->preventsharedip)) {
-                $sess->preventsharedip = $formdata->preventsharedip;
-            }
-            if (!empty($formdata->preventsharediptime)) {
-                $sess->preventsharediptime = $formdata->preventsharediptime;
-            }
         }
         $sess->statusset = $formdata->statusset;
+        $sess->earliestscantime = $formdata->earliestscantime;
 
         attendance_fill_groupid($formdata, $sessions, $sess);
     }
@@ -921,7 +924,7 @@ function attendance_template_variables($record) {
  * @param stdclass $attforsession attendance_session record.
  * @return bool/int
  */
-function attendance_session_get_highest_status(mod_attendance_structure $att, $attforsession) {
+function attendance_session_get_highest_status(mod_attendance_structure $att, $attforsession, $fromcsv = false, $scantime = null) {
     // Find the status to set here.
     $statuses = $att->get_statuses();
     $highestavailablegrade = 0;
@@ -932,13 +935,27 @@ function attendance_session_get_highest_status(mod_attendance_structure $att, $a
             continue;
         }
         if (!empty($status->studentavailability)) {
-            $toolateforstatus = (($attforsession->sessdate + ($status->studentavailability * 60)) < time());
+            if ($fromcsv == false) {
+                $toolateforstatus = (($attforsession->sessdate + ($status->studentavailability * 60)) < time());
+            } else {
+                $toolateforstatus = (($attforsession->sessdate + ($status->studentavailability * 60)) < $scantime);
+            }
             if ($toolateforstatus) {
                 continue;
             }
         }
+        if ($fromcsv == true) {
+            if ($scantime < ($attforsession->sessdate - ($attforsession->earliestscantime * 60)) && $status->grade != 0) {
+                // Scantimes can occur before the start of class.
+                // The lecturer can specify how much time before the start of class the earliest scantime can occur.
+                // The default setting is 30 mins.
+                // Scantimes within this specified time will be marked the highest available status.
+                // Scantimes that occur before this specified time will be marked the lowest available status.
+                continue;
+            }
+        }
         // This status is available to the student.
-        if ($status->grade > $highestavailablegrade) {
+        if ($status->grade >= $highestavailablegrade) {
             // This is the most favourable grade so far; save it.
             $highestavailablegrade = $status->grade;
             $highestavailablestatus = $status;

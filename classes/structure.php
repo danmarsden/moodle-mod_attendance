@@ -561,33 +561,35 @@ class mod_attendance_structure {
         if (!empty($formdata->autoassignstatus)) {
             $sess->autoassignstatus = $formdata->autoassignstatus;
         }
-        if (!empty(get_config('attendance', 'studentscanmark')) &&
+        $studentscanmark = get_config('attendance', 'studentscanmark');
+
+        if (!empty($studentscanmark) &&
             !empty($formdata->studentscanmark)) {
             $sess->studentscanmark = $formdata->studentscanmark;
             $sess->studentpassword = $formdata->studentpassword;
             $sess->autoassignstatus = $formdata->autoassignstatus;
-            if (!empty($formdata->usedefaultsubnet)) {
-                $sess->subnet = $this->subnet;
-            } else {
-                $sess->subnet = $formdata->subnet;
-            }
-
-            if (!empty($formdata->automark)) {
-                $sess->automark = $formdata->automark;
-            }
-            if (!empty($formdata->preventsharedip)) {
-                $sess->preventsharedip = $formdata->preventsharedip;
-            }
-            if (!empty($formdata->preventsharediptime)) {
-                $sess->preventsharediptime = $formdata->preventsharediptime;
-            }
             if (!empty($formdata->includeqrcode)) {
                 $sess->includeqrcode = $formdata->includeqrcode;
             }
+        }
+        if (!empty($formdata->usedefaultsubnet)) {
+            $sess->subnet = $this->subnet;
+        } else {
+            $sess->subnet = $formdata->subnet;
+        }
 
+        if (!empty($formdata->automark)) {
+            $sess->automark = $formdata->automark;
+        }
+        if (!empty($formdata->preventsharedip)) {
+            $sess->preventsharedip = $formdata->preventsharedip;
+        }
+        if (!empty($formdata->preventsharediptime)) {
+            $sess->preventsharediptime = $formdata->preventsharediptime;
         }
 
         $sess->timemodified = time();
+        $sess->earliestscantime = $formdata->earliestscantime;
         $DB->update_record('attendance_sessions', $sess);
 
         if (empty($sess->caleventid)) {
@@ -672,11 +674,12 @@ class mod_attendance_structure {
     }
 
     /**
-     * Take attendance from form data.
+     * Take attendance from form data or csv file.
      *
-     * @param stdClass $formdata
+     * @param stdClass $data
+     * @param boolean $fromcsv
      */
-    public function take_from_form_data($formdata) {
+    public function take_from_form_data($data, $fromcsv=false, $att=null, $attforsession=null) {
         global $DB, $USER;
         // TODO: WARNING - $formdata is unclean - comes from direct $_POST - ideally needs a rewrite but we do some cleaning below.
         // This whole function could do with a nice clean up.
@@ -684,44 +687,66 @@ class mod_attendance_structure {
         // Prime variables with the corresponding attendance status id.
         $statuses = $this->get_statuses();
 
-        foreach ($statuses as $status) {
-            if ($status->description == 'Present') {
-                $present = $status->id;
-            }
-            if ($status->description == 'Late') {
-                $late = $status->id;
-            }
-            if ($status->description == 'Excused') {
-                $excused = $status->id;
-            }
-            if ($status->description == 'Absent') {
-                $absent = $status->id;
-            }
-        }
-
         $statuses = implode(',', array_keys( (array)$this->get_statuses() ));
         $now = time();
         $sesslog = array();
-        $formdata = (array)$formdata;
-        foreach ($formdata as $key => $value) {
-            // Look at Remarks field because the user options may not be passed if empty.
-            if (substr($key, 0, 7) == 'remarks') {
-                $sid = substr($key, 7);
-                if (!(is_numeric($sid))) { // Sanity check on $sid.
-                    print_error('nonnumericid', 'attendance');
+
+        if ($fromcsv == false) {
+            $formdata = (array)$data;
+
+            foreach ($formdata as $key => $value) {
+                // Look at Remarks field because the user options may not be passed if empty.
+                if (substr($key, 0, 7) == 'remarks') {
+                    $sid = substr($key, 7);
+                    if (!(is_numeric($sid))) { // Sanity check on $sid.
+                        print_error('nonnumericid', 'attendance');
+                    }
+                    $sesslog[$sid] = new stdClass();
+                    $sesslog[$sid]->studentid = $sid; // We check is_numeric on this above.
+                    if (array_key_exists('user'.$sid, $formdata) && is_numeric($formdata['user' . $sid])) {
+                        $sesslog[$sid]->statusid = $formdata['user' . $sid];
+                    }
+                    $sesslog[$sid]->statusset = $statuses;
+                    $sesslog[$sid]->remarks = $value;
+                    $sesslog[$sid]->sessionid = $this->pageparams->sessionid;
+                    $sesslog[$sid]->timetaken = $now;
+                    $sesslog[$sid]->takenby = $USER->id;
                 }
+            }
+        } else {
+            $sessioninfo = $this->get_session_info($this->pageparams->sessionid);
+            $validusers = $this->get_users($this->pageparams->grouptype, 0);
+            $attimporter = $data;
+            // For loop generating the data to insert into the attendance_log database.
+            foreach ($validusers as $student) {
+
+                $sid = $student->id;
                 $sesslog[$sid] = new stdClass();
-                $sesslog[$sid]->studentid = $sid; // We check is_numeric on this above.
-                if (array_key_exists('user'.$sid, $formdata) && is_numeric($formdata['user' . $sid])) {
-                    $sesslog[$sid]->statusid = $formdata['user' . $sid];
-                }
+                $sesslog[$sid]->studentid = $sid;
                 $sesslog[$sid]->statusset = $statuses;
-                $sesslog[$sid]->remarks = $value;
+                $sesslog[$sid]->remarks = '';
                 $sesslog[$sid]->sessionid = $this->pageparams->sessionid;
                 $sesslog[$sid]->timetaken = $now;
                 $sesslog[$sid]->takenby = $USER->id;
+
+                // While loop to set the student's attendance status based on scantime and presence in the csv file.
+                while ($record = $attimporter->next()) {
+                    $userid = $record->user->id;
+                    if ($sid == $userid) {
+                        // If the student scanned, they will be given the highest available status according to their scantime.
+                        $scantime = $record->scantime;
+                        $sesslog[$sid]->statusid = attendance_session_get_highest_status($att, $attforsession, $fromcsv, $scantime);
+                    }
+                }
+                // If the student did not scan, they ill be given the lowest available status which is absent.
+                if (empty($sesslog[$sid]->statusid)) {
+                    // This function will use the current time to give the student the lowest available status.
+                    $sesslog[$sid]->statusid = attendance_session_get_highest_status($att, $attforsession);
+                }
+                $attimporter->restart();
             }
         }
+
         // Get existing session log.
         $dbsesslog = $this->get_session_log($this->pageparams->sessionid);
         foreach ($sesslog as $log) {
@@ -735,13 +760,8 @@ class mod_attendance_structure {
                         $dbsesslog[$log->studentid]->statusset <> $log->statusset) {
                         // To prevent users from changing the attendance of studentswho are marked as P,L or E,
                         // only allow the students with attendance status A to be changed to either P,L, or E.
-                        if ($dbsesslog[$log->studentid]->statusid == $absent) {
-
-                            $log->id = $dbsesslog[$log->studentid]->id;
-                            $DB->update_record('attendance_log', $log);
-                        } else {
-                            $this->attemptedfraud = true;
-                        }
+                        $log->id = $dbsesslog[$log->studentid]->id;
+                        $DB->update_record('attendance_log', $log);
                     }
                 } else {
                     $DB->insert_record('attendance_log', $log, false);
@@ -770,6 +790,17 @@ class mod_attendance_structure {
         $event->add_record_snapshot('course_modules', $this->cm);
         $event->add_record_snapshot('attendance_sessions', $session);
         $event->trigger();
+
+        // If the user tries to change the attendance of a student who is P, L or E, they will be unable to do so and be
+        // directed to the manual input page where they will be presented with a warning message.
+        if ($this->attemptedfraud == true) {
+            $this->attemptedfraud = false;
+            $params = array(
+                    'sessionid' => $this->pageparams->sessionid,
+                    'grouptype' => $this->pageparams->grouptype);
+            redirect($this->url_take($params), get_string('attemptedfraud', 'attendance'),
+                        null, \core\output\notification::NOTIFY_ERROR);
+        }
     }
 
     /**

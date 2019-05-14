@@ -56,6 +56,10 @@ if ($ADMIN->fulltree) {
         get_string('studentscanmarksessiontime', 'attendance'),
         get_string('studentscanmarksessiontime_desc', 'attendance'), 1));
 
+    $settings->add(new admin_setting_configtext('attendance/earliestscantime',
+        get_string('earliestscantime', 'attendance'),
+        get_string('earliestscantime_desc', 'attendance'), '30', PARAM_INT));
+
     $settings->add(new admin_setting_configtext('attendance/studentscanmarksessiontimeend',
         get_string('studentscanmarksessiontimeend', 'attendance'),
         get_string('studentscanmarksessiontimeend_desc', 'attendance'), '60', PARAM_INT));

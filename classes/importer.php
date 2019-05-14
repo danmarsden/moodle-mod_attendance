@@ -86,6 +86,12 @@ class mod_attendance_importer {
     /** @var boolean $scantimeerr triggers if the file is suspected of being affected by DST or the wrong file was uploaded. */
     public $scantimeerr = false;
 
+    /** @var stdClass $highestgradedstatus stores the highest graded status available to assign students. */
+    public $highestgradedstatus;
+
+    /** @var stdClass $lowestgradedstatus stores the lowest graded status available to assign students. */
+    public $lowestgradedstatus;
+
     /** @var array $validusers only the enrolled users with the correct capability in this course */
     private $validusers;
 
@@ -126,7 +132,7 @@ class mod_attendance_importer {
      * @return bool false is a failed import
      */
     public function init() {
-        GLOBAL $CFG, $USER;
+        GLOBAL $CFG, $DB, $USER;
 
         if ($this->csvreader == null) {
             $this->csvreader = new csv_import_reader($this->importid, 'attendance');
@@ -168,7 +174,7 @@ class mod_attendance_importer {
 
         $this->validusers = $this->att->get_users($this->att->pageparams->grouptype, 0);
 
-        // Fixing bugs here with a precheck of the file before processing.
+        // Precheck the uploaded file for any errors before processing.
         $this->csvreader->init();
 
         $sessiondate = date('n/j/Y', $sessioninfo->sessdate);
@@ -177,14 +183,12 @@ class mod_attendance_importer {
         $scandate = strtotime($firstrecord[$this->scandateindex]);
         $scandate = date('n/j/Y', $scandate);
 
-        $earliest = $sessioninfo->sessdate - 1800;
-        $latest = $sessioninfo->sessdate + $sessioninfo->duration;
-
-        $pcount = 0; // Number of students marked present.
-        $lcount = 0; // Number of students marked late.
-        $ascount = 0; // Number of students marked as absent with scan.
-
-        $studentcount = count($this->validusers);
+        // Setting up the precheck statuses.
+        $precheckstatus = '';
+        $statuses = $this->att->get_statuses();
+        foreach ($statuses as $status) {
+            $sessionstats[$status->id] = 0;
+        }
 
         $this->restart();
 
@@ -213,8 +217,10 @@ class mod_attendance_importer {
 
             // Flag an error if the scan date column is not formatted as a time.
             $d = strtotime($record[$this->scandateindex]);
-            if (!($record[$this->scandateindex] !== date('n/j/Y', $d) ||
-                  $record[$this->scandateindex] !== date('m/d/Y', $d))) {
+            if (!($record[$this->scandateindex] == date('n/j/Y', $d) ||
+                  $record[$this->scandateindex] == date('m/d/Y', $d) ||
+                  $record[$this->scandateindex] == date('n/j/y', $d) ||
+                  $record[$this->scandateindex] == date('m/d/y', $d))) {
                 $this->scandateformaterr = true;
             }
 
@@ -228,7 +234,7 @@ class mod_attendance_importer {
                 $this->multipledays = true;
             }
 
-            // Prechecking the file for how many students would be marked as Present, Late and Absent(with scan).
+            // Prechecking the file for how many students would be marked each attendance status.
             $scantime = $record[$this->scandateindex].' '.$record[$this->scantimeindex];
             $scantime = strtotime($scantime);
             $scantime = (int) $scantime;
@@ -240,25 +246,42 @@ class mod_attendance_importer {
             }
             if ($userid = $this->att->get_user_id_from_idnumber($idstr)) {
                 if (!empty($this->validusers[$userid])) {
-                    if ($scantime >= $earliest && $scantime <= $sessioninfo->sessdate + 900) {
-                        $pcount += 1;
-                    }
-                    if ($scantime > $sessioninfo->sessdate + 900 && $scantime <= $latest) {
-                        $lcount += 1;
-                    }
-                    if ($scantime < $earliest || $scantime > $latest) {
-                        $ascount += 1;
-                    }
-
-                    if ($studentcount > 10 || ($lcount + $ascount) >= (0.1 * $studentcount)) {
-                        if ($pcount == 0 && ($lcount + $ascount) > (0.4 * $studentcount)) {
-                            $this->scantimeerr = true;
-                        }
-                        if ($ascount > ($pcount + $lcount)) {
-                            $this->scantimeerr = true;
+                    $precheckstatus = attendance_session_get_highest_status($this->att, $sessioninfo, $fromcsv = true, $scantime);
+                    foreach ($statuses as $status) {
+                        if ($precheckstatus == $status->id) {
+                            $sessionstats[$status->id]++;
                         }
                     }
                 }
+            }
+        }
+
+        // Using how many students were allocated to each status to determine whether there were any scantime issues.
+        // These may include an uncalibrated scanner or DST.
+        // This criteria can also be used to identify if the wrong file was uploaded.
+        $this->highestgradedstatus = new stdClass;
+        $this->highestgradedstatus->grade = 0;
+
+        $this->lowestgradedstatus = new stdClass;
+        $this->lowestgradedstatus->grade = 0;
+
+        foreach ($statuses as $status) {
+            if ($status->grade > $this->highestgradedstatus->grade) {
+                $this->highestgradedstatus = $status;
+            }
+            if ($status->grade <= $this->lowestgradedstatus->grade) {
+                $this->lowestgradedstatus = $status;
+            }
+        }
+
+        $studentcount = count($this->validusers);
+
+        // If the class size is less than 10 students, it doesn't make sense to run these checks.
+        // The attendance records for a class this small can be adjust with little hassle.
+        if ($studentcount > 10) {
+            // If the status with the highest grade does not contain majority of the class, there must be an issue such as DST.
+            if ($this->highestgradedstatus->id != array_search(max($sessionstats), $sessionstats)) {
+                $this->scantimeerr = true;
             }
         }
 
