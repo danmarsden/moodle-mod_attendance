@@ -318,6 +318,13 @@ class mod_attendance_renderer extends plugin_renderer_base {
             has_capability('mod/attendance:changeattendances', $sessdata->att->context))) {
 
             $icon = new attendance_password_icon($sess->studentpassword, $sess->id);
+
+            if ($sess->includeqrcode == 1) {
+                $icon->includeqrcode = 1;
+            } else {
+                $icon->includeqrcode = 0;
+            }
+
             $actions .= $this->render($icon);
         }
 
