@@ -261,7 +261,7 @@
 #page-mod-attendance-report .attendancereporttable .headcol {
     position: absolute;
     width: 200px;
-    left: 10px;
+    left: 15px;
     top: auto;
     border-top-width: 1px;
 }
@@ -276,20 +276,20 @@
 }
 
 /* CSS for old clean based themes with docks etc. */
-#page-mod-attendance-report.has-region-side-pre .attendancereporttable .headcol {
+#page-mod-attendance-report.has-region-side-pre:not(.empty-region-side-pre) .attendancereporttable .headcol {
     left: 370px;
 }
 
-#page-mod-attendance-report.has-region-side-pre .attendancereporttable {
+#page-mod-attendance-report.has-region-side-pre:not(.empty-region-side-pre) .attendancereporttable {
     margin-left: 230px;
 }
 
-#page-mod-attendance-report.has-region-side-pre.content-only .attendancereporttable .headcol {
+#page-mod-attendance-report.has-region-side-pre:not(.empty-region-side-pre).content-only .attendancereporttable .headcol {
     left: 80px;
 }
 
 @media (max-width: 767px) {
-    #page-mod-attendance-report.has-region-side-pre .attendancereporttable .headcol {
+    #page-mod-attendance-report.has-region-side-pre:not(.empty-region-side-pre) .attendancereporttable .headcol {
         left: 80px;
     }
 }
