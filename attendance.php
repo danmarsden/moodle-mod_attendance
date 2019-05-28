@@ -33,6 +33,34 @@ $id = required_param('sessid', PARAM_INT);
 $qrpass = optional_param('qrpass', '', PARAM_TEXT);
 
 $attforsession = $DB->get_record('attendance_sessions', array('id' => $id), '*', MUST_EXIST);
+
+// If the randomised code is on grab it.
+if ($attforsession->rotateqrcode==1) {
+    $cookiename = 'attendance_'.$attforsession->id;
+    $secrethash = md5($USER->id.$attforsession->studentpassword);
+    $url = new moodle_url('/mod/attendance/view.php', array('id' => $cm->id));
+
+    // Check if cookie is set and verify
+    if (isset($_COOKIE[$cookiename])) {
+        // Check the token
+        if ($secrethash !== $_COOKIE[$cookiename]) {
+            // Flag error
+            print_error('qr_cookie_error', 'mod_attendance', $url);
+        }
+    } else {
+        // Check password
+        $qrpassdatabase = $DB->get_record_sql('SELECT * FROM {attendance_rotate_passwords} WHERE attendanceid = ? AND expirytime > UNIX_TIMESTAMP() ORDER BY expirytime ASC LIMIT 1', ['attendanceid'=>$id], $strictness=IGNORE_MISSING);
+
+        if ($qrpass == $qrpassdatabase) {
+            // Create and store the token
+            setcookie($cookiename, $secrethash, 0, "/");
+        } else {
+            // Flag error
+            print_error('qr_pass_wrong', 'mod_attendance', $url);
+        }
+    }
+}
+
 $attendance = $DB->get_record('attendance', array('id' => $attforsession->attendanceid), '*', MUST_EXIST);
 $cm = get_coursemodule_from_instance('attendance', $attendance->id, 0, false, MUST_EXIST);
 $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
