@@ -1062,7 +1062,8 @@ function attendance_renderqrcode($session) {
     global $CFG;
 
     if (strlen($session->studentpassword) > 0) {
-        $qrcodeurl = $CFG->wwwroot . '/mod/attendance/attendance.php?qrpass=' . $session->studentpassword . '&sessid=' . $session->id;
+        $qrcodeurl = $CFG->wwwroot . '/mod/attendance/attendance.php?qrpass=' . $session->studentpassword .
+            '&sessid=' . $session->id;
     } else {
         $qrcodeurl = $CFG->wwwroot . '/mod/attendance/attendance.php?sessid=' . $session->id;
     }
