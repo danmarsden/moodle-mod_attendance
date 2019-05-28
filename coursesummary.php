@@ -27,7 +27,6 @@ require_once($CFG->libdir.'/adminlib.php');
 require_once($CFG->dirroot.'/mod/attendance/lib.php');
 require_once($CFG->dirroot.'/mod/attendance/locallib.php');
 require_once($CFG->libdir.'/tablelib.php');
-require_once($CFG->libdir.'/coursecatlib.php');
 
 $category = optional_param('category', 0, PARAM_INT);
 $download = optional_param('download', '', PARAM_ALPHA);
@@ -47,7 +46,7 @@ if (empty($category)) {
     $courses = array(); // Show all courses.
 } else {
     $context = context_coursecat::instance($category);
-    $coursecat = coursecat::get($category);
+    $coursecat = core_course_category::get($category);
     $courses = $coursecat->get_courses(array('recursive' => true, 'idonly' => true));
 }
 // Check permissions.
