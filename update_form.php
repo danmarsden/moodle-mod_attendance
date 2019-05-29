@@ -77,7 +77,8 @@ class mod_attendance_update_form extends moodleform {
             'automarkcompleted' => 0,
             'preventsharedip' => $sess->preventsharedip,
             'preventsharediptime' => $sess->preventsharediptime,
-            'includeqrcode' => $sess->includeqrcode
+            'includeqrcode' => $sess->includeqrcode,
+            'rotateqrcode' => $sess->rotateqrcode,
         );
         if ($sess->subnet == $attendancesubnet) {
             $data['usedefaultsubnet'] = 1;
@@ -150,6 +151,11 @@ class mod_attendance_update_form extends moodleform {
             $mform->hideif('randompassword', 'automark', 'eq', ATTENDANCE_AUTOMARK_ALL);
             $mform->addElement('checkbox', 'includeqrcode', '', get_string('includeqrcode', 'attendance'));
             $mform->hideif('includeqrcode', 'studentscanmark', 'notchecked');
+            $mform->addElement('checkbox', 'rotateqrcode', '', get_string('rotateqrcode', 'attendance'));
+            $mform->hideif('rotateqrcode', 'studentscanmark', 'notchecked');
+            $mform->addElement('text', 'rotateqrcodeinterval', '', get_string('rotateqrcodeinterval', 'attendance'));
+            $mform->setType('rotateqrcodeinterval', PARAM_INT);
+            $mform->hideif('rotateqrcodeinterval', 'studentscanmark', 'notchecked');
             $mform->addElement('checkbox', 'autoassignstatus', '', get_string('autoassignstatus', 'attendance'));
             $mform->addHelpButton('autoassignstatus', 'autoassignstatus', 'attendance');
             $mform->hideif('autoassignstatus', 'studentscanmark', 'notchecked');

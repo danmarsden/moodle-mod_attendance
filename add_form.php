@@ -210,10 +210,16 @@ class mod_attendance_add_form extends moodleform {
             $mgroup[] = & $mform->createElement('text', 'studentpassword', get_string('studentpassword', 'attendance'));
             $mgroup[] = & $mform->createElement('checkbox', 'randompassword', '', get_string('randompassword', 'attendance'));
             $mgroup[] = & $mform->createElement('checkbox', 'includeqrcode', '', get_string('includeqrcode', 'attendance'));
+            $mgroup[] = & $mform->createElement('checkbox', 'rotateqrcode', '', get_string('rotateqrcode', 'attendance'));
+
             $mform->addGroup($mgroup, 'passwordgrp', get_string('passwordgrp', 'attendance'), array(' '), false);
 
             $mform->setType('studentpassword', PARAM_TEXT);
             $mform->addHelpButton('passwordgrp', 'passwordgrp', 'attendance');
+
+            $mform->addElement('text', 'rotateqrcodeinterval', get_string('rotateqrcodeinterval', 'attendance'));
+            $mform->setType('rotateqrcodeinterval', PARAM_INT);
+            $mform->hideif('rotateqrcodeinterval', 'rotateqrcode', 'notchecked');
 
             $mform->hideif('passwordgrp', 'studentscanmark', 'notchecked');
             $mform->hideif('studentpassword', 'randompassword', 'checked');
@@ -233,6 +239,14 @@ class mod_attendance_add_form extends moodleform {
             }
             if (isset($pluginconfig->includeqrcode_default)) {
                 $mform->setDefault('includeqrcode', $pluginconfig->includeqrcode_default);
+            }
+            // TODO - Change in DB and provide value
+            if (isset($pluginconfig->includeqrcode_default)) {
+                $mform->setDefault('rotateqrcode', $pluginconfig->includeqrcode_default);
+            }
+            // TODO - Change in DB and provide value
+            if (isset($pluginconfig->includeqrcode_default)) {
+                $mform->setDefault('rotateqrcodeinterval', $pluginconfig->includeqrcode_default);
             }
             if (isset($pluginconfig->automark_default)) {
                 $mform->setDefault('automark', $pluginconfig->automark_default);

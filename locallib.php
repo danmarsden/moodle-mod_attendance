@@ -634,6 +634,7 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
                     $sess->absenteereport = $absenteereport;
                     $sess->studentpassword = '';
                     $sess->includeqrcode = 0;
+                    $sess->rotateqrcode = 0;
                     if (isset($formdata->studentscanmark)) { // Students will be able to mark their own attendance.
                         $sess->studentscanmark = 1;
                         if (!empty($formdata->usedefaultsubnet)) {
@@ -653,6 +654,10 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
                         }
                         if (!empty($formdata->includeqrcode)) {
                             $sess->includeqrcode = $formdata->includeqrcode;
+                        }
+                        if (!empty($formdata->rotateqrcode)) {
+                            $sess->rotateqrcode = $formdata->rotateqrcode;
+                            $sess->studentpassword = attendance_random_string();
                         }
                         if (!empty($formdata->preventsharedip)) {
                             $sess->preventsharedip = $formdata->preventsharedip;
@@ -694,6 +699,7 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
         $sess->automarkcompleted = 0;
         $sess->absenteereport = $absenteereport;
         $sess->includeqrcode = 0;
+        $sess->rotateqrcode = 0;
 
         if (isset($formdata->studentscanmark) && !empty($formdata->studentscanmark)) {
             // Students will be able to mark their own attendance.
@@ -708,6 +714,10 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
             }
             if (!empty($formdata->includeqrcode)) {
                 $sess->includeqrcode = $formdata->includeqrcode;
+            }
+            if (!empty($formdata->rotateqrcode)) {
+                $sess->rotateqrcode = $formdata->rotateqrcode;
+                $sess->studentpassword = attendance_random_string();
             }
             if (!empty($formdata->usedefaultsubnet)) {
                 $sess->subnet = $att->subnet;
@@ -1084,12 +1094,13 @@ function attendance_renderqrcode($session) {
  */
 function attendance_generate_passwords($session) {
     global $DB;
+    $attconfig = get_config('attendance');
     $password = array();
 
     $DB->delete_records('attendance_rotate_passwords', array("attendanceid"=>$session->id));
 
     for ($i=0;$i<30;$i++) {
-        array_push($password, array("attendanceid"=>$session->id, "password"=>mt_rand(1000, 10000), "expirytime"=>time()+($session->rotateqrcodeinterval*$i)));
+        array_push($password, array("attendanceid"=>$session->id, "password"=>mt_rand(1000, 10000), "expirytime"=>time()+($attconfig->rotateqrcodeinterval*$i)));
     }
 
     $DB->insert_records('attendance_rotate_passwords', $password);

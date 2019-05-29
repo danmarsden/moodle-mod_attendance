@@ -46,6 +46,10 @@ if ($ADMIN->fulltree) {
          1000 => 1000,
     );
 
+    $settings->add(new admin_setting_configtext('attendance/rotateqrcodeinterval',
+        get_string('rotateqrcodeinterval', 'attendance'),
+        get_string('rotateqrcodeinterval_desc', 'attendance'), '15', PARAM_INT));
+
     $settings->add(new admin_setting_configselect('attendance/resultsperpage',
         get_string('resultsperpage', 'attendance'), get_string('resultsperpage_desc', 'attendance'), 25, $options));
 
