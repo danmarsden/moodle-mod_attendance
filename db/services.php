@@ -25,6 +25,14 @@
 defined('MOODLE_INTERNAL') || die();
 
 $functions = array(
+    'mod_wsattendance_add_session' => array(
+        'classname'    => 'mod_wsattendance_external',
+        'methodname'   => 'add_session',
+        'classpath'    => 'mod/attendance/externallib.php',
+        'description'  => 'Add a new session.',
+        'type'         => 'write',
+        'capabilities' => 'mod/attendance:manageattendances',
+    ),
     'mod_wsattendance_get_courses_with_today_sessions' => array(
         'classname'   => 'mod_wsattendance_external',
         'methodname'  => 'get_courses_with_today_sessions',
@@ -54,6 +62,7 @@ $functions = array(
 $services = array(
     'Attendance' => array(
         'functions' => array(
+            'mod_wsattendance_add_session',
             'mod_wsattendance_get_courses_with_today_sessions',
             'mod_wsattendance_get_session',
             'mod_wsattendance_update_user_status'

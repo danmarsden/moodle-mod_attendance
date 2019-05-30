@@ -34,6 +34,50 @@ require_once(dirname(__FILE__).'/classes/attendance_webservices_handler.php');
 class mod_wsattendance_external extends external_api {
 
     /**
+     * Describes the parameters for add_session.
+     *
+     * @return external_function_parameters
+     */
+    public static function add_session_parameters() {
+        return new external_function_parameters(
+            array(
+                'attendanceid' => new external_value(PARAM_INT, 'attendance instance id'),
+                'sessiontype' => new external_value(PARAM_INT, '0 - all students, 1 - group of students (only used in "visible groups" mode)', VALUE_OPTIONAL),
+                'groupid' => new external_multiple_structure(
+                    new external_value(PARAM_INT, 'group id'),
+                    'group ids (only used in "visible groups" or "separate groups" mode)',
+                    VALUE_DEFAULT, array()
+                ),
+                'sessiontime' => new external_value(PARAM_INT, 'session start unix timestamp'),
+                'duration' => new external_value(PARAM_INT, 'session duration (seconds)', VALUE_DEFAULT, 0),
+                'description' => new external_value(PARAM_RAW, 'field description', VALUE_OPTIONAL),
+                'addcalendarevent' => new external_value(PARAM_BOOL, 'add calendar event', VALUE_DEFAULT, true),
+            )
+        );
+    }
+
+    /**
+     * Adds session.
+     *
+     * @param int $userid
+     * @return int $sessionid
+     */
+    public static function add_session(int $attendanceid, int $sessiontype, int $groupid, int $sessiontime, int $duration, $description, bool $addcalendarevent) {
+        // Add session creation routine.
+    }
+
+    /**
+     * Describes add_session return values.
+     *
+     * @return external_multiple_structure
+     */
+    public static function add_session_returns() {
+        return new external_single_structure(array(
+            'sessionid' => new external_value(PARAM_INT, 'ID of the created session'),
+        ));
+    }
+
+    /**
      * Get parameter list.
      * @return external_function_parameters
      */
