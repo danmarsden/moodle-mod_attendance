@@ -42,15 +42,10 @@ class mod_wsattendance_external extends external_api {
         return new external_function_parameters(
             array(
                 'attendanceid' => new external_value(PARAM_INT, 'attendance instance id'),
-                'sessiontype' => new external_value(PARAM_INT, '0 - all students, 1 - group of students (only used in "visible groups" mode)', VALUE_OPTIONAL),
-                'groupid' => new external_multiple_structure(
-                    new external_value(PARAM_INT, 'group id'),
-                    'group ids (only used in "visible groups" or "separate groups" mode)',
-                    VALUE_DEFAULT, array()
-                ),
-                'sessiontime' => new external_value(PARAM_INT, 'session start unix timestamp'),
+                'groupid' => new external_value(PARAM_INT, 'group id', VALUE_DEFAULT, 0),
+                'sessiontime' => new external_value(PARAM_INT, 'session start timestamp'),
                 'duration' => new external_value(PARAM_INT, 'session duration (seconds)', VALUE_DEFAULT, 0),
-                'description' => new external_value(PARAM_RAW, 'field description', VALUE_OPTIONAL),
+                'description' => new external_value(PARAM_RAW, 'field description', VALUE_DEFAULT, ''),
                 'addcalendarevent' => new external_value(PARAM_BOOL, 'add calendar event', VALUE_DEFAULT, true),
             )
         );
@@ -62,8 +57,59 @@ class mod_wsattendance_external extends external_api {
      * @param int $userid
      * @return int $sessionid
      */
-    public static function add_session(int $attendanceid, int $sessiontype, int $groupid, int $sessiontime, int $duration, $description, bool $addcalendarevent) {
-        // Add session creation routine.
+    public static function add_session(int $attendanceid, int $groupid, int $sessiontime, int $duration, $description, bool $addcalendarevent) {
+        global $USER;
+
+        $cm = get_coursemodule_from_id('attendance', $attendanceid, 0, false, MUST_EXIST);
+        $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
+        $attendance = $DB->get_record('attendance', array('id' => $cm->instance), '*', MUST_EXIST);
+
+        // Check permissions.
+        $context = context_module::instance($cm->id);
+        require_capability('mod/attendance:manageattendances', $context);
+
+        // Get attendance.
+        $attendance = new mod_attendance_structure($attendance, $cm, $course, $context);
+
+        // Create session.
+        $sess = new stdClass();
+        $sess->sessdate = $sessiontime;
+        $sess->duration = $duration;
+        $sess->descriptionitemid = 0;
+        $sess->description = $description;
+        $sess->descriptionformat = FORMAT_HTML;
+        $sess->calendarevent = (int) $addcalendarevent;
+        $sess->timemodified = time();
+        $sess->studentscanmark = 0;
+        $sess->autoassignstatus = 0;
+        $sess->subnet = '';
+        $sess->studentpassword = '';
+        $sess->automark = 0;
+        $sess->automarkcompleted = 0;
+        $sess->absenteereport = get_config('attendance', 'absenteereport_default');
+        $sess->includeqrcode = 0;
+        $sess->subnet = $attendance->subnet;
+        $sess->statusset = 0;
+        $sess->groupid = $groupid;
+
+        // Validate group.
+        $groupmode = groups_get_activity_groupmode($cm);
+        if ($groupmode === NOGROUPS && $groupid > 0) {
+            throw new invalid_parameter_exception('Group id is specified, but group mode is disabled for activity');
+        } else if ($groupmode === SEPARATEGROUPS && $groupid === 0) {
+            throw new invalid_parameter_exception('Group id is not specified (or 0) in separate groups mode.');
+        }
+        if ($groupmode === SEPARATEGROUPS || ($groupmode === VISIBLEGROUPS && $groupid > 0)) {
+            // Determine valid groups
+            $userid = has_capability('moodle/site:accessallgroups', $context) ? 0 : $USER->id;
+            $validgroupids = array_map(function($group) { return $group->id; },
+                groups_get_all_groups($course->id, $userid, $cm->groupingid));
+            if (!in_array($groupid, $valudgroupids)) {
+                throw new invalid_parameter_exception('Invalid group id');
+            }
+        }
+
+        $att->add_sessions(array($sess));
     }
 
     /**
