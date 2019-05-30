@@ -1076,3 +1076,21 @@ function attendance_renderqrcode($session) {
     $image = $barcode->getBarcodePngData(15, 15);
     echo html_writer::img('data:image/png;base64,' . base64_encode($image), get_string('qrcode', 'attendance'));
 }
+
+/**
+ * Generate QR code passwords.
+ *
+ * @param stdClass $session
+ */
+function attendance_generate_passwords($session) {
+    global $DB;
+    $password = array();
+
+    $DB->delete_records('attendance_rotate_passwords', array("attendanceid"=>$session->id));
+
+    for ($i=0;$i<30;$i++) {
+        array_push($password, array("attendanceid"=>$session->id, "password"=>mt_rand(1000, 10000), "expirytime"=>time()+($session->rotateqrcodeinterval*$i)));
+    }
+
+    $DB->insert_records('attendance_rotate_passwords', $password);
+}

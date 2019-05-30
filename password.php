@@ -52,6 +52,7 @@ echo $OUTPUT->header();
 
 $showpassword = (isset($session->studentpassword) && strlen($session->studentpassword) > 0);
 $showqr = (isset($session->includeqrcode) && $session->includeqrcode == 1);
+$rotateqr = (isset($session->rotateqrcode) && $session->rotateqrcode == 1);
 
 if ($showpassword) {
     attendance_renderpassword($session);
@@ -59,6 +60,11 @@ if ($showpassword) {
 
 if ($showqr) {
     attendance_renderqrcode($session);
+}
+
+if ($rotateqr) {
+    attendance_generate_passwords($session);
+    //TODO - Function that outputs the JS to rotate the code.
 }
 
 echo $OUTPUT->footer();
