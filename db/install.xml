@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/attendance/db" VERSION="20190125" COMMENT="XMLDB file for Moodle mod/attendance"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+<XMLDB PATH="mod/attendance/db" VERSION="20190531" COMMENT="XMLDB file for Moodle mod/attendance"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
   <TABLES>
     <TABLE NAME="attendance" COMMENT="Attendance module table">
@@ -50,6 +50,8 @@
         <FIELD NAME="caleventid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="calendarevent" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false"/>
         <FIELD NAME="includeqrcode" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Include a QR code image when displaying the password"/>
+        <FIELD NAME="rotateqrcode" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="rotateqrcodeinterval" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="15" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="Primary key for attendance_sessions"/>
@@ -152,6 +154,16 @@
       <INDEXES>
         <INDEX NAME="notifyid_userid" UNIQUE="false" FIELDS="notifyid, userid"/>
       </INDEXES>
+    </TABLE>
+    <TABLE NAME="rotate_passwords" COMMENT="Table to hold temporary passwords for rotate QR code feature.">
+      <FIELDS>
+        <FIELD NAME="attendanceid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="password" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="expirytime" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="attendanceid, password, expirytime"/>
+      </KEYS>
     </TABLE>
   </TABLES>
 </XMLDB>

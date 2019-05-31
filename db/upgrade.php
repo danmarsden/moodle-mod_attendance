@@ -550,5 +550,38 @@ function xmldb_attendance_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2019012500, 'attendance');
     }
 
+    if ($oldversion < 2019053100) {
+
+        // Define table attendance to be created.
+        $table = new xmldb_table('attendance');
+
+        // Adding fields to table attendance.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('course', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('name', XMLDB_TYPE_CHAR, '255', null, null, null, null);
+        $table->add_field('grade', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '100');
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('intro', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $table->add_field('introformat', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('subnet', XMLDB_TYPE_CHAR, '255', null, null, null, null);
+        $table->add_field('sessiondetailspos', XMLDB_TYPE_CHAR, '5', null, XMLDB_NOTNULL, null, 'left');
+        $table->add_field('showsessiondetails', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '1');
+        $table->add_field('showextrauserdetails', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '1');
+
+        // Adding keys to table attendance.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+
+        // Adding indexes to table attendance.
+        $table->add_index('course', XMLDB_INDEX_NOTUNIQUE, ['course']);
+
+        // Conditionally launch create table for attendance.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Attendance savepoint reached.
+        upgrade_mod_savepoint(true, 2019053100, 'attendance');
+    }
+
     return $result;
 }
