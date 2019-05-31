@@ -1015,6 +1015,9 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $o .= html_writer::empty_tag('hr');
             $o .= construct_user_data_stat($userdata->summary->get_all_sessions_summary_for($userdata->user->id),
                 $userdata->pageparams->view);
+        } else if ($userdata->pageparams->mode == mod_attendance_view_page_params::MODE_ALL_SESSIONS) {
+            $o .= $this->render_attendance_filter_controls($userdata->filtercontrols);
+            $o .= $this->construct_user_allsessions_log($userdata);
         } else {
             $table = new html_table();
             $table->head  = array(get_string('course'),
@@ -1195,6 +1198,166 @@ class mod_attendance_renderer extends plugin_renderer_base {
                                 array('sessid' => $sess->id, 'sesskey' => sesskey()));
                         $cell = new html_table_cell(html_writer::link($url, get_string('submitattendance', 'attendance')));
                     }
+                    $cell->colspan = 3;
+                    $row->cells[] = $cell;
+                } else { // Student cannot mark their own attendace.
+                    $row->cells[] = '?';
+                    $row->cells[] = '? / ' . format_float($statussetmaxpoints[$sess->statusset], 1, true, true);
+                    $row->cells[] = '';
+                }
+            }
+
+            if (has_capability('mod/attendance:takeattendances', $context)) {
+                $params = array('id' => $userdata->filtercontrols->cm->id,
+                    'sessionid' => $sess->id,
+                    'grouptype' => $sess->groupid);
+                $url = new moodle_url('/mod/attendance/take.php', $params);
+                $icon = $OUTPUT->pix_icon('redo', get_string('changeattendance', 'attendance'), 'attendance');
+                $row->cells[] = html_writer::link($url, $icon);
+            }
+
+            $table->data[] = $row;
+        }
+
+        return html_writer::table($table);
+    }
+
+    /**
+     * Construct table showing all sessions, not limited to current course.
+     *
+     * @param attendance_user_data $userdata
+     * @return string
+     */
+    private function construct_user_allsessions_log(attendance_user_data $userdata) {
+        global $OUTPUT, $USER;
+
+        $shortform = false;
+        if ($USER->id == $userdata->user->id) {
+            // This is a user viewing their own stuff - hide non-relevant columns.
+            $shortform = true;
+        }
+
+        $context = context_module::instance($userdata->filtercontrols->cm->id);
+
+        $table = new html_table();
+        $table->attributes['class'] = 'generaltable attwidth boxaligncenter';
+        $table->head = array();
+        $table->align = array();
+        $table->size = array();
+        $table->colclasses = array();
+
+        $table->head[] = get_string('course');
+        $table->align[] = 'left';
+        $table->colclasses[] = 'colcourse';
+
+        $table->head[] = get_string('pluginname', 'mod_attendance');
+        $table->align[] = 'left';
+        $table->colclasses[] = 'colcourse';
+        $table->size[] = '*';
+
+        // use "session" instead
+        //$table->head[] = get_string('description', 'attendance');
+        $table->head[] = get_string('session', 'attendance');
+        $table->align[] = 'left';
+        $table->colclasses[] = 'desccol';
+        $table->size[] = '*';
+
+        if (!$shortform) {
+            $table->head[] = get_string('sessiontypeshort', 'attendance');
+            $table->align[] = '';
+            $table->size[] = '1px';
+            $table->colclasses[] = '';
+        }
+
+        $table->head[] = get_string('date');
+        $table->align[] = 'left';
+        $table->colclasses[] = 'datecol';
+        $table->size[] = '1px';
+
+        $table->head[] = get_string('status', 'attendance');
+        $table->align[] = 'center';
+        $table->colclasses[] = 'statuscol';
+        $table->size[] = '*';
+
+        $table->head[] = get_string('points', 'attendance');
+        $table->align[] = 'center';
+        $table->colclasses[] = 'pointscol';
+        $table->size[] = '1px';
+
+        $table->head[] = get_string('remarks', 'attendance');
+        $table->align[] = 'center';
+        $table->colclasses[] = 'remarkscol';
+        $table->size[] = '*';
+
+        if (has_capability('mod/attendance:takeattendances', $context)) {
+            $table->head[] = get_string('action');
+            $table->align[] = '';
+            $table->colclasses[] = 'actioncol';
+            $table->size[] = '';
+        }
+
+        $statusmaxpoints = array();
+        foreach ($userdata->statuses as $attid => $attstatuses) {
+            $statusmaxpoints[$attid] = attendance_get_statusset_maxpoints($attstatuses);
+        }
+
+        $i = 0;
+        foreach ($userdata->sessionslog as $sess) {
+            $i++;
+
+            $statussetmaxpoints = $statusmaxpoints[$sess->attendanceid];
+
+            $row = new html_table_row();
+
+            // course / activity / session / type / date / status / points / remarks / action
+            //
+            $courseurl = new moodle_url('/course/view.php', array('id' => $sess->courseid));
+            $row->cells[] = html_writer::link($courseurl, $sess->cname);
+
+            $attendanceurl = new moodle_url('/mod/attendance/view.php', array('id' => $sess->cmid,
+                                                                              'studentid' => $userdata->user->id,
+                                                                              'view' => ATT_VIEW_ALL));
+            $row->cells[] = html_writer::link($attendanceurl, $sess->attname);
+
+            $row->cells[] = $sess->description;
+
+            if (!$shortform) {
+                if ($sess->groupid) {
+                    $sessiontypeshort = get_string('group') . ': ' . $userdata->groups[$sess->courseid][$sess->groupid]->name;
+                } else {
+                    $sessiontypeshort = get_string('commonsession', 'attendance');
+                }
+                $row->cells[] = html_writer::tag('nobr', $sessiontypeshort);
+            }
+
+            $row->cells[] = userdate($sess->sessdate, get_string('strftimedmyw', 'attendance')) .
+             " ". $this->construct_time($sess->sessdate, $sess->duration);
+
+            if (!empty($sess->statusid)) {
+                $status = $userdata->statuses[$sess->attendanceid][$sess->statusid];
+                $row->cells[] = $status->description;
+                $row->cells[] = format_float($status->grade, 1, true, true) . ' / ' .
+                                    format_float($statussetmaxpoints[$status->setnumber], 1, true, true);
+                $row->cells[] = $sess->remarks;
+            } else if (($sess->sessdate + $sess->duration) < $userdata->user->enrolmentstart) {
+                $cell = new html_table_cell(get_string('enrolmentstart', 'attendance',
+                                            userdate($userdata->user->enrolmentstart, '%d.%m.%Y')));
+                $cell->colspan = 3;
+                $row->cells[] = $cell;
+            } else if ($userdata->user->enrolmentend and $sess->sessdate > $userdata->user->enrolmentend) {
+                $cell = new html_table_cell(get_string('enrolmentend', 'attendance',
+                                            userdate($userdata->user->enrolmentend, '%d.%m.%Y')));
+                $cell->colspan = 3;
+                $row->cells[] = $cell;
+            } else {
+                list($canmark, $reason) = attendance_can_student_mark($sess, false);
+                if ($canmark) {
+                    // Student can mark their own attendance.
+                    // URL to the page that lets the student modify their attendance.
+
+                    $url = new moodle_url('/mod/attendance/attendance.php',
+                            array('sessid' => $sess->id, 'sesskey' => sesskey()));
+                    $cell = new html_table_cell(html_writer::link($url, get_string('submitattendance', 'attendance')));
                     $cell->colspan = 3;
                     $row->cells[] = $cell;
                 } else { // Student cannot mark their own attendace.

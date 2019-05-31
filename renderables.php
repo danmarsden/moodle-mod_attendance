@@ -486,6 +486,42 @@ class attendance_user_data implements renderable {
             $this->sessionslog = $att->get_user_filtered_sessions_log_extended($userid);
 
             $this->groups = groups_get_all_groups($att->course->id);
+        } else if ($this->pageparams->mode == mod_attendance_view_page_params::MODE_ALL_SESSIONS) {
+            $this->coursesatts = attendance_get_user_courses_attendances($userid);
+            $this->statuses = array();
+            $this->summaries = array();
+            $this->groups = array();
+
+            foreach ($this->coursesatts as $atid => $ca) {
+                // Check to make sure the user can view this cm.
+                $modinfo = get_fast_modinfo($ca->courseid);
+                if (!$modinfo->instances['attendance'][$ca->attid]->uservisible) {
+                    unset($this->coursesatts[$atid]);
+                    continue;
+                } else {
+                    $this->coursesatts[$atid]->cmid = $modinfo->instances['attendance'][$ca->attid]->get_course_module_record()->id;
+                }
+                $this->statuses[$ca->attid] = attendance_get_statuses($ca->attid);
+                $this->summaries[$ca->attid] = new mod_attendance_summary($ca->attid, array($userid));
+
+                if (!array_key_exists($ca->courseid, $this->groups)) {
+                    $this->groups[$ca->courseid] = groups_get_all_groups($ca->courseid);
+                }
+            }
+
+            if (!$mobile) {
+                $this->summary = new mod_attendance_summary($att->id, array($userid), $att->pageparams->startdate,
+                    $att->pageparams->enddate);
+
+                $this->filtercontrols = new attendance_filter_controls($att);
+            }
+
+            $this->sessionslog = get_user_sessions_log_full($userid);
+
+            foreach ($this->sessionslog as $sessid => $sess) {
+                $this->sessionslog[$sessid]->cmid = $this->coursesatts[$sess->attendanceid]->cmid;
+            }
+
         } else {
             $this->coursesatts = attendance_get_user_courses_attendances($userid);
             $this->statuses = array();

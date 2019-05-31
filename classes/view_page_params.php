@@ -37,6 +37,9 @@ class mod_attendance_view_page_params extends mod_attendance_page_with_filter_co
     /** All courses  */
     const MODE_ALL_COURSES  = 1;
 
+    /** All sessions */
+    const MODE_ALL_SESSIONS = 2;
+
     /** @var int */
     public $studentid;
 
