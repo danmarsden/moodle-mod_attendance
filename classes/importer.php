@@ -44,20 +44,23 @@ class mod_attendance_importer {
     /** @var mod_attendance_structure $att - the mod_attendance_structure class */
     private $att;
 
-    /** @var int $idnumindex the column index containing the student's id number */
-    private $idnumindex = 0;
+    /** @var string $mapto the database field to map the student column to */
+    private $mapto;
+
+    /** @var int $studentindex the column index containing the student's id number */
+    private $studentindex;
 
     /** @var int $encodingindex the column index containing the student's id number */
-    private $encodingindex = 1;
+    private $encodingindex;
 
     /** @var int $gradeindex the column index containing the grades */
-    private $scantimeindex = 2;
+    private $scantimeindex;
 
     /** @var int $modifiedindex the column index containing the last modified time */
-    private $scandateindex = 3;
+    private $scandateindex;
 
-    /** @var boolean $idnumcolempty checks if the student id column is empty. */
-    public $idnumcolempty = false;
+    /** @var boolean $studentcolempty checks if the student id column is empty. */
+    public $studentcolempty = false;
 
     /** @var boolean $encodingcolempty checks if the encoding column is empty. */
     public $encodingcolempty = false;
@@ -101,6 +104,15 @@ class mod_attendance_importer {
     /** @var string $separator How each bit of information is separated in the file. Defaults to comma separated. */
     private $separator;
 
+    /** @var boolean $noheader triggers if no header row is detected in the uploaded csv file. */
+    private $noheader = false;
+
+    /** @var array $headers Column names for the data. */
+    protected $headers;
+
+    /** @var array $previewdata A subsection of the csv imported data. */
+    protected $previewdata;
+
     /**
      * Constructor
      *
@@ -119,7 +131,6 @@ class mod_attendance_importer {
      * Should be called before init().
      *
      * @param string $csvdata The csv data
-     * @return bool false is a failed import
      */
     public function parsecsv($csvdata) {
         $this->csvreader = new csv_import_reader($this->importid, 'attendance');
@@ -127,7 +138,75 @@ class mod_attendance_importer {
     }
 
     /**
-     * Initialise the import reader and locate the column indexes.
+     * Preview the first few rows of the csv file.
+     *
+     * @param int $previewrows The number of rows the user wants to preview.
+     */
+    public function preview($previewrows) {
+        GLOBAL $CFG, $USER;
+
+        if ($this->csvreader == null) {
+            $this->csvreader = new csv_import_reader($this->importid, 'attendance');
+        }
+        $this->csvreader->init();
+
+        // Checking to see if the entire first row is a header row.
+        $this->headers = $this->csvreader->get_columns();
+        foreach ($this->headers as $value) {
+            if (is_numeric($value)) {
+                $this->noheader = true;
+            }
+        }
+        // If a header row doesn't already exist, insert one.
+        if ($this->noheader == true) {
+            $filename = $CFG->tempdir.'/csvimport/'.'attendance'.'/'.$USER->id.'/'.$this->importid;
+            $tempfilename = $CFG->tempdir.'/csvimport/'.'attendance'.'/'.$USER->id.'/'.'temp.csv';
+            $header = ['Column 1', 'Column 2', 'Column 3', 'Column 4', 'Column 5', 'Column 6', 'Column 7'];
+            $mainfile = fopen($filename, 'r+');
+            $tempfile = fopen($tempfilename, 'w+');
+
+            // Need to insert a header row so that the csv reader will not skip the first row of attendance data.
+            while (!feof($mainfile)) {
+                // Copy the contents of the main file to a temp file.
+                $line = fgetcsv($mainfile);
+                if ($line != false) {
+                    fputcsv($tempfile, $line);
+                }
+            }
+
+            rewind($mainfile); // Resetting the file pointer of both files.
+            rewind($tempfile);
+
+            fputcsv($mainfile, $header); // Placing the header at the top of the main file.
+
+            while (!feof($tempfile)) {
+                // Copy the contents of the temp file to below the headings of the main file.
+                $line = fgetcsv($tempfile);
+                if ($line != false) {
+                    fputcsv($mainfile, $line);
+                }
+            }
+
+            fclose($mainfile); // Finished with boths files, therefore closing them.
+            fclose($tempfile);
+        }
+        // Get the column headers.
+        $this->headers = $this->get_headers($this->importid);
+
+        // Get the preview data.
+        $this->csvreader->init();
+        $this->previewdata = array();
+
+        for ($numoflines = 0; $numoflines <= $previewrows; $numoflines++) {
+            $lines = $this->csvreader->next();
+            if ($lines) {
+                $this->previewdata[] = $lines;
+            }
+        }
+    }
+
+    /**
+     * Initialises the import reader and prechecks the uploaded csv file.
      *
      * @return bool false is a failed import
      */
@@ -137,40 +216,8 @@ class mod_attendance_importer {
         if ($this->csvreader == null) {
             $this->csvreader = new csv_import_reader($this->importid, 'attendance');
         }
-        $this->csvreader->init();
 
         $sessioninfo = $this->att->get_session_info($this->att->pageparams->sessionid);
-
-        $filename = $CFG->tempdir.'/csvimport/'.'attendance'.'/'.$USER->id.'/'.$this->importid;
-        $tempfilename = $CFG->tempdir.'/csvimport/'.'attendance'.'/'.$USER->id.'/'.'temp.csv';
-        $header = ['ID Number', 'Symbology', 'Scan Time', 'Scan Date', 'Current Time', 'Current Date', 'Serial Number'];
-        $mainfile = fopen($filename, 'r+');
-        $tempfile = fopen($tempfilename, 'w+');
-
-        // Need to insert a header row so that the csv reader will not skip the first row of attendance data.
-        while (!feof($mainfile)) {
-            // Copy the contents of the main file to a temp file.
-            $line = fgetcsv($mainfile);
-            if ($line != false) {
-                fputcsv($tempfile, $line);
-            }
-        }
-
-        rewind($mainfile); // Resetting the file pointer of both files.
-        rewind($tempfile);
-
-        fputcsv($mainfile, $header); // Placing the header at the top of the main file.
-
-        while (!feof($tempfile)) {
-            // Copy the contents of the temp file to below the headings of the main file.
-            $line = fgetcsv($tempfile);
-            if ($line != false) {
-                fputcsv($mainfile, $line);
-            }
-        }
-
-        fclose($mainfile); // Finished with boths files, therefore closing them.
-        fclose($tempfile);
 
         $this->validusers = $this->att->get_users($this->att->pageparams->grouptype, 0);
 
@@ -195,8 +242,8 @@ class mod_attendance_importer {
         while ($record = $this->csvreader->next()) {
 
             // Flag an error if the studentid, encoding, scan time or scan date column is missing.
-            if (empty($record[$this->idnumindex])) {
-                $this->idnumcolempty = true;
+            if (empty($record[$this->studentindex])) {
+                $this->studentcolempty = true;
             }
             if (empty($record[$this->encodingindex])) {
                 $this->encodingcolempty = true;
@@ -239,12 +286,13 @@ class mod_attendance_importer {
             $scantime = strtotime($scantime);
             $scantime = (int) $scantime;
 
-            $idstr = $record[$this->idnumindex];
+            $student = $record[$this->studentindex];
             $encoding = $record[$this->encodingindex];
             if ($encoding == 'UPC-A') {
-                $idstr = substr($idstr, 1, -2);
+                $student = substr($student, 1, -2);
             }
-            if ($userid = $this->att->get_user_id_from_idnumber($idstr)) {
+            if ($userrecord = $DB->get_record('user', array($this->mapto => $student), 'id', IGNORE_MISSING)) {
+                $userid = $userrecord->id;
                 if (!empty($this->validusers[$userid])) {
                     $precheckstatus = attendance_session_get_highest_status($this->att, $sessioninfo, $fromcsv = true, $scantime);
                     foreach ($statuses as $status) {
@@ -285,7 +333,7 @@ class mod_attendance_importer {
             }
         }
 
-        if ($this->idnumcolempty == true     || $this->encodingcolempty == true  || $this->scantimecolempty == true  ||
+        if ($this->studentcolempty == true   || $this->encodingcolempty == true  || $this->scantimecolempty == true  ||
             $this->scandatecolempty == true  || $this->scantimeformaterr == true || $this->scandateformaterr == true ||
             $this->incompatsessdate == true  || $this->multipledays == true      || $this->scantimeerr == true) {
             return false;
@@ -315,21 +363,111 @@ class mod_attendance_importer {
     }
 
     /**
+     * Returns the header row.
+     *
+     * @return array returns headers parameter for this class.
+     */
+    public function get_headers($importid) {
+        global $CFG, $USER;
+
+        $filename = $CFG->tempdir.'/csvimport/'.'attendance'.'/'.$USER->id.'/'.$importid;
+        $fp = fopen($filename, "r");
+        $headers = fgetcsv($fp);
+        fclose($fp);
+        if ($headers === false) {
+            return false;
+        }
+
+        return $headers;
+    }
+
+    /**
+     * Returns the preview data.
+     *
+     * @return array returns previewdata parameter for this class.
+     */
+    public function get_previewdata() {
+        return $this->previewdata;
+    }
+
+    /**
+     * Set the index mapping of the student column in the csv file.
+     *
+     * @param int $index The column index to map this field to
+     */
+    public function set_studentindex($index) {
+        $this->studentindex = $index;
+    }
+
+    /**
+     * Set the index mapping of the encoding column in the csv file.
+     *
+     * @param int $index The column index to map this field to
+     */
+    public function set_encodingindex($index) {
+        $this->encodingindex = $index;
+    }
+
+    /**
+     * Set the index mapping of the scantime column in the csv file.
+     *
+     * @param int $index The column index to map this field to
+     */
+    public function set_scantimeindex($index) {
+        $this->scantimeindex = $index;
+    }
+
+    /**
+     * Set the index mapping of the scandate column in the csv file.
+     *
+     * @param int $index The column index to map this field to
+     */
+    public function set_scandateindex($index) {
+        $this->scandateindex = $index;
+    }
+
+    /**
+     * Set the database field to map the student column to.
+     *
+     * @param string $mapto The database field to map the student column to
+     */
+    public function set_mapto($mapto) {
+        switch($mapto){
+            case 'userid';
+                $this->mapto = 'id';
+                break;
+            case 'username':
+                $this->mapto = 'username';
+                break;
+            case 'useridnumber':
+                $this->mapto = 'idnumber';
+                break;
+            case 'useremail':
+                $this->mapto = 'email';
+                break;
+            default:
+                $this->mapto = null;
+        }
+    }
+
+    /**
      * Get the next row of data from the csv file (only the columns we care about)
      *
      * @return stdClass or false The stdClass is an object containing user id, scan time and scan date.
      */
     public function next() {
+        GLOBAL $DB;
 
         $result = new stdClass();
 
         while ($record = $this->csvreader->next()) {
-            $idstr = $record[$this->idnumindex];
+            $student = $record[$this->studentindex];
             $encoding = $record[$this->encodingindex];
             if ($encoding == 'UPC-A') {
-                $idstr = substr($idstr, 1, -2);
+                $student = substr($student, 1, -2);
             }
-            if ($userid = $this->att->get_user_id_from_idnumber($idstr)) {
+            if ($userrecord = $DB->get_record('user', array($this->mapto => $student), 'id', IGNORE_MISSING)) {
+                $userid = $userrecord->id;
                 $result->user = $this->validusers[$userid];
                 $result->scandate = strtotime($record[$this->scandateindex]);
                 $result->scantime = $record[$this->scandateindex].' '.$record[$this->scantimeindex];

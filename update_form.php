@@ -78,7 +78,6 @@ class mod_attendance_update_form extends moodleform {
             'preventsharedip' => $sess->preventsharedip,
             'preventsharediptime' => $sess->preventsharediptime,
             'includeqrcode' => $sess->includeqrcode,
-            'earliestscantime' => $sess->earliestscantime
         );
         if ($sess->subnet == $attendancesubnet) {
             $data['usedefaultsubnet'] = 1;
@@ -187,13 +186,6 @@ class mod_attendance_update_form extends moodleform {
         $mform->addHelpButton('preventsharedgroup', 'preventsharedip', 'attendance');
         $mform->setAdvanced('preventsharedgroup');
         $mform->setType('preventsharediptime', PARAM_INT);
-
-        // Upload attendance files.
-        $mform->addElement('header', 'headeruploadattendance', get_string('uploadattendance', 'attendance'));
-        $mform->setExpanded('headeruploadattendance');
-        $mform->addElement('text', 'earliestscantime', get_string('earliestscantime', 'attendance'));
-        $mform->setType('earliestscantime', PARAM_TEXT);
-        $mform->addHelpButton('earliestscantime', 'earliestscantime', 'attendance');
 
         $mform->setDefaults($data);
         $this->add_action_buttons(true);

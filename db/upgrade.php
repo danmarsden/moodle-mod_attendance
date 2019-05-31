@@ -550,17 +550,5 @@ function xmldb_attendance_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2019012500, 'attendance');
     }
 
-    if ($oldversion < 2019022500) {
-
-        // Adding field "earliestscantime" to attendance_session.
-        $table = new xmldb_table('attendance_sessions');
-        $field = new xmldb_field('earliestscantime', XMLDB_TYPE_INTEGER, '5', XMLDB_UNSIGNED, XMLDB_NOTNULL,
-            null, null, 'statusset');
-        if (!$dbman->field_exists($table, $field)) {
-            $dbman->add_field($table, $field);
-        }
-        upgrade_mod_savepoint(true, 2019022500, 'attendance');
-    }
-
     return $result;
 }

@@ -40,7 +40,7 @@ require_once($CFG->libdir.'/formslib.php');
 class csv_upload_form extends moodleform {
 
     public function definition() {
-        global $COURSE, $USER;
+        global $COURSE;
 
         $mform = $this->_form;
         $params = $this->_customdata;
@@ -68,6 +68,11 @@ class csv_upload_form extends moodleform {
         $mform->addGroup($radio, 'separator', get_string('separator', 'grades'), ' ', false);
         $mform->addHelpButton('separator', 'separator', 'grades');
         $mform->setDefault('separator', 'comma');
+
+        $options = array('10' => 10, '20' => 20, '100' => 100, '1000' => 1000, '100000' => 100000);
+        $mform->addElement('select', 'previewrows', get_string('previewrows', 'attendance'), $options);
+        $mform->addHelpButton('previewrows', 'previewrows', 'attendance');
+        $mform->setType('previewrows', PARAM_INT);
 
         $mform->addElement('hidden', 'id', $params['cm']);
         $mform->setType('id', PARAM_INT);

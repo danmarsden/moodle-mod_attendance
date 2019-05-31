@@ -85,9 +85,6 @@ class mod_attendance_structure {
     /** @var int Position for the session detail columns related to summary columns.*/
     public $sessiondetailspos;
 
-    /** @var boolean flag set when user attempts to change student's attendance from P,L or E to A */
-    public $attemptedfraud;
-
     /** @var int groupmode  */
     private $groupmode;
 
@@ -589,7 +586,6 @@ class mod_attendance_structure {
         }
 
         $sess->timemodified = time();
-        $sess->earliestscantime = $formdata->earliestscantime;
         $DB->update_record('attendance_sessions', $sess);
 
         if (empty($sess->caleventid)) {
@@ -758,8 +754,7 @@ class mod_attendance_structure {
                     if ($dbsesslog[$log->studentid]->remarks <> $log->remarks ||
                         $dbsesslog[$log->studentid]->statusid <> $log->statusid ||
                         $dbsesslog[$log->studentid]->statusset <> $log->statusset) {
-                        // To prevent users from changing the attendance of studentswho are marked as P,L or E,
-                        // only allow the students with attendance status A to be changed to either P,L, or E.
+
                         $log->id = $dbsesslog[$log->studentid]->id;
                         $DB->update_record('attendance_log', $log);
                     }
@@ -790,17 +785,6 @@ class mod_attendance_structure {
         $event->add_record_snapshot('course_modules', $this->cm);
         $event->add_record_snapshot('attendance_sessions', $session);
         $event->trigger();
-
-        // If the user tries to change the attendance of a student who is P, L or E, they will be unable to do so and be
-        // directed to the manual input page where they will be presented with a warning message.
-        if ($this->attemptedfraud == true) {
-            $this->attemptedfraud = false;
-            $params = array(
-                    'sessionid' => $this->pageparams->sessionid,
-                    'grouptype' => $this->pageparams->grouptype);
-            redirect($this->url_take($params), get_string('attemptedfraud', 'attendance'),
-                        null, \core\output\notification::NOTIFY_ERROR);
-        }
     }
 
     /**
@@ -1347,25 +1331,5 @@ class mod_attendance_structure {
         }
 
         return $this->lowgradethreshold;
-    }
-
-    /**
-     * Lookup this student's id number and return the student's user id.
-     *
-     * @param int $idnumber The idnumber to lookup
-     * @return int The user id or false if they don't exist
-     */
-    public function get_user_id_from_idnumber($idnumber) {
-        global $DB;
-
-        // Search for a record.
-        if ($record = $DB->get_record('user',
-                                      array('idnumber' => $idnumber),
-                                      'id',
-                                      IGNORE_MISSING)) {
-            return $record->id;
-        }
-
-        return false;
     }
 }

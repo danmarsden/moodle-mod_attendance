@@ -668,7 +668,6 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
                         }
                     }
                     $sess->statusset = $formdata->statusset;
-                    $sess->earliestscantime = $formdata->earliestscantime;
 
                     attendance_fill_groupid($formdata, $sessions, $sess);
                 }
@@ -728,7 +727,6 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
             }
         }
         $sess->statusset = $formdata->statusset;
-        $sess->earliestscantime = $formdata->earliestscantime;
 
         attendance_fill_groupid($formdata, $sessions, $sess);
     }
@@ -941,16 +939,6 @@ function attendance_session_get_highest_status(mod_attendance_structure $att, $a
                 $toolateforstatus = (($attforsession->sessdate + ($status->studentavailability * 60)) < $scantime);
             }
             if ($toolateforstatus) {
-                continue;
-            }
-        }
-        if ($fromcsv == true) {
-            if ($scantime < ($attforsession->sessdate - ($attforsession->earliestscantime * 60)) && $status->grade != 0) {
-                // Scantimes can occur before the start of class.
-                // The lecturer can specify how much time before the start of class the earliest scantime can occur.
-                // The default setting is 30 mins.
-                // Scantimes within this specified time will be marked the highest available status.
-                // Scantimes that occur before this specified time will be marked the lowest available status.
                 continue;
             }
         }

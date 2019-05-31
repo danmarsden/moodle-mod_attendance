@@ -39,6 +39,7 @@ $id                     = required_param('id', PARAM_INT);
 $pageparams->sessionid  = required_param('sessionid', PARAM_INT);
 $pageparams->grouptype  = optional_param('grouptype', null, PARAM_INT);
 $pageparams->page       = optional_param('page', 1, PARAM_INT);
+$importid               = optional_param('importid', null, PARAM_INT);
 
 $cm                     = get_coursemodule_from_id('attendance', $id, 0, false, MUST_EXIST);
 $course                 = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
@@ -60,29 +61,81 @@ $PAGE->set_heading($course->fullname);
 $PAGE->set_cacheable(true);
 $PAGE->navbar->add($att->name);
 
-
-$mform = new \mod_attendance\import\csv_upload_form(null,
-                                                    array('cm' => $cm->id,
-                                                          'sessionid' => $pageparams->sessionid,
-                                                          'grouptype' => $pageparams->grouptype));
-
 $o = '';
 
 // Form processing and displaying is done here.
 $output = $PAGE->get_renderer('mod_attendance');
 
-if ($mform->is_cancelled()) {
+// If the csv file hasn't been imported yet then look for a form submission or show the initial submission form.
+if (!$importid) {
+    $mform = new \mod_attendance\import\csv_upload_form(null,
+                                                        array('cm' => $cm->id,
+                                                              'sessionid' => $pageparams->sessionid,
+                                                              'grouptype' => $pageparams->grouptype));
+
+    if ($mform->is_cancelled()) {
+        redirect(new moodle_url('/mod/attendance/take.php',
+                                array('id' => $cm->id,
+                                      'sessionid' => $pageparams->sessionid,
+                                      'grouptype' => $pageparams->grouptype)));
+        return;
+    } else if (($data = $mform->get_data()) &&
+            ($csvdata = $mform->get_file_content('attendancefile'))) {
+        $importid = csv_import_reader::get_new_iid('attendance');
+
+        $attimporter = new mod_attendance_importer($importid, $att, $data->encoding, $data->separator);
+        $attimporter->parsecsv($csvdata);
+        $attimporter->preview($data->previewrows);
+
+        echo $output->header();
+        echo $output->heading(get_string('attendanceforthecourse', 'attendance').' :: ' .format_string($course->fullname));
+        echo $output->preview_page($attimporter->get_headers($importid), $attimporter->get_previewdata());
+    } else {
+        // Output for the file upload form starts here.
+        echo $output->header();
+        echo $output->heading(get_string('attendanceforthecourse', 'attendance').' :: ' .format_string($course->fullname));
+        $mform->display();
+
+        echo $output->footer();
+        die();
+    }
+}
+
+// Form was submitted, so we can use the $importid to retrieve its data.
+$attimporter = new mod_attendance_importer($importid, $att);
+$header = $attimporter->get_headers($importid);
+
+// A new form is created for handling the mapping data from the form to the database.
+$mform2 = new \mod_attendance\import\csv_upload_mapping_form(null, array('cm' => $cm->id,
+                                                                         'sessionid' => $pageparams->sessionid,
+                                                                         'grouptype' => $pageparams->grouptype,
+                                                                         'header' => $header,
+                                                                         'importid' => $importid));
+
+if ($mform2->is_cancelled()) {
     redirect(new moodle_url('/mod/attendance/take.php',
                             array('id' => $cm->id,
                                   'sessionid' => $pageparams->sessionid,
                                   'grouptype' => $pageparams->grouptype)));
     return;
-} else if (($data = $mform->get_data()) &&
-        ($csvdata = $mform->get_file_content('attendancefile'))) {
-    $importid = csv_import_reader::get_new_iid('attendance');
+} else if ($data = $mform2->get_data()) {
+    // Make sure there are only one to one column mappings.
+    if ($data->mapfrom == $data->encoding ||
+        $data->mapfrom == $data->scantime ||
+        $data->mapfrom == $data->scandate) {
+        echo $output->notification(get_string('mappingcollision', 'attendance'));
+    }
 
-    $attimporter = new mod_attendance_importer($importid, $att, $data->encoding, $data->separator);
-    $attimporter->parsecsv($csvdata);
+    // Mapping the columns for the encoding, scantime and scandate to the corresponding indices.
+    // Without this the program would not know which column contains which piece of information.
+    // These must be set before prechecking the file.
+    $attimporter->set_encodingindex($data->encoding);
+    $attimporter->set_scantimeindex($data->scantime);
+    $attimporter->set_scandateindex($data->scandate);
+
+    // Set which column in the csv file to identify the student by and set which field in the database it should map to.
+    $attimporter->set_studentindex($data->mapfrom);
+    $attimporter->set_mapto($data->mapto);
 
     // An error message is displayed if something is wrong with the uploaded file during the precheck.
     if (!$attimporter->init()) {
@@ -95,9 +148,9 @@ if ($mform->is_cancelled()) {
         $err = '';
 
         // Action error flags here.
-        if ($attimporter->idnumcolempty == true) {
-            $attimporter->idnumcolempty = false;
-            $missing .= get_string('idnumcolempty', 'attendance');
+        if ($attimporter->studentcolempty == true) {
+            $attimporter->studentcolempty = false;
+            $missing .= get_string('studentcolempty', 'attendance');
         }
         if ($attimporter->encodingcolempty == true) {
             $attimporter->encodingcolempty = false;
@@ -149,11 +202,9 @@ if ($mform->is_cancelled()) {
     redirect($att->url_manage(), get_string('attendancesuccess', 'attendance'));
 
     return;
+} else {
+    // Output for the mapping form starts here.
+    $mform2->display();
+
+    echo $output->footer();
 }
-
-// Output starts here.
-echo $output->header();
-echo $output->heading(get_string('attendanceforthecourse', 'attendance').' :: ' .format_string($course->fullname));
-$mform->display();
-
-echo $output->footer();

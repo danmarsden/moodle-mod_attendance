@@ -280,14 +280,6 @@ class mod_attendance_add_form extends moodleform {
             $mform->setDefault('preventsharediptime', $pluginconfig->preventsharediptime);
         }
 
-        // Upload attendance files.
-        $mform->addElement('header', 'headeruploadattendance', get_string('uploadattendance', 'attendance'));
-        $mform->setExpanded('headeruploadattendance');
-        $mform->addElement('text', 'earliestscantime', get_string('earliestscantime', 'attendance'));
-        $mform->setType('earliestscantime', PARAM_TEXT);
-        $mform->addHelpButton('earliestscantime', 'earliestscantime', 'attendance');
-        $mform->setDefault('earliestscantime', $pluginconfig->earliestscantime);
-
         $this->add_action_buttons(true, get_string('add', 'attendance'));
     }
 
