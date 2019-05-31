@@ -171,12 +171,20 @@ class attendance_webservices_tests extends advanced_testcase {
         }
 
         // Add a session that's identical to the first, but with a group.
+        $midnight = usergetmidnight(time()); // Check if this test is running during midnight.
         $session = clone $this->sessions[0];
         $session->groupid = $group->id;
         $session->sessdate += 3600; // Make sure it appears second in the list.
         $this->attendance->add_sessions([$session]);
 
         $courseswithsessions = attendance_handler::get_courses_with_today_sessions($this->teacher->id);
+
+        // This test is fragile when running over midnight - check that it is still the same day, if not, run this again.
+        // This isn't really ideal code, but will hopefully still give a valid test.
+        if (empty($courseswithsessions) && $midnight !== usergetmidnight(time())) {
+            $this->attendance->add_sessions([$session]);
+            $courseswithsessions = attendance_handler::get_courses_with_today_sessions($this->teacher->id);
+        }
 
         $course = array_pop($courseswithsessions);
         $attendanceinstance = array_pop($course->attendance_instances);

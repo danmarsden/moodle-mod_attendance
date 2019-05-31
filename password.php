@@ -49,15 +49,16 @@ $PAGE->set_context(context_system::instance());
 $PAGE->set_title(get_string('password', 'attendance'));
 
 echo $OUTPUT->header();
-echo html_writer::tag('h2', get_string('passwordgrp', 'attendance'));
-echo html_writer::span($session->studentpassword, 'student-password');
 
-if (isset($session->includeqrcode) && $session->includeqrcode == 1) {
-    $qrcodeurl = $CFG->wwwroot . '/mod/attendance/attendance.php?qrpass=' . $session->studentpassword . '&sessid=' . $session->id;
-    echo html_writer::tag('h3', get_string('qrcode', 'attendance'));
+$showpassword = (isset($session->studentpassword) && strlen($session->studentpassword) > 0);
+$showqr = (isset($session->includeqrcode) && $session->includeqrcode == 1);
 
-    $barcode = new TCPDF2DBarcode($qrcodeurl, 'QRCODE');
-    $image = $barcode->getBarcodePngData(15, 15);
-    echo html_writer::img('data:image/png;base64,' . base64_encode($image), get_string('qrcode', 'attendance'));
+if ($showpassword) {
+    attendance_renderpassword($session);
 }
+
+if ($showqr) {
+    attendance_renderqrcode($session);
+}
+
 echo $OUTPUT->footer();

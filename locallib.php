@@ -1050,3 +1050,35 @@ function construct_session_full_date_time($datetime, $duration) {
 
     return $sessinfo;
 }
+
+/**
+ * Render the session password.
+ *
+ * @param stdClass $session
+ */
+function attendance_renderpassword($session) {
+    echo html_writer::tag('h2', get_string('passwordgrp', 'attendance'));
+    echo html_writer::span($session->studentpassword, 'student-password');
+}
+
+/**
+ * Render the session QR code.
+ *
+ * @param stdClass $session
+ */
+function attendance_renderqrcode($session) {
+    global $CFG;
+
+    if (strlen($session->studentpassword) > 0) {
+        $qrcodeurl = $CFG->wwwroot . '/mod/attendance/attendance.php?qrpass=' . $session->studentpassword .
+            '&sessid=' . $session->id;
+    } else {
+        $qrcodeurl = $CFG->wwwroot . '/mod/attendance/attendance.php?sessid=' . $session->id;
+    }
+
+    echo html_writer::tag('h3', get_string('qrcode', 'attendance'));
+
+    $barcode = new TCPDF2DBarcode($qrcodeurl, 'QRCODE');
+    $image = $barcode->getBarcodePngData(15, 15);
+    echo html_writer::img('data:image/png;base64,' . base64_encode($image), get_string('qrcode', 'attendance'));
+}
