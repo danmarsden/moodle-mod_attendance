@@ -25,6 +25,13 @@
 defined('MOODLE_INTERNAL') || die();
 
 $functions = array(
+    'mod_wsattendance_add_attendance' => array(
+        'classname'    => 'mod_wsattendance_external',
+        'methodname'   => 'add_attendance',
+        'classpath'    => 'mod/attendance/externallib.php',
+        'description'  => 'Add attendance instance to course.',
+        'type'         => 'write',
+    ),
     'mod_wsattendance_add_session' => array(
         'classname'    => 'mod_wsattendance_external',
         'methodname'   => 'add_session',

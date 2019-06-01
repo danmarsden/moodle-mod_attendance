@@ -34,6 +34,79 @@ require_once(dirname(__FILE__).'/classes/attendance_webservices_handler.php');
 class mod_wsattendance_external extends external_api {
 
     /**
+     * Describes the parameters for add_attendance.
+     *
+     * @return external_function_parameters
+     */
+    public static function add_attendance_parameters() {
+        return new external_function_parameters(
+            array(
+                'courseid' => new external_value(PARAM_INT, 'course id'),
+                'name' => new external_value(PARAM_TEXT, 'attendance name'),
+                'intro' => new external_value(PARAM_RAW, 'attendance description', VALUE_DEFAULT, ''),
+                'groupmode' => new external_value(PARAM_INT, 'group mode (0 - no groups, 1 - separate goups, 2 - visible groups)', VALUE_DEFAULT, 0),
+            )
+        );
+    }
+
+    /**
+     * Adds attendance instance to course.
+     *
+     * @param int $courseid
+     * @param string $name
+     * @param string $intro
+     * @param int $groupmode
+     * @return int $sessionid
+     */
+    public static function add_attendance(int $courseid, $name, $intro, int $groupmode) {
+        global $CFG, $DB;
+        require_once($CFG->dirroot.'/course/modlib.php');
+
+        // Get course.
+        $course = $DB->get_record('course', array('id' => $courseid), '*', MUST_EXIST);
+
+        // Verify permissions.
+        list($module, $context) = can_add_moduleinfo($course, 'attendance', 0);
+        require_capability('mod/attendance:addinstance', $context);
+
+        // Verify group mode.
+        if (!in_array($groupmode, array(NOGROUPS, SEPARATEGROUPS, VISIBLEGROUPS))) {
+            throw new invalid_parameter_exception('Group mode is invalid.');
+        }
+
+        // Populate modinfo object.
+        $moduleinfo = new stdClass();
+        $moduleinfo->modulename = 'attendance';
+        $moduleinfo->module = $module;
+
+        $moduleinfo->name = $name;
+        $moduleinfo->intro = $intro;
+        $moduleinfo->intoformat = FORMAT_HTML;
+
+        $moduleinfo->section = 0;
+        $moduleinfo->visible = 1;
+        $moduleinfo->visibleoncoursepage = 1;
+        $moduleinfo->cmidnumber = '';
+        $moduleinfo->groupmode = $groupmode;
+        $moduleinfo->groupingid = 0;
+
+        // Add the module to the course.
+        $moduleinfo = add_moduleinfo($moduleinfo, $course);
+        return array('attendanceid' => $moduleinfo->instance);
+    }
+
+    /**
+     * Describes add_attendance return values.
+     *
+     * @return external_multiple_structure
+     */
+    public static function add_attendance_returns() {
+        return new external_single_structure(array(
+            'attendanceid' => new external_value(PARAM_INT, 'instance id of the created attendance'),
+        ));
+    }
+
+    /**
      * Describes the parameters for add_session.
      *
      * @return external_function_parameters
