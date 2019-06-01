@@ -452,73 +452,84 @@ class mod_attendance_structure {
      * @param array $sessions
      */
     public function add_sessions($sessions) {
-        global $DB;
+        foreach ($sessions as $sess) {
+            $this->add_session($sess);
+        }
+    }
 
+    /**
+     * Add single session.
+     *
+     * @param array $session
+     * @return int $sessionid
+     */
+    public function add_session($sess) {
+        global $DB;
         $config = get_config('attendance');
 
-        foreach ($sessions as $sess) {
-            $sess->attendanceid = $this->id;
-            $sess->automarkcompleted = 0;
-            if (!isset($sess->automark)) {
-                $sess->automark = 0;
-            }
-            if (empty($config->enablecalendar)) {
-                // If calendard disabled at site level, don't use it.
-                $sess->calendarevent = 0;
-            }
-            $sess->id = $DB->insert_record('attendance_sessions', $sess);
-            $description = file_save_draft_area_files($sess->descriptionitemid,
-                $this->context->id, 'mod_attendance', 'session', $sess->id,
-                array('subdirs' => false, 'maxfiles' => -1, 'maxbytes' => 0),
-                $sess->description);
-            $DB->set_field('attendance_sessions', 'description', $description, array('id' => $sess->id));
-
-            $sess->caleventid = 0;
-            attendance_create_calendar_event($sess);
-
-            $infoarray = array();
-            $infoarray[] = construct_session_full_date_time($sess->sessdate, $sess->duration);
-
-            // Trigger a session added event.
-            $event = \mod_attendance\event\session_added::create(array(
-                'objectid' => $this->id,
-                'context' => $this->context,
-                'other' => array('info' => implode(',', $infoarray))
-            ));
-            $event->add_record_snapshot('course_modules', $this->cm);
-            $sess->description = $description;
-            $sess->lasttaken = 0;
-            $sess->lasttakenby = 0;
-            if (!isset($sess->studentscanmark)) {
-                $sess->studentscanmark = 0;
-            }
-            if (!isset($sess->autoassignstatus)) {
-                $sess->autoassignstatus = 0;
-            }
-            if (!isset($sess->studentpassword)) {
-                $sess->studentpassword = '';
-            }
-            if (!isset($sess->subnet)) {
-                $sess->subnet = '';
-            }
-
-            if (!isset($sess->preventsharedip)) {
-                $sess->preventsharedip = 0;
-            }
-
-            if (!isset($sess->preventsharediptime)) {
-                $sess->preventsharediptime = '';
-            }
-            if (!isset($sess->includeqrcode)) {
-                $sess->includeqrcode = 0;
-            }
-            if (!isset($sess->rotateqrcode)) {
-                $sess->rotateqrcode = 0;
-                $sess->rotateqrcodesecret = '';
-            }
-            $event->add_record_snapshot('attendance_sessions', $sess);
-            $event->trigger();
+        $sess->attendanceid = $this->id;
+        $sess->automarkcompleted = 0;
+        if (!isset($sess->automark)) {
+            $sess->automark = 0;
         }
+        if (empty($config->enablecalendar)) {
+            // If calendard disabled at site level, don't use it.
+            $sess->calendarevent = 0;
+        }
+        $sess->id = $DB->insert_record('attendance_sessions', $sess);
+        $description = file_save_draft_area_files($sess->descriptionitemid,
+            $this->context->id, 'mod_attendance', 'session', $sess->id,
+            array('subdirs' => false, 'maxfiles' => -1, 'maxbytes' => 0),
+            $sess->description);
+        $DB->set_field('attendance_sessions', 'description', $description, array('id' => $sess->id));
+
+        $sess->caleventid = 0;
+        attendance_create_calendar_event($sess);
+
+        $infoarray = array();
+        $infoarray[] = construct_session_full_date_time($sess->sessdate, $sess->duration);
+
+        // Trigger a session added event.
+        $event = \mod_attendance\event\session_added::create(array(
+            'objectid' => $this->id,
+            'context' => $this->context,
+            'other' => array('info' => implode(',', $infoarray))
+        ));
+        $event->add_record_snapshot('course_modules', $this->cm);
+        $sess->description = $description;
+        $sess->lasttaken = 0;
+        $sess->lasttakenby = 0;
+        if (!isset($sess->studentscanmark)) {
+            $sess->studentscanmark = 0;
+        }
+        if (!isset($sess->autoassignstatus)) {
+            $sess->autoassignstatus = 0;
+        }
+        if (!isset($sess->studentpassword)) {
+            $sess->studentpassword = '';
+        }
+        if (!isset($sess->subnet)) {
+            $sess->subnet = '';
+        }
+
+        if (!isset($sess->preventsharedip)) {
+            $sess->preventsharedip = 0;
+        }
+
+        if (!isset($sess->preventsharediptime)) {
+            $sess->preventsharediptime = '';
+        }
+        if (!isset($sess->includeqrcode)) {
+            $sess->includeqrcode = 0;
+        }
+        if (!isset($sess->rotateqrcode)) {
+            $sess->rotateqrcode = 0;
+            $sess->rotateqrcodesecret = '';
+        }
+        $event->add_record_snapshot('attendance_sessions', $sess);
+        $event->trigger();
+
+        return $sess->id;
     }
 
     /**

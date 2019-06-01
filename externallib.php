@@ -109,7 +109,8 @@ class mod_wsattendance_external extends external_api {
             }
         }
 
-        $att->add_sessions(array($sess));
+        $sessionid = $att->add_session($sess);
+        return array('sessionid' => $sessionid);
     }
 
     /**
