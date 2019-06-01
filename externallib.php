@@ -118,22 +118,27 @@ class mod_wsattendance_external extends external_api {
                 'groupid' => new external_value(PARAM_INT, 'group id', VALUE_DEFAULT, 0),
                 'sessiontime' => new external_value(PARAM_INT, 'session start timestamp'),
                 'duration' => new external_value(PARAM_INT, 'session duration (seconds)', VALUE_DEFAULT, 0),
-                'description' => new external_value(PARAM_RAW, 'field description', VALUE_DEFAULT, ''),
+                'description' => new external_value(PARAM_RAW, 'description', VALUE_DEFAULT, ''),
                 'addcalendarevent' => new external_value(PARAM_BOOL, 'add calendar event', VALUE_DEFAULT, true),
             )
         );
     }
 
     /**
-     * Adds session.
+     * Adds session to attendance instance.
      *
-     * @param int $userid
+     * @param int $attendanceid
+     * @param int $groupid
+     * @param int $sessiontime
+     * @param int $duration
+     * @param string $description
+     * @param bool $addcalendarevent
      * @return int $sessionid
      */
     public static function add_session(int $attendanceid, int $groupid, int $sessiontime, int $duration, $description, bool $addcalendarevent) {
         global $USER;
 
-        $cm = get_coursemodule_from_id('attendance', $attendanceid, 0, false, MUST_EXIST);
+        $cm = get_coursemodule_from_instance('attendance', $attendanceid, 0, false, MUST_EXIST);
         $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
         $attendance = $DB->get_record('attendance', array('id' => $cm->instance), '*', MUST_EXIST);
 
@@ -193,7 +198,7 @@ class mod_wsattendance_external extends external_api {
      */
     public static function add_session_returns() {
         return new external_single_structure(array(
-            'sessionid' => new external_value(PARAM_INT, 'ID of the created session'),
+            'sessionid' => new external_value(PARAM_INT, 'id of the created session'),
         ));
     }
 

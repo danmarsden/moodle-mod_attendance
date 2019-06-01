@@ -38,7 +38,6 @@ $functions = array(
         'classpath'    => 'mod/attendance/externallib.php',
         'description'  => 'Add a new session.',
         'type'         => 'write',
-        'capabilities' => 'mod/attendance:manageattendances',
     ),
     'mod_wsattendance_get_courses_with_today_sessions' => array(
         'classname'   => 'mod_wsattendance_external',
