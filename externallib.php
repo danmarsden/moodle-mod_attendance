@@ -63,15 +63,23 @@ class mod_wsattendance_external extends external_api {
         global $CFG, $DB;
         require_once($CFG->dirroot.'/course/modlib.php');
 
+        $params = self::validate_parameters(self::add_attendance_parameters(), array(
+            'courseid' => $courseid,
+            'name' => $name,
+            'intro' => $intro,
+            'groupmode' => $groupmode,
+        ));
+
         // Get course.
-        $course = $DB->get_record('course', array('id' => $courseid), '*', MUST_EXIST);
+        $course = $DB->get_record('course', array('id' => $params['courseid']), '*', MUST_EXIST);
 
         // Verify permissions.
         list($module, $context) = can_add_moduleinfo($course, 'attendance', 0);
+        self::validate_context($context);
         require_capability('mod/attendance:addinstance', $context);
 
         // Verify group mode.
-        if (!in_array($groupmode, array(NOGROUPS, SEPARATEGROUPS, VISIBLEGROUPS))) {
+        if (!in_array($params['groupmode'], array(NOGROUPS, SEPARATEGROUPS, VISIBLEGROUPS))) {
             throw new invalid_parameter_exception('Group mode is invalid.');
         }
 
@@ -80,15 +88,15 @@ class mod_wsattendance_external extends external_api {
         $moduleinfo->modulename = 'attendance';
         $moduleinfo->module = $module->id;
 
-        $moduleinfo->name = $name;
-        $moduleinfo->intro = $intro;
+        $moduleinfo->name = $params['name'];
+        $moduleinfo->intro = $params['intro'];
         $moduleinfo->introformat = FORMAT_HTML;
 
         $moduleinfo->section = 0;
         $moduleinfo->visible = 1;
         $moduleinfo->visibleoncoursepage = 1;
         $moduleinfo->cmidnumber = '';
-        $moduleinfo->groupmode = $groupmode;
+        $moduleinfo->groupmode = $params['groupmode'];
         $moduleinfo->groupingid = 0;
 
         // Add the module to the course.
@@ -140,39 +148,26 @@ class mod_wsattendance_external extends external_api {
     public static function add_session(int $attendanceid, $description, int $sessiontime, int $duration, int $groupid, bool $addcalendarevent) {
         global $USER, $DB;
 
-        $cm = get_coursemodule_from_instance('attendance', $attendanceid, 0, false, MUST_EXIST);
+        $params = self::validate_parameters(self::add_session_parameters(), array(
+            'attendanceid' => $attendanceid,
+            'description' => $description,
+            'sessiontime' => $sessiontime,
+            'duration' => $duration,
+            'groupid' => $groupid,
+            'addcalendarevent' => $addcalendarevent,
+        ));
+
+        $cm = get_coursemodule_from_instance('attendance', $params['attendanceid'], 0, false, MUST_EXIST);
         $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
         $attendance = $DB->get_record('attendance', array('id' => $cm->instance), '*', MUST_EXIST);
 
         // Check permissions.
         $context = context_module::instance($cm->id);
+        self::validate_context($context);
         require_capability('mod/attendance:manageattendances', $context);
 
-        // Get attendance.
-        $attendance = new mod_attendance_structure($attendance, $cm, $course, $context);
-
-        // Create session.
-        $sess = new stdClass();
-        $sess->sessdate = $sessiontime;
-        $sess->duration = $duration;
-        $sess->descriptionitemid = 0;
-        $sess->description = $description;
-        $sess->descriptionformat = FORMAT_HTML;
-        $sess->calendarevent = (int) $addcalendarevent;
-        $sess->timemodified = time();
-        $sess->studentscanmark = 0;
-        $sess->autoassignstatus = 0;
-        $sess->subnet = '';
-        $sess->studentpassword = '';
-        $sess->automark = 0;
-        $sess->automarkcompleted = 0;
-        $sess->absenteereport = get_config('attendance', 'absenteereport_default');
-        $sess->includeqrcode = 0;
-        $sess->subnet = $attendance->subnet;
-        $sess->statusset = 0;
-        $sess->groupid = $groupid;
-
         // Validate group.
+        $groupid = $params['groupid'];
         $groupmode = (int)groups_get_activity_groupmode($cm);
         if ($groupmode === NOGROUPS && $groupid > 0) {
             throw new invalid_parameter_exception('Group id is specified, but group mode is disabled for activity');
@@ -188,6 +183,30 @@ class mod_wsattendance_external extends external_api {
                 throw new invalid_parameter_exception('Invalid group id');
             }
         }
+
+        // Get attendance.
+        $attendance = new mod_attendance_structure($attendance, $cm, $course, $context);
+
+        // Create session.
+        $sess = new stdClass();
+        $sess->sessdate = $params['sessiontime'];
+        $sess->duration = $params['duration'];
+        $sess->descriptionitemid = 0;
+        $sess->description = $params['description'];
+        $sess->descriptionformat = FORMAT_HTML;
+        $sess->calendarevent = (int) $params['addcalendarevent'];
+        $sess->timemodified = time();
+        $sess->studentscanmark = 0;
+        $sess->autoassignstatus = 0;
+        $sess->subnet = '';
+        $sess->studentpassword = '';
+        $sess->automark = 0;
+        $sess->automarkcompleted = 0;
+        $sess->absenteereport = get_config('attendance', 'absenteereport_default');
+        $sess->includeqrcode = 0;
+        $sess->subnet = $attendance->subnet;
+        $sess->statusset = 0;
+        $sess->groupid = $groupid;
 
         $sessionid = $attendance->add_session($sess);
         return array('sessionid' => $sessionid);
