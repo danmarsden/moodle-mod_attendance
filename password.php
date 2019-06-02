@@ -41,6 +41,12 @@ if (!has_any_capability($capabilities, $context)) {
     exit;
 }
 
+if (isset($_GET['returnpasswords']) && $_GET['returnpasswords'] == 1) {
+    header('Content-Type: application/json');
+    attendance_return_passwords($session);
+    exit;
+}
+
 $PAGE->set_url('/mod/attendance/password.php');
 $PAGE->set_pagelayout('popup');
 
