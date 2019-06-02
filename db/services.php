@@ -39,6 +39,13 @@ $functions = array(
         'description'  => 'Add a new session.',
         'type'         => 'write',
     ),
+    'mod_wsattendance_remove_session' => array(
+        'classname'    => 'mod_wsattendance_external',
+        'methodname'   => 'remove_session',
+        'classpath'    => 'mod/attendance/externallib.php',
+        'description'  => 'Delete a session.',
+        'type'         => 'write',
+    ),
     'mod_wsattendance_get_courses_with_today_sessions' => array(
         'classname'   => 'mod_wsattendance_external',
         'methodname'  => 'get_courses_with_today_sessions',
@@ -70,6 +77,7 @@ $services = array(
         'functions' => array(
             'mod_wsattendance_add_attendance',
             'mod_wsattendance_add_session',
+            'mod_wsattendance_remove_session',
             'mod_wsattendance_get_courses_with_today_sessions',
             'mod_wsattendance_get_session',
             'mod_wsattendance_update_user_status'

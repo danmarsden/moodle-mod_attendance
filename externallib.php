@@ -205,6 +205,57 @@ class mod_wsattendance_external extends external_api {
     }
 
     /**
+     * Describes the parameters for remove_session.
+     *
+     * @return external_function_parameters
+     */
+    public static function remove_session_parameters() {
+        return new external_function_parameters(
+            array(
+                'sessionid' => new external_value(PARAM_INT, 'session id'),
+            )
+        );
+    }
+
+    /**
+     * Delete session from attendance instance.
+     *
+     * @param int $sessionid
+     * @return int $sessionid
+     */
+    public static function remove_session(int $sessionid) {
+        global $DB;
+
+        $params = self::validate_parameters(self::remove_session_parameters(),
+            array('sessionid' => $sessionid));
+
+        $session = $DB->get_record('attendance_sessions', array('id' => $params['sessionid']), '*', MUST_EXIST);
+        $attendance = $DB->get_record('attendance', array('id' => $session->attendanceid), '*', MUST_EXIST);
+        $cm = get_coursemodule_from_instance('attendance', $attendance->id, 0, false, MUST_EXIST);
+        $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
+
+        // Check permissions.
+        $context = context_module::instance($cm->id);
+        self::validate_context($context);
+        require_capability('mod/attendance:manageattendances', $context);
+
+        // Get attendance.
+        $attendance = new mod_attendance_structure($attendance, $cm, $course, $context);
+
+        // Delete session.
+        $attendance->delete_sessions(array($sessionid));
+        attendance_update_users_grade($attendance);
+    }
+
+    /**
+     * Describes remove_session return values.
+     *
+     * @return external_multiple_structure
+     */
+    public static function remove_session_returns() {
+    }
+
+    /**
      * Get parameter list.
      * @return external_function_parameters
      */
