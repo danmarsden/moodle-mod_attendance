@@ -23,7 +23,8 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-require_once("$CFG->libdir/externallib.php");
+require_once($CFG->libdir . '/externallib.php');
+require_once($CFG->libdir . '/filelib.php');
 require_once(dirname(__FILE__).'/classes/attendance_webservices_handler.php');
 
 /**
@@ -77,11 +78,11 @@ class mod_wsattendance_external extends external_api {
         // Populate modinfo object.
         $moduleinfo = new stdClass();
         $moduleinfo->modulename = 'attendance';
-        $moduleinfo->module = $module;
+        $moduleinfo->module = $module->id;
 
         $moduleinfo->name = $name;
         $moduleinfo->intro = $intro;
-        $moduleinfo->intoformat = FORMAT_HTML;
+        $moduleinfo->introformat = FORMAT_HTML;
 
         $moduleinfo->section = 0;
         $moduleinfo->visible = 1;
@@ -92,6 +93,7 @@ class mod_wsattendance_external extends external_api {
 
         // Add the module to the course.
         $moduleinfo = add_moduleinfo($moduleinfo, $course);
+
         return array('attendanceid' => $moduleinfo->instance);
     }
 
@@ -115,10 +117,10 @@ class mod_wsattendance_external extends external_api {
         return new external_function_parameters(
             array(
                 'attendanceid' => new external_value(PARAM_INT, 'attendance instance id'),
-                'groupid' => new external_value(PARAM_INT, 'group id', VALUE_DEFAULT, 0),
+                'description' => new external_value(PARAM_RAW, 'description', VALUE_DEFAULT, ''),
                 'sessiontime' => new external_value(PARAM_INT, 'session start timestamp'),
                 'duration' => new external_value(PARAM_INT, 'session duration (seconds)', VALUE_DEFAULT, 0),
-                'description' => new external_value(PARAM_RAW, 'description', VALUE_DEFAULT, ''),
+                'groupid' => new external_value(PARAM_INT, 'group id', VALUE_DEFAULT, 0),
                 'addcalendarevent' => new external_value(PARAM_BOOL, 'add calendar event', VALUE_DEFAULT, true),
             )
         );
@@ -135,8 +137,8 @@ class mod_wsattendance_external extends external_api {
      * @param bool $addcalendarevent
      * @return int $sessionid
      */
-    public static function add_session(int $attendanceid, int $groupid, int $sessiontime, int $duration, $description, bool $addcalendarevent) {
-        global $USER;
+    public static function add_session(int $attendanceid, $description, int $sessiontime, int $duration, int $groupid, bool $addcalendarevent) {
+        global $USER, $DB;
 
         $cm = get_coursemodule_from_instance('attendance', $attendanceid, 0, false, MUST_EXIST);
         $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
@@ -171,7 +173,7 @@ class mod_wsattendance_external extends external_api {
         $sess->groupid = $groupid;
 
         // Validate group.
-        $groupmode = groups_get_activity_groupmode($cm);
+        $groupmode = (int)groups_get_activity_groupmode($cm);
         if ($groupmode === NOGROUPS && $groupid > 0) {
             throw new invalid_parameter_exception('Group id is specified, but group mode is disabled for activity');
         } else if ($groupmode === SEPARATEGROUPS && $groupid === 0) {
@@ -182,12 +184,12 @@ class mod_wsattendance_external extends external_api {
             $userid = has_capability('moodle/site:accessallgroups', $context) ? 0 : $USER->id;
             $validgroupids = array_map(function($group) { return $group->id; },
                 groups_get_all_groups($course->id, $userid, $cm->groupingid));
-            if (!in_array($groupid, $valudgroupids)) {
+            if (!in_array($groupid, $validgroupids)) {
                 throw new invalid_parameter_exception('Invalid group id');
             }
         }
 
-        $sessionid = $att->add_session($sess);
+        $sessionid = $attendance->add_session($sess);
         return array('sessionid' => $sessionid);
     }
 

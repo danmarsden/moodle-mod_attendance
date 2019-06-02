@@ -68,6 +68,7 @@ $functions = array(
 $services = array(
     'Attendance' => array(
         'functions' => array(
+            'mod_wsattendance_add_attendance',
             'mod_wsattendance_add_session',
             'mod_wsattendance_get_courses_with_today_sessions',
             'mod_wsattendance_get_session',
