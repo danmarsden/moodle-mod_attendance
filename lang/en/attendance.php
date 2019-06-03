@@ -106,6 +106,7 @@ $string['confirmdeleteuser'] = 'Are you sure you want to delete user \'{$a->full
 $string['copyfrom'] = 'Copy attendance data from';
 $string['countofselected'] = 'Count of selected';
 $string['course'] = 'Course';
+$string['courseshortname'] = 'Course shortname';
 $string['coursesummary'] = 'Course summary report';
 $string['createmultiplesessions'] = 'Create multiple sessions';
 $string['createmultiplesessions_help'] = 'This function allows you to create multiple sessions in one simple step.
