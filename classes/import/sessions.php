@@ -92,7 +92,7 @@ class sessions {
      */
     public static function list_required_headers() {
         return array(
-            get_string('course', 'attendance'),
+            get_string('courseshortname', 'attendance'),
             get_string('groups', 'attendance'),
             get_string('sessiondate', 'attendance'),
             get_string('from', 'attendance'),
