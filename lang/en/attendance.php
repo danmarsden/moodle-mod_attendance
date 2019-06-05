@@ -72,10 +72,10 @@ $string['attrecords'] = 'Attendances records';
 $string['automark'] = 'Automatic marking';
 $string['automarkall'] = 'Yes';
 $string['automarkclose'] = 'Set unmarked at end of session';
-$string['automarktask'] = 'Check for attendance sessions that require auto marking';
 $string['automark_help'] = 'Allows marking to be completed automatically.
 If "Yes" students will be automatically marked depending on their first access to the course.
 If "Set unmarked at end of session" any students who have not marked their attendance will be set to the unmarked status selected.';
+$string['automarktask'] = 'Check for attendance sessions that require auto marking';
 $string['autorecorded'] = 'system auto recorded';
 $string['averageattendance'] = 'Average attendance';
 $string['averageattendancegraded'] = 'Average attendance';
@@ -110,6 +110,7 @@ $string['confirmdeleteuser'] = 'Are you sure you want to delete user \'{$a->full
 $string['copyfrom'] = 'Copy attendance data from';
 $string['countofselected'] = 'Count of selected';
 $string['course'] = 'Course';
+$string['courseshortname'] = 'Course shortname';
 $string['coursesummary'] = 'Course summary report';
 $string['createmultiplesessions'] = 'Create multiple sessions';
 $string['createmultiplesessions_help'] = 'This function allows you to create multiple sessions in one simple step.
@@ -206,6 +207,7 @@ $string['error:sessioncourseinvalid'] = 'A session course is invalid! Skipping.'
 $string['error:sessiondateinvalid'] = 'A session date is invalid! Skipping.';
 $string['error:sessionendinvalid'] = 'A session end time is invalid! Skipping.';
 $string['error:sessionstartinvalid'] = 'A session start time is invalid! Skipping.';
+$string['error:qrcode'] = 'Allow students to record own attendance must be enabled to use QR code! Skipping.';
 $string['errorgroupsnotselected'] = 'Select one or more groups';
 $string['errorinaddingsession'] = 'Error in adding session';
 $string['erroringeneratingsessions'] = 'Error in generating sessions ';
@@ -496,7 +498,7 @@ $string['studentavailability_help'] = 'When students are marking their own atten
  <br/>If empty, this status will always be available, If set to 0 it will always be hidden to students.';
 $string['studentcolempty'] = 'The student column is missing. <br>';
 $string['studentid'] = 'Student ID';
-$string['studentmarking'] = 'Student marking';
+$string['studentmarking'] = 'Student recording';
 $string['studentpassword'] = 'Student password';
 $string['studentrecordingexpanded'] = 'Student recording expanded';
 $string['studentrecordingexpanded_desc'] = 'Show the "Student recording" settings as expanded by default when creating new sessions.';

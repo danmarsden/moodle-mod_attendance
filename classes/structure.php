@@ -677,7 +677,7 @@ class mod_attendance_structure {
      */
     public function take_from_form_data($data, $fromcsv=false, $att=null, $attforsession=null) {
         global $DB, $USER;
-        // TODO: WARNING - $formdata is unclean - comes from direct $_POST - ideally needs a rewrite but we do some cleaning below.
+        // TODO: WARNING - $data is unclean - comes from direct $_POST - ideally needs a rewrite but we do some cleaning below.
         // This whole function could do with a nice clean up.
 
         // Prime variables with the corresponding attendance status id.

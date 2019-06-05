@@ -854,8 +854,14 @@ class attendance_password_icon implements renderable, templatable {
         $data->heading = '';
         $data->text = $this->text;
 
+        if ($this->includeqrcode == 1) {
+            $pix = 'qrcode';
+        } else {
+            $pix = 'key';
+        }
+
         $data->alt = $title;
-        $data->icon = (new pix_icon('key', '', 'attendance'))->export_for_template($output);
+        $data->icon = (new pix_icon($pix, '', 'attendance'))->export_for_template($output);
         $data->linktext = '';
         $data->title = $title;
         $data->url = (new moodle_url('/mod/attendance/password.php', [

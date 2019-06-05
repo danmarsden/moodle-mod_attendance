@@ -60,11 +60,6 @@ if (empty($attforsession->includeqrcode)) {
     $qrpass = ''; // Override qrpass if set, as it is not allowed.
 }
 
-if (empty($qrpass)) {
-    // Sesskey is required on this page when QR code not in use.
-    require_sesskey();
-}
-
 // Check to see if autoassignstatus is in use and no password required.
 if ($attforsession->autoassignstatus && empty($attforsession->studentpassword)) {
     $statusid = attendance_session_get_highest_status($att, $attforsession);

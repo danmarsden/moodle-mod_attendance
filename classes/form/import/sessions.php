@@ -46,7 +46,6 @@ class sessions extends moodleform {
      * Define the form - called by parent constructor
      */
     public function definition() {
-        global $CFG;
 
         $mform = $this->_form;
         $element = $mform->createElement('filepicker', 'importfile', get_string('importfile', 'mod_attendance'));

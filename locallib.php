@@ -27,10 +27,6 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/gradelib.php');
 require_once(dirname(__FILE__).'/renderhelpers.php');
 
-define('ATT_DISABLED', 1);
-define('ATT_AUTOMARK_ONLY', 2);
-define('ATT_AUTOMARK_STUDENTSCANMARK', 3);
-
 define('ATT_VIEW_DAYS', 1);
 define('ATT_VIEW_WEEKS', 2);
 define('ATT_VIEW_MONTHS', 3);
@@ -438,7 +434,7 @@ function attendance_can_student_mark($sess, $log = true) {
     $canmark = false;
     $reason = 'closed';
     $attconfig = get_config('attendance');
-    if ($attconfig->automark_studentscanmark == ATT_AUTOMARK_STUDENTSCANMARK && !empty($sess->studentscanmark)) {
+    if (!empty($attconfig->studentscanmark) && !empty($sess->studentscanmark)) {
         if (empty($attconfig->studentscanmarksessiontime)) {
             $canmark = true;
             $reason = '';
@@ -1049,4 +1045,36 @@ function construct_session_full_date_time($datetime, $duration) {
     $sessinfo .= ' '.attendance_construct_session_time($datetime, $duration);
 
     return $sessinfo;
+}
+
+/**
+ * Render the session password.
+ *
+ * @param stdClass $session
+ */
+function attendance_renderpassword($session) {
+    echo html_writer::tag('h2', get_string('passwordgrp', 'attendance'));
+    echo html_writer::span($session->studentpassword, 'student-password');
+}
+
+/**
+ * Render the session QR code.
+ *
+ * @param stdClass $session
+ */
+function attendance_renderqrcode($session) {
+    global $CFG;
+
+    if (strlen($session->studentpassword) > 0) {
+        $qrcodeurl = $CFG->wwwroot . '/mod/attendance/attendance.php?qrpass=' . $session->studentpassword .
+            '&sessid=' . $session->id;
+    } else {
+        $qrcodeurl = $CFG->wwwroot . '/mod/attendance/attendance.php?sessid=' . $session->id;
+    }
+
+    echo html_writer::tag('h3', get_string('qrcode', 'attendance'));
+
+    $barcode = new TCPDF2DBarcode($qrcodeurl, 'QRCODE');
+    $image = $barcode->getBarcodePngData(15, 15);
+    echo html_writer::img('data:image/png;base64,' . base64_encode($image), get_string('qrcode', 'attendance'));
 }

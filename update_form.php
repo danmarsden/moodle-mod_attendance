@@ -77,7 +77,7 @@ class mod_attendance_update_form extends moodleform {
             'automarkcompleted' => 0,
             'preventsharedip' => $sess->preventsharedip,
             'preventsharediptime' => $sess->preventsharediptime,
-            'includeqrcode' => $sess->includeqrcode,
+            'includeqrcode' => $sess->includeqrcode
         );
         if ($sess->subnet == $attendancesubnet) {
             $data['usedefaultsubnet'] = 1;
