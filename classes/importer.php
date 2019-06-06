@@ -32,7 +32,7 @@ require_once($CFG->libdir . '/csvlib.class.php');
  * @package   mod_attendance
  * @copyright 2019 Jonathan Chan <jonathan.chan@sta.uwi.edu>
  * @copyright based on work by 2012 NetSpot {@link http://www.netspot.com.au}
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later 
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mod_attendance_importer {
     /** @var string $importid - unique id for this import operation - must be passed between requests */
