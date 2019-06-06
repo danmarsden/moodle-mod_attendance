@@ -15,8 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file creates a page for the "csv_upload_form" and processes the uploaded csv attendance file to automatically
- * update student attendance records.
+ * Creates the "csv_upload_form" and processes the uploaded csv file to automatically update student attendance records.
  *
  * @package   mod_attendance
  * @copyright 2019 Jonathan Chan <jonathan.chan@sta.uwi.edu>

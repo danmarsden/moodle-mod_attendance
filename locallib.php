@@ -916,6 +916,8 @@ function attendance_template_variables($record) {
  *
  * @param mod_attendance_structure $att attendance structure
  * @param stdclass $attforsession attendance_session record.
+ * @param bool $fromcsv signifies whether the data was from a csv file or not
+ * @param int $scantime student's scan time
  * @return bool/int
  */
 function attendance_session_get_highest_status(mod_attendance_structure $att, $attforsession, $fromcsv = false, $scantime = null) {

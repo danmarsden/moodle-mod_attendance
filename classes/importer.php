@@ -32,8 +32,8 @@ require_once($CFG->libdir . '/csvlib.class.php');
  * @package   mod_attendance
  * @copyright 2019 Jonathan Chan <jonathan.chan@sta.uwi.edu>
  * @copyright based on work by 2012 NetSpot {@link http://www.netspot.com.au}
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later */
-
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later 
+ */
 class mod_attendance_importer {
     /** @var string $importid - unique id for this import operation - must be passed between requests */
     public $importid;
@@ -117,9 +117,11 @@ class mod_attendance_importer {
      * Constructor
      *
      * @param string $importid A unique id for this import
-     * @param assign $assignment The current assignment
+     * @param mod_attendance_structure $att The current assignment
+     * @param string $encoding contains the encoding format of the csv file
+     * @param string $separator identifies the type of separator used in the csv file.
      */
-    public function __construct($importid, mod_attendance_structure $att, $encoding = 'utf-8', $separator = 'comma') {
+    public function __construct($importid, $att, $encoding = 'utf-8', $separator = 'comma') {
         $this->importid = $importid;
         $this->att = $att;
         $this->encoding = $encoding;
@@ -365,6 +367,7 @@ class mod_attendance_importer {
     /**
      * Returns the header row.
      *
+     * @param string $importid A unique id for this import
      * @return array returns headers parameter for this class.
      */
     public function get_headers($importid) {

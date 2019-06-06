@@ -39,6 +39,11 @@ require_once($CFG->libdir.'/formslib.php');
  */
 class csv_upload_form extends moodleform {
 
+    /**
+     * Called to define this moodle form
+     *
+     * @return void
+     */
     public function definition() {
         global $COURSE;
 

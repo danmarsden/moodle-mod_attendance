@@ -673,7 +673,9 @@ class mod_attendance_structure {
      * Take attendance from form data or csv file.
      *
      * @param stdClass $data
-     * @param boolean $fromcsv
+     * @param bool $fromcsv signifies whether the data was from a csv file or not
+     * @param mod_attendance_structure $att attendance structure
+     * @param stdclass $attforsession attendance_session record.
      */
     public function take_from_form_data($data, $fromcsv=false, $att=null, $attforsession=null) {
         global $DB, $USER;
