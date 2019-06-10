@@ -1114,5 +1114,5 @@ function attendance_generate_passwords($session) {
 function attendance_return_passwords($session) {
     global $DB;
 
-    echo json_encode($DB->get_records_sql('SELECT * FROM {attendance_rotate_passwords} WHERE attendanceid = ? AND expirytime > UNIX_TIMESTAMP() ORDER BY expirytime ASC', ['attendanceid'=>$session->id]));
+    echo json_encode($DB->get_records_sql('SELECT * FROM {attendance_rotate_passwords} WHERE attendanceid = ? AND expirytime > ? ORDER BY expirytime ASC', ['attendanceid'=>$session->id, time()], $strictness=IGNORE_MISSING));
 }

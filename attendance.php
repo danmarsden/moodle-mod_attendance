@@ -49,7 +49,7 @@ if ($attforsession->rotateqrcode==1) {
         }
     } else {
         // Check password
-        $qrpassdatabase = $DB->get_record_sql('SELECT * FROM {attendance_rotate_passwords} WHERE attendanceid = ? AND expirytime > UNIX_TIMESTAMP() ORDER BY expirytime ASC LIMIT 1', ['attendanceid'=>$id], $strictness=IGNORE_MISSING);
+        $qrpassdatabase = $DB->get_record_sql('SELECT * FROM {attendance_rotate_passwords} WHERE attendanceid = ? AND expirytime > ? ORDER BY expirytime ASC LIMIT 1', ['attendanceid'=>$id, time()], $strictness=IGNORE_MISSING);
 
         if ($qrpass == $qrpassdatabase) {
             // Create and store the token
