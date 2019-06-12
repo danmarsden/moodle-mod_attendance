@@ -33,6 +33,9 @@ $id = required_param('sessid', PARAM_INT);
 $qrpass = optional_param('qrpass', '', PARAM_TEXT);
 
 $attforsession = $DB->get_record('attendance_sessions', array('id' => $id), '*', MUST_EXIST);
+$attendance = $DB->get_record('attendance', array('id' => $attforsession->attendanceid), '*', MUST_EXIST);
+$cm = get_coursemodule_from_instance('attendance', $attendance->id, 0, false, MUST_EXIST);
+$course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
 
 // If the randomised code is on grab it.
 if ($attforsession->rotateqrcode==1) {
@@ -51,7 +54,7 @@ if ($attforsession->rotateqrcode==1) {
         // Check password
         $qrpassdatabase = $DB->get_record_sql('SELECT * FROM {attendance_rotate_passwords} WHERE attendanceid = ? AND expirytime > ? ORDER BY expirytime ASC LIMIT 1', ['attendanceid'=>$id, time()], $strictness=IGNORE_MISSING);
 
-        if ($qrpass == $qrpassdatabase) {
+        if ($qrpass == $qrpassdatabase->password) {
             // Create and store the token
             setcookie($cookiename, $secrethash, 0, "/");
         } else {
@@ -60,10 +63,6 @@ if ($attforsession->rotateqrcode==1) {
         }
     }
 }
-
-$attendance = $DB->get_record('attendance', array('id' => $attforsession->attendanceid), '*', MUST_EXIST);
-$cm = get_coursemodule_from_instance('attendance', $attendance->id, 0, false, MUST_EXIST);
-$course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
 
 // Require the user is logged in.
 require_login($course, true, $cm);
@@ -108,7 +107,6 @@ if ($attforsession->autoassignstatus && empty($attforsession->studentpassword)) 
     }
 }
 
-// Check to see if autoassignstatus is in use and if qrcode is being used.
 if (!empty($qrpass) && !empty($attforsession->autoassignstatus)) {
     $fromform = new stdClass();
 
