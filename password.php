@@ -70,7 +70,7 @@ if ($showqr) {
 
 if ($rotateqr) {
     attendance_generate_passwords($session);
-    //TODO - Function that outputs the JS to rotate the code.
+    attendance_renderqrcoderotate($session);
 }
 
 echo $OUTPUT->footer();

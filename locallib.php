@@ -1099,11 +1099,41 @@ function attendance_generate_passwords($session) {
 
     $DB->delete_records('attendance_rotate_passwords', array("attendanceid"=>$session->id));
 
+    // TODO - Make sure the interval code setting is set. The default value is not set by default.
     for ($i=0;$i<30;$i++) {
         array_push($password, array("attendanceid"=>$session->id, "password"=>mt_rand(1000, 10000), "expirytime"=>time()+($attconfig->rotateqrcodeinterval*$i)));
     }
 
     $DB->insert_records('attendance_rotate_passwords', $password);
+}
+
+/**
+ * Render JS for rotate QR code passwords.
+ *
+ * @param stdClass $session
+ */
+function attendance_renderqrcoderotate($session) {
+    echo html_writer::tag('h3', get_string('qrcode', 'attendance'));
+    // load requered js
+    echo html_writer::tag('script', '',
+        [
+            'src' => 'js/qrcode/qrcode.min.js',
+            'type' => 'text/javascript'
+        ]
+    );
+    echo html_writer::tag('script', '',
+        [
+            'src' => 'js/password/PasswordManager.js',
+            'type' => 'text/javascript'
+        ]
+    );
+    echo html_writer::tag('div', '', ['id' => 'qrcode']); // div to display qr code
+    // js to start the password manager
+    echo '
+    <script type="text/javascript">
+        let pwManager = new PasswordManager();
+        pwManager.start(' . $session->id . ', document.getElementById("qrcode"));
+    </script>';
 }
 
 /**
