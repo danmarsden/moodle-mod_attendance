@@ -46,6 +46,12 @@ class mod_attendance_view_page_params extends mod_attendance_page_with_filter_co
     /** @var string */
     public $mode;
 
+    /** @var string */
+    public $groupby;
+
+    /** @var string */
+    public $sesscourses;
+
     /**
      * mod_attendance_view_page_params constructor.
      */
@@ -66,6 +72,12 @@ class mod_attendance_view_page_params extends mod_attendance_page_with_filter_co
         }
         if ($this->mode != self::MODE_THIS_COURSE) {
             $params['mode'] = $this->mode;
+        }
+        if ($this->groupby != 'course') {
+            $params['groupby'] = $this->groupby;
+        }
+        if ($this->sesscourses != 'current') {
+            $params['sesscourses'] = $this->sesscourses;
         }
 
         return $params;

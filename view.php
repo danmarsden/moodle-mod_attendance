@@ -33,6 +33,8 @@ $pageparams->studentid  = optional_param('studentid', null, PARAM_INT);
 $pageparams->mode       = optional_param('mode', mod_attendance_view_page_params::MODE_THIS_COURSE, PARAM_INT);
 $pageparams->view       = optional_param('view', null, PARAM_INT);
 $pageparams->curdate    = optional_param('curdate', null, PARAM_INT);
+$pageparams->groupby    = optional_param('groupby', 'course', PARAM_ALPHA);
+$pageparams->sesscourses = optional_param('sesscourses', 'current', PARAM_ALPHA);
 
 $cm             = get_coursemodule_from_id('attendance', $id, 0, false, MUST_EXIST);
 $course         = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
@@ -60,7 +62,7 @@ if (!$pageparams->studentid) {
     }
 }
 
-$PAGE->set_url($att->url_view());
+$PAGE->set_url($att->url_view($pageparams->get_significant_params()));
 $PAGE->set_title($course->shortname. ": ".$att->name);
 $PAGE->set_heading($course->fullname);
 $PAGE->set_cacheable(true);
