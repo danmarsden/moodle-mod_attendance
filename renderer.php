@@ -56,21 +56,41 @@ class mod_attendance_renderer extends plugin_renderer_base {
      * @return string html code
      */
     protected function render_attendance_filter_controls(attendance_filter_controls $fcontrols) {
+        $classes = 'attfiltercontrols';
         $filtertable = new html_table();
         $filtertable->attributes['class'] = ' ';
         $filtertable->width = '100%';
         $filtertable->align = array('left', 'center', 'right', 'right');
 
-        $filtertable->data[0][] = $this->render_sess_group_selector($fcontrols);
+        if ($fcontrols->pageparams->mode === mod_attendance_view_page_params::MODE_ALL_SESSIONS) {
+            $classes .= ' float-right';
 
-        $filtertable->data[0][] = $this->render_curdate_controls($fcontrols);
+            $row = array();
+            $row[] = '';
+            $row[] = '';
+            $row[] = '';
+            $row[] = $this->render_grouping_controls($fcontrols);
+            $filtertable->data[] = $row;
 
-        $filtertable->data[0][] = $this->render_paging_controls($fcontrols);
+            $row = array();
+            $row[] = '';
+            $row[] = '';
+            $row[] = '';
+            $row[] = $this->render_course_controls($fcontrols);
+            $filtertable->data[] = $row;
+        }
 
-        $filtertable->data[0][] = $this->render_view_controls($fcontrols);
+        $row = array();
+
+        $row[] = $this->render_sess_group_selector($fcontrols);
+        $row[] = $this->render_curdate_controls($fcontrols);
+        $row[] = $this->render_paging_controls($fcontrols);
+        $row[] = $this->render_view_controls($fcontrols);
+
+        $filtertable->data[] = $row;
 
         $o = html_writer::table($filtertable);
-        $o = $this->output->container($o, 'attfiltercontrols');
+        $o = $this->output->container($o, $classes);
 
         return $o;
     }
@@ -196,6 +216,59 @@ class mod_attendance_renderer extends plugin_renderer_base {
         }
 
         return $curdatecontrols;
+    }
+
+    /**
+     * Render grouping controls (for all sessions report).
+     *
+     * @param attendance_filter_controls $fcontrols
+     * @return string
+     */
+    protected function render_grouping_controls(attendance_filter_controls $fcontrols) {
+        if ($fcontrols->pageparams->mode === mod_attendance_view_page_params::MODE_ALL_SESSIONS) {
+            $groupoptions = array(
+                'date' => get_string('sessionsbydate', 'attendance'),
+                'activity' => get_string('sessionsbyactivity', 'attendance'),
+                'course' => get_string('sessionsbycourse', 'attendance')
+            );
+            $groupcontrols = get_string('groupsessionsby', 'attendance') . ":";
+            foreach ($groupoptions as $key => $opttext) {
+                if ($key != $fcontrols->pageparams->groupby) {
+                    $link = html_writer::link($fcontrols->url(array('groupby' => $key)), $opttext);
+                    $groupcontrols .= html_writer::tag('span', $link, array('class' => 'attbtn'));
+                } else {
+                    $groupcontrols .= html_writer::tag('span', $opttext, array('class' => 'attcurbtn'));
+                }
+            }
+            return html_writer::tag('nobr', $groupcontrols);
+        }
+        return "";
+    }
+
+    /**
+     * Render course controls (for all sessions report).
+     *
+     * @param attendance_filter_controls $fcontrols
+     * @return string
+     */
+    protected function render_course_controls(attendance_filter_controls $fcontrols) {
+        if ($fcontrols->pageparams->mode === mod_attendance_view_page_params::MODE_ALL_SESSIONS) {
+            $courseoptions = array(
+                'all' => get_string('sessionsallcourses', 'attendance'),
+                'current' => get_string('sessionscurrentcourses', 'attendance')
+            );
+            $coursecontrols = "";
+            foreach ($courseoptions as $key => $opttext) {
+                if ($key != $fcontrols->pageparams->sesscourses) {
+                    $link = html_writer::link($fcontrols->url(array('sesscourses' => $key)), $opttext);
+                    $coursecontrols .= html_writer::tag('span', $link, array('class' => 'attbtn'));
+                } else {
+                    $coursecontrols .= html_writer::tag('span', $opttext, array('class' => 'attcurbtn'));
+                }
+            }
+            return html_writer::tag('nobr', $coursecontrols);
+        }
+        return "";
     }
 
     /**
@@ -960,7 +1033,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
         $o = $this->render_user_report_tabs($userdata);
 
-        if ($USER->id == $userdata->user->id) {
+        if ($USER->id == $userdata->user->id ||
+            $userdata->pageparams->mode === mod_attendance_view_page_params::MODE_ALL_SESSIONS) {
 
             $o .= $this->construct_user_data($userdata);
 
@@ -993,11 +1067,14 @@ class mod_attendance_renderer extends plugin_renderer_base {
                         $userdata->url()->out(true, array('mode' => mod_attendance_view_page_params::MODE_THIS_COURSE)),
                         get_string('thiscourse', 'attendance'));
 
-        // Skip the 'all courses' tab for 'temporary' users.
+        // Skip the 'all courses' and 'all sessions' tabs for 'temporary' users.
         if ($userdata->user->type == 'standard') {
             $tabs[] = new tabobject(mod_attendance_view_page_params::MODE_ALL_COURSES,
                             $userdata->url()->out(true, array('mode' => mod_attendance_view_page_params::MODE_ALL_COURSES)),
                             get_string('allcourses', 'attendance'));
+            $tabs[] = new tabobject(mod_attendance_view_page_params::MODE_ALL_SESSIONS,
+                            $userdata->url()->out(true, array('mode' => mod_attendance_view_page_params::MODE_ALL_SESSIONS)),
+                            get_string('allsessions', 'attendance'));
         }
 
         return print_tabs(array($tabs), $userdata->pageparams->mode, null, null, true);
@@ -1023,8 +1100,21 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $o .= construct_user_data_stat($userdata->summary->get_all_sessions_summary_for($userdata->user->id),
                 $userdata->pageparams->view);
         } else if ($userdata->pageparams->mode == mod_attendance_view_page_params::MODE_ALL_SESSIONS) {
+            $allsessions = $this->construct_user_allsessions_log($userdata);
+            $o .= html_writer::start_div('allsessionssummary');
+            $o .= html_writer::start_div('float-left');
+            $o .= html_writer::start_div('float-left');
+            $o .= $this->user_picture($userdata->user, array('size' => 100, 'class' => 'userpicture float-left'));
+            $o .= html_writer::end_div();
+            $o .= html_writer::start_div('float-right');
+            $o .= $allsessions->summary;
+            $o .= html_writer::end_div();
+            $o .= html_writer::end_div();
+            $o .= html_writer::start_div('float-right');
             $o .= $this->render_attendance_filter_controls($userdata->filtercontrols);
-            $o .= $this->construct_user_allsessions_log($userdata);
+            $o .= html_writer::end_div();
+            $o .= html_writer::end_div();
+            $o .= $allsessions->detail;
         } else {
             $table = new html_table();
             $table->head  = array(get_string('course'),
@@ -1238,6 +1328,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
     private function construct_user_allsessions_log(attendance_user_data $userdata) {
         global $OUTPUT, $USER;
 
+        $allsessions = new stdClass();
+
         $shortform = false;
         if ($USER->id == $userdata->user->id) {
             // This is a user viewing their own stuff - hide non-relevant columns.
@@ -1246,21 +1338,69 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
         $context = context_module::instance($userdata->filtercontrols->cm->id);
 
+        $groupby = $userdata->pageparams->groupby;
+        //$groupby = 'course';
+        //$groupby = 'activity';
+        //$groupby = 'date';
+
         $table = new html_table();
-        $table->attributes['class'] = 'generaltable attwidth boxaligncenter';
+        $table->attributes['class'] = 'generaltable attwidth boxaligncenter allsessions';
         $table->head = array();
         $table->align = array();
         $table->size = array();
         $table->colclasses = array();
+        $colcount = 0;
+        $summarywidth = 0;
 
-        $table->head[] = get_string('course');
-        $table->align[] = 'left';
-        $table->colclasses[] = 'colcourse';
+        // If grouping by date, we need some form of date up front.
+        // Only need course column if we are not using course to group
+        // (currently date is only option which does not use course)
+        if ($groupby === 'date') {
+            $table->head[] = '';
+            $table->align[] = 'left';
+            $table->colclasses[] = 'grouper';
+            $table->size[] = '1px';
 
-        $table->head[] = get_string('pluginname', 'mod_attendance');
-        $table->align[] = 'left';
-        $table->colclasses[] = 'colcourse';
-        $table->size[] = '*';
+            $table->head[] = get_string('date');
+            $table->align[] = 'left';
+            $table->colclasses[] = 'datecol';
+            $table->size[] = '1px';
+            $colcount++;
+
+            $table->head[] = get_string('course');
+            $table->align[] = 'left';
+            $table->colclasses[] = 'colcourse';
+            $colcount++;
+        } else {
+            $table->head[] = '';
+            $table->align[] = 'left';
+            $table->colclasses[] = 'grouper';
+            $table->size[] = '1px';
+            if ($groupby === 'activity') {
+                $table->head[] = '';
+                $table->align[] = 'left';
+                $table->colclasses[] = 'grouper';
+                $table->size[] = '1px';
+            }
+        }
+
+        // Need activity column unless we are using activity to group
+        if ($groupby !== 'activity') {
+            $table->head[] = get_string('pluginname', 'mod_attendance');
+            $table->align[] = 'left';
+            $table->colclasses[] = 'colcourse';
+            $table->size[] = '*';
+            $colcount++;
+        }
+
+        // If grouping by date, it belongs up front rather than here
+        if ($groupby !== 'date') {
+            $table->head[] = get_string('date');
+            $table->align[] = 'left';
+            $table->colclasses[] = 'datecol';
+            $table->size[] = '1px';
+            $colcount++;
+        }
 
         // use "session" instead
         //$table->head[] = get_string('description', 'attendance');
@@ -1268,125 +1408,509 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $table->align[] = 'left';
         $table->colclasses[] = 'desccol';
         $table->size[] = '*';
+        $colcount++;
 
         if (!$shortform) {
             $table->head[] = get_string('sessiontypeshort', 'attendance');
             $table->align[] = '';
             $table->size[] = '1px';
             $table->colclasses[] = '';
+            $colcount++;
         }
 
-        $table->head[] = get_string('date');
-        $table->align[] = 'left';
-        $table->colclasses[] = 'datecol';
-        $table->size[] = '1px';
+        if (!empty($USER->editing)) {
+            $table->head[] = get_string('status', 'attendance');
+            $table->align[] = 'center';
+            $table->colclasses[] = 'statuscol';
+            $table->size[] = '*';
+            $colcount++;
+            $summarywidth++;
 
-        $table->head[] = get_string('status', 'attendance');
-        $table->align[] = 'center';
-        $table->colclasses[] = 'statuscol';
-        $table->size[] = '*';
+            $table->head[] = get_string('remarks', 'attendance');
+            $table->align[] = 'center';
+            $table->colclasses[] = 'remarkscol';
+            $table->size[] = '*';
+            $colcount++;
+            $summarywidth++;
+        } else {
+            $table->head[] = get_string('status', 'attendance');
+            $table->align[] = 'center';
+            $table->colclasses[] = 'statuscol';
+            $table->size[] = '*';
+            $colcount++;
+            $summarywidth++;
 
-        $table->head[] = get_string('points', 'attendance');
-        $table->align[] = 'center';
-        $table->colclasses[] = 'pointscol';
-        $table->size[] = '1px';
+            $table->head[] = get_string('points', 'attendance');
+            $table->align[] = 'center';
+            $table->colclasses[] = 'pointscol';
+            $table->size[] = '1px';
+            $colcount++;
+            $summarywidth++;
 
-        $table->head[] = get_string('remarks', 'attendance');
-        $table->align[] = 'center';
-        $table->colclasses[] = 'remarkscol';
-        $table->size[] = '*';
-
-        if (has_capability('mod/attendance:takeattendances', $context)) {
-            $table->head[] = get_string('action');
-            $table->align[] = '';
-            $table->colclasses[] = 'actioncol';
-            $table->size[] = '';
+            $table->head[] = get_string('remarks', 'attendance');
+            $table->align[] = 'center';
+            $table->colclasses[] = 'remarkscol';
+            $table->size[] = '*';
+            $colcount++;
+            $summarywidth++;
         }
+
+        /* if (has_capability('mod/attendance:takeattendances', $context)) { */
+        /*     $table->head[] = get_string('action'); */
+        /*     $table->align[] = ''; */
+        /*     $table->colclasses[] = 'actioncol'; */
+        /*     $table->size[] = ''; */
+        /*     $colcount++; */
+        /*     $summarywidth++; */
+        /* } */
 
         $statusmaxpoints = array();
         foreach ($userdata->statuses as $attid => $attstatuses) {
             $statusmaxpoints[$attid] = attendance_get_statusset_maxpoints($attstatuses);
         }
 
-        $i = 0;
-        foreach ($userdata->sessionslog as $sess) {
-            $i++;
+        $lastgroup = array(null, null);
+        $groups = array();
+        $stats = array(
+            'course' => array(),
+            'activity' => array(),
+            'date' => array(),
+            'overall' => array(
+                'points' => 0,
+                'maxpointstodate' => 0,
+                'maxpoints' => 0,
+                'pcpointstodate' => null,
+                'pcpoints' => null,
+                'statuses' => array()
+            )
+        );
+        $group = null;
+        if ($userdata->sessionslog) {
+            foreach ($userdata->sessionslog as $sess) {
+                if ($groupby === 'date') {
+                    $weekformat = date("YW", $sess->sessdate);
+                    if ($weekformat != $lastgroup[0]) {
+                        if ($group !== null) {
+                            array_push($groups, $group);
+                        }
+                        $group = array();
+                        $lastgroup[0] = $weekformat;
+                    }
+                    if (!array_key_exists($weekformat, $stats['date'])) {
+                        $stats['date'][$weekformat] = array(
+                            'points' => 0,
+                            'maxpointstodate' => 0,
+                            'maxpoints' => 0,
+                            'pcpointstodate' => null,
+                            'pcpoints' => null,
+                            'statuses' => array()
+                        );
+                    }
+                    $statussetmaxpoints = $statusmaxpoints[$sess->attendanceid];
+                    // ensure all possible acronyms for current sess's statusset are available as
+                    // keys in status array for period
+                    //
+                    // A bit yucky because we can't tell whether we've seen statusset before, and
+                    // we usually will have, so much wasted spinning.
+                    if ($sess->id == 163) {
+                        error_log("STATUSSET: ".print_r($sess->statusset, true));
+                    }
+                    foreach ($userdata->statuses[$sess->attendanceid] as $attstatus) {
+                        if ($attstatus->setnumber === $sess->statusset) {
+                            if (!array_key_exists($attstatus->acronym, $stats['date'][$weekformat]['statuses'])) {
+                                $stats['date'][$weekformat]['statuses'][$attstatus->acronym] = array('count' => 0, 'description' => $attstatus->description);
+                            }
+                            if (!array_key_exists($attstatus->acronym, $stats['overall']['statuses'])) {
+                                $stats['overall']['statuses'][$attstatus->acronym] = array('count' => 0, 'description' => $attstatus->description);
+                            }
+                        }
+                    }
+                    // array_key_exists check is for hidden statuses
+                    if (isset($sess->statusid) && array_key_exists($sess->statusid, $userdata->statuses[$sess->attendanceid])) {
+                        $status = $userdata->statuses[$sess->attendanceid][$sess->statusid];
+                        $stats['date'][$weekformat]['statuses'][$status->acronym]['count']++;
+                        $stats['date'][$weekformat]['points'] += $status->grade;
+                        $stats['date'][$weekformat]['maxpointstodate'] += $statussetmaxpoints[$sess->statusset];
+                        $stats['overall']['statuses'][$status->acronym]['count']++;
+                        $stats['overall']['points'] += $status->grade;
+                        $stats['overall']['maxpointstodate'] += $statussetmaxpoints[$sess->statusset];
+                    }
+                    $stats['date'][$weekformat]['maxpoints'] += $statussetmaxpoints[$sess->statusset];
+                    $stats['overall']['maxpoints'] += $statussetmaxpoints[$sess->statusset];
+                }
+                else {
+                    // By course and perhaps activity
+                    if (
+                        ($sess->courseid != $lastgroup[0]) ||
+                        ($groupby === 'activity' && $sess->cmid != $lastgroup[1])
+                    ) {
+                        if ($group !== null) {
+                            array_push($groups, $group);
+                        }
+                        $group = array();
+                        $lastgroup[0] = $sess->courseid;
+                        $lastgroup[1] = $sess->cmid;
+                    }
+                    if (!array_key_exists($sess->courseid, $stats['course'])) {
+                        $stats['course'][$sess->courseid] = array(
+                            'points' => 0,
+                            'maxpointstodate' => 0,
+                            'maxpoints' => 0,
+                            'pcpointstodate' => null,
+                            'pcpoints' => null,
+                            'statuses' => array()
+                        );
+                    }
+                    $statussetmaxpoints = $statusmaxpoints[$sess->attendanceid];
+                    // ensure all possible acronyms for current sess's statusset are available as
+                    // keys in status array for course
+                    //
+                    // A bit yucky because we can't tell whether we've seen statusset before, and
+                    // we usually will have, so much wasted spinning.
+                    foreach ($userdata->statuses[$sess->attendanceid] as $attstatus) {
+                        if ($attstatus->setnumber === $sess->statusset) {
+                            if (!array_key_exists($attstatus->acronym, $stats['course'][$sess->courseid]['statuses'])) {
+                                $stats['course'][$sess->courseid]['statuses'][$attstatus->acronym] = array('count' => 0, 'description' => $attstatus->description);
+                            }
+                            if (!array_key_exists($attstatus->acronym, $stats['overall']['statuses'])) {
+                                $stats['overall']['statuses'][$attstatus->acronym] = array('count' => 0, 'description' => $attstatus->description);
+                            }
+                        }
+                    }
+                    // array_key_exists check is for hidden statuses
+                    if (isset($sess->statusid) && array_key_exists($sess->statusid, $userdata->statuses[$sess->attendanceid])) {
+                        $status = $userdata->statuses[$sess->attendanceid][$sess->statusid];
+                        $stats['course'][$sess->courseid]['statuses'][$status->acronym]['count']++;
+                        $stats['course'][$sess->courseid]['points'] += $status->grade;
+                        $stats['course'][$sess->courseid]['maxpointstodate'] += $statussetmaxpoints[$sess->statusset];
+                        $stats['overall']['statuses'][$status->acronym]['count']++;
+                        $stats['overall']['points'] += $status->grade;
+                        $stats['overall']['maxpointstodate'] += $statussetmaxpoints[$sess->statusset];
+                    }
+                    $stats['course'][$sess->courseid]['maxpoints'] += $statussetmaxpoints[$sess->statusset];
+                    $stats['overall']['maxpoints'] += $statussetmaxpoints[$sess->statusset];
+
+                    if (!array_key_exists($sess->cmid, $stats['activity'])) {
+                        $stats['activity'][$sess->cmid] = array(
+                            'points' => 0,
+                            'maxpointstodate' => 0,
+                            'maxpoints' => 0,
+                            'pcpointstodate' => null,
+                            'pcpoints' => null,
+                            'statuses' => array()
+                        );
+                    }
+                    $statussetmaxpoints = $statusmaxpoints[$sess->attendanceid];
+                    // ensure all possible acronyms for current sess's statusset are available as
+                    // keys in status array for period
+                    //
+                    // A bit yucky because we can't tell whether we've seen statusset before, and
+                    // we usually will have, so much wasted spinning.
+                    foreach ($userdata->statuses[$sess->attendanceid] as $attstatus) {
+                        if ($attstatus->setnumber === $sess->statusset) {
+                            if (!array_key_exists($attstatus->acronym, $stats['activity'][$sess->cmid]['statuses'])) {
+                                $stats['activity'][$sess->cmid]['statuses'][$attstatus->acronym] = array('count' => 0, 'description' => $attstatus->description);
+                            }
+                            if (!array_key_exists($attstatus->acronym, $stats['overall']['statuses'])) {
+                                $stats['overall']['statuses'][$attstatus->acronym] = array('count' => 0, 'description' => $attstatus->description);
+                            }
+                        }
+                    }
+                    // array_key_exists check is for hidden statuses
+                    if (isset($sess->statusid) && array_key_exists($sess->statusid, $userdata->statuses[$sess->attendanceid])) {
+                        $status = $userdata->statuses[$sess->attendanceid][$sess->statusid];
+                        $stats['activity'][$sess->cmid]['statuses'][$status->acronym]['count']++;
+                        $stats['activity'][$sess->cmid]['points'] += $status->grade;
+                        $stats['activity'][$sess->cmid]['maxpointstodate'] += $statussetmaxpoints[$sess->statusset];
+                        $stats['overall']['statuses'][$status->acronym]['count']++;
+                        $stats['overall']['points'] += $status->grade;
+                        $stats['overall']['maxpointstodate'] += $statussetmaxpoints[$sess->statusset];
+                    }
+                    $stats['activity'][$sess->cmid]['maxpoints'] += $statussetmaxpoints[$sess->statusset];
+                    $stats['overall']['maxpoints'] += $statussetmaxpoints[$sess->statusset];
+                }
+                array_push($group, $sess);
+            }
+            array_push($groups, $group);
+        }
+
+        $points = $stats['overall']['points'];
+        $maxpoints = $stats['overall']['maxpointstodate'];
+        $summary = '';
+        $summarytable = new html_table();
+        $summarytable->attributes['class'] = 'generaltable table-bordered table-condensed';
+        $row = new html_table_row();
+        $cell = new html_table_cell(get_string('allsessionstotals', 'attendance'));
+        $cell->colspan = 2;
+        $cell->header = true;
+        $row->cells[] = $cell;
+        $summarytable->data[] = $row;
+        foreach ($stats['overall']['statuses'] as $acronym => $status) {
+            $row = new html_table_row();
+            $row->cells[] = $status['description'] . ":";
+            $row->cells[] = $status['count'];
+            $summarytable->data[] = $row;
+        }
+        /* $row = new html_table_row(); */
+        /* $summarytable->data[] = $row; */
+        $row = new html_table_row();
+        if ($maxpoints !== 0) {
+            $pctodate = format_float( $points * 100 / $maxpoints);
+            $pointsinfo  = get_string('points', 'attendance') . ": " . $points . "/" . $maxpoints;
+            $pointsinfo .= " (" . $pctodate . "%)";
+        } else {
+            $pointsinfo  = get_string('points', 'attendance') . ": " . $points . "/" . $maxpoints;
+        }
+        $pointsinfo .= " " . get_string('todate', 'attendance');
+        $cell = new html_table_cell($pointsinfo);
+        $cell->colspan = 2;
+        $row->cells[] = $cell;
+        $summarytable->data[] = $row;
+        $allsessions->summary = html_writer::table($summarytable);
+
+        $lastgroup = array(null, null);
+        foreach ($groups as $group) {
 
             $statussetmaxpoints = $statusmaxpoints[$sess->attendanceid];
 
-            $row = new html_table_row();
+            // For use in headings etc.
+            $sess = $group[0];
 
-            // course / activity / session / type / date / status / points / remarks / action
-            //
-            $courseurl = new moodle_url('/course/view.php', array('id' => $sess->courseid));
-            $row->cells[] = html_writer::link($courseurl, $sess->cname);
-
-            $attendanceurl = new moodle_url('/mod/attendance/view.php', array('id' => $sess->cmid,
-                                                                              'studentid' => $userdata->user->id,
-                                                                              'view' => ATT_VIEW_ALL));
-            $row->cells[] = html_writer::link($attendanceurl, $sess->attname);
-
-            $row->cells[] = $sess->description;
-
-            if (!$shortform) {
-                if ($sess->groupid) {
-                    $sessiontypeshort = get_string('group') . ': ' . $userdata->groups[$sess->courseid][$sess->groupid]->name;
+            if ($groupby === 'date') {
+                $row = new html_table_row();
+                $row->attributes['class'] = 'grouper';
+                $cell = new html_table_cell();
+                $cell->rowspan = sizeof($group) + 2;
+                $row->cells[] = $cell;
+                $week = date("W", $sess->sessdate);
+                $year = date("Y", $sess->sessdate);
+                // ISO week starts on day 1, Monday
+                $weekstart = date_timestamp_get(date_isodate_set(date_create(), $year, $week, 1));
+                $dmywformat = get_string('strftimedmyw', 'attendance');
+                $cell = new html_table_cell(get_string('weekcommencing', 'attendance') . ": " . userdate($weekstart, $dmywformat));
+                $cell->colspan = $colcount - $summarywidth;
+                $cell->rowspan = 2;
+                $cell->attributes['class'] = 'groupheading';
+                $row->cells[] = $cell;
+                $weekformat = date("YW", $sess->sessdate);
+                $points = $stats['date'][$weekformat]['points'];
+                $maxpoints = $stats['date'][$weekformat]['maxpointstodate'];
+                if ($maxpoints !== 0) {
+                    $pctodate = format_float( $points * 100 / $maxpoints);
+                    $summary  = get_string('points', 'attendance') . ": " . $points . "/" . $maxpoints;
+                    $summary .= " (" . $pctodate . "%)";
                 } else {
-                    $sessiontypeshort = get_string('commonsession', 'attendance');
+                    $summary  = get_string('points', 'attendance') . ": " . $points . "/" . $maxpoints;
                 }
-                $row->cells[] = html_writer::tag('nobr', $sessiontypeshort);
+                $summary .= " " . get_string('todate', 'attendance');
+                $cell = new html_table_cell($summary);
+                $cell->colspan = $summarywidth;
+                $row->cells[] = $cell;
+                $table->data[] = $row;
+                $row = new html_table_row();
+                $row->attributes['class'] = 'grouper';
+                $summary = array();
+                foreach ($stats['date'][$weekformat]['statuses'] as $acronym => $status) {
+                    array_push($summary, html_writer::tag('b', $acronym) . $status['count']);
+                }
+                $cell = new html_table_cell(implode(" ", $summary));
+                $cell->colspan = $summarywidth;
+                $row->cells[] = $cell;
+                $table->data[] = $row;
+                $lastgroup[0] = date("YW", $weekstart);
             }
-
-            $row->cells[] = userdate($sess->sessdate, get_string('strftimedmyw', 'attendance')) .
-             " ". $this->construct_time($sess->sessdate, $sess->duration);
-
-            if (!empty($sess->statusid)) {
-                $status = $userdata->statuses[$sess->attendanceid][$sess->statusid];
-                $row->cells[] = $status->description;
-                $row->cells[] = format_float($status->grade, 1, true, true) . ' / ' .
-                                    format_float($statussetmaxpoints[$status->setnumber], 1, true, true);
-                $row->cells[] = $sess->remarks;
-            } else if (($sess->sessdate + $sess->duration) < $userdata->user->enrolmentstart) {
-                $cell = new html_table_cell(get_string('enrolmentstart', 'attendance',
-                                            userdate($userdata->user->enrolmentstart, '%d.%m.%Y')));
-                $cell->colspan = 3;
-                $row->cells[] = $cell;
-            } else if ($userdata->user->enrolmentend and $sess->sessdate > $userdata->user->enrolmentend) {
-                $cell = new html_table_cell(get_string('enrolmentend', 'attendance',
-                                            userdate($userdata->user->enrolmentend, '%d.%m.%Y')));
-                $cell->colspan = 3;
-                $row->cells[] = $cell;
-            } else {
-                list($canmark, $reason) = attendance_can_student_mark($sess, false);
-                if ($canmark) {
-                    // Student can mark their own attendance.
-                    // URL to the page that lets the student modify their attendance.
-
-                    $url = new moodle_url('/mod/attendance/attendance.php',
-                            array('sessid' => $sess->id, 'sesskey' => sesskey()));
-                    $cell = new html_table_cell(html_writer::link($url, get_string('submitattendance', 'attendance')));
-                    $cell->colspan = 3;
+            else {
+                if ($groupby === 'course' || $sess->courseid !== $lastgroup[0]) {
+                    $row = new html_table_row();
+                    $row->attributes['class'] = 'grouper';
+                    $cell = new html_table_cell();
+                    $cell->rowspan = sizeof($group) + 2;
+                    if ($groupby === 'activity') {
+                        $headcell = $cell; // keep ref to be able to adjust rowspan later
+                        $cell->rowspan += 2;
+                        $row->cells[] = $cell;
+                        $cell = new html_table_cell();
+                        $cell->rowspan = 2;
+                    }
                     $row->cells[] = $cell;
-                } else { // Student cannot mark their own attendace.
-                    $row->cells[] = '?';
-                    $row->cells[] = '? / ' . format_float($statussetmaxpoints[$sess->statusset], 1, true, true);
-                    $row->cells[] = '';
+                    $courseurl = new moodle_url('/course/view.php', array('id' => $sess->courseid));
+                    $cell = new html_table_cell(get_string('course', 'attendance') . ": " . html_writer::link($courseurl, $sess->cname));
+                    $cell->colspan = $colcount - $summarywidth;
+                    $cell->rowspan = 2;
+                    $cell->attributes['class'] = 'groupheading';
+                    $row->cells[] = $cell;
+                    $points = $stats['course'][$sess->courseid]['points'];
+                    $maxpoints = $stats['course'][$sess->courseid]['maxpointstodate'];
+                    if ($maxpoints !== 0) {
+                        $pctodate = format_float( $points * 100 / $maxpoints);
+                        $summary  = get_string('points', 'attendance') . ": " . $points . "/" . $maxpoints;
+                        $summary .= " (" . $pctodate . "%)";
+                    } else {
+                        $summary  = get_string('points', 'attendance') . ": " . $points . "/" . $maxpoints;
+                    }
+                    $summary .= " " . get_string('todate', 'attendance');
+                    $cell = new html_table_cell($summary);
+                    $cell->colspan = $summarywidth;
+                    $row->cells[] = $cell;
+                    $table->data[] = $row;
+                    $row = new html_table_row();
+                    $row->attributes['class'] = 'grouper';
+                    $summary = array();
+                    foreach ($stats['course'][$sess->courseid]['statuses'] as $acronym => $status) {
+                        array_push($summary, html_writer::tag('b', $acronym) . $status['count']);
+                    }
+                    $cell = new html_table_cell(implode(" ", $summary));
+                    $cell->colspan = $summarywidth;
+                    $row->cells[] = $cell;
+                    $table->data[] = $row;
                 }
+                if ($groupby === 'activity') {
+                    if ($sess->courseid === $lastgroup[0]) {
+                        $headcell->rowspan += sizeof($group) + 2;
+                    }
+                    $row = new html_table_row();
+                    $row->attributes['class'] = 'grouper';
+                    $cell = new html_table_cell();
+                    $cell->rowspan = sizeof($group) + 2;
+                    $row->cells[] = $cell;
+                    $attendanceurl = new moodle_url('/mod/attendance/view.php', array('id' => $sess->cmid,
+                                                                                      'studentid' => $userdata->user->id,
+                                                                                      'view' => ATT_VIEW_ALL));
+                    $cell = new html_table_cell(get_string('pluginname', 'mod_attendance') . ": " . html_writer::link($attendanceurl, $sess->attname));
+                    $cell->colspan = $colcount - $summarywidth;
+                    $cell->rowspan = 2;
+                    $cell->attributes['class'] = 'groupheading';
+                    $row->cells[] = $cell;
+                    $points = $stats['activity'][$sess->cmid]['points'];
+                    $maxpoints = $stats['activity'][$sess->cmid]['maxpointstodate'];
+                    if ($maxpoints !== 0) {
+                        $pctodate = format_float( $points * 100 / $maxpoints);
+                        $summary  = get_string('points', 'attendance') . ": " . $points . "/" . $maxpoints;
+                        $summary .= " (" . $pctodate . "%)";
+                    } else {
+                        $summary  = get_string('points', 'attendance') . ": " . $points . "/" . $maxpoints;
+                    }
+                    $summary .= " " . get_string('todate', 'attendance');
+                    $cell = new html_table_cell($summary);
+                    $cell->colspan = $summarywidth;
+                    $row->cells[] = $cell;
+                    $table->data[] = $row;
+                    $row = new html_table_row();
+                    $row->attributes['class'] = 'grouper';
+                    $summary = array();
+                    foreach ($stats['activity'][$sess->cmid]['statuses'] as $acronym => $status) {
+                        array_push($summary, html_writer::tag('b', $acronym) . $status['count']);
+                    }
+                    $cell = new html_table_cell(implode(" ", $summary));
+                    $cell->colspan = $summarywidth;
+                    $row->cells[] = $cell;
+                    $table->data[] = $row;
+                }
+                $lastgroup[0] = $sess->courseid;
+                $lastgroup[1] = $sess->cmid;
             }
 
-            if (has_capability('mod/attendance:takeattendances', $context)) {
-                $params = array('id' => $userdata->filtercontrols->cm->id,
-                    'sessionid' => $sess->id,
-                    'grouptype' => $sess->groupid);
-                $url = new moodle_url('/mod/attendance/take.php', $params);
-                $icon = $OUTPUT->pix_icon('redo', get_string('changeattendance', 'attendance'), 'attendance');
-                $row->cells[] = html_writer::link($url, $icon);
-            }
+            // Now iterate over sessions in group...
 
-            $table->data[] = $row;
+            foreach($group as $sess) {
+                $row = new html_table_row();
+
+                // partialdate? / course? / activity? / date? / session / type / status / points / remarks / action
+                //
+
+                // If grouping by date, we need some form of date up front.
+                // Only need course column if we are not using course to group
+                // (currently date is only option which does not use course)
+                //
+                if ($groupby === 'date') {
+                    // What part of date do we want if grouped by it already?
+                    $row->cells[] = userdate($sess->sessdate, get_string('strftimedmw', 'attendance')) .
+                        " ". $this->construct_time($sess->sessdate, $sess->duration);
+
+                    $courseurl = new moodle_url('/course/view.php', array('id' => $sess->courseid));
+                    $row->cells[] = html_writer::link($courseurl, $sess->cname);
+                }
+
+                // Need activity column unless we are using activity to group
+                //
+                if ($groupby !== 'activity') {
+                    $attendanceurl = new moodle_url('/mod/attendance/view.php', array('id' => $sess->cmid,
+                                                                                      'studentid' => $userdata->user->id,
+                                                                                      'view' => ATT_VIEW_ALL));
+                    $row->cells[] = html_writer::link($attendanceurl, $sess->attname);
+                }
+
+                // If grouping by date, it belongs up front rather than here
+                //
+                if ($groupby !== 'date') {
+                    $row->cells[] = userdate($sess->sessdate, get_string('strftimedmyw', 'attendance')) .
+                        " ". $this->construct_time($sess->sessdate, $sess->duration);
+                }
+
+                $sesscontext = context_module::instance($sess->cmid);
+                if (has_capability('mod/attendance:takeattendances', $sesscontext)) {
+                    $sessionurl = new moodle_url('/mod/attendance/take.php', array('id' => $sess->cmid,
+                                                                                   'sessionid' => $sess->id,
+                                                                                   'grouptype' => $sess->groupid));
+                    $description = html_writer::link($sessionurl, $sess->description);
+                } else {
+                    $description = $sess->description;
+                }
+                $row->cells[] = $description;
+
+                if (!$shortform) {
+                    if ($sess->groupid) {
+                        $sessiontypeshort = get_string('group') . ': ' . $userdata->groups[$sess->courseid][$sess->groupid]->name;
+                    } else {
+                        $sessiontypeshort = get_string('commonsession', 'attendance');
+                    }
+                    $row->cells[] = html_writer::tag('nobr', $sessiontypeshort);
+                }
+
+                if (!empty($USER->editing)) {
+                    // TODO!
+                } else {
+                    if (!empty($sess->statusid)) {
+                        $status = $userdata->statuses[$sess->attendanceid][$sess->statusid];
+                        $row->cells[] = $status->description;
+                        $row->cells[] = format_float($status->grade, 1, true, true) . ' / ' .
+                            format_float($statussetmaxpoints[$status->setnumber], 1, true, true);
+                        $row->cells[] = $sess->remarks;
+                    } else if (($sess->sessdate + $sess->duration) < $userdata->user->enrolmentstart) {
+                        $cell = new html_table_cell(get_string('enrolmentstart', 'attendance',
+                        userdate($userdata->user->enrolmentstart, '%d.%m.%Y')));
+                        $cell->colspan = 3;
+                        $row->cells[] = $cell;
+                    } else if ($userdata->user->enrolmentend and $sess->sessdate > $userdata->user->enrolmentend) {
+                        $cell = new html_table_cell(get_string('enrolmentend', 'attendance',
+                        userdate($userdata->user->enrolmentend, '%d.%m.%Y')));
+                        $cell->colspan = 3;
+                        $row->cells[] = $cell;
+                    } else {
+                        list($canmark, $reason) = attendance_can_student_mark($sess, false);
+                        if ($canmark) {
+                            // Student can mark their own attendance.
+                            // URL to the page that lets the student modify their attendance.
+
+                            $url = new moodle_url('/mod/attendance/attendance.php',
+                            array('sessid' => $sess->id, 'sesskey' => sesskey()));
+                            $cell = new html_table_cell(html_writer::link($url, get_string('submitattendance', 'attendance')));
+                            $cell->colspan = 3;
+                            $row->cells[] = $cell;
+                        } else { // Student cannot mark their own attendace.
+                            $row->cells[] = '?';
+                            $row->cells[] = '? / ' . format_float($statussetmaxpoints[$sess->statusset], 1, true, true);
+                            $row->cells[] = '';
+                        }
+                    }
+                }
+
+                $table->data[] = $row;
+            }
         }
 
-        return html_writer::table($table);
+        $allsessions->detail = html_writer::table($table);
+        return $allsessions;
     }
 
     /**

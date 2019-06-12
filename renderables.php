@@ -516,7 +516,7 @@ class attendance_user_data implements renderable {
                 $this->filtercontrols = new attendance_filter_controls($att);
             }
 
-            $this->sessionslog = get_user_sessions_log_full($userid);
+            $this->sessionslog = get_user_sessions_log_full($userid, $this->pageparams);
 
             foreach ($this->sessionslog as $sessid => $sess) {
                 $this->sessionslog[$sessid]->cmid = $this->coursesatts[$sess->attendanceid]->cmid;

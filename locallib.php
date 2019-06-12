@@ -114,12 +114,48 @@ function attendance_get_setname($attid, $statusset, $includevalues = true) {
  * @param int $userid
  * @return array
  */
-function get_user_sessions_log_full($userid) {
+function get_user_sessions_log_full($userid, $pageparams) {
     global $DB;
     // All taken sessions (including previous groups).
 
     $usercourses = enrol_get_users_courses($userid);
     list($usql, $uparams) = $DB->get_in_or_equal(array_keys($usercourses), SQL_PARAMS_NAMED, 'cid0');
+
+    // If we base on structure->get_user_filtered_sessions_log_extended:
+    /* if ($this->pageparams->startdate && $this->pageparams->enddate) { */
+    /*     $where = "ats.sessdate >= :csdate AND */
+    /*               ats.sessdate >= :sdate AND ats.sessdate < :edate"; */
+    /* } else { */
+    /*     $where = "ats.attendanceid = :aid AND ats.sessdate >= :csdate"; */
+    /* } */
+
+    $coursesql = "(1 = 1)";
+    $courseparams = array();
+    $now = time();
+    if ($pageparams->sesscourses === 'current') {
+        $coursesql = "(c.startdate = 0 OR c.startdate <= :now1) AND (c.enddate = 0 OR c.enddate >= :now2)";
+        $courseparams = array(
+            'now1' => $now,
+            'now2' => $now,
+        );
+    }
+
+    $datesql = "(1 = 1)";
+    $dateparams = array();
+    if ($pageparams->startdate && $pageparams->enddate) {
+        $datesql = "ats.sessdate >= :sdate AND ats.sessdate < :edate";
+        $dateparams = array(
+            'sdate'     => $pageparams->startdate,
+            'edate'     => $pageparams->enddate,
+        );
+    }
+
+    if ($pageparams->groupby === 'date') {
+        $ordersql = "ats.sessdate ASC, c.fullname ASC, att.name ASC, att.id ASC";
+    }
+    else {
+        $ordersql = "c.fullname ASC, att.name ASC, att.id ASC, ats.sessdate ASC";
+    }
 
     // WHERE clause is important:
     // gm.userid not null => get unmarked attendances for user's current groups
@@ -141,13 +177,17 @@ function get_user_sessions_log_full($userid) {
                 ON (ats.groupid = gm.groupid AND gm.userid = :uid1)
              WHERE (gm.userid IS NOT NULL OR ats.groupid = 0 OR al.id IS NOT NULL)
                AND att.course $usql
-          ORDER BY c.fullname ASC, att.name ASC, att.id ASC, ats.sessdate ASC";
+               AND $datesql
+               AND $coursesql
+          ORDER BY $ordersql";
 
     $params = array(
         'uid'       => $userid,
         'uid1'      => $userid,
     );
     $params = array_merge($params, $uparams);
+    $params = array_merge($params, $dateparams);
+    $params = array_merge($params, $courseparams);
     $sessions = $DB->get_records_sql($sql, $params);
 
     foreach ($sessions as $sess) {
