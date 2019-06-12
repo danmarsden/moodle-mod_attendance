@@ -60,7 +60,7 @@ $showpassword = (isset($session->studentpassword) && strlen($session->studentpas
 $showqr = (isset($session->includeqrcode) && $session->includeqrcode == 1);
 $rotateqr = (isset($session->rotateqrcode) && $session->rotateqrcode == 1);
 
-if ($showpassword) {
+if ($showpassword  && !$rotateqr) {
     attendance_renderpassword($session);
 }
 
