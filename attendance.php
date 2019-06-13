@@ -144,9 +144,15 @@ if (!empty($qrpass) && !empty($attforsession->autoassignstatus)) {
 $PAGE->set_url($att->url_sessions());
 
 // Create the form.
-$mform = new mod_attendance_student_attendance_form(null,
+if ($attforsession->rotateqrcode==1) {
+    $mform = new mod_attendance_student_attendance_form(null,
         array('course' => $course, 'cm' => $cm, 'modcontext' => $PAGE->context, 'session' => $attforsession,
-              'attendance' => $att, 'password' => $qrpass));
+            'attendance' => $att, 'password' => $attforsession->studentpassword));
+} else {
+    $mform = new mod_attendance_student_attendance_form(null,
+        array('course' => $course, 'cm' => $cm, 'modcontext' => $PAGE->context, 'session' => $attforsession,
+            'attendance' => $att, 'password' => $qrpass));
+}
 
 if ($mform->is_cancelled()) {
     // The user cancelled the form, so redirect them to the view page.
