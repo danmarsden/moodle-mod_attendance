@@ -56,7 +56,7 @@ if ($attforsession->rotateqrcode==1) {
 
         if ($qrpass == $qrpassdatabase->password) {
             // Create and store the token
-            setcookie($cookiename, $secrethash, 0, "/");
+            setcookie($cookiename, $secrethash, time() + (60 * 5), "/");
         } else {
             // Flag error
             print_error('qr_pass_wrong', 'mod_attendance', $url);
