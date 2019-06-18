@@ -550,37 +550,45 @@ function xmldb_attendance_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2019012500, 'attendance');
     }
 
-    if ($oldversion < 2019053100) {
+    if ($oldversion < 2019061800) {
 
-        // Define table attendance to be created.
-        $table = new xmldb_table('attendance');
+        // Define table rotate_passwords to be created.
+        $table = new xmldb_table('attendance_rotate_passwords');
 
-        // Adding fields to table attendance.
-        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
-        $table->add_field('course', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
-        $table->add_field('name', XMLDB_TYPE_CHAR, '255', null, null, null, null);
-        $table->add_field('grade', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '100');
-        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
-        $table->add_field('intro', XMLDB_TYPE_TEXT, null, null, null, null, null);
-        $table->add_field('introformat', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, '0');
-        $table->add_field('subnet', XMLDB_TYPE_CHAR, '255', null, null, null, null);
-        $table->add_field('sessiondetailspos', XMLDB_TYPE_CHAR, '5', null, XMLDB_NOTNULL, null, 'left');
-        $table->add_field('showsessiondetails', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '1');
-        $table->add_field('showextrauserdetails', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '1');
+        // Adding fields to table rotate_passwords.
+        $table->add_field('attendanceid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('password', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('expirytime', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
 
-        // Adding keys to table attendance.
-        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        // Adding keys to table rotate_passwords.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['attendanceid', 'password', 'expirytime']);
 
-        // Adding indexes to table attendance.
-        $table->add_index('course', XMLDB_INDEX_NOTUNIQUE, ['course']);
-
-        // Conditionally launch create table for attendance.
+        // Conditionally launch create table for rotate_passwords.
         if (!$dbman->table_exists($table)) {
             $dbman->create_table($table);
         }
 
+        // Define field rotateqrcode to be added to attendance_sessions.
+        $table = new xmldb_table('attendance_sessions');
+        $field = new xmldb_field('rotateqrcode', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'includeqrcode');
+
+        // Conditionally launch add field rotateqrcode.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field rotateqrcodeinterval to be added to attendance_sessions.
+        $table = new xmldb_table('attendance_sessions');
+        $field = new xmldb_field('rotateqrcodeinterval', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '15', 'rotateqrcode');
+
+        // Conditionally launch add field rotateqrcodeinterval.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
         // Attendance savepoint reached.
-        upgrade_mod_savepoint(true, 2019053100, 'attendance');
+        upgrade_mod_savepoint(true, 2019061800, 'attendance');
+
     }
 
     return $result;
