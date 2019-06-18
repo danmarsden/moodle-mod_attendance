@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/attendance/db" VERSION="20190531" COMMENT="XMLDB file for Moodle mod/attendance"
+<XMLDB PATH="mod/attendance/db" VERSION="20190618" COMMENT="XMLDB file for Moodle mod/attendance"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -155,10 +155,10 @@
         <INDEX NAME="notifyid_userid" UNIQUE="false" FIELDS="notifyid, userid"/>
       </INDEXES>
     </TABLE>
-    <TABLE NAME="rotate_passwords" COMMENT="Table to hold temporary passwords for rotate QR code feature.">
+    <TABLE NAME="attendance_rotate_passwords" COMMENT="Table to hold temporary passwords for rotate QR code feature.">
       <FIELDS>
         <FIELD NAME="attendanceid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="password" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="password" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="expirytime" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
