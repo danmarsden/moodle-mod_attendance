@@ -208,14 +208,19 @@ class mod_attendance_add_form extends moodleform {
             $mgroup = array();
 
             $mgroup[] = & $mform->createElement('text', 'studentpassword', get_string('studentpassword', 'attendance'));
+            $mform->disabledif('studentpassword', 'rotateqrcode', 'checked');
             $mgroup[] = & $mform->createElement('checkbox', 'randompassword', '', get_string('randompassword', 'attendance'));
+            $mform->disabledif('randompassword', 'rotateqrcode', 'checked');
             $mgroup[] = & $mform->createElement('checkbox', 'includeqrcode', '', get_string('includeqrcode', 'attendance'));
-            $mgroup[] = & $mform->createElement('checkbox', 'rotateqrcode', '', get_string('rotateqrcode', 'attendance'));
+            $mform->disabledif('includeqrcode', 'rotateqrcode', 'checked');
 
             $mform->addGroup($mgroup, 'passwordgrp', get_string('passwordgrp', 'attendance'), array(' '), false);
 
             $mform->setType('studentpassword', PARAM_TEXT);
             $mform->addHelpButton('passwordgrp', 'passwordgrp', 'attendance');
+
+            $mform->addElement('checkbox', 'rotateqrcode', '', get_string('rotateqrcode', 'attendance'));
+            $mform->hideif('rotateqrcode', 'studentscanmark', 'notchecked');
 
             $mform->addElement('text', 'rotateqrcodeinterval', get_string('rotateqrcodeinterval', 'attendance'));
             $mform->setType('rotateqrcodeinterval', PARAM_INT);
