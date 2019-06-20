@@ -565,5 +565,19 @@ function xmldb_attendance_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2019061800, 'attendance');
     }
 
+    if ($oldversion < 2019062000) {
+
+        // Make sure sessiondetailspos is not null.
+        $table = new xmldb_table('attendance');
+        $field = new xmldb_field('sessiondetailspos', XMLDB_TYPE_CHAR, '5', null, XMLDB_NOTNULL, null, 'left', 'subnet');
+
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->change_field_notnull($table, $field);
+        }
+
+        // Attendance savepoint reached.
+        upgrade_mod_savepoint(true, 2019062000, 'attendance');
+    }
+
     return $result;
 }
