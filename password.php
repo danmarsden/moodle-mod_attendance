@@ -43,7 +43,7 @@ if (!has_any_capability($capabilities, $context)) {
 
 if (isset($_GET['returnpasswords']) && $_GET['returnpasswords'] == 1) {
     header('Content-Type: application/json');
-    attendance_return_passwords($session);
+    echo attendance_return_passwords($session);
     exit;
 }
 

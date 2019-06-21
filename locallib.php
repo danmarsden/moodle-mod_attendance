@@ -1144,5 +1144,5 @@ function attendance_renderqrcoderotate($session) {
 function attendance_return_passwords($session) {
     global $DB;
 
-    echo json_encode($DB->get_records_sql('SELECT * FROM {attendance_rotate_passwords} WHERE attendanceid = ? AND expirytime > ? ORDER BY expirytime ASC', ['attendanceid'=>$session->id, time()], $strictness=IGNORE_MISSING));
+    return json_encode($DB->get_records_sql('SELECT * FROM {attendance_rotate_passwords} WHERE attendanceid = ? AND expirytime > ? ORDER BY expirytime ASC', ['attendanceid'=>$session->id, time()], $strictness=IGNORE_MISSING));
 }
