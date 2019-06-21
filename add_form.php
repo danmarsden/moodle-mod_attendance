@@ -222,10 +222,6 @@ class mod_attendance_add_form extends moodleform {
             $mform->addElement('checkbox', 'rotateqrcode', '', get_string('rotateqrcode', 'attendance'));
             $mform->hideif('rotateqrcode', 'studentscanmark', 'notchecked');
 
-            $mform->addElement('text', 'rotateqrcodeinterval', get_string('rotateqrcodeinterval', 'attendance'));
-            $mform->setType('rotateqrcodeinterval', PARAM_INT);
-            $mform->hideif('rotateqrcodeinterval', 'rotateqrcode', 'notchecked');
-
             $mform->hideif('passwordgrp', 'studentscanmark', 'notchecked');
             $mform->hideif('studentpassword', 'randompassword', 'checked');
             $mform->hideif('passwordgrp', 'automark', 'eq', ATTENDANCE_AUTOMARK_ALL);
@@ -248,10 +244,6 @@ class mod_attendance_add_form extends moodleform {
             // TODO - Change in DB and provide value
             if (isset($pluginconfig->includeqrcode_default)) {
                 $mform->setDefault('rotateqrcode', $pluginconfig->includeqrcode_default);
-            }
-            // TODO - Change in DB and provide value
-            if (isset($pluginconfig->includeqrcode_default)) {
-                $mform->setDefault('rotateqrcodeinterval', $pluginconfig->includeqrcode_default);
             }
             if (isset($pluginconfig->automark_default)) {
                 $mform->setDefault('automark', $pluginconfig->automark_default);

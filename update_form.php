@@ -154,10 +154,6 @@ class mod_attendance_update_form extends moodleform {
             $mform->hideif('includeqrcode', 'studentscanmark', 'notchecked');
             $mform->disabledif('includeqrcode', 'rotateqrcode', 'checked');
             $mform->addElement('checkbox', 'rotateqrcode', '', get_string('rotateqrcode', 'attendance'));
-            $mform->addElement('text', 'rotateqrcodeinterval', get_string('rotateqrcodeinterval', 'attendance'));
-            $mform->setType('rotateqrcodeinterval', PARAM_INT);
-            $mform->hideif('rotateqrcodeinterval', 'studentscanmark', 'notchecked');
-            $mform->hideif('rotateqrcodeinterval', 'rotateqrcode', 'notchecked');
             $mform->addElement('checkbox', 'autoassignstatus', '', get_string('autoassignstatus', 'attendance'));
             $mform->addHelpButton('autoassignstatus', 'autoassignstatus', 'attendance');
             $mform->hideif('autoassignstatus', 'studentscanmark', 'notchecked');
