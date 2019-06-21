@@ -552,18 +552,19 @@ function xmldb_attendance_upgrade($oldversion=0) {
 
     if ($oldversion < 2019061800) {
 
-        // Define table rotate_passwords to be created.
+        // Define table attendance_rotate_passwords to be created.
         $table = new xmldb_table('attendance_rotate_passwords');
 
-        // Adding fields to table rotate_passwords.
+        // Adding fields to table attendance_rotate_passwords.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
         $table->add_field('attendanceid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
         $table->add_field('password', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, null);
         $table->add_field('expirytime', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
 
-        // Adding keys to table rotate_passwords.
-        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['attendanceid', 'password', 'expirytime']);
+        // Adding keys to table attendance_rotate_passwords.
+        $table->add_key('id', XMLDB_KEY_PRIMARY, ['id']);
 
-        // Conditionally launch create table for rotate_passwords.
+        // Conditionally launch create table for attendance_rotate_passwords.
         if (!$dbman->table_exists($table)) {
             $dbman->create_table($table);
         }
