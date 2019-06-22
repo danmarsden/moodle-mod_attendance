@@ -586,7 +586,7 @@ function xmldb_attendance_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2019062000, 'attendance');
     }
 
-    if ($oldversion < 2019061800) {
+    if ($oldversion < 2019062200) {
 
         // Define table attendance_rotate_passwords to be created.
         $table = new xmldb_table('attendance_rotate_passwords');
@@ -624,7 +624,7 @@ function xmldb_attendance_upgrade($oldversion=0) {
         }
 
         // Attendance savepoint reached.
-        upgrade_mod_savepoint(true, 2019061800, 'attendance');
+        upgrade_mod_savepoint(true, 2019062200, 'attendance');
 
     }
 
