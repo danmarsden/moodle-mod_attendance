@@ -635,18 +635,26 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
                     $sess->studentpassword = '';
                     $sess->includeqrcode = 0;
                     $sess->rotateqrcode = 0;
+                    if (!empty($formdata->usedefaultsubnet)) {
+                        $sess->subnet = $att->subnet;
+                    } else {
+                        $sess->subnet = $formdata->subnet;
+                    }
+                    $sess->automark = $formdata->automark;
+                    $sess->automarkcompleted = 0;
+                    if (!empty($formdata->preventsharedip)) {
+                        $sess->preventsharedip = $formdata->preventsharedip;
+                    }
+                    if (!empty($formdata->preventsharediptime)) {
+                        $sess->preventsharediptime = $formdata->preventsharediptime;
+                    }
+
                     if (isset($formdata->studentscanmark)) { // Students will be able to mark their own attendance.
                         $sess->studentscanmark = 1;
-                        if (!empty($formdata->usedefaultsubnet)) {
-                            $sess->subnet = $att->subnet;
-                        } else {
-                            $sess->subnet = $formdata->subnet;
-                        }
-                        $sess->automark = $formdata->automark;
                         if (isset($formdata->autoassignstatus)) {
                             $sess->autoassignstatus = 1;
                         }
-                        $sess->automarkcompleted = 0;
+
                         if (!empty($formdata->randompassword)) {
                             $sess->studentpassword = attendance_random_string();
                         } else if (!empty($formdata->studentpassword)) {
@@ -700,6 +708,22 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
         $sess->absenteereport = $absenteereport;
         $sess->includeqrcode = 0;
         $sess->rotateqrcode = 0;
+
+        if (!empty($formdata->usedefaultsubnet)) {
+            $sess->subnet = $att->subnet;
+        } else {
+            $sess->subnet = $formdata->subnet;
+        }
+
+        if (!empty($formdata->automark)) {
+            $sess->automark = $formdata->automark;
+        }
+        if (!empty($formdata->preventsharedip)) {
+            $sess->preventsharedip = $formdata->preventsharedip;
+        }
+        if (!empty($formdata->preventsharediptime)) {
+            $sess->preventsharediptime = $formdata->preventsharediptime;
+        }
 
         if (isset($formdata->studentscanmark) && !empty($formdata->studentscanmark)) {
             // Students will be able to mark their own attendance.

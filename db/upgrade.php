@@ -552,6 +552,42 @@ function xmldb_attendance_upgrade($oldversion=0) {
 
     if ($oldversion < 2019061800) {
 
+        // Make sure default value  to '0'.
+        $table = new xmldb_table('attendance_sessions');
+        $field = new xmldb_field('preventsharedip', XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED,
+            XMLDB_NOTNULL, null, '0', 'absenteereport');
+
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->change_field_default($table, $field);
+        }
+
+        // Attendance savepoint reached.
+        upgrade_mod_savepoint(true, 2019061800, 'attendance');
+    }
+
+    if ($oldversion < 2019062000) {
+        // Make sure sessiondetailspos is not null.
+        $table = new xmldb_table('attendance');
+        $field = new xmldb_field('sessiondetailspos', XMLDB_TYPE_CHAR, '5', null, XMLDB_NOTNULL, null, 'left', 'subnet');
+
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->change_field_notnull($table, $field);
+        }
+
+        // Make sure maxwarn has default value of '1'.
+        $table = new xmldb_table('attendance_warning');
+        $field = new xmldb_field('maxwarn', XMLDB_TYPE_INTEGER, '10', null, true, null, '1', 'warnafter');
+
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->change_field_default($table, $field);
+        }
+
+        // Attendance savepoint reached.
+        upgrade_mod_savepoint(true, 2019062000, 'attendance');
+    }
+
+    if ($oldversion < 2019061800) {
+
         // Define table attendance_rotate_passwords to be created.
         $table = new xmldb_table('attendance_rotate_passwords');
 

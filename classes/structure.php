@@ -454,13 +454,18 @@ class mod_attendance_structure {
     public function add_sessions($sessions) {
         global $DB;
 
+        $config = get_config('attendance');
+
         foreach ($sessions as $sess) {
             $sess->attendanceid = $this->id;
             $sess->automarkcompleted = 0;
             if (!isset($sess->automark)) {
                 $sess->automark = 0;
             }
-
+            if (empty($config->enablecalendar)) {
+                // If calendard disabled at site level, don't use it.
+                $sess->calendarevent = 0;
+            }
             $sess->id = $DB->insert_record('attendance_sessions', $sess);
             $description = file_save_draft_area_files($sess->descriptionitemid,
                 $this->context->id, 'mod_attendance', 'session', $sess->id,
@@ -557,32 +562,34 @@ class mod_attendance_structure {
         if (!empty($formdata->autoassignstatus)) {
             $sess->autoassignstatus = $formdata->autoassignstatus;
         }
-        if (!empty(get_config('attendance', 'studentscanmark')) &&
+        $studentscanmark = get_config('attendance', 'studentscanmark');
+
+        if (!empty($studentscanmark) &&
             !empty($formdata->studentscanmark)) {
             $sess->studentscanmark = $formdata->studentscanmark;
             $sess->studentpassword = $formdata->studentpassword;
             $sess->autoassignstatus = $formdata->autoassignstatus;
-            if (!empty($formdata->usedefaultsubnet)) {
-                $sess->subnet = $this->subnet;
-            } else {
-                $sess->subnet = $formdata->subnet;
-            }
-
-            if (!empty($formdata->automark)) {
-                $sess->automark = $formdata->automark;
-            }
-            if (!empty($formdata->preventsharedip)) {
-                $sess->preventsharedip = $formdata->preventsharedip;
-            }
-            if (!empty($formdata->preventsharediptime)) {
-                $sess->preventsharediptime = $formdata->preventsharediptime;
-            }
             if (!empty($formdata->includeqrcode)) {
                 $sess->includeqrcode = $formdata->includeqrcode;
             }
             if (!empty($formdata->rotateqrcode)) {
                 $sess->rotateqrcode = $formdata->rotateqrcode;
             }
+        }
+        if (!empty($formdata->usedefaultsubnet)) {
+            $sess->subnet = $this->subnet;
+        } else {
+            $sess->subnet = $formdata->subnet;
+        }
+
+        if (!empty($formdata->automark)) {
+            $sess->automark = $formdata->automark;
+        }
+        if (!empty($formdata->preventsharedip)) {
+            $sess->preventsharedip = $formdata->preventsharedip;
+        }
+        if (!empty($formdata->preventsharediptime)) {
+            $sess->preventsharediptime = $formdata->preventsharediptime;
         }
 
         $sess->timemodified = time();

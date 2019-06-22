@@ -35,7 +35,7 @@ $sort = optional_param('tsort', 'timesent', PARAM_ALPHA);
 
 if (!empty($category)) {
     $context = context_coursecat::instance($category);
-    $coursecat = coursecat::get($category);
+    $coursecat = core_course_category::get($category);
     $courses = $coursecat->get_courses(array('recursive' => true, 'idonly' => true));
     $PAGE->set_category_by_id($category);
     require_login();
