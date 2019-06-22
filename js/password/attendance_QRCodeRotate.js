@@ -1,12 +1,12 @@
 /**
  *
- * @copyright  2019
+ * @copyright  2019 Maksud R
  * @package   mod_attendance
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * 
  */
 
-class QRCodeRotate {
+class attendance_QRCodeRotate {
 
     constructor() {
         this.sessionId = 0;

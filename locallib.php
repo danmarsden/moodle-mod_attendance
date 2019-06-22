@@ -1147,7 +1147,7 @@ function attendance_renderqrcoderotate($session) {
     );
     echo html_writer::tag('script', '',
         [
-            'src' => 'js/password/QRCodeRotate.js',
+            'src' => 'js/password/attendance_QRCodeRotate.js',
             'type' => 'text/javascript'
         ]
     );
@@ -1155,7 +1155,7 @@ function attendance_renderqrcoderotate($session) {
     // js to start the password manager
     echo '
     <script type="text/javascript">
-        let qrCodeRotate = new QRCodeRotate();
+        let qrCodeRotate = new attendance_QRCodeRotate();
         qrCodeRotate.start(' . $session->id . ', document.getElementById("qrcode"));
     </script>';
 }
