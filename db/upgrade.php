@@ -614,15 +614,6 @@ function xmldb_attendance_upgrade($oldversion=0) {
             $dbman->add_field($table, $field);
         }
 
-        // Define field rotateqrcodeinterval to be added to attendance_sessions.
-        $table = new xmldb_table('attendance_sessions');
-        $field = new xmldb_field('rotateqrcodeinterval', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '15', 'rotateqrcode');
-
-        // Conditionally launch add field rotateqrcodeinterval.
-        if (!$dbman->field_exists($table, $field)) {
-            $dbman->add_field($table, $field);
-        }
-
         // Define field rotateqrcodesecret to be added to attendance_sessions.
         $table = new xmldb_table('attendance_sessions');
         $field = new xmldb_field('rotateqrcodesecret', XMLDB_TYPE_CHAR, '10', null, null, null, null, 'rotateqrcode');
