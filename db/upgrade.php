@@ -565,5 +565,17 @@ function xmldb_attendance_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2019061800, 'attendance');
     }
 
+    if ($oldversion < 2019062100) {
+        // make entries in (calendar) event table compatible with timeline block
+        $lookbackdays = time() - 30 * (60*60*24); // no point changing all historical events on large sites
+        $events = $DB->get_records_select('event', "modulename='attendance' AND timestart > ". $lookbackdays);
+        foreach ($events as $calendarevent) {
+            $calendarevent->type = 1;
+            $calendarevent->timesort = $calendarevent->timestart;
+            $DB->update_record('event',$calendarevent);
+        }
+        upgrade_mod_savepoint(true, 2019062100, 'attendance');
+    }
+
     return $result;
 }

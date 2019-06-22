@@ -530,3 +530,57 @@ function attendance_remove_user_from_thirdpartyemails($warnings, $userid) {
         $DB->update_record('attendance_warning', $updatedwarning);
     }
 }
+
+/**
+ * @param calendar_event $event
+ * @param \core_calendar\action_factory $factory
+ * @param int $userid
+ * @return \core_calendar\local\event\entities\action_interface|\core_calendar\local\event\value_objects\action
+ */
+
+function mod_attendance_core_calendar_provide_event_action(calendar_event $event,
+                                                           \core_calendar\action_factory $factory,
+                                                           $userid = 0) {
+    global $DB;
+
+    $url = '/mod/attendance/attendance.php';
+    $param = [];
+    $actiontext = '';
+
+    $sql = 'SELECT cm.id cmid, s.sessdate, s.id, s.studentscanmark FROM {attendance_sessions} s '
+         . 'JOIN {attendance} a ON a.id = s.attendanceid '
+         . 'JOIN {course_modules} cm ON (cm.course = a.course AND cm.instance = a.id) '
+         . 'WHERE cm.module = (SELECT id FROM {modules} WHERE name = "attendance") '
+         . 'AND s.caleventid = ?';
+    $sess = $DB->get_record_sql($sql, [$event->id]);
+
+    $context = context_module::instance($sess->cmid);
+
+    if (has_capability('mod/attendance:takeattendances', $context) && $sess->sessdate < time()) {
+        $actiontext = get_string('takeattendance', 'mod_attendance');
+        $url = '/mod/attendance/take.php';
+        $param = ['id' => $sess->cmid,'sessionid'=> $sess->id, 'grouptype'=> 0];
+    } else if(has_capability('mod/attendance:canbelisted', $context)) {
+        $sql = 'SELECT s.description FROM {attendance_log} l '
+             . 'JOIN {attendance_statuses} s ON s.id = l.statusid '
+             . 'WHERE sessionid = ? AND studentid = ?';
+        $recorded = $DB->get_record_sql($sql, [$sess->id, $userid]);
+
+        if($recorded !== false) {
+            $actiontext = $recorded->description;
+            $url = '/mod/attendance/view.php';
+            $param = ['id' => $sess->cmid];
+        }  else {
+            $actiontext = $sess->studentscanmark && $sess->sessdate < time()
+                        ? get_string('submitattendance', 'mod_attendance') : "";
+            $param = ['sessid' => $sess->id];
+        }
+    }
+
+    return $factory->create_instance(
+        $actiontext,
+        new \moodle_url($url, $param),
+        1,
+        1
+    );
+}

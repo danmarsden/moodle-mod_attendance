@@ -50,13 +50,14 @@ function attendance_create_calendar_event(&$session) {
     $caleventdata->courseid       = $attendance->course;
     $caleventdata->groupid        = $session->groupid;
     $caleventdata->instance       = $session->attendanceid;
-    $caleventdata->timestart      = $session->sessdate;
+    $caleventdata->timestart      = $caleventdata->timesort       = $session->sessdate;
     $caleventdata->timeduration   = $session->duration;
     $caleventdata->description    = $session->description;
     $caleventdata->format         = $session->descriptionformat;
     $caleventdata->eventtype      = 'attendance';
     $caleventdata->timemodified   = time();
     $caleventdata->modulename     = 'attendance';
+    $caleventdata->type           = 1;
 
     if (!empty($session->groupid)) {
         $caleventdata->name .= " (". get_string('group', 'group') ." ". groups_get_group_name($session->groupid) .")";
@@ -135,9 +136,10 @@ function attendance_update_calendar_event($session) {
     // Boring update.
     $caleventdata = new stdClass();
     $caleventdata->timeduration   = $timeduration;
-    $caleventdata->timestart      = $timestart;
+    $caleventdata->timestart      = $caleventdata->timesort       = $timestart;
     $caleventdata->timemodified   = time();
     $caleventdata->description    = $session->description;
+    $caleventdata->type           = 1;
 
     $calendarevent = calendar_event::load($caleventid);
     if ($calendarevent) {
