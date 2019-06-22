@@ -575,6 +575,7 @@ class mod_attendance_structure {
             if (!empty($formdata->rotateqrcode)) {
                 $sess->rotateqrcode = $formdata->rotateqrcode;
                 $sess->studentpassword = attendance_random_string();
+                $sess->rotateqrcodesecret = attendance_random_string();
             }
         }
         if (!empty($formdata->usedefaultsubnet)) {

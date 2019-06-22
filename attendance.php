@@ -40,7 +40,7 @@ $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST)
 // If the randomised code is on grab it.
 if ($attforsession->rotateqrcode==1) {
     $cookiename = 'attendance_'.$attforsession->id;
-    $secrethash = md5($USER->id.$attforsession->studentpassword);
+    $secrethash = md5($USER->id.$attforsession->rotateqrcodesecret);
     $url = new moodle_url('/mod/attendance/view.php', array('id' => $cm->id));
 
     // Check if cookie is set and verify
