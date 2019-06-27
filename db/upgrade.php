@@ -565,17 +565,37 @@ function xmldb_attendance_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2019061800, 'attendance');
     }
 
+    if ($oldversion < 2019062000) {
+        // Make sure sessiondetailspos is not null.
+        $table = new xmldb_table('attendance');
+        $field = new xmldb_field('sessiondetailspos', XMLDB_TYPE_CHAR, '5', null, XMLDB_NOTNULL, null, 'left', 'subnet');
+
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->change_field_notnull($table, $field);
+        }
+
+        // Make sure maxwarn has default value of '1'.
+        $table = new xmldb_table('attendance_warning');
+        $field = new xmldb_field('maxwarn', XMLDB_TYPE_INTEGER, '10', null, true, null, '1', 'warnafter');
+
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->change_field_default($table, $field);
+        }
+
+        // Attendance savepoint reached.
+        upgrade_mod_savepoint(true, 2019062000, 'attendance');
+    }
+
     if ($oldversion < 2019062100) {
         // make entries in (calendar) event table compatible with timeline block
-        $lookbackdays = time() - 30 * (60*60*24); // no point changing all historical events on large sites
-        $events = $DB->get_records_select('event', "modulename='attendance' AND timestart > ". $lookbackdays);
+        $lookbackdays = time() - 30 * (60 * 60 * 24); // no point changing all historical events on large sites
+        $events = $DB->get_records_select('event', "modulename='attendance' AND timestart > " . $lookbackdays);
         foreach ($events as $calendarevent) {
             $calendarevent->type = 1;
             $calendarevent->timesort = $calendarevent->timestart;
-            $DB->update_record('event',$calendarevent);
+            $DB->update_record('event', $calendarevent);
         }
         upgrade_mod_savepoint(true, 2019062100, 'attendance');
     }
-
     return $result;
 }
