@@ -38,7 +38,7 @@ $cm = get_coursemodule_from_instance('attendance', $attendance->id, 0, false, MU
 $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
 
 // If the randomised code is on grab it.
-if ($attforsession->rotateqrcode==1) {
+if ($attforsession->rotateqrcode == 1) {
     $cookiename = 'attendance_'.$attforsession->id;
     $secrethash = md5($USER->id.$attforsession->rotateqrcodesecret);
     $url = new moodle_url('/mod/attendance/view.php', array('id' => $cm->id));
@@ -52,7 +52,9 @@ if ($attforsession->rotateqrcode==1) {
         }
     } else {
         // Check password
-        $qrpassdatabase = $DB->get_record_sql('SELECT * FROM {attendance_rotate_passwords} WHERE attendanceid = ? AND expirytime > ? ORDER BY expirytime ASC LIMIT 1', ['attendanceid'=>$id, time()], $strictness=IGNORE_MISSING);
+        $sql = 'SELECT * FROM {attendance_rotate_passwords}'.
+                ' WHERE attendanceid = ? AND expirytime > ? ORDER BY expirytime ASC LIMIT 1';
+        $qrpassdatabase = $DB->get_record_sql($sql, ['attendanceid' => $id, time()], $strictness = IGNORE_MISSING);
 
         if ($qrpass == $qrpassdatabase->password) {
             // Create and store the token
@@ -144,7 +146,7 @@ if (!empty($qrpass) && !empty($attforsession->autoassignstatus)) {
 $PAGE->set_url($att->url_sessions());
 
 // Create the form.
-if ($attforsession->rotateqrcode==1) {
+if ($attforsession->rotateqrcode == 1) {
     $mform = new mod_attendance_student_attendance_form(null,
         array('course' => $course, 'cm' => $cm, 'modcontext' => $PAGE->context, 'session' => $attforsession,
             'attendance' => $att, 'password' => $attforsession->studentpassword));
