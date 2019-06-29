@@ -117,6 +117,49 @@ class mod_wsattendance_external extends external_api {
     }
 
     /**
+     * Describes the parameters for remove_attendance.
+     *
+     * @return external_function_parameters
+     */
+    public static function remove_attendance_parameters() {
+        return new external_function_parameters(
+            array(
+                'attendanceid' => new external_value(PARAM_INT, 'attendance instance id'),
+            )
+        );
+    }
+
+    /**
+     * Remove attendance instance.
+     *
+     * @param int $attendanceid
+     */
+    public static function remove_attendance(int $attendanceid) {
+        $params = self::validate_parameters(self::remove_attendance_parameters(), array(
+            'attendanceid' => $attendanceid,
+        ));
+
+        $cm = get_coursemodule_from_instance('attendance', $params['attendanceid'], 0, false, MUST_EXIST);
+
+        // Check permissions.
+        $context = context_module::instance($cm->id);
+        self::validate_context($context);
+        require_capability('mod/attendance:manageattendances', $context);
+
+        // Delete attendance instance.
+        attendance_delete_instance($params['attendanceid']);
+        rebuild_course_cache($cm->course, true);
+    }
+
+    /**
+     * Describes remove_attendance return values.
+     *
+     * @return void
+     */
+    public static function remove_attendance_returns() {
+    }
+
+    /**
      * Describes the parameters for add_session.
      *
      * @return external_function_parameters
@@ -269,7 +312,7 @@ class mod_wsattendance_external extends external_api {
     /**
      * Describes remove_session return values.
      *
-     * @return external_multiple_structure
+     * @return void
      */
     public static function remove_session_returns() {
     }
