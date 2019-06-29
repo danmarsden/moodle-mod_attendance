@@ -635,6 +635,8 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
                     $sess->studentpassword = '';
                     $sess->includeqrcode = 0;
                     $sess->rotateqrcode = 0;
+                    $sess->rotateqrcodesecret = '';
+
                     if (!empty($formdata->usedefaultsubnet)) {
                         $sess->subnet = $att->subnet;
                     } else {
@@ -709,6 +711,7 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
         $sess->absenteereport = $absenteereport;
         $sess->includeqrcode = 0;
         $sess->rotateqrcode = 0;
+        $sess->rotateqrcodesecret = '';
 
         if (!empty($formdata->usedefaultsubnet)) {
             $sess->subnet = $att->subnet;
