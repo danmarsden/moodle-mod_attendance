@@ -41,7 +41,7 @@ if (!has_any_capability($capabilities, $context)) {
     exit;
 }
 
-if (isset($_GET['returnpasswords']) && $_GET['returnpasswords'] == 1) {
+if (optional_param('returnpasswords', 0, PARAM_INT) == 1) {
     header('Content-Type: application/json');
     echo attendance_return_passwords($session);
     exit;
