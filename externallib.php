@@ -398,6 +398,28 @@ class mod_wsattendance_external extends external_api {
      * @return mixed
      */
     public static function get_session($sessionid) {
+        global $DB;
+
+        $params = self::validate_parameters(self::get_session_parameters(), array(
+            'sessionid' => $sessionid,
+        ));
+
+        $session = $DB->get_record('attendance_sessions', array('id' => $params['sessionid']), '*', MUST_EXIST);
+        $attendance = $DB->get_record('attendance', array('id' => $session->attendanceid), '*', MUST_EXIST);
+        $cm = get_coursemodule_from_instance('attendance', $attendance->id, 0, false, MUST_EXIST);
+
+        // Check permissions.
+        $context = context_module::instance($cm->id);
+        self::validate_context($context);
+        $capabilities = array(
+            'mod/attendance:manageattendances',
+            'mod/attendance:takeattendances',
+            'mod/attendance:changeattendances'
+        );
+        if (!has_any_capability($capabilities, $context)) {
+            throw new invalid_parameter_exception('Invalid session id or no permissions.');
+        }
+
         return attendance_handler::get_session($sessionid);
     }
 
