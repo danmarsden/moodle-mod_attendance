@@ -79,7 +79,7 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
         $session->absenteereport = 1;
         $session->calendarevent = 0;
 
-        // Creating two sessions.
+        // Creating session.
         $this->sessions[] = $session;
 
         $this->attendance->add_sessions($this->sessions);
@@ -238,13 +238,43 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
                                               $teacherrole->id);
         $this->setUser($teacher);
 
+        // Check attendance does not exist.
         $this->assertCount(0, $DB->get_records('attendance', ['course' => $course->id]));
 
+        // Create attendance.
         $result = mod_wsattendance_external::add_attendance($course->id, 'test', 'test', NOGROUPS);
 
+        // Check attendance exist.
         $this->assertCount(1, $DB->get_records('attendance', ['course' => $course->id]));
-
         $record = $DB->get_record('attendance', ['id' => $result['attendanceid']]);
         $this->assertEquals($record->name, 'test');
+
+        // Create attendance with wrong group mode.
+        $this->expectException('invalid_parameter_exception');
+        $result = mod_wsattendance_external::add_attendance($course->id, 'test1', 'test1', 100);
+    }
+
+    public function test_remove_attendance() {
+        global $DB;
+        $this->resetAfterTest(true);
+
+        // Become a teacher.
+        $teacher = self::getDataGenerator()->create_user();
+        $teacherrole = $DB->get_record('role', array('shortname'=>'editingteacher'));
+        $this->getDataGenerator()->enrol_user($teacher->id,
+                                              $this->course->id,
+                                              $teacherrole->id);
+        $this->setUser($teacher);
+
+        // Check attendance exists.
+        $this->assertCount(1, $DB->get_records('attendance', ['course' => $this->course->id]));
+        $this->assertCount(1, $DB->get_records('attendance_sessions', ['attendanceid' => $this->attendance->id]));
+
+        // Remove attendance.
+        mod_wsattendance_external::remove_attendance($this->attendance->id);
+
+        // Check attendance removed.
+        $this->assertCount(0, $DB->get_records('attendance', ['course' => $this->course->id]));
+        $this->assertCount(0, $DB->get_records('attendance_sessions', ['attendanceid' => $this->attendance->id]));
     }
 }
