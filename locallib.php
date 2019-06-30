@@ -1125,7 +1125,7 @@ function attendance_generate_passwords($session) {
     global $DB;
     $attconfig = get_config('attendance');
     $password = array();
-    
+
     for ($i = 0; $i < 30; $i++) {
         array_push($password, array("attendanceid" => $session->id, "password" => mt_rand(1000, 10000), "expirytime" => time() + ($attconfig->rotateqrcodeinterval * $i)));
     }
