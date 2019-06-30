@@ -514,6 +514,7 @@ class mod_attendance_structure {
             }
             if (!isset($sess->rotateqrcode)) {
                 $sess->rotateqrcode = 0;
+                $sess->rotateqrcodesecret = '';
             }
             $event->add_record_snapshot('attendance_sessions', $sess);
             $event->trigger();
@@ -556,6 +557,8 @@ class mod_attendance_structure {
         $sess->preventsharediptime = '';
         $sess->includeqrcode = 0;
         $sess->rotateqrcode = 0;
+        $sess->rotateqrcodesecret = '';
+
         if (!empty(get_config('attendance', 'enablewarnings'))) {
             $sess->absenteereport = empty($formdata->absenteereport) ? 0 : 1;
         }
