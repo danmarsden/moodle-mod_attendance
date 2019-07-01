@@ -1126,9 +1126,6 @@ function attendance_generate_passwords($session) {
     $attconfig = get_config('attendance');
     $password = array();
 
-    $DB->delete_records('attendance_rotate_passwords', array("attendanceid" => $session->id));
-
-    // TODO - Make sure the interval code setting is set. The default value is not set by default.
     for ($i = 0; $i < 30; $i++) {
         array_push($password, array("attendanceid" => $session->id, "password" => mt_rand(1000, 10000), "expirytime" => time() + ($attconfig->rotateqrcodeinterval * $i)));
     }

@@ -53,10 +53,18 @@ if ($attforsession->rotateqrcode == 1) {
     } else {
         // Check password
         $sql = 'SELECT * FROM {attendance_rotate_passwords}'.
-                ' WHERE attendanceid = ? AND expirytime > ? ORDER BY expirytime ASC LIMIT 1';
-        $qrpassdatabase = $DB->get_record_sql($sql, ['attendanceid' => $id, time()], $strictness = IGNORE_MISSING);
+                ' WHERE attendanceid = ? AND expirytime > ? ORDER BY expirytime ASC LIMIT 2';
+        $qrpassdatabase = $DB->get_records_sql($sql, ['attendanceid' => $id, time() - 2]);
 
-        if ($qrpass == $qrpassdatabase->password) {
+        $qrpassflag = false;
+
+        foreach ($qrpassdatabase as $qrpasselement) {
+            if ($qrpass == $qrpasselement->password) {
+                $qrpassflag = true;
+            }
+        }
+
+        if ($qrpassflag) {
             // Create and store the token
             setcookie($cookiename, $secrethash, time() + (60 * 5), "/");
         } else {

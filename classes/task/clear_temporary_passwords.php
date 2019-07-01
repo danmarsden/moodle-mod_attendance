@@ -15,38 +15,39 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Attendance module tasks.
+ * Attendance task - clear temporary passwords.
  *
  * @package    mod_attendance
- * @copyright  2017 Dan Marsden
+ * @copyright  2019 Maksud R
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace mod_attendance\task;
 defined('MOODLE_INTERNAL') || die();
 
-$tasks = array(
-    array(
-        'classname' => 'mod_attendance\task\auto_mark',
-        'blocking' => 0,
-        'minute' => '8',
-        'hour' => '*',
-        'day' => '*',
-        'dayofweek' => '*',
-        'month' => '*'),
-    array(
-        'classname' => 'mod_attendance\task\notify',
-        'blocking' => 0,
-        'minute' => '30',
-        'hour' => '1',
-        'day' => '*',
-        'dayofweek' => '*',
-        'month' => '*'),
-        array(
-        'classname' => 'mod_attendance\task\clear_temporary_passwords',
-        'blocking' => 0,
-        'minute' => '0',
-        'hour' => '1',
-        'day' => '*',
-        'dayofweek' => '*',
-        'month' => '*')
-);
+/**
+ * clear_temporary_passwords class, used to clean up the temporary passwords.
+ *
+ * @package    mod_attendance
+ * @copyright  2019 Maksud R
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class clear_temporary_passwords extends \core\task\scheduled_task {
+    /**
+     * Return the task's name as shown in admin screens.
+     *
+     * @return string
+     */
+    public function get_name() {
+        return get_string('rotateqrcode_cleartemppass_task', 'mod_attendance');
+    }
+
+    /**
+     * Execute the task.
+     */
+    public function execute() {
+        global $DB;
+
+        $DB->delete_records('attendance_rotate_passwords');
+    }
+}
