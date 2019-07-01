@@ -25,6 +25,13 @@
 namespace mod_attendance\task;
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * clear_temporary_passwords class, used to clean up the temporary passwords.
+ *
+ * @package    mod_attendance
+ * @copyright  2019 Maksud R
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class clear_temporary_passwords extends \core\task\scheduled_task {
     /**
      * Return the task's name as shown in admin screens.
