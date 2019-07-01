@@ -13,30 +13,34 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
- * Webservices test for attendance plugin.
+ * External functions test for attendance plugin.
  *
  * @package    mod_attendance
+ * @category   external
  * @copyright  2015 Caio Bressan Doneda
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-if (!defined('MOODLE_INTERNAL')) {
-    die('Direct access to this script is forbidden.');
-}
+defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 
-// Include the code to test.
+require_once($CFG->dirroot . '/webservice/tests/helpers.php');
 require_once($CFG->dirroot . '/mod/attendance/classes/attendance_webservices_handler.php');
 require_once($CFG->dirroot . '/mod/attendance/classes/structure.php');
+require_once($CFG->dirroot . '/mod/attendance/externallib.php');
 
 /**
- * This class contains the test cases for the functions in attendance_webservices_handler.php.
+ * This class contains the test cases for webservices.
+ *
+ * @package mod_attendance
+ * @category external
  * @copyright  2015 Caio Bressan Doneda
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class attendance_webservices_tests extends advanced_testcase {
+class mod_attendance_external_testcase extends externallib_advanced_testcase {
     /** @var coursecat */
     protected $category;
     /** @var stdClass */
@@ -219,5 +223,28 @@ class attendance_webservices_tests extends advanced_testcase {
         $studentlog = $log[$student->id];
 
         $this->assertEquals($status->id, $studentlog->statusid);
+    }
+
+    public function test_add_attendance() {
+        global $DB;
+        $this->resetAfterTest(true);
+
+        // Become a teacher.
+        $course = $this->getDataGenerator()->create_course();
+        $teacher = self::getDataGenerator()->create_user();
+        $teacherrole = $DB->get_record('role', array('shortname'=>'editingteacher'));
+        $this->getDataGenerator()->enrol_user($teacher->id,
+                                              $course->id,
+                                              $teacherrole->id);
+        $this->setUser($teacher);
+
+        $this->assertCount(0, $DB->get_records('attendance', ['course' => $course->id]));
+
+        $result = mod_wsattendance_external::add_attendance($course->id, 'test', 'test', NOGROUPS);
+
+        $this->assertCount(1, $DB->get_records('attendance', ['course' => $course->id]));
+
+        $record = $DB->get_record('attendance', ['id' => $result['attendanceid']]);
+        $this->assertEquals($record->name, 'test');
     }
 }

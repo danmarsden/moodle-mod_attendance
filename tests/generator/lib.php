@@ -37,6 +37,7 @@ class mod_attendance_generator extends testing_module_generator {
 
     /**
      * Create new attendance module instance
+     *
      * @param array|stdClass $record
      * @param array $options
      * @return stdClass activity record with extra cmid field
@@ -61,8 +62,6 @@ class mod_attendance_generator extends testing_module_generator {
             $record->grade = 100;
         }
 
-        $record->coursemodule = $this->precreate_course_module($record->course, $options);
-        $id = attendance_add_instance($record, null);
-        return $this->post_add_instance($id, $record->coursemodule);
+        return parent::create_instance($record, (array)$options);
     }
 }
