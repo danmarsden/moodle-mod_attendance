@@ -229,13 +229,12 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
         global $DB;
         $this->resetAfterTest(true);
 
-        // Become a teacher.
         $course = $this->getDataGenerator()->create_course();
+
+        // Become a teacher.
         $teacher = self::getDataGenerator()->create_user();
         $teacherrole = $DB->get_record('role', array('shortname'=>'editingteacher'));
-        $this->getDataGenerator()->enrol_user($teacher->id,
-                                              $course->id,
-                                              $teacherrole->id);
+        $this->getDataGenerator()->enrol_user($teacher->id, $course->id, $teacherrole->id);
         $this->setUser($teacher);
 
         // Check attendance does not exist.
@@ -249,6 +248,24 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
         $record = $DB->get_record('attendance', ['id' => $result['attendanceid']]);
         $this->assertEquals($record->name, 'test');
 
+        // Check group.
+        $cm = get_coursemodule_from_instance('attendance', $result['attendanceid'], 0, false, MUST_EXIST);
+        $groupmode = (int)groups_get_activity_groupmode($cm);
+        $this->assertEquals($groupmode, NOGROUPS);
+
+        // Create attendance with "separate groups" group mode.
+        $result = mod_wsattendance_external::add_attendance($course->id, 'testsepgrp', 'testsepgrp', SEPARATEGROUPS);
+
+        // Check attendance exist.
+        $this->assertCount(2, $DB->get_records('attendance', ['course' => $course->id]));
+        $record = $DB->get_record('attendance', ['id' => $result['attendanceid']]);
+        $this->assertEquals($record->name, 'testsepgrp');
+
+        // Check group.
+        $cm = get_coursemodule_from_instance('attendance', $result['attendanceid'], 0, false, MUST_EXIST);
+        $groupmode = (int)groups_get_activity_groupmode($cm);
+        $this->assertEquals($groupmode, SEPARATEGROUPS);
+
         // Create attendance with wrong group mode.
         $this->expectException('invalid_parameter_exception');
         $result = mod_wsattendance_external::add_attendance($course->id, 'test1', 'test1', 100);
@@ -261,9 +278,7 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
         // Become a teacher.
         $teacher = self::getDataGenerator()->create_user();
         $teacherrole = $DB->get_record('role', array('shortname'=>'editingteacher'));
-        $this->getDataGenerator()->enrol_user($teacher->id,
-                                              $this->course->id,
-                                              $teacherrole->id);
+        $this->getDataGenerator()->enrol_user($teacher->id, $this->course->id, $teacherrole->id);
         $this->setUser($teacher);
 
         // Check attendance exists.
@@ -276,5 +291,131 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
         // Check attendance removed.
         $this->assertCount(0, $DB->get_records('attendance', ['course' => $this->course->id]));
         $this->assertCount(0, $DB->get_records('attendance_sessions', ['attendanceid' => $this->attendance->id]));
+    }
+
+    public function test_add_session() {
+        global $DB;
+        $this->resetAfterTest(true);
+
+        $course = $this->getDataGenerator()->create_course();
+        $group = $this->getDataGenerator()->create_group(array('courseid' => $course->id));
+
+        // Become a teacher.
+        $teacher = self::getDataGenerator()->create_user();
+        $teacherrole = $DB->get_record('role', array('shortname'=>'editingteacher'));
+        $this->getDataGenerator()->enrol_user($teacher->id, $course->id, $teacherrole->id);
+        $this->setUser($teacher);
+
+        // Create attendances.
+        $attendancenogroups = mod_wsattendance_external::add_attendance($course->id, 'nogroups', 'test', NOGROUPS);
+        $attendancesepgroups = mod_wsattendance_external::add_attendance($course->id, 'sepgroups', 'test', SEPARATEGROUPS);
+        $attendancevisgroups = mod_wsattendance_external::add_attendance($course->id, 'visgroups', 'test', VISIBLEGROUPS);
+
+        // Check attendances exist.
+        $this->assertCount(3, $DB->get_records('attendance', ['course' => $course->id]));
+
+        // Create session with group in "no groups" attendance.
+        $this->expectException('invalid_parameter_exception');
+        mod_wsattendance_external::add_session($attendancenogroups['attendanceid'], 'test', time(), 3600, $group->id, false);
+
+        // Create session with no group in "separate groups" attendance.
+        $this->expectException('invalid_parameter_exception');
+        mod_wsattendance_external::add_session($attendancesepgroups['attendanceid'], 'test', time(), 3600, 0, false);
+
+        // Create session with invalid group in "visible groups" attendance.
+        $this->expectException('invalid_parameter_exception');
+        mod_wsattendance_external::add_session($attendancevisgroups['attendanceid'], 'test', time(), 3600, $group->id + 100, false);
+
+        // Create session and validate record.
+        $time = time();
+        $duration = 3600;
+        $result = mod_wsattendance_external::add_session($attendancesepgroups['attendanceid'], 'testsession', $time, $duration, $group->id, true);
+
+        $this->assertCount(1, $DB->get_records('attendance_sessions', ['id' => $result['sessionid']]));
+        $record = $DB->get_records('attendance_sessions', ['id' => $result['sessionid']]);
+        $this->assertEquals($record->description, 'testsession');
+        $this->assertEquals($record->attendanceid, $attendancesepgroups['attendanceid']);
+        $this->assertEquals($record->groupid, $group->id);
+        $this->assertEquals($record->sessdate, $time);
+        $this->assertEquals($record->duration, $duration);
+        $this->assertEquals($record->calendarevent, 1);
+    }
+
+    public function test_remove_session() {
+        global $DB;
+        $this->resetAfterTest(true);
+
+        $course = $this->getDataGenerator()->create_course();
+
+        // Become a teacher.
+        $teacher = self::getDataGenerator()->create_user();
+        $teacherrole = $DB->get_record('role', array('shortname'=>'editingteacher'));
+        $this->getDataGenerator()->enrol_user($teacher->id, $course->id, $teacherrole->id);
+        $this->setUser($teacher);
+
+        // Create attendance.
+        $attendance = mod_wsattendance_external::add_attendance($course->id, 'test', 'test', NOGROUPS);
+
+        // Check attendance exist.
+        $this->assertCount(1, $DB->get_records('attendance', ['course' => $course->id]));
+
+        // Create session.
+        $result0 = mod_wsattendance_external::add_session($attendance['attendanceid'], 'test0', time(), 3600, 0, false);
+        $result1 = mod_wsattendance_external::add_session($attendance['attendanceid'], 'test1', time(), 3600, 0, false);
+
+        $this->assertCount(2, $DB->get_records('attendance_sessions', ['attendanceid' => $attendance['attendanceid']]));
+
+        // Delete session 0
+        mod_wsattendance_external::remove_session($result0['sessionid']);
+        $this->assertCount(1, $DB->get_records('attendance_sessions', ['attendanceid' => $attendance['attendanceid']]));
+
+        // Delete session 1
+        mod_wsattendance_external::remove_session($result1['sessionid']);
+        $this->assertCount(0, $DB->get_records('attendance_sessions', ['attendanceid' => $attendance['attendanceid']]));
+    }
+
+    public function test_add_session_creates_calendar_event() {
+        global $DB;
+        $this->resetAfterTest(true);
+
+        $course = $this->getDataGenerator()->create_course();
+
+        // Become a teacher.
+        $teacher = self::getDataGenerator()->create_user();
+        $teacherrole = $DB->get_record('role', array('shortname'=>'editingteacher'));
+        $this->getDataGenerator()->enrol_user($teacher->id, $course->id, $teacherrole->id);
+        $this->setUser($teacher);
+
+        // Create attendance.
+        $attendance = mod_wsattendance_external::add_attendance($course->id, 'test', 'test', NOGROUPS);
+
+        // Check attendance exist.
+        $this->assertCount(1, $DB->get_records('attendance', ['course' => $course->id]));
+
+        // Prepare events tracing.
+        $sink = $this->redirectEvents();
+
+        // Create session with no calendar event.
+        mod_wsattendance_external::add_session($attendance['attendanceid'], 'test0', time(), 3600, 0, false);
+
+        // Capture the event.
+        $events = $sink->get_events();
+        $sink->clear();
+
+        // Validate.
+        $this->assertCount(1, $events);
+        $this->assertInstanceOf('\mod_attendance\event\session_added', $events[0]);
+
+        // Create session with calendar event.
+        mod_wsattendance_external::add_session($attendance['attendanceid'], 'test0', time(), 3600, 0, true);
+
+        // Capture the event.
+        $events = $sink->get_events();
+        $sink->clear();
+
+        // Validate the event.
+        $this->assertCount(2, $events);
+        $this->assertInstanceOf('\core\event\calendar_event_created', $events[0]);
+        $this->assertInstanceOf('\mod_attendance\event\session_added', $events[1]);
     }
 }

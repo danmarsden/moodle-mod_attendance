@@ -45,7 +45,7 @@ class mod_wsattendance_external extends external_api {
                 'courseid' => new external_value(PARAM_INT, 'course id'),
                 'name' => new external_value(PARAM_TEXT, 'attendance name'),
                 'intro' => new external_value(PARAM_RAW, 'attendance description', VALUE_DEFAULT, ''),
-                'groupmode' => new external_value(PARAM_INT, 'group mode (0 - no groups, 1 - separate goups, 2 - visible groups)', VALUE_DEFAULT, 0),
+                'groupmode' => new external_value(PARAM_INT, 'group mode (0 - no groups, 1 - separate groups, 2 - visible groups)', VALUE_DEFAULT, 0),
             )
         );
     }
