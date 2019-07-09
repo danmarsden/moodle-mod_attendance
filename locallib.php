@@ -121,14 +121,6 @@ function get_user_sessions_log_full($userid, $pageparams) {
     $usercourses = enrol_get_users_courses($userid);
     list($usql, $uparams) = $DB->get_in_or_equal(array_keys($usercourses), SQL_PARAMS_NAMED, 'cid0');
 
-    // If we base on structure->get_user_filtered_sessions_log_extended:
-    /* if ($this->pageparams->startdate && $this->pageparams->enddate) { */
-    /*     $where = "ats.sessdate >= :csdate AND */
-    /*               ats.sessdate >= :sdate AND ats.sessdate < :edate"; */
-    /* } else { */
-    /*     $where = "ats.attendanceid = :aid AND ats.sessdate >= :csdate"; */
-    /* } */
-
     $coursesql = "(1 = 1)";
     $courseparams = array();
     $now = time();

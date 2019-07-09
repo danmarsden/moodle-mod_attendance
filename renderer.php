@@ -62,7 +62,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $filtertable->width = '100%';
         $filtertable->align = array('left', 'center', 'right', 'right');
 
-        if ($fcontrols->pageparams->mode === mod_attendance_view_page_params::MODE_ALL_SESSIONS) {
+        if (property_exists($fcontrols->pageparams, 'mode') &&
+            $fcontrols->pageparams->mode === mod_attendance_view_page_params::MODE_ALL_SESSIONS) {
             $classes .= ' float-right';
 
             $row = array();
@@ -1331,10 +1332,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
         $context = context_module::instance($userdata->filtercontrols->cm->id);
 
+        // 'course', 'activity', 'date'
         $groupby = $userdata->pageparams->groupby;
-        //$groupby = 'course';
-        //$groupby = 'activity';
-        //$groupby = 'date';
 
         $table = new html_table();
         $table->attributes['class'] = 'generaltable attwidth boxaligncenter allsessions';
@@ -1395,8 +1394,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $colcount++;
         }
 
-        // use "session" instead
-        //$table->head[] = get_string('description', 'attendance');
+        // use "session" instead of "description"
         $table->head[] = get_string('session', 'attendance');
         $table->align[] = 'left';
         $table->colclasses[] = 'desccol';
@@ -1505,9 +1503,6 @@ class mod_attendance_renderer extends plugin_renderer_base {
                     //
                     // A bit yucky because we can't tell whether we've seen statusset before, and
                     // we usually will have, so much wasted spinning.
-                    if ($sess->id == 163) {
-                        error_log("STATUSSET: ".print_r($sess->statusset, true));
-                    }
                     foreach ($userdata->statuses[$sess->attendanceid] as $attstatus) {
                         if ($attstatus->setnumber === $sess->statusset) {
                             if (!array_key_exists($attstatus->acronym, $stats['date'][$weekformat]['statuses'])) {
@@ -1673,7 +1668,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 $row = new html_table_row();
                 $row->attributes['class'] = 'grouper';
                 $cell = new html_table_cell();
-                $cell->rowspan = sizeof($group) + 2;
+                $cell->rowspan = count($group) + 2;
                 $row->cells[] = $cell;
                 $week = date("W", $sess->sessdate);
                 $year = date("Y", $sess->sessdate);
@@ -1717,7 +1712,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
                     $row = new html_table_row();
                     $row->attributes['class'] = 'grouper';
                     $cell = new html_table_cell();
-                    $cell->rowspan = sizeof($group) + 2;
+                    $cell->rowspan = count($group) + 2;
                     if ($groupby === 'activity') {
                         $headcell = $cell; // keep ref to be able to adjust rowspan later
                         $cell->rowspan += 2;
@@ -1759,12 +1754,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 }
                 if ($groupby === 'activity') {
                     if ($sess->courseid === $lastgroup[0]) {
-                        $headcell->rowspan += sizeof($group) + 2;
+                        $headcell->rowspan += count($group) + 2;
                     }
                     $row = new html_table_row();
                     $row->attributes['class'] = 'grouper';
                     $cell = new html_table_cell();
-                    $cell->rowspan = sizeof($group) + 2;
+                    $cell->rowspan = count($group) + 2;
                     $row->cells[] = $cell;
                     $attendanceurl = new moodle_url('/mod/attendance/view.php', array('id' => $sess->cmid,
                                                                                       'studentid' => $userdata->user->id,
@@ -1805,7 +1800,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
             // Now iterate over sessions in group...
 
-            foreach($group as $sess) {
+            foreach ($group as $sess) {
                 $row = new html_table_row();
 
                 // partialdate? / course? / activity? / date? / session / type / status / points / remarks / action
@@ -1861,7 +1856,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 }
 
                 if (!empty($USER->editing)) {
-                    // TODO!
+                    // TODO: add ability to edit attendance here
                 } else {
                     if (!empty($sess->statusid)) {
                         $status = $userdata->statuses[$sess->attendanceid][$sess->statusid];
