@@ -112,6 +112,7 @@ function attendance_get_setname($attid, $statusset, $includevalues = true) {
 /**
  * Get full filtered log.
  * @param int $userid
+ * @param stdClass $pageparams
  * @return array
  */
 function get_user_sessions_log_full($userid, $pageparams) {
