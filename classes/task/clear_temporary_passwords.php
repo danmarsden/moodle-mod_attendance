@@ -48,6 +48,7 @@ class clear_temporary_passwords extends \core\task\scheduled_task {
     public function execute() {
         global $DB;
 
-        $DB->delete_records('attendance_rotate_passwords');
+        $params = array('currenttime' => time());
+        $DB->delete_records_select('attendance_rotate_passwords', 'expirytime < :currenttime', $params);
     }
 }
