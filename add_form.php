@@ -213,13 +213,20 @@ class mod_attendance_add_form extends moodleform {
         if (!empty($studentscanmark)) {
             $mgroup = array();
 
-            $mgroup[] = &$mform->createElement('text', 'studentpassword', get_string('studentpassword', 'attendance'));
-            $mgroup[] = &$mform->createElement('checkbox', 'randompassword', '', get_string('randompassword', 'attendance'));
-            $mgroup[] = &$mform->createElement('checkbox', 'includeqrcode', '', get_string('includeqrcode', 'attendance'));
+            $mgroup[] = & $mform->createElement('text', 'studentpassword', get_string('studentpassword', 'attendance'));
+            $mform->disabledif('studentpassword', 'rotateqrcode', 'checked');
+            $mgroup[] = & $mform->createElement('checkbox', 'randompassword', '', get_string('randompassword', 'attendance'));
+            $mform->disabledif('randompassword', 'rotateqrcode', 'checked');
+            $mgroup[] = & $mform->createElement('checkbox', 'includeqrcode', '', get_string('includeqrcode', 'attendance'));
+            $mform->disabledif('includeqrcode', 'rotateqrcode', 'checked');
+
             $mform->addGroup($mgroup, 'passwordgrp', get_string('passwordgrp', 'attendance'), array(' '), false);
 
             $mform->setType('studentpassword', PARAM_TEXT);
             $mform->addHelpButton('passwordgrp', 'passwordgrp', 'attendance');
+
+            $mform->addElement('checkbox', 'rotateqrcode', '', get_string('rotateqrcode', 'attendance'));
+            $mform->hideif('rotateqrcode', 'studentscanmark', 'notchecked');
 
             $mform->hideif('passwordgrp', 'studentscanmark', 'notchecked');
             $mform->hideif('studentpassword', 'randompassword', 'checked');
@@ -239,6 +246,10 @@ class mod_attendance_add_form extends moodleform {
             }
             if (isset($pluginconfig->includeqrcode_default)) {
                 $mform->setDefault('includeqrcode', $pluginconfig->includeqrcode_default);
+            }
+            // TODO - Change in DB and provide value
+            if (isset($pluginconfig->includeqrcode_default)) {
+                $mform->setDefault('rotateqrcode', $pluginconfig->includeqrcode_default);
             }
             if (isset($pluginconfig->automark_default)) {
                 $mform->setDefault('automark', $pluginconfig->automark_default);

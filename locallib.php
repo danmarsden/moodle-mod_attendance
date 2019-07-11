@@ -634,6 +634,9 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
                     $sess->absenteereport = $absenteereport;
                     $sess->studentpassword = '';
                     $sess->includeqrcode = 0;
+                    $sess->rotateqrcode = 0;
+                    $sess->rotateqrcodesecret = '';
+
                     if (!empty($formdata->usedefaultsubnet)) {
                         $sess->subnet = $att->subnet;
                     } else {
@@ -662,6 +665,23 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
                         if (!empty($formdata->includeqrcode)) {
                             $sess->includeqrcode = $formdata->includeqrcode;
                         }
+                        if (!empty($formdata->rotateqrcode)) {
+                            $sess->rotateqrcode = $formdata->rotateqrcode;
+                            $sess->studentpassword = attendance_random_string();
+                            $sess->rotateqrcodesecret = attendance_random_string();
+                        }
+                        if (!empty($formdata->preventsharedip)) {
+                            $sess->preventsharedip = $formdata->preventsharedip;
+                        }
+                        if (!empty($formdata->preventsharediptime)) {
+                            $sess->preventsharediptime = $formdata->preventsharediptime;
+                        }
+                    } else {
+                        $sess->subnet = '';
+                        $sess->automark = 0;
+                        $sess->automarkcompleted = 0;
+                        $sess->preventsharedip = 0;
+                        $sess->preventsharediptime = '';
                     }
                     $sess->statusset = $formdata->statusset;
 
@@ -690,6 +710,8 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
         $sess->automarkcompleted = 0;
         $sess->absenteereport = $absenteereport;
         $sess->includeqrcode = 0;
+        $sess->rotateqrcode = 0;
+        $sess->rotateqrcodesecret = '';
 
         if (!empty($formdata->usedefaultsubnet)) {
             $sess->subnet = $att->subnet;
@@ -720,6 +742,26 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
             }
             if (!empty($formdata->includeqrcode)) {
                 $sess->includeqrcode = $formdata->includeqrcode;
+            }
+            if (!empty($formdata->rotateqrcode)) {
+                $sess->rotateqrcode = $formdata->rotateqrcode;
+                $sess->studentpassword = attendance_random_string();
+                $sess->rotateqrcodesecret = attendance_random_string();
+            }
+            if (!empty($formdata->usedefaultsubnet)) {
+                $sess->subnet = $att->subnet;
+            } else {
+                $sess->subnet = $formdata->subnet;
+            }
+
+            if (!empty($formdata->automark)) {
+                $sess->automark = $formdata->automark;
+            }
+            if (!empty($formdata->preventsharedip)) {
+                $sess->preventsharedip = $formdata->preventsharedip;
+            }
+            if (!empty($formdata->preventsharediptime)) {
+                $sess->preventsharediptime = $formdata->preventsharediptime;
             }
         }
         $sess->statusset = $formdata->statusset;
@@ -1062,8 +1104,7 @@ function attendance_renderqrcode($session) {
     global $CFG;
 
     if (strlen($session->studentpassword) > 0) {
-        $qrcodeurl = $CFG->wwwroot . '/mod/attendance/attendance.php?qrpass=' . $session->studentpassword .
-            '&sessid=' . $session->id;
+        $qrcodeurl = $CFG->wwwroot . '/mod/attendance/attendance.php?qrpass=' . $session->studentpassword . '&sessid=' . $session->id;
     } else {
         $qrcodeurl = $CFG->wwwroot . '/mod/attendance/attendance.php?sessid=' . $session->id;
     }
@@ -1073,4 +1114,62 @@ function attendance_renderqrcode($session) {
     $barcode = new TCPDF2DBarcode($qrcodeurl, 'QRCODE');
     $image = $barcode->getBarcodePngData(15, 15);
     echo html_writer::img('data:image/png;base64,' . base64_encode($image), get_string('qrcode', 'attendance'));
+}
+
+/**
+ * Generate QR code passwords.
+ *
+ * @param stdClass $session
+ */
+function attendance_generate_passwords($session) {
+    global $DB;
+    $attconfig = get_config('attendance');
+    $password = array();
+
+    for ($i = 0; $i < 30; $i++) {
+        array_push($password, array("attendanceid" => $session->id, "password" => mt_rand(1000, 10000), "expirytime" => time() + ($attconfig->rotateqrcodeinterval * $i)));
+    }
+
+    $DB->insert_records('attendance_rotate_passwords', $password);
+}
+
+/**
+ * Render JS for rotate QR code passwords.
+ *
+ * @param stdClass $session
+ */
+function attendance_renderqrcoderotate($session) {
+    echo html_writer::tag('h3', get_string('qrcode', 'attendance'));
+    // load requered js
+    echo html_writer::tag('script', '',
+        [
+            'src' => 'js/qrcode/qrcode.min.js',
+            'type' => 'text/javascript'
+        ]
+    );
+    echo html_writer::tag('script', '',
+        [
+            'src' => 'js/password/attendance_QRCodeRotate.js',
+            'type' => 'text/javascript'
+        ]
+    );
+    echo html_writer::tag('div', '', ['id' => 'qrcode']); // div to display qr code
+    // js to start the password manager
+    echo '
+    <script type="text/javascript">
+        let qrCodeRotate = new attendance_QRCodeRotate();
+        qrCodeRotate.start(' . $session->id . ', document.getElementById("qrcode"));
+    </script>';
+}
+
+/**
+ * Return QR code passwords.
+ *
+ * @param stdClass $session
+ */
+function attendance_return_passwords($session) {
+    global $DB;
+
+    $sql = 'SELECT * FROM {attendance_rotate_passwords} WHERE attendanceid = ? AND expirytime > ? ORDER BY expirytime ASC';
+    return json_encode($DB->get_records_sql($sql, ['attendanceid' => $session->id, time()], $strictness = IGNORE_MISSING));
 }

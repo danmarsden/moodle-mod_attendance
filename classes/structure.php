@@ -512,6 +512,10 @@ class mod_attendance_structure {
             if (!isset($sess->includeqrcode)) {
                 $sess->includeqrcode = 0;
             }
+            if (!isset($sess->rotateqrcode)) {
+                $sess->rotateqrcode = 0;
+                $sess->rotateqrcodesecret = '';
+            }
             $event->add_record_snapshot('attendance_sessions', $sess);
             $event->trigger();
         }
@@ -552,6 +556,9 @@ class mod_attendance_structure {
         $sess->preventsharedip = 0;
         $sess->preventsharediptime = '';
         $sess->includeqrcode = 0;
+        $sess->rotateqrcode = 0;
+        $sess->rotateqrcodesecret = '';
+
         if (!empty(get_config('attendance', 'enablewarnings'))) {
             $sess->absenteereport = empty($formdata->absenteereport) ? 0 : 1;
         }
@@ -567,6 +574,11 @@ class mod_attendance_structure {
             $sess->autoassignstatus = $formdata->autoassignstatus;
             if (!empty($formdata->includeqrcode)) {
                 $sess->includeqrcode = $formdata->includeqrcode;
+            }
+            if (!empty($formdata->rotateqrcode)) {
+                $sess->rotateqrcode = $formdata->rotateqrcode;
+                $sess->studentpassword = attendance_random_string();
+                $sess->rotateqrcodesecret = attendance_random_string();
             }
         }
         if (!empty($formdata->usedefaultsubnet)) {

@@ -319,7 +319,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
             $icon = new attendance_password_icon($sess->studentpassword, $sess->id);
 
-            if ($sess->includeqrcode == 1) {
+            if ($sess->includeqrcode == 1||$sess->rotateqrcode == 1) {
                 $icon->includeqrcode = 1;
             } else {
                 $icon->includeqrcode = 0;

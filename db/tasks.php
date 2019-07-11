@@ -40,5 +40,13 @@ $tasks = array(
         'hour' => '1',
         'day' => '*',
         'dayofweek' => '*',
+        'month' => '*'),
+        array(
+        'classname' => 'mod_attendance\task\clear_temporary_passwords',
+        'blocking' => 0,
+        'minute' => '0',
+        'hour' => '1',
+        'day' => '*',
+        'dayofweek' => '*',
         'month' => '*')
 );

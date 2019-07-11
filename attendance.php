@@ -37,6 +37,43 @@ $attendance = $DB->get_record('attendance', array('id' => $attforsession->attend
 $cm = get_coursemodule_from_instance('attendance', $attendance->id, 0, false, MUST_EXIST);
 $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
 
+// If the randomised code is on grab it.
+if ($attforsession->rotateqrcode == 1) {
+    $cookiename = 'attendance_'.$attforsession->id;
+    $secrethash = md5($USER->id.$attforsession->rotateqrcodesecret);
+    $url = new moodle_url('/mod/attendance/view.php', array('id' => $cm->id));
+
+    // Check if cookie is set and verify
+    if (isset($_COOKIE[$cookiename])) {
+        // Check the token
+        if ($secrethash !== $_COOKIE[$cookiename]) {
+            // Flag error
+            print_error('qr_cookie_error', 'mod_attendance', $url);
+        }
+    } else {
+        // Check password
+        $sql = 'SELECT * FROM {attendance_rotate_passwords}'.
+                ' WHERE attendanceid = ? AND expirytime > ? ORDER BY expirytime ASC LIMIT 2';
+        $qrpassdatabase = $DB->get_records_sql($sql, ['attendanceid' => $id, time() - 2]);
+
+        $qrpassflag = false;
+
+        foreach ($qrpassdatabase as $qrpasselement) {
+            if ($qrpass == $qrpasselement->password) {
+                $qrpassflag = true;
+            }
+        }
+
+        if ($qrpassflag) {
+            // Create and store the token
+            setcookie($cookiename, $secrethash, time() + (60 * 5), "/");
+        } else {
+            // Flag error
+            print_error('qr_pass_wrong', 'mod_attendance', $url);
+        }
+    }
+}
+
 // Require the user is logged in.
 require_login($course, true, $cm);
 
@@ -80,7 +117,6 @@ if ($attforsession->autoassignstatus && empty($attforsession->studentpassword)) 
     }
 }
 
-// Check to see if autoassignstatus is in use and if qrcode is being used.
 if (!empty($qrpass) && !empty($attforsession->autoassignstatus)) {
     $fromform = new stdClass();
 
@@ -118,9 +154,15 @@ if (!empty($qrpass) && !empty($attforsession->autoassignstatus)) {
 $PAGE->set_url($att->url_sessions());
 
 // Create the form.
-$mform = new mod_attendance_student_attendance_form(null,
+if ($attforsession->rotateqrcode == 1) {
+    $mform = new mod_attendance_student_attendance_form(null,
         array('course' => $course, 'cm' => $cm, 'modcontext' => $PAGE->context, 'session' => $attforsession,
-              'attendance' => $att, 'password' => $qrpass));
+            'attendance' => $att, 'password' => $attforsession->studentpassword));
+} else {
+    $mform = new mod_attendance_student_attendance_form(null,
+        array('course' => $course, 'cm' => $cm, 'modcontext' => $PAGE->context, 'session' => $attforsession,
+            'attendance' => $att, 'password' => $qrpass));
+}
 
 if ($mform->is_cancelled()) {
     // The user cancelled the form, so redirect them to the view page.

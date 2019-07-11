@@ -41,6 +41,12 @@ if (!has_any_capability($capabilities, $context)) {
     exit;
 }
 
+if (optional_param('returnpasswords', 0, PARAM_INT) == 1) {
+    header('Content-Type: application/json');
+    echo attendance_return_passwords($session);
+    exit;
+}
+
 $PAGE->set_url('/mod/attendance/password.php');
 $PAGE->set_pagelayout('popup');
 
@@ -52,13 +58,19 @@ echo $OUTPUT->header();
 
 $showpassword = (isset($session->studentpassword) && strlen($session->studentpassword) > 0);
 $showqr = (isset($session->includeqrcode) && $session->includeqrcode == 1);
+$rotateqr = (isset($session->rotateqrcode) && $session->rotateqrcode == 1);
 
-if ($showpassword) {
+if ($showpassword  && !$rotateqr) {
     attendance_renderpassword($session);
 }
 
 if ($showqr) {
     attendance_renderqrcode($session);
+}
+
+if ($rotateqr) {
+    attendance_generate_passwords($session);
+    attendance_renderqrcoderotate($session);
 }
 
 echo $OUTPUT->footer();
