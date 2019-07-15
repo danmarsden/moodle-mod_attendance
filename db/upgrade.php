@@ -586,7 +586,49 @@ function xmldb_attendance_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2019062000, 'attendance');
     }
 
-    if ($oldversion < 2019062100) {
+    if ($oldversion < 2019062200) {
+
+        // Define table attendance_rotate_passwords to be created.
+        $table = new xmldb_table('attendance_rotate_passwords');
+
+        // Adding fields to table attendance_rotate_passwords.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('attendanceid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('password', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('expirytime', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+
+        // Adding keys to table attendance_rotate_passwords.
+        $table->add_key('id', XMLDB_KEY_PRIMARY, ['id']);
+
+        // Conditionally launch create table for attendance_rotate_passwords.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Define field rotateqrcode to be added to attendance_sessions.
+        $table = new xmldb_table('attendance_sessions');
+        $field = new xmldb_field('rotateqrcode', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'includeqrcode');
+
+        // Conditionally launch add field rotateqrcode.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field rotateqrcodesecret to be added to attendance_sessions.
+        $table = new xmldb_table('attendance_sessions');
+        $field = new xmldb_field('rotateqrcodesecret', XMLDB_TYPE_CHAR, '10', null, null, null, null, 'rotateqrcode');
+
+        // Conditionally launch add field rotateqrcodesecret.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Attendance savepoint reached.
+        upgrade_mod_savepoint(true, 2019062200, 'attendance');
+
+    }
+
+    if ($oldversion < 2019062300) {
         // make entries in (calendar) event table compatible with timeline block
         $lookbackdays = time() - 30 * (60 * 60 * 24); // no point changing all historical events on large sites
         $events = $DB->get_records_select('event', "modulename='attendance' AND timestart > " . $lookbackdays);
@@ -595,7 +637,8 @@ function xmldb_attendance_upgrade($oldversion=0) {
             $calendarevent->timesort = $calendarevent->timestart;
             $DB->update_record('event', $calendarevent);
         }
-        upgrade_mod_savepoint(true, 2019062100, 'attendance');
+        upgrade_mod_savepoint(true, 2019062300, 'attendance');
     }
+
     return $result;
 }
