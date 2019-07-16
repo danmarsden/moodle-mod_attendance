@@ -33,6 +33,7 @@ $id = required_param('sessid', PARAM_INT);
 $qrpass = optional_param('qrpass', '', PARAM_TEXT);
 
 $attforsession = $DB->get_record('attendance_sessions', array('id' => $id), '*', MUST_EXIST);
+$attconfig = get_config('attendance');
 $attendance = $DB->get_record('attendance', array('id' => $attforsession->attendanceid), '*', MUST_EXIST);
 $cm = get_coursemodule_from_instance('attendance', $attendance->id, 0, false, MUST_EXIST);
 $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
@@ -54,7 +55,7 @@ if ($attforsession->rotateqrcode == 1) {
         // Check password
         $sql = 'SELECT * FROM {attendance_rotate_passwords}'.
                 ' WHERE attendanceid = ? AND expirytime > ? ORDER BY expirytime ASC LIMIT 2';
-        $qrpassdatabase = $DB->get_records_sql($sql, ['attendanceid' => $id, time() - 2]);
+        $qrpassdatabase = $DB->get_records_sql($sql, ['attendanceid' => $id, time() - $attconfig->rotateqrcodeexpirymargin]);
 
         $qrpassflag = false;
 
