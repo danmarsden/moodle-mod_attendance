@@ -1153,12 +1153,13 @@ function attendance_renderqrcoderotate($session) {
             'type' => 'text/javascript'
         ]
     );
+    echo html_writer::tag('div', '', ['id' => 'text-password']); // div to display qr code
     echo html_writer::tag('div', '', ['id' => 'qrcode']); // div to display qr code
     // js to start the password manager
     echo '
     <script type="text/javascript">
         let qrCodeRotate = new attendance_QRCodeRotate();
-        qrCodeRotate.start(' . $session->id . ', document.getElementById("qrcode"));
+        qrCodeRotate.start(' . $session->id . ', document.getElementById("qrcode"), document.getElementById("text-password"));
     </script>';
 }
 
