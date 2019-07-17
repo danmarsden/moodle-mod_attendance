@@ -1121,12 +1121,23 @@ class mod_attendance_renderer extends plugin_renderer_base {
             } else {
                 list($canmark, $reason) = attendance_can_student_mark($sess, false);
                 if ($canmark) {
-                    // Student can mark their own attendance.
-                    // URL to the page that lets the student modify their attendance.
-
-                    $url = new moodle_url('/mod/attendance/attendance.php',
-                            array('sessid' => $sess->id, 'sesskey' => sesskey()));
-                    $cell = new html_table_cell(html_writer::link($url, get_string('submitattendance', 'attendance')));
+                    if ($sess->rotateqrcode == 1) {
+                        $url = new moodle_url('/mod/attendance/attendance.php');
+                        $output = html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'sessid',
+                                'value' => $sess->id));
+                        $output .= html_writer::empty_tag('input', array('type' => 'text', 'name' => 'qrpass',
+                                'placeholder' => "Enter password"));
+                        $output .= html_writer::empty_tag('input', array('type' => 'submit',
+                                'value' => get_string('submit'),
+                                'class' => 'btn btn-secondary'));
+                        $cell = new html_table_cell(html_writer::tag('form', $output, array('action' => $url->out(), 'method' => 'get')));
+                    } else {
+                        // Student can mark their own attendance.
+                        // URL to the page that lets the student modify their attendance.
+                        $url = new moodle_url('/mod/attendance/attendance.php',
+                                array('sessid' => $sess->id, 'sesskey' => sesskey()));
+                        $cell = new html_table_cell(html_writer::link($url, get_string('submitattendance', 'attendance')));
+                    }
                     $cell->colspan = 3;
                     $row->cells[] = $cell;
                 } else { // Student cannot mark their own attendace.
