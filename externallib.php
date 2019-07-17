@@ -332,7 +332,18 @@ class mod_wsattendance_external extends external_api {
      * @return array
      */
     public static function get_courses_with_today_sessions($userid) {
-        return attendance_handler::get_courses_with_today_sessions($userid);
+        global $DB;
+
+        $params = self::validate_parameters(self::get_courses_with_today_sessions_parameters(), array(
+            'userid' => $userid,
+        ));
+
+        // Check user id is valid.
+        $user = $DB->get_record('user', array('id' => $params['userid']), '*', MUST_EXIST);
+
+        // Capability check is done in get_courses_with_today_sessions
+        // as it switches contexts in loop for each course.
+        return attendance_handler::get_courses_with_today_sessions($params['userid']);
     }
 
     /**
@@ -480,7 +491,28 @@ class mod_wsattendance_external extends external_api {
      * @param int $statusset
      */
     public static function update_user_status($sessionid, $studentid, $takenbyid, $statusid, $statusset) {
-        return attendance_handler::update_user_status($sessionid, $studentid, $takenbyid, $statusid, $statusset);
+        $params = self::validate_parameters(self::update_user_status_parameters(), array(
+            'sessionid' => $sessionid,
+            'studentid' => $studentid,
+            'takenbyid' => $takenbyid,
+            'statusid' => $statusid,
+            'statusset' => $statusset,
+        ));
+
+        // Make sure session is open for marking.
+        $session = $DB->get_record('attendance_sessions', array('id' => $params['sessionid']), '*', MUST_EXIST);
+        list($canmark, $reason) = attendance_can_student_mark($attforsession);
+        if (!$canmark) {
+            throw new invalid_parameter_exception($reason);
+        }
+
+        // Check user id is valid.
+        $student = $DB->get_record('user', array('id' => $params['studentid']), '*', MUST_EXIST);
+        $takenby = $DB->get_record('user', array('id' => $params['takenbyid']), '*', MUST_EXIST);
+
+        // TODO: Verify statusset and statusid.
+
+        return attendance_handler::update_user_status($params['sessionid'], $params['studentid'], $params['takenbyid'], $params['statusid'], $params['statusset']);
     }
 
     /**
