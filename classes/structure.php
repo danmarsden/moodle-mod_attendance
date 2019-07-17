@@ -1106,7 +1106,7 @@ class mod_attendance_structure {
         if ($this->get_group_mode()) {
             $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description,
                            al.statusid, al.remarks, ats.studentscanmark, ats.autoassignstatus,
-                           ats.preventsharedip, ats.preventsharediptime
+                           ats.preventsharedip, ats.preventsharediptime, ats.rotateqrcode
                       FROM {attendance_sessions} ats
                 RIGHT JOIN {attendance_log} al
                         ON ats.id = al.sessionid AND al.studentid = :uid
@@ -1116,7 +1116,7 @@ class mod_attendance_structure {
         } else {
             $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, ats.statusset,
                            al.statusid, al.remarks, ats.studentscanmark, ats.autoassignstatus,
-                           ats.preventsharedip, ats.preventsharediptime
+                           ats.preventsharedip, ats.preventsharediptime, ats.rotateqrcode
                       FROM {attendance_sessions} ats
                 RIGHT JOIN {attendance_log} al
                         ON ats.id = al.sessionid AND al.studentid = :uid
@@ -1147,7 +1147,7 @@ class mod_attendance_structure {
         }
         $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, ats.statusset,
                        al.statusid, al.remarks, ats.studentscanmark, ats.autoassignstatus,
-                       ats.preventsharedip, ats.preventsharediptime
+                       ats.preventsharedip, ats.preventsharediptime, ats.rotateqrcode
                   FROM {attendance_sessions} ats
              LEFT JOIN {attendance_log} al
                     ON ats.id = al.sessionid AND al.studentid = :uid
