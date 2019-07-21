@@ -460,7 +460,7 @@ class mod_attendance_structure {
     /**
      * Add single session.
      *
-     * @param array $session
+     * @param stdClass $sess
      * @return int $sessionid
      */
     public function add_session($sess) {

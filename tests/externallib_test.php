@@ -233,7 +233,7 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
 
         // Become a teacher.
         $teacher = self::getDataGenerator()->create_user();
-        $teacherrole = $DB->get_record('role', array('shortname'=>'editingteacher'));
+        $teacherrole = $DB->get_record('role', array('shortname' => 'editingteacher'));
         $this->getDataGenerator()->enrol_user($teacher->id, $course->id, $teacherrole->id);
         $this->setUser($teacher);
 
@@ -277,7 +277,7 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
 
         // Become a teacher.
         $teacher = self::getDataGenerator()->create_user();
-        $teacherrole = $DB->get_record('role', array('shortname'=>'editingteacher'));
+        $teacherrole = $DB->get_record('role', array('shortname' => 'editingteacher'));
         $this->getDataGenerator()->enrol_user($teacher->id, $this->course->id, $teacherrole->id);
         $this->setUser($teacher);
 
@@ -302,7 +302,7 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
 
         // Become a teacher.
         $teacher = self::getDataGenerator()->create_user();
-        $teacherrole = $DB->get_record('role', array('shortname'=>'editingteacher'));
+        $teacherrole = $DB->get_record('role', array('shortname' => 'editingteacher'));
         $this->getDataGenerator()->enrol_user($teacher->id, $course->id, $teacherrole->id);
         $this->setUser($teacher);
 
@@ -329,7 +329,8 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
         // Create session and validate record.
         $time = time();
         $duration = 3600;
-        $result = mod_wsattendance_external::add_session($attendancesepgroups['attendanceid'], 'testsession', $time, $duration, $group->id, true);
+        $result = mod_wsattendance_external::add_session($attendancesepgroups['attendanceid'],
+            'testsession', $time, $duration, $group->id, true);
 
         $this->assertCount(1, $DB->get_records('attendance_sessions', ['id' => $result['sessionid']]));
         $record = $DB->get_records('attendance_sessions', ['id' => $result['sessionid']]);
@@ -349,7 +350,7 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
 
         // Become a teacher.
         $teacher = self::getDataGenerator()->create_user();
-        $teacherrole = $DB->get_record('role', array('shortname'=>'editingteacher'));
+        $teacherrole = $DB->get_record('role', array('shortname' => 'editingteacher'));
         $this->getDataGenerator()->enrol_user($teacher->id, $course->id, $teacherrole->id);
         $this->setUser($teacher);
 
@@ -365,11 +366,11 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
 
         $this->assertCount(2, $DB->get_records('attendance_sessions', ['attendanceid' => $attendance['attendanceid']]));
 
-        // Delete session 0
+        // Delete session 0.
         mod_wsattendance_external::remove_session($result0['sessionid']);
         $this->assertCount(1, $DB->get_records('attendance_sessions', ['attendanceid' => $attendance['attendanceid']]));
 
-        // Delete session 1
+        // Delete session 1.
         mod_wsattendance_external::remove_session($result1['sessionid']);
         $this->assertCount(0, $DB->get_records('attendance_sessions', ['attendanceid' => $attendance['attendanceid']]));
     }
@@ -382,7 +383,7 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
 
         // Become a teacher.
         $teacher = self::getDataGenerator()->create_user();
-        $teacherrole = $DB->get_record('role', array('shortname'=>'editingteacher'));
+        $teacherrole = $DB->get_record('role', array('shortname' => 'editingteacher'));
         $this->getDataGenerator()->enrol_user($teacher->id, $course->id, $teacherrole->id);
         $this->setUser($teacher);
 

@@ -57,7 +57,7 @@ class mod_wsattendance_external extends external_api {
      * @param string $name
      * @param string $intro
      * @param int $groupmode
-     * @return int $sessionid
+     * @return array
      */
     public static function add_attendance(int $courseid, $name, $intro, int $groupmode) {
         global $CFG, $DB;
@@ -181,12 +181,12 @@ class mod_wsattendance_external extends external_api {
      * Adds session to attendance instance.
      *
      * @param int $attendanceid
-     * @param int $groupid
+     * @param string $description
      * @param int $sessiontime
      * @param int $duration
-     * @param string $description
+     * @param int $groupid
      * @param bool $addcalendarevent
-     * @return int $sessionid
+     * @return array
      */
     public static function add_session(int $attendanceid, $description, int $sessiontime, int $duration, int $groupid, bool $addcalendarevent) {
         global $USER, $DB;
@@ -220,8 +220,9 @@ class mod_wsattendance_external extends external_api {
         if ($groupmode === SEPARATEGROUPS || ($groupmode === VISIBLEGROUPS && $groupid > 0)) {
             // Determine valid groups
             $userid = has_capability('moodle/site:accessallgroups', $context) ? 0 : $USER->id;
-            $validgroupids = array_map(function($group) { return $group->id; },
-                groups_get_all_groups($course->id, $userid, $cm->groupingid));
+            $validgroupids = array_map(function($group) {
+                return $group->id;
+            }, groups_get_all_groups($course->id, $userid, $cm->groupingid));
             if (!in_array($groupid, $validgroupids)) {
                 throw new invalid_parameter_exception('Invalid group id');
             }
