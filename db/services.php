@@ -25,28 +25,28 @@
 defined('MOODLE_INTERNAL') || die();
 
 $functions = array(
-    'mod_wsattendance_add_attendance' => array(
+    'mod_attendance_add_attendance' => array(
         'classname'    => 'mod_wsattendance_external',
         'methodname'   => 'add_attendance',
         'classpath'    => 'mod/attendance/externallib.php',
         'description'  => 'Add attendance instance to course.',
         'type'         => 'write',
     ),
-    'mod_wsattendance_remove_attendance' => array(
+    'mod_attendance_remove_attendance' => array(
         'classname'    => 'mod_wsattendance_external',
         'methodname'   => 'remove_attendance',
         'classpath'    => 'mod/attendance/externallib.php',
         'description'  => 'Delete attendance instance.',
         'type'         => 'write',
     ),
-    'mod_wsattendance_add_session' => array(
+    'mod_attendance_add_session' => array(
         'classname'    => 'mod_wsattendance_external',
         'methodname'   => 'add_session',
         'classpath'    => 'mod/attendance/externallib.php',
         'description'  => 'Add a new session.',
         'type'         => 'write',
     ),
-    'mod_wsattendance_remove_session' => array(
+    'mod_attendance_remove_session' => array(
         'classname'    => 'mod_wsattendance_external',
         'methodname'   => 'remove_session',
         'classpath'    => 'mod/attendance/externallib.php',
@@ -82,10 +82,10 @@ $functions = array(
 $services = array(
     'Attendance' => array(
         'functions' => array(
-            'mod_wsattendance_add_attendance',
-            'mod_wsattendance_remove_attendance',
-            'mod_wsattendance_add_session',
-            'mod_wsattendance_remove_session',
+            'mod_attendance_add_attendance',
+            'mod_attendance_remove_attendance',
+            'mod_attendance_add_session',
+            'mod_attendance_remove_session',
             'mod_wsattendance_get_courses_with_today_sessions',
             'mod_wsattendance_get_session',
             'mod_wsattendance_update_user_status'
