@@ -1001,6 +1001,71 @@ class mod_attendance_renderer extends plugin_renderer_base {
     }
 
     /**
+     * Construct take session controls.
+     *
+     * @param attendance_take_data $takedata
+     * @param stdClass $user
+     * @return array
+     */
+    private function construct_take_session_controls(attendance_take_data $takedata, $user) {
+        $celldata = array();
+        if ($user->enrolmentend and $user->enrolmentend < $takedata->sessioninfo->sessdate) {
+            $celldata['text'] = get_string('enrolmentend', 'attendance', userdate($user->enrolmentend, '%d.%m.%Y'));
+            $celldata['colspan'] = count($takedata->statuses) + 1;
+            $celldata['class'] = 'userwithoutenrol';
+        } else if (!$user->enrolmentend and $user->enrolmentstatus == ENROL_USER_SUSPENDED) {
+            // No enrolmentend and ENROL_USER_SUSPENDED.
+            $celldata['text'] = get_string('enrolmentsuspended', 'attendance');
+            $celldata['colspan'] = count($takedata->statuses) + 1;
+            $celldata['class'] = 'userwithoutenrol';
+        } else {
+            if ($takedata->updatemode and !array_key_exists($user->id, $takedata->sessionlog)) {
+                $celldata['class'] = 'userwithoutdata';
+            }
+
+            $celldata['text'] = array();
+            foreach ($takedata->statuses as $st) {
+                $params = array(
+                        'type'  => 'radio',
+                        'name'  => 'user'.$user->id.'sess'.$takedata->sessioninfo->id,
+                        'class' => 'st'.$st->id,
+                        'value' => $st->id);
+                if (array_key_exists($user->id, $takedata->sessionlog) and $st->id == $takedata->sessionlog[$user->id]->statusid) {
+                    $params['checked'] = '';
+                }
+
+                $input = html_writer::empty_tag('input', $params);
+
+                if ($takedata->pageparams->viewmode == mod_attendance_take_page_params::SORTED_GRID) {
+                    $input = html_writer::tag('nobr', $input . $st->acronym);
+                }
+
+                $celldata['text'][] = $input;
+            }
+            $params = array(
+                    'type'  => 'text',
+                    'name'  => 'remarks'.$user->id.'sess'.$takedata->sessioninfo->id,
+                    'maxlength' => 255);
+            if (array_key_exists($user->id, $takedata->sessionlog)) {
+                $params['value'] = $takedata->sessionlog[$user->id]->remarks;
+            }
+            $input = html_writer::empty_tag('input', $params);
+            if ($takedata->pageparams->viewmode == mod_attendance_take_page_params::SORTED_GRID) {
+                $input = html_writer::empty_tag('br').$input;
+            }
+            $celldata['text'][] = $input;
+
+            if ($user->enrolmentstart > $takedata->sessioninfo->sessdate + $takedata->sessioninfo->duration) {
+                $celldata['warning'] = get_string('enrolmentstart', 'attendance',
+                                                  userdate($user->enrolmentstart, '%H:%M %d.%m.%Y'));
+                $celldata['class'] = 'userwithoutenrol';
+            }
+        }
+
+        return $celldata;
+    }
+
+    /**
      * Render header.
      *
      * @param mod_attendance_header $header
@@ -1453,15 +1518,6 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $summarywidth++;
         }
 
-        /* if (has_capability('mod/attendance:takeattendances', $context)) { */
-        /*     $table->head[] = get_string('action'); */
-        /*     $table->align[] = ''; */
-        /*     $table->colclasses[] = 'actioncol'; */
-        /*     $table->size[] = ''; */
-        /*     $colcount++; */
-        /*     $summarywidth++; */
-        /* } */
-
         $statusmaxpoints = array();
         foreach ($userdata->statuses as $attid => $attstatuses) {
             $statusmaxpoints[$attid] = attendance_get_statusset_maxpoints($attstatuses);
@@ -1863,7 +1919,61 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 }
 
                 if (!empty($USER->editing)) {
-                    // TODO: add ability to edit attendance here
+                    $context = context_module::instance($sess->cmid);
+                    if (has_capability('mod/attendance:takeattendances', $context)) {
+                        // TODO: add ability to edit attendance here
+                        $celltext = '';
+
+                        // takedata needs:
+                        // sessioninfo->sessdate
+                        // sessioninfo->duration
+                        // statuses
+                        // updatemode
+                        // sessionlog[userid]->statusid
+                        // sessionlog[userid]->remarks
+                        // pageparams->viewmode == mod_attendance_take_page_params::SORTED_GRID
+                        // and urlparams to be able to use url method later.
+                        //
+                        // user needs:
+                        // enrolmentstart
+                        // enrolmentend
+                        // enrolmentstatus
+                        // id
+
+                        $nastyhack = new ReflectionClass('attendance_take_data');
+                        $takedata = $nastyhack->newInstanceWithoutConstructor();
+                        $takedata->sessioninfo = $sess;
+                        $takedata->statuses = array_filter($userdata->statuses[$sess->attendanceid], function($x) use ($sess) {
+                            return ($x->setnumber == $sess->statusset);
+                        });
+                        $takedata->updatemode = true;
+                        $takedata->sessionlog = array($userdata->user->id => $sess);
+                        $takedata->pageparams = new stdClass();
+                        $takedata->pageparams->viewmode = mod_attendance_take_page_params::SORTED_GRID;
+                        $ucdata = $this->construct_take_session_controls($takedata, $userdata->user);
+
+                        $celltext = join($ucdata['text']);
+
+                        if (array_key_exists('warning', $ucdata)) {
+                            $celltext .= html_writer::empty_tag('br');
+                            $celltext .= $ucdata['warning'];
+                        }
+                        if (array_key_exists('class', $ucdata)) {
+                            $row->attributes['class'] = $ucdata['class'];
+                        }
+
+                        $cell = new html_table_cell($celltext);
+                        $cell->colspan = 2;
+                        $row->cells[] = $cell;
+                    }
+                    else {
+                        if (!empty($sess->statusid)) {
+                            $status = $userdata->statuses[$sess->attendanceid][$sess->statusid];
+                            $row->cells[] = $status->description;
+                            $row->cells[] = $sess->remarks;
+                        }
+                    }
+                        
                 } else {
                     if (!empty($sess->statusid)) {
                         $status = $userdata->statuses[$sess->attendanceid][$sess->statusid];
@@ -1904,7 +2014,31 @@ class mod_attendance_renderer extends plugin_renderer_base {
             }
         }
 
-        $allsessions->detail = html_writer::table($table);
+        if (!empty($USER->editing)) {
+            $row = new html_table_row();
+            $params = array(
+                'type'  => 'submit',
+                'class' => 'btn btn-primary',
+                'value' => get_string('save', 'attendance'));
+            $cell = new html_table_cell(html_writer::tag('center', html_writer::empty_tag('input', $params)));
+            $cell->colspan = $colcount + (($groupby == 'activity')? 2 : 1);
+            $row->cells[] = $cell;
+            $table->data[] = $row;
+        }
+
+        $logtext = html_writer::table($table);
+
+        if (!empty($USER->editing)) {
+            $formtext = html_writer::start_div('no-overflow');
+            $formtext .= $logtext;
+            $formtext .= html_writer::input_hidden_params($userdata->url(array('sesskey' => sesskey())));
+            $formtext .= html_writer::end_div();
+            // could use userdata->urlpath if not private or userdata->url_path() if existed, but '' turns
+            // out to DTRT.
+            $logtext = html_writer::tag('form', $formtext, array('method' => 'post', 'action' => '',
+                                                                 'id' => 'attendancetakeform'));
+        }
+        $allsessions->detail = $logtext;
         return $allsessions;
     }
 
