@@ -734,7 +734,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $PAGE->requires->js_amd_inline("
                  require(['jquery'], function($) {
                      $('#checkstatus".$st->id."').click(function(e) {
-                         $('#attendancetakeform').find('.st".$st->id."').prop('checked', true);
+                         if (e.shiftKey) {
+                             $('#attendancetakeform').find('input:indeterminate.st".$st->id."').prop('checked', true);
+                         }
+                         else {
+                             $('#attendancetakeform').find('.st".$st->id."').prop('checked', true);
+                         }
                          e.preventDefault();
                      });
                  });");
