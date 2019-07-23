@@ -62,14 +62,6 @@ if (!$pageparams->studentid) {
     }
 }
 
-$PAGE->set_url($att->url_view($pageparams->get_significant_params()));
-$PAGE->set_title($course->shortname. ": ".$att->name);
-$PAGE->set_heading($course->fullname);
-$PAGE->set_cacheable(true);
-$PAGE->navbar->add(get_string('attendancereport', 'attendance'));
-
-$output = $PAGE->get_renderer('mod_attendance');
-
 if (isset($pageparams->studentid) && $USER->id != $pageparams->studentid) {
     // Only users with proper permissions should be able to see any user's individual report.
     require_capability('mod/attendance:viewreports', $context);
@@ -78,6 +70,9 @@ if (isset($pageparams->studentid) && $USER->id != $pageparams->studentid) {
     // A valid request to see another users report has not been sent, show the user's own.
     $userid = $USER->id;
 }
+
+$url = $att->url_view($pageparams->get_significant_params());
+$PAGE->set_url($url);
 
 $userdata = new attendance_user_data($att, $userid);
 
@@ -104,6 +99,19 @@ $event->add_record_snapshot('course_modules', $cm);
 $event->trigger();
 
 $header = new mod_attendance_header($att);
+
+if (($formdata = data_submitted()) && confirm_sesskey()) {
+    $userdata->take_sessions_from_form_data($formdata);
+
+    redirect($url, get_string('attendancesuccess', 'attendance'));
+}
+
+$PAGE->set_title($course->shortname. ": ".$att->name);
+$PAGE->set_heading($course->fullname);
+$PAGE->set_cacheable(true);
+$PAGE->navbar->add(get_string('attendancereport', 'attendance'));
+
+$output = $PAGE->get_renderer('mod_attendance');
 
 echo $output->header();
 

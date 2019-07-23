@@ -115,7 +115,7 @@ function attendance_get_setname($attid, $statusset, $includevalues = true) {
  * @param stdClass $pageparams
  * @return array
  */
-function get_user_sessions_log_full($userid, $pageparams) {
+function attendance_get_user_sessions_log_full($userid, $pageparams) {
     global $DB;
     // All taken sessions (including previous groups).
 
@@ -362,6 +362,54 @@ function attendance_update_users_grade($attendance, $userids=array()) {
     }
 
     return grade_update('mod/attendance', $course->id, 'mod', 'attendance', $attendance->id, 0, $grades);
+}
+
+/**
+ * Update grades for specified users for specified attendance
+ *
+ * @param integer $attendanceid - the id of the attendance to update
+ * @param integer $grade - the value of the 'grade' property of the specified attendance
+ * @param array $userids - the userids of the users to be updated
+ */
+function attendance_update_users_grades_by_id($attendanceid, $grade, $userids) {
+    global $DB;
+
+    if (empty($grade)) {
+        return false;
+    }
+
+    list($course, $cm) = get_course_and_cm_from_instance($attendanceid, 'attendance');
+
+    $summary = new mod_attendance_summary($attendanceid, $userids);
+
+    if (empty($userids)) {
+        $context = context_module::instance($cm->id);
+        $userids = array_keys(get_enrolled_users($context, 'mod/attendance:canbelisted', 0, 'u.id'));
+    }
+
+    if ($grade < 0) {
+        $dbparams = array('id' => -($grade));
+        $scale = $DB->get_record('scale', $dbparams);
+        $scalearray = explode(',', $scale->scale);
+        $attendancegrade = count($scalearray);
+    } else {
+        $attendancegrade = $grade;
+    }
+
+    $grades = array();
+    foreach ($userids as $userid) {
+        $grades[$userid] = new stdClass();
+        $grades[$userid]->userid = $userid;
+
+        if ($summary->has_taken_sessions($userid)) {
+            $usersummary = $summary->get_taken_sessions_summary_for($userid);
+            $grades[$userid]->rawgrade = $usersummary->takensessionspercentage * $attendancegrade;
+        } else {
+            $grades[$userid]->rawgrade = null;
+        }
+    }
+
+    return grade_update('mod/attendance', $course->id, 'mod', 'attendance', $attendanceid, 0, $grades);
 }
 
 /**

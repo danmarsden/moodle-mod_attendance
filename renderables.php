@@ -516,7 +516,7 @@ class attendance_user_data implements renderable {
                 $this->filtercontrols = new attendance_filter_controls($att);
             }
 
-            $this->sessionslog = get_user_sessions_log_full($userid, $this->pageparams);
+            $this->sessionslog = attendance_get_user_sessions_log_full($userid, $this->pageparams);
 
             foreach ($this->sessionslog as $sessid => $sess) {
                 $this->sessionslog[$sessid]->cmid = $this->coursesatts[$sess->attendanceid]->cmid;
@@ -546,12 +546,145 @@ class attendance_user_data implements renderable {
     }
 
     /**
-     * url helper.
+     * Url function
+     * @param array $params
+     * @param array $excludeparams
      * @return moodle_url
      */
-    public function url() {
-        return new moodle_url($this->urlpath, $this->urlparams);
+    public function url($params=array(), $excludeparams=array()) {
+        $params = array_merge($this->urlparams, $params);
+
+        foreach ($excludeparams as $paramkey) {
+            unset($params[$paramkey]);
+        }
+
+        return new moodle_url($this->urlpath, $params);
     }
+
+    /**
+     * Take multiple sessions attendance from form data.
+     *
+     * @param stdClass $formdata
+     */
+    public function take_sessions_from_form_data($formdata) {
+        global $DB, $USER;
+        // TODO: WARNING - $formdata is unclean - comes from direct $_POST - ideally needs a rewrite but we do some cleaning below.
+        // This whole function could do with a nice clean up.
+
+        // XXX - replace this, see below
+        //$statuses = implode(',', array_keys( (array)$this->get_statuses() ));
+        $now = time();
+        $sesslog = array();
+        $formdata = (array)$formdata;
+        $dbstudlogs = array();
+        $updatedsessions = array();
+        $sessionatt = array();
+
+        foreach ($formdata as $key => $value) {
+            // Look at Remarks field because the user options may not be passed if empty.
+            if (substr($key, 0, 7) == 'remarks') {
+                $formlog = array();
+                $parts = explode('sess', substr($key, 7));
+                $stid = $parts[0];
+                if (!(is_numeric($stid))) { // Sanity check on $stid.
+                    print_error('nonnumericid', 'attendance');
+                }
+                $sessid = $parts[1];
+                if (!(is_numeric($sessid))) { // Sanity check on $sessid.
+                    print_error('nonnumericid', 'attendance');
+                }
+                $dbsession = $this->sessionslog[$sessid];
+
+                $context = context_module::instance($dbsession->cmid);
+                if (!has_capability('mod/attendance:takeattendances', $context)) {
+                    // How do we tell user about this?
+                    error_log("User without capability tried to take attendance for context, cmid:", $dbsession->cmid);
+                    continue;
+                }
+
+                $formkey = 'user'.$stid.'sess'.$sessid;
+                $attid = $dbsession->attendanceid;
+                $statusset = array_filter($this->statuses[$attid], function($x) use($dbsession) { return $x->setnumber === $dbsession->statusset; });
+                $sessionatt[$sessid] = $attid;
+                $formlog = new stdClass();
+                if (array_key_exists($formkey, $formdata) && is_numeric($formdata[$formkey])) {
+                    $formlog->statusid = $formdata[$formkey];
+                }
+                $formlog->studentid = $stid; // We check is_numeric on this above.
+                $formlog->statusset = implode(',', array_keys($statusset));
+                $formlog->remarks = $value;
+                $formlog->sessionid = $sessid;
+                $formlog->timetaken = $now;
+                $formlog->takenby = $USER->id;
+
+                if (!array_key_exists($stid, $sesslog)) {
+                    $sesslog[$stid] = array();
+                }
+                $sesslog[$stid][$sessid] = $formlog;
+            }
+        }
+
+        $updateatts = array();
+        foreach ($sesslog as $stid => $userlog) {
+            $dbstudlog = $DB->get_records('attendance_log', array('studentid' => $stid), '', 'sessionid,statusid,remarks,id,statusset');
+            foreach($userlog as $log) {
+                if (array_key_exists($log->sessionid, $dbstudlog)) {
+                    $attid = $sessionatt[$log->sessionid];
+                    // Check if anything important has changed before updating record.
+                    // Don't update timetaken/takenby records if nothing has changed.
+                    if ($dbstudlog[$log->sessionid]->remarks != $log->remarks ||
+                        $dbstudlog[$log->sessionid]->statusid != $log->statusid ||
+                        $dbstudlog[$log->sessionid]->statusset != $log->statusset) {
+                        
+                        $log->id = $dbstudlog[$log->sessionid]->id;
+                        $DB->update_record('attendance_log', $log);
+
+                        $updatedsessions[$log->sessionid] = $log->sessionid;
+                        if (!array_key_exists($attid, $updateatts)) {
+                            $updateatts[$attid] = array();
+                        }
+                        array_push($updateatts[$attid], $log->studentid);
+                    }
+                } else {
+                    $DB->insert_record('attendance_log', $log, false);
+                    $updatedsessions[$log->sessionid] = $log->sessionid;
+                    if (!array_key_exists($attid, $updateatts)) {
+                        $updateatts[$attid] = array();
+                    }
+                    array_push($updateatts[$attid], $log->studentid);
+                }
+            }
+        }
+
+        foreach ($updatedsessions as $sessionid) {
+            $session = $this->sessionslog[$sessionid];
+            $session->lasttaken = $now;
+            $session->lasttakenby = $USER->id;
+            $DB->update_record('attendance_sessions', $session);
+        }
+
+        if (!empty($updateatts)) {
+            $attendancegrade = $DB->get_records_list('attendance', 'id', array_keys($updateatts), '', 'id, grade');
+            foreach($updateatts as $attid => $updateusers) {
+                if ($attendancegrade[$attid] != 0) {
+                    attendance_update_users_grades_by_id($attid, $grade, $updateusers);
+                }
+            }
+        }
+
+        // Create url for link in log screen.
+        $params = $this->pageparams->get_significant_params();
+        // XXX - TODO
+        // Waiting for event for viewing user report(s) before creating derived event for editing.
+        /* $event = \mod_attendance\event\attendance_taken::create(array( */
+        /*     'objectid' => $this->id, */
+        /*     'context' => $this->context, */
+        /*     'other' => $params)); */
+        /* $event->add_record_snapshot('course_modules', $this->cm); */
+        /* $event->add_record_snapshot('attendance_sessions', $session); */
+        /* $event->trigger(); */
+    }
+    
 }
 
 /**
