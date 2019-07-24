@@ -74,7 +74,7 @@ class report_viewed extends \core\event\base {
      * @return \moodle_url
      */
     public function get_url() {
-        return new \moodle_url('/mod/attendance/report.php', array('id' => $this->objectid));
+        return new \moodle_url('/mod/attendance/report.php', array('id' => $this->contextinstanceid));
     }
 
     /**
@@ -83,7 +83,7 @@ class report_viewed extends \core\event\base {
      * @return array of parameters to be passed to legacy add_to_log() function.
      */
     protected function get_legacy_logdata() {
-        return array($this->courseid, 'attendance', 'report', 'report.php?id=' . $this->objectid,
+        return array($this->courseid, 'attendance', 'report', 'report.php?id=' . $this->contextinstanceid,
             $this->objectid, $this->contextinstanceid);
     }
 
