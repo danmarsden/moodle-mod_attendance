@@ -19,7 +19,7 @@ php:
 
 env:
   global:
-    - MOODLE_BRANCH=master
+    - MOODLE_BRANCH=MOODLE_37_STABLE
     - MUSTACHE_IGNORE_NAMES=mobile_teacher_form.mustache
   matrix:
     - DB=pgsql
