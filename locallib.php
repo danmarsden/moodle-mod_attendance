@@ -1139,7 +1139,6 @@ function attendance_generate_passwords($session) {
  * @param stdClass $session
  */
 function attendance_renderqrcoderotate($session) {
-    echo html_writer::tag('h3', get_string('qrcode', 'attendance'));
     // load requered js
     echo html_writer::tag('script', '',
         [
@@ -1153,12 +1152,17 @@ function attendance_renderqrcoderotate($session) {
             'type' => 'text/javascript'
         ]
     );
+    echo html_writer::tag('div', '', ['id' => 'rotate-time']); // div to display timer
+    echo html_writer::tag('h3', get_string('passwordgrp', 'attendance'));
+    echo html_writer::tag('div', '', ['id' => 'text-password']); // div to display password
+    echo html_writer::tag('h3', get_string('qrcode', 'attendance'));
     echo html_writer::tag('div', '', ['id' => 'qrcode']); // div to display qr code
     // js to start the password manager
     echo '
     <script type="text/javascript">
         let qrCodeRotate = new attendance_QRCodeRotate();
-        qrCodeRotate.start(' . $session->id . ', document.getElementById("qrcode"));
+        qrCodeRotate.start(' . $session->id . ', document.getElementById("qrcode"), document.getElementById("text-password"),
+        document.getElementById("rotate-time"));
     </script>';
 }
 

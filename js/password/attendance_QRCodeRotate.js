@@ -3,7 +3,7 @@
  * @copyright  2019 Maksud R
  * @package   mod_attendance
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * 
+ *
  */
 
 class attendance_QRCodeRotate {
@@ -15,9 +15,11 @@ class attendance_QRCodeRotate {
         this.qrCodeHTMLElement = "";
     }
 
-    start(sessionId, qrCodeHTMLElement) {
+    start(sessionId, qrCodeHTMLElement, textPasswordHTMLElement, timerHTMLElement) {
         this.sessionId = sessionId;
         this.qrCodeHTMLElement = qrCodeHTMLElement;
+        this.textPasswordHTMLElement = textPasswordHTMLElement;
+        this.timerHTMLElement = timerHTMLElement;
         this.fetchAndRotate();
     }
 
@@ -36,6 +38,12 @@ class attendance_QRCodeRotate {
         var qrcodeurl = document.URL.substr(0,document.URL.lastIndexOf('/')) + '/attendance.php?qrpass=' + password + '&sessid=' + this.sessionId;
         this.qrCodeInstance.clear();
         this.qrCodeInstance.makeCode(qrcodeurl);
+        // display new password
+        this.textPasswordHTMLElement.innerHTML = '<h2>'+password+'</h2>';
+    }
+
+    updateTimer(timeLeft) {
+        this.timerHTMLElement.innerHTML = '<h3>Time left: '+timeLeft+'</h3>';
     }
 
     startRotating() {
@@ -53,6 +61,8 @@ class attendance_QRCodeRotate {
                 location.reload(true);
             } else {
                 parent.changeQRCode(found.password);
+                parent.updateTimer(found.expirytime - Math.round(new Date().getTime() / 1000));
+
             }
 
         }, 1000);
