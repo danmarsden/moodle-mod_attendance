@@ -23,7 +23,8 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-require_once("$CFG->libdir/externallib.php");
+require_once($CFG->libdir . '/externallib.php');
+require_once($CFG->libdir . '/filelib.php');
 require_once(dirname(__FILE__).'/classes/attendance_webservices_handler.php');
 
 /**
@@ -32,6 +33,290 @@ require_once(dirname(__FILE__).'/classes/attendance_webservices_handler.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mod_wsattendance_external extends external_api {
+
+    /**
+     * Describes the parameters for add_attendance.
+     *
+     * @return external_function_parameters
+     */
+    public static function add_attendance_parameters() {
+        return new external_function_parameters(
+            array(
+                'courseid' => new external_value(PARAM_INT, 'course id'),
+                'name' => new external_value(PARAM_TEXT, 'attendance name'),
+                'intro' => new external_value(PARAM_RAW, 'attendance description', VALUE_DEFAULT, ''),
+                'groupmode' => new external_value(PARAM_INT, 'group mode (0 - no groups, 1 - separate groups, 2 - visible groups)', VALUE_DEFAULT, 0),
+            )
+        );
+    }
+
+    /**
+     * Adds attendance instance to course.
+     *
+     * @param int $courseid
+     * @param string $name
+     * @param string $intro
+     * @param int $groupmode
+     * @return array
+     */
+    public static function add_attendance(int $courseid, $name, $intro, int $groupmode) {
+        global $CFG, $DB;
+        require_once($CFG->dirroot.'/course/modlib.php');
+
+        $params = self::validate_parameters(self::add_attendance_parameters(), array(
+            'courseid' => $courseid,
+            'name' => $name,
+            'intro' => $intro,
+            'groupmode' => $groupmode,
+        ));
+
+        // Get course.
+        $course = $DB->get_record('course', array('id' => $params['courseid']), '*', MUST_EXIST);
+
+        // Verify permissions.
+        list($module, $context) = can_add_moduleinfo($course, 'attendance', 0);
+        self::validate_context($context);
+        require_capability('mod/attendance:addinstance', $context);
+
+        // Verify group mode.
+        if (!in_array($params['groupmode'], array(NOGROUPS, SEPARATEGROUPS, VISIBLEGROUPS))) {
+            throw new invalid_parameter_exception('Group mode is invalid.');
+        }
+
+        // Populate modinfo object.
+        $moduleinfo = new stdClass();
+        $moduleinfo->modulename = 'attendance';
+        $moduleinfo->module = $module->id;
+
+        $moduleinfo->name = $params['name'];
+        $moduleinfo->intro = $params['intro'];
+        $moduleinfo->introformat = FORMAT_HTML;
+
+        $moduleinfo->section = 0;
+        $moduleinfo->visible = 1;
+        $moduleinfo->visibleoncoursepage = 1;
+        $moduleinfo->cmidnumber = '';
+        $moduleinfo->groupmode = $params['groupmode'];
+        $moduleinfo->groupingid = 0;
+
+        // Add the module to the course.
+        $moduleinfo = add_moduleinfo($moduleinfo, $course);
+
+        return array('attendanceid' => $moduleinfo->instance);
+    }
+
+    /**
+     * Describes add_attendance return values.
+     *
+     * @return external_multiple_structure
+     */
+    public static function add_attendance_returns() {
+        return new external_single_structure(array(
+            'attendanceid' => new external_value(PARAM_INT, 'instance id of the created attendance'),
+        ));
+    }
+
+    /**
+     * Describes the parameters for remove_attendance.
+     *
+     * @return external_function_parameters
+     */
+    public static function remove_attendance_parameters() {
+        return new external_function_parameters(
+            array(
+                'attendanceid' => new external_value(PARAM_INT, 'attendance instance id'),
+            )
+        );
+    }
+
+    /**
+     * Remove attendance instance.
+     *
+     * @param int $attendanceid
+     */
+    public static function remove_attendance(int $attendanceid) {
+        $params = self::validate_parameters(self::remove_attendance_parameters(), array(
+            'attendanceid' => $attendanceid,
+        ));
+
+        $cm = get_coursemodule_from_instance('attendance', $params['attendanceid'], 0, false, MUST_EXIST);
+
+        // Check permissions.
+        $context = context_module::instance($cm->id);
+        self::validate_context($context);
+        require_capability('mod/attendance:manageattendances', $context);
+
+        // Delete attendance instance.
+        attendance_delete_instance($params['attendanceid']);
+        rebuild_course_cache($cm->course, true);
+    }
+
+    /**
+     * Describes remove_attendance return values.
+     *
+     * @return void
+     */
+    public static function remove_attendance_returns() {
+    }
+
+    /**
+     * Describes the parameters for add_session.
+     *
+     * @return external_function_parameters
+     */
+    public static function add_session_parameters() {
+        return new external_function_parameters(
+            array(
+                'attendanceid' => new external_value(PARAM_INT, 'attendance instance id'),
+                'description' => new external_value(PARAM_RAW, 'description', VALUE_DEFAULT, ''),
+                'sessiontime' => new external_value(PARAM_INT, 'session start timestamp'),
+                'duration' => new external_value(PARAM_INT, 'session duration (seconds)', VALUE_DEFAULT, 0),
+                'groupid' => new external_value(PARAM_INT, 'group id', VALUE_DEFAULT, 0),
+                'addcalendarevent' => new external_value(PARAM_BOOL, 'add calendar event', VALUE_DEFAULT, true),
+            )
+        );
+    }
+
+    /**
+     * Adds session to attendance instance.
+     *
+     * @param int $attendanceid
+     * @param string $description
+     * @param int $sessiontime
+     * @param int $duration
+     * @param int $groupid
+     * @param bool $addcalendarevent
+     * @return array
+     */
+    public static function add_session(int $attendanceid, $description, int $sessiontime, int $duration, int $groupid, bool $addcalendarevent) {
+        global $USER, $DB;
+
+        $params = self::validate_parameters(self::add_session_parameters(), array(
+            'attendanceid' => $attendanceid,
+            'description' => $description,
+            'sessiontime' => $sessiontime,
+            'duration' => $duration,
+            'groupid' => $groupid,
+            'addcalendarevent' => $addcalendarevent,
+        ));
+
+        $cm = get_coursemodule_from_instance('attendance', $params['attendanceid'], 0, false, MUST_EXIST);
+        $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
+        $attendance = $DB->get_record('attendance', array('id' => $cm->instance), '*', MUST_EXIST);
+
+        // Check permissions.
+        $context = context_module::instance($cm->id);
+        self::validate_context($context);
+        require_capability('mod/attendance:manageattendances', $context);
+
+        // Validate group.
+        $groupid = $params['groupid'];
+        $groupmode = (int)groups_get_activity_groupmode($cm);
+        if ($groupmode === NOGROUPS && $groupid > 0) {
+            throw new invalid_parameter_exception('Group id is specified, but group mode is disabled for activity');
+        } else if ($groupmode === SEPARATEGROUPS && $groupid === 0) {
+            throw new invalid_parameter_exception('Group id is not specified (or 0) in separate groups mode.');
+        }
+        if ($groupmode === SEPARATEGROUPS || ($groupmode === VISIBLEGROUPS && $groupid > 0)) {
+            // Determine valid groups
+            $userid = has_capability('moodle/site:accessallgroups', $context) ? 0 : $USER->id;
+            $validgroupids = array_map(function($group) {
+                return $group->id;
+            }, groups_get_all_groups($course->id, $userid, $cm->groupingid));
+            if (!in_array($groupid, $validgroupids)) {
+                throw new invalid_parameter_exception('Invalid group id');
+            }
+        }
+
+        // Get attendance.
+        $attendance = new mod_attendance_structure($attendance, $cm, $course, $context);
+
+        // Create session.
+        $sess = new stdClass();
+        $sess->sessdate = $params['sessiontime'];
+        $sess->duration = $params['duration'];
+        $sess->descriptionitemid = 0;
+        $sess->description = $params['description'];
+        $sess->descriptionformat = FORMAT_HTML;
+        $sess->calendarevent = (int) $params['addcalendarevent'];
+        $sess->timemodified = time();
+        $sess->studentscanmark = 0;
+        $sess->autoassignstatus = 0;
+        $sess->subnet = '';
+        $sess->studentpassword = '';
+        $sess->automark = 0;
+        $sess->automarkcompleted = 0;
+        $sess->absenteereport = get_config('attendance', 'absenteereport_default');
+        $sess->includeqrcode = 0;
+        $sess->subnet = $attendance->subnet;
+        $sess->statusset = 0;
+        $sess->groupid = $groupid;
+
+        $sessionid = $attendance->add_session($sess);
+        return array('sessionid' => $sessionid);
+    }
+
+    /**
+     * Describes add_session return values.
+     *
+     * @return external_multiple_structure
+     */
+    public static function add_session_returns() {
+        return new external_single_structure(array(
+            'sessionid' => new external_value(PARAM_INT, 'id of the created session'),
+        ));
+    }
+
+    /**
+     * Describes the parameters for remove_session.
+     *
+     * @return external_function_parameters
+     */
+    public static function remove_session_parameters() {
+        return new external_function_parameters(
+            array(
+                'sessionid' => new external_value(PARAM_INT, 'session id'),
+            )
+        );
+    }
+
+    /**
+     * Delete session from attendance instance.
+     *
+     * @param int $sessionid
+     * @return int $sessionid
+     */
+    public static function remove_session(int $sessionid) {
+        global $DB;
+
+        $params = self::validate_parameters(self::remove_session_parameters(),
+            array('sessionid' => $sessionid));
+
+        $session = $DB->get_record('attendance_sessions', array('id' => $params['sessionid']), '*', MUST_EXIST);
+        $attendance = $DB->get_record('attendance', array('id' => $session->attendanceid), '*', MUST_EXIST);
+        $cm = get_coursemodule_from_instance('attendance', $attendance->id, 0, false, MUST_EXIST);
+        $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
+
+        // Check permissions.
+        $context = context_module::instance($cm->id);
+        self::validate_context($context);
+        require_capability('mod/attendance:manageattendances', $context);
+
+        // Get attendance.
+        $attendance = new mod_attendance_structure($attendance, $cm, $course, $context);
+
+        // Delete session.
+        $attendance->delete_sessions(array($sessionid));
+        attendance_update_users_grade($attendance);
+    }
+
+    /**
+     * Describes remove_session return values.
+     *
+     * @return void
+     */
+    public static function remove_session_returns() {
+    }
 
     /**
      * Get parameter list.
@@ -48,7 +333,18 @@ class mod_wsattendance_external extends external_api {
      * @return array
      */
     public static function get_courses_with_today_sessions($userid) {
-        return attendance_handler::get_courses_with_today_sessions($userid);
+        global $DB;
+
+        $params = self::validate_parameters(self::get_courses_with_today_sessions_parameters(), array(
+            'userid' => $userid,
+        ));
+
+        // Check user id is valid.
+        $user = $DB->get_record('user', array('id' => $params['userid']), '*', MUST_EXIST);
+
+        // Capability check is done in get_courses_with_today_sessions
+        // as it switches contexts in loop for each course.
+        return attendance_handler::get_courses_with_today_sessions($params['userid']);
     }
 
     /**
@@ -114,6 +410,28 @@ class mod_wsattendance_external extends external_api {
      * @return mixed
      */
     public static function get_session($sessionid) {
+        global $DB;
+
+        $params = self::validate_parameters(self::get_session_parameters(), array(
+            'sessionid' => $sessionid,
+        ));
+
+        $session = $DB->get_record('attendance_sessions', array('id' => $params['sessionid']), '*', MUST_EXIST);
+        $attendance = $DB->get_record('attendance', array('id' => $session->attendanceid), '*', MUST_EXIST);
+        $cm = get_coursemodule_from_instance('attendance', $attendance->id, 0, false, MUST_EXIST);
+
+        // Check permissions.
+        $context = context_module::instance($cm->id);
+        self::validate_context($context);
+        $capabilities = array(
+            'mod/attendance:manageattendances',
+            'mod/attendance:takeattendances',
+            'mod/attendance:changeattendances'
+        );
+        if (!has_any_capability($capabilities, $context)) {
+            throw new invalid_parameter_exception('Invalid session id or no permissions.');
+        }
+
         return attendance_handler::get_session($sessionid);
     }
 
@@ -174,7 +492,28 @@ class mod_wsattendance_external extends external_api {
      * @param int $statusset
      */
     public static function update_user_status($sessionid, $studentid, $takenbyid, $statusid, $statusset) {
-        return attendance_handler::update_user_status($sessionid, $studentid, $takenbyid, $statusid, $statusset);
+        $params = self::validate_parameters(self::update_user_status_parameters(), array(
+            'sessionid' => $sessionid,
+            'studentid' => $studentid,
+            'takenbyid' => $takenbyid,
+            'statusid' => $statusid,
+            'statusset' => $statusset,
+        ));
+
+        // Make sure session is open for marking.
+        $session = $DB->get_record('attendance_sessions', array('id' => $params['sessionid']), '*', MUST_EXIST);
+        list($canmark, $reason) = attendance_can_student_mark($attforsession);
+        if (!$canmark) {
+            throw new invalid_parameter_exception($reason);
+        }
+
+        // Check user id is valid.
+        $student = $DB->get_record('user', array('id' => $params['studentid']), '*', MUST_EXIST);
+        $takenby = $DB->get_record('user', array('id' => $params['takenbyid']), '*', MUST_EXIST);
+
+        // TODO: Verify statusset and statusid.
+
+        return attendance_handler::update_user_status($params['sessionid'], $params['studentid'], $params['takenbyid'], $params['statusid'], $params['statusset']);
     }
 
     /**

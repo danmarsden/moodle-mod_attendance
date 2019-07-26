@@ -101,6 +101,12 @@ function attendance_add_instance($attendance) {
 
     $attendance->timemodified = time();
 
+    // Default grade (similar to what db fields defaults if no grade attribute is passed),
+    // but we need it in object for grading update.
+    if (!isset($attendance->grade)) {
+        $attendance->grade = 100;
+    }
+
     $attendance->id = $DB->insert_record('attendance', $attendance);
 
     att_add_default_statuses($attendance->id);
