@@ -78,6 +78,24 @@ if (isset($pageparams->studentid) && $USER->id != $pageparams->studentid) {
 }
 
 $userdata = new attendance_user_data($att, $userid);
+
+// Trigger viewed event
+
+// Create url for link in log screen.
+$filterparams = array(
+    'view' => $userdata->pageparams->view,
+    'curdate' => $userdata->pageparams->curdate,
+    'startdate' => $userdata->pageparams->startdate,
+    'enddate' => $userdata->pageparams->enddate
+);
+$params = array_merge($userdata->pageparams->get_significant_params(), $filterparams);
+$event = \mod_attendance\event\student_attendance_sessions_viewed::create(array(
+    'relateduserid' => $userdata->pageparams->studentid,
+    'context' => $context,
+    'other' => $params));
+$event->add_record_snapshot('course_modules', $cm);
+$event->trigger();
+
 $header = new mod_attendance_header($att);
 
 echo $output->header();
