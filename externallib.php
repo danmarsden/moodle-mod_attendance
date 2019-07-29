@@ -28,11 +28,11 @@ require_once($CFG->libdir . '/filelib.php');
 require_once(dirname(__FILE__).'/classes/attendance_webservices_handler.php');
 
 /**
- * Class mod_wsattendance_external
+ * Class mod_attendance_external
  * @copyright  2015 Caio Bressan Doneda
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_wsattendance_external extends external_api {
+class mod_attendance_external extends external_api {
 
     /**
      * Describes the parameters for add_attendance.
