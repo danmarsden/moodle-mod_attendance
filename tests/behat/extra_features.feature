@@ -182,16 +182,16 @@ Feature: Test the various new features in the attendance module
     And I click on "submitbutton" "button"
 
     When I click on "Take attendance" "link" in the "10AM" "table_row"
-    Then "Set status for all users to «Present»" "link" should exist
-    And "Set status for all users to «Late»" "link" should exist
-    And "Set status for all users to «Excused»" "link" should exist
-    And "Set status for all users to «Absent»" "link" should exist
+    Then "Set status to «Present»" "link" should exist
+    And "Set status to «Late»" "link" should exist
+    And "Set status to «Excused»" "link" should exist
+    And "Set status to «Absent»" "link" should exist
 
     When I follow "Sessions"
     And I click on "Take attendance" "link" in the "12PM" "table_row"
-    Then "Set status for all users to «Great»" "link" should exist
-    And "Set status for all users to «OK»" "link" should exist
-    And "Set status for all users to «Bad»" "link" should exist
+    Then "Set status to «Great»" "link" should exist
+    And "Set status to «OK»" "link" should exist
+    And "Set status to «Bad»" "link" should exist
 
   Scenario: A teacher can use the radio buttons to set attendance values for all users
     Given I log in as "teacher1"
