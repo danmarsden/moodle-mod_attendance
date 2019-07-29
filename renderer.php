@@ -649,7 +649,11 @@ class mod_attendance_renderer extends plugin_renderer_base {
         foreach ($extrasearchfields as $field) {
             $row->cells[] = '';
         }
-        $row->cells[] = html_writer::div(get_string('setallstatuses', 'attendance'), 'setallstatuses');
+        $row->cells[] = html_writer::div(get_string('setallstatuses', 'attendance').
+            " <select id='setallstatus-select'>
+                <option value='all'>all</option>
+                <option value='unselected'>unselected</option>
+            </select>", 'setallstatuses');
         foreach ($takedata->statuses as $st) {
             $attribs = array(
                 'id' => 'radiocheckstatus'.$st->id,
@@ -663,7 +667,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $PAGE->requires->js_amd_inline("
                 require(['jquery'], function($) {
                     $('#radiocheckstatus".$st->id."').click(function(e) {
-                        if (e.shiftKey) {
+                        if ($('#setallstatus-select').val() == 'all') {
                             $('#attendancetakeform').find('.st".$st->id."').prop('checked', true);
                         }
                         else {
@@ -727,6 +731,11 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $table->attributes['class'] = 'generaltable takegrid';
         $table->headspan = $takedata->pageparams->gridcols;
         $head = array();
+        $head[] = html_writer::div(get_string('setallstatuses', 'attendance').
+            " <select id='setallstatus-select'>
+                <option value='all'>all</option>
+                <option value='unselected'>unselected</option>
+            </select>", 'setallstatuses');
         foreach ($takedata->statuses as $st) {
             $head[] = html_writer::link("#", $st->acronym, array('id' => 'checkstatus'.$st->id,
                                               'title' => get_string('setallstatusesto', 'attendance', $st->description)));
@@ -734,7 +743,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $PAGE->requires->js_amd_inline("
                  require(['jquery'], function($) {
                      $('#checkstatus".$st->id."').click(function(e) {
-                         if (e.shiftKey) {
+                         if ($('#setallstatus-select').val() == 'unselected') {
                              $('#attendancetakeform').find('input:indeterminate.st".$st->id."').prop('checked', true);
                          }
                          else {
