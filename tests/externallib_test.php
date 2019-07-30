@@ -241,7 +241,7 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
         $this->assertCount(0, $DB->get_records('attendance', ['course' => $course->id]));
 
         // Create attendance.
-        $result = mod_wsattendance_external::add_attendance($course->id, 'test', 'test', NOGROUPS);
+        $result = mod_attendance_external::add_attendance($course->id, 'test', 'test', NOGROUPS);
 
         // Check attendance exist.
         $this->assertCount(1, $DB->get_records('attendance', ['course' => $course->id]));
@@ -254,7 +254,7 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
         $this->assertEquals($groupmode, NOGROUPS);
 
         // Create attendance with "separate groups" group mode.
-        $result = mod_wsattendance_external::add_attendance($course->id, 'testsepgrp', 'testsepgrp', SEPARATEGROUPS);
+        $result = mod_attendance_external::add_attendance($course->id, 'testsepgrp', 'testsepgrp', SEPARATEGROUPS);
 
         // Check attendance exist.
         $this->assertCount(2, $DB->get_records('attendance', ['course' => $course->id]));
@@ -268,7 +268,7 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
 
         // Create attendance with wrong group mode.
         $this->expectException('invalid_parameter_exception');
-        $result = mod_wsattendance_external::add_attendance($course->id, 'test1', 'test1', 100);
+        $result = mod_attendance_external::add_attendance($course->id, 'test1', 'test1', 100);
     }
 
     public function test_remove_attendance() {
@@ -286,7 +286,7 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
         $this->assertCount(1, $DB->get_records('attendance_sessions', ['attendanceid' => $this->attendance->id]));
 
         // Remove attendance.
-        mod_wsattendance_external::remove_attendance($this->attendance->id);
+        mod_attendance_external::remove_attendance($this->attendance->id);
 
         // Check attendance removed.
         $this->assertCount(0, $DB->get_records('attendance', ['course' => $this->course->id]));
@@ -307,29 +307,29 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
         $this->setUser($teacher);
 
         // Create attendances.
-        $attendancenogroups = mod_wsattendance_external::add_attendance($course->id, 'nogroups', 'test', NOGROUPS);
-        $attendancesepgroups = mod_wsattendance_external::add_attendance($course->id, 'sepgroups', 'test', SEPARATEGROUPS);
-        $attendancevisgroups = mod_wsattendance_external::add_attendance($course->id, 'visgroups', 'test', VISIBLEGROUPS);
+        $attendancenogroups = mod_attendance_external::add_attendance($course->id, 'nogroups', 'test', NOGROUPS);
+        $attendancesepgroups = mod_attendance_external::add_attendance($course->id, 'sepgroups', 'test', SEPARATEGROUPS);
+        $attendancevisgroups = mod_attendance_external::add_attendance($course->id, 'visgroups', 'test', VISIBLEGROUPS);
 
         // Check attendances exist.
         $this->assertCount(3, $DB->get_records('attendance', ['course' => $course->id]));
 
         // Create session with group in "no groups" attendance.
         $this->expectException('invalid_parameter_exception');
-        mod_wsattendance_external::add_session($attendancenogroups['attendanceid'], 'test', time(), 3600, $group->id, false);
+        mod_attendance_external::add_session($attendancenogroups['attendanceid'], 'test', time(), 3600, $group->id, false);
 
         // Create session with no group in "separate groups" attendance.
         $this->expectException('invalid_parameter_exception');
-        mod_wsattendance_external::add_session($attendancesepgroups['attendanceid'], 'test', time(), 3600, 0, false);
+        mod_attendance_external::add_session($attendancesepgroups['attendanceid'], 'test', time(), 3600, 0, false);
 
         // Create session with invalid group in "visible groups" attendance.
         $this->expectException('invalid_parameter_exception');
-        mod_wsattendance_external::add_session($attendancevisgroups['attendanceid'], 'test', time(), 3600, $group->id + 100, false);
+        mod_attendance_external::add_session($attendancevisgroups['attendanceid'], 'test', time(), 3600, $group->id + 100, false);
 
         // Create session and validate record.
         $time = time();
         $duration = 3600;
-        $result = mod_wsattendance_external::add_session($attendancesepgroups['attendanceid'],
+        $result = mod_attendance_external::add_session($attendancesepgroups['attendanceid'],
             'testsession', $time, $duration, $group->id, true);
 
         $this->assertCount(1, $DB->get_records('attendance_sessions', ['id' => $result['sessionid']]));
@@ -355,23 +355,23 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
         $this->setUser($teacher);
 
         // Create attendance.
-        $attendance = mod_wsattendance_external::add_attendance($course->id, 'test', 'test', NOGROUPS);
+        $attendance = mod_attendance_external::add_attendance($course->id, 'test', 'test', NOGROUPS);
 
         // Check attendance exist.
         $this->assertCount(1, $DB->get_records('attendance', ['course' => $course->id]));
 
         // Create session.
-        $result0 = mod_wsattendance_external::add_session($attendance['attendanceid'], 'test0', time(), 3600, 0, false);
-        $result1 = mod_wsattendance_external::add_session($attendance['attendanceid'], 'test1', time(), 3600, 0, false);
+        $result0 = mod_attendance_external::add_session($attendance['attendanceid'], 'test0', time(), 3600, 0, false);
+        $result1 = mod_attendance_external::add_session($attendance['attendanceid'], 'test1', time(), 3600, 0, false);
 
         $this->assertCount(2, $DB->get_records('attendance_sessions', ['attendanceid' => $attendance['attendanceid']]));
 
         // Delete session 0.
-        mod_wsattendance_external::remove_session($result0['sessionid']);
+        mod_attendance_external::remove_session($result0['sessionid']);
         $this->assertCount(1, $DB->get_records('attendance_sessions', ['attendanceid' => $attendance['attendanceid']]));
 
         // Delete session 1.
-        mod_wsattendance_external::remove_session($result1['sessionid']);
+        mod_attendance_external::remove_session($result1['sessionid']);
         $this->assertCount(0, $DB->get_records('attendance_sessions', ['attendanceid' => $attendance['attendanceid']]));
     }
 
@@ -388,7 +388,7 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
         $this->setUser($teacher);
 
         // Create attendance.
-        $attendance = mod_wsattendance_external::add_attendance($course->id, 'test', 'test', NOGROUPS);
+        $attendance = mod_attendance_external::add_attendance($course->id, 'test', 'test', NOGROUPS);
 
         // Check attendance exist.
         $this->assertCount(1, $DB->get_records('attendance', ['course' => $course->id]));
@@ -397,7 +397,7 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
         $sink = $this->redirectEvents();
 
         // Create session with no calendar event.
-        mod_wsattendance_external::add_session($attendance['attendanceid'], 'test0', time(), 3600, 0, false);
+        mod_attendance_external::add_session($attendance['attendanceid'], 'test0', time(), 3600, 0, false);
 
         // Capture the event.
         $events = $sink->get_events();
@@ -408,7 +408,7 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
         $this->assertInstanceOf('\mod_attendance\event\session_added', $events[0]);
 
         // Create session with calendar event.
-        mod_wsattendance_external::add_session($attendance['attendanceid'], 'test0', time(), 3600, 0, true);
+        mod_attendance_external::add_session($attendance['attendanceid'], 'test0', time(), 3600, 0, true);
 
         // Capture the event.
         $events = $sink->get_events();

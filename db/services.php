@@ -26,50 +26,50 @@ defined('MOODLE_INTERNAL') || die();
 
 $functions = array(
     'mod_attendance_add_attendance' => array(
-        'classname'    => 'mod_wsattendance_external',
+        'classname'    => 'mod_attendance_external',
         'methodname'   => 'add_attendance',
         'classpath'    => 'mod/attendance/externallib.php',
         'description'  => 'Add attendance instance to course.',
         'type'         => 'write',
     ),
     'mod_attendance_remove_attendance' => array(
-        'classname'    => 'mod_wsattendance_external',
+        'classname'    => 'mod_attendance_external',
         'methodname'   => 'remove_attendance',
         'classpath'    => 'mod/attendance/externallib.php',
         'description'  => 'Delete attendance instance.',
         'type'         => 'write',
     ),
     'mod_attendance_add_session' => array(
-        'classname'    => 'mod_wsattendance_external',
+        'classname'    => 'mod_attendance_external',
         'methodname'   => 'add_session',
         'classpath'    => 'mod/attendance/externallib.php',
         'description'  => 'Add a new session.',
         'type'         => 'write',
     ),
     'mod_attendance_remove_session' => array(
-        'classname'    => 'mod_wsattendance_external',
+        'classname'    => 'mod_attendance_external',
         'methodname'   => 'remove_session',
         'classpath'    => 'mod/attendance/externallib.php',
         'description'  => 'Delete a session.',
         'type'         => 'write',
     ),
-    'mod_wsattendance_get_courses_with_today_sessions' => array(
-        'classname'   => 'mod_wsattendance_external',
+    'mod_attendance_get_courses_with_today_sessions' => array(
+        'classname'   => 'mod_attendance_external',
         'methodname'  => 'get_courses_with_today_sessions',
         'classpath'   => 'mod/attendance/externallib.php',
         'description' => 'Method that retrieves courses with today sessions of a teacher.',
         'type'        => 'read',
     ),
-    'mod_wsattendance_get_session' => array(
-        'classname'   => 'mod_wsattendance_external',
+    'mod_attendance_get_session' => array(
+        'classname'   => 'mod_attendance_external',
         'methodname'  => 'get_session',
         'classpath'   => 'mod/attendance/externallib.php',
         'description' => 'Method that retrieves the session data',
         'type'        => 'read',
     ),
 
-    'mod_wsattendance_update_user_status' => array(
-        'classname'   => 'mod_wsattendance_external',
+    'mod_attendance_update_user_status' => array(
+        'classname'   => 'mod_attendance_external',
         'methodname'  => 'update_user_status',
         'classpath'   => 'mod/attendance/externallib.php',
         'description' => 'Method that updates the user status in a session.',
@@ -86,12 +86,12 @@ $services = array(
             'mod_attendance_remove_attendance',
             'mod_attendance_add_session',
             'mod_attendance_remove_session',
-            'mod_wsattendance_get_courses_with_today_sessions',
-            'mod_wsattendance_get_session',
-            'mod_wsattendance_update_user_status'
+            'mod_attendance_get_courses_with_today_sessions',
+            'mod_attendance_get_session',
+            'mod_attendance_update_user_status'
         ),
         'restrictedusers' => 0,
         'enabled' => 1,
-        'shortname' => 'mod_attendance_ws'
+        'shortname' => 'mod_attendance'
     )
 );
