@@ -89,7 +89,7 @@ $filterparams = array(
     'enddate' => $userdata->pageparams->enddate
 );
 $params = array_merge($userdata->pageparams->get_significant_params(), $filterparams);
-$event = \mod_attendance\event\student_attendance_sessions_viewed::create(array(
+$event = \mod_attendance\event\session_report_viewed::create(array(
     'relateduserid' => $userdata->pageparams->studentid,
     'context' => $context,
     'other' => $params));

@@ -18,7 +18,7 @@
  * This file contains an event for when a student's attendance report is viewed.
  *
  * @package    mod_attendance
- * @copyright  2014 onwards Dan Marsden
+ * @copyright  2019 Nick Phillips
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -35,11 +35,10 @@ defined('MOODLE_INTERNAL') || die();
  *      string mode Mode of the report viewed.
  * }
  * @package    mod_attendance
- * @since      Moodle 2.7
- * @copyright  2013 onwards Dan Marsden
+ * @copyright  2019 Nick Phillips
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class student_attendance_sessions_viewed extends \core\event\base {
+class session_report_viewed extends \core\event\base {
 
     /**
      * Init method.
@@ -75,9 +74,11 @@ class student_attendance_sessions_viewed extends \core\event\base {
      * @return \moodle_url
      */
     public function get_url() {
+        // Mode is optional.
+        $mode = empty($this->other['mode']) ? "" : $this->other['mode'];
         return new \moodle_url('/mod/attendance/view.php', array('id' => $this->contextinstanceid,
                                                                  'studentid' => $this->relateduserid,
-                                                                 'mode' => $this->other['mode'],
+                                                                 'mode' => $mode,
                                                                  'view' => $this->other['view'],
                                                                  'curdate' => $this->other['curdate']));
     }
