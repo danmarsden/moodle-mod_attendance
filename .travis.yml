@@ -10,7 +10,6 @@ addons:
   postgresql: "9.4"
   apt:
     packages:
-      - openjdk-8-jre-headless
 
 cache:
   directories:
