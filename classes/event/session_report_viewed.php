@@ -119,17 +119,17 @@ class session_report_viewed extends \core\event\base {
      */
     protected function validate_data() {
         if (!isset($this->relateduserid)) {
-            throw new \coding_exception('The event mod_attendance\\event\\student_attendance_sessions_viewed must specify relateduserid.');
+            throw new \coding_exception('The event mod_attendance\\event\\session_report_viewed must specify relateduserid.');
         }
         // view params can be left out as defaults will be the same when log event is viewed as when
         // it was stored.
         // filter params are important, but stored in session so default effectively unknown,
         // hence required here.
         if (!isset($this->other['view'])) {
-            throw new \coding_exception('The event mod_attendance\\event\\student_attendance_sessions_viewed must specify view.');
+            throw new \coding_exception('The event mod_attendance\\event\\session_report_viewed must specify view.');
         }
         if (!isset($this->other['curdate'])) {
-            throw new \coding_exception('The event mod_attendance\\event\\student_attendance_sessions_viewed must specify curdate.');
+            throw new \coding_exception('The event mod_attendance\\event\\session_report_viewed must specify curdate.');
         }
         parent::validate_data();
     }

@@ -89,8 +89,13 @@ $filterparams = array(
     'enddate' => $userdata->pageparams->enddate
 );
 $params = array_merge($userdata->pageparams->get_significant_params(), $filterparams);
+if (empty($userdata->pageparams->studentid)) {
+    $relateduserid = $USER->id;
+} else {
+    $relateduserid = $userdata->pageparams->studentid;
+}
 $event = \mod_attendance\event\session_report_viewed::create(array(
-    'relateduserid' => $userdata->pageparams->studentid,
+    'relateduserid' => $relateduserid,
     'context' => $context,
     'other' => $params));
 $event->add_record_snapshot('course_modules', $cm);
