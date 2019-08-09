@@ -111,7 +111,7 @@ class mod_attendance_structure {
      * @param stdClass $dbrecord Attandance instance data from {attendance} table
      * @param stdClass $cm       Course module record as returned by {@link get_coursemodule_from_id()}
      * @param stdClass $course   Course record from {course} table
-     * @param stdClass $context  The context of the workshop instance
+     * @param stdClass $context  The context of the attendance instance
      * @param stdClass $pageparams
      */
     public function __construct(stdClass $dbrecord, stdClass $cm, stdClass $course, stdClass $context=null, $pageparams=null) {
