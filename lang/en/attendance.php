@@ -236,6 +236,7 @@ $string['eventsessionupdated'] = 'Session updated';
 $string['eventstatusadded'] = 'Status added';
 $string['eventstatusupdated'] = 'Status updated';
 $string['eventstudentattendancesessionsviewed'] = 'Session report viewed';
+$string['eventstudentattendancesessionsupdated'] = 'Session report updated';
 $string['eventtaken'] = 'Attendance taken';
 $string['eventtakenbystudent'] = 'Attendance taken by student';
 $string['export'] = 'Export';

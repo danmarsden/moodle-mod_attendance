@@ -84,26 +84,37 @@ $filterparams = array(
     'enddate' => $userdata->pageparams->enddate
 );
 $params = array_merge($userdata->pageparams->get_significant_params(), $filterparams);
+
+$header = new mod_attendance_header($att);
+
 if (empty($userdata->pageparams->studentid)) {
     $relateduserid = $USER->id;
 } else {
     $relateduserid = $userdata->pageparams->studentid;
 }
 
-// Trigger viewed event.
-$event = \mod_attendance\event\session_report_viewed::create(array(
-    'relateduserid' => $relateduserid,
-    'context' => $context,
-    'other' => $params));
-$event->add_record_snapshot('course_modules', $cm);
-$event->trigger();
-
-$header = new mod_attendance_header($att);
-
 if (($formdata = data_submitted()) && confirm_sesskey()) {
     $userdata->take_sessions_from_form_data($formdata);
 
+    // Trigger updated event
+    $event = \mod_attendance\event\session_report_updated::create(array(
+        'relateduserid' => $relateduserid,
+        'context' => $context,
+        'other' => $params));
+    $event->add_record_snapshot('course_modules', $cm);
+    //$event->add_record_snapshot('user', $);
+    $event->trigger();
+
     redirect($url, get_string('attendancesuccess', 'attendance'));
+}
+else {
+    // Trigger viewed event
+    $event = \mod_attendance\event\session_report_viewed::create(array(
+        'relateduserid' => $relateduserid,
+        'context' => $context,
+        'other' => $params));
+    $event->add_record_snapshot('course_modules', $cm);
+    $event->trigger();
 }
 
 $PAGE->set_title($course->shortname. ": ".$att->name);

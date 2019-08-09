@@ -571,8 +571,6 @@ class attendance_user_data implements renderable {
         // TODO: WARNING - $formdata is unclean - comes from direct $_POST - ideally needs a rewrite but we do some cleaning below.
         // This whole function could do with a nice clean up.
 
-        // XXX - replace this, see below
-        //$statuses = implode(',', array_keys( (array)$this->get_statuses() ));
         $now = time();
         $sesslog = array();
         $formdata = (array)$formdata;
@@ -671,20 +669,7 @@ class attendance_user_data implements renderable {
                 }
             }
         }
-
-        // Create url for link in log screen.
-        $params = $this->pageparams->get_significant_params();
-        // XXX - TODO
-        // Waiting for event for viewing user report(s) before creating derived event for editing.
-        /* $event = \mod_attendance\event\attendance_taken::create(array( */
-        /*     'objectid' => $this->id, */
-        /*     'context' => $this->context, */
-        /*     'other' => $params)); */
-        /* $event->add_record_snapshot('course_modules', $this->cm); */
-        /* $event->add_record_snapshot('attendance_sessions', $session); */
-        /* $event->trigger(); */
     }
-    
 }
 
 /**
