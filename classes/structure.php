@@ -23,7 +23,9 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
+global $CFG; // This class is included inside existing functions.
 require_once(dirname(__FILE__) . '/calendar_helpers.php');
+require_once($CFG->libdir .'/filelib.php');
 
 /**
  * Main class with all Attendance related info.
