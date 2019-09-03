@@ -786,7 +786,7 @@ class mod_attendance_structure {
         $fields = array_merge($fields, $extrafields);
 
         $userfields = user_picture::fields('u', $fields);
-        $userfields_extended = implode(',', array_unique(explode(',', str_replace(' ', '', $userfields.',u.id, u.firstname, u.lastname, u.email'))));
+        $userfieldsextended = implode(',', array_unique(explode(',', str_replace(' ', '', $userfields.',u.id, u.firstname, u.lastname, u.email'))));
 
         if (empty($this->pageparams->sort)) {
             $this->pageparams->sort = ATT_SORT_DEFAULT;
@@ -809,7 +809,7 @@ class mod_attendance_structure {
                     $groups = $groupid;
                 }
                 $users = get_users_by_capability($this->context, 'mod/attendance:canbelisted',
-                    $userfields_extended,
+                    $userfieldsextended,
                     $orderby, $startusers, $usersperpage, $groups,
                     '', false, true);
             } else {
@@ -825,7 +825,7 @@ class mod_attendance_structure {
                     $groups = $groupid;
                 }
                 $users = get_users_by_capability($this->context, 'mod/attendance:canbelisted',
-                    $userfields_extended,
+                    $userfieldsextended,
                     $orderby, '', '', $groups,
                     '', false, true);
             } else {
