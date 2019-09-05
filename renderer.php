@@ -599,6 +599,26 @@ class mod_attendance_renderer extends plugin_renderer_base {
     }
 
     /**
+     * Render statusdropdown
+     *
+     * @param string $preference
+     * @return string
+     */
+    private function render_statusdropdown($preference) {
+        if ($preference == 'unselected') {
+            return " <select id='setallstatus-select'>
+                <option value='all'>".get_string('statusall', 'attendance')."</option>
+                <option selected value='unselected'>".get_string('statusunselected', 'attendance')."</option>
+            </select>";
+        } else {
+            return " <select id='setallstatus-select'>
+                <option selected value='all'>".get_string('statusall', 'attendance')."</option>
+                <option value='unselected'>".get_string('statusunselected', 'attendance')."</option>
+            </select>";
+        }
+    }
+
+    /**
      * Render take list.
      *
      * @param attendance_take_data $takedata
@@ -653,17 +673,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $row->cells[] = '';
         }
 
-        if (get_user_preferences('mod_attendance_statusdropdown') == 'unselected') {
-            $selectmenu = " <select id='setallstatus-select'>
-                <option value='all'>all</option>
-                <option selected value='unselected'>unselected</option>
-            </select>";
-        } else {
-            $selectmenu = " <select id='setallstatus-select'>
-                <option selected value='all'>all</option>
-                <option value='unselected'>unselected</option>
-            </select>";
-        }
+        $selectmenu = $this->render_statusdropdown(get_user_preferences('mod_attendance_statusdropdown'));
 
         $row->cells[] = html_writer::div(get_string('setallstatuses', 'attendance').
             $selectmenu, 'setallstatuses');
@@ -746,17 +756,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $table->attributes['class'] = 'generaltable takegrid';
         $table->headspan = $takedata->pageparams->gridcols;
 
-        if (get_user_preferences('mod_attendance_statusdropdown') == 'unselected') {
-            $selectmenu = " <select id='setallstatus-select'>
-                <option value='all'>all</option>
-                <option selected value='unselected'>unselected</option>
-            </select>";
-        } else {
-            $selectmenu = " <select id='setallstatus-select'>
-                <option selected value='all'>all</option>
-                <option value='unselected'>unselected</option>
-            </select>";
-        }
+        $selectmenu = $this->render_statusdropdown(get_user_preferences('mod_attendance_statusdropdown'));
 
         $head = array();
         $head[] = html_writer::div(get_string('setallstatuses', 'attendance').
