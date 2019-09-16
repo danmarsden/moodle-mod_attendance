@@ -458,7 +458,7 @@ function attendance_can_student_mark($sess, $log = true) {
             $record = $DB->get_record_select('attendance_log', $sql, $params);
         } else {
             // Assume ATTENDANCE_SHAREDIP_FORCED.
-            $sql = 'sessionid = ? AND studentid <> ? ipaddress = ?';
+            $sql = 'sessionid = ? AND studentid <> ? AND ipaddress = ?';
             $params = array($sess->id, $USER->id, getremoteaddr());
             $record = $DB->get_record_select('attendance_log', $sql, $params);
         }
