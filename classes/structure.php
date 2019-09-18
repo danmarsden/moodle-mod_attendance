@@ -808,7 +808,7 @@ class mod_attendance_structure {
                     $groups = $groupid;
                 }
                 $users = get_users_by_capability($this->context, 'mod/attendance:canbelisted',
-                    $userfields.',u.id, u.firstname, u.lastname, u.email',
+                    $userfields,
                     $orderby, $startusers, $usersperpage, $groups,
                     '', false, true);
             } else {
@@ -824,7 +824,7 @@ class mod_attendance_structure {
                     $groups = $groupid;
                 }
                 $users = get_users_by_capability($this->context, 'mod/attendance:canbelisted',
-                    $userfields.',u.id, u.firstname, u.lastname, u.email',
+                    $userfields,
                     $orderby, '', '', $groups,
                     '', false, true);
             } else {
