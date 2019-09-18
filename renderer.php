@@ -667,16 +667,16 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
         // Show a 'select all' row of radio buttons.
         $row = new html_table_row();
-        $row->cells[] = '';
         $row->attributes['class'] = 'setallstatusesrow';
         foreach ($extrasearchfields as $field) {
             $row->cells[] = '';
         }
 
         $selectmenu = $this->render_statusdropdown(get_user_preferences('mod_attendance_statusdropdown'));
-
-        $row->cells[] = html_writer::div(get_string('setallstatuses', 'attendance').
-            $selectmenu, 'setallstatuses');
+        $cell = new html_table_cell(html_writer::div(get_string('setallstatuses', 'attendance').
+            $selectmenu, 'setallstatuses'));
+        $cell->colspan = 2;
+        $row->cells[] = $cell;
         foreach ($takedata->statuses as $st) {
             $attribs = array(
                 'id' => 'radiocheckstatus'.$st->id,
