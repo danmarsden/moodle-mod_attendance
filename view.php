@@ -79,8 +79,6 @@ if (isset($pageparams->studentid) && $USER->id != $pageparams->studentid) {
 
 $userdata = new attendance_user_data($att, $userid);
 
-// Trigger viewed event
-
 // Create url for link in log screen.
 $filterparams = array(
     'view' => $userdata->pageparams->view,
@@ -94,6 +92,8 @@ if (empty($userdata->pageparams->studentid)) {
 } else {
     $relateduserid = $userdata->pageparams->studentid;
 }
+
+// Trigger viewed event.
 $event = \mod_attendance\event\session_report_viewed::create(array(
     'relateduserid' => $relateduserid,
     'context' => $context,
