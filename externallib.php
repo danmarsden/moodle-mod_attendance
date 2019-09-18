@@ -45,7 +45,8 @@ class mod_attendance_external extends external_api {
                 'courseid' => new external_value(PARAM_INT, 'course id'),
                 'name' => new external_value(PARAM_TEXT, 'attendance name'),
                 'intro' => new external_value(PARAM_RAW, 'attendance description', VALUE_DEFAULT, ''),
-                'groupmode' => new external_value(PARAM_INT, 'group mode (0 - no groups, 1 - separate groups, 2 - visible groups)', VALUE_DEFAULT, 0),
+                'groupmode' => new external_value(PARAM_INT,
+                    'group mode (0 - no groups, 1 - separate groups, 2 - visible groups)', VALUE_DEFAULT, 0),
             )
         );
     }
@@ -188,7 +189,8 @@ class mod_attendance_external extends external_api {
      * @param bool $addcalendarevent
      * @return array
      */
-    public static function add_session(int $attendanceid, $description, int $sessiontime, int $duration, int $groupid, bool $addcalendarevent) {
+    public static function add_session(int $attendanceid, $description, int $sessiontime, int $duration, int $groupid,
+                                       bool $addcalendarevent) {
         global $USER, $DB;
 
         $params = self::validate_parameters(self::add_session_parameters(), array(
@@ -218,7 +220,7 @@ class mod_attendance_external extends external_api {
             throw new invalid_parameter_exception('Group id is not specified (or 0) in separate groups mode.');
         }
         if ($groupmode === SEPARATEGROUPS || ($groupmode === VISIBLEGROUPS && $groupid > 0)) {
-            // Determine valid groups
+            // Determine valid groups.
             $userid = has_capability('moodle/site:accessallgroups', $context) ? 0 : $USER->id;
             $validgroupids = array_map(function($group) {
                 return $group->id;

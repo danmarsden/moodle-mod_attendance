@@ -44,15 +44,15 @@ if ($attforsession->rotateqrcode == 1) {
     $secrethash = md5($USER->id.$attforsession->rotateqrcodesecret);
     $url = new moodle_url('/mod/attendance/view.php', array('id' => $cm->id));
 
-    // Check if cookie is set and verify
+    // Check if cookie is set and verify.
     if (isset($_COOKIE[$cookiename])) {
-        // Check the token
+        // Check the token.
         if ($secrethash !== $_COOKIE[$cookiename]) {
-            // Flag error
+            // Flag error.
             print_error('qr_cookie_error', 'mod_attendance', $url);
         }
     } else {
-        // Check password
+        // Check password.
         $sql = 'SELECT * FROM {attendance_rotate_passwords}'.
                 ' WHERE attendanceid = ? AND expirytime > ? ORDER BY expirytime ASC LIMIT 2';
         $qrpassdatabase = $DB->get_records_sql($sql, ['attendanceid' => $id, time() - $attconfig->rotateqrcodeexpirymargin]);
@@ -66,10 +66,10 @@ if ($attforsession->rotateqrcode == 1) {
         }
 
         if ($qrpassflag) {
-            // Create and store the token
+            // Create and store the token.
             setcookie($cookiename, $secrethash, time() + (60 * 5), "/");
         } else {
-            // Flag error
+            // Flag error.
             print_error('qr_pass_wrong', 'mod_attendance', $url);
         }
     }

@@ -46,7 +46,7 @@ class session_report_viewed extends \core\event\base {
     protected function init() {
         $this->data['crud'] = 'r';
         $this->data['edulevel'] = self::LEVEL_TEACHING;
-        // objecttable and objectid can't be meaningfully specified
+        // Objecttable and objectid can't be meaningfully specified.
     }
 
     /**
@@ -121,7 +121,7 @@ class session_report_viewed extends \core\event\base {
         if (!isset($this->relateduserid)) {
             throw new \coding_exception('The event mod_attendance\\event\\session_report_viewed must specify relateduserid.');
         }
-        // view params can be left out as defaults will be the same when log event is viewed as when
+        // View params can be left out as defaults will be the same when log event is viewed as when
         // it was stored.
         // filter params are important, but stored in session so default effectively unknown,
         // hence required here.

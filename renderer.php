@@ -1176,7 +1176,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
                         $output .= html_writer::empty_tag('input', array('type' => 'submit',
                                 'value' => get_string('submit'),
                                 'class' => 'btn btn-secondary'));
-                        $cell = new html_table_cell(html_writer::tag('form', $output, array('action' => $url->out(), 'method' => 'get')));
+                        $cell = new html_table_cell(html_writer::tag('form', $output,
+                            array('action' => $url->out(), 'method' => 'get')));
                     } else {
                         // Student can mark their own attendance.
                         // URL to the page that lets the student modify their attendance.
