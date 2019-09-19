@@ -148,16 +148,18 @@ class mod_attendance_external extends external_api {
         require_capability('mod/attendance:manageattendances', $context);
 
         // Delete attendance instance.
-        attendance_delete_instance($params['attendanceid']);
+        $result = attendance_delete_instance($params['attendanceid']);
         rebuild_course_cache($cm->course, true);
+        return $result;
     }
 
     /**
      * Describes remove_attendance return values.
      *
-     * @return void
+     * @return external_value
      */
     public static function remove_attendance_returns() {
+        return new external_value(PARAM_BOOL, 'attendance deletion result');
     }
 
     /**
@@ -286,7 +288,7 @@ class mod_attendance_external extends external_api {
      * Delete session from attendance instance.
      *
      * @param int $sessionid
-     * @return int $sessionid
+     * @return bool
      */
     public static function remove_session(int $sessionid) {
         global $DB;
@@ -310,14 +312,17 @@ class mod_attendance_external extends external_api {
         // Delete session.
         $attendance->delete_sessions(array($sessionid));
         attendance_update_users_grade($attendance);
+
+        return true;
     }
 
     /**
      * Describes remove_session return values.
      *
-     * @return void
+     * @return external_value
      */
     public static function remove_session_returns() {
+        return new external_value(PARAM_BOOL, 'attendance session deletion result');
     }
 
     /**
