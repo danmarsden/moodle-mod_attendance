@@ -494,6 +494,8 @@ class mod_attendance_external extends external_api {
      * @param int $statusset
      */
     public static function update_user_status($sessionid, $studentid, $takenbyid, $statusid, $statusset) {
+        global $DB;
+
         $params = self::validate_parameters(self::update_user_status_parameters(), array(
             'sessionid' => $sessionid,
             'studentid' => $studentid,
@@ -502,11 +504,20 @@ class mod_attendance_external extends external_api {
             'statusset' => $statusset,
         ));
 
-        // Make sure session is open for marking.
         $session = $DB->get_record('attendance_sessions', array('id' => $params['sessionid']), '*', MUST_EXIST);
-        list($canmark, $reason) = attendance_can_student_mark($attforsession);
-        if (!$canmark) {
-            throw new invalid_parameter_exception($reason);
+        $cm = get_coursemodule_from_instance('attendance', $session->attendanceid, 0, false, MUST_EXIST);
+
+        // Check permissions.
+        $context = context_module::instance($cm->id);
+        self::validate_context($context);
+        require_capability('mod/attendance:view', $context);
+
+        // If not a teacher, make sure session is open for self-marking.
+        if (!has_capability('mod/attendance:takeattendances', $context)) {
+            list($canmark, $reason) = attendance_can_student_mark($session);
+            if (!$canmark) {
+                throw new invalid_parameter_exception($reason);
+            }
         }
 
         // Check user id is valid.
