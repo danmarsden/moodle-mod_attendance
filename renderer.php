@@ -415,7 +415,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
      * @return string
      */
     protected function render_attendance_take_data(attendance_take_data $takedata) {
-        user_preference_allow_ajax_update('mod_attendance_statusdropdown', PARAM_RAW);
+        user_preference_allow_ajax_update('mod_attendance_statusdropdown', PARAM_TEXT);
 
         $controls = $this->render_attendance_take_controls($takedata);
         $table = html_writer::start_div('no-overflow');
