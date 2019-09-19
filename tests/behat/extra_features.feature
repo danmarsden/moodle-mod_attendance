@@ -202,8 +202,8 @@ Feature: Test the various new features in the attendance module
       | id_addmultiply | 0 |
     And I click on "submitbutton" "button"
     And I click on "Take attendance" "link"
-
-    When I click on "setallstatuses" "field" in the ".takelist tbody td.c4" "css_element"
+    And I set the field "Set status for" to "all"
+    When I click on "setallstatuses" "field" in the ".takelist tbody td.c3" "css_element"
     And I press "Save attendance"
     And I follow "Report"
     Then "L" "text" should exist in the "Student 1" "table_row"

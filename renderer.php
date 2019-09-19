@@ -599,23 +599,23 @@ class mod_attendance_renderer extends plugin_renderer_base {
     }
 
     /**
-     * Render statusdropdown
+     * get statusdropdown
      *
-     * @param string $preference
-     * @return string
+     * @return \single_select
      */
-    private function render_statusdropdown($preference) {
-        if ($preference == 'unselected') {
-            return " <select id='setallstatus-select'>
-                <option value='all'>".get_string('statusall', 'attendance')."</option>
-                <option selected value='unselected'>".get_string('statusunselected', 'attendance')."</option>
-            </select>";
-        } else {
-            return " <select id='setallstatus-select'>
-                <option selected value='all'>".get_string('statusall', 'attendance')."</option>
-                <option value='unselected'>".get_string('statusunselected', 'attendance')."</option>
-            </select>";
+    private function statusdropdown() {
+        $pref = get_user_preferences('mod_attendance_statusdropdown');
+        if (empty($pref)) {
+            $pref = 'unselected';
         }
+        $options = array('all' => get_string('statusall', 'attendance'),
+            'unselected' => get_string('statusunselected', 'attendance'));
+
+        $select = new \single_select(new \moodle_url('/'), 'setallstatus-select', $options,
+            $pref, null, 'setallstatus-select');
+        $select->label = get_string('setallstatuses', 'attendance');
+
+        return $select;
     }
 
     /**
@@ -653,7 +653,14 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $PAGE->requires->js_amd_inline("
                 require(['jquery'], function($) {
                     $('#checkstatus".$st->id."').click(function(e) {
-                        $('#attendancetakeform').find('.st".$st->id."').prop('checked', true);
+                     if ($('select[name=\"setallstatus-select\"] option:selected').val() == 'all') {
+                            $('#attendancetakeform').find('.st".$st->id."').prop('checked', true);
+                            M.util.set_user_preference('mod_attendance_statusdropdown','all');
+                        }
+                        else {
+                            $('#attendancetakeform').find('input:indeterminate.st".$st->id."').prop('checked', true);
+                            M.util.set_user_preference('mod_attendance_statusdropdown','unselected');
+                        }
                         e.preventDefault();
                     });
                 });");
@@ -672,9 +679,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $row->cells[] = '';
         }
 
-        $selectmenu = $this->render_statusdropdown(get_user_preferences('mod_attendance_statusdropdown'));
-        $cell = new html_table_cell(html_writer::div(get_string('setallstatuses', 'attendance').
-            $selectmenu, 'setallstatuses'));
+        $cell = new html_table_cell(html_writer::div($this->output->render($this->statusdropdown()), 'setallstatuses'));
         $cell->colspan = 2;
         $row->cells[] = $cell;
         foreach ($takedata->statuses as $st) {
@@ -690,7 +695,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $PAGE->requires->js_amd_inline("
                 require(['jquery'], function($) {
                     $('#radiocheckstatus".$st->id."').click(function(e) {
-                        if ($('#setallstatus-select').val() == 'all') {
+                        if ($('select[name=\"setallstatus-select\"] option:selected').val() == 'all') {
                             $('#attendancetakeform').find('.st".$st->id."').prop('checked', true);
                             M.util.set_user_preference('mod_attendance_statusdropdown','all');
                         }
@@ -756,11 +761,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $table->attributes['class'] = 'generaltable takegrid';
         $table->headspan = $takedata->pageparams->gridcols;
 
-        $selectmenu = $this->render_statusdropdown(get_user_preferences('mod_attendance_statusdropdown'));
-
         $head = array();
-        $head[] = html_writer::div(get_string('setallstatuses', 'attendance').
-            $selectmenu, 'setallstatuses');
+        $head[] = html_writer::div($this->output->render($this->statusdropdown()), 'setallstatuses');
         foreach ($takedata->statuses as $st) {
             $head[] = html_writer::link("#", $st->acronym, array('id' => 'checkstatus'.$st->id,
                                               'title' => get_string('setallstatusesto', 'attendance', $st->description)));
@@ -768,7 +770,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $PAGE->requires->js_amd_inline("
                  require(['jquery'], function($) {
                      $('#checkstatus".$st->id."').click(function(e) {
-                         if ($('#setallstatus-select').val() == 'unselected') {
+                         if ($('select[name=\"setallstatus-select\"] option:selected').val() == 'unselected') {
                              $('#attendancetakeform').find('input:indeterminate.st".$st->id."').prop('checked', true);
                              M.util.set_user_preference('mod_attendance_statusdropdown','unselected');
                          }
