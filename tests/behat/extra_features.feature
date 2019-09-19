@@ -209,3 +209,22 @@ Feature: Test the various new features in the attendance module
     Then "L" "text" should exist in the "Student 1" "table_row"
     And "L" "text" should exist in the "Student 2" "table_row"
     And "L" "text" should exist in the "Student 3" "table_row"
+
+  Scenario: A teacher can use the radio buttons to set attendance values for unselected users
+    Given I log in as "teacher1"
+    And I am on "Course 1" course homepage
+    And I follow "Test attendance"
+    And I follow "Add"
+    And I set the following fields to these values:
+      | id_addmultiply | 0 |
+    And I click on "submitbutton" "button"
+    And I click on "Take attendance" "link"
+        # Present
+    And I click on "td.cell.c3 input" "css_element" in the "Student 1" "table_row"
+    And I set the field "Set status for" to "unselected"
+    And I click on "setallstatuses" "field" in the ".takelist tbody td.c3" "css_element"
+    And I press "Save attendance"
+    When I follow "Report"
+    Then "P" "text" should exist in the "Student 1" "table_row"
+    And "L" "text" should exist in the "Student 2" "table_row"
+    And "L" "text" should exist in the "Student 3" "table_row"
