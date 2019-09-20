@@ -60,8 +60,7 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
     public function setUp() {
         $this->category = $this->getDataGenerator()->create_category();
         $this->course = $this->getDataGenerator()->create_course(array('category' => $this->category->id));
-
-        $this->attendance = $this->create_attendance();
+        $this->attendance = $this->getDataGenerator()->create_module('attendance', array('course' => $this->course->id));
 
         $this->create_and_enrol_users();
 
@@ -85,28 +84,14 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
         $this->attendance->add_sessions($this->sessions);
     }
 
-    /**
-     * Create new attendance activity.
-     */
-    private function create_attendance() {
-        global $DB;
-        $att = $this->getDataGenerator()->create_module('attendance', array('course' => $this->course->id));
-        $cm = $DB->get_record('course_modules', array('id' => $att->cmid));
-        unset($att->cmid);
-        return new mod_attendance_structure($att, $cm, $this->course);
-    }
-
     /** Creating 10 students and 1 teacher. */
     protected function create_and_enrol_users() {
         $this->students = array();
         for ($i = 0; $i < 10; $i++) {
-            $student = $this->getDataGenerator()->create_user();
-            $this->getDataGenerator()->enrol_user($student->id, $this->course->id, 5); // Enrol as student.
-            $this->students[] = $student;
+            $this->students[] = $this->getDataGenerator()->create_and_enrol($this->course, 'student');
         }
 
-        $this->teacher = $this->getDataGenerator()->create_user();
-        $this->getDataGenerator()->enrol_user($this->teacher->id, $this->course->id, 3); // Enrol as teacher.
+        $this->teacher = $this->getDataGenerator()->create_and_enrol($this->course, 'editingteacher');
     }
 
     public function test_get_courses_with_today_sessions() {
@@ -131,7 +116,7 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
         $this->resetAfterTest(true);
 
         // Make another attendance.
-        $second = $this->create_attendance();
+        $second = $this->getDataGenerator()->create_module('attendance', array('course' => $this->course->id));
 
         // Just add the same session.
         $secondsession = clone $this->sessions[0];
