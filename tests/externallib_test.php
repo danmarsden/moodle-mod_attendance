@@ -398,20 +398,9 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
         global $DB;
         $this->resetAfterTest(true);
 
-        $course = $this->getDataGenerator()->create_course();
-
-        // Become a teacher.
-        $teacher = self::getDataGenerator()->create_user();
-        $teacherrole = $DB->get_record('role', array('shortname' => 'editingteacher'));
-        $this->getDataGenerator()->enrol_user($teacher->id, $course->id, $teacherrole->id);
-        $this->setUser($teacher);
-
         // Create attendance with no groups mode.
-        $attendance = mod_attendance_external::add_attendance($course->id, 'test', 'test', NOGROUPS);
+        $attendance = mod_attendance_external::add_attendance($this->course->id, 'test', 'test', NOGROUPS);
         $attendance = external_api::clean_returnvalue(mod_attendance_external::add_attendance_returns(), $attendance);
-
-        // Check attendance exist.
-        $this->assertCount(1, $DB->get_records('attendance', ['course' => $course->id]));
 
         // Create sessions.
         $result0 = mod_attendance_external::add_session($attendance['attendanceid'], 'test0', time(), 3600, 0, false);
@@ -436,20 +425,9 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
         global $DB;
         $this->resetAfterTest(true);
 
-        $course = $this->getDataGenerator()->create_course();
-
-        // Become a teacher.
-        $teacher = self::getDataGenerator()->create_user();
-        $teacherrole = $DB->get_record('role', array('shortname' => 'editingteacher'));
-        $this->getDataGenerator()->enrol_user($teacher->id, $course->id, $teacherrole->id);
-        $this->setUser($teacher);
-
-        // Create attendance.
-        $attendance = mod_attendance_external::add_attendance($course->id, 'test', 'test', NOGROUPS);
+        // Create attendance with no groups mode.
+        $attendance = mod_attendance_external::add_attendance($this->course->id, 'test', 'test', NOGROUPS);
         $attendance = external_api::clean_returnvalue(mod_attendance_external::add_attendance_returns(), $attendance);
-
-        // Check attendance exist.
-        $this->assertCount(1, $DB->get_records('attendance', ['course' => $course->id]));
 
         // Prepare events tracing.
         $sink = $this->redirectEvents();
