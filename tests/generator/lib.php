@@ -40,7 +40,7 @@ class mod_attendance_generator extends testing_module_generator {
      *
      * @param array|stdClass $record
      * @param array $options
-     * @return stdClass activity record with extra cmid field
+     * @return stdClass mod_attendance_structure
      */
     public function create_instance($record = null, array $options = null) {
         global $CFG;
