@@ -6,11 +6,12 @@ services:
   - mysql
 
 addons:
-  firefox: "47.0.1"
   postgresql: "9.4"
+  chrome: stable
   apt:
     packages:
-      - openjdk-8-jre-headless      -
+      - openjdk-8-jre-headless
+      - chromium-chromedriver
 
 cache:
   directories:
@@ -51,4 +52,4 @@ script:
   - moodle-plugin-ci grunt
   - moodle-plugin-ci phpdoc
   - moodle-plugin-ci phpunit
-  - moodle-plugin-ci behat
+  - moodle-plugin-ci behat --profile chrome
