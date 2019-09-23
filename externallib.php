@@ -148,16 +148,18 @@ class mod_attendance_external extends external_api {
         require_capability('mod/attendance:manageattendances', $context);
 
         // Delete attendance instance.
-        attendance_delete_instance($params['attendanceid']);
+        $result = attendance_delete_instance($params['attendanceid']);
         rebuild_course_cache($cm->course, true);
+        return $result;
     }
 
     /**
      * Describes remove_attendance return values.
      *
-     * @return void
+     * @return external_value
      */
     public static function remove_attendance_returns() {
+        return new external_value(PARAM_BOOL, 'attendance deletion result');
     }
 
     /**
@@ -286,7 +288,7 @@ class mod_attendance_external extends external_api {
      * Delete session from attendance instance.
      *
      * @param int $sessionid
-     * @return int $sessionid
+     * @return bool
      */
     public static function remove_session(int $sessionid) {
         global $DB;
@@ -310,14 +312,17 @@ class mod_attendance_external extends external_api {
         // Delete session.
         $attendance->delete_sessions(array($sessionid));
         attendance_update_users_grade($attendance);
+
+        return true;
     }
 
     /**
      * Describes remove_session return values.
      *
-     * @return void
+     * @return external_value
      */
     public static function remove_session_returns() {
+        return new external_value(PARAM_BOOL, 'attendance session deletion result');
     }
 
     /**
@@ -494,6 +499,8 @@ class mod_attendance_external extends external_api {
      * @param int $statusset
      */
     public static function update_user_status($sessionid, $studentid, $takenbyid, $statusid, $statusset) {
+        global $DB;
+
         $params = self::validate_parameters(self::update_user_status_parameters(), array(
             'sessionid' => $sessionid,
             'studentid' => $studentid,
@@ -502,11 +509,20 @@ class mod_attendance_external extends external_api {
             'statusset' => $statusset,
         ));
 
-        // Make sure session is open for marking.
         $session = $DB->get_record('attendance_sessions', array('id' => $params['sessionid']), '*', MUST_EXIST);
-        list($canmark, $reason) = attendance_can_student_mark($attforsession);
-        if (!$canmark) {
-            throw new invalid_parameter_exception($reason);
+        $cm = get_coursemodule_from_instance('attendance', $session->attendanceid, 0, false, MUST_EXIST);
+
+        // Check permissions.
+        $context = context_module::instance($cm->id);
+        self::validate_context($context);
+        require_capability('mod/attendance:view', $context);
+
+        // If not a teacher, make sure session is open for self-marking.
+        if (!has_capability('mod/attendance:takeattendances', $context)) {
+            list($canmark, $reason) = attendance_can_student_mark($session);
+            if (!$canmark) {
+                throw new invalid_parameter_exception($reason);
+            }
         }
 
         // Check user id is valid.
