@@ -177,12 +177,21 @@ function attendance_form_sessiondate_selector (MoodleQuickForm $mform) {
     }
 
     $sesendtime = array();
-    $sesendtime[] =& $mform->createElement('static', 'from', '', get_string('from', 'attendance'));
-    $sesendtime[] =& $mform->createElement('select', 'starthour', get_string('hour', 'form'), $hours, false, true);
-    $sesendtime[] =& $mform->createElement('select', 'startminute', get_string('minute', 'form'), $minutes, false, true);
-    $sesendtime[] =& $mform->createElement('static', 'to', '', get_string('to', 'attendance'));
-    $sesendtime[] =& $mform->createElement('select', 'endhour', get_string('hour', 'form'), $hours, false, true);
-    $sesendtime[] =& $mform->createElement('select', 'endminute', get_string('minute', 'form'), $minutes, false, true);
+    if (!right_to_left()) {
+        $sesendtime[] =& $mform->createElement('static', 'from', '', get_string('from', 'attendance'));
+        $sesendtime[] =& $mform->createElement('select', 'starthour', get_string('hour', 'form'), $hours, false, true);
+        $sesendtime[] =& $mform->createElement('select', 'startminute', get_string('minute', 'form'), $minutes, false, true);
+        $sesendtime[] =& $mform->createElement('static', 'to', '', get_string('to', 'attendance'));
+        $sesendtime[] =& $mform->createElement('select', 'endhour', get_string('hour', 'form'), $hours, false, true);
+        $sesendtime[] =& $mform->createElement('select', 'endminute', get_string('minute', 'form'), $minutes, false, true);
+    } else {
+        $sesendtime[] =& $mform->createElement('static', 'from', '', get_string('from', 'attendance'));
+        $sesendtime[] =& $mform->createElement('select', 'startminute', get_string('minute', 'form'), $minutes, false, true);
+        $sesendtime[] =& $mform->createElement('select', 'starthour', get_string('hour', 'form'), $hours, false, true);
+        $sesendtime[] =& $mform->createElement('static', 'to', '', get_string('to', 'attendance'));
+        $sesendtime[] =& $mform->createElement('select', 'endminute', get_string('minute', 'form'), $minutes, false, true);
+        $sesendtime[] =& $mform->createElement('select', 'endhour', get_string('hour', 'form'), $hours, false, true);
+    }
     $mform->addGroup($sesendtime, 'sestime', get_string('time', 'attendance'), array(' '), true);
 }
 
