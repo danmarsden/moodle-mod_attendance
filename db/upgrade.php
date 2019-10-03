@@ -550,5 +550,32 @@ function xmldb_attendance_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2018051408, 'attendance');
     }
 
+    if ($oldversion < 2018051409) {
+
+        // Changing nullability of field sessiondetailspos on table attendance to not null.
+        $table = new xmldb_table('attendance');
+        $field = new xmldb_field('sessiondetailspos', XMLDB_TYPE_CHAR, '5', null, XMLDB_NOTNULL, null, 'left', 'subnet');
+
+        // Launch change of nullability for field sessiondetailspos.
+        $dbman->change_field_notnull($table, $field);
+
+        // Changing the default of field preventsharedip on table attendance_sessions to 1.
+        $table = new xmldb_table('attendance_sessions');
+        $field = new xmldb_field('preventsharedip', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '1', 'absenteereport');
+
+        // Launch change of default for field preventsharedip.
+        $dbman->change_field_default($table, $field);
+
+        // Changing the default of field maxwarn on table attendance_warning to drop it.
+        $table = new xmldb_table('attendance_warning');
+        $field = new xmldb_field('maxwarn', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, 'warnafter');
+
+        // Launch change of default for field maxwarn.
+        $dbman->change_field_default($table, $field);
+
+        // Attendance savepoint reached.
+        upgrade_mod_savepoint(true, 2018051409, 'attendance');
+    }
+
     return $result;
 }
