@@ -275,6 +275,12 @@ $string['maxpossiblepoints'] = 'Maximum possible points';
 $string['maxwarn'] = 'Maximum number of e-mail warnings';
 $string['maxwarn_help'] = 'The maximum number of times a warning should be sent (only one warning per session is sent)';
 $string['mergeuser'] = 'Merge user';
+$string['mobilesessionfrom'] = 'Show sessions older than the last';
+$string['mobilesessionfrom_help'] = 'Allows the list of sessions to be restricted when marking in the app - only shows sessions that started since this value';
+$string['mobilesessionto'] = 'Show future sessions';
+$string['mobilesessionto_help'] = 'Allows the list of sessions to be restricted to only show a small number of future sessions.';
+$string['mobilesettings'] = 'Mobile app settings';
+$string['mobilesettings_help'] = 'These settings control Moodle mobile app behaviour';
 $string['modulename'] = 'Attendance';
 $string['modulename_help'] = 'The attendance activity module enables a teacher to take attendance during class and students to view their own attendance record.
 

@@ -70,6 +70,7 @@ class mobile {
 
         $attendance    = $DB->get_record('attendance', array('id' => $cm->instance), '*', MUST_EXIST);
         $course         = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
+        $config = get_config('attendance');
 
         $data = array(); // Data to pass to renderer.
         $data['cmid'] = $cmid;
@@ -126,14 +127,15 @@ class mobile {
             }
         }
 
-        // Get list of sessions within the next 24hrs and in last 6hrs.
-        // TODO: provide way of adjusting which sessions to show in app.
-        $time = time() - (6 * 60 * 60);
+        // Get list of sessions based on site level settings. default = the next 24hrs and in last 6hrs.
+        $timefrom = time() - $config->mobilesessionfrom;
+        $timeto = time() + $config->mobilesessionto;
 
         $data['sessions'] = array();
 
         $sessions = $DB->get_records_select('attendance_sessions',
-            'attendanceid = ? AND sessdate > ? ORDER BY sessdate', array($attendance->id, $time));
+            'attendanceid = ? AND sessdate > ? AND sessdate < ? ORDER BY sessdate',
+            array($attendance->id, $timefrom, $timeto));
 
         if (!empty($sessions)) {
             $userdata = new \attendance_user_data($att, $USER->id, true);

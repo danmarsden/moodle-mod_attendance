@@ -105,6 +105,18 @@ if ($ADMIN->fulltree) {
         get_string('enablewarnings', 'attendance'),
         get_string('enablewarnings_desc', 'attendance'), 0));
 
+    $name = new lang_string('mobilesettings', 'mod_attendance');
+    $description = new lang_string('mobilesettings_help', 'mod_attendance');
+    $settings->add(new admin_setting_heading('mobilesettings', $name, $description));
+
+    $settings->add(new admin_setting_configduration('attendance/mobilesessionfrom',
+        get_string('mobilesessionfrom', 'attendance'), get_string('mobilesessionfrom_help', 'attendance'),
+         6 * HOURSECS, PARAM_RAW));
+
+    $settings->add(new admin_setting_configduration('attendance/mobilesessionto',
+        get_string('mobilesessionto', 'attendance'), get_string('mobilesessionto_help', 'attendance'),
+        24 * HOURSECS, PARAM_RAW));
+
     $name = new lang_string('defaultsettings', 'mod_attendance');
     $description = new lang_string('defaultsettings_help', 'mod_attendance');
     $settings->add(new admin_setting_heading('defaultsettings', $name, $description));
