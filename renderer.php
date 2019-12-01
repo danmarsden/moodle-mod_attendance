@@ -253,8 +253,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $table->width = '100%';
         $table->head = array(
                 '#',
-                get_string('date'),
-                get_string('time'),
+                get_string('date', 'attendance'),
+                get_string('time', 'attendance'),
                 get_string('sessiontypeshort', 'attendance'),
                 get_string('description', 'attendance'),
                 get_string('actions'),
