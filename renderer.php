@@ -129,7 +129,11 @@ class mod_attendance_renderer extends plugin_renderer_base {
                                                                        'page' => $fcontrols->pageparams->page - 1)),
                                                                  $this->output->larrow());
         }
-        $pagingcontrols .= html_writer::tag('span', "Page {$fcontrols->pageparams->page} of $numberofpages",
+        $a = new stdClass();
+        $a->page = $fcontrols->pageparams->page;
+        $a->numpages = $numberofpages;
+        $text = get_string('pageof', 'attendance', $a);
+        $pagingcontrols .= html_writer::tag('span', $text,
                                             array('class' => 'attbtn'));
         if ($fcontrols->pageparams->page < $numberofpages) {
             $pagingcontrols .= html_writer::link($fcontrols->url(array('curdate' => $fcontrols->curdate,
@@ -532,7 +536,11 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 $controls .= html_writer::link($takedata->url(array('page' => $takedata->pageparams->page - 1)),
                                                               $this->output->larrow());
             }
-            $controls .= html_writer::tag('span', "Page {$takedata->pageparams->page} of $numberofpages",
+            $a = new stdClass();
+            $a->page = $takedata->pageparams->page;
+            $a->numpages = $numberofpages;
+            $text = get_string('pageof', 'attendance', $a);
+            $controls .= html_writer::tag('span', $text,
                                           array('class' => 'attbtn'));
             if ($takedata->pageparams->page < $numberofpages) {
                 $controls .= html_writer::link($takedata->url(array('page' => $takedata->pageparams->page + 1,

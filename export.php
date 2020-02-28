@@ -79,7 +79,9 @@ if ($formdata = $mform->get_data()) {
 
     $reportdata = new attendance_report_data($att);
     if ($reportdata->users) {
-        $filename = clean_filename($course->shortname.'_Attendances_'.userdate(time(), '%Y%m%d-%H%M'));
+        $filename = clean_filename($course->shortname.'_'.
+            get_string('modulenameplural', 'attendance').
+            '_'.userdate(time(), '%Y%m%d-%H%M'));
 
         $group = $formdata->group ? $reportdata->groups[$formdata->group] : 0;
         $data = new stdClass;
