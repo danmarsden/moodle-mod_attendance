@@ -518,7 +518,7 @@ function attendance_exporttotableed($data, $filename, $format) {
     // Sending HTTP headers.
     $workbook->send($filename);
     // Creating the first worksheet.
-    $myxls = $workbook->add_worksheet('Attendances');
+    $myxls = $workbook->add_worksheet(get_string('modulenameplural', 'attendance'));
     // Format types.
     $formatbc = $workbook->add_format();
     $formatbc->set_bold(1);

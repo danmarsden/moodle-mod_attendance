@@ -325,6 +325,7 @@ $string['oversessionstaken_help'] = 'Shows statistics for sessions where attenda
     <li><strong>Points</strong>: points awarded based on the taken sessions.</li>
     <li><strong>Percentage</strong>: percentage of points awarded over the maxium possible points of the taken sessions.</li>
     </ul>';
+$string['pageof'] = 'Page {$a->page} of {$a->numpages}';
 $string['participant'] = 'Participant';
 $string['password'] = 'Password';
 $string['enterpassword'] = 'Enter password';
