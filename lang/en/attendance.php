@@ -583,3 +583,4 @@ $string['formattexttype'] = 'Formatting';
 $string['currentlyselectedusers'] = 'Currently selected users';
 $string['usemessageform'] = 'or use the form below to send a message to the selected students';
 $string['backtoparticipants'] = 'Back to participants list';
+$string['all_courses_attendance_report']='All courses attendance';
