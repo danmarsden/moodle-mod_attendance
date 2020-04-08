@@ -633,7 +633,7 @@ class attendance_user_data implements renderable {
                     if ($dbstudlog[$log->sessionid]->remarks != $log->remarks ||
                         $dbstudlog[$log->sessionid]->statusid != $log->statusid ||
                         $dbstudlog[$log->sessionid]->statusset != $log->statusset) {
-                        
+
                         $log->id = $dbstudlog[$log->sessionid]->id;
                         $DB->update_record('attendance_log', $log);
 

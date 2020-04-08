@@ -1973,7 +1973,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
                             $row->cells[] = $sess->remarks;
                         }
                     }
-                        
+
                 } else {
                     if (!empty($sess->statusid)) {
                         $status = $userdata->statuses[$sess->attendanceid][$sess->statusid];
