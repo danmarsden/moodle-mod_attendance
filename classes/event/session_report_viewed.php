@@ -74,13 +74,14 @@ class session_report_viewed extends \core\event\base {
      * @return \moodle_url
      */
     public function get_url() {
-        // Mode is optional.
+        // Mode and groupby are optional.
         $mode = empty($this->other['mode']) ? "" : $this->other['mode'];
+        $groupby = empty($this->other['groupby']) ? "" : $this->other['groupby'];
         return new \moodle_url('/mod/attendance/view.php', array('id' => $this->contextinstanceid,
                                                                  'studentid' => $this->relateduserid,
                                                                  'mode' => $mode,
                                                                  'view' => $this->other['view'],
-                                                                 'groupby' => $this->other['groupby'],
+                                                                 'groupby' => $groupby,
                                                                  'sesscourses' => $this->other['sesscourses'],
                                                                  'curdate' => $this->other['curdate']));
     }
