@@ -76,7 +76,7 @@ if (!$table->is_downloading($download, $exportfilename)) {
     $url = new moodle_url('/mod/attendance/coursesummary.php', array('category' => $category, 'fromcourse' => $fromcourse));
 
     if ($admin) {
-        $options = coursecat::make_categories_list('mod/attendance:viewsummaryreports');
+        $options = core_course_category::make_categories_list('mod/attendance:viewsummaryreports');
         echo $OUTPUT->single_select($url, 'category', $options, $category);
     }
 
