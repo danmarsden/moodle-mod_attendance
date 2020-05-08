@@ -69,38 +69,6 @@ Feature: Visiting reports
 
     And I log out
 
-  Scenario: Teacher changes the maximum points in the attendance settings
-    Given I log in as "teacher1"
-    And I am on "Course 1" course homepage
-    And I follow "Attendance"
-    And I navigate to "Edit settings" in current page administration
-    Then I set the following fields to these values:
-      | id_grade_modgrade_type  | Point |
-      | id_grade_modgrade_point | 50   |
-    And I press "Save and display"
-
-    When I follow "Attendance"
-    Then I click on "Take attendance" "link" in the "1AM - 2AM" "table_row"
-    # Excused
-    And I click on "td.cell.c4 input" "css_element" in the "Student 1" "table_row"
-    And I press "Save attendance"
-
-    When I follow "Attendance"
-    And I navigate to "Edit settings" in current page administration
-    Then I set the following fields to these values:
-      | id_grade_modgrade_type  | Point |
-      | id_grade_modgrade_point | 70   |
-    And I press "Save and display"
-
-    When I follow "Report"
-    Then "1 / 2" "text" should exist in the "Student 1" "table_row"
-    And "50.0%" "text" should exist in the "Student 1" "table_row"
-
-    When I follow "Grades" in the user menu
-    And I follow "Course 1"
-    Then "35.00" "text" should exist in the "Student 1" "table_row"
-    And I log out
-
   Scenario: Teacher take attendance of group session
     Given the following "groups" exist:
       | course | name   | idnumber |
