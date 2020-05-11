@@ -251,6 +251,10 @@
     }
 }
 
+#page-mod-attendance-report div[role=main] {
+    position: relative;
+}
+
 #page-mod-attendance-report .attendancereporttable {
     overflow-x: scroll;
     overflow-y: visible;
@@ -261,7 +265,7 @@
 #page-mod-attendance-report .attendancereporttable .headcol {
     position: absolute;
     width: 200px;
-    left: 15px;
+    left: 0;
     top: auto;
     border-top-width: 1px;
 }
@@ -273,23 +277,4 @@
 
 .attendancereporttable img.icon {
     padding-left: 5px;
-}
-
-/* CSS for old clean based themes with docks etc. */
-#page-mod-attendance-report.has-region-side-pre:not(.empty-region-side-pre) .attendancereporttable .headcol {
-    left: 370px;
-}
-
-#page-mod-attendance-report.has-region-side-pre:not(.empty-region-side-pre) .attendancereporttable {
-    margin-left: 230px;
-}
-
-#page-mod-attendance-report.has-region-side-pre:not(.empty-region-side-pre).content-only .attendancereporttable .headcol {
-    left: 80px;
-}
-
-@media (max-width: 767px) {
-    #page-mod-attendance-report.has-region-side-pre:not(.empty-region-side-pre) .attendancereporttable .headcol {
-        left: 80px;
-    }
 }
