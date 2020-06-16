@@ -42,6 +42,9 @@ class mod_attendance_structure {
     /** @var stdclass course module record */
     public $cm;
 
+    /** @var int cmid - needed for calendar internal tests (see Issue #473) */
+    public $cmid;
+
     /** @var stdclass course record */
     public $course;
 
@@ -125,6 +128,9 @@ class mod_attendance_structure {
             }
         }
         $this->cm           = $cm;
+        if (empty($this->cmid)) {
+            $this->cmid = $cm->id;
+        }
         $this->course       = $course;
         if (is_null($context)) {
             $this->context = context_module::instance($this->cm->id);
