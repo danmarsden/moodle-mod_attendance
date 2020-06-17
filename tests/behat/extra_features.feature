@@ -219,10 +219,11 @@ Feature: Test the various new features in the attendance module
       | id_addmultiply | 0 |
     And I click on "submitbutton" "button"
     And I click on "Take attendance" "link"
-        # Present
-    And I click on "td.cell.c3 input" "css_element" in the "Student 1" "table_row"
     And I set the field "Set status for" to "unselected"
+    # Set student 1 as present.
+    And I click on "td.cell.c3 input" "css_element" in the "Student 1" "table_row"
     And I click on "setallstatuses" "field" in the ".takelist tbody td.c3" "css_element"
+    And I wait until the page is ready
     And I press "Save attendance"
     When I follow "Report"
     Then "P" "text" should exist in the "Student 1" "table_row"
