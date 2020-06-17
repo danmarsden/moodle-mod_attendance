@@ -531,7 +531,8 @@ class mod_attendance_external extends external_api {
 
         // TODO: Verify statusset and statusid.
 
-        return attendance_handler::update_user_status($params['sessionid'], $params['studentid'], $params['takenbyid'], $params['statusid'], $params['statusset']);
+        return attendance_handler::update_user_status($params['sessionid'], $params['studentid'], $params['takenbyid'],
+            $params['statusid'], $params['statusset']);
     }
 
     /**

@@ -219,7 +219,8 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
         $status = array_pop($sessioninfo['statuses']);
         $statusset = $sessioninfo['statusset'];
 
-        $result = mod_attendance_external::update_user_status($session['id'], $student['id'], $this->teacher->id, $status['id'], $statusset);
+        $result = mod_attendance_external::update_user_status($session['id'], $student['id'], $this->teacher->id,
+            $status['id'], $statusset);
         $result = external_api::clean_returnvalue(mod_attendance_external::update_user_status_returns(), $result);
 
         $sessioninfo = attendance_handler::get_session($session['id']);
@@ -317,7 +318,8 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
 
         // Create attendance with separate groups mode.
         $attendancesepgroups = mod_attendance_external::add_attendance($course->id, 'sepgroups', 'test', SEPARATEGROUPS);
-        $attendancesepgroups = external_api::clean_returnvalue(mod_attendance_external::add_attendance_returns(), $attendancesepgroups);
+        $attendancesepgroups = external_api::clean_returnvalue(mod_attendance_external::add_attendance_returns(),
+                                                               $attendancesepgroups);
 
         // Check attendance exist.
         $this->assertCount(1, $DB->get_records('attendance', ['course' => $course->id]));
@@ -358,7 +360,8 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
         $this->setUser($teacher);
 
         // Create attendance with no groups mode.
-        $attendancenogroups = mod_attendance_external::add_attendance($course->id, 'nogroups', 'test', NOGROUPS);
+        $attendancenogroups = mod_attendance_external::add_attendance($course->id, 'nogroups',
+                                                                 'test', NOGROUPS);
         $attendancenogroups = external_api::clean_returnvalue(mod_attendance_external::add_attendance_returns(), $attendancenogroups);
 
         // Check attendance exist.
@@ -384,7 +387,8 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
 
         // Create attendance with visible groups mode.
         $attendancevisgroups = mod_attendance_external::add_attendance($course->id, 'visgroups', 'test', VISIBLEGROUPS);
-        $attendancevisgroups = external_api::clean_returnvalue(mod_attendance_external::add_attendance_returns(), $attendancevisgroups);
+        $attendancevisgroups = external_api::clean_returnvalue(mod_attendance_external::add_attendance_returns(),
+                                                               $attendancevisgroups);
 
         // Check attendance exist.
         $this->assertCount(1, $DB->get_records('attendance', ['course' => $course->id]));
