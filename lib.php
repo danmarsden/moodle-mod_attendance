@@ -475,7 +475,7 @@ function attendance_print_settings_tabs($selected = 'settings') {
     global $CFG;
     // Print tabs for different settings pages.
     $tabs = array();
-    $tabs[] = new tabobject('settings', $CFG->wwwroot.'/admin/settings.php?section=modsettingattendance',
+    $tabs[] = new tabobject('settings', "{$CFG->wwwroot}/{$CFG->admin}/settings.php?section=modsettingattendance",
         get_string('settings', 'attendance'), get_string('settings'), false);
 
     $tabs[] = new tabobject('defaultstatus', $CFG->wwwroot.'/mod/attendance/defaultstatus.php',
