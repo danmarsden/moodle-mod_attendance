@@ -7,7 +7,6 @@ services:
 
 addons:
   postgresql: "9.5"
-  chrome: stable
 
   apt:
     packages:
@@ -54,4 +53,4 @@ script:
   - moodle-plugin-ci grunt
   - moodle-plugin-ci phpdoc
   - moodle-plugin-ci phpunit
-  - moodle-plugin-ci behat --profile chrome
+  - moodle-plugin-ci behat
