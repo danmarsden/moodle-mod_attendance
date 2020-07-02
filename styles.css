@@ -55,6 +55,10 @@
     font-size: 0.8em;
 }
 
+.path-mod-attendance div.allsessionssummary + form#attendancetakeform > div {
+    width: 100%;
+}
+
 .path-mod-attendance table.controls {
     text-align: center;
     width: 100%;
