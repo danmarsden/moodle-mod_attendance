@@ -171,7 +171,7 @@ class mod_attendance_page_with_filter_controls {
     private function calc_sessgroupslist_sesstype() {
         global $SESSION;
 
-        if (!property_exists('attsessiontype', $SESSION)) {
+        if (!property_exists($SESSION, 'attsessiontype')) {
             $SESSION->attsessiontype = array($this->cm->course => self::SESSTYPE_ALL);
         } else if (!array_key_exists($this->cm->course, $SESSION->attsessiontype)) {
             $SESSION->attsessiontype[$this->cm->course] = self::SESSTYPE_ALL;
