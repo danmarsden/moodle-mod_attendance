@@ -97,7 +97,7 @@ class mod_attendance_student_attendance_form extends moodleform {
                 $radioarray[] =& $mform->createElement('static', '', '', $warning);
             }
             // Add the radio buttons as a control with the user's name in front.
-            $radiogroup = $mform->addGroup($radioarray, 'statusarray', $USER->firstname.' '.$USER->lastname.':', array(''), false);
+            $radiogroup = $mform->addGroup($radioarray, 'statusarray', fullname($USER).':', array(''), false);
             $radiogroup->setAttributes(array('class' => 'statusgroup'));
             $mform->addRule('statusarray', get_string('attendancenotset', 'attendance'), 'required', '', 'client', false, false);
         }
