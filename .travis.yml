@@ -1,18 +1,12 @@
 language: php
 
-sudo: required
+addons:
+  postgresql: "9.5"
 
 services:
   - mysql
-
-addons:
-  postgresql: "9.5"
-  firefox: "47.0.1"
-
-  apt:
-    packages:
-      - openjdk-8-jre-headless
-      - chromium-chromedriver
+  - postgresql
+  - docker
 
 cache:
   directories:
@@ -33,12 +27,12 @@ env:
 
 before_install:
   - phpenv config-rm xdebug.ini
-  - nvm install 14.0
-  - nvm use 14.0
+  - nvm install 14.0.0
+  - nvm use 14.0.0
   - cd ../..
-  - composer create-project -n --no-dev --prefer-dist blackboard-open-source/moodle-plugin-ci ci ^2
+  - composer create-project -n --no-dev --prefer-dist moodlehq/moodle-plugin-ci ci ^2
   - export PATH="$(cd ci/bin; pwd):$(cd ci/vendor/bin; pwd):$PATH"
-  - PATH=$(echo "$PATH" | sed -e 's/:\/usr\/local\/lib\/jvm\/openjdk11\/bin//') JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64
+  - docker run -d -p 127.0.0.1:4444:4444 --net=host --shm-size=2g -v $HOME/build/moodle:$HOME/build/moodle selenium/standalone-firefox:2.53.1
 
 install:
   - moodle-plugin-ci install
