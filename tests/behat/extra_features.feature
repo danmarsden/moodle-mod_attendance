@@ -24,6 +24,8 @@ Feature: Test the various new features in the attendance module
     And I am on "Course 1" course homepage with editing mode on
     And I add a "Attendance" to section "1" and I fill the form with:
       | Name | Test attendance |
+    And I add a "Attendance" to section "1" and I fill the form with:
+      | Name | Test2 attendance |
     And I log out
 
   Scenario: A teacher can create and update temporary users
@@ -213,13 +215,13 @@ Feature: Test the various new features in the attendance module
   Scenario: A teacher can use the radio buttons to set attendance values for unselected users
     Given I log in as "teacher1"
     And I am on "Course 1" course homepage
-    And I follow "Test attendance"
+    And I follow "Test2 attendance"
     And I follow "Add"
     And I set the following fields to these values:
       | id_addmultiply | 0 |
     And I click on "submitbutton" "button"
     And I click on "Take attendance" "link"
-    And I set the field "Set status for" to "not set"
+    And I set the field "Set status for" to "unselected"
     # Set student 1 as present.
     And I click on "td.cell.c3 input" "css_element" in the "Student 1" "table_row"
     And I click on "setallstatuses" "field" in the ".takelist tbody td.c3" "css_element"
