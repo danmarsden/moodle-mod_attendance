@@ -362,7 +362,8 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
         // Create attendance with no groups mode.
         $attendancenogroups = mod_attendance_external::add_attendance($course->id, 'nogroups',
                                                                  'test', NOGROUPS);
-        $attendancenogroups = external_api::clean_returnvalue(mod_attendance_external::add_attendance_returns(), $attendancenogroups);
+        $attendancenogroups = external_api::clean_returnvalue(mod_attendance_external::add_attendance_returns(),
+            $attendancenogroups);
 
         // Check attendance exist.
         $this->assertCount(1, $DB->get_records('attendance', ['course' => $course->id]));
