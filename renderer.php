@@ -633,7 +633,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
      * @return string
      */
     protected function render_attendance_take_list(attendance_take_data $takedata) {
-        global $PAGE, $CFG;
+        global $CFG;
         $table = new html_table();
         $table->width = '0%';
         $table->head = array(
@@ -658,7 +658,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $table->align[] = 'center';
             $table->size[] = '20px';
             // JS to select all radios of this status and prevent default behaviour of # link.
-            $PAGE->requires->js_amd_inline("
+            $this->page->requires->js_amd_inline("
                 require(['jquery'], function($) {
                     $('#checkstatus".$st->id."').click(function(e) {
                      if ($('select[name=\"setallstatus-select\"] option:selected').val() == 'all') {
@@ -700,7 +700,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             );
             $row->cells[] = html_writer::empty_tag('input', $attribs);
             // Select all radio buttons of the same status.
-            $PAGE->requires->js_amd_inline("
+            $this->page->requires->js_amd_inline("
                 require(['jquery'], function($) {
                     $('#radiocheckstatus".$st->id."').click(function(e) {
                         if ($('select[name=\"setallstatus-select\"] option:selected').val() == 'all') {
@@ -760,7 +760,6 @@ class mod_attendance_renderer extends plugin_renderer_base {
      * @return string
      */
     protected function render_attendance_take_grid(attendance_take_data $takedata) {
-        global $PAGE;
         $table = new html_table();
         for ($i = 0; $i < $takedata->pageparams->gridcols; $i++) {
             $table->align[] = 'center';
@@ -775,7 +774,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $head[] = html_writer::link("#", $st->acronym, array('id' => 'checkstatus'.$st->id,
                                               'title' => get_string('setallstatusesto', 'attendance', $st->description)));
             // JS to select all radios of this status and prevent default behaviour of # link.
-            $PAGE->requires->js_amd_inline("
+            $this->page->requires->js_amd_inline("
                  require(['jquery'], function($) {
                      $('#checkstatus".$st->id."').click(function(e) {
                          if ($('select[name=\"setallstatus-select\"] option:selected').val() == 'unselected') {
@@ -1102,7 +1101,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
      * @return string
      */
     private function construct_user_sessions_log(attendance_user_data $userdata) {
-        global $OUTPUT, $USER;
+        global $USER;
         $context = context_module::instance($userdata->filtercontrols->cm->id);
 
         $shortform = false;
@@ -1197,7 +1196,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
                     'sessionid' => $sess->id,
                     'grouptype' => $sess->groupid);
                 $url = new moodle_url('/mod/attendance/take.php', $params);
-                $icon = $OUTPUT->pix_icon('redo', get_string('changeattendance', 'attendance'), 'attendance');
+                $icon = $this->output->pix_icon('redo', get_string('changeattendance', 'attendance'), 'attendance');
                 $row->cells[] = html_writer::link($url, $icon);
             }
 
@@ -1227,7 +1226,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
      * @return string
      */
     protected function render_attendance_report_data(attendance_report_data $reportdata) {
-        global $PAGE, $COURSE;
+        global $COURSE;
 
         // Initilise Javascript used to (un)check all checkboxes.
         $this->page->requires->js_init_call('M.mod_attendance.init_manage');
@@ -1257,7 +1256,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $summaryrows = $this->get_summary_rows($reportdata, $startwithcontrast);
 
         // Check if the user should be able to bulk send messages to other users on the course.
-        $bulkmessagecapability = has_capability('moodle/course:bulkmessaging', $PAGE->context);
+        $bulkmessagecapability = has_capability('moodle/course:bulkmessaging', $this->page->context);
 
         // Extract rows from each part and collate them into one row each.
         $sessiondetailsleft = $reportdata->pageparams->sessiondetailspos == 'left';
@@ -1300,10 +1299,9 @@ class mod_attendance_renderer extends plugin_renderer_base {
      * @return array Array of html_table_row objects
      */
     protected function get_user_rows(attendance_report_data $reportdata) {
-        global $OUTPUT, $PAGE;
         $rows = array();
 
-        $bulkmessagecapability = has_capability('moodle/course:bulkmessaging', $PAGE->context);
+        $bulkmessagecapability = has_capability('moodle/course:bulkmessaging', $this->page->context);
         $extrafields = get_extra_user_fields($reportdata->att->context);
         $showextrauserdetails = $reportdata->pageparams->showextrauserdetails;
         $params = $reportdata->pageparams->get_significant_params();
@@ -1312,12 +1310,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
             if ($showextrauserdetails) {
                 $params['showextrauserdetails'] = 0;
                 $url = $reportdata->att->url_report($params);
-                $text .= $OUTPUT->action_icon($url, new pix_icon('t/switch_minus',
+                $text .= $this->output->action_icon($url, new pix_icon('t/switch_minus',
                             get_string('hideextrauserdetails', 'attendance')), null, null);
             } else {
                 $params['showextrauserdetails'] = 1;
                 $url = $reportdata->att->url_report($params);
-                $text .= $OUTPUT->action_icon($url, new pix_icon('t/switch_plus',
+                $text .= $this->output->action_icon($url, new pix_icon('t/switch_plus',
                             get_string('showextrauserdetails', 'attendance')), null, null);
                 $extrafields = array();
             }
@@ -1535,7 +1533,6 @@ class mod_attendance_renderer extends plugin_renderer_base {
      * @return array Array of html_table_row objects
      */
     protected function get_session_rows(attendance_report_data $reportdata, $startwithcontrast=false) {
-        global $OUTPUT;
 
         $rows = array();
 
@@ -1548,13 +1545,13 @@ class mod_attendance_renderer extends plugin_renderer_base {
             if ($showsessiondetails) {
                 $params['showsessiondetails'] = 0;
                 $url = $reportdata->att->url_report($params);
-                $text .= $OUTPUT->action_icon($url, new pix_icon('t/switch_minus',
+                $text .= $this->output->action_icon($url, new pix_icon('t/switch_minus',
                             get_string('hidensessiondetails', 'attendance')), null, null);
                 $colspan = count($reportdata->sessions);
             } else {
                 $params['showsessiondetails'] = 1;
                 $url = $reportdata->att->url_report($params);
-                $text .= $OUTPUT->action_icon($url, new pix_icon('t/switch_plus',
+                $text .= $this->output->action_icon($url, new pix_icon('t/switch_plus',
                             get_string('showsessiondetails', 'attendance')), null, null);
                 $colspan = 1;
             }
@@ -1566,11 +1563,11 @@ class mod_attendance_renderer extends plugin_renderer_base {
         if ($reportdata->pageparams->sessiondetailspos == 'left') {
             $params['sessiondetailspos'] = 'right';
             $url = $reportdata->att->url_report($params);
-            $text .= $OUTPUT->action_icon($url, new pix_icon('t/right', get_string('moveright', 'attendance')), null, null);
+            $text .= $this->output->action_icon($url, new pix_icon('t/right', get_string('moveright', 'attendance')), null, null);
         } else {
             $params['sessiondetailspos'] = 'left';
             $url = $reportdata->att->url_report($params);
-            $text = $OUTPUT->action_icon($url, new pix_icon('t/left', get_string('moveleft', 'attendance')), null, null) . $text;
+            $text = $this->output->action_icon($url, new pix_icon('t/left', get_string('moveleft', 'attendance')), null, null) . $text;
         }
 
         $row->cells[] = $this->build_header_cell($text, '', true, $colspan);
@@ -1919,23 +1916,22 @@ class mod_attendance_renderer extends plugin_renderer_base {
      * @return string
      */
     private function construct_preferences_actions_icons($st, $prefdata) {
-        global $OUTPUT;
         $params = array('sesskey' => sesskey(),
                         'statusid' => $st->id);
         if ($st->visible) {
             $params['action'] = mod_attendance_preferences_page_params::ACTION_HIDE;
-            $showhideicon = $OUTPUT->action_icon(
+            $showhideicon = $this->output->action_icon(
                     $prefdata->url($params),
                     new pix_icon("t/hide", get_string('hide')));
         } else {
             $params['action'] = mod_attendance_preferences_page_params::ACTION_SHOW;
-            $showhideicon = $OUTPUT->action_icon(
+            $showhideicon = $this->output->action_icon(
                     $prefdata->url($params),
                     new pix_icon("t/show", get_string('show')));
         }
         if (empty($st->haslogs)) {
             $params['action'] = mod_attendance_preferences_page_params::ACTION_DELETE;
-            $deleteicon = $OUTPUT->action_icon(
+            $deleteicon = $this->output->action_icon(
                     $prefdata->url($params),
                     new pix_icon("t/delete", get_string('delete')));
         } else {
