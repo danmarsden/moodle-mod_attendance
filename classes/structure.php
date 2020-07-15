@@ -193,7 +193,7 @@ class mod_attendance_structure {
      *
      * @return array of records or an empty array
      */
-    public function get_today_sessions() {
+    public function get_today_sessions() : array {
         global $DB;
 
         $start = usergetmidnight(time());
