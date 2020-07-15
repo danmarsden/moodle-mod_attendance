@@ -156,7 +156,7 @@ class mod_attendance_structure {
      *
      * @return int
      */
-    public function get_group_mode() {
+    public function get_group_mode() : int {
         if (is_null($this->groupmode)) {
             $this->groupmode = groups_get_activity_groupmode($this->cm, $this->course);
         }
@@ -170,7 +170,7 @@ class mod_attendance_structure {
      *
      * @return array of records or an empty array
      */
-    public function get_current_sessions() {
+    public function get_current_sessions() : array {
         global $DB;
 
         $today = time(); // Because we compare with database, we don't need to use usertime().
@@ -193,7 +193,7 @@ class mod_attendance_structure {
      *
      * @return array of records or an empty array
      */
-    public function get_today_sessions() {
+    public function get_today_sessions() : array {
         global $DB;
 
         $start = usergetmidnight(time());
@@ -218,7 +218,7 @@ class mod_attendance_structure {
      * @param stdClass $sess
      * @return array of records or an empty array
      */
-    public function get_today_sessions_for_copy($sess) {
+    public function get_today_sessions_for_copy($sess) : array {
         global $DB;
 
         $start = usergetmidnight($sess->sessdate);
@@ -242,9 +242,9 @@ class mod_attendance_structure {
      *
      * Fetches data from {attendance_sessions}
      *
-     * @return count of hidden sessions
+     * @return int count of hidden sessions
      */
-    public function get_hidden_sessions_count() {
+    public function get_hidden_sessions_count() : int {
         global $DB;
 
         $where = "attendanceid = :aid AND sessdate < :csdate";
@@ -260,9 +260,9 @@ class mod_attendance_structure {
      *
      * Fetches data from {attendance_sessions}
      *
-     * @return hidden sessions
+     * @return array hidden sessions
      */
-    public function get_hidden_sessions() {
+    public function get_hidden_sessions() : array {
         global $DB;
 
         $where = "attendanceid = :aid AND sessdate < :csdate";
@@ -278,7 +278,7 @@ class mod_attendance_structure {
      *
      * @return array
      */
-    public function get_filtered_sessions() {
+    public function get_filtered_sessions() : array {
         global $DB;
 
         if ($this->pageparams->startdate && $this->pageparams->enddate) {
@@ -318,7 +318,7 @@ class mod_attendance_structure {
      * @param array $params
      * @return moodle_url of manage.php for attendance instance
      */
-    public function url_manage($params=array()) {
+    public function url_manage($params=array()) : moodle_url {
         $params = array_merge(array('id' => $this->cm->id), $params);
         return new moodle_url('/mod/attendance/manage.php', $params);
     }
@@ -328,7 +328,7 @@ class mod_attendance_structure {
      * @param array $params optional
      * @return moodle_url of tempusers.php for attendance instance
      */
-    public function url_managetemp($params=array()) {
+    public function url_managetemp($params=array()) : moodle_url {
         $params = array_merge(array('id' => $this->cm->id), $params);
         return new moodle_url('/mod/attendance/tempusers.php', $params);
     }
@@ -339,7 +339,7 @@ class mod_attendance_structure {
      * @param array $params optional
      * @return moodle_url of tempdelete.php for attendance instance
      */
-    public function url_tempdelete($params=array()) {
+    public function url_tempdelete($params=array()) : moodle_url {
         $params = array_merge(array('id' => $this->cm->id, 'action' => 'delete'), $params);
         return new moodle_url('/mod/attendance/tempedit.php', $params);
     }
@@ -350,7 +350,7 @@ class mod_attendance_structure {
      * @param array $params optional
      * @return moodle_url of tempedit.php for attendance instance
      */
-    public function url_tempedit($params=array()) {
+    public function url_tempedit($params=array()) : moodle_url {
         $params = array_merge(array('id' => $this->cm->id), $params);
         return new moodle_url('/mod/attendance/tempedit.php', $params);
     }
@@ -361,7 +361,7 @@ class mod_attendance_structure {
      * @param array $params optional
      * @return moodle_url of tempedit.php for attendance instance
      */
-    public function url_tempmerge($params=array()) {
+    public function url_tempmerge($params=array()) : moodle_url {
         $params = array_merge(array('id' => $this->cm->id), $params);
         return new moodle_url('/mod/attendance/tempmerge.php', $params);
     }
@@ -371,7 +371,7 @@ class mod_attendance_structure {
      * @param array $params
      * @return moodle_url of sessions.php for attendance instance
      */
-    public function url_sessions($params=array()) {
+    public function url_sessions($params=array()) : moodle_url {
         $params = array_merge(array('id' => $this->cm->id), $params);
         return new moodle_url('/mod/attendance/sessions.php', $params);
     }
@@ -381,7 +381,7 @@ class mod_attendance_structure {
      * @param array $params
      * @return moodle_url of report.php for attendance instance
      */
-    public function url_report($params=array()) {
+    public function url_report($params=array()) : moodle_url {
         $params = array_merge(array('id' => $this->cm->id), $params);
         return new moodle_url('/mod/attendance/report.php', $params);
     }
@@ -391,7 +391,7 @@ class mod_attendance_structure {
      * @param array $params
      * @return moodle_url of report.php for attendance instance
      */
-    public function url_absentee($params=array()) {
+    public function url_absentee($params=array()) : moodle_url {
         $params = array_merge(array('id' => $this->cm->id), $params);
         return new moodle_url('/mod/attendance/absentee.php', $params);
     }
@@ -401,7 +401,7 @@ class mod_attendance_structure {
      *
      * @return moodle_url of export.php for attendance instance
      */
-    public function url_export() {
+    public function url_export() : moodle_url {
         $params = array('id' => $this->cm->id);
         return new moodle_url('/mod/attendance/export.php', $params);
     }
@@ -411,7 +411,7 @@ class mod_attendance_structure {
      * @param array $params
      * @return moodle_url of attsettings.php for attendance instance
      */
-    public function url_preferences($params=array()) {
+    public function url_preferences($params=array()) : moodle_url {
         // Add the statusset params.
         if (isset($this->pageparams->statusset) && !isset($params['statusset'])) {
             $params['statusset'] = $this->pageparams->statusset;
@@ -425,7 +425,7 @@ class mod_attendance_structure {
      * @param array $params
      * @return moodle_url of attsettings.php for attendance instance
      */
-    public function url_warnings($params=array()) {
+    public function url_warnings($params=array()) : moodle_url {
         // Add the statusset params.
         if (isset($this->pageparams->statusset) && !isset($params['statusset'])) {
             $params['statusset'] = $this->pageparams->statusset;
@@ -439,7 +439,7 @@ class mod_attendance_structure {
      * @param array $params
      * @return moodle_url of attendances.php for attendance instance
      */
-    public function url_take($params=array()) {
+    public function url_take($params=array()) : moodle_url {
         $params = array_merge(array('id' => $this->cm->id), $params);
         return new moodle_url('/mod/attendance/take.php', $params);
     }
@@ -449,7 +449,7 @@ class mod_attendance_structure {
      * @param array $params
      * @return moodle_url
      */
-    public function url_view($params=array()) {
+    public function url_view($params=array()) : moodle_url {
         $params = array_merge(array('id' => $this->cm->id), $params);
         return new moodle_url('/mod/attendance/view.php', $params);
     }
@@ -471,7 +471,7 @@ class mod_attendance_structure {
      * @param stdClass $sess
      * @return int $sessionid
      */
-    public function add_session($sess) {
+    public function add_session($sess) : int {
         global $DB;
         $config = get_config('attendance');
 
@@ -643,7 +643,7 @@ class mod_attendance_structure {
      * @param stdClass $mformdata
      * @return boolean
      */
-    public function take_from_student($mformdata) {
+    public function take_from_student($mformdata) : bool {
         global $DB, $USER;
 
         $statuses = implode(',', array_keys( (array)$this->get_statuses() ));
@@ -783,7 +783,7 @@ class mod_attendance_structure {
      * @param int $page
      * @return array
      */
-    public function get_users($groupid = 0, $page = 1) {
+    public function get_users($groupid = 0, $page = 1) : array {
         global $DB;
 
         $fields = array('username' , 'idnumber' , 'institution' , 'department');
@@ -965,7 +965,7 @@ class mod_attendance_structure {
      * @param bool $allsets
      * @return array
      */
-    public function get_statuses($onlyvisible = true, $allsets = false) {
+    public function get_statuses($onlyvisible = true, $allsets = false) : array {
         if (!isset($this->statuses)) {
             // Get the statuses for the current set only.
             $statusset = 0;
@@ -1012,7 +1012,7 @@ class mod_attendance_structure {
      * @param array $sessionids
      * @return array
      */
-    public function get_sessions_info($sessionids) {
+    public function get_sessions_info($sessionids) : array {
         global $DB;
 
         list($sql, $params) = $DB->get_in_or_equal($sessionids);
@@ -1036,7 +1036,7 @@ class mod_attendance_structure {
      * @param int $sessionid
      * @return array
      */
-    public function get_session_log($sessionid) {
+    public function get_session_log($sessionid) : array {
         global $DB;
 
         return $DB->get_records('attendance_log', array('sessionid' => $sessionid), '', 'studentid,statusid,remarks,id,statusset');
@@ -1055,7 +1055,7 @@ class mod_attendance_structure {
      * @param int $userid
      * @return array
      */
-    public function get_user_filtered_sessions_log($userid) {
+    public function get_user_filtered_sessions_log($userid) : array {
         global $DB;
 
         if ($this->pageparams->startdate && $this->pageparams->enddate) {
@@ -1106,7 +1106,7 @@ class mod_attendance_structure {
      * @param int $userid
      * @return array
      */
-    public function get_user_filtered_sessions_log_extended($userid) {
+    public function get_user_filtered_sessions_log_extended($userid) : array {
         global $DB;
         // All taked sessions (including previous groups).
 
