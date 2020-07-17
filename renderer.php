@@ -1575,11 +1575,13 @@ class mod_attendance_renderer extends plugin_renderer_base {
         if ($reportdata->pageparams->sessiondetailspos == 'left') {
             $params['sessiondetailspos'] = 'right';
             $url = $reportdata->att->url_report($params);
-            $text .= $this->output->action_icon($url, new pix_icon('t/right', get_string('moveright', 'attendance')), null, null);
+            $text .= $this->output->action_icon($url, new pix_icon('t/right', get_string('moveright', 'attendance')),
+                null, null);
         } else {
             $params['sessiondetailspos'] = 'left';
             $url = $reportdata->att->url_report($params);
-            $text = $this->output->action_icon($url, new pix_icon('t/left', get_string('moveleft', 'attendance')), null, null) . $text;
+            $text = $this->output->action_icon($url, new pix_icon('t/left', get_string('moveleft', 'attendance')),
+                    null, null) . $text;
         }
 
         $row->cells[] = $this->build_header_cell($text, '', true, $colspan);
