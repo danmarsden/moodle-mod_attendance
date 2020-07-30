@@ -440,6 +440,17 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $table = html_writer::tag('form', $table, array('method' => 'post', 'action' => $takedata->url_path(),
                                                         'id' => 'attendancetakeform'));
 
+        $table .= html_writer::empty_tag('br');
+
+        $table .= '<center>';
+        $urlparams = array('id' => $takedata->cm->id,
+                           'sessionid' => $takedata->pageparams->sessionid,
+                           'grouptype' => $takedata->pageparams->grouptype);
+        $url = new moodle_url('/mod/attendance/upload_attendance.php', $urlparams);
+        $table .= '<a href="' . $url . '" class="btn btn-primary" >' . get_string('uploadattendance', 'attendance') . '</a>';
+
+        $table .= '</center>';
+
         foreach ($takedata->statuses as $status) {
             $sessionstats[$status->id] = 0;
         }
@@ -2004,5 +2015,24 @@ class mod_attendance_renderer extends plugin_renderer_base {
         }
 
         return $this->output->user_picture($user, $opts);
+    }
+
+    /**
+     * A renderer for the CSV file preview.
+     *
+     * @param array $header Column headers from the CSV file.
+     * @param array $data The data from the CSV file.
+     * @return string html to be displayed.
+     */
+    public function preview_page($header, $data) {
+
+        $html = $this->output->heading(get_string('preview', 'attendance'));
+
+        $table = new html_table();
+        $table->head = $header;
+        $table->data = $data;
+        $html .= html_writer::table($table);
+
+        return $html;
     }
 }

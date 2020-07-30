@@ -701,37 +701,81 @@ class mod_attendance_structure {
     }
 
     /**
-     * Take attendance from form data.
+     * Take attendance from form data or csv file.
      *
-     * @param stdClass $formdata
+     * @param stdClass $data
+     * @param bool $fromcsv signifies whether the data was from a csv file or not
+     * @param mod_attendance_structure $att attendance structure
+     * @param stdclass $attforsession attendance_session record.
      */
-    public function take_from_form_data($formdata) {
+    public function take_from_form_data($data, $fromcsv=false, $att=null, $attforsession=null) {
         global $DB, $USER;
-        // TODO: WARNING - $formdata is unclean - comes from direct $_POST - ideally needs a rewrite but we do some cleaning below.
+        // TODO: WARNING - $data is unclean - comes from direct $_POST - ideally needs a rewrite but we do some cleaning below.
         // This whole function could do with a nice clean up.
+
+        // Prime variables with the corresponding attendance status id.
+        $statuses = $this->get_statuses();
+
         $statuses = implode(',', array_keys( (array)$this->get_statuses() ));
         $now = time();
         $sesslog = array();
-        $formdata = (array)$formdata;
-        foreach ($formdata as $key => $value) {
-            // Look at Remarks field because the user options may not be passed if empty.
-            if (substr($key, 0, 7) == 'remarks') {
-                $sid = substr($key, 7);
-                if (!(is_numeric($sid))) { // Sanity check on $sid.
-                    print_error('nonnumericid', 'attendance');
+
+        if ($fromcsv == false) {
+            $formdata = (array)$data;
+
+            foreach ($formdata as $key => $value) {
+                // Look at Remarks field because the user options may not be passed if empty.
+                if (substr($key, 0, 7) == 'remarks') {
+                    $sid = substr($key, 7);
+                    if (!(is_numeric($sid))) { // Sanity check on $sid.
+                        print_error('nonnumericid', 'attendance');
+                    }
+                    $sesslog[$sid] = new stdClass();
+                    $sesslog[$sid]->studentid = $sid; // We check is_numeric on this above.
+                    if (array_key_exists('user'.$sid, $formdata) && is_numeric($formdata['user' . $sid])) {
+                        $sesslog[$sid]->statusid = $formdata['user' . $sid];
+                    }
+                    $sesslog[$sid]->statusset = $statuses;
+                    $sesslog[$sid]->remarks = $value;
+                    $sesslog[$sid]->sessionid = $this->pageparams->sessionid;
+                    $sesslog[$sid]->timetaken = $now;
+                    $sesslog[$sid]->takenby = $USER->id;
                 }
+            }
+        } else {
+            $sessioninfo = $this->get_session_info($this->pageparams->sessionid);
+            $validusers = $this->get_users($this->pageparams->grouptype, 0);
+            $attimporter = $data;
+            // For loop generating the data to insert into the attendance_log database.
+            foreach ($validusers as $student) {
+
+                $sid = $student->id;
                 $sesslog[$sid] = new stdClass();
-                $sesslog[$sid]->studentid = $sid; // We check is_numeric on this above.
-                if (array_key_exists('user'.$sid, $formdata) && is_numeric($formdata['user' . $sid])) {
-                    $sesslog[$sid]->statusid = $formdata['user' . $sid];
-                }
+                $sesslog[$sid]->studentid = $sid;
                 $sesslog[$sid]->statusset = $statuses;
-                $sesslog[$sid]->remarks = $value;
+                $sesslog[$sid]->remarks = '';
                 $sesslog[$sid]->sessionid = $this->pageparams->sessionid;
                 $sesslog[$sid]->timetaken = $now;
                 $sesslog[$sid]->takenby = $USER->id;
+
+                // While loop to set the student's attendance status based on scantime and presence in the csv file.
+                while ($record = $attimporter->next()) {
+                    $userid = $record->user->id;
+                    if ($sid == $userid) {
+                        // If the student scanned, they will be given the highest available status according to their scantime.
+                        $scantime = $record->scantime;
+                        $sesslog[$sid]->statusid = attendance_session_get_highest_status($att, $attforsession, $fromcsv, $scantime);
+                    }
+                }
+                // If the student did not scan, they ill be given the lowest available status which is absent.
+                if (empty($sesslog[$sid]->statusid)) {
+                    // This function will use the current time to give the student the lowest available status.
+                    $sesslog[$sid]->statusid = attendance_session_get_highest_status($att, $attforsession);
+                }
+                $attimporter->restart();
             }
         }
+
         // Get existing session log.
         $dbsesslog = $this->get_session_log($this->pageparams->sessionid);
         foreach ($sesslog as $log) {

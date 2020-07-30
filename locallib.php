@@ -967,9 +967,11 @@ function attendance_template_variables($record) {
  *
  * @param mod_attendance_structure $att attendance structure
  * @param stdclass $attforsession attendance_session record.
+ * @param bool $fromcsv signifies whether the data was from a csv file or not
+ * @param int $scantime student's scan time
  * @return bool/int
  */
-function attendance_session_get_highest_status(mod_attendance_structure $att, $attforsession) {
+function attendance_session_get_highest_status(mod_attendance_structure $att, $attforsession, $fromcsv = false, $scantime = null) {
     // Find the status to set here.
     $statuses = $att->get_statuses();
     $highestavailablegrade = 0;
@@ -980,13 +982,17 @@ function attendance_session_get_highest_status(mod_attendance_structure $att, $a
             continue;
         }
         if (!empty($status->studentavailability)) {
-            $toolateforstatus = (($attforsession->sessdate + ($status->studentavailability * 60)) < time());
+            if ($fromcsv == false) {
+                $toolateforstatus = (($attforsession->sessdate + ($status->studentavailability * 60)) < time());
+            } else {
+                $toolateforstatus = (($attforsession->sessdate + ($status->studentavailability * 60)) < $scantime);
+            }
             if ($toolateforstatus) {
                 continue;
             }
         }
         // This status is available to the student.
-        if ($status->grade > $highestavailablegrade) {
+        if ($status->grade >= $highestavailablegrade) {
             // This is the most favourable grade so far; save it.
             $highestavailablegrade = $status->grade;
             $highestavailablestatus = $status;
