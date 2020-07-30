@@ -296,7 +296,7 @@ class mod_attendance_importer {
             if ($userrecord = $DB->get_record('user', array($this->mapto => $student), 'id', IGNORE_MISSING)) {
                 $userid = $userrecord->id;
                 if (!empty($this->validusers[$userid])) {
-                    $precheckstatus = attendance_session_get_highest_status($this->att, $sessioninfo, $fromcsv = true, $scantime);
+                    $precheckstatus = attendance_session_get_highest_status($this->att, $sessioninfo, $scantime);
                     foreach ($statuses as $status) {
                         if ($precheckstatus == $status->id) {
                             $sessionstats[$status->id]++;

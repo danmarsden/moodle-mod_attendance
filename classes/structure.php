@@ -763,8 +763,7 @@ class mod_attendance_structure {
                     $userid = $record->user->id;
                     if ($sid == $userid) {
                         // If the student scanned, they will be given the highest available status according to their scantime.
-                        $scantime = $record->scantime;
-                        $sesslog[$sid]->statusid = attendance_session_get_highest_status($att, $attforsession, $fromcsv, $scantime);
+                        $sesslog[$sid]->statusid = attendance_session_get_highest_status($att, $attforsession, $record->scantime);
                     }
                 }
                 // If the student did not scan, they ill be given the lowest available status which is absent.
