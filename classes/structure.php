@@ -713,9 +713,6 @@ class mod_attendance_structure {
         // TODO: WARNING - $data is unclean - comes from direct $_POST - ideally needs a rewrite but we do some cleaning below.
         // This whole function could do with a nice clean up.
 
-        // Prime variables with the corresponding attendance status id.
-        $statuses = $this->get_statuses();
-
         $statuses = implode(',', array_keys( (array)$this->get_statuses() ));
         $now = time();
         $sesslog = array();
@@ -743,7 +740,6 @@ class mod_attendance_structure {
                 }
             }
         } else {
-            $sessioninfo = $this->get_session_info($this->pageparams->sessionid);
             $validusers = $this->get_users($this->pageparams->grouptype, 0);
             $attimporter = $data;
             // For loop generating the data to insert into the attendance_log database.
