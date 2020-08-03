@@ -354,25 +354,28 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
         $this->getDataGenerator()->enrol_user($teacher->id, $course->id, $teacherrole->id);
         $this->setUser($teacher);
 
-        // Create attendance.
-        $attendance = mod_wsattendance_external::add_attendance($course->id, 'test', 'test', NOGROUPS);
+        // Create attendance with no groups mode.
+        $attendancenogroups = mod_wsattendance_external::add_attendance($course->id, 'nogroups',
+                                                                 'test', NOGROUPS);
+        $attendancenogroups = external_api::clean_returnvalue(mod_wsattendance_external::add_attendance_returns(),
+            $attendancenogroups);
 
         // Check attendance exist.
         $this->assertCount(1, $DB->get_records('attendance', ['course' => $course->id]));
 
         // Create session.
-        $result0 = mod_wsattendance_external::add_session($attendance['attendanceid'], 'test0', time(), 3600, 0, false);
-        $result1 = mod_wsattendance_external::add_session($attendance['attendanceid'], 'test1', time(), 3600, 0, false);
+        $result0 = mod_wsattendance_external::add_session($attendancenogroups['attendanceid'], 'test0', time(), 3600, 0, false);
+        $result1 = mod_wsattendance_external::add_session($attendancenogroups['attendanceid'], 'test1', time(), 3600, 0, false);
 
-        $this->assertCount(2, $DB->get_records('attendance_sessions', ['attendanceid' => $attendance['attendanceid']]));
+        $this->assertCount(2, $DB->get_records('attendance_sessions', ['attendanceid' => $attendancenogroups['attendanceid']]));
 
         // Delete session 0.
         mod_wsattendance_external::remove_session($result0['sessionid']);
-        $this->assertCount(1, $DB->get_records('attendance_sessions', ['attendanceid' => $attendance['attendanceid']]));
+        $this->assertCount(1, $DB->get_records('attendance_sessions', ['attendanceid' => $attendancenogroups['attendanceid']]));
 
         // Delete session 1.
         mod_wsattendance_external::remove_session($result1['sessionid']);
-        $this->assertCount(0, $DB->get_records('attendance_sessions', ['attendanceid' => $attendance['attendanceid']]));
+        $this->assertCount(0, $DB->get_records('attendance_sessions', ['attendanceid' => $attendancenogroups['attendanceid']]));
     }
 
     public function test_add_session_creates_calendar_event() {
