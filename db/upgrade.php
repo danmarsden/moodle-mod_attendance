@@ -628,5 +628,17 @@ function xmldb_attendance_upgrade($oldversion=0) {
 
     }
 
+    if ($oldversion < 2020072900) {
+        $table = new xmldb_table('attendance_sessions');
+
+        // Conditionally launch add index caleventid.
+        $index = new xmldb_index('caleventid', XMLDB_INDEX_NOTUNIQUE, array('caleventid'));
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+        // Attendance savepoint reached.
+        upgrade_mod_savepoint(true, 2020072900, 'attendance');
+    }
+
     return $result;
 }
