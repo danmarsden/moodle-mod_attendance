@@ -104,9 +104,6 @@ class mod_attendance_importer {
     /** @var string $separator How each bit of information is separated in the file. Defaults to comma separated. */
     private $separator;
 
-    /** @var boolean $noheader triggers if no header row is detected in the uploaded csv file. */
-    private $noheader = false;
-
     /** @var array $headers Column names for the data. */
     protected $headers;
 
@@ -126,6 +123,7 @@ class mod_attendance_importer {
         $this->att = $att;
         $this->encoding = $encoding;
         $this->separator = $separator;
+
     }
 
     /**
@@ -145,58 +143,8 @@ class mod_attendance_importer {
      * @param int $previewrows The number of rows the user wants to preview.
      */
     public function preview($previewrows) {
-        GLOBAL $CFG, $USER;
-
-        if ($this->csvreader == null) {
-            $this->csvreader = new csv_import_reader($this->importid, 'attendance');
-        }
         $this->csvreader->init();
 
-        // Checking to see if the entire first row is a header row.
-        $this->headers = $this->csvreader->get_columns();
-        foreach ($this->headers as $value) {
-            if (is_numeric($value)) {
-                $this->noheader = true;
-            }
-        }
-        // If a header row doesn't already exist, insert one.
-        if ($this->noheader == true) {
-            $filename = $CFG->tempdir.'/csvimport/'.'attendance'.'/'.$USER->id.'/'.$this->importid;
-            $tempfilename = $CFG->tempdir.'/csvimport/'.'attendance'.'/'.$USER->id.'/'.'temp.csv';
-            $header = ['Column 1', 'Column 2', 'Column 3', 'Column 4', 'Column 5', 'Column 6', 'Column 7'];
-            $mainfile = fopen($filename, 'r+');
-            $tempfile = fopen($tempfilename, 'w+');
-
-            // Need to insert a header row so that the csv reader will not skip the first row of attendance data.
-            while (!feof($mainfile)) {
-                // Copy the contents of the main file to a temp file.
-                $line = fgetcsv($mainfile);
-                if ($line != false) {
-                    fputcsv($tempfile, $line);
-                }
-            }
-
-            rewind($mainfile); // Resetting the file pointer of both files.
-            rewind($tempfile);
-
-            fputcsv($mainfile, $header); // Placing the header at the top of the main file.
-
-            while (!feof($tempfile)) {
-                // Copy the contents of the temp file to below the headings of the main file.
-                $line = fgetcsv($tempfile);
-                if ($line != false) {
-                    fputcsv($mainfile, $line);
-                }
-            }
-
-            fclose($mainfile); // Finished with boths files, therefore closing them.
-            fclose($tempfile);
-        }
-        // Get the column headers.
-        $this->headers = $this->get_headers($this->importid);
-
-        // Get the preview data.
-        $this->csvreader->init();
         $this->previewdata = array();
 
         for ($numoflines = 0; $numoflines <= $previewrows; $numoflines++) {
@@ -213,7 +161,7 @@ class mod_attendance_importer {
      * @return bool false is a failed import
      */
     public function init() {
-        GLOBAL $CFG, $DB, $USER;
+        global $DB;
 
         if ($this->csvreader == null) {
             $this->csvreader = new csv_import_reader($this->importid, 'attendance');
@@ -232,8 +180,6 @@ class mod_attendance_importer {
         $scandate = strtotime($firstrecord[$this->scandateindex]);
         $scandate = date('n/j/Y', $scandate);
 
-        // Setting up the precheck statuses.
-        $precheckstatus = '';
         $statuses = $this->att->get_statuses();
         foreach ($statuses as $status) {
             $sessionstats[$status->id] = 0;
@@ -347,24 +293,6 @@ class mod_attendance_importer {
     }
 
     /**
-     * Return the encoding for this csv import.
-     *
-     * @return string The encoding for this csv import.
-     */
-    public function get_encoding() {
-        return $this->encoding;
-    }
-
-    /**
-     * Return the separator for this csv import.
-     *
-     * @return string The separator for this csv import.
-     */
-    public function get_separator() {
-        return $this->separator;
-    }
-
-    /**
      * Returns the header row.
      *
      * @param string $importid A unique id for this import
@@ -373,7 +301,7 @@ class mod_attendance_importer {
     public function get_headers($importid) {
         global $CFG, $USER;
 
-        $filename = $CFG->tempdir.'/csvimport/'.'attendance'.'/'.$USER->id.'/'.$importid;
+        $filename = $CFG->tempdir.'/csvimport/attendance/'.$USER->id.'/'.$importid;
         $fp = fopen($filename, "r");
         $headers = fgetcsv($fp);
         fclose($fp);
@@ -459,7 +387,7 @@ class mod_attendance_importer {
      * @return stdClass or false The stdClass is an object containing user id, scan time and scan date.
      */
     public function next() {
-        GLOBAL $DB;
+        global $DB;
 
         $result = new stdClass();
 

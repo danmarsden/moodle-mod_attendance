@@ -45,8 +45,6 @@ class csv_upload_mapping_form extends moodleform {
      * @return void
      */
     public function definition() {
-        global $COURSE;
-
         $mform = $this->_form;
         $params = $this->_customdata;
 
