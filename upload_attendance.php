@@ -196,7 +196,7 @@ if ($mform2->is_cancelled()) {
     }
 
     // Processing the csv file data here.
-    $att->take_from_form_data($attimporter, $fromcsv = true, $att, $session);
+    $att->take_from_csv_importer($attimporter, $session);
 
     redirect($att->url_manage(), get_string('attendancesuccess', 'attendance'));
 
