@@ -80,8 +80,6 @@ class csv_upload_mapping_form extends moodleform {
         $mform->addHelpButton('encoding', 'encoding', 'attendance');
         $mform->addElement('select', 'scantime', get_string('scantime', 'attendance'), $mapfromoptions);
         $mform->setDefault('scantime', 2);
-        $mform->addElement('select', 'scandate', get_string('scandate', 'attendance'), $mapfromoptions);
-        $mform->setDefault('scandate', 3);
 
         $mform->addElement('hidden', 'id', $params['cm']);
         $mform->setType('id', PARAM_INT);

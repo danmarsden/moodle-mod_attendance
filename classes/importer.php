@@ -56,9 +56,6 @@ class mod_attendance_importer {
     /** @var int $gradeindex the column index containing the grades */
     private $scantimeindex;
 
-    /** @var int $modifiedindex the column index containing the last modified time */
-    private $scandateindex;
-
     /** @var boolean $studentcolempty checks if the student id column is empty. */
     public $studentcolempty = false;
 
@@ -68,23 +65,11 @@ class mod_attendance_importer {
     /** @var boolean $scantimecolempty checks if the scan time column is empty. */
     public $scantimecolempty = false;
 
-    /** @var boolean $scandatecolempty checks if the scan date column is empty. */
-    public $scandatecolempty = false;
-
     /** @var boolean $scantimeformaterr checks if the scantime column is formatted properly. */
     public $scantimeformaterr = false;
 
-    /** @var boolean $scandateformaterr checks if the scandate column is formatted properly. */
-    public $scandateformaterr = false;
-
-    /** @var boolean $incompatsessdate checks scandate column for records with scan dates that do not match the session date. */
-    public $incompatsessdate = false;
-
     /** @var boolean $incompatsesstime checks scantime column for records with scan times that are not within the session time. */
     public $incompatsesstime = false;
-
-    /** @var boolean $multipledays checks scandate column for multiple days of records. */
-    public $multipledays = false;
 
     /** @var boolean $scantimeerr triggers if the file is suspected of being affected by DST or the wrong file was uploaded. */
     public $scantimeerr = false;
@@ -174,18 +159,10 @@ class mod_attendance_importer {
         // Precheck the uploaded file for any errors before processing.
         $this->csvreader->init();
 
-        $sessiondate = date('n/j/Y', $sessioninfo->sessdate);
-        $firstrecord = $this->csvreader->next();
-
-        $scandate = strtotime($firstrecord[$this->scandateindex]);
-        $scandate = date('n/j/Y', $scandate);
-
         $statuses = $this->att->get_statuses();
         foreach ($statuses as $status) {
             $sessionstats[$status->id] = 0;
         }
-
-        $this->restart();
 
         while ($record = $this->csvreader->next()) {
 
@@ -199,9 +176,6 @@ class mod_attendance_importer {
             if (empty($record[$this->scantimeindex])) {
                 $this->scantimecolempty = true;
             }
-            if (empty($record[$this->scandateindex])) {
-                $this->scandatecolempty = true;
-            }
 
             // Flag an error if the scan time column is not formatted as a time.
             $t = strtotime($record[$this->scantimeindex]);
@@ -210,28 +184,8 @@ class mod_attendance_importer {
                 $this->scantimeformaterr = true;
             }
 
-            // Flag an error if the scan date column is not formatted as a time.
-            $d = strtotime($record[$this->scandateindex]);
-            if (!($record[$this->scandateindex] == date('n/j/Y', $d) ||
-                  $record[$this->scandateindex] == date('m/d/Y', $d) ||
-                  $record[$this->scandateindex] == date('n/j/y', $d) ||
-                  $record[$this->scandateindex] == date('m/d/y', $d))) {
-                $this->scandateformaterr = true;
-            }
-
-            // Flag an error if the file contains records with scan dates that do not match the session date.
-            if ($sessiondate !== date('n/j/Y', $d)) {
-                $this->incompatsessdate = true;
-            }
-
-            // Flag an error if the file contains multiple days of attendance records.
-            if ($scandate !== date('n/j/Y', $d)) {
-                $this->multipledays = true;
-            }
-
             // Prechecking the file for how many students would be marked each attendance status.
-            $scantime = $record[$this->scandateindex].' '.$record[$this->scantimeindex];
-            $scantime = strtotime($scantime);
+            $scantime = strtotime($record[$this->scantimeindex]);
             $scantime = (int) $scantime;
 
             $student = $record[$this->studentindex];
@@ -282,8 +236,8 @@ class mod_attendance_importer {
         }
 
         if ($this->studentcolempty == true   || $this->encodingcolempty == true  || $this->scantimecolempty == true  ||
-            $this->scandatecolempty == true  || $this->scantimeformaterr == true || $this->scandateformaterr == true ||
-            $this->incompatsessdate == true  || $this->multipledays == true      || $this->scantimeerr == true) {
+            $this->scantimeformaterr == true || $this->multipledays == true ||
+            $this->scantimeerr == true) {
             return false;
         }
 
@@ -349,15 +303,6 @@ class mod_attendance_importer {
     }
 
     /**
-     * Set the index mapping of the scandate column in the csv file.
-     *
-     * @param int $index The column index to map this field to
-     */
-    public function set_scandateindex($index) {
-        $this->scandateindex = $index;
-    }
-
-    /**
      * Set the database field to map the student column to.
      *
      * @param string $mapto The database field to map the student column to
@@ -400,10 +345,7 @@ class mod_attendance_importer {
             if ($userrecord = $DB->get_record('user', array($this->mapto => $student), 'id', IGNORE_MISSING)) {
                 $userid = $userrecord->id;
                 $result->user = $this->validusers[$userid];
-                $result->scandate = strtotime($record[$this->scandateindex]);
-                $result->scantime = $record[$this->scandateindex].' '.$record[$this->scantimeindex];
-                $result->scantime = strtotime($result->scantime);
-                $result->scantime = (int) $result->scantime;
+                $result->scantime = strtotime($record[$this->scantimeindex]);
                 return $result;
             }
         }

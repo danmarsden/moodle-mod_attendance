@@ -120,17 +120,15 @@ if ($mform2->is_cancelled()) {
 } else if ($data = $mform2->get_data()) {
     // Make sure there are only one to one column mappings.
     if ($data->mapfrom == $data->encoding ||
-        $data->mapfrom == $data->scantime ||
-        $data->mapfrom == $data->scandate) {
+        $data->mapfrom == $data->scantime) {
         echo $output->notification(get_string('mappingcollision', 'attendance'));
     }
 
-    // Mapping the columns for the encoding, scantime and scandate to the corresponding indices.
+    // Mapping the columns for the encoding, scantime to the corresponding indices.
     // Without this the program would not know which column contains which piece of information.
     // These must be set before prechecking the file.
     $attimporter->set_encodingindex($data->encoding);
     $attimporter->set_scantimeindex($data->scantime);
-    $attimporter->set_scandateindex($data->scandate);
 
     // Set which column in the csv file to identify the student by and set which field in the database it should map to.
     $attimporter->set_studentindex($data->mapfrom);
@@ -159,10 +157,6 @@ if ($mform2->is_cancelled()) {
             $attimporter->scantimecolempty = false;
             $missing .= get_string('scantimecolempty', 'attendance');
         }
-        if ($attimporter->scandatecolempty == true) {
-            $attimporter->scandatecolempty = false;
-            $missing .= get_string('scandatecolempty', 'attendance');
-        }
         if (!empty($missing)) {
             $missing .= get_string('missing', 'attendance');
             redirect($thisurl, $missing, null, \core\output\notification::NOTIFY_ERROR);
@@ -171,10 +165,6 @@ if ($mform2->is_cancelled()) {
         if ($attimporter->scantimeformaterr == true) {
             $attimporter->scantimeformaterr = false;
             $err .= get_string('scantimeformaterr', 'attendance');
-        }
-        if ($attimporter->scandateformaterr == true) {
-            $attimporter->scandateformaterr = false;
-            $err .= get_string('scandateformaterr', 'attendance');
         }
         if ($attimporter->multipledays == true) {
             $attimporter->multipledays = false;
