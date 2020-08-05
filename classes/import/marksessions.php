@@ -22,9 +22,13 @@
  * @copyright based on work by 2012 NetSpot {@link http://www.netspot.com.au}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later */
 
+namespace mod_attendance\import;
+
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->libdir . '/csvlib.class.php');
+use csv_import_reader;
+use mod_attendance_structure;
+use stdClass;
 
 /**
  * Class for the CSV file importer.
@@ -34,7 +38,7 @@ require_once($CFG->libdir . '/csvlib.class.php');
  * @copyright based on work by 2012 NetSpot {@link http://www.netspot.com.au}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_attendance_importer {
+class marksessions {
     /** @var string $importid - unique id for this import operation - must be passed between requests */
     public $importid;
 
@@ -90,7 +94,7 @@ class mod_attendance_importer {
     private $separator;
 
     /** @var array $headers Column names for the data. */
-    protected $headers;
+    public $headers;
 
     /** @var array $previewdata A subsection of the csv imported data. */
     protected $previewdata;
@@ -103,23 +107,22 @@ class mod_attendance_importer {
      * @param string $encoding contains the encoding format of the csv file
      * @param string $separator identifies the type of separator used in the csv file.
      */
-    public function __construct($importid, $att, $encoding = 'utf-8', $separator = 'comma') {
+    public function __construct($importid, $att, $encoding = 'utf-8', $separator = 'comma', $data = null) {
+        global $CFG;
+
+        require_once($CFG->libdir . '/csvlib.class.php');
         $this->importid = $importid;
         $this->att = $att;
         $this->encoding = $encoding;
         $this->separator = $separator;
-
-    }
-
-    /**
-     * Parse a csv file and save the content to a temp file.
-     * Should be called before init().
-     *
-     * @param string $csvdata The csv data
-     */
-    public function parsecsv($csvdata) {
         $this->csvreader = new csv_import_reader($this->importid, 'attendance');
-        $this->csvreader->load_csv_content($csvdata, $this->encoding, $this->separator);
+        if (empty($data)) {
+            $this->csvreader->init();
+        } else {
+            $this->csvreader->load_csv_content($data, $this->encoding, $this->separator);
+            $this->csvreader->init();
+        }
+        $this->headers = $this->csvreader->get_columns();
     }
 
     /**
@@ -148,9 +151,7 @@ class mod_attendance_importer {
     public function init() {
         global $DB;
 
-        if ($this->csvreader == null) {
-            $this->csvreader = new csv_import_reader($this->importid, 'attendance');
-        }
+
 
         $sessioninfo = $this->att->get_session_info($this->att->pageparams->sessionid);
 
@@ -236,7 +237,7 @@ class mod_attendance_importer {
         }
 
         if ($this->studentcolempty == true   || $this->encodingcolempty == true  || $this->scantimecolempty == true  ||
-            $this->scantimeformaterr == true || $this->multipledays == true ||
+            $this->scantimeformaterr == true ||
             $this->scantimeerr == true) {
             return false;
         }
@@ -244,26 +245,6 @@ class mod_attendance_importer {
         $this->restart();
 
         return true;
-    }
-
-    /**
-     * Returns the header row.
-     *
-     * @param string $importid A unique id for this import
-     * @return array returns headers parameter for this class.
-     */
-    public function get_headers($importid) {
-        global $CFG, $USER;
-
-        $filename = $CFG->tempdir.'/csvimport/attendance/'.$USER->id.'/'.$importid;
-        $fp = fopen($filename, "r");
-        $headers = fgetcsv($fp);
-        fclose($fp);
-        if ($headers === false) {
-            return false;
-        }
-
-        return $headers;
     }
 
     /**

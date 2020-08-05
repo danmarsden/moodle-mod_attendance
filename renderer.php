@@ -472,7 +472,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $urlparams = array('id' => $takedata->cm->id,
             'sessionid' => $takedata->pageparams->sessionid,
             'grouptype' => $takedata->pageparams->grouptype);
-        $url = new moodle_url('/mod/attendance/upload_attendance.php', $urlparams);
+        $url = new moodle_url('/mod/attendance/import/marksessions.php', $urlparams);
         $return = $this->output->single_button($url, get_string('uploadattendance', 'attendance'));
 
         $table = new html_table();

@@ -21,7 +21,7 @@
  * @copyright 2019 Jonathan Chan <jonathan.chan@sta.uwi.edu>
  * @copyright based on work by 2012 NetSpot {@link http://www.netspot.com.au}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later */
-namespace mod_attendance\import;
+namespace mod_attendance\form\import;
 
 defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
 
@@ -37,7 +37,7 @@ require_once($CFG->libdir.'/formslib.php');
  * @copyright based on work by 2012 NetSpot {@link http://www.netspot.com.au}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class csv_upload_mapping_form extends moodleform {
+class marksessions_confirm extends moodleform {
 
     /**
      * Called to define this moodle form
@@ -45,21 +45,19 @@ class csv_upload_mapping_form extends moodleform {
      * @return void
      */
     public function definition() {
+        $importer = $this->_customdata['importer'];
+
         $mform = $this->_form;
-        $params = $this->_customdata;
+        $mform->addElement('hidden', 'confirm', 1);
+        $mform->setType('confirm', PARAM_BOOL);
+        $mform->addElement('hidden', 'importid', $importer->get_importid());
+        $mform->setType('importid', PARAM_INT);
 
-        $mform->addElement('header', 'general', get_string('identifier', 'attendance'));
+        $foundheaders = $importer->list_found_headers();
 
-        // This is the array or column headers from the uploaded csv file.
-        $header = $params['header'];
-        // This allows the user to choose which column of the csv file will be used to identify the students.
-        $mapfromoptions = array();
-        if ($header) {
-            foreach ($header as $i => $h) {
-                $mapfromoptions[$i] = s($h);
-            }
-        }
-        $mform->addElement('select', 'mapfrom', get_string('mapfrom', 'attendance'), $mapfromoptions);
+        $foundheaders[- 1] = get_string('none');
+
+        $mform->addElement('select', 'mapfrom', get_string('mapfrom', 'attendance'), $foundheaders);
         $mform->addHelpButton('mapfrom', 'mapfrom', 'attendance');
         // This allows the user to choose which field in the user database the identifying column will map to.
         $maptooptions = array(
@@ -75,13 +73,14 @@ class csv_upload_mapping_form extends moodleform {
         $mform->addElement('header', 'column_map', get_string('columnmap', 'attendance'));
         $mform->addHelpButton('column_map', 'columnmap', 'attendance');
         // The user maps Encoding, Scan Time and Scan Date to the corresponding columns in the csv file.
-        $mform->addElement('select', 'encoding', get_string('encoding', 'attendance'), $mapfromoptions);
+        $mform->addElement('select', 'encoding', get_string('encoding', 'attendance'), $foundheaders);
         $mform->setDefault('encoding', 1);
         $mform->addHelpButton('encoding', 'encoding', 'attendance');
-        $mform->addElement('select', 'scantime', get_string('scantime', 'attendance'), $mapfromoptions);
+        $mform->addElement('select', 'scantime', get_string('scantime', 'attendance'), $foundheaders);
+        $mform->setDefault('scantime', 2);
         $mform->setDefault('scantime', 2);
 
-        $mform->addElement('hidden', 'id', $params['cm']);
+        $mform->addElement('hidden', 'id', $params['id']);
         $mform->setType('id', PARAM_INT);
         $mform->addElement('hidden', 'sessionid', $params['sessionid']);
         $mform->setType('sessionid', PARAM_INT);

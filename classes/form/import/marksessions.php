@@ -21,7 +21,7 @@
  * @copyright 2019 Jonathan Chan <jonathan.chan@sta.uwi.edu>
  * @copyright based on work by 2012 NetSpot {@link http://www.netspot.com.au}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later */
-namespace mod_attendance\import;
+namespace mod_attendance\form\import;
 
 defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
 
@@ -37,7 +37,7 @@ require_once($CFG->libdir.'/formslib.php');
  * @copyright based on work by 2012 NetSpot {@link http://www.netspot.com.au}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class csv_upload_form extends moodleform {
+class marksessions extends moodleform {
 
     /**
      * Called to define this moodle form
@@ -79,7 +79,7 @@ class csv_upload_form extends moodleform {
         $mform->addHelpButton('previewrows', 'previewrows', 'attendance');
         $mform->setType('previewrows', PARAM_INT);
 
-        $mform->addElement('hidden', 'id', $params['cm']);
+        $mform->addElement('hidden', 'id', $params['id']);
         $mform->setType('id', PARAM_INT);
         $mform->addElement('hidden', 'sessionid', $params['sessionid']);
         $mform->setType('sessionid', PARAM_INT);
