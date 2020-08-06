@@ -18,8 +18,7 @@
  * This file contains the form used to upload a csv attendance file to automatically update attendance records.
  *
  * @package   mod_attendance
- * @copyright 2019 Jonathan Chan <jonathan.chan@sta.uwi.edu>
- * @copyright based on work by 2012 NetSpot {@link http://www.netspot.com.au}
+ * @copyright 2020 Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later */
 namespace mod_attendance\form\import;
 
@@ -30,11 +29,10 @@ use moodleform;
 require_once($CFG->libdir.'/formslib.php');
 
 /**
- * Class for displaying the csv upload form.
+ * Mark attendance sessions confirm csv upload.
  *
  * @package   mod_attendance
- * @copyright 2019 Jonathan Chan <jonathan.chan@sta.uwi.edu>
- * @copyright based on work by 2012 NetSpot {@link http://www.netspot.com.au}
+ * @copyright 2020 Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class marksessions_confirm extends moodleform {
@@ -45,7 +43,10 @@ class marksessions_confirm extends moodleform {
      * @return void
      */
     public function definition() {
+        $params = $this->_customdata;
         $importer = $this->_customdata['importer'];
+
+        $statusset = array();
 
         $mform = $this->_form;
         $mform->addElement('hidden', 'confirm', 1);
@@ -55,30 +56,71 @@ class marksessions_confirm extends moodleform {
 
         $foundheaders = $importer->list_found_headers();
 
-        $foundheaders[- 1] = get_string('none');
-
-        $mform->addElement('select', 'mapfrom', get_string('mapfrom', 'attendance'), $foundheaders);
-        $mform->addHelpButton('mapfrom', 'mapfrom', 'attendance');
+        // Add user mapping.
+        $mform->addElement('select', 'userfrom', get_string('userimportfield', 'attendance'), $foundheaders);
+        $mform->addHelpButton('userfrom', 'userimportfield', 'attendance');
         // This allows the user to choose which field in the user database the identifying column will map to.
-        $maptooptions = array(
+        $useroptions = array(
             'userid'       => get_string('userid', 'attendance'),
             'username'     => get_string('username'),
-            'useridnumber' => get_string('idnumber'),
-            'useremail'    => get_string('email')
+            'idnumber' => get_string('idnumber'),
+            'email'    => get_string('email')
         );
-        $mform->addElement('select', 'mapto', get_string('mapto', 'attendance'), $maptooptions);
-        $mform->setDefault('mapto', 'useridnumber');
-        $mform->addHelpButton('mapto', 'mapto', 'attendance');
+        $mform->addElement('select', 'userto', get_string('userimportto', 'attendance'), $useroptions);
 
-        $mform->addElement('header', 'column_map', get_string('columnmap', 'attendance'));
-        $mform->addHelpButton('column_map', 'columnmap', 'attendance');
-        // The user maps Encoding, Scan Time and Scan Date to the corresponding columns in the csv file.
-        $mform->addElement('select', 'encoding', get_string('encoding', 'attendance'), $foundheaders);
-        $mform->setDefault('encoding', 1);
-        $mform->addHelpButton('encoding', 'encoding', 'attendance');
+        // Check if we can set an easy default value.
+        foreach (array_keys($useroptions) as $o) {
+            if (in_array($o, $foundheaders)) {
+                $mform->setDefault('userto', $o);
+                $mform->setDefault('userfrom', $o);
+                break;
+            }
+        }
+
+        $mform->addHelpButton('userto', 'userimportto', 'attendance');
+
+        // Below options need a "none" option in the headers.
+        $foundheaders[- 1] = get_string('notset','mod_attendance');
+        ksort($foundheaders);
+
+        // Add scan time mapping.
         $mform->addElement('select', 'scantime', get_string('scantime', 'attendance'), $foundheaders);
-        $mform->setDefault('scantime', 2);
-        $mform->setDefault('scantime', 2);
+        $mform->addHelpButton('scantime', 'scantime', 'attendance');
+        $mform->setDefault('scantime', -1);
+
+        // Add status mapping.
+        $mform->addElement('select', 'status', get_string('importstatus', 'attendance'), $foundheaders);
+        $mform->addHelpButton('status', 'importstatus', 'attendance');
+        //$mform->setDefault('status', 1);
+        $mform->disabledif('status', 'scantime', 'noteq', -1);
+        $mform->disabledif('scantime', 'status', 'noteq', -1);
+
+        // Try to set a useful default value for scantime or status.
+        $key = array_search('status', $foundheaders);
+
+        if ($key !== false) {
+            // Status is passed in CSV - set that as default.
+            $mform->setDefault('status', $key);
+            $mform->setDefault('scantime', -1);
+        } else {
+            $keyscan = array_search('scantime', $foundheaders);
+            if ($keyscan !== false) {
+                // The Scantime var exists in the csv.
+                $mform->setDefault('status', -1);
+                $mform->setDefault('scantime', $keyscan);
+            } else {
+                $mform->setDefault('status', -1);
+                $mform->setDefault('scantime', -1);
+            }
+
+        }
+        foreach (array_keys($useroptions) as $o) {
+            if (in_array($o, $foundheaders)) {
+                $mform->setDefault('userto', $o);
+                $mform->setDefault('userfrom', $o);
+                break;
+            }
+        }
 
         $mform->addElement('hidden', 'id', $params['id']);
         $mform->setType('id', PARAM_INT);
@@ -86,9 +128,10 @@ class marksessions_confirm extends moodleform {
         $mform->setType('sessionid', PARAM_INT);
         $mform->addElement('hidden', 'grouptype', $params['grouptype']);
         $mform->setType('grouptype', PARAM_INT);
-        $mform->addElement('hidden', 'importid', $params['importid']);
+        $mform->addElement('hidden', 'importid', $importer->get_importid());
         $mform->setType('importid', PARAM_INT);
-        $mform->setConstant('importid', $params['importid']);
+        $mform->setConstant('importid', $importer->get_importid());
+
         $this->add_action_buttons(true, get_string('uploadattendance', 'attendance'));
     }
 }

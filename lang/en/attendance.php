@@ -437,14 +437,8 @@ $string['restoredefaults'] = 'Restore defaults';
 $string['resultsperpage'] = 'Results per page';
 $string['resultsperpage_desc'] = 'Number of students displayed on a page';
 $string['save'] = 'Save attendance';
-$string['scantime'] = 'Scan Time';
-$string['scantimecolempty'] = 'The scan time column is missing. <br>';
-$string['scantimeformaterr'] = 'The scan time column is not formatted properly. Please ensure the scan times are in the format H:M:S A, before re-uploading the file.  <br><br>';
-$string['scantimeerr'] = 'The majority of the class was not classified as {$a}. This may be because: <br>
-- the wrong file was uploaded for this session time <br>
-- the scanner was uncalibrated <br>
-- the scanner was affected by Daylight Savings Time (DST). <br>
-Please ensure the file is correct before re-uploading. If the scanner was either uncalibrated or affected by DST, please manually enter the attendance for this session. <br><br> ';
+$string['scantime'] = 'Scan time';
+$string['scantime_help'] = 'This allows a timestamp to be included in the import file - it will attempt to convert the timestamp passed using the PHP strtotime function and then use attendance status settings to decide which status to set for the user';
 $string['search:activity'] = 'Attendance - activity information';
 $string['session'] = 'Session';
 $string['session_help'] = 'Session';
@@ -614,3 +608,10 @@ $string['currentlyselectedusers'] = 'Currently selected users';
 $string['usemessageform'] = 'or use the form below to send a message to the selected students';
 $string['backtoparticipants'] = 'Back to participants list';
 $string['previewhtml'] = 'HTML format preview';
+$string['userimportfield'] = 'External user field';
+$string['userimportfield_help'] = 'Field from uploaded CSV that contains user identifier';
+$string['userimportto'] = 'Moodle user field';
+$string['userimportto_help'] = 'Moodle field that matches the data from the CSV export';
+$string['notset'] = 'not set';
+$string['importstatus'] = 'Status field';
+$string['importstatus_help'] = 'This allows a status value to be included in the import - eg values like P, L, or A';

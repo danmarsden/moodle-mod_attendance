@@ -85,6 +85,8 @@ class marksessions extends moodleform {
         $mform->setType('sessionid', PARAM_INT);
         $mform->addElement('hidden', 'grouptype', $params['grouptype']);
         $mform->setType('grouptype', PARAM_INT);
+        $mform->addElement('hidden', 'confirm', 0);
+        $mform->setType('confirm', PARAM_BOOL);
         $this->add_action_buttons(true, get_string('uploadattendance', 'attendance'));
     }
 }

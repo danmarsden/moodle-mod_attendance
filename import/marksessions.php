@@ -69,7 +69,7 @@ $form = null;
 if (optional_param('needsconfirm', 0, PARAM_BOOL)) {
     $form = new \mod_attendance\form\import\marksessions($url->out(false), $formparams);
 } else if (optional_param('confirm', 0, PARAM_BOOL)) {
-    $importer = new \mod_attendance\import\marksessions();
+    $importer = new \mod_attendance\import\marksessions(null, $att);
     $formparams['importer'] = $importer;
     $form = new \mod_attendance\form\import\marksessions_confirm(null, $formparams);
 } else {
@@ -85,10 +85,10 @@ if (optional_param('needsconfirm', 0, PARAM_BOOL)) {
  } else if ($data = $form->get_data()) {
      if ($data->confirm) {
          $importid = $data->importid;
-         $importer = new \mod_attendance\import\marksessions(null, null, null, $importid, $data, true);
+         $importer = new \mod_attendance\import\marksessions(null, $att, null, null, $importid, $data, true);
          $error = $importer->get_error();
          if ($error) {
-             $form = new \mod_attendance\form\import\marksessions($url->out(false));
+             $form = new \mod_attendance\form\import\marksessions($url->out(false), $formparams);
              $form->set_import_error($error);
          } else {
              $sessions = $importer->import();
@@ -100,8 +100,8 @@ if (optional_param('needsconfirm', 0, PARAM_BOOL)) {
      } else {
          $text = $form->get_file_content('attendancefile');
          $encoding = $data->encoding;
-         $delimiter = $data->delimiter_name;
-         $importer = new \mod_attendance\import\marksessions($text, $encoding, $delimiter, 0, null, true);
+         $delimiter = $data->separator;
+         $importer = new \mod_attendance\import\marksessions($text, $att, $encoding, $delimiter, 0, null, true);
          $formparams['importer'] = $importer;
          $confirmform = new \mod_attendance\form\import\marksessions_confirm(null, $formparams);
          $form = $confirmform;
