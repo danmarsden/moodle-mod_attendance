@@ -105,11 +105,13 @@ class marksessions {
             return array(
                 'user' => $data->header0,
                 'scantime' => $data->header1,
+                'status' => $data->header2
             );
         } else {
             return array(
                 'user' => 0,
                 'scantime' => 1,
+                'status' => 2
             );
         }
     }
@@ -141,11 +143,9 @@ class marksessions {
      */
     public function __construct($text = null, $att, $encoding = null, $delimiter = null, $importid = 0,
                                 $mappingdata = null, $useprogressbar = false) {
-        global $CFG;
+        global $CFG, $USER;
 
         require_once($CFG->libdir . '/csvlib.class.php');
-
-        $pluginconfig = get_config('attendance');
 
         $type = 'marksessions';
 
@@ -181,80 +181,71 @@ class marksessions {
 
         $this->useprogressbar = $useprogressbar;
 
-        $sessions = array();
+        $sesslog = array();
+
+        $validusers = $this->att->get_users($this->att->pageparams->grouptype, 0);
+        $users = array();
+
+        // Re-key validusers based on the identifier used by import.
+        if (!empty($mappingdata) && $mappingdata->userto !== 'id') {
+            foreach ($validusers as $u) {
+                if (!empty($u->{$mappingdata->userto})) {
+                    $users[$u->{$mappingdata->userto}] = $u;
+                }
+            }
+        } else {
+            $users = $validusers;
+        }
+
+        $statuses = $this->att->get_statuses();
+
+        $sessioninfo = $this->att->get_session_info($this->att->pageparams->sessionid);
 
         while ($row = $this->importer->next()) {
             // This structure mimics what the UI form returns.
+            if (empty($mappingdata)) {
+                // Precheck - just return for now - would be nice to look at adding preview option in future.
+                return;
+            }
             $mapping = $this->read_mapping_data($mappingdata);
 
-            $session = new stdClass();
-            $session->course = $this->get_column_data($row, $mapping['course']);
-            if (empty($session->course)) {
-                \mod_attendance_notifyqueue::notify_problem(get_string('error:sessioncourseinvalid', 'attendance'));
+            // Get user.
+            $extuser = $this->get_column_data($row, $mapping['user']);
+            if (empty($users[$extuser])) {
+                $a = new \stdClass();
+                $a->extfield = $extuser;
+                $a->userfield = $mappingdata->userto;
+                \mod_attendance_notifyqueue::notify_problem(get_string('error:usernotfound', 'attendance', $a));
                 continue;
             }
-
-            // Handle multiple group assignments per session. Expect semicolon separated group names.
-            $groups = $this->get_column_data($row, $mapping['groups']);
-            if (! empty($groups)) {
-                $session->groups = explode(';', $groups);
-                $session->sessiontype = \mod_attendance_structure::SESSION_GROUP;
-            } else {
-                $session->sessiontype = \mod_attendance_structure::SESSION_COMMON;
-            }
-
-            // Expect standardised date format, eg YYYY-MM-DD.
-            $sessiondate = strtotime($this->get_column_data($row, $mapping['sessiondate']));
-            if ($sessiondate === false) {
-                \mod_attendance_notifyqueue::notify_problem(get_string('error:sessiondateinvalid', 'attendance'));
+            $userid = $users[$extuser]->id;
+            if (isset($sesslog[$userid])) {
+                \mod_attendance_notifyqueue::notify_problem(get_string('error:userduplicate', 'attendance', $extuser));
                 continue;
             }
-            $session->sessiondate = $sessiondate;
+            $sesslog[$userid] = new stdClass();
+            $sesslog[$userid]->studentid = $userid;
+            $sesslog[$userid]->statusset = $statuses;
+            $sesslog[$userid]->remarks = '';
+            $sesslog[$userid]->sessionid = $this->att->pageparams->sessionid;
+            $sesslog[$userid]->timetaken = time();
+            $sesslog[$userid]->takenby = $USER->id;
 
-            // Expect standardised time format, eg HH:MM.
-            $from = $this->get_column_data($row, $mapping['from']);
-            if (empty($from)) {
-                \mod_attendance_notifyqueue::notify_problem(get_string('error:sessionstartinvalid', 'attendance'));
-                continue;
+            $scantime = $this->get_column_data($row, $mapping['scantime']);
+            if (!empty($scantime)) {
+                $t = strtotime($scantime);
+                if ($t === false) {
+                    $a = new \stdClass();
+                    $a->extfield = $extuser;
+                    $a->scantime = $scantime;
+                    \mod_attendance_notifyqueue::notify_problem(get_string('error:timenotreadable', 'attendance', $a));
+                    continue;
+                }
+
+                $sesslog[$userid]->statusid = attendance_session_get_highest_status($this->att, $sessioninfo, $t);
             }
-            $from = explode(':', $from);
-            $session->sestime['starthour'] = $from[0];
-            $session->sestime['startminute'] = $from[1];
-
-            $to = $this->get_column_data($row, $mapping['to']);
-            if (empty($to)) {
-                \mod_attendance_notifyqueue::notify_problem(get_string('error:sessionendinvalid', 'attendance'));
-                continue;
-            }
-            $to = explode(':', $to);
-            $session->sestime['endhour'] = $to[0];
-            $session->sestime['endminute'] = $to[1];
-
-            // Wrap the plain text description in html tags.
-            $session->sdescription['text'] = '<p>' . $this->get_column_data($row, $mapping['description']) . '</p>';
-            $session->sdescription['format'] = FORMAT_HTML;
-            $session->sdescription['itemid'] = 0;
-            $session->passwordgrp = $this->get_column_data($row, $mapping['passwordgrp']);
-            $session->subnet = $this->get_column_data($row, $mapping['subnet']);
-            // Set session subnet restriction. Use the default activity level subnet if there isn't one set for this session.
-            if (empty($session->subnet)) {
-                $session->usedefaultsubnet = '1';
-            } else {
-                $session->usedefaultsubnet = '';
-            }
-
-            if ($mapping['studentscanmark'] == -1) {
-                $session->studentscanmark = $pluginconfig->studentscanmark_default;
-            } else {
-                $session->studentscanmark = $this->get_column_data($row, $mapping['studentscanmark']);
-            }
-
-
-            $session->statusset = 0;
-
-            $sessions[] = $session;
         }
-        $this->sessions = $sessions;
+        $this->sessions = $sesslog;
 
         $this->importer->close();
         if ($this->sessions == null) {
@@ -290,97 +281,6 @@ class marksessions {
      * @return void
      */
     public function import() {
-        global $DB;
-
-        // Count of sessions added.
-        $okcount = 0;
-
-        foreach ($this->sessions as $session) {
-            $groupids = array();
-            // Check course shortname matches.
-            if ($DB->record_exists('course', array(
-                'shortname' => $session->course
-            ))) {
-                // Get course.
-                $course = $DB->get_record('course', array(
-                    'shortname' => $session->course
-                ), '*', MUST_EXIST);
-
-                // Check course has activities.
-                if ($DB->record_exists('attendance', array(
-                    'course' => $course->id
-                ))) {
-                    // Translate group names to group IDs. They are unique per course.
-                    if ($session->sessiontype === \mod_attendance_structure::SESSION_GROUP) {
-                        foreach ($session->groups as $groupname) {
-                            $gid = groups_get_group_by_name($course->id, $groupname);
-                            if ($gid === false) {
-                                \mod_attendance_notifyqueue::notify_problem(get_string('sessionunknowngroup',
-                                    'attendance', $groupname));
-                            } else {
-                                $groupids[] = $gid;
-                            }
-                        }
-                        $session->groups = $groupids;
-                    }
-
-                    // Get activities in course.
-                    $activities = $DB->get_recordset('attendance', array(
-                        'course' => $course->id
-                    ), 'id', 'id');
-
-                    foreach ($activities as $activity) {
-                        // Build the session data.
-                        $cm = get_coursemodule_from_instance('attendance', $activity->id, $course->id);
-                        if (!empty($cm->deletioninprogress)) {
-                            // Don't do anything if this attendance is in recycle bin.
-                            continue;
-                        }
-                        $att = new mod_attendance_structure($activity, $cm, $course);
-                        $sessions = attendance_construct_sessions_data_for_add($session, $att);
-
-                        foreach ($sessions as $index => $sess) {
-                            // Check for duplicate sessions.
-                            if ($this->session_exists($sess)) {
-                                mod_attendance_notifyqueue::notify_message(get_string('sessionduplicate', 'attendance', (array(
-                                    'course' => $session->course,
-                                    'activity' => $cm->name
-                                ))));
-                                unset($sessions[$index]);
-                            } else {
-                                $okcount ++;
-                            }
-                        }
-                        if (! empty($sessions)) {
-                            $att->add_sessions($sessions);
-                        }
-                    }
-                    $activities->close();
-                } else {
-                    mod_attendance_notifyqueue::notify_problem(get_string('error:coursehasnoattendance',
-                        'attendance', $session->course));
-                }
-            } else {
-                mod_attendance_notifyqueue::notify_problem(get_string('error:coursenotfound', 'attendance', $session->course));
-            }
-        }
-
-        $message = get_string('sessionsgenerated', 'attendance', $okcount);
-        if ($okcount < 1) {
-            mod_attendance_notifyqueue::notify_message($message);
-        } else {
-            mod_attendance_notifyqueue::notify_success($message);
-        }
-
-        // Trigger a sessions imported event.
-        $event = \mod_attendance\event\sessions_imported::create(array(
-            'objectid' => 0,
-            'context' => \context_system::instance(),
-            'other' => array(
-                'count' => $okcount
-            )
-        ));
-
-        $event->trigger();
+        $this->att->save_log($this->sessions);
     }
 }

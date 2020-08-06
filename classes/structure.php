@@ -792,7 +792,7 @@ class mod_attendance_structure {
      * @throws coding_exception
      * @throws dml_exception
      */
-    private function save_log($sesslog) {
+    public function save_log($sesslog) {
         global $DB, $USER;
         // Get existing session log.
         $dbsesslog = $this->get_session_log($this->pageparams->sessionid);

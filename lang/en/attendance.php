@@ -615,3 +615,6 @@ $string['userimportto_help'] = 'Moodle field that matches the data from the CSV 
 $string['notset'] = 'not set';
 $string['importstatus'] = 'Status field';
 $string['importstatus_help'] = 'This allows a status value to be included in the import - eg values like P, L, or A';
+$string['error:usernotfound'] = 'A user with the {$a->userfield} set to {$a->extuser} could not be found';
+$string['error:timenotreadable'] = 'User: {$a->extuser} has a scantime that could not be converted by strtotime: {$a->scantime}';
+$string['error:userduplicate'] = 'User {$a} was found twice in the import. please only include one record per user.';
