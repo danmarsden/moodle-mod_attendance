@@ -272,7 +272,6 @@ class marksessions {
                 $this->progress = new \core\progress\display_if_slow(get_string('processingfile', 'attendance'));
                 $this->progress->start_html();
             } else {
-                // Avoid html output on CLI scripts.
                 $this->progress = new \core\progress\none();
             }
             $this->progress->start_progress('', count($this->sessions));
