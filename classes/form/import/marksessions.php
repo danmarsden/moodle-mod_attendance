@@ -74,11 +74,6 @@ class marksessions extends moodleform {
         $mform->addHelpButton('separator', 'separator', 'grades');
         $mform->setDefault('separator', 'comma');
 
-        $options = array('10' => 10, '20' => 20, '100' => 100, '1000' => 1000, '100000' => 100000);
-        $mform->addElement('select', 'previewrows', get_string('previewrows', 'attendance'), $options);
-        $mform->addHelpButton('previewrows', 'previewrows', 'attendance');
-        $mform->setType('previewrows', PARAM_INT);
-
         $mform->addElement('hidden', 'id', $params['id']);
         $mform->setType('id', PARAM_INT);
         $mform->addElement('hidden', 'sessionid', $params['sessionid']);

@@ -2013,23 +2013,4 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
         return $this->output->user_picture($user, $opts);
     }
-
-    /**
-     * A renderer for the CSV file preview.
-     *
-     * @param array $header Column headers from the CSV file.
-     * @param array $data The data from the CSV file.
-     * @return string html to be displayed.
-     */
-    public function preview_page($header, $data) {
-
-        $html = $this->output->heading(get_string('preview', 'attendance'));
-
-        $table = new html_table();
-        $table->head = $header;
-        $table->data = $data;
-        $html .= html_writer::table($table);
-
-        return $html;
-    }
 }
