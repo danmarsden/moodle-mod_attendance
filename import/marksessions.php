@@ -78,40 +78,40 @@ if (optional_param('needsconfirm', 0, PARAM_BOOL)) {
     $form = new \mod_attendance\form\import\marksessions($url->out(false), $formparams);
 }
 
- if ($form->is_cancelled()) {
-     redirect(new moodle_url('/mod/attendance/take.php',
-         array('id' => $cm->id,
+if ($form->is_cancelled()) {
+    redirect(new moodle_url('/mod/attendance/take.php',
+             array('id' => $cm->id,
              'sessionid' => $pageparams->sessionid,
              'grouptype' => $pageparams->grouptype)));
-     return;
- } else if ($data = $form->get_data()) {
-     if ($data->confirm) {
-         $importid = $data->importid;
-         $importer = new \mod_attendance\import\marksessions(null, $att, null, null, $importid, $data, true);
-         $error = $importer->get_error();
-         if ($error) {
-             $form = new \mod_attendance\form\import\marksessions($url->out(false), $formparams);
-             $form->set_import_error($error);
-         } else {
-             echo $output->header();
-             $sessions = $importer->import();
-             mod_attendance_notifyqueue::show();
-             $url = new moodle_url('/mod/attendance/manage.php', array('id' => $att->cmid));
-             echo $output->continue_button($url);
-             echo $output->footer();
-             die();
-         }
-     } else {
-         $text = $form->get_file_content('attendancefile');
-         $encoding = $data->encoding;
-         $delimiter = $data->separator;
-         $importer = new \mod_attendance\import\marksessions($text, $att, $encoding, $delimiter, 0, null, true);
-         $formparams['importer'] = $importer;
-         $confirmform = new \mod_attendance\form\import\marksessions_confirm(null, $formparams);
-         $form = $confirmform;
-         $pagetitle = get_string('confirmcolumnmappings', 'attendance');
-     }
- }
+    return;
+} else if ($data = $form->get_data()) {
+    if ($data->confirm) {
+        $importid = $data->importid;
+        $importer = new \mod_attendance\import\marksessions(null, $att, null, null, $importid, $data, true);
+        $error = $importer->get_error();
+        if ($error) {
+            $form = new \mod_attendance\form\import\marksessions($url->out(false), $formparams);
+            $form->set_import_error($error);
+        } else {
+            echo $output->header();
+            $sessions = $importer->import();
+            mod_attendance_notifyqueue::show();
+            $url = new moodle_url('/mod/attendance/manage.php', array('id' => $att->cmid));
+            echo $output->continue_button($url);
+            echo $output->footer();
+            die();
+        }
+    } else {
+        $text = $form->get_file_content('attendancefile');
+        $encoding = $data->encoding;
+        $delimiter = $data->separator;
+        $importer = new \mod_attendance\import\marksessions($text, $att, $encoding, $delimiter, 0, null, true);
+        $formparams['importer'] = $importer;
+        $confirmform = new \mod_attendance\form\import\marksessions_confirm(null, $formparams);
+        $form = $confirmform;
+        $pagetitle = get_string('confirmcolumnmappings', 'attendance');
+    }
+}
 
 // Output for the file upload form starts here.
 echo $output->header();

@@ -199,7 +199,7 @@ class marksessions {
 
         $statuses = $this->att->get_statuses();
         $statusmap = array();
-        foreach($statuses as $st) {
+        foreach ($statuses as $st) {
             $statusmap[$st->acronym] = $st->id;
         }
 
@@ -258,8 +258,6 @@ class marksessions {
                     \mod_attendance_notifyqueue::notify_problem(get_string('error:statusnotfound', 'attendance', $a));
                     continue;
                 }
-
-
             }
         }
         $this->sessions = $sesslog;

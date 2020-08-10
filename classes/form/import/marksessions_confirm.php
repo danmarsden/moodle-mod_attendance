@@ -78,7 +78,7 @@ class marksessions_confirm extends moodleform {
         $mform->addHelpButton('userto', 'userimportto', 'attendance');
 
         // Below options need a "none" option in the headers.
-        $foundheaders[- 1] = get_string('notset','mod_attendance');
+        $foundheaders[- 1] = get_string('notset', 'mod_attendance');
         ksort($foundheaders);
 
         // Add scan time mapping.
@@ -89,7 +89,6 @@ class marksessions_confirm extends moodleform {
         // Add status mapping.
         $mform->addElement('select', 'status', get_string('importstatus', 'attendance'), $foundheaders);
         $mform->addHelpButton('status', 'importstatus', 'attendance');
-        //$mform->setDefault('status', 1);
         $mform->disabledif('status', 'scantime', 'noteq', -1);
         $mform->disabledif('scantime', 'status', 'noteq', -1);
 
