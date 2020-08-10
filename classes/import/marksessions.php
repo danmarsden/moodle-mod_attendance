@@ -103,9 +103,9 @@ class marksessions {
     protected function read_mapping_data($data) {
         if ($data) {
             return array(
-                'user' => $data->header0,
-                'scantime' => $data->header1,
-                'status' => $data->header2
+                'user' => $data->userfrom,
+                'scantime' => $data->scantime,
+                'status' => $data->status
             );
         } else {
             return array(
@@ -282,5 +282,6 @@ class marksessions {
      */
     public function import() {
         $this->att->save_log($this->sessions);
+        \mod_attendance_notifyqueue::notify_success(get_string('sessionsupdated', 'mod_attendance'));
     }
 }

@@ -89,4 +89,14 @@ class marksessions extends moodleform {
         $mform->setType('confirm', PARAM_BOOL);
         $this->add_action_buttons(true, get_string('uploadattendance', 'attendance'));
     }
+    /**
+     * Display an error on the import form.
+     *
+     * @param string $msg
+     */
+    public function set_import_error($msg) {
+        $mform = $this->_form;
+
+        $mform->setElementError('attendancefile', $msg);
+    }
 }

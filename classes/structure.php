@@ -739,53 +739,6 @@ class mod_attendance_structure {
     }
 
     /**
-     * Take attendance from csv file.
-     *
-     * @param mod_attendance_importer $attimporter
-     * @param stdClass $attforsession
-     * @throws coding_exception
-     * @throws dml_exception
-     */
-    public function take_from_csv_importer($attimporter, $attforsession) {
-        global $USER;
-        $statuses = implode(',', array_keys( (array)$this->get_statuses() ));
-        $now = time();
-        $sesslog = array();
-
-        $validusers = $this->get_users($this->pageparams->grouptype, 0);
-
-        // For loop generating the data to insert into the attendance_log database.
-        foreach ($validusers as $student) {
-
-            $sid = $student->id;
-            $sesslog[$sid] = new stdClass();
-            $sesslog[$sid]->studentid = $sid;
-            $sesslog[$sid]->statusset = $statuses;
-            $sesslog[$sid]->remarks = '';
-            $sesslog[$sid]->sessionid = $this->pageparams->sessionid;
-            $sesslog[$sid]->timetaken = $now;
-            $sesslog[$sid]->takenby = $USER->id;
-
-            // While loop to set the student's attendance status based on scantime and presence in the csv file.
-            while ($record = $attimporter->next()) {
-                $userid = $record->user->id;
-                if ($sid == $userid) {
-                    // If the student scanned, they will be given the highest available status according to their scantime.
-                    $sesslog[$sid]->statusid = attendance_session_get_highest_status($this, $attforsession, $record->scantime);
-                }
-            }
-            // If the student did not scan, they ill be given the lowest available status which is absent.
-            if (empty($sesslog[$sid]->statusid)) {
-                // This function will use the current time to give the student the lowest available status.
-                $sesslog[$sid]->statusid = attendance_session_get_highest_status($this, $attforsession);
-            }
-            $attimporter->restart();
-        }
-
-        $this->save_log($sesslog);
-    }
-
-    /**
      * Helper function to save attendance and trigger events.
      *
      * @param array $sesslog

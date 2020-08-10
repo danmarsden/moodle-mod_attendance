@@ -51,8 +51,6 @@ class marksessions_confirm extends moodleform {
         $mform = $this->_form;
         $mform->addElement('hidden', 'confirm', 1);
         $mform->setType('confirm', PARAM_BOOL);
-        $mform->addElement('hidden', 'importid', $importer->get_importid());
-        $mform->setType('importid', PARAM_INT);
 
         $foundheaders = $importer->list_found_headers();
 

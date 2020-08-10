@@ -23,6 +23,8 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+define('NO_OUTPUT_BUFFERING', true);
+
 require(__DIR__ . '/../../../config.php');
 require_once($CFG->dirroot . '/mod/attendance/lib.php');
 require_once($CFG->dirroot . '/mod/attendance/locallib.php');
@@ -69,7 +71,7 @@ $form = null;
 if (optional_param('needsconfirm', 0, PARAM_BOOL)) {
     $form = new \mod_attendance\form\import\marksessions($url->out(false), $formparams);
 } else if (optional_param('confirm', 0, PARAM_BOOL)) {
-    $importer = new \mod_attendance\import\marksessions(null, $att);
+    $importer = new \mod_attendance\import\marksessions(null, $att, null, null, $importid);
     $formparams['importer'] = $importer;
     $form = new \mod_attendance\form\import\marksessions_confirm(null, $formparams);
 } else {
@@ -91,10 +93,12 @@ if (optional_param('needsconfirm', 0, PARAM_BOOL)) {
              $form = new \mod_attendance\form\import\marksessions($url->out(false), $formparams);
              $form->set_import_error($error);
          } else {
-             $sessions = $importer->import();
              echo $output->header();
+             $sessions = $importer->import();
              mod_attendance_notifyqueue::show();
+             $url = new moodle_url('/mod/attendance/manage.php', array('id' => $att->cmid));
              echo $output->continue_button($url);
+             echo $output->footer();
              die();
          }
      } else {
@@ -109,8 +113,9 @@ if (optional_param('needsconfirm', 0, PARAM_BOOL)) {
      }
  }
 
- // Output for the file upload form starts here.
- echo $output->header();
- echo $output->heading(get_string('attendanceforthecourse', 'attendance') . ' :: ' . format_string($course->fullname));
- $form->display();
- echo $output->footer();
+// Output for the file upload form starts here.
+echo $output->header();
+echo $output->heading(get_string('attendanceforthecourse', 'attendance') . ' :: ' . format_string($course->fullname));
+mod_attendance_notifyqueue::show();
+$form->display();
+echo $output->footer();

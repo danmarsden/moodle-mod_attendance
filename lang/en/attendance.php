@@ -618,3 +618,4 @@ $string['importstatus_help'] = 'This allows a status value to be included in the
 $string['error:usernotfound'] = 'A user with the {$a->userfield} set to {$a->extuser} could not be found';
 $string['error:timenotreadable'] = 'User: {$a->extuser} has a scantime that could not be converted by strtotime: {$a->scantime}';
 $string['error:userduplicate'] = 'User {$a} was found twice in the import. please only include one record per user.';
+$string['sessionsupdated'] = 'Sessions updated';
