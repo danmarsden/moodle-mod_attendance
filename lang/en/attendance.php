@@ -619,3 +619,4 @@ $string['error:usernotfound'] = 'A user with the {$a->userfield} set to {$a->ext
 $string['error:timenotreadable'] = 'User: {$a->extuser} has a scantime that could not be converted by strtotime: {$a->scantime}';
 $string['error:userduplicate'] = 'User {$a} was found twice in the import. please only include one record per user.';
 $string['sessionsupdated'] = 'Sessions updated';
+$string['error:statusnotfound'] = 'User: {$a->extuser} has a status value that could not be found: {$a->status}';

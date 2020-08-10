@@ -198,6 +198,10 @@ class marksessions {
         }
 
         $statuses = $this->att->get_statuses();
+        $statusmap = array();
+        foreach($statuses as $st) {
+            $statusmap[$st->acronym] = $st->id;
+        }
 
         $sessioninfo = $this->att->get_session_info($this->att->pageparams->sessionid);
 
@@ -213,7 +217,7 @@ class marksessions {
             $extuser = $this->get_column_data($row, $mapping['user']);
             if (empty($users[$extuser])) {
                 $a = new \stdClass();
-                $a->extfield = $extuser;
+                $a->extuser = $extuser;
                 $a->userfield = $mappingdata->userto;
                 \mod_attendance_notifyqueue::notify_problem(get_string('error:usernotfound', 'attendance', $a));
                 continue;
@@ -236,13 +240,26 @@ class marksessions {
                 $t = strtotime($scantime);
                 if ($t === false) {
                     $a = new \stdClass();
-                    $a->extfield = $extuser;
+                    $a->extuser = $extuser;
                     $a->scantime = $scantime;
                     \mod_attendance_notifyqueue::notify_problem(get_string('error:timenotreadable', 'attendance', $a));
                     continue;
                 }
 
                 $sesslog[$userid]->statusid = attendance_session_get_highest_status($this->att, $sessioninfo, $t);
+            } else {
+                $status = $this->get_column_data($row, $mapping['status']);
+                if (!empty($statusmap[$status])) {
+                    $sesslog[$userid]->statusid = $statusmap[$status];
+                } else {
+                    $a = new \stdClass();
+                    $a->extuser = $extuser;
+                    $a->status = $status;
+                    \mod_attendance_notifyqueue::notify_problem(get_string('error:statusnotfound', 'attendance', $a));
+                    continue;
+                }
+
+
             }
         }
         $this->sessions = $sesslog;
