@@ -606,3 +606,4 @@ $string['error:timenotreadable'] = 'User: {$a->extuser} has a scantime that coul
 $string['error:userduplicate'] = 'User {$a} was found twice in the import. please only include one record per user.';
 $string['sessionsupdated'] = 'Sessions updated';
 $string['error:statusnotfound'] = 'User: {$a->extuser} has a status value that could not be found: {$a->status}';
+$string['marksessionimportcsvhelp'] = 'This form allows you to upload a csv file containing a user identifier and a status - the status field can be the status acronym or the time that attendance was recorded for that user. If a time value is passed then it will try to assign the status value with the highest grade available at that time.';
