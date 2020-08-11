@@ -468,13 +468,21 @@ class mod_attendance_renderer extends plugin_renderer_base {
      * @return string
      */
     protected function render_attendance_take_controls(attendance_take_data $takedata) {
+
+        $urlparams = array('id' => $takedata->cm->id,
+            'sessionid' => $takedata->pageparams->sessionid,
+            'grouptype' => $takedata->pageparams->grouptype);
+        $url = new moodle_url('/mod/attendance/import/marksessions.php', $urlparams);
+        $return = $this->output->single_button($url, get_string('uploadattendance', 'attendance'));
+
         $table = new html_table();
         $table->attributes['class'] = ' ';
 
         $table->data[0][] = $this->construct_take_session_info($takedata);
         $table->data[0][] = $this->construct_take_controls($takedata);
 
-        return $this->output->container(html_writer::table($table), 'generalbox takecontrols');
+        $return .= $this->output->container(html_writer::table($table), 'generalbox takecontrols');
+        return $return;
     }
 
     /**

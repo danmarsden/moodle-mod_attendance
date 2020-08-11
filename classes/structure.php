@@ -703,16 +703,18 @@ class mod_attendance_structure {
     /**
      * Take attendance from form data.
      *
-     * @param stdClass $formdata
+     * @param stdClass $data
      */
-    public function take_from_form_data($formdata) {
-        global $DB, $USER;
-        // TODO: WARNING - $formdata is unclean - comes from direct $_POST - ideally needs a rewrite but we do some cleaning below.
-        // This whole function could do with a nice clean up.
+    public function take_from_form_data($data) {
+        global $USER;
+        // WARNING - $data is unclean - comes from direct $_POST - ideally needs a rewrite but we do some cleaning below.
+
         $statuses = implode(',', array_keys( (array)$this->get_statuses() ));
         $now = time();
         $sesslog = array();
-        $formdata = (array)$formdata;
+
+        $formdata = (array)$data;
+
         foreach ($formdata as $key => $value) {
             // Look at Remarks field because the user options may not be passed if empty.
             if (substr($key, 0, 7) == 'remarks') {
@@ -722,7 +724,7 @@ class mod_attendance_structure {
                 }
                 $sesslog[$sid] = new stdClass();
                 $sesslog[$sid]->studentid = $sid; // We check is_numeric on this above.
-                if (array_key_exists('user'.$sid, $formdata) && is_numeric($formdata['user' . $sid])) {
+                if (array_key_exists('user' . $sid, $formdata) && is_numeric($formdata['user' . $sid])) {
                     $sesslog[$sid]->statusid = $formdata['user' . $sid];
                 }
                 $sesslog[$sid]->statusset = $statuses;
@@ -732,6 +734,19 @@ class mod_attendance_structure {
                 $sesslog[$sid]->takenby = $USER->id;
             }
         }
+
+        $this->save_log($sesslog);
+    }
+
+    /**
+     * Helper function to save attendance and trigger events.
+     *
+     * @param array $sesslog
+     * @throws coding_exception
+     * @throws dml_exception
+     */
+    public function save_log($sesslog) {
+        global $DB, $USER;
         // Get existing session log.
         $dbsesslog = $this->get_session_log($this->pageparams->sessionid);
         foreach ($sesslog as $log) {
@@ -754,7 +769,7 @@ class mod_attendance_structure {
         }
 
         $session = $this->get_session_info($this->pageparams->sessionid);
-        $session->lasttaken = $now;
+        $session->lasttaken = time();
         $session->lasttakenby = $USER->id;
 
         $DB->update_record('attendance_sessions', $session);

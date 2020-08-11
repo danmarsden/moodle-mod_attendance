@@ -967,26 +967,29 @@ function attendance_template_variables($record) {
  *
  * @param mod_attendance_structure $att attendance structure
  * @param stdclass $attforsession attendance_session record.
+ * @param int $scantime - time that session should be recorded against.
  * @return bool/int
  */
-function attendance_session_get_highest_status(mod_attendance_structure $att, $attforsession) {
+function attendance_session_get_highest_status(mod_attendance_structure $att, $attforsession, $scantime = null) {
     // Find the status to set here.
     $statuses = $att->get_statuses();
     $highestavailablegrade = 0;
     $highestavailablestatus = new stdClass();
+    // Override time used in status recording.
+    $scantime = empty($scantime) ? time() : $scantime;
     foreach ($statuses as $status) {
         if ($status->studentavailability === '0') {
             // This status is never available to students.
             continue;
         }
         if (!empty($status->studentavailability)) {
-            $toolateforstatus = (($attforsession->sessdate + ($status->studentavailability * 60)) < time());
+            $toolateforstatus = (($attforsession->sessdate + ($status->studentavailability * 60)) < $scantime);
             if ($toolateforstatus) {
                 continue;
             }
         }
         // This status is available to the student.
-        if ($status->grade > $highestavailablegrade) {
+        if ($status->grade >= $highestavailablegrade) {
             // This is the most favourable grade so far; save it.
             $highestavailablegrade = $status->grade;
             $highestavailablestatus = $status;
