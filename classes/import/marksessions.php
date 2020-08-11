@@ -263,10 +263,12 @@ class marksessions {
         $this->sessions = $sesslog;
 
         $this->importer->close();
-        if ($this->sessions == null) {
+        if (empty($sesslog)) {
             $this->fail(get_string('invalidimportfile', 'attendance'));
             return;
         } else {
+            raise_memory_limit(MEMORY_EXTRA);
+
             // We are calling from browser, display progress bar.
             if ($this->useprogressbar === true) {
                 $this->progress = new \core\progress\display_if_slow(get_string('processingfile', 'attendance'));
@@ -275,7 +277,6 @@ class marksessions {
                 $this->progress = new \core\progress\none();
             }
             $this->progress->start_progress('', count($this->sessions));
-            raise_memory_limit(MEMORY_EXTRA);
             $this->progress->end_progress();
         }
     }
