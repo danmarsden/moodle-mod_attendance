@@ -100,7 +100,13 @@ Feature: Teachers and Students can record session attendance
     Then "Attendance report viewed" "link" should exist
 
   Scenario: Export report includes id number, department and institution
-    Given I log in as "teacher1"
+    Given I log in as "admin"
+    And I navigate to "Users > Permissions > User policies" in site administration
+    And the following config values are set as admin:
+      | showuseridentity | idnumber,email,phone1,phone2,department,institution |
+
+    And I log out
+    And I log in as "teacher1"
     And I am on "Course 1" course homepage
     And I follow "Attendance"
     And I follow "Add"
@@ -109,9 +115,47 @@ Feature: Teachers and Students can record session attendance
       | id_sestime_endhour   | 02 |
     And I click on "id_submitbutton" "button"
     And I follow "Export"
-    Then the field "id_ident_idnumber" matches value ""
-    And the field "id_ident_institution" matches value ""
-    And the field "id_ident_department" matches value ""
+    Then the field "id_ident_idnumber" matches value "1"
+    And the field "id_ident_institution" matches value "1"
+    And the field "id_ident_department" matches value "1"
+
+  Scenario: Test enabling custom user profile field
+    # Add custom field.
+    Given I log in as "admin"
+    And I navigate to "Users > Accounts > User profile fields" in site administration
+    And I set the field "datatype" to "Text input"
+    And I set the following fields to these values:
+      | Short name | superfield  |
+      | Name       | Super field |
+    And I click on "Save changes" "button"
+
+    And I navigate to "Plugins > Activity modules > Attendance" in site administration
+    And the "Default export fields" select box should contain "Super field"
+
+  Scenario: Test adding custom user profile
+    # Add custom field.
+    Given I log in as "admin"
+    And I navigate to "Users > Accounts > User profile fields" in site administration
+    And I set the field "datatype" to "Text input"
+    And I set the following fields to these values:
+      | Short name | superfield  |
+      | Name       | Super field |
+    And I click on "Save changes" "button"
+
+    And the following config values are set as admin:
+    | defaultexportfields | superfield | attendance |
+
+    And I log out
+    And I log in as "teacher1"
+    And I am on "Course 1" course homepage
+    And I follow "Attendance"
+    And I follow "Add"
+    And I set the following fields to these values:
+      | id_sestime_starthour | 01 |
+      | id_sestime_endhour   | 02 |
+    And I click on "id_submitbutton" "button"
+    And I follow "Export"
+    Then the field "id_ident_superfield" matches value "1"
 
   # Removed dependency on behat_download to allow automated Travis CI tests to pass.
   # It would be good to add these back at some point.

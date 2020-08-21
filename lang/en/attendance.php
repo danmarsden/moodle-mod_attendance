@@ -615,3 +615,8 @@ $string['warningupdated'] = 'Updated warnings';
 $string['week'] = 'week(s)';
 $string['weeks'] = 'Weeks';
 $string['youcantdo'] = 'You can\'t do anything';
+
+$string['defaultexportsettings'] = 'Default export settings';
+$string['defaultexportsettings_help'] = 'These settings define the defaults for sessions export';
+$string['defaultexportfields'] = 'Default export fields';
+$string['defaultexportfields_help'] = 'Fields that can be used to identify student in export report (If you are seeing less options than expected, please check show user identity in User policies).';

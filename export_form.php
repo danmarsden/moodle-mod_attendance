@@ -39,7 +39,7 @@ class mod_attendance_export_form extends moodleform {
      * @return void
      */
     public function definition() {
-        global $USER, $DB, $PAGE;
+        global $USER, $DB, $PAGE, $CFG;
         $mform    =& $this->_form;
         $course        = $this->_customdata['course'];
         $cm            = $this->_customdata['cm'];
@@ -102,19 +102,37 @@ class mod_attendance_export_form extends moodleform {
         $PAGE->requires->yui_module('moodle-mod_attendance-groupfilter', 'M.mod_attendance.groupfilter.init', array($opts));
 
         $ident = array();
-        $ident[] =& $mform->createElement('checkbox', 'id', '', get_string('studentid', 'attendance'));
-        $ident[] =& $mform->createElement('checkbox', 'uname', '', get_string('username'));
-
-        $optional = array('idnumber', 'institution', 'department');
-        foreach ($optional as $opt) {
-            $ident[] =& $mform->createElement('checkbox', $opt, '', get_string($opt));
-            $mform->setType($opt, PARAM_NOTAGS);
+        $checkedfields = array();
+        $adminsetfields = get_config('attendance', 'defaultexportfields');
+        if (in_array('id', explode(',', $adminsetfields))) {
+            $ident[] =& $mform->createElement('checkbox', 'id', '', get_string('studentid', 'attendance'));
+            $checkedfields['ident[id]'] = true;
         }
 
-        $mform->addGroup($ident, 'ident', get_string('identifyby', 'attendance'), array('<br />'), true);
-        $mform->setDefaults(array('ident[id]' => true, 'ident[uname]' => true));
+        $extrafields = get_extra_user_fields($modcontext);
+        foreach ($extrafields as $field) {
+            $ident[] =& $mform->createElement('checkbox',  $field, '', get_string( $field));
+            $mform->setType($field, PARAM_NOTAGS);
+            $checkedfields['ident['. $field .']'] = true;
+        }
+
+        require_once($CFG->dirroot . '/user/profile/lib.php');
+        $customfields = profile_get_custom_fields();
+
+        foreach ($customfields as $field) {
+            if ((is_siteadmin($USER) || $field->visible == PROFILE_VISIBLE_ALL)
+            && in_array($field->shortname, explode(',', $adminsetfields))) {
+                $ident[] =& $mform->createElement('checkbox', $field->shortname, '', $field->name);
+                $mform->setType($field->shortname, PARAM_NOTAGS);
+                $checkedfields['ident['. $field->shortname .']'] = true;
+            }
+        }
+
+        if (count($ident) > 0) {
+            $mform->addGroup($ident, 'ident', get_string('identifyby', 'attendance'), array('<br />'), true);
+            $mform->setDefaults($checkedfields);
+        }
         $mform->setType('id', PARAM_INT);
-        $mform->setType('uname', PARAM_INT);
 
         $mform->addElement('checkbox', 'includeallsessions', get_string('includeall', 'attendance'), get_string('yes'));
         $mform->setDefault('includeallsessions', true);
