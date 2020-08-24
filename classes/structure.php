@@ -109,7 +109,7 @@ class mod_attendance_structure {
      * with a full database record (course should not be stored in instances table anyway).
      *
      * @param stdClass $dbrecord Attandance instance data from {attendance} table
-     * @param stdClass $cm       Course module record as returned by {@link get_coursemodule_from_id()}
+     * @param stdClass $cm       Course module record as returned by {@see get_coursemodule_from_id()}
      * @param stdClass $course   Course record from {course} table
      * @param stdClass $context  The context of the workshop instance
      * @param stdClass $pageparams
