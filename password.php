@@ -17,7 +17,7 @@
 /**
  * Displays help via AJAX call or in a new page
  *
- * Use {@link core_renderer::help_icon()} or {@link addHelpButton()} to display
+ * Use {@see core_renderer::help_icon()} or {@see addHelpButton()} to display
  * the help icon.
  *
  * @copyright  2017 Dan Marsden
