@@ -36,6 +36,10 @@ function xmldb_attendance_install() {
         $rec = new stdClass;
         $rec->attendanceid = 0;
         $rec->acronym = get_string($k.'acronym', 'attendance');
+        // Sanity check - if language translation uses more than the allowed 2 chars.
+        if (mb_strlen($rec->acronym) > 2) {
+            $rec->acronym = $k;
+        }
         $rec->description = get_string($k.'full', 'attendance');
         $rec->grade = $v;
         $rec->visible = 1;
