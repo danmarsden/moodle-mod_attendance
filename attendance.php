@@ -38,6 +38,9 @@ $attendance = $DB->get_record('attendance', array('id' => $attforsession->attend
 $cm = get_coursemodule_from_instance('attendance', $attendance->id, 0, false, MUST_EXIST);
 $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
 
+// Require the user is logged in.
+require_login($course, true, $cm);
+
 // If the randomised code is on grab it.
 if ($attforsession->rotateqrcode == 1) {
     $cookiename = 'attendance_'.$attforsession->id;
@@ -54,7 +57,7 @@ if ($attforsession->rotateqrcode == 1) {
     } else {
         // Check password.
         $sql = 'SELECT * FROM {attendance_rotate_passwords}'.
-                ' WHERE attendanceid = ? AND expirytime > ? ORDER BY expirytime ASC LIMIT 2';
+            ' WHERE attendanceid = ? AND expirytime > ? ORDER BY expirytime ASC LIMIT 2';
         $qrpassdatabase = $DB->get_records_sql($sql, ['attendanceid' => $id, time() - $attconfig->rotateqrcodeexpirymargin]);
 
         $qrpassflag = false;
@@ -74,9 +77,6 @@ if ($attforsession->rotateqrcode == 1) {
         }
     }
 }
-
-// Require the user is logged in.
-require_login($course, true, $cm);
 
 list($canmark, $reason) = attendance_can_student_mark($attforsession);
 if (!$canmark) {
