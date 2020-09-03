@@ -39,6 +39,7 @@ require_once($CFG->dirroot . '/mod/attendance/externallib.php');
  * @category external
  * @copyright  2015 Caio Bressan Doneda
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @group      mod_attendance
  */
 class mod_attendance_external_testcase extends externallib_advanced_testcase {
     /** @var coursecat */
