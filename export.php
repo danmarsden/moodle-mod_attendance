@@ -89,25 +89,29 @@ if ($formdata = $mform->get_data()) {
         $data->course = $att->course->fullname;
         $data->group = $group ? $group->name : get_string('allparticipants');
 
-        if (isset($formdata->ident['id'])) {
-            $data->tabhead[] = get_string('studentid', 'attendance');
-        }
-        if (isset($formdata->ident['uname'])) {
-            $data->tabhead[] = get_string('username');
-        }
-
-        $optional = array('idnumber', 'institution', 'department');
-        foreach ($optional as $opt) {
-            if (isset($formdata->ident[$opt])) {
-                $data->tabhead[] = get_string($opt);
-            }
-        }
-
         $data->tabhead[] = get_string('lastname');
         $data->tabhead[] = get_string('firstname');
         $groupmode = groups_get_activity_groupmode($cm, $course);
         if (!empty($groupmode)) {
             $data->tabhead[] = get_string('groups');
+        }
+        require_once($CFG->dirroot . '/user/profile/lib.php');
+        $customfields = profile_get_custom_fields(false);
+
+        if (isset($formdata->ident)) {
+            foreach (array_keys($formdata->ident) as $opt) {
+                if ($opt == 'id') {
+                    $data->tabhead[] = get_string('studentid', 'attendance');
+                } else if (in_array($opt, array_column($customfields, 'shortname'))) {
+                    foreach ($customfields as $customfield) {
+                        if ($opt == $customfield->shortname) {
+                            $data->tabhead[] = $customfield->name;
+                        }
+                    }
+                } else {
+                    $data->tabhead[] = get_string($opt);
+                }
+            }
         }
 
         if (count($reportdata->sessions) > 0) {
@@ -144,19 +148,7 @@ if ($formdata = $mform->get_data()) {
         $i = 0;
         $data->table = array();
         foreach ($reportdata->users as $user) {
-            if (isset($formdata->ident['id'])) {
-                $data->table[$i][] = $user->id;
-            }
-            if (isset($formdata->ident['uname'])) {
-                $data->table[$i][] = $user->username;
-            }
-
-            $optionalrow = array('idnumber', 'institution', 'department');
-            foreach ($optionalrow as $opt) {
-                if (isset($formdata->ident[$opt])) {
-                    $data->table[$i][] = $user->$opt;
-                }
-            }
+            profile_load_custom_fields($user);
 
             $data->table[$i][] = $user->lastname;
             $data->table[$i][] = $user->firstname;
@@ -169,6 +161,22 @@ if ($formdata = $mform->get_data()) {
                 }
                 $data->table[$i][] = implode(', ', $groups);
             }
+
+            if (isset($formdata->ident)) {
+                foreach (array_keys($formdata->ident) as $opt) {
+                    if (in_array($opt, array_column($customfields, 'shortname'))) {
+                        if (isset($user->profile[$opt])) {
+                            $data->table[$i][] = $user->profile[$opt];
+                        } else {
+                            $data->table[$i][] = '';
+                        }
+                        continue;
+                    }
+
+                    $data->table[$i][] = $user->$opt;
+                }
+            }
+
             $cellsgenerator = new user_sessions_cells_text_generator($reportdata, $user);
             $data->table[$i] = array_merge($data->table[$i], $cellsgenerator->get_cells(isset($formdata->includeremarks)));
 

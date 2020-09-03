@@ -192,4 +192,22 @@ if ($ADMIN->fulltree) {
         get_string('emailcontent', 'attendance'), get_string('emailcontent_help', 'attendance'),
         get_string('emailcontent_default', 'attendance'), PARAM_RAW));
 
+    $name = new lang_string('defaultexportsettings', 'mod_attendance');
+    $description = new lang_string('defaultexportsettings_help', 'mod_attendance');
+    $settings->add(new admin_setting_heading('defaultexportsettings', $name, $description));
+
+    $fields = array('id' => get_string('studentid', 'attendance'));
+
+    require_once($CFG->dirroot . '/user/profile/lib.php');
+    $customfields = profile_get_custom_fields();
+    foreach ($customfields as $field) {
+        $fields[$field->shortname] = $field->name;
+    }
+
+    $settings->add(new admin_setting_configmultiselect('attendance/defaultexportfields',
+        new lang_string('defaultexportfields', 'attendance'),
+        new lang_string('defaultexportfields_help', 'attendance'),
+        array('id'), $fields)
+    );
+
 }
