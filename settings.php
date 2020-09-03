@@ -27,6 +27,7 @@ defined('MOODLE_INTERNAL') || die;
 if ($ADMIN->fulltree) {
     require_once(dirname(__FILE__).'/lib.php');
     require_once(dirname(__FILE__).'/locallib.php');
+    require_once($CFG->dirroot . '/user/profile/lib.php');
 
     $tabmenu = attendance_print_settings_tabs();
 
@@ -104,6 +105,18 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configcheckbox('attendance/enablewarnings',
         get_string('enablewarnings', 'attendance'),
         get_string('enablewarnings_desc', 'attendance'), 0));
+
+    $fields = array();
+    $customfields = profile_get_custom_fields();
+    foreach ($customfields as $field) {
+        $fields[$field->shortname] = $field->name;
+    }
+
+    $settings->add(new admin_setting_configmultiselect('attendance/customexportfields',
+            new lang_string('customexportfields', 'attendance'),
+            new lang_string('customexportfields_help', 'attendance'),
+            array('id'), $fields)
+    );
 
     $name = new lang_string('mobilesettings', 'mod_attendance');
     $description = new lang_string('mobilesettings_help', 'mod_attendance');
@@ -191,23 +204,4 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configtextarea('attendance/emailcontent',
         get_string('emailcontent', 'attendance'), get_string('emailcontent_help', 'attendance'),
         get_string('emailcontent_default', 'attendance'), PARAM_RAW));
-
-    $name = new lang_string('defaultexportsettings', 'mod_attendance');
-    $description = new lang_string('defaultexportsettings_help', 'mod_attendance');
-    $settings->add(new admin_setting_heading('defaultexportsettings', $name, $description));
-
-    $fields = array('id' => get_string('studentid', 'attendance'));
-
-    require_once($CFG->dirroot . '/user/profile/lib.php');
-    $customfields = profile_get_custom_fields();
-    foreach ($customfields as $field) {
-        $fields[$field->shortname] = $field->name;
-    }
-
-    $settings->add(new admin_setting_configmultiselect('attendance/defaultexportfields',
-        new lang_string('defaultexportfields', 'attendance'),
-        new lang_string('defaultexportfields_help', 'attendance'),
-        array('id'), $fields)
-    );
-
 }
