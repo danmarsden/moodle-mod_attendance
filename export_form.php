@@ -104,10 +104,11 @@ class mod_attendance_export_form extends moodleform {
         $ident = array();
         $checkedfields = array();
 
-        $ident[] =& $mform->createElement('checkbox', 'id', '', get_string('studentid', 'attendance'));
-        $checkedfields['ident[id]'] = true;
-
         $adminsetfields = get_config('attendance', 'customexportfields');
+        if (in_array('id', explode(',', $adminsetfields))) {
+            $ident[] =& $mform->createElement('checkbox', 'id', '', get_string('studentid', 'attendance'));
+            $checkedfields['ident[id]'] = true;
+        }
 
         $extrafields = get_extra_user_fields($modcontext);
         foreach ($extrafields as $field) {

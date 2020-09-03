@@ -106,7 +106,7 @@ if ($ADMIN->fulltree) {
         get_string('enablewarnings', 'attendance'),
         get_string('enablewarnings_desc', 'attendance'), 0));
 
-    $fields = array();
+    $fields = array('id' => get_string('studentid', 'attendance'));
     $customfields = profile_get_custom_fields();
     foreach ($customfields as $field) {
         $fields[$field->shortname] = $field->name;
