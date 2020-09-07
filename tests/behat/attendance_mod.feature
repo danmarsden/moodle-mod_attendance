@@ -130,7 +130,7 @@ Feature: Teachers and Students can record session attendance
     And I click on "Save changes" "button"
 
     And I navigate to "Plugins > Activity modules > Attendance" in site administration
-    And the "Default export fields" select box should contain "Super field"
+    And the "Export custom user profile fields" select box should contain "Super field"
 
   Scenario: Test adding custom user profile
     # Add custom field.
@@ -143,7 +143,7 @@ Feature: Teachers and Students can record session attendance
     And I click on "Save changes" "button"
 
     And the following config values are set as admin:
-    | defaultexportfields | superfield | attendance |
+    | customexportfields | superfield | attendance |
 
     And I log out
     And I log in as "teacher1"
