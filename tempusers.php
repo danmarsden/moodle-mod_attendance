@@ -23,9 +23,8 @@
  */
 
 require_once(dirname(__FILE__).'/../../config.php');
-global $CFG, $DB, $OUTPUT, $PAGE, $COURSE;
+require_once($CFG->libdir.'/formslib.php');
 require_once($CFG->dirroot.'/mod/attendance/locallib.php');
-require_once($CFG->dirroot.'/mod/attendance/temp_form.php');
 
 $id = required_param('id', PARAM_INT);
 
@@ -52,7 +51,7 @@ $tabs = new attendance_tabs($att, attendance_tabs::TAB_TEMPORARYUSERS);
 $formdata = (object)array(
     'id' => $cm->id,
 );
-$mform = new temp_form();
+$mform = new mod_attendance\form\tempuser();
 $mform->set_data($formdata);
 
 if ($data = $mform->get_data()) {

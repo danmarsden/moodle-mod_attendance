@@ -15,23 +15,28 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Contains class mod_attendance_add_warning_form
+ * Contains class addwarning
  *
  * @package   mod_attendance
  * @copyright 2017 Dan Marsden
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+namespace mod_attendance\form;
 
 defined('MOODLE_INTERNAL') || die();
 
+use moodleform;
+use context_course;
+
 /**
- * Class mod_attendance_add_warning_form
+ * Class addwarning
  *
  * @package   mod_attendance
  * @copyright 2017 Dan Marsden
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_attendance_add_warning_form extends moodleform {
+class addwarning extends moodleform {
     /**
      * Form definition
      */

@@ -22,8 +22,11 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace mod_attendance\form;
+
 defined('MOODLE_INTERNAL') || die();
-require_once($CFG->libdir.'/formslib.php');
+
+use moodleform;
 
 /**
  * class for displaying duration form.
@@ -31,7 +34,7 @@ require_once($CFG->libdir.'/formslib.php');
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_attendance_duration_form extends moodleform {
+class duration extends moodleform {
 
     /**
      * Called to define this moodle form
@@ -62,7 +65,7 @@ class mod_attendance_duration_form extends moodleform {
         $mform->setType('ids', PARAM_ALPHANUMEXT);
         $mform->addElement('hidden', 'id', $cm->id);
         $mform->setType('id', PARAM_INT);
-        $mform->addElement('hidden', 'action', mod_attendance_sessions_page_params::ACTION_CHANGE_DURATION);
+        $mform->addElement('hidden', 'action', \mod_attendance_sessions_page_params::ACTION_CHANGE_DURATION);
         $mform->setType('action', PARAM_INT);
 
         $mform->setDefaults(array('durtime' => array('hours' => 0, 'minutes' => 0)));

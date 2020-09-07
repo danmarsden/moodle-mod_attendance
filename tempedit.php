@@ -23,10 +23,8 @@
  */
 
 require_once(dirname(__FILE__).'/../../config.php');
-
-global $CFG, $DB, $PAGE, $OUTPUT;
+require_once($CFG->libdir.'/formslib.php');
 require_once($CFG->dirroot.'/mod/attendance/locallib.php');
-require_once($CFG->dirroot.'/mod/attendance/tempedit_form.php');
 
 $id = required_param('id', PARAM_INT);
 $userid = required_param('userid', PARAM_INT);
@@ -90,7 +88,7 @@ $formdata->tname = $tempuser->fullname;
 $formdata->userid = $tempuser->id;
 $formdata->temail = $tempuser->email;
 
-$mform = new tempedit_form();
+$mform = new \mod_attendance\form\tempuseredit();
 $mform->set_data($formdata);
 
 if ($mform->is_cancelled()) {

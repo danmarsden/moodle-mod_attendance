@@ -22,16 +22,17 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace mod_attendance\form;
+
 defined('MOODLE_INTERNAL') || die();
-require_once($CFG->libdir.'/formslib.php');
 
 /**
- * class for displaying update form.
+ * class for displaying update session form.
  *
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_attendance_update_form extends moodleform {
+class updatesession extends \moodleform {
 
     /**
      * Called to define this moodle form

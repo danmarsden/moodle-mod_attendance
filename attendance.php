@@ -24,7 +24,7 @@
 
 require_once(dirname(__FILE__).'/../../config.php');
 require_once(dirname(__FILE__).'/locallib.php');
-require_once(dirname(__FILE__).'/student_attendance_form.php');
+require_once($CFG->libdir.'/formslib.php');
 
 $pageparams = new mod_attendance_sessions_page_params();
 
@@ -156,11 +156,11 @@ $PAGE->set_url($att->url_sessions());
 
 // Create the form.
 if ($attforsession->rotateqrcode == 1) {
-    $mform = new mod_attendance_student_attendance_form(null,
+    $mform = new mod_attendance\form\studentattendance(null,
         array('course' => $course, 'cm' => $cm, 'modcontext' => $PAGE->context, 'session' => $attforsession,
             'attendance' => $att, 'password' => $attforsession->studentpassword));
 } else {
-    $mform = new mod_attendance_student_attendance_form(null,
+    $mform = new mod_attendance\form\studentattendance(null,
         array('course' => $course, 'cm' => $cm, 'modcontext' => $PAGE->context, 'session' => $attforsession,
             'attendance' => $att, 'password' => $qrpass));
 }

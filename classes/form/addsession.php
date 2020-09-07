@@ -15,16 +15,21 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file contains the forms to add
+ * This file contains the forms to add session.
  *
  * @package   mod_attendance
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+namespace mod_attendance\form;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->libdir.'/formslib.php');
+use moodleform;
+use mod_attendance_structure;
+use DateTime;
+use DateInterval;
+use DatePeriod;
 
 /**
  * class for displaying add form.
@@ -32,7 +37,7 @@ require_once($CFG->libdir.'/formslib.php');
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_attendance_add_form extends moodleform {
+class addsession extends moodleform {
 
     /**
      * Called to define this moodle form

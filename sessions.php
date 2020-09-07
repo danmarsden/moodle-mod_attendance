@@ -24,9 +24,7 @@
 
 require_once(dirname(__FILE__).'/../../config.php');
 require_once(dirname(__FILE__).'/locallib.php');
-require_once(dirname(__FILE__).'/add_form.php');
-require_once(dirname(__FILE__).'/update_form.php');
-require_once(dirname(__FILE__).'/duration_form.php');
+require_once($CFG->dirroot.'/lib/formslib.php');
 
 $pageparams = new mod_attendance_sessions_page_params();
 
@@ -67,7 +65,7 @@ $formparams = array('course' => $course, 'cm' => $cm, 'modcontext' => $context, 
 switch ($att->pageparams->action) {
     case mod_attendance_sessions_page_params::ACTION_ADD:
         $url = $att->url_sessions(array('action' => mod_attendance_sessions_page_params::ACTION_ADD));
-        $mform = new mod_attendance_add_form($url, $formparams);
+        $mform = new \mod_attendance\form\addsession($url, $formparams);
 
         if ($mform->is_cancelled()) {
             redirect($att->url_manage());
@@ -93,7 +91,7 @@ switch ($att->pageparams->action) {
 
         $url = $att->url_sessions(array('action' => mod_attendance_sessions_page_params::ACTION_UPDATE, 'sessionid' => $sessionid));
         $formparams['sessionid'] = $sessionid;
-        $mform = new mod_attendance_update_form($url, $formparams);
+        $mform = new \mod_attendance\form\updatesession($url, $formparams);
 
         if ($mform->is_cancelled()) {
             redirect($att->url_manage());
@@ -179,7 +177,7 @@ switch ($att->pageparams->action) {
 
         $url = $att->url_sessions(array('action' => mod_attendance_sessions_page_params::ACTION_CHANGE_DURATION));
         $formparams['ids'] = $slist;
-        $mform = new mod_attendance_duration_form($url, $formparams);
+        $mform = new mod_attendance\form\duration($url, $formparams);
 
         if ($mform->is_cancelled()) {
             redirect($att->url_manage());

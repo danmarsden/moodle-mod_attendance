@@ -22,8 +22,9 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace mod_attendance\form;
+
 defined('MOODLE_INTERNAL') || die();
-require_once($CFG->libdir.'/formslib.php');
 
 /**
  * class for displaying export form.
@@ -31,7 +32,7 @@ require_once($CFG->libdir.'/formslib.php');
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_attendance_export_form extends moodleform {
+class export extends \moodleform {
 
     /**
      * Called to define this moodle form

@@ -21,17 +21,17 @@
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+namespace mod_attendance\form;
 
 defined('MOODLE_INTERNAL') || die();
-require_once($CFG->libdir.'/formslib.php');
 
 /**
- * Class mod_attendance_student_attendance_form
+ * Class studentattendance
  *
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_attendance_student_attendance_form extends moodleform {
+class studentattendance extends \moodleform {
     /**
      * Called to define this moodle form
      *
@@ -89,11 +89,11 @@ class mod_attendance_student_attendance_form extends moodleform {
             // Create radio buttons for setting the attendance status.
             $radioarray = array();
             foreach ($statuses as $status) {
-                $name = html_writer::span($status->description, 'statusdesc');
+                $name = \html_writer::span($status->description, 'statusdesc');
                 $radioarray[] =& $mform->createElement('radio', 'status', '', $name, $status->id, array());
             }
             if ($disabledduetotime) {
-                $warning = html_writer::span(get_string('somedisabledstatus', 'attendance'), 'somedisabledstatus');
+                $warning = \html_writer::span(get_string('somedisabledstatus', 'attendance'), 'somedisabledstatus');
                 $radioarray[] =& $mform->createElement('static', '', '', $warning);
             }
             // Add the radio buttons as a control with the user's name in front.

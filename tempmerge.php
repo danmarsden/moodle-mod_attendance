@@ -23,10 +23,8 @@
  */
 
 require_once(dirname(__FILE__).'/../../config.php');
-
-global $CFG, $DB, $PAGE, $OUTPUT;
+require_once($CFG->libdir.'/formslib.php');
 require_once($CFG->dirroot.'/mod/attendance/locallib.php');
-require_once($CFG->dirroot.'/mod/attendance/tempmerge_form.php');
 
 $id = required_param('id', PARAM_INT);
 $userid = required_param('userid', PARAM_INT);
@@ -55,7 +53,7 @@ $formdata = (object)array(
 $custom = array(
     'description' => format_string($tempuser->fullname).' ('.format_string($tempuser->email).')',
 );
-$mform = new tempmerge_form(null, $custom);
+$mform = new mod_attendance\form\tempmerge(null, $custom);
 $mform->set_data($formdata);
 
 if ($mform->is_cancelled()) {

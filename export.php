@@ -26,9 +26,9 @@ define('NO_OUTPUT_BUFFERING', true);
 
 require_once(dirname(__FILE__).'/../../config.php');
 require_once(dirname(__FILE__).'/locallib.php');
-require_once(dirname(__FILE__).'/export_form.php');
 require_once(dirname(__FILE__).'/renderables.php');
 require_once(dirname(__FILE__).'/renderhelpers.php');
+require_once($CFG->libdir.'/formslib.php');
 
 $id             = required_param('id', PARAM_INT);
 
@@ -51,7 +51,7 @@ $PAGE->set_cacheable(true);
 $PAGE->navbar->add(get_string('export', 'attendance'));
 
 $formparams = array('course' => $course, 'cm' => $cm, 'modcontext' => $context);
-$mform = new mod_attendance_export_form($att->url_export(), $formparams);
+$mform = new mod_attendance\form\export($att->url_export(), $formparams);
 
 if ($formdata = $mform->get_data()) {
 
