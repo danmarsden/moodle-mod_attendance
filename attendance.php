@@ -59,8 +59,8 @@ if ($attforsession->rotateqrcode == 1) {
     } else {
         // Check password.
         $sql = 'SELECT * FROM {attendance_rotate_passwords}'.
-            ' WHERE attendanceid = ? AND expirytime > ? ORDER BY expirytime ASC LIMIT 2';
-        $qrpassdatabase = $DB->get_records_sql($sql, ['attendanceid' => $id, time() - $attconfig->rotateqrcodeexpirymargin]);
+            ' WHERE attendanceid = ? AND expirytime > ? ORDER BY expirytime ASC';
+        $qrpassdatabase = $DB->get_records_sql($sql, ['attendanceid' => $id, time() - $attconfig->rotateqrcodeexpirymargin], 0, 2);
 
         foreach ($qrpassdatabase as $qrpasselement) {
             if ($qrpass == $qrpasselement->password) {
