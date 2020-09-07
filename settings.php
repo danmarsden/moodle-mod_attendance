@@ -161,6 +161,9 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configcheckbox('attendance/includeqrcode_default',
         get_string('includeqrcode', 'attendance'), '', 0));
 
+    $settings->add(new admin_setting_configcheckbox('attendance/rotateqrcode_default',
+        get_string('rotateqrcode', 'attendance'), '', 0));
+
     $settings->add(new admin_setting_configcheckbox('attendance/autoassignstatus',
         get_string('autoassignstatus', 'attendance'), '', 0));
 
