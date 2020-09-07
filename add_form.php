@@ -247,9 +247,8 @@ class mod_attendance_add_form extends moodleform {
             if (isset($pluginconfig->includeqrcode_default)) {
                 $mform->setDefault('includeqrcode', $pluginconfig->includeqrcode_default);
             }
-            // TODO - Change in DB and provide value.
-            if (isset($pluginconfig->includeqrcode_default)) {
-                $mform->setDefault('rotateqrcode', $pluginconfig->includeqrcode_default);
+            if (isset($pluginconfig->rotateqrcode_default)) {
+                $mform->setDefault('rotateqrcode', $pluginconfig->rotateqrcode_default);
             }
             if (isset($pluginconfig->automark_default)) {
                 $mform->setDefault('automark', $pluginconfig->automark_default);
