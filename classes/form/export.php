@@ -140,6 +140,7 @@ class export extends \moodleform {
         $mform->setDefault('includeallsessions', true);
         $mform->addElement('checkbox', 'includenottaken', get_string('includenottaken', 'attendance'), get_string('yes'));
         $mform->addElement('checkbox', 'includeremarks', get_string('includeremarks', 'attendance'), get_string('yes'));
+        $mform->addElement('checkbox', 'includedescription', get_string('includedescription', 'attendance'), get_string('yes'));
         $mform->addElement('date_selector', 'sessionstartdate', get_string('startofperiod', 'attendance'));
         $mform->setDefault('sessionstartdate', $course->startdate);
         $mform->disabledIf('sessionstartdate', 'includeallsessions', 'checked');

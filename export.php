@@ -123,6 +123,9 @@ if ($formdata = $mform->get_data()) {
                 } else {
                     $text .= $sess->groupid ? $reportdata->groups[$sess->groupid]->name : get_string('commonsession', 'attendance');
                 }
+                if (isset($formdata->includedescription) && !empty($sess->description)) {
+                    $text .= " ". strip_tags($sess->description);
+                }
                 $data->tabhead[] = $text;
                 if (isset($formdata->includeremarks)) {
                     $data->tabhead[] = ''; // Space for the remarks.
