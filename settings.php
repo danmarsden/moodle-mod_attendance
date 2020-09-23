@@ -109,7 +109,7 @@ if ($ADMIN->fulltree) {
     $fields = array('id' => get_string('studentid', 'attendance'));
     $customfields = profile_get_custom_fields();
     foreach ($customfields as $field) {
-        $fields[$field->shortname] = $field->name;
+        $fields[$field->shortname] = format_string($field->name);
     }
 
     $settings->add(new admin_setting_configmultiselect('attendance/customexportfields',

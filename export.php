@@ -105,7 +105,7 @@ if ($formdata = $mform->get_data()) {
                 } else if (in_array($opt, array_column($customfields, 'shortname'))) {
                     foreach ($customfields as $customfield) {
                         if ($opt == $customfield->shortname) {
-                            $data->tabhead[] = $customfield->name;
+                            $data->tabhead[] = format_string($customfield->name, true, array('context' => $context));
                         }
                     }
                 } else {
@@ -169,7 +169,7 @@ if ($formdata = $mform->get_data()) {
                 foreach (array_keys($formdata->ident) as $opt) {
                     if (in_array($opt, array_column($customfields, 'shortname'))) {
                         if (isset($user->profile[$opt])) {
-                            $data->table[$i][] = $user->profile[$opt];
+                            $data->table[$i][] = format_string($user->profile[$opt], true, array('context' => $context));
                         } else {
                             $data->table[$i][] = '';
                         }
