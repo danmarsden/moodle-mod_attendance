@@ -124,7 +124,8 @@ class export extends \moodleform {
         foreach ($customfields as $field) {
             if ((is_siteadmin($USER) || $field->visible == PROFILE_VISIBLE_ALL)
             && in_array($field->shortname, explode(',', $adminsetfields))) {
-                $ident[] =& $mform->createElement('checkbox', $field->shortname, '', $field->name);
+                $ident[] =& $mform->createElement('checkbox', $field->shortname, '',
+                    format_string($field->name, true, array('context' => $modcontext)));
                 $mform->setType($field->shortname, PARAM_NOTAGS);
                 $checkedfields['ident['. $field->shortname .']'] = true;
             }
