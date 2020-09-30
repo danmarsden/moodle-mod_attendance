@@ -15,7 +15,9 @@
         </tr>
 
         <tr valign="top">
-            <td align="right"><label for="menuformat"><b><?php print_string("formattexttype", 'mod_attendance'); ?>:</b></label></td>
+            <td align="right"><label for="menuformat">
+                <b><?php print_string("formattexttype", 'mod_attendance'); ?>:</b></label>
+            </td>
             <td>
                 <?php
         print_string('formathtml');
@@ -30,7 +32,10 @@
         </td></tr>
     </table>
     <?php echo $OUTPUT->box_end(); ?>
-    <table align="center"><tr><th colspan="4" scope="row"><?php print_string('currentlyselectedusers', 'mod_attendance'); ?></th></tr>
+    <table align="center">
+        <tr>
+            <th colspan="4" scope="row"><?php print_string('currentlyselectedusers', 'mod_attendance'); ?></th>
+        </tr>
         <?php
     if (count($SESSION->emailto[$id])) {
         foreach ($SESSION->emailto[$id] as $user) {
@@ -48,7 +53,9 @@
                 echo $OUTPUT->pix_icon('t/emailno', $error);
                 unset($error);
                 }
-                echo '</td><td><input type="submit" onClick="this.form.deluser.value='.$user->id.';" value="' . get_string('remove') . '" /></td></tr>';
+                echo '</td><td>
+                       <input type="submit" onClick="this.form.deluser.value='.$user->id.';" value="' . get_string('remove') . '" />
+                      </td></tr>';
         }
         }
         else {
