@@ -574,14 +574,12 @@ class attendance_user_data implements renderable {
         $now = time();
         $sesslog = array();
         $formdata = (array)$formdata;
-        $dbstudlogs = array();
         $updatedsessions = array();
         $sessionatt = array();
 
         foreach ($formdata as $key => $value) {
             // Look at Remarks field because the user options may not be passed if empty.
             if (substr($key, 0, 7) == 'remarks') {
-                $formlog = array();
                 $parts = explode('sess', substr($key, 7));
                 $stid = $parts[0];
                 if (!(is_numeric($stid))) { // Sanity check on $stid.
@@ -596,13 +594,15 @@ class attendance_user_data implements renderable {
                 $context = context_module::instance($dbsession->cmid);
                 if (!has_capability('mod/attendance:takeattendances', $context)) {
                     // How do we tell user about this?
-                    error_log("User without capability tried to take attendance for context, cmid:", $dbsession->cmid);
+                    \core\notification::warning(get_string("nocapabilitytotakethisattendance", "attendance", $dbsession->cmid));
                     continue;
                 }
 
                 $formkey = 'user'.$stid.'sess'.$sessid;
                 $attid = $dbsession->attendanceid;
-                $statusset = array_filter($this->statuses[$attid], function($x) use($dbsession) { return $x->setnumber === $dbsession->statusset; });
+                $statusset = array_filter($this->statuses[$attid], function($x) use($dbsession) {
+                                                                       return $x->setnumber === $dbsession->statusset;
+                                                                   });
                 $sessionatt[$sessid] = $attid;
                 $formlog = new stdClass();
                 if (array_key_exists($formkey, $formdata) && is_numeric($formdata[$formkey])) {
@@ -624,8 +624,9 @@ class attendance_user_data implements renderable {
 
         $updateatts = array();
         foreach ($sesslog as $stid => $userlog) {
-            $dbstudlog = $DB->get_records('attendance_log', array('studentid' => $stid), '', 'sessionid,statusid,remarks,id,statusset');
-            foreach($userlog as $log) {
+            $dbstudlog = $DB->get_records('attendance_log', array('studentid' => $stid), '',
+                'sessionid,statusid,remarks,id,statusset');
+            foreach ($userlog as $log) {
                 if (array_key_exists($log->sessionid, $dbstudlog)) {
                     $attid = $sessionatt[$log->sessionid];
                     // Check if anything important has changed before updating record.
@@ -663,7 +664,7 @@ class attendance_user_data implements renderable {
 
         if (!empty($updateatts)) {
             $attendancegrade = $DB->get_records_list('attendance', 'id', array_keys($updateatts), '', 'id, grade');
-            foreach($updateatts as $attid => $updateusers) {
+            foreach ($updateatts as $attid => $updateusers) {
                 if ($attendancegrade[$attid] != 0) {
                     attendance_update_users_grades_by_id($attid, $grade, $updateusers);
                 }

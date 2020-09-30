@@ -29,6 +29,7 @@ require_once(dirname(__FILE__).'/locallib.php');
 $pageparams = new mod_attendance_view_page_params();
 
 $id                     = required_param('id', PARAM_INT);
+$edit                   = optional_param('edit', -1, PARAM_BOOL);
 $pageparams->studentid  = optional_param('studentid', null, PARAM_INT);
 $pageparams->mode       = optional_param('mode', mod_attendance_view_page_params::MODE_THIS_COURSE, PARAM_INT);
 $pageparams->view       = optional_param('view', null, PARAM_INT);
@@ -74,6 +75,33 @@ if (isset($pageparams->studentid) && $USER->id != $pageparams->studentid) {
 $url = $att->url_view($pageparams->get_significant_params());
 $PAGE->set_url($url);
 
+$buttons = '';
+$capabilities = array('mod/attendance:takeattendances', 'mod/attendance:changeattendances');
+if (has_any_capability($capabilities, $context) &&
+    $pageparams->mode == mod_attendance_view_page_params::MODE_ALL_SESSIONS) {
+
+    if (!isset($USER->attendanceediting)) {
+        $USER->attendanceediting = false;
+    }
+
+    if (($edit == 1) and confirm_sesskey()) {
+        $USER->attendanceediting = true;
+    } else if ($edit == 0 and confirm_sesskey()) {
+        $USER->attendanceediting = false;
+    }
+
+    if ($USER->attendanceediting) {
+        $options['edit'] = 0;
+        $string = get_string('turneditingoff');
+    } else {
+        $options['edit'] = 1;
+        $string = get_string('turneditingon');
+    }
+    $options['sesskey'] = sesskey();
+    $button = new single_button(new moodle_url($PAGE->url, $options), $string, 'post');
+    $PAGE->set_button($OUTPUT->render($button));
+}
+
 $userdata = new attendance_user_data($att, $userid);
 
 // Create url for link in log screen.
@@ -93,22 +121,20 @@ if (empty($userdata->pageparams->studentid)) {
     $relateduserid = $userdata->pageparams->studentid;
 }
 
-if (($formdata = data_submitted()) && confirm_sesskey()) {
+if (($formdata = data_submitted()) && confirm_sesskey() && $edit == -1) {
     $userdata->take_sessions_from_form_data($formdata);
 
-    // Trigger updated event
+    // Trigger updated event.
     $event = \mod_attendance\event\session_report_updated::create(array(
         'relateduserid' => $relateduserid,
         'context' => $context,
         'other' => $params));
     $event->add_record_snapshot('course_modules', $cm);
-    //$event->add_record_snapshot('user', $);
     $event->trigger();
 
     redirect($url, get_string('attendancesuccess', 'attendance'));
-}
-else {
-    // Trigger viewed event
+} else {
+    // Trigger viewed event.
     $event = \mod_attendance\event\session_report_viewed::create(array(
         'relateduserid' => $relateduserid,
         'context' => $context,

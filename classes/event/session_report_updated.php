@@ -35,7 +35,6 @@ defined('MOODLE_INTERNAL') || die();
  *      string mode Mode of the report updated.
  * }
  * @package    mod_attendance
- * @since      Moodle 2.7
  * @copyright  2013 onwards Dan Marsden
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -47,7 +46,7 @@ class session_report_updated extends \mod_attendance\event\session_report_viewed
     protected function init() {
         $this->data['crud'] = 'u';
         $this->data['edulevel'] = self::LEVEL_TEACHING;
-        // objecttable and objectid can't be meaningfully specified
+        // Objecttable and objectid can't be meaningfully specified.
     }
 
     /**

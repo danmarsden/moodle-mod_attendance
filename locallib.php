@@ -145,16 +145,14 @@ function attendance_get_user_sessions_log_full($userid, $pageparams) {
 
     if ($pageparams->groupby === 'date') {
         $ordersql = "ats.sessdate ASC, c.fullname ASC, att.name ASC, att.id ASC";
-    }
-    else {
+    } else {
         $ordersql = "c.fullname ASC, att.name ASC, att.id ASC, ats.sessdate ASC";
     }
 
     // WHERE clause is important:
     // gm.userid not null => get unmarked attendances for user's current groups
     // ats.groupid 0 => get all sessions that are for all students enrolled in course
-    // al.id not null => get all marked sessions whether or not user currently still in group
-    //
+    // al.id not null => get all marked sessions whether or not user currently still in group.
     $sql = "SELECT ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, ats.statusset,
                    al.statusid, al.remarks, ats.studentscanmark, ats.autoassignstatus,
                    ats.preventsharedip, ats.preventsharediptime,

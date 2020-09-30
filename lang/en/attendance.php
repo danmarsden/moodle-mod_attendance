@@ -335,6 +335,7 @@ $string['noabsentstatusset'] = 'The status set in use does not have a status to 
 $string['noattendanceusers'] = 'It is not possible to export any data as there are no students enrolled in the course.';
 $string['noattforuser'] = 'No attendance records exist for the user';
 $string['noautomark'] = 'Disabled';
+$string['nocapabilitytotakethisattendance'] = 'You tried to change the attendance of a session with the cmid: {$a} that you do not have permission to modify.';
 $string['nodescription'] = 'Regular class session';
 $string['noeventstoreset'] = 'There are no calendar events that require an update.';
 $string['nogroups'] = 'You can\'t add group sessions. No groups exists in course.';
