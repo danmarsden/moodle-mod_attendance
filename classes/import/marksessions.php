@@ -190,7 +190,7 @@ class marksessions {
         if (!empty($mappingdata) && $mappingdata->userto !== 'id') {
             foreach ($validusers as $u) {
                 if (!empty($u->{$mappingdata->userto})) {
-                    $users[$u->{$mappingdata->userto}] = $u;
+                    $users[strtolower($u->{$mappingdata->userto})] = $u;
                 }
             }
         } else {
@@ -214,7 +214,7 @@ class marksessions {
             $mapping = $this->read_mapping_data($mappingdata);
 
             // Get user.
-            $extuser = $this->get_column_data($row, $mapping['user']);
+            $extuser = strtolower($this->get_column_data($row, $mapping['user']));
             if (empty($users[$extuser])) {
                 $a = new \stdClass();
                 $a->extuser = $extuser;

@@ -124,7 +124,8 @@ class export extends \moodleform {
         foreach ($customfields as $field) {
             if ((is_siteadmin($USER) || $field->visible == PROFILE_VISIBLE_ALL)
             && in_array($field->shortname, explode(',', $adminsetfields))) {
-                $ident[] =& $mform->createElement('checkbox', $field->shortname, '', $field->name);
+                $ident[] =& $mform->createElement('checkbox', $field->shortname, '',
+                    format_string($field->name, true, array('context' => $modcontext)));
                 $mform->setType($field->shortname, PARAM_NOTAGS);
                 $checkedfields['ident['. $field->shortname .']'] = true;
             }
@@ -140,6 +141,7 @@ class export extends \moodleform {
         $mform->setDefault('includeallsessions', true);
         $mform->addElement('checkbox', 'includenottaken', get_string('includenottaken', 'attendance'), get_string('yes'));
         $mform->addElement('checkbox', 'includeremarks', get_string('includeremarks', 'attendance'), get_string('yes'));
+        $mform->addElement('checkbox', 'includedescription', get_string('includedescription', 'attendance'), get_string('yes'));
         $mform->addElement('date_selector', 'sessionstartdate', get_string('startofperiod', 'attendance'));
         $mform->setDefault('sessionstartdate', $course->startdate);
         $mform->disabledIf('sessionstartdate', 'includeallsessions', 'checked');

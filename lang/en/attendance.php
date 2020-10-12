@@ -267,6 +267,7 @@ $string['importstatus_help'] = 'This allows a status value to be included in the
 $string['includeabsentee'] = 'Include session when calculating absentee report';
 $string['includeabsentee_help'] = 'If checked this session will be included in the absentee report calculations.';
 $string['includeall'] = 'Select all sessions';
+$string['includedescription'] = 'Include session description';
 $string['includenottaken'] = 'Include not taken sessions';
 $string['includeqrcode'] = 'Include QR code';
 $string['includeremarks'] = 'Include remarks';
