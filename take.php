@@ -25,6 +25,8 @@
 require_once(dirname(__FILE__).'/../../config.php');
 require_once(dirname(__FILE__).'/locallib.php');
 
+global $PAGE, $DB;
+
 $pageparams = new mod_attendance_take_page_params();
 
 $id                     = required_param('id', PARAM_INT);
@@ -99,7 +101,6 @@ $tabs = new attendance_tabs($att);
 $sesstable = new attendance_take_data($att);
 
 // Output starts here.
-
 echo $output->header();
 echo $output->heading(get_string('attendanceforthecourse', 'attendance').' :: ' .format_string($course->fullname));
 echo $output->render($tabs);

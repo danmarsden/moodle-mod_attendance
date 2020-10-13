@@ -16,6 +16,7 @@
 
 /**
  * Library of functions and constants for module attendance
+ * The interface between the Moodle core and the plugin is defined here for the most plugin types.
  *
  * @package   mod_attendance
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
@@ -34,17 +35,12 @@ require_once(dirname(__FILE__) . '/classes/calendar_helpers.php');
  */
 function attendance_supports($feature) {
     switch($feature) {
-        case FEATURE_GRADE_HAS_GRADE:
-            return true;
         case FEATURE_GROUPS:
-            return true;
-        case FEATURE_GROUPINGS:
-            return true;
         case FEATURE_SHOW_DESCRIPTION:
-            return true;
+        case FEATURE_GROUPINGS:
         case FEATURE_MOD_INTRO:
-            return true;
         case FEATURE_BACKUP_MOODLE2:
+        case FEATURE_GRADE_HAS_GRADE:
             return true;
         // Artem Andreev: AFAIK it's not tested.
         case FEATURE_COMPLETION_TRACKS_VIEWS:
@@ -58,6 +54,7 @@ function attendance_supports($feature) {
  * Add default set of statuses to the new attendance.
  *
  * @param int $attid - id of attendance instance.
+ * @throws dml_exception
  */
 function att_add_default_statuses($attid) {
     global $DB;
@@ -75,6 +72,7 @@ function att_add_default_statuses($attid) {
  * Add default set of warnings to the new attendance.
  *
  * @param int $id - id of attendance instance.
+ * @throws dml_exception
  */
 function attendance_add_default_warnings($id) {
     global $DB, $CFG;
@@ -95,6 +93,7 @@ function attendance_add_default_warnings($id) {
  *
  * @param stdClass $attendance
  * @return bool|int
+ * @throws dml_exception
  */
 function attendance_add_instance($attendance) {
     global $DB;
@@ -123,6 +122,7 @@ function attendance_add_instance($attendance) {
  *
  * @param stdClass $attendance
  * @return bool
+ * @throws dml_exception
  */
 function attendance_update_instance($attendance) {
     global $DB;
@@ -144,6 +144,7 @@ function attendance_update_instance($attendance) {
  *
  * @param int $id
  * @return bool
+ * @throws dml_exception
  */
 function attendance_delete_instance($id) {
     global $DB, $CFG;
@@ -174,6 +175,7 @@ function attendance_delete_instance($id) {
 /**
  * Called by course/reset.php
  * @param moodleform $mform form passed by reference
+ * @throws coding_exception
  */
 function attendance_reset_course_form_definition(&$mform) {
     $mform->addElement('header', 'attendanceheader', get_string('modulename', 'attendance'));

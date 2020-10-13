@@ -166,6 +166,7 @@ class attendance_filter_controls implements renderable {
      * attendance_filter_controls constructor.
      * @param mod_attendance_structure $att
      * @param bool $report
+     * @throws coding_exception
      */
     public function __construct(mod_attendance_structure $att, $report = false) {
         global $PAGE;
@@ -219,6 +220,7 @@ class attendance_filter_controls implements renderable {
      *
      * @param array $params
      * @return moodle_url
+     * @throws moodle_exception
      */
     public function url($params=array()) {
         $params = array_merge($this->urlparams, $params);
