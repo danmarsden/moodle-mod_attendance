@@ -207,6 +207,7 @@ function attendance_reset_course_form_defaults($course) {
  *
  * @param stdClass $data
  * @return array
+ * @throws dml_exception
  */
 function attendance_reset_userdata($data) {
     global $DB;
@@ -264,6 +265,7 @@ function attendance_reset_userdata($data) {
 
     return $status;
 }
+
 /**
  * Return a small object with summary information about what a
  *  user has done with a given particular instance of this module
@@ -276,6 +278,7 @@ function attendance_reset_userdata($data) {
  * @param stdClass $mod
  * @param stdClass $attendance
  * @return stdClass.
+ * @throws coding_exception
  */
 function attendance_user_outline($course, $user, $mod, $attendance) {
     global $CFG;
@@ -300,6 +303,7 @@ function attendance_user_outline($course, $user, $mod, $attendance) {
 
     return $result;
 }
+
 /**
  * Print a detailed representation of what a  user has done with
  * a given particular instance of this module, for user activity reports.
@@ -308,6 +312,7 @@ function attendance_user_outline($course, $user, $mod, $attendance) {
  * @param stdClass $user
  * @param stdClass $mod
  * @param stdClass $attendance
+ * @throws coding_exception
  */
 function attendance_user_complete($course, $user, $mod, $attendance) {
     global $CFG;
@@ -330,6 +335,7 @@ function attendance_user_complete($course, $user, $mod, $attendance) {
 function attendance_update_grades($attendance, $userid=0, $nullifnone=true) {
     // We need this function to exist so that quick editing of module name is passed to gradebook.
 }
+
 /**
  * Create grade item for given attendance
  *
@@ -384,7 +390,7 @@ function attendance_grade_item_update($attendance, $grades=null) {
  * Delete grade item for given attendance
  *
  * @param object $attendance object
- * @return object attendance
+ * @return int attendance
  */
 function attendance_grade_item_delete($attendance) {
     global $CFG;
@@ -434,6 +440,7 @@ function attendance_scale_used_anywhere($scaleid) {
  * @param array $args
  * @param bool $forcedownload
  * @return bool false if file not found, does not return if found - justsend the file
+ * @throws dml_exception
  */
 function attendance_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload) {
     global $DB;
@@ -472,6 +479,8 @@ function attendance_pluginfile($course, $cm, $context, $filearea, $args, $forced
  * Print tabs on attendance settings page.
  *
  * @param string $selected - current selected tab.
+ * @throws dml_exception
+ * @throws coding_exception
  */
 function attendance_print_settings_tabs($selected = 'settings') {
     global $CFG;
@@ -515,6 +524,7 @@ function attendance_print_settings_tabs($selected = 'settings') {
  *
  * @param array $warnings - list of warnings to parse.
  * @param int $userid - User id of user to remove.
+ * @throws dml_exception
  */
 function attendance_remove_user_from_thirdpartyemails($warnings, $userid) {
     global $DB;

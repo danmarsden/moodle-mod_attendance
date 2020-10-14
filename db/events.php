@@ -16,6 +16,7 @@
 
 /**
  * Attendance event handler definition.
+ * Event handlers (subscriptions) are defined here. It lists all the events that your plugin want to observe and be notified about.
  *
  * @package mod_attendance
  * @category event

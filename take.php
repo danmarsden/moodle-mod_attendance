@@ -63,7 +63,6 @@ if (!empty($pageparams->grouptype) && !array_key_exists($pageparams->grouptype, 
 
 if (($formdata = data_submitted()) && confirm_sesskey()) {
     $att->take_from_form_data($formdata);
-
     $group = 0;
     if ($att->pageparams->grouptype != mod_attendance_structure::SESSION_COMMON) {
         $group = $att->pageparams->grouptype;
@@ -105,5 +104,4 @@ echo $output->header();
 echo $output->heading(get_string('attendanceforthecourse', 'attendance').' :: ' .format_string($course->fullname));
 echo $output->render($tabs);
 echo $output->render($sesstable);
-
 echo $output->footer();

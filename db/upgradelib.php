@@ -26,6 +26,7 @@ defined('MOODLE_INTERNAL') || die();
 
 /**
  * Function to help upgrade old attendance records and create calendar events.
+ * @throws dml_exception
  */
 function attendance_upgrade_create_calendar_events() {
     global $DB;

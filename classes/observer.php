@@ -22,6 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use core\event\course_content_deleted;
+
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -36,9 +38,10 @@ class mod_attendance_observer {
     /**
      * Observer for the event course_content_deleted - delete all attendance stuff.
      *
-     * @param \core\event\course_content_deleted $event
+     * @param course_content_deleted $event
+     * @throws dml_exception
      */
-    public static function course_content_deleted(\core\event\course_content_deleted $event) {
+    public static function course_content_deleted(course_content_deleted $event) {
         global $DB;
 
         $attids = array_keys($DB->get_records('attendance', array('course' => $event->objectid), '', 'id'));
