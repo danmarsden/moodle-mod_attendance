@@ -22,11 +22,33 @@
     {
     }
 }}
-<h1>{{texttodisplay}}</h1>
-<p><ul>
+<table class="generaltable" width="100%">
+    <thead>
+    <tr>
+        <th>{{name}}</th>
+        <th>{{description}}</th>
+        <th>{{capacity}}</th>
+        <th>{{bookable}}</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
     {{#rooms}}
-        <li>a room</li>
+        <tr>
+            <td>{{name}}</td>
+            <td>{{description}}</td>
+            <td>{{capacity}}</td>
+            <td>{{is_bookable}}</td>
+            <td>
+                <a href="{{url_edit}}" class="action-icon"><i class="icon fa fa-edit fa-fw "></i></a>
+                <a href="{{url_delete}}" class="action-icon"><i class="icon fa fa-trash fa-fw "></i></a>
+            </td>
+        </tr>
     {{/rooms}}
+    </tbody>
+</table>
+<p><ul>
+
 </ul></p>
 
-<input type="button" class="btn btn-primary" onclick="location.href='{{editurl}}'" value="{{button_addroom}}" />
+<input type="button" class="btn btn-primary" onclick="location.href='{{addurl}}'" value="{{button_addroom}}" />

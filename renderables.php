@@ -17,9 +17,9 @@
 /**
  * Attendance module renderable components are defined here
  *
- * @package    mod_attendance
- * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package     mod_attendance
+ * @copyright   2011 Artem Andreev <andreev.artem@gmail.com>
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
@@ -702,6 +702,38 @@ class attendance_default_statusset implements renderable {
      */
     public function url($params) {
         return new moodle_url('/mod/attendance/defaultstatus.php', $params);
+    }
+}
+
+/**
+ * Rooms List
+ *
+ * @author     2020 Florian Metzger-Noel (github.com/flocko-motion)
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class attendance_rooms implements renderable {
+    /** @var array  */
+    public $rooms;
+    /** @var array  */
+    public $errors;
+
+    /**
+     * attendance_rooms constructor.
+     * @param array $rooms
+     * @param array $errors
+     */
+    public function __construct($rooms, $errors) {
+        $this->rooms = $rooms;
+        $this->errors = $errors;
+    }
+
+    /**
+     * url helper.
+     * @param stdClass $params
+     * @return moodle_url
+     */
+    public function url($params) {
+        return new moodle_url('/mod/attendance/rooms.php', $params);
     }
 }
 

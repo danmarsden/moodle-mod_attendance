@@ -180,6 +180,9 @@
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
+      <INDEXES>
+        <INDEX NAME="name" UNIQUE="true" FIELDS="name"/>
+      </INDEXES>
     </TABLE>
     <TABLE NAME="attendance_booking" COMMENT="which users signed up to partake in which session?">
       <FIELDS>

@@ -23,8 +23,8 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
-global $plugin;
 
+$plugin = new stdClass();
 $plugin->version  = 2020082500;
 $plugin->requires = 2019072500; // Requires 3.8.
 $plugin->release = '3.8.4';

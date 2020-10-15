@@ -23,6 +23,8 @@
  */
 
 defined('MOODLE_INTERNAL') || die();
+global $CFG, $DB, $USER, $OUTPUT, $PAGE;
+
 require_once($CFG->dirroot.'/course/moodleform_mod.php');
 
 /**
