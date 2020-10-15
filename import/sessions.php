@@ -26,6 +26,7 @@
 define('NO_OUTPUT_BUFFERING', true);
 
 require_once(__DIR__ . '/../../../config.php');
+global $CFG, $DB, $OUTPUT, $PAGE, $SESSION, $USER;
 require_once($CFG->libdir . '/adminlib.php');
 require_once($CFG->dirroot . '/mod/attendance/lib.php');
 require_once($CFG->dirroot . '/mod/attendance/locallib.php');
@@ -47,7 +48,6 @@ echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('importsessions', 'attendance'));
 $tabmenu = attendance_print_settings_tabs('importsessions');
 echo $tabmenu;
-
 $form = null;
 if (optional_param('needsconfirm', 0, PARAM_BOOL)) {
     $form = new \mod_attendance\form\import\sessions($url->out(false));
@@ -86,8 +86,6 @@ if ($form->is_cancelled()) {
         $pagetitle = get_string('confirmcolumnmappings', 'attendance');
     }
 }
-
-echo $OUTPUT->heading($pagetitle);
 
 $form->display();
 
