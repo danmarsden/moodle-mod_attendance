@@ -55,6 +55,10 @@ class mod_attendance_take_page_params {
 
     /** @var int */
     public $gridcols;
+    /** @var int paging: current page */
+    public $page;
+    /** @var int paging: amount of items per page */
+    public $perpage;
 
     /**
      * Initialize params.
