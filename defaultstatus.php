@@ -24,7 +24,6 @@
 
 
 require_once(__DIR__.'/../../config.php');
-global $CFG, $DB, $PAGE, $USER, $OUTPUT;
 require_once($CFG->libdir.'/adminlib.php');
 require_once($CFG->dirroot.'/mod/attendance/lib.php');
 require_once($CFG->dirroot.'/mod/attendance/locallib.php');
@@ -35,12 +34,15 @@ admin_externalpage_setup('managemodules');
 $url = new moodle_url('/mod/attendance/defaultstatus.php', array('statusid' => $statusid, 'action' => $action));
 
 // Check sesskey if we are performing an action.
-if (!empty($action)) require_sesskey();
+if (!empty($action)) {
+    require_sesskey();
+}
 
 $output = $PAGE->get_renderer('mod_attendance');
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('defaultstatus', 'mod_attendance'));
-echo attendance_print_settings_tabs('defaultstatus');
+$tabmenu = attendance_print_settings_tabs('defaultstatus');
+echo $tabmenu;
 
 // TODO: Would be good to combine this code block with the one in preferences to avoid duplication.
 $errors = array();

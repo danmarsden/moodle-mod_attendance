@@ -2,8 +2,7 @@
     "name": "danmarsden/moodle-mod_attendance",
     "type": "moodle-mod",
     "require": {
-        "composer/installers": "~1.0",
-        "ext-mbstring": "*"
+        "composer/installers": "~1.0"
     },
     "extra": {
         "installer-name": "attendance"

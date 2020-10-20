@@ -23,7 +23,6 @@
  */
 
 require_once(dirname(__FILE__).'/../../config.php');
-global $CFG, $DB, $OUTPUT, $PAGE, $SESSION, $USER;
 require_once(dirname(__FILE__).'/locallib.php');
 require_once($CFG->dirroot.'/lib/formslib.php');
 

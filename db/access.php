@@ -16,7 +16,6 @@
 
 /**
  * Capability definitions for this module.
- * (The Access API gives you functions so you can determine what the current user is allowed to do.)
  *
  * @package   mod_attendance
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>

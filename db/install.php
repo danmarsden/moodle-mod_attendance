@@ -16,7 +16,6 @@
 
 /**
  * post installation hook for adding data.
- * Allows you to execute a PHP code right after the plugin's database scheme has been installed.
  *
  * @package    mod_attendance
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
@@ -27,8 +26,6 @@ defined('MOODLE_INTERNAL') || die();
 
 /**
  * Post installation procedure
- * @throws coding_exception
- * @throws dml_exception
  */
 function xmldb_attendance_install() {
     global $DB;
@@ -51,5 +48,6 @@ function xmldb_attendance_install() {
             $result = $result && $DB->insert_record('attendance_statuses', $rec);
         }
     }
+
     return $result;
 }

@@ -17,9 +17,9 @@
 /**
  * Attendance module renderable components are defined here
  *
- * @package     mod_attendance
- * @copyright   2011 Artem Andreev <andreev.artem@gmail.com>
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    mod_attendance
+ * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
@@ -55,19 +55,19 @@ class attendance_tabs implements renderable {
     const TAB_WARNINGS = 8;
     /** Absentee tab */
     const TAB_ABSENTEE      = 9;
-    /** @var int|null current tab */
+    /** @var int current tab */
     public $currenttab;
 
-    /** @var mod_attendance_structure attendance */
+    /** @var stdClass attendance */
     private $att;
 
     /**
      * Prepare info about sessions for attendance taking into account view parameters.
      *
      * @param mod_attendance_structure $att
-     * @param int|null $currenttab - one of attendance_tabs constants
+     * @param int $currenttab - one of attendance_tabs constants
      */
-    public function  __construct(mod_attendance_structure $att, int $currenttab=null) {
+    public function  __construct(mod_attendance_structure $att, $currenttab=null) {
         $this->att = $att;
         $this->currenttab = $currenttab;
     }
@@ -166,7 +166,6 @@ class attendance_filter_controls implements renderable {
      * attendance_filter_controls constructor.
      * @param mod_attendance_structure $att
      * @param bool $report
-     * @throws coding_exception
      */
     public function __construct(mod_attendance_structure $att, $report = false) {
         global $PAGE;
@@ -220,7 +219,6 @@ class attendance_filter_controls implements renderable {
      *
      * @param array $params
      * @return moodle_url
-     * @throws moodle_exception
      */
     public function url($params=array()) {
         $params = array_merge($this->urlparams, $params);
@@ -364,9 +362,6 @@ class attendance_take_data implements renderable {
     /**
      * attendance_take_data constructor.
      * @param mod_attendance_structure $att
-     * @throws coding_exception
-     * @throws dml_exception
-     * @throws moodle_exception
      */
     public function  __construct(mod_attendance_structure $att) {
         if ($att->pageparams->grouptype) {
@@ -410,7 +405,6 @@ class attendance_take_data implements renderable {
      * @param array $params
      * @param array $excludeparams
      * @return moodle_url
-     * @throws moodle_exception
      */
     public function url($params=array(), $excludeparams=array()) {
         $params = array_merge($this->urlparams, $params);
@@ -518,7 +512,6 @@ class attendance_user_data implements renderable {
     /**
      * url helper.
      * @return moodle_url
-     * @throws moodle_exception
      */
     public function url() {
         return new moodle_url($this->urlpath, $this->urlparams);
@@ -556,8 +549,6 @@ class attendance_report_data implements renderable {
     /**
      * attendance_report_data constructor.
      * @param mod_attendance_structure $att
-     * @throws coding_exception
-     * @throws dml_exception
      */
     public function  __construct(mod_attendance_structure $att) {
         $this->pageparams = $att->pageparams;
@@ -626,7 +617,6 @@ class attendance_report_data implements renderable {
      * url helper.
      * @param array $params
      * @return moodle_url
-     * @throws moodle_exception
      */
     public function url($params=array()) {
         $params = array_merge($params, $this->pageparams->get_significant_params());
@@ -671,7 +661,6 @@ class attendance_preferences_data implements renderable {
      * @param array $params
      * @param bool $significantparams
      * @return moodle_url
-     * @throws moodle_exception
      */
     public function url($params=array(), $significantparams=true) {
         if ($significantparams) {
@@ -715,38 +704,6 @@ class attendance_default_statusset implements renderable {
 }
 
 /**
- * Rooms List
- *
- * @author     2020 Florian Metzger-Noel (github.com/flocko-motion)
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-class attendance_rooms implements renderable {
-    /** @var array  */
-    public $rooms;
-    /** @var array  */
-    public $errors;
-
-    /**
-     * attendance_rooms constructor.
-     * @param array $rooms
-     * @param array $errors
-     */
-    public function __construct($rooms, $errors) {
-        $this->rooms = $rooms;
-        $this->errors = $errors;
-    }
-
-    /**
-     * url helper.
-     * @param stdClass $params
-     * @return moodle_url
-     */
-    public function url($params) {
-        return new moodle_url('/mod/attendance/rooms.php', $params);
-    }
-}
-
-/**
  * Output a selector to change between status sets.
  *
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
@@ -772,7 +729,6 @@ class attendance_set_selector implements renderable {
      * url helper
      * @param array $statusset
      * @return moodle_url
-     * @throws moodle_exception
      */
     public function url($statusset) {
         $params = array();
@@ -888,9 +844,7 @@ class attendance_password_icon implements renderable, templatable {
      * Export this data so it can be used as the context for a mustache template.
      *
      * @param renderer_base $output Used to do a final render of any components that need to be rendered for export.
-     * @return stdClass
-     * @throws coding_exception
-     * @throws moodle_exception
+     * @return array
      */
     public function export_for_template(renderer_base $output) {
 

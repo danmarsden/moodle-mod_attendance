@@ -24,8 +24,6 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-global $CFG, $DB;
-
 require_once($CFG->libdir . '/gradelib.php');
 require_once(dirname(__FILE__).'/renderhelpers.php');
 
