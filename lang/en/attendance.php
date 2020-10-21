@@ -472,6 +472,7 @@ $string['room'] = 'Room';
 $string['roomadd'] = 'Add Room';
 $string['rooms'] = 'Rooms';
 $string['roomname'] = 'Room Name';
+$string['roomattendants'] = 'Attendants';
 $string['roomcapacity'] = 'Capacity';
 $string['roombookable'] = 'Bookable';
 $string['roombooking'] = 'Book room';

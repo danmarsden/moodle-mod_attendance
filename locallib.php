@@ -713,6 +713,7 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
         $sess->calendarevent = $calendarevent;
         $sess->timemodified = $now;
         $sess->roomid = intval($formdata->roomid);
+        $sess->maxattendants = $formdata->roomattendants;
         $sess->studentscanmark = 0;
         $sess->autoassignstatus = 0;
         $sess->subnet = '';

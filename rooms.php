@@ -18,7 +18,7 @@
  * Shows a list of all rooms
  *
  * @package   mod_attendance
- * @author    2020 Florian Metzger-Noel (github.com/flocko-motion)
+ * @copyright 2020 Florian Metzger-Noel (github.com/flocko-motion)
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

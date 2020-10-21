@@ -136,13 +136,24 @@ class updatesession extends \moodleform {
             $mform->addElement('header', 'headerrooms', get_string('roombooking', 'attendance'));
             $mform->setExpanded('headerrooms');
 
-            $rooms = [0 => ''] + $att->get_room_names();
+            $options = [0 => ''] + $att->get_room_names();
             $mform->addElement('select', 'roomid',
-                get_string('roomselect', 'attendance'), $rooms);
+                get_string('roomselect', 'attendance'), $options);
             $mform->setType('roomid', PARAM_INT);
+
+            $options = [0 => get_string('unlimited')];
+            $capacity = $att->get_room_capacity($data['roomid']);
+            for($i = 1; $i <= $capacity; $i++) {
+                $options[$i] = $i;
+            }            //
+            $mform->addElement('select', 'roomattendants',
+                get_string('roomattendants', 'attendance'), $options);
+            $mform->setType('roomattendants', PARAM_INT);
         } else {
             $mform->addElement('hidden', 'roomid', '0');
             $mform->settype('roomid', PARAM_INT);
+            $mform->addElement('hidden', 'roomattendants', '0');
+            $mform->settype('roomattendants', PARAM_INT);
         }
 
         // Students can mark own attendance.

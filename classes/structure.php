@@ -534,6 +534,8 @@ class mod_attendance_structure {
             $sess->rotateqrcode = 0;
             $sess->rotateqrcodesecret = '';
         }
+        $sess->roomid = 0;
+        $sess->maxattendants = 0;
         $event->add_record_snapshot('attendance_sessions', $sess);
         $event->trigger();
 
@@ -566,6 +568,7 @@ class mod_attendance_structure {
         $sess->descriptionformat = $formdata->sdescription['format'];
         $sess->calendarevent = empty($formdata->calendarevent) ? 0 : $formdata->calendarevent;
         $sess->roomid = $formdata->roomid;
+        $sess->maxattendants = $formdata->roomattendants;
         $sess->studentscanmark = 0;
         $sess->autoassignstatus = 0;
         $sess->studentpassword = '';
@@ -1390,6 +1393,23 @@ class mod_attendance_structure {
         $room = $DB->get_field('attendance_rooms', 'name', ["id" => $roomid]);
         if ($room === false) {
             $room = '';
+        }
+        return $room;
+    }
+
+    /**
+     * Gets capacity of a room
+     * @param int|null $roomid
+     * @return int
+     */
+    public function get_room_capacity($roomid) : int {
+        if(!$roomid) {
+            return 0;
+        }
+        global $DB;
+        $room = $DB->get_field('attendance_rooms', 'capacity', ["id" => $roomid]);
+        if ($room === false) {
+            $room = 0;
         }
         return $room;
     }

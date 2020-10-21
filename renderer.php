@@ -262,7 +262,11 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 get_string('date', 'attendance'),
                 get_string('time', 'attendance')
             ],
-            ($enablerooms ? [get_string('room', 'attendance')] : []),
+            ($enablerooms ? [
+                get_string('room', 'attendance'),
+                get_string('roomattendants', 'attendance'),
+                ] : []
+            ),
             [
                 get_string('sessiontypeshort', 'attendance'),
                 get_string('description', 'attendance'),
@@ -270,10 +274,10 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 html_writer::checkbox('cb_selector', 0, false, '', array('id' => 'cb_selector')),
             ]);
         $table->align = array_merge(['', 'right', ''],
-            ($enablerooms ? ['left'] : []),
+            ($enablerooms ? ['left', 'left'] : []),
             ['', 'left', 'right', 'center']);
         $table->size = array_merge(['1px', '1px', '1px'],
-            ($enablerooms ? ['1px'] : []),
+            ($enablerooms ? ['1px', '1px'] : []),
             ['', '*', '120px', '1px']);
 
         $i = 0;
@@ -288,6 +292,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
             if ($enablerooms) {
                 $table->data[$sess->id][] = $sessdata->att->get_room_name($sess->roomid);
+                $table->data[$sess->id][] = $sess->maxattendants; //->capacity;
             }
             if ($sess->groupid) {
                 if (empty($sessdata->groups[$sess->groupid])) {

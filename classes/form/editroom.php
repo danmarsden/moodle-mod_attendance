@@ -15,16 +15,29 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * Form for editing a room
+ *
  * @package     mod_attendance
- * @author      Florian Metzger-Noel (github.com/flocko-motion)
+ * @copyright   Florian Metzger-Noel (github.com/flocko-motion)
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die;
 require_once("$CFG->libdir/formslib.php");
 
-
+/**
+ * class for displaying edit room form.
+ *
+ * @copyright  Florian Metzger-Noel (github.com/flocko-motion)
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class editroom extends moodleform {
+
+    /**
+     * Called to define this moodle form
+     *
+     * @return void
+     */
     public function definition() {
 
         $mform = $this->_form; // Don't forget the underscore!
@@ -56,8 +69,5 @@ class editroom extends moodleform {
         $this->add_action_buttons();
 
     }
-    // Custom validation should be added here.
-    public function validation($data, $files) {
-        return array();
-    }
+
 }

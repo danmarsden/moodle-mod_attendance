@@ -78,6 +78,8 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
         $session->groupid = 0;
         $session->absenteereport = 1;
         $session->calendarevent = 0;
+        $session->roomid = 0;
+        $session->maxattendants = 0;
 
         // Creating session.
         $this->sessions[] = $session;
