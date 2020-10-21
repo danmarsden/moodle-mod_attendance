@@ -1403,7 +1403,7 @@ class mod_attendance_structure {
      * @return int
      */
     public function get_room_capacity($roomid) : int {
-        if(!$roomid) {
+        if (!$roomid) {
             return 0;
         }
         global $DB;

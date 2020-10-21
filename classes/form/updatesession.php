@@ -143,7 +143,7 @@ class updatesession extends \moodleform {
 
             $options = [0 => get_string('unlimited')];
             $capacity = $att->get_room_capacity($data['roomid']);
-            for($i = 1; $i <= $capacity; $i++) {
+            for ($i = 1; $i <= $capacity; $i++) {
                 $options[$i] = $i;
             }            //
             $mform->addElement('select', 'roomattendants',

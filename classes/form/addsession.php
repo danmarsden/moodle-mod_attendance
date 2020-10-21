@@ -194,32 +194,7 @@ class addsession extends moodleform {
         $mform->addElement('hidden', 'previoussessiondate', 0);
         $mform->setType('previoussessiondate', PARAM_INT);
 
-        // For room booking.
-        if (get_config('attendance', 'enablerooms')) {
-            $mform->addElement('header', 'headerrooms', get_string('roombooking', 'attendance'));
-            $mform->setExpanded('headerrooms');
-
-            $options = [0 => ''] + $att->get_room_names();
-            $mform->addElement('select', 'roomid',
-                get_string('roomselect', 'attendance'), $options);
-            $mform->setType('roomid', PARAM_INT);
-
-            $options = [0 => get_string('unlimited')];
-            $capacity = $att->get_room_capacity($data['roomid']);
-            for ($i = 1; $i <= $capacity; $i++) {
-                $options[$i] = $i;
-            }
-            $mform->addElement('select', 'roomattendants',
-                get_string('roomattendants', 'attendance'), $options);
-            $mform->setType('roomattendants', PARAM_INT);
-            $mform->setDefault('roomattendants', 0);
-
-        } else {
-            $mform->addElement('hidden', 'roomid', '0');
-            $mform->settype('roomid', PARAM_INT);
-            $mform->addElement('hidden', 'roomattendants', '0');
-            $mform->settype('roomattendants', PARAM_INT);
-        }
+        attendance_form_session_room($mform, $att);
 
         // Students can mark own attendance.
         $studentscanmark = get_config('attendance', 'studentscanmark');

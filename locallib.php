@@ -196,6 +196,27 @@ function attendance_form_sessiondate_selector (MoodleQuickForm $mform) {
 }
 
 /**
+ * Helper function to add room options to add/update forms.
+ *
+ * @param MoodleQuickForm $mform
+ * @param mod_attendance_structure $att
+ */
+function attendance_form_session_room (MoodleQuickForm $mform, mod_attendance_structure $att) {
+    if (get_config('attendance', 'enablerooms')) {
+        $mform->addElement('header', 'headerrooms', get_string('roombooking', 'attendance'));
+        $mform->setExpanded('headerrooms');
+
+        $options = [0 => ''] + $att->get_room_names(true, true);
+        $mform->addElement('select', 'roomid',
+            get_string('roomselect', 'attendance'), $options);
+        $mform->setType('roomid', PARAM_INT);
+    } else {
+        $mform->addElement('hidden', 'roomid', '0');
+        $mform->settype('roomid', PARAM_INT);
+    }
+}
+
+/**
  * Count the number of status sets that exist for this instance.
  *
  * @param int $attendanceid

@@ -254,6 +254,9 @@ class mod_attendance_renderer extends plugin_renderer_base {
     protected function render_sess_manage_table(attendance_manage_data $sessdata) {
         $this->page->requires->js_init_call('M.mod_attendance.init_manage');
         $enablerooms = get_config('attendance', 'enablerooms');
+        // This flag will be used by the "signup" feature upgrade, which will be part of the next update
+        // by Florian Metzger-Noel expected in 2020-10.
+        $enablesignup = false;
 
         $table = new html_table();
         $table->width = '100%';
@@ -264,8 +267,11 @@ class mod_attendance_renderer extends plugin_renderer_base {
             ],
             ($enablerooms ? [
                 get_string('room', 'attendance'),
-                get_string('roomattendants', 'attendance'),
                 ] : []
+            ),
+            ($enablesignup ? [
+                get_string('roomattendants', 'attendance'),
+            ] : []
             ),
             [
                 get_string('sessiontypeshort', 'attendance'),
@@ -274,10 +280,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 html_writer::checkbox('cb_selector', 0, false, '', array('id' => 'cb_selector')),
             ]);
         $table->align = array_merge(['', 'right', ''],
-            ($enablerooms ? ['left', 'left'] : []),
+            ($enablerooms ? ['left', ] : []),
+            ($enablesignup ? ['left', ] : []),
             ['', 'left', 'right', 'center']);
         $table->size = array_merge(['1px', '1px', '1px'],
-            ($enablerooms ? ['1px', '1px'] : []),
+            ($enablerooms ? ['1px', ] : []),
+            ($enablesignup ? ['1px', ] : []),
             ['', '*', '120px', '1px']);
 
         $i = 0;
@@ -292,7 +300,9 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
             if ($enablerooms) {
                 $table->data[$sess->id][] = $sessdata->att->get_room_name($sess->roomid);
-                $table->data[$sess->id][] = $sess->maxattendants; //->capacity;
+            }
+            if ($enablesignup) {
+                $table->data[$sess->id][] = $sess->maxattendants;
             }
             if ($sess->groupid) {
                 if (empty($sessdata->groups[$sess->groupid])) {
