@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/attendance/db" VERSION="20190622" COMMENT="XMLDB file for Moodle mod/attendance"
+<XMLDB PATH="mod/attendance/db" VERSION="20201020" COMMENT="XMLDB file for Moodle mod/attendance"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -52,6 +52,8 @@
         <FIELD NAME="includeqrcode" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Include a QR code image when displaying the password"/>
         <FIELD NAME="rotateqrcode" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="rotateqrcodesecret" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="roomid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="maxattendants" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="Primary key for attendance_sessions"/>
@@ -61,6 +63,7 @@
         <INDEX NAME="groupid" UNIQUE="false" FIELDS="groupid"/>
         <INDEX NAME="sessdate" UNIQUE="false" FIELDS="sessdate"/>
         <INDEX NAME="caleventid" UNIQUE="false" FIELDS="caleventid"/>
+        <INDEX NAME="roomid" UNIQUE="false" FIELDS="roomid"/>
       </INDEXES>
     </TABLE>
     <TABLE NAME="attendance_log" COMMENT="attendance_log table retrofitted from MySQL">
@@ -164,6 +167,32 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="id" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="attendance_rooms" COMMENT="definitions of physical rooms where sessions can take place">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false" COMMENT="name of the room"/>
+        <FIELD NAME="description" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="description of the room"/>
+        <FIELD NAME="capacity" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="how many people fit into this room"/>
+        <FIELD NAME="bookable" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false" COMMENT="set to 0 if room is e.g. in renovation or not available for other reasons"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="name" UNIQUE="true" FIELDS="name"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="attendance_booking" COMMENT="which users signed up to partake in which session?">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="sessionid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="user_session" TYPE="unique" FIELDS="userid, sessionid"/>
       </KEYS>
     </TABLE>
   </TABLES>

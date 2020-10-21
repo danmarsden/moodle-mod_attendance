@@ -253,20 +253,28 @@ class mod_attendance_renderer extends plugin_renderer_base {
      */
     protected function render_sess_manage_table(attendance_manage_data $sessdata) {
         $this->page->requires->js_init_call('M.mod_attendance.init_manage');
+        $enablerooms = get_config('attendance', 'enablerooms');
 
         $table = new html_table();
         $table->width = '100%';
-        $table->head = array(
+        $table->head = array_merge([
                 '#',
                 get_string('date', 'attendance'),
-                get_string('time', 'attendance'),
+                get_string('time', 'attendance')
+            ],
+            ($enablerooms ? [get_string('room', 'attendance')] : []),
+            [
                 get_string('sessiontypeshort', 'attendance'),
                 get_string('description', 'attendance'),
                 get_string('actions'),
-                html_writer::checkbox('cb_selector', 0, false, '', array('id' => 'cb_selector'))
-            );
-        $table->align = array('', 'right', '', '', 'left', 'right', 'center');
-        $table->size = array('1px', '1px', '1px', '', '*', '120px', '1px');
+                html_writer::checkbox('cb_selector', 0, false, '', array('id' => 'cb_selector')),
+            ]);
+        $table->align = array_merge(['', 'right', ''],
+            ($enablerooms ? ['left'] : []),
+            ['', 'left', 'right', 'center']);
+        $table->size = array_merge(['1px', '1px', '1px'],
+            ($enablerooms ? ['1px'] : []),
+            ['', '*', '120px', '1px']);
 
         $i = 0;
         foreach ($sessdata->sessions as $key => $sess) {
@@ -277,6 +285,10 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $table->data[$sess->id][] = $i;
             $table->data[$sess->id][] = $dta['date'];
             $table->data[$sess->id][] = $dta['time'];
+
+            if ($enablerooms) {
+                $table->data[$sess->id][] = $sessdata->att->get_room_name($sess->roomid);
+            }
             if ($sess->groupid) {
                 if (empty($sessdata->groups[$sess->groupid])) {
                     $table->data[$sess->id][] = get_string('deletedgroup', 'attendance');

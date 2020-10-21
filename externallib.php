@@ -542,4 +542,33 @@ class mod_attendance_external extends external_api {
     public static function update_user_status_returns() {
         return new external_value(PARAM_TEXT, 'Http code');
     }
+
+    /**
+     * Get room capacity.
+     * @param int $roomid
+     * @return int capacity
+     */
+    public static function get_room_capacity(int $roomid) {
+        global $DB;
+        $capacity = $DB->get_field('attendance_rooms', 'capacity', ["id" => $roomid]);
+        return intval($capacity);
+    }
+
+    /**
+     * Get room capacity params.
+     *
+     * @return external_function_parameters
+     */
+    public static function get_room_capacity_parameters() {
+        return new external_function_parameters(
+            array('roomid' => new external_value(PARAM_INT, 'Session id')));
+    }
+
+    /**
+     * Returns description of method result value.
+     * @return external_description
+     */
+    public static function get_room_capacity_returns() {
+        return new external_value(PARAM_INT, 'The capacity of the room with the given id');
+    }
 }

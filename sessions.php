@@ -26,6 +26,7 @@ require_once(dirname(__FILE__).'/../../config.php');
 require_once(dirname(__FILE__).'/locallib.php');
 require_once($CFG->dirroot.'/lib/formslib.php');
 
+
 $pageparams = new mod_attendance_sessions_page_params();
 
 $id                     = required_param('id', PARAM_INT);
@@ -59,6 +60,7 @@ $PAGE->set_heading($course->fullname);
 $PAGE->force_settings_menu(true);
 $PAGE->set_cacheable(true);
 $PAGE->navbar->add($att->name);
+$PAGE->requires->js('/mod/attendance/js/rooms/rooms.js');
 
 $currenttab = attendance_tabs::TAB_ADD;
 $formparams = array('course' => $course, 'cm' => $cm, 'modcontext' => $context, 'att' => $att);
@@ -73,6 +75,7 @@ switch ($att->pageparams->action) {
 
         if ($formdata = $mform->get_data()) {
             $sessions = attendance_construct_sessions_data_for_add($formdata, $att);
+            echo var_dump($formdata);
             $att->add_sessions($sessions);
             if (count($sessions) == 1) {
                 $message = get_string('sessiongenerated', 'attendance');

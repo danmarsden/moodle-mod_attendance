@@ -481,6 +481,11 @@ function attendance_print_settings_tabs($selected = 'settings') {
     $tabs[] = new tabobject('defaultstatus', $CFG->wwwroot.'/mod/attendance/defaultstatus.php',
         get_string('defaultstatus', 'attendance'), get_string('defaultstatus', 'attendance'), false);
 
+    if (get_config('attendance', 'enablerooms')) {
+        $tabs[] = new tabobject('rooms', $CFG->wwwroot.'/mod/attendance/rooms.php',
+            get_string('rooms', 'attendance'), get_string('rooms', 'attendance'), false);
+    }
+
     if (get_config('attendance', 'enablewarnings')) {
         $tabs[] = new tabobject('defaultwarnings', $CFG->wwwroot . '/mod/attendance/warnings.php',
             get_string('defaultwarnings', 'attendance'), get_string('defaultwarnings', 'attendance'), false);

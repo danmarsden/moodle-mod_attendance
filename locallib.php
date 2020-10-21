@@ -640,6 +640,7 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
                     $sess->descriptionformat = $formdata->sdescription['format'];
                     $sess->calendarevent = $calendarevent;
                     $sess->timemodified = $now;
+                    $sess->roomid = intval($formdata->roomid);
                     $sess->absenteereport = $absenteereport;
                     $sess->studentpassword = '';
                     $sess->includeqrcode = 0;
@@ -711,6 +712,7 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
         $sess->descriptionformat = $formdata->sdescription['format'];
         $sess->calendarevent = $calendarevent;
         $sess->timemodified = $now;
+        $sess->roomid = intval($formdata->roomid);
         $sess->studentscanmark = 0;
         $sess->autoassignstatus = 0;
         $sess->subnet = '';

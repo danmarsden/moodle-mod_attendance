@@ -565,7 +565,7 @@ class mod_attendance_structure {
         $sess->description = $description;
         $sess->descriptionformat = $formdata->sdescription['format'];
         $sess->calendarevent = empty($formdata->calendarevent) ? 0 : $formdata->calendarevent;
-
+        $sess->roomid = $formdata->roomid;
         $sess->studentscanmark = 0;
         $sess->autoassignstatus = 0;
         $sess->studentpassword = '';
@@ -1335,5 +1335,62 @@ class mod_attendance_structure {
         }
 
         return $this->lowgradethreshold;
+    }
+
+    /**
+     * Gets an array of existing rooms
+     * @param bool $onlybookable - return only rooms that are bookable (edit bookable flag in room editor)
+     * @return array
+     */
+    public function get_rooms(bool $onlybookable = true) : array {
+        global $DB;
+        if ($onlybookable) {
+            $rooms = array_values($DB->get_records('attendance_rooms', ["bookable" => true], 'name ASC'));
+        } else {
+            $rooms = array_values($DB->get_records('attendance_rooms', null, 'name ASC'));
+        }
+        return $rooms;
+    }
+
+    /**
+     * Gets a hashed array of existing rooms with roomid as key
+     * @param bool $onlybookable - return only rooms that are bookable (edit bookable flag in room editor)
+     * @return array
+     */
+    public function get_rooms_hash(bool $onlybookable = true) : array {
+        $roomsarray = $this->get_rooms($onlybookable);
+        $roomshash = [];
+        foreach ($roomsarray as $room) {
+            $roomshash[$room->id] = $room;
+        }
+        return $roomshash;
+    }
+
+    /**
+     * Gets a hashed array of existing rooms names with roomid as key
+     * @param bool $onlybookable - return only rooms that are bookable (edit bookable flag in room editor)
+     * @return array
+     */
+    public function get_room_names(bool $onlybookable = true) : array {
+        $roomsarray = $this->get_rooms($onlybookable);
+        $roomshash = [];
+        foreach ($roomsarray as $room) {
+            $roomshash[$room->id] = $room->name;
+        }
+        return $roomshash;
+    }
+
+    /**
+     * Gets name of a room
+     * @param int $roomid
+     * @return string
+     */
+    public function get_room_name(int $roomid) : string {
+        global $DB;
+        $room = $DB->get_field('attendance_rooms', 'name', ["id" => $roomid]);
+        if ($room === false) {
+            $room = '';
+        }
+        return $room;
     }
 }

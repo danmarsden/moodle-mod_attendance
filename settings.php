@@ -112,6 +112,11 @@ if ($ADMIN->fulltree) {
         $fields[$field->shortname] = format_string($field->name);
     }
 
+    $settings->add(new admin_setting_configcheckbox('attendance/enablerooms',
+        get_string('roomsenable', 'attendance'),
+        get_string('roomsenable_desc', 'attendance'), 0));
+
+
     $settings->add(new admin_setting_configmultiselect('attendance/customexportfields',
             new lang_string('customexportfields', 'attendance'),
             new lang_string('customexportfields_help', 'attendance'),

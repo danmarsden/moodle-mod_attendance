@@ -46,6 +46,7 @@ class updatesession extends \moodleform {
 
         $modcontext    = $this->_customdata['modcontext'];
         $sessionid     = $this->_customdata['sessionid'];
+        $att           = $this->_customdata['att'];
 
         if (!$sess = $DB->get_record('attendance_sessions', array('id' => $sessionid) )) {
             error('No such session in this course');
@@ -69,6 +70,7 @@ class updatesession extends \moodleform {
             'endhour' => $endhour, 'endminute' => $endminute),
             'sdescription' => $sess->description_editor,
             'calendarevent' => $sess->calendarevent,
+            'roomid' => $sess->roomid,
             'studentscanmark' => $sess->studentscanmark,
             'studentpassword' => $sess->studentpassword,
             'autoassignstatus' => $sess->autoassignstatus,
@@ -127,6 +129,20 @@ class updatesession extends \moodleform {
         if (!empty(get_config('attendance', 'enablewarnings'))) {
             $mform->addElement('checkbox', 'absenteereport', '', get_string('includeabsentee', 'attendance'));
             $mform->addHelpButton('absenteereport', 'includeabsentee', 'attendance');
+        }
+
+        // For room booking.
+        if (get_config('attendance', 'enablerooms')) {
+            $mform->addElement('header', 'headerrooms', get_string('roombooking', 'attendance'));
+            $mform->setExpanded('headerrooms');
+
+            $rooms = [0 => ''] + $att->get_room_names();
+            $mform->addElement('select', 'roomid',
+                get_string('roomselect', 'attendance'), $rooms);
+            $mform->setType('roomid', PARAM_INT);
+        } else {
+            $mform->addElement('hidden', 'roomid', '0');
+            $mform->settype('roomid', PARAM_INT);
         }
 
         // Students can mark own attendance.
