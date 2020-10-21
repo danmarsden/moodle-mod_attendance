@@ -78,8 +78,6 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
         $session->groupid = 0;
         $session->absenteereport = 1;
         $session->calendarevent = 0;
-        $session->roomid = 0;
-        $session->maxattendants = 0;
 
         // Creating session.
         $this->sessions[] = $session;
@@ -322,7 +320,7 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
         // Create attendance with separate groups mode.
         $attendancesepgroups = mod_attendance_external::add_attendance($course->id, 'sepgroups', 'test', SEPARATEGROUPS);
         $attendancesepgroups = external_api::clean_returnvalue(mod_attendance_external::add_attendance_returns(),
-                                                               $attendancesepgroups);
+            $attendancesepgroups);
 
         // Check attendance exist.
         $this->assertCount(1, $DB->get_records('attendance', ['course' => $course->id]));
@@ -364,7 +362,7 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
 
         // Create attendance with no groups mode.
         $attendancenogroups = mod_attendance_external::add_attendance($course->id, 'nogroups',
-                                                                 'test', NOGROUPS);
+            'test', NOGROUPS);
         $attendancenogroups = external_api::clean_returnvalue(mod_attendance_external::add_attendance_returns(),
             $attendancenogroups);
 
@@ -392,7 +390,7 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
         // Create attendance with visible groups mode.
         $attendancevisgroups = mod_attendance_external::add_attendance($course->id, 'visgroups', 'test', VISIBLEGROUPS);
         $attendancevisgroups = external_api::clean_returnvalue(mod_attendance_external::add_attendance_returns(),
-                                                               $attendancevisgroups);
+            $attendancevisgroups);
 
         // Check attendance exist.
         $this->assertCount(1, $DB->get_records('attendance', ['course' => $course->id]));
