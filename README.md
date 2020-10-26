@@ -1,4 +1,4 @@
-# ABOUT [![Build Status](https://travis-ci.org/danmarsden/moodle-mod_attendance.svg?branch=master)](https://travis-ci.org/danmarsden/moodle-mod_attendance)
+# ABOUT [![Build Status](https://travis-ci.org/flocko-motion/moodle-mod_attendance.svg?branch=master)](https://travis-ci.org/flocko-motion/moodle-mod_attendance)
 
 The Attendance module is supported and maintained by Dan Marsden http://danmarsden.com
 
