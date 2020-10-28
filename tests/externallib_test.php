@@ -42,7 +42,7 @@ require_once($CFG->dirroot . '/mod/attendance/externallib.php');
  * @group      mod_attendance
  */
 class mod_attendance_external_testcase extends externallib_advanced_testcase {
-    /** @var coursecat */
+    /** @var core_course_category */
     protected $category;
     /** @var stdClass */
     protected $course;
@@ -58,7 +58,7 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
     /**
      * Setup class.
      */
-    public function setUp() {
+    public function setUp(): void {
         global $DB;
         $this->category = $this->getDataGenerator()->create_category();
         $this->course = $this->getDataGenerator()->create_course(array('category' => $this->category->id));
