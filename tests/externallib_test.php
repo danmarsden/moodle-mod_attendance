@@ -58,7 +58,7 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
     /**
      * Setup class.
      */
-    public function setUp() {
+    public function setUp() : void {
         $this->category = $this->getDataGenerator()->create_category();
         $this->course = $this->getDataGenerator()->create_course(array('category' => $this->category->id));
         $this->attendance = $this->getDataGenerator()->create_module('attendance', array('course' => $this->course->id));
