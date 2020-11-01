@@ -42,7 +42,7 @@ require_once($CFG->dirroot . '/mod/attendance/externallib.php');
  * @group      mod_attendance
  */
 class mod_attendance_external_testcase extends externallib_advanced_testcase {
-    /** @var coursecat */
+    /** @var core_course_category */
     protected $category;
     /** @var stdClass */
     protected $course;
@@ -58,10 +58,14 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
     /**
      * Setup class.
      */
-    public function setUp() {
+    public function setUp(): void {
+        global $DB;
         $this->category = $this->getDataGenerator()->create_category();
         $this->course = $this->getDataGenerator()->create_course(array('category' => $this->category->id));
-        $this->attendance = $this->getDataGenerator()->create_module('attendance', array('course' => $this->course->id));
+        $att = $this->getDataGenerator()->create_module('attendance', array('course' => $this->course->id));
+        $cm = $DB->get_record('course_modules', array('id' => $att->cmid), '*', MUST_EXIST);
+        $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
+        $this->attendance = new mod_attendance_structure($att, $cm, $course);
 
         $this->create_and_enrol_users();
 
@@ -114,10 +118,14 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
     }
 
     public function test_get_courses_with_today_sessions_multiple_instances() {
+        global $DB;
         $this->resetAfterTest(true);
 
         // Make another attendance.
-        $second = $this->getDataGenerator()->create_module('attendance', array('course' => $this->course->id));
+        $att = $this->getDataGenerator()->create_module('attendance', array('course' => $this->course->id));
+        $cm = $DB->get_record('course_modules', array('id' => $att->cmid), '*', MUST_EXIST);
+        $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
+        $second = new mod_attendance_structure($att, $cm, $course);
 
         // Just add the same session.
         $secondsession = clone $this->sessions[0];
