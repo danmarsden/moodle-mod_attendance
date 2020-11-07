@@ -1,16 +1,15 @@
 //
-// * Javascript
+// * Javascript for "rooms" feature extension
 // *
-// * @package    ajaxdemo
-// * Developer: 2020 Ricoshae Pty Ltd (http://ricoshae.com.au)
+// * Developer: 2020 Florian Metzger-Noel (github.com/flocko-motion)
 //
 
-require(['core/first', 'jquery', 'jqueryui', 'core/ajax'], function(core, $, bootstrap, ajax) {
+require(['core/first', 'jquery', 'jqueryui', 'core/ajax', 'core/notification'], function(core, $, bootstrap, ajax, notification) {
+    window.notification = notification;
 
-    // -----------------------------
     $(document).ready(function() {
 
-        $('#id_roomid').change(function() {
+        function modAttendanceGetRoomCapacity() {
             var selectedroomid = $('#id_roomid').val();
             ajax.call([{
                 methodname: 'mod_attendance_get_room_capacity',
@@ -18,22 +17,57 @@ require(['core/first', 'jquery', 'jqueryui', 'core/ajax'], function(core, $, boo
                     'roomid': selectedroomid
                 },
             }])[0].done(function(capacity) {
-                var oldCapacity = $('#id_roomattendants').val();
-                $('#id_roomattendants option').each(function() {
-                    if ( $(this).val() > 0) {
-                        $(this).remove();
+                var minVal = Number($('[name=bookings]').val());
+                var currentVal = $('#id_maxattendants').val();
+                var currentValAllowed = false;
+                $('#id_maxattendants option').each(function() {
+                    var n = $(this).val();
+                    if (n > capacity || ( n > 0 && n < minVal)) {
+                        $(this).hide();
+                    }
+                    else {
+                        $(this).show();
+                        if (currentVal == $(this).val()) {
+                            currentValAllowed = true;
+                        }
                     }
                 });
-                for (var i = 1; i <= capacity; i++) {
-                    $('<option/>').val(i).html(i).appendTo('#id_roomattendants');
+                if (!currentValAllowed) {
+                    $('#id_maxattendants').val(0);
                 }
-                $('#id_roomattendants').val(Math.min(oldCapacity, capacity));
+                return;
+            }).fail(function(err) {
+                return;
+            });
+        }
+        modAttendanceGetRoomCapacity();
+
+        $('#id_roomid').change(modAttendanceGetRoomCapacity);
+
+
+
+        $('button[data-att-book-session]').click(function() {
+            ajax.call([{
+                methodname: 'mod_attendance_book_session',
+                args: {
+                    'sessionid': $(this).attr('data-att-book-session'),
+                    'book': $(this).attr('data-att-book-action'),
+                },
+            }])[0].done(function(result) {
+                var show = result.bookingstatus * -2 + 1;
+                var hide = result.bookingstatus *  2 - 1;
+                $(`button[data-att-book-session=${result.sessionid}][data-att-book-action=${show}]`).show();
+                $(`button[data-att-book-session=${result.sessionid}][data-att-book-action=${hide}]`).hide();
+                $(`span[data-att-book-session=${result.sessionid}]`)
+                    .text(result.bookedspots);
+                if (result.errormessage) {
+                    notification.alert(result.errortitle, result.errormessage, result.errorconfirm);
+                }
                 return;
             }).fail(function(err) {
                 // notification.exception(new Error('Failed to load data'));
                 return;
             });
-
         });
 
     });

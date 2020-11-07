@@ -64,7 +64,6 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
         $this->attendance = $this->getDataGenerator()->create_module('attendance', array('course' => $this->course->id));
 
         $this->create_and_enrol_users();
-
         $this->setUser($this->teacher);
 
         $session = new stdClass();

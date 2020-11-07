@@ -207,6 +207,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
     protected function render_view_controls(attendance_filter_controls $fcontrols) {
         $views[ATT_VIEW_ALL] = get_string('all', 'attendance');
         $views[ATT_VIEW_ALLPAST] = get_string('allpast', 'attendance');
+        $views[ATT_VIEW_ALLFUTURE] = get_string('allfuture', 'attendance');
         $views[ATT_VIEW_MONTHS] = get_string('months', 'attendance');
         $views[ATT_VIEW_WEEKS] = get_string('weeks', 'attendance');
         $views[ATT_VIEW_DAYS] = get_string('days', 'attendance');
@@ -220,7 +221,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $viewcontrols = '';
         foreach ($views as $key => $sview) {
             if ($key != $fcontrols->pageparams->view) {
-                $link = html_writer::link($fcontrols->url(array('view' => $key)), $sview);
+                $link = html_writer::link($fcontrols->url(array('view' => $key, 'mode' => $fcontrols->pageparams->mode)), $sview);
                 $viewcontrols .= html_writer::tag('span', $link, array('class' => 'attbtn'));
             } else {
                 $viewcontrols .= html_writer::tag('span', $sview, array('class' => 'attcurbtn'));
@@ -253,10 +254,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
      */
     protected function render_sess_manage_table(attendance_manage_data $sessdata) {
         $this->page->requires->js_init_call('M.mod_attendance.init_manage');
-        $enablerooms = get_config('attendance', 'enablerooms');
-        // This flag will be used by the "signup" feature upgrade, which will be part of the next update
-        // by Florian Metzger-Noel expected in 2020-10.
-        $enablesignup = false;
+        $enablerooms = intval(get_config('attendance', 'enablerooms'));
 
         $table = new html_table();
         $table->width = '100%';
@@ -265,28 +263,25 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 get_string('date', 'attendance'),
                 get_string('time', 'attendance')
             ],
+            [
+                get_string('sessiontypeshort', 'attendance'),
+                get_string('description', 'attendance')
+            ],
             ($enablerooms ? [
                 get_string('room', 'attendance'),
-                ] : []
-            ),
-            ($enablesignup ? [
                 get_string('roomattendants', 'attendance'),
             ] : []
             ),
             [
-                get_string('sessiontypeshort', 'attendance'),
-                get_string('description', 'attendance'),
                 get_string('actions'),
                 html_writer::checkbox('cb_selector', 0, false, '', array('id' => 'cb_selector')),
             ]);
-        $table->align = array_merge(['', 'right', ''],
-            ($enablerooms ? ['left', ] : []),
-            ($enablesignup ? ['left', ] : []),
-            ['', 'left', 'right', 'center']);
-        $table->size = array_merge(['1px', '1px', '1px'],
-            ($enablerooms ? ['1px', ] : []),
-            ($enablesignup ? ['1px', ] : []),
-            ['', '*', '120px', '1px']);
+        $table->align = array_merge(['', 'right', '', '', 'left', ],
+            ($enablerooms ? ['left', 'right' ] : []),
+            ['right', 'center']);
+        $table->size = array_merge(['1px', '1px', '1px', '', '*', ],
+            ($enablerooms ? ['1px', '1px' ] : []),
+            ['120px', '1px']);
 
         $i = 0;
         foreach ($sessdata->sessions as $key => $sess) {
@@ -298,12 +293,6 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $table->data[$sess->id][] = $dta['date'];
             $table->data[$sess->id][] = $dta['time'];
 
-            if ($enablerooms) {
-                $table->data[$sess->id][] = $sessdata->att->get_room_name($sess->roomid);
-            }
-            if ($enablesignup) {
-                $table->data[$sess->id][] = $sess->maxattendants;
-            }
             if ($sess->groupid) {
                 if (empty($sessdata->groups[$sess->groupid])) {
                     $table->data[$sess->id][] = get_string('deletedgroup', 'attendance');
@@ -318,6 +307,16 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 $table->data[$sess->id][] = get_string('commonsession', 'attendance');
             }
             $table->data[$sess->id][] = $sess->description;
+            if ($enablerooms) {
+                $table->data[$sess->id][] = $sessdata->att->get_room_name($sess->roomid);
+                if ($sess->maxattendants) {
+                    $table->data[$sess->id][] = $sess->maxattendants ? $sess->bookings . ' / ' . $sess->maxattendants : '';
+                } else if ($sess->bookings) {
+                    $table->data[$sess->id][] = $sess->bookings;
+                } else {
+                    $table->data[$sess->id][] = '';
+                }
+            }
             $table->data[$sess->id][] = $dta['actions'];
             $table->data[$sess->id][] = html_writer::checkbox('sessid[]', $sess->id, false, '',
                                                               array('class' => 'attendancesesscheckbox'));
@@ -647,12 +646,22 @@ class mod_attendance_renderer extends plugin_renderer_base {
      * @return \single_select
      */
     private function statusdropdown() {
+        $enablerooms = intval(get_config('attendance', 'enablerooms'));
+
         $pref = get_user_preferences('mod_attendance_statusdropdown');
         if (empty($pref)) {
             $pref = 'unselected';
         }
-        $options = array('all' => get_string('statusall', 'attendance'),
-            'unselected' => get_string('statusunselected', 'attendance'));
+        $options = array_merge(
+            [
+                'all' => get_string('statusall', 'attendance'),
+                'unselected' => get_string('statusunselected', 'attendance')
+            ],
+            $enablerooms ? [
+                'booked' => get_string('statusbooked', 'attendance'),
+                'unbooked' => get_string('statusunbooked', 'attendance'),
+            ] : []
+        );
 
         $select = new \single_select(new \moodle_url('/'), 'setallstatus-select', $options,
             $pref, null, 'setallstatus-select');
@@ -669,14 +678,24 @@ class mod_attendance_renderer extends plugin_renderer_base {
      */
     protected function render_attendance_take_list(attendance_take_data $takedata) {
         global $CFG;
+        $enablerooms = intval(get_config('attendance', 'enablerooms'));
         $table = new html_table();
         $table->width = '0%';
-        $table->head = array(
-                '#',
-                $this->construct_fullname_head($takedata)
-            );
-        $table->align = array('left', 'left');
-        $table->size = array('20px', '');
+        $table->head = array_merge(
+                ['#', ],
+                $enablerooms ? ['Booked', ] : [],
+                [$this->construct_fullname_head($takedata), ]
+        );
+        $table->align = array_merge(
+            ['left', ],
+            $enablerooms ? ['center', ] : [],
+            ['left', ]
+        );
+        $table->size = array_merge(
+            ['20px', ],
+            $enablerooms ? ['30px', ] : [],
+            ['', ]
+        );
         $table->wrap[1] = 'nowrap';
         // Check if extra useridentity fields need to be added.
         $extrasearchfields = array();
@@ -718,6 +737,9 @@ class mod_attendance_renderer extends plugin_renderer_base {
         // Show a 'select all' row of radio buttons.
         $row = new html_table_row();
         $row->attributes['class'] = 'setallstatusesrow';
+        if ($enablerooms) {
+            $row->cells[] = '';
+        }
         foreach ($extrasearchfields as $field) {
             $row->cells[] = '';
         }
@@ -738,13 +760,20 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $this->page->requires->js_amd_inline("
                 require(['jquery'], function($) {
                     $('#radiocheckstatus".$st->id."').click(function(e) {
-                        if ($('select[name=\"setallstatus-select\"] option:selected').val() == 'all') {
+                        console.log(".$st->id.");
+                        var mode = $('select[name=\"setallstatus-select\"] option:selected').val();
+                        M.util.set_user_preference('mod_attendance_statusdropdown', mode);
+                        if (mode == 'all') {
                             $('#attendancetakeform').find('.st".$st->id."').prop('checked', true);
-                            M.util.set_user_preference('mod_attendance_statusdropdown','all');
                         }
-                        else {
+                        else if(mode == 'unselected') {
                             $('#attendancetakeform').find('input:indeterminate.st".$st->id."').prop('checked', true);
-                            M.util.set_user_preference('mod_attendance_statusdropdown','unselected');
+                        }
+                        else if(mode == 'booked') {
+                            $('#attendancetakeform').find('.st".$st->id."[data-booked=1]').prop('checked', true);
+                        }
+                        else if(mode == 'unbooked') {
+                            $('#attendancetakeform').find('.st".$st->id."[data-booked=0]').prop('checked', true);
                         }
                     });
                 });");
@@ -757,6 +786,9 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $i++;
             $row = new html_table_row();
             $row->cells[] = $i;
+            if ($enablerooms) {
+                $row->cells[] = $user->booked ? $this->output->pix_icon('t/check', $title) : '';
+            }
             $fullname = html_writer::link($takedata->url_view(array('studentid' => $user->id)), fullname($user));
             $fullname = $this->user_picture($user).$fullname; // Show different picture if it is a temporary user.
 
@@ -777,7 +809,6 @@ class mod_attendance_renderer extends plugin_renderer_base {
             } else {
                 $row->cells = array_merge($row->cells, $ucdata['text']);
             }
-
             if (array_key_exists('class', $ucdata)) {
                 $row->attributes['class'] = $ucdata['class'];
             }
@@ -795,6 +826,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
      * @return string
      */
     protected function render_attendance_take_grid(attendance_take_data $takedata) {
+        $enablerooms = intval(get_config('attendance', 'enablerooms'));
         $table = new html_table();
         for ($i = 0; $i < $takedata->pageparams->gridcols; $i++) {
             $table->align[] = 'center';
@@ -812,13 +844,19 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $this->page->requires->js_amd_inline("
                  require(['jquery'], function($) {
                      $('#checkstatus".$st->id."').click(function(e) {
-                         if ($('select[name=\"setallstatus-select\"] option:selected').val() == 'unselected') {
+                         var mode = $('select[name=\"setallstatus-select\"] option:selected').val();
+                         M.util.set_user_preference('mod_attendance_statusdropdown','unselected');
+                         if (mode == 'unselected') {
                              $('#attendancetakeform').find('input:indeterminate.st".$st->id."').prop('checked', true);
-                             M.util.set_user_preference('mod_attendance_statusdropdown','unselected');
                          }
-                         else {
+                         else if (mode == 'all') {
                              $('#attendancetakeform').find('.st".$st->id."').prop('checked', true);
-                             M.util.set_user_preference('mod_attendance_statusdropdown','all');
+                         }
+                         else if(mode == 'booked') {
+                             $('#attendancetakeform').find('.st".$st->id."[data-booked=1]').prop('checked', true);
+                         }
+                         else if(mode == 'unbooked') {
+                             $('#attendancetakeform').find('.st".$st->id."[data-booked=0]').prop('checked', true);
                          }
                          e.preventDefault();
                      });
@@ -833,6 +871,9 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $celltext .= html_writer::empty_tag('br');
             $fullname = html_writer::link($takedata->url_view(array('studentid' => $user->id)), fullname($user));
             $celltext .= html_writer::tag('span', $fullname, array('class' => 'fullname'));
+            if ($enablerooms) {
+                $celltext .= $user->booked ? ' '.$this->output->pix_icon('t/check', $title) : '';
+            }
             $celltext .= html_writer::empty_tag('br');
             $ucdata = $this->construct_take_user_controls($takedata, $user);
             $celltext .= is_array($ucdata['text']) ? implode('', $ucdata['text']) : $ucdata['text'];
@@ -921,7 +962,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
                         'type'  => 'radio',
                         'name'  => 'user'.$user->id,
                         'class' => 'st'.$st->id,
-                        'value' => $st->id);
+                        'value' => $st->id,
+                        'data-booked' => $user->booked);
                 if (array_key_exists($user->id, $takedata->sessionlog) and $st->id == $takedata->sessionlog[$user->id]->statusid) {
                     $params['checked'] = '';
                 }
@@ -1016,15 +1058,23 @@ class mod_attendance_renderer extends plugin_renderer_base {
     protected function render_user_report_tabs(attendance_user_data $userdata) {
         $tabs = array();
 
+        $prefixresults = "";
+        if (get_config('attendance', 'enablerooms') === '1') {
+            $tabs[] = new tabobject(mod_attendance_view_page_params::MODE_THIS_BOOKING,
+                $userdata->url()->out(true, array('mode' => mod_attendance_view_page_params::MODE_THIS_BOOKING)),
+                get_string('sessions', 'attendance'));
+            $prefixresults = get_string('results', 'attendance') . ': ';
+        }
+
         $tabs[] = new tabobject(mod_attendance_view_page_params::MODE_THIS_COURSE,
                         $userdata->url()->out(true, array('mode' => mod_attendance_view_page_params::MODE_THIS_COURSE)),
-                        get_string('thiscourse', 'attendance'));
+                        $prefixresults. get_string('thiscourse', 'attendance'));
 
         // Skip the 'all courses' tab for 'temporary' users.
         if ($userdata->user->type == 'standard') {
             $tabs[] = new tabobject(mod_attendance_view_page_params::MODE_ALL_COURSES,
                             $userdata->url()->out(true, array('mode' => mod_attendance_view_page_params::MODE_ALL_COURSES)),
-                            get_string('allcourses', 'attendance'));
+                            $prefixresults . get_string('allcourses', 'attendance'));
         }
 
         return print_tabs(array($tabs), $userdata->pageparams->mode, null, null, true);
@@ -1049,7 +1099,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $o .= html_writer::empty_tag('hr');
             $o .= construct_user_data_stat($userdata->summary->get_all_sessions_summary_for($userdata->user->id),
                 $userdata->pageparams->view);
-        } else {
+        } else if ($userdata->pageparams->mode == mod_attendance_view_page_params::MODE_ALL_COURSES) {
             $table = new html_table();
             $table->head  = array(get_string('course'),
                 get_string('pluginname', 'mod_attendance'),
@@ -1124,9 +1174,86 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 $o .= html_writer::div("<h3>".get_string('ungraded', 'mod_attendance')."</h3>");
                 $o .= html_writer::table($table2);
             }
+        } else if ($userdata->pageparams->mode == mod_attendance_view_page_params::MODE_THIS_BOOKING) {
+            $o .= $this->render_attendance_filter_controls($userdata->filtercontrols);
+            $o .= $this->construct_user_sessions_bookable($userdata);
+            $o .= html_writer::empty_tag('hr');
         }
 
         return $o;
+    }
+
+    /**
+     * Construct user session booking list.
+     *
+     * @param attendance_user_data $userdata
+     * @return string
+     */
+    private function construct_user_sessions_bookable(attendance_user_data $userdata) {
+        global $USER;
+        $context = context_module::instance($userdata->filtercontrols->cm->id);
+
+        $table = new html_table();
+        $table->attributes['class'] = 'generaltable attwidth boxaligncenter';
+        $table->head = array();
+        $table->align = array();
+        $table->size = array();
+        $table->colclasses = array();
+
+        $table->head[] = get_string('date');
+        $table->head[] = get_string('description', 'attendance');
+        $table->head[] = get_string('room', 'attendance');
+        $table->head[] = get_string('sessionbookedspots', 'attendance');
+        $table->head[] = get_string('action');
+
+        $table->align = array_merge($table->align, array('', 'left', 'left', 'center', 'center'));
+        $table->colclasses = array_merge($table->colclasses, array('datecol', 'desccol', '', '', ''));
+        $table->size = array_merge($table->size, array('1px', '*', '*', '*', '100px'));
+
+        $bookedsessionids = attendance_sessionsbooked();
+
+        $i = 0;
+        foreach ($userdata->sessionslog as $sess) {
+            $i++;
+
+            $row = new html_table_row();
+            $row->cells[] = userdate($sess->sessdate, get_string('strftimedmyw', 'attendance')) .
+                " ". $this->construct_time($sess->sessdate, $sess->duration);
+            $row->cells[] = $sess->description;
+            $row->cells[] = $sess->roomname;
+            $cellbookedspots = html_writer::tag('span', $sess->bookedspots, array('data-att-book-session' => $sess->id));
+            if ($sess->maxattendants > 0) {
+                $cellbookedspots .= "  / {$sess->maxattendants}";
+            }
+            $row->cells[] = $cellbookedspots;
+            $actions = '';
+            if ($sess->sessdate > time()) {
+                $actions .= html_writer::tag('button', get_string('sessionbook', 'attendance'),
+                        array('data-att-book-session' => $sess->id,
+                            'data-att-book-action' => 1,
+                            'type' => 'button',
+                            'class' => 'btn btn-secondary' . (in_array($sess->id, $bookedsessionids) ? ' hidden' : '')));
+                $actions .= html_writer::tag('button', get_string('sessionunbook', 'attendance'),
+                        array('data-att-book-session' => $sess->id,
+                            'data-att-book-action' => -1,
+                            'type' => 'button',
+                            'class' => 'btn btn-primary' . (in_array($sess->id, $bookedsessionids) ? '' : ' hidden')));
+            }
+            $row->cells[] = $actions;
+
+            if (has_capability('mod/attendance:takeattendances', $context)) {
+                $params = array('id' => $userdata->filtercontrols->cm->id,
+                    'sessionid' => $sess->id,
+                    'grouptype' => $sess->groupid);
+                $url = new moodle_url('/mod/attendance/take.php', $params);
+                $icon = $this->output->pix_icon('redo', get_string('changeattendance', 'attendance'), 'attendance');
+                $row->cells[] = html_writer::link($url, $icon);
+            }
+
+            $table->data[] = $row;
+        }
+
+        return html_writer::table($table);
     }
 
     /**

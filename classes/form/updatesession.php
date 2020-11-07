@@ -51,9 +51,12 @@ class updatesession extends \moodleform {
         if (!$sess = $DB->get_record('attendance_sessions', array('id' => $sessionid) )) {
             error('No such session in this course');
         }
+
         $attendancesubnet = $DB->get_field('attendance', 'subnet', array('id' => $sess->attendanceid));
         $defopts = array('maxfiles' => EDITOR_UNLIMITED_FILES, 'noclean' => true, 'context' => $modcontext);
         $sess = file_prepare_standard_editor($sess, 'description', $defopts, $modcontext, 'mod_attendance', 'session', $sess->id);
+
+        $sess->bookings = attendance_sessionbookings($sess->id);
 
         $starttime = $sess->sessdate - usergetmidnight($sess->sessdate);
         $starthour = floor($starttime / HOURSECS);
@@ -71,6 +74,7 @@ class updatesession extends \moodleform {
             'sdescription' => $sess->description_editor,
             'calendarevent' => $sess->calendarevent,
             'roomid' => $sess->roomid,
+            'maxattendants' => $sess->maxattendants,
             'studentscanmark' => $sess->studentscanmark,
             'studentpassword' => $sess->studentpassword,
             'autoassignstatus' => $sess->autoassignstatus,
@@ -131,7 +135,7 @@ class updatesession extends \moodleform {
             $mform->addHelpButton('absenteereport', 'includeabsentee', 'attendance');
         }
 
-        attendance_form_session_room($mform, $att);
+        attendance_form_session_room($mform, $att, $sess);
 
         // Students can mark own attendance.
         $studentscanmark = get_config('attendance', 'studentscanmark');

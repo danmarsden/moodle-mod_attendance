@@ -561,7 +561,7 @@ class mod_attendance_external extends external_api {
      */
     public static function get_room_capacity_parameters() {
         return new external_function_parameters(
-            array('roomid' => new external_value(PARAM_INT, 'Session id')));
+            array('roomid' => new external_value(PARAM_INT, 'Room id')));
     }
 
     /**
@@ -571,4 +571,99 @@ class mod_attendance_external extends external_api {
     public static function get_room_capacity_returns() {
         return new external_value(PARAM_INT, 'The capacity of the room with the given id');
     }
+
+    /**
+     * Get booking object and session.
+     *
+     * @param int $bookingid
+     * @return stdClass booking object with session
+     */
+    public static function get_booking(int $bookingid) {
+        global $DB;
+
+        $booking = $DB->get_record('attendance_bookings', array('id' => $bookingid));
+        if (!$booking) {
+            throw new invalid_parameter_exception('Invalid booking id or no permissions.');
+        }
+        $booking->session = $DB->get_record('attendance_sessions', array('id' => $booking->sessionid));
+        if (!$booking->session) {
+            throw new invalid_parameter_exception('Invalid session id or no permissions.');
+        }
+        return $booking;
+    }
+
+    /**
+     * Book/unbook session for current user.
+     * @param int $sessionid
+     * @param int $book -1: unbook, 0: toggle booking, 1: book
+     * @return array new status of booking
+     */
+    public static function book_session(int $sessionid, int $book = 0) : array {
+        global $DB, $USER;
+
+        $bookedspots = $DB->count_records('attendance_bookings', array('sessionid' => $sessionid));
+        $booking = $DB->get_record('attendance_bookings', array('sessionid' => $sessionid, 'userid' => $USER->id));
+        $maxattendants = intval($DB->get_field('attendance_sessions', 'maxattendants', array('id' => $sessionid)));
+        $result = intval(boolval($booking));
+
+        $errortitle = '';
+        $errormessage = '';
+        $errorconfirm = '';
+
+        if ($booking && $book <= 0) {
+            attendance_delete_calendar_event_booking($booking);
+            $DB->delete_records('attendance_bookings', ['id' => $booking->id, 'userid' => $USER->id]);
+            $bookedspots--;
+            $result = 0;
+        } else if (!$booking && $book >= 0) {
+            if ($maxattendants > 0 && $bookedspots + 1 >= $maxattendants) {
+                $errortitle = get_string('sessionfulltitle', 'attendance');
+                $errormessage = get_string('sessionfull', 'attendance');
+                $errorconfirm = get_string('ok');
+            } else {
+                $bookingid = $DB->insert_record('attendance_bookings',
+                    array('sessionid' => $sessionid, 'userid' => $USER->id, 'caleventid' => 0));
+                $bookedspots++;
+                attendance_create_calendar_event_booking(self::get_booking($bookingid));
+                $result = 1;
+            }
+        }
+
+        return array(
+            'sessionid' => $sessionid,
+            'bookingstatus' => $result,
+            'bookedspots' => $bookedspots,
+            'errortitle' => $errortitle,
+            'errormessage' => $errormessage,
+            'errorconfirm' => $errorconfirm
+        );
+    }
+
+    /**
+     * Describes book_session user parameters.
+     *
+     * @return external_function_parameters
+     */
+    public static function book_session_parameters() {
+        return new external_function_parameters(
+            array('sessionid' => new external_value(PARAM_INT, 'Session id'),
+                'book' => new external_value(PARAM_INT, '-1: unbook, 0(default): toggle, 1: book')));
+    }
+
+    /**
+     * Describes book_session return values.
+     *
+     * @return external_single_structure
+     */
+    public static function book_session_returns() {
+        return new external_single_structure(array(
+            'sessionid' => new external_value(PARAM_INT, 'id of the manipulated session'),
+            'bookingstatus' => new external_value(PARAM_INT, 'new status of the booking (1: booked, 0: not booked)'),
+            'bookedspots' => new external_value(PARAM_INT, 'bookedspots'),
+            'errortitle' => new external_value(PARAM_TEXT, 'title for error message'),
+            'errormessage' => new external_value(PARAM_TEXT, 'text for error message'),
+            'errorconfirm' => new external_value(PARAM_TEXT, 'error message confirm button caption')
+        ));
+    }
+
 }

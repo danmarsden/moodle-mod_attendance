@@ -74,6 +74,28 @@ $functions = array(
         'classpath'   => 'mod/attendance/externallib.php',
         'description' => 'Method that updates the user status in a session.',
         'type'        => 'write',
+    ),
+
+    'mod_attendance_get_room_capacity' => array(
+        'classname'   => 'mod_attendance_external',
+        'methodname'  => 'get_room_capacity',
+        'classpath'   => 'mod/attendance/externallib.php',
+        'description' => 'Method that returns the capacity of a room',
+        'type'        => 'read',
+        'ajax'        => true,
+        'capabilities' => '',
+        'loginrequired' => true
+    ),
+
+    'mod_attendance_book_session' => array(
+        'classname'   => 'mod_attendance_external',
+        'methodname'  => 'book_session',
+        'classpath'   => 'mod/attendance/externallib.php',
+        'description' => 'Method that books/unbooks a session for a user',
+        'type'        => 'write',
+        'ajax'        => true,
+        'capabilities' => '',
+        'loginrequired' => true
     )
 );
 

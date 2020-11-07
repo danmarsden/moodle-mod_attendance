@@ -31,11 +31,14 @@ defined('MOODLE_INTERNAL') || die();
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mod_attendance_view_page_params extends mod_attendance_page_with_filter_controls {
-    /** Only This course  */
+    /** Only This course - reports */
     const MODE_THIS_COURSE  = 0;
 
-    /** All courses  */
+    /** All courses - reports */
     const MODE_ALL_COURSES  = 1;
+
+    /** This course - bookable sessions  */
+    const MODE_THIS_BOOKING  = 2;
 
     /** @var int */
     public $studentid;
@@ -67,4 +70,5 @@ class mod_attendance_view_page_params extends mod_attendance_page_with_filter_co
 
         return $params;
     }
+
 }

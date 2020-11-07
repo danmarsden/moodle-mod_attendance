@@ -280,6 +280,7 @@ class mod_attendance_structure {
      */
     public function get_filtered_sessions() : array {
         global $DB;
+        $enablerooms = intval(get_config('attendance', 'enablerooms'));
 
         if ($this->pageparams->startdate && $this->pageparams->enddate) {
             $where = "attendanceid = :aid AND sessdate >= :csdate AND sessdate >= :sdate AND sessdate < :edate";
@@ -298,7 +299,16 @@ class mod_attendance_structure {
             'sdate'     => $this->pageparams->startdate,
             'edate'     => $this->pageparams->enddate,
             'cgroup'    => $this->pageparams->get_current_sesstype());
-        $sessions = $DB->get_records_select('attendance_sessions', $where, $params, 'sessdate asc');
+        if ($enablerooms) {
+            $sessions = $DB->get_records_sql(
+                "SELECT *, (SELECT COUNT(*) FROM {attendance_bookings} AS attb WHERE atts.id = attb.sessionid) as bookings
+            FROM {attendance_sessions} AS atts
+            WHERE $where
+            ORDER BY sessdate ASC", $params);
+        } else {
+            $sessions = $DB->get_records_select('attendance_sessions', $where, $params, 'sessdate asc');
+        }
+
         $statussetmaxpoints = attendance_get_statusset_maxpoints($this->get_statuses(true, true));
         foreach ($sessions as $sess) {
             if (empty($sess->description)) {
@@ -550,6 +560,7 @@ class mod_attendance_structure {
      */
     public function update_session_from_form_data($formdata, $sessionid) {
         global $DB;
+        $enablerooms = intval(get_config('attendance', 'enablerooms'));
 
         if (!$sess = $DB->get_record('attendance_sessions', array('id' => $sessionid) )) {
             print_error('No such session in this course');
@@ -567,8 +578,11 @@ class mod_attendance_structure {
         $sess->description = $description;
         $sess->descriptionformat = $formdata->sdescription['format'];
         $sess->calendarevent = empty($formdata->calendarevent) ? 0 : $formdata->calendarevent;
-        $sess->roomid = $formdata->roomid;
-        $sess->maxattendants = $formdata->roomattendants;
+
+        if ($enablerooms) {
+            $sess->roomid = $formdata->roomid;
+            $sess->maxattendants = $formdata->maxattendants;
+        }
         $sess->studentscanmark = 0;
         $sess->autoassignstatus = 0;
         $sess->studentpassword = '';
@@ -799,9 +813,10 @@ class mod_attendance_structure {
      *
      * @param int $groupid
      * @param int $page
+     * @param int $sessionid
      * @return array
      */
-    public function get_users($groupid = 0, $page = 1) : array {
+    public function get_users($groupid = 0, $page = 1, $sessionid = 0) : array {
         global $DB;
 
         $fields = array('username' , 'idnumber' , 'institution' , 'department', 'city', 'country');
@@ -867,14 +882,21 @@ class mod_attendance_structure {
             // See CONTRIB-3549.
             $sql = "SELECT ue.userid, MIN(ue.status) as status,
                            $mintime AS mintime,
-                           $maxtime AS maxtime
+                           $maxtime AS maxtime,
+                           COUNT(attb.id) AS booked
                       FROM {user_enrolments} ue
                       JOIN {enrol} e ON e.id = ue.enrolid
+                 LEFT JOIN {attendance_bookings} attb ON ue.userid = attb.userid AND attb.sessionid = :sessionid
                      WHERE ue.userid $sql
                            AND e.status = :estatus
                            AND e.courseid = :courseid
                   GROUP BY ue.userid";
-            $params += array('zerotime' => 0, 'estatus' => ENROL_INSTANCE_ENABLED, 'courseid' => $this->course->id);
+            $params += array(
+                'zerotime' => 0,
+                'estatus' => ENROL_INSTANCE_ENABLED,
+                'courseid' => $this->course->id,
+                'sessionid' => $sessionid
+            );
             $enrolments = $DB->get_records_sql($sql, $params);
 
             foreach ($users as $user) {
@@ -883,6 +905,7 @@ class mod_attendance_structure {
                 $users[$user->id]->enrolmentstart = $enrolments[$user->id]->mintime;
                 $users[$user->id]->enrolmentend = $enrolments[$user->id]->maxtime;
                 $users[$user->id]->type = 'standard'; // Mark as a standard (not a temporary) user.
+                $users[$user->id]->booked = $enrolments[$user->id]->booked;
             }
         }
 
@@ -1135,7 +1158,7 @@ class mod_attendance_structure {
             $where = "ats.attendanceid = :aid AND ats.sessdate >= :csdate";
         }
 
-        // We need to add this concatination so that moodle will use it as the array index that is a string.
+        // We need to add this concatenation so that moodle will use it as the array index that is a string.
         // If the array's index is a number it will not merge entries.
         // It would be better as a UNION query but unfortunatly MS SQL does not seem to support doing a
         // DISTINCT on a the description field.
@@ -1143,7 +1166,8 @@ class mod_attendance_structure {
         if ($this->get_group_mode()) {
             $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description,
                            al.statusid, al.remarks, ats.studentscanmark, ats.autoassignstatus,
-                           ats.preventsharedip, ats.preventsharediptime, ats.rotateqrcode
+                           ats.preventsharedip, ats.preventsharediptime, ats.rotateqrcode,
+                           ats.roomid, ats.maxattendants
                       FROM {attendance_sessions} ats
                 RIGHT JOIN {attendance_log} al
                         ON ats.id = al.sessionid AND al.studentid = :uid
@@ -1153,7 +1177,8 @@ class mod_attendance_structure {
         } else {
             $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, ats.statusset,
                            al.statusid, al.remarks, ats.studentscanmark, ats.autoassignstatus,
-                           ats.preventsharedip, ats.preventsharediptime, ats.rotateqrcode
+                           ats.preventsharedip, ats.preventsharediptime, ats.rotateqrcode,
+                           ats.roomid, ats.maxattendants
                       FROM {attendance_sessions} ats
                 RIGHT JOIN {attendance_log} al
                         ON ats.id = al.sessionid AND al.studentid = :uid
@@ -1184,10 +1209,14 @@ class mod_attendance_structure {
         }
         $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, ats.statusset,
                        al.statusid, al.remarks, ats.studentscanmark, ats.autoassignstatus,
-                       ats.preventsharedip, ats.preventsharediptime, ats.rotateqrcode
+                       ats.preventsharedip, ats.preventsharediptime, ats.rotateqrcode,
+                       ats.roomid, ats.maxattendants, atr.name AS roomname, atr.description AS roomdescription, atr.bookable,
+                       (SELECT COUNT(*) FROM {attendance_bookings} as atb WHERE atb.sessionid = ats.id) as bookedspots
                   FROM {attendance_sessions} ats
              LEFT JOIN {attendance_log} al
                     ON ats.id = al.sessionid AND al.studentid = :uid
+             LEFT JOIN {attendance_rooms} atr
+                    ON ats.roomid = atr.id
                  WHERE $where
               ORDER BY ats.sessdate ASC";
 
@@ -1202,6 +1231,11 @@ class mod_attendance_structure {
                     'pluginfile.php', $this->context->id, 'mod_attendance', 'session', $sess->id);
             }
         }
+
+        // We have two merged arrays, each is sorted - but the merged array is not sorted. Let's do that now.
+        usort($sessions, function($a, $b) {
+            return $a->sessdate <=> $b->sessdate;
+        });
 
         return $sessions;
     }
@@ -1219,6 +1253,14 @@ class mod_attendance_structure {
         list($sql, $params) = $DB->get_in_or_equal($sessionsids);
         $DB->delete_records_select('attendance_log', "sessionid $sql", $params);
         $DB->delete_records_list('attendance_sessions', 'id', $sessionsids);
+
+        $bookings = $DB->get_records_list('attendance_bookings', 'sessionid', $sessionsids);
+        $caleventids = array_map(function($booking) {
+            return $booking->caleventid;
+        }, $bookings);
+        $DB->delete_records_list('attendance_bookings', 'sessionid', $sessionsids);
+        $DB->delete_records_list('event', 'id', $caleventids);
+
         $event = \mod_attendance\event\session_deleted::create(array(
             'objectid' => $this->id,
             'context' => $this->context,

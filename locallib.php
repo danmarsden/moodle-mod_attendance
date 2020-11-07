@@ -34,10 +34,13 @@ define('ATT_VIEW_ALLPAST', 4);
 define('ATT_VIEW_ALL', 5);
 define('ATT_VIEW_NOTPRESENT', 6);
 define('ATT_VIEW_SUMMARY', 7);
+define('ATT_VIEW_ALLFUTURE', 8);
 
 define('ATT_SORT_DEFAULT', 0);
 define('ATT_SORT_LASTNAME', 1);
 define('ATT_SORT_FIRSTNAME', 2);
+
+define('ATT_ROOMS_MAX_CAPACITY', 1000);
 
 define('ATTENDANCE_AUTOMARK_DISABLED', 0);
 define('ATTENDANCE_AUTOMARK_ALL', 1);
@@ -201,7 +204,7 @@ function attendance_form_sessiondate_selector (MoodleQuickForm $mform) {
  * @param MoodleQuickForm $mform
  * @param mod_attendance_structure $att
  */
-function attendance_form_session_room (MoodleQuickForm $mform, mod_attendance_structure $att) {
+function attendance_form_session_room (MoodleQuickForm $mform, mod_attendance_structure $att, $sess = null) {
     if (get_config('attendance', 'enablerooms')) {
         $mform->addElement('header', 'headerrooms', get_string('roombooking', 'attendance'));
         $mform->setExpanded('headerrooms');
@@ -210,10 +213,24 @@ function attendance_form_session_room (MoodleQuickForm $mform, mod_attendance_st
         $mform->addElement('select', 'roomid',
             get_string('roomselect', 'attendance'), $options);
         $mform->setType('roomid', PARAM_INT);
+
+        if (!$sess) {
+            $sess = new stdClass();
+            $sess->roomid = 0;
+            $sess->maxattendants = 0;
+            $sess->bookings = 0;
+        }
+        $mform->addElement('select', 'maxattendants',
+            get_string('roomattendantsmax', 'attendance'), attendance_room_capacities());
+        $mform->setType('maxattendants', PARAM_INT);
     } else {
-        $mform->addElement('hidden', 'roomid', '0');
+        $mform->addElement('hidden', 'roomid', $sess->roomid);
         $mform->settype('roomid', PARAM_INT);
+        $mform->addElement('hidden', 'maxattendants', $sess->maxattendants);
+        $mform->settype('maxattendants', PARAM_INT);
     }
+    $mform->addElement('hidden', 'bookings', $sess->bookings);
+    $mform->settype('bookings', PARAM_INT);
 }
 
 /**
@@ -734,7 +751,6 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
         $sess->calendarevent = $calendarevent;
         $sess->timemodified = $now;
         $sess->roomid = intval($formdata->roomid);
-        // $sess->maxattendants = $formdata->roomattendants;
         $sess->studentscanmark = 0;
         $sess->autoassignstatus = 0;
         $sess->subnet = '';
@@ -1214,4 +1230,36 @@ function attendance_return_passwords($session) {
 
     $sql = 'SELECT * FROM {attendance_rotate_passwords} WHERE attendanceid = ? AND expirytime > ? ORDER BY expirytime ASC';
     return json_encode($DB->get_records_sql($sql, ['attendanceid' => $session->id, time()], $strictness = IGNORE_MISSING));
+}
+
+/**
+ * Returns description of method result value.
+ * @return array of room capacity options
+ */
+function attendance_room_capacities() {
+    $options = [];
+    $options[0] = '';
+    $i = 1;
+    for ($n = 1; $n <= ATT_ROOMS_MAX_CAPACITY; $n += $n < 20 ? 1 : ($n < 50 ? 5 : ($n < 200 ? 10 : ($n < 500 ? 50 : 100)))) {
+        $options[$i++] = $n;
+    }
+    return $options;
+}
+
+/**
+ * Returns array of session ids that the user has booked.
+ */
+function attendance_sessionsbooked() {
+    global $DB, $USER;
+    return $DB->get_fieldset_select('attendance_bookings', 'sessionid', 'userid = ?', array($USER->id));
+}
+
+
+/**
+ * Returns int how many bookings exist for given session.
+ */
+function attendance_sessionbookings($sessionid) {
+    global $DB;
+    return intval($DB->get_field_sql('SELECT COUNT(*) FROM {attendance_bookings} WHERE sessionid = :sessionid',
+        array('sessionid' => $sessionid)));
 }

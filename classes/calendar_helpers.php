@@ -72,6 +72,8 @@ function attendance_create_calendar_event(&$session) {
     }
 }
 
+
+
 /**
  * Create multiple calendar events based on sessions data.
  *
@@ -182,4 +184,66 @@ function attendance_existing_calendar_events_ids($sessionsids) {
     } else {
         return false;
     }
+}
+
+/**
+ * Create/update single personal calendar event for booking
+ *
+ * @param stdClass $booking id of the booking
+ * @return bool result of calendar event creation
+ */
+function attendance_create_calendar_event_booking($booking) {
+    global $DB, $USER;
+
+    if (empty(get_config('attendance', 'enablecalendar'))) {
+        // Calendar events are not used.
+        return true;
+    }
+
+    $attendance = $DB->get_record('attendance', array('id' => $booking->session->attendanceid));
+    $room = $DB->get_record('attendance_rooms', array('id' => $booking->session->roomid));
+    $course = $DB->get_record('course', array('id' => $attendance->course));
+    $caleventdata = new stdClass();
+    $caleventdata->name           = get_string("bookedcalprefix" , "attendance")
+        .($course->shortname ? $course->shortname : $course->fullname);
+    $caleventdata->type           = CALENDAR_EVENT_TYPE_STANDARD;
+    $caleventdata->courseid       = 0;
+    $caleventdata->groupid        = 0;
+    $caleventdata->userid         = $USER->id;
+    $caleventdata->instance       = $booking->session->attendanceid;
+    $caleventdata->timestart      = $booking->session->sessdate;
+    $caleventdata->timeduration   = $booking->session->duration;
+    $caleventdata->description    = '<p>'. get_string("bookedcaldescription", "attendance") .'</p>'
+        .'<p>'.$course->fullname.'</p>'
+        . $booking->session->description;
+    $caleventdata->format         = $booking->session->descriptionformat;
+    $caleventdata->eventtype      = 'attendancebooking';
+    $caleventdata->timemodified   = time();
+    $caleventdata->modulename     = 'attendance';
+    if ($room) {
+        $caleventdata->location   = $room->name;
+    }
+    if (!empty($session->groupid)) {
+        $caleventdata->name .= " (". get_string('group', 'group') ." ". groups_get_group_name($session->groupid) .")";
+    }
+
+    if ($calevent = calendar_event::create($caleventdata, false)) {
+        $DB->set_field('attendance_bookings', 'caleventid', $calevent->id, array('id' => $booking->id));
+        return true;
+    }
+    return false;
+}
+
+/**
+ * Delete single personal calendar event for booking
+ *
+ * @param stdClass $booking booking to delete cal event for
+ * @return bool result of calendar event creation
+ */
+function attendance_delete_calendar_event_booking($booking) {
+    global $DB, $USER;
+    if (intval($booking->caleventid)) {
+        $DB->delete_records('event', ['id' => $booking->caleventid, 'userid' => $USER->id]);
+    }
+    return true;
 }

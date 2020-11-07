@@ -39,6 +39,7 @@ if ($id) {
 } else {
     $room = (object)['id' => $id, 'name' => '', 'description' => '', 'capacity' => '', 'bookable' => 1];
 }
+$room->capacities = attendance_room_capacities();
 
 $mform = new editroom(null, $room);
 

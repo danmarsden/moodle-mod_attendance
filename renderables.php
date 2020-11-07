@@ -365,9 +365,9 @@ class attendance_take_data implements renderable {
      */
     public function  __construct(mod_attendance_structure $att) {
         if ($att->pageparams->grouptype) {
-            $this->users = $att->get_users($att->pageparams->grouptype, $att->pageparams->page);
+            $this->users = $att->get_users($att->pageparams->grouptype, $att->pageparams->page, $att->pageparams->sessionid);
         } else {
-            $this->users = $att->get_users($att->pageparams->group, $att->pageparams->page);
+            $this->users = $att->get_users($att->pageparams->group, $att->pageparams->page, $att->pageparams->sessionid);
         }
 
         $this->pageparams = $att->pageparams;
@@ -473,7 +473,8 @@ class attendance_user_data implements renderable {
 
         $this->pageparams = $att->pageparams;
 
-        if ($this->pageparams->mode == mod_attendance_view_page_params::MODE_THIS_COURSE) {
+        if ($this->pageparams->mode == mod_attendance_view_page_params::MODE_THIS_COURSE
+                || $this->pageparams->mode == mod_attendance_view_page_params::MODE_THIS_BOOKING) {
             $this->statuses = $att->get_statuses(true, true);
 
             if (!$mobile) {

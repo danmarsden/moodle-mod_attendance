@@ -153,6 +153,10 @@ class mod_attendance_page_with_filter_controls {
                 $this->startdate = 1;
                 $this->enddate = time();
                 break;
+            case ATT_VIEW_ALLFUTURE:
+                $this->startdate = time();
+                $this->enddate = PHP_INT_MAX;
+                break;
             case ATT_VIEW_ALL:
             case ATT_VIEW_NOTPRESENT:
                 $this->startdate = 0;

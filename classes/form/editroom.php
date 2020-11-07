@@ -25,6 +25,7 @@
 defined('MOODLE_INTERNAL') || die;
 require_once("$CFG->libdir/formslib.php");
 
+
 /**
  * class for displaying edit room form.
  *
@@ -54,7 +55,8 @@ class editroom extends moodleform {
         $mform->setType('description', PARAM_NOTAGS);
         $mform->setDefault('description', $this->_customdata->description);
 
-        $mform->addElement('text', 'capacity', get_string('roomcapacity', 'mod_attendance'));
+        $mform->addElement('select', 'capacity',
+            get_string('roomcapacity', 'mod_attendance'), attendance_room_capacities());
         $mform->setType('capacity', PARAM_INT);
         $mform->setDefault('capacity', $this->_customdata->capacity);
         $mform->addRule('capacity', get_string('mustbenumericorempty', 'mod_attendance'), 'numeric', null, 'client');
@@ -67,7 +69,6 @@ class editroom extends moodleform {
         $mform->setDefault('bookable', $this->_customdata->bookable);
 
         $this->add_action_buttons();
-
     }
 
 }

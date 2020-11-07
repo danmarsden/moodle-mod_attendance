@@ -15,17 +15,26 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information
+ * Test for attendance plugin related to the "rooms" feature
  *
  * @package    mod_attendance
- * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
+ * @category   test
+ * @copyright  2020 Florian Metzger-Noel (github.com/flocko-motion)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version  = 2020110701;
-$plugin->requires = 2019072500; // Requires 3.8.
-$plugin->release = '3.8.4';
-$plugin->maturity  = MATURITY_STABLE;
-$plugin->cron     = 0;
-$plugin->component = 'mod_attendance';
+global $CFG;
+require_once($CFG->dirroot . '/webservice/tests/helpers.php');
+require_once($CFG->dirroot . '/mod/attendance/classes/attendance_webservices_handler.php');
+require_once($CFG->dirroot . '/mod/attendance/classes/structure.php');
+require_once($CFG->dirroot . '/mod/attendance/externallib.php');
+
+class mod_attendance_rooms_tests extends externallib_advanced_testcase
+{
+
+    public function test_get_courses_with_today_sessions() {
+        $options = mod_attendance_external::get_room_capacities();
+    }
+}
