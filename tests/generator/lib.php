@@ -62,10 +62,6 @@ class mod_attendance_generator extends testing_module_generator {
             $record->grade = 100;
         }
 
-        $att = parent::create_instance($record, (array)$options);
-        $cm = $DB->get_record('course_modules', array('id' => $att->cmid), '*', MUST_EXIST);
-        $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
-
-        return new mod_attendance_structure($att, $cm, $course);
+        return parent::create_instance($record, (array)$options);
     }
 }
