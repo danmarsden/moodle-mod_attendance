@@ -203,8 +203,16 @@ function attendance_form_sessiondate_selector (MoodleQuickForm $mform) {
  *
  * @param MoodleQuickForm $mform
  * @param mod_attendance_structure $att
+ * @param stdClass $sess
  */
 function attendance_form_session_room (MoodleQuickForm $mform, mod_attendance_structure $att, $sess = null) {
+    if (!$sess) {
+        $sess = new stdClass();
+        $sess->roomid = 0;
+        $sess->maxattendants = 0;
+        $sess->bookings = 0;
+
+    }
     if (get_config('attendance', 'enablerooms')) {
         $mform->addElement('header', 'headerrooms', get_string('roombooking', 'attendance'));
         $mform->setExpanded('headerrooms');
@@ -214,12 +222,6 @@ function attendance_form_session_room (MoodleQuickForm $mform, mod_attendance_st
             get_string('roomselect', 'attendance'), $options);
         $mform->setType('roomid', PARAM_INT);
 
-        if (!$sess) {
-            $sess = new stdClass();
-            $sess->roomid = 0;
-            $sess->maxattendants = 0;
-            $sess->bookings = 0;
-        }
         $mform->addElement('select', 'maxattendants',
             get_string('roomattendantsmax', 'attendance'), attendance_room_capacities());
         $mform->setType('maxattendants', PARAM_INT);
@@ -1257,6 +1259,7 @@ function attendance_sessionsbooked() {
 
 /**
  * Returns int how many bookings exist for given session.
+ * @param int $sessionid
  */
 function attendance_sessionbookings($sessionid) {
     global $DB;

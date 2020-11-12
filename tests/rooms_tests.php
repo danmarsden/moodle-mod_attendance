@@ -31,9 +31,21 @@ require_once($CFG->dirroot . '/mod/attendance/classes/attendance_webservices_han
 require_once($CFG->dirroot . '/mod/attendance/classes/structure.php');
 require_once($CFG->dirroot . '/mod/attendance/externallib.php');
 
+/**
+ * This class contains the test cases for the "rooms" feature extension.
+ *
+ * @package    mod_attendance
+ * @category   test
+ * @copyright  2020 Florian Metzger-Noel (github.com/flocko-motion)
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class mod_attendance_rooms_tests extends externallib_advanced_testcase
 {
 
+    /**
+     * Test for rooms.
+     * TODO: write tests.
+     */
     public function test_get_courses_with_today_sessions() {
         $options = mod_attendance_external::get_room_capacities();
     }

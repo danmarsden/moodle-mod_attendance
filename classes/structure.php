@@ -937,6 +937,7 @@ class mod_attendance_structure {
             'enrolmentend' => 0,
             'picture' => 0,
             'type' => 'temporary',
+            'booked' => 0,
         );
         $allfields = get_all_user_name_fields();
         if (!empty($CFG->showuseridentity)) {

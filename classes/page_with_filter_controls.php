@@ -51,6 +51,9 @@ class mod_attendance_page_with_filter_controls {
     /** @var int current view mode */
     public $view;
 
+    /** @var int current operation mode: booking or course */
+    public $mode;
+
     /** @var int $view and $curdate specify displaed date range */
     public $curdate;
 
