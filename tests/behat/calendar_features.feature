@@ -37,5 +37,6 @@ Feature: Test the calendar related features in the attendance module
     And I should see "Test attendance"
     And I log out
     And I log in as "student1"
+    And I am on "Course 1" course homepage
     And I follow "Go to calendar"
     Then I should see "Test attendance"
