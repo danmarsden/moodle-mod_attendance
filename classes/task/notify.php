@@ -80,7 +80,7 @@ class notify extends \core\task\scheduled_task {
                     // attendance updated since the last time the notification was sent.
                     if (!empty($record->timesent)) {
                         $sql = "SELECT *
-                              FROM {attendance_log} l
+                              FROM {attendance_evaluations} l
                               JOIN {attendance_sessions} s ON s.id = l.sessionid
                              WHERE s.attendanceid = ? AND studentid = ? AND timetaken > ?";
                         if (!$DB->record_exists_sql($sql, array($record->aid, $record->userid, $record->timesent))) {

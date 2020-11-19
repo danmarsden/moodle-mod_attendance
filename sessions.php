@@ -60,7 +60,7 @@ $PAGE->set_heading($course->fullname);
 $PAGE->force_settings_menu(true);
 $PAGE->set_cacheable(true);
 $PAGE->navbar->add($att->name);
-$PAGE->requires->js('/mod/attendance/js/rooms/rooms.js');
+$PAGE->requires->js('/mod/attendance/js/rooms.js');
 
 $currenttab = attendance_tabs::TAB_ADD;
 $formparams = array('course' => $course, 'cm' => $cm, 'modcontext' => $context, 'att' => $att);
@@ -116,7 +116,6 @@ switch ($att->pageparams->action) {
 
         if (isset($confirm) && confirm_sesskey()) {
             $att->delete_sessions(array($sessionid));
-            attendance_update_users_grade($att);
             redirect($att->url_manage(), get_string('sessiondeleted', 'attendance'));
         }
 

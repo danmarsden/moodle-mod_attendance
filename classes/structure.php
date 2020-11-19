@@ -151,17 +151,7 @@ class mod_attendance_structure {
         }
     }
 
-    /**
-     * Get group mode.
-     *
-     * @return int
-     */
-    public function get_group_mode() : int {
-        if (is_null($this->groupmode)) {
-            $this->groupmode = groups_get_activity_groupmode($this->cm, $this->course);
-        }
-        return $this->groupmode;
-    }
+
 
     /**
      * Returns current sessions for this attendance
@@ -211,67 +201,7 @@ class mod_attendance_structure {
         return $DB->get_records_sql($sql, $params);
     }
 
-    /**
-     * Returns today sessions suitable for copying attendance log
-     *
-     * Fetches data from {attendance_sessions}
-     * @param stdClass $sess
-     * @return array of records or an empty array
-     */
-    public function get_today_sessions_for_copy($sess) : array {
-        global $DB;
 
-        $start = usergetmidnight($sess->sessdate);
-
-        $sql = "SELECT *
-                  FROM {attendance_sessions}
-                 WHERE sessdate >= :start AND sessdate <= :end AND
-                       (groupid = 0 OR groupid = :groupid) AND
-                       lasttaken > 0 AND attendanceid = :aid";
-        $params = array(
-            'start'     => $start,
-            'end'       => $sess->sessdate,
-            'groupid'   => $sess->groupid,
-            'aid'       => $this->id);
-
-        return $DB->get_records_sql($sql, $params);
-    }
-
-    /**
-     * Returns count of hidden sessions for this attendance
-     *
-     * Fetches data from {attendance_sessions}
-     *
-     * @return int count of hidden sessions
-     */
-    public function get_hidden_sessions_count() : int {
-        global $DB;
-
-        $where = "attendanceid = :aid AND sessdate < :csdate";
-        $params = array(
-            'aid'   => $this->id,
-            'csdate' => $this->course->startdate);
-
-        return $DB->count_records_select('attendance_sessions', $where, $params);
-    }
-
-    /**
-     * Returns the hidden sessions for this attendance
-     *
-     * Fetches data from {attendance_sessions}
-     *
-     * @return array hidden sessions
-     */
-    public function get_hidden_sessions() : array {
-        global $DB;
-
-        $where = "attendanceid = :aid AND sessdate < :csdate";
-        $params = array(
-            'aid'   => $this->id,
-            'csdate' => $this->course->startdate);
-
-        return $DB->get_records_select('attendance_sessions', $where, $params);
-    }
 
     /**
      * Get filtered sessions.
@@ -280,36 +210,43 @@ class mod_attendance_structure {
      */
     public function get_filtered_sessions() : array {
         global $DB;
-        $enablerooms = intval(get_config('attendance', 'enablerooms'));
 
-        if ($this->pageparams->startdate && $this->pageparams->enddate) {
-            $where = "attendanceid = :aid AND sessdate >= :csdate AND sessdate >= :sdate AND sessdate < :edate";
-        } else if ($this->pageparams->enddate) {
-            $where = "attendanceid = :aid AND sessdate >= :csdate AND sessdate < :edate";
-        } else {
-            $where = "attendanceid = :aid AND sessdate >= :csdate";
+        $where = "attendanceid = :aid";
+
+        if ($this->pageparams->startdate) {
+            $where .= " AND sessdate >= :sdate";
+        }
+        if ($this->pageparams->enddate) {
+            $where .= " AND sessdate < :edate";
         }
 
-        if ($this->pageparams->get_current_sesstype() > mod_attendance_page_with_filter_controls::SESSTYPE_ALL) {
-            $where .= " AND (groupid = :cgroup OR groupid = 0)";
-        }
         $params = array(
             'aid'       => $this->id,
             'csdate'    => $this->course->startdate,
             'sdate'     => $this->pageparams->startdate,
             'edate'     => $this->pageparams->enddate,
             'cgroup'    => $this->pageparams->get_current_sesstype());
-        if ($enablerooms) {
-            $sessions = $DB->get_records_sql(
-                "SELECT *, (SELECT COUNT(*) FROM {attendance_bookings} AS attb WHERE atts.id = attb.sessionid) as bookings
-            FROM {attendance_sessions} AS atts
-            WHERE $where
-            ORDER BY sessdate ASC", $params);
-        } else {
-            $sessions = $DB->get_records_select('attendance_sessions', $where, $params, 'sessdate asc');
-        }
 
-        $statussetmaxpoints = attendance_get_statusset_maxpoints($this->get_statuses(true, true));
+        $sessions = $DB->get_records_sql(
+            "SELECT atts.*, attr.name as roomname,
+                        (SELECT COUNT(*) FROM {attendance_bookings} AS attb WHERE atts.id = attb.sessionid) as bookings
+                   FROM {attendance_sessions} AS atts
+              LEFT JOIN {attendance_rooms} AS attr ON atts.roomid = attr.id
+                  WHERE $where
+               ORDER BY sessdate ASC", $params);
+
+        return $this->add_session_details($sessions);
+    }
+
+
+    /**
+     * Add some details to a session object from the db
+     *
+     * @param $sessions
+     * @return array the improved session objects
+     * @throws coding_exception
+     */
+    private function add_session_details($sessions) : array {
         foreach ($sessions as $sess) {
             if (empty($sess->description)) {
                 $sess->description = get_string('nodescription', 'attendance');
@@ -317,9 +254,17 @@ class mod_attendance_structure {
                 $sess->description = file_rewrite_pluginfile_urls($sess->description,
                     'pluginfile.php', $this->context->id, 'mod_attendance', 'session', $sess->id);
             }
-            $sess->maxpoints = $statussetmaxpoints[$sess->statusset];
-        }
+            // TODO: localize time format
+            $sess->maxattendants = intval($sess->maxattendants);
+            $sess->timefrom = date("H:i", $sess->sessdate);
+            $sess->timeto = date("H:i", $sess->sessdate + $sess->duration);
 
+            if (has_capability('mod/attendance:manageattendances', $this->context)) {
+                $sess->urledit = url_helpers::url_sessions($this, $sess->id, mod_attendance_sessions_page_params::ACTION_UPDATE);
+                $sess->urldelete = url_helpers::url_sessions($this, $sess->id, mod_attendance_sessions_page_params::ACTION_DELETE);
+                $sess->urlevaluate = $this->url_evaluation(['sessionid' => $sess->id, 'action' => mod_attendance_sessions_page_params::ACTION_EVALUATE ]);
+            }
+        }
         return $sessions;
     }
 
@@ -333,48 +278,8 @@ class mod_attendance_structure {
         return new moodle_url('/mod/attendance/manage.php', $params);
     }
 
-    /**
-     * Get manage temp users url.
-     * @param array $params optional
-     * @return moodle_url of tempusers.php for attendance instance
-     */
-    public function url_managetemp($params=array()) : moodle_url {
-        $params = array_merge(array('id' => $this->cm->id), $params);
-        return new moodle_url('/mod/attendance/tempusers.php', $params);
-    }
 
-    /**
-     * Get temp delete url.
-     *
-     * @param array $params optional
-     * @return moodle_url of tempdelete.php for attendance instance
-     */
-    public function url_tempdelete($params=array()) : moodle_url {
-        $params = array_merge(array('id' => $this->cm->id, 'action' => 'delete'), $params);
-        return new moodle_url('/mod/attendance/tempedit.php', $params);
-    }
 
-    /**
-     * Get temp edit url.
-     *
-     * @param array $params optional
-     * @return moodle_url of tempedit.php for attendance instance
-     */
-    public function url_tempedit($params=array()) : moodle_url {
-        $params = array_merge(array('id' => $this->cm->id), $params);
-        return new moodle_url('/mod/attendance/tempedit.php', $params);
-    }
-
-    /**
-     * Get temp merge url
-     *
-     * @param array $params optional
-     * @return moodle_url of tempedit.php for attendance instance
-     */
-    public function url_tempmerge($params=array()) : moodle_url {
-        $params = array_merge(array('id' => $this->cm->id), $params);
-        return new moodle_url('/mod/attendance/tempmerge.php', $params);
-    }
 
     /**
      * Get url for sessions.
@@ -386,73 +291,37 @@ class mod_attendance_structure {
         return new moodle_url('/mod/attendance/sessions.php', $params);
     }
 
-    /**
-     * Get url for report.
-     * @param array $params
-     * @return moodle_url of report.php for attendance instance
-     */
-    public function url_report($params=array()) : moodle_url {
-        $params = array_merge(array('id' => $this->cm->id), $params);
-        return new moodle_url('/mod/attendance/report.php', $params);
-    }
+
+
 
     /**
-     * Get url for report.
-     * @param array $params
-     * @return moodle_url of report.php for attendance instance
-     */
-    public function url_absentee($params=array()) : moodle_url {
-        $params = array_merge(array('id' => $this->cm->id), $params);
-        return new moodle_url('/mod/attendance/absentee.php', $params);
-    }
-
-    /**
-     * Get url for export.
-     *
-     * @return moodle_url of export.php for attendance instance
-     */
-    public function url_export() : moodle_url {
-        $params = array('id' => $this->cm->id);
-        return new moodle_url('/mod/attendance/export.php', $params);
-    }
-
-    /**
-     * Get preferences url
+     * Get evaluation url.
      * @param array $params
      * @return moodle_url of attsettings.php for attendance instance
      */
-    public function url_preferences($params=array()) : moodle_url {
-        // Add the statusset params.
-        if (isset($this->pageparams->statusset) && !isset($params['statusset'])) {
-            $params['statusset'] = $this->pageparams->statusset;
+    public function url_evaluation($params=array()) : moodle_url {
+        if((isset($params['sessionid']) && !$params['sessionid']) || (isset($params['action']) && !$params['action'])) {
+            unset($params['sessionid']);
+            unset($params['action']);
         }
-        $params = array_merge(array('id' => $this->cm->id), $params);
-        return new moodle_url('/mod/attendance/preferences.php', $params);
+        $params = array_merge( array('id' => $this->cm->id), $params);
+        return new moodle_url('/mod/attendance/evaluation.php', $params);
     }
 
     /**
-     * Get preferences url
+     * Get user profile url.
      * @param array $params
      * @return moodle_url of attsettings.php for attendance instance
      */
-    public function url_warnings($params=array()) : moodle_url {
-        // Add the statusset params.
-        if (isset($this->pageparams->statusset) && !isset($params['statusset'])) {
-            $params['statusset'] = $this->pageparams->statusset;
+    public function url_userprofile($params=array()) : moodle_url {
+        if(!isset($params['userid']) || !$params['userid']) {
+            throw new \coding_exception('User id needed to create user profile URL.');
         }
-        $params = array_merge(array('id' => $this->cm->id), $params);
-        return new moodle_url('/mod/attendance/warnings.php', $params);
+        $params = array_merge( array('id' => $this->cm->id), $params);
+        return new moodle_url('/mod/attendance/userprofile.php', $params);
     }
 
-    /**
-     * Get take url.
-     * @param array $params
-     * @return moodle_url of attendances.php for attendance instance
-     */
-    public function url_take($params=array()) : moodle_url {
-        $params = array_merge(array('id' => $this->cm->id), $params);
-        return new moodle_url('/mod/attendance/take.php', $params);
-    }
+
 
     /**
      * Get view url.
@@ -486,14 +355,8 @@ class mod_attendance_structure {
         $config = get_config('attendance');
 
         $sess->attendanceid = $this->id;
-        $sess->automarkcompleted = 0;
-        if (!isset($sess->automark)) {
-            $sess->automark = 0;
-        }
-        if (empty($config->enablecalendar)) {
-            // If calendard disabled at site level, don't use it.
-            $sess->calendarevent = 0;
-        }
+        $sess->calendarevent = 1;
+        $sess->statusset = 0;
         $sess->id = $DB->insert_record('attendance_sessions', $sess);
         $description = file_save_draft_area_files($sess->descriptionitemid,
             $this->context->id, 'mod_attendance', 'session', $sess->id,
@@ -517,38 +380,11 @@ class mod_attendance_structure {
         $sess->description = $description;
         $sess->lasttaken = 0;
         $sess->lasttakenby = 0;
-        if (!isset($sess->studentscanmark)) {
-            $sess->studentscanmark = 0;
-        }
-        if (!isset($sess->autoassignstatus)) {
-            $sess->autoassignstatus = 0;
-        }
-        if (!isset($sess->studentpassword)) {
-            $sess->studentpassword = '';
-        }
-        if (!isset($sess->subnet)) {
-            $sess->subnet = '';
-        }
-
-        if (!isset($sess->preventsharedip)) {
-            $sess->preventsharedip = 0;
-        }
-
-        if (!isset($sess->preventsharediptime)) {
-            $sess->preventsharediptime = '';
-        }
-        if (!isset($sess->includeqrcode)) {
-            $sess->includeqrcode = 0;
-        }
-        if (!isset($sess->rotateqrcode)) {
-            $sess->rotateqrcode = 0;
-            $sess->rotateqrcodesecret = '';
-        }
         $sess->roomid = 0;
         $sess->maxattendants = 0;
+
         $event->add_record_snapshot('attendance_sessions', $sess);
         $event->trigger();
-
         return $sess->id;
     }
 
@@ -560,7 +396,6 @@ class mod_attendance_structure {
      */
     public function update_session_from_form_data($formdata, $sessionid) {
         global $DB;
-        $enablerooms = intval(get_config('attendance', 'enablerooms'));
 
         if (!$sess = $DB->get_record('attendance_sessions', array('id' => $sessionid) )) {
             print_error('No such session in this course');
@@ -579,59 +414,8 @@ class mod_attendance_structure {
         $sess->descriptionformat = $formdata->sdescription['format'];
         $sess->calendarevent = empty($formdata->calendarevent) ? 0 : $formdata->calendarevent;
 
-        if ($enablerooms) {
-            $sess->roomid = $formdata->roomid;
-            $sess->maxattendants = $formdata->maxattendants;
-        }
-        $sess->studentscanmark = 0;
-        $sess->autoassignstatus = 0;
-        $sess->studentpassword = '';
-        $sess->subnet = '';
-        $sess->automark = 0;
-        $sess->automarkcompleted = 0;
-        $sess->preventsharedip = 0;
-        $sess->preventsharediptime = '';
-        $sess->includeqrcode = 0;
-        $sess->rotateqrcode = 0;
-        $sess->rotateqrcodesecret = '';
-
-        if (!empty(get_config('attendance', 'enablewarnings'))) {
-            $sess->absenteereport = empty($formdata->absenteereport) ? 0 : 1;
-        }
-        if (!empty($formdata->autoassignstatus)) {
-            $sess->autoassignstatus = $formdata->autoassignstatus;
-        }
-        $studentscanmark = get_config('attendance', 'studentscanmark');
-
-        if (!empty($studentscanmark) &&
-            !empty($formdata->studentscanmark)) {
-            $sess->studentscanmark = $formdata->studentscanmark;
-            $sess->studentpassword = $formdata->studentpassword;
-            $sess->autoassignstatus = $formdata->autoassignstatus;
-            if (!empty($formdata->includeqrcode)) {
-                $sess->includeqrcode = $formdata->includeqrcode;
-            }
-            if (!empty($formdata->rotateqrcode)) {
-                $sess->rotateqrcode = $formdata->rotateqrcode;
-                $sess->studentpassword = attendance_random_string();
-                $sess->rotateqrcodesecret = attendance_random_string();
-            }
-        }
-        if (!empty($formdata->usedefaultsubnet)) {
-            $sess->subnet = $this->subnet;
-        } else {
-            $sess->subnet = $formdata->subnet;
-        }
-
-        if (!empty($formdata->automark)) {
-            $sess->automark = $formdata->automark;
-        }
-        if (!empty($formdata->preventsharedip)) {
-            $sess->preventsharedip = $formdata->preventsharedip;
-        }
-        if (!empty($formdata->preventsharediptime)) {
-            $sess->preventsharediptime = $formdata->preventsharediptime;
-        }
+        $sess->roomid = $formdata->roomid;
+        $sess->maxattendants = $formdata->maxattendants;
 
         $sess->timemodified = time();
         $DB->update_record('attendance_sessions', $sess);
@@ -654,106 +438,7 @@ class mod_attendance_structure {
         $event->trigger();
     }
 
-    /**
-     * Used to record attendance submitted by the student.
-     *
-     * @param stdClass $mformdata
-     * @return boolean
-     */
-    public function take_from_student($mformdata) : bool {
-        global $DB, $USER;
 
-        $statuses = implode(',', array_keys( (array)$this->get_statuses() ));
-        $now = time();
-
-        $record = new stdClass();
-        $record->studentid = $USER->id;
-        $record->statusid = $mformdata->status;
-        $record->statusset = $statuses;
-        $record->remarks = get_string('set_by_student', 'mod_attendance');
-        $record->sessionid = $mformdata->sessid;
-        $record->timetaken = $now;
-        $record->takenby = $USER->id;
-        $record->ipaddress = getremoteaddr(null);
-
-        $existingattendance = $DB->record_exists('attendance_log',
-            array('sessionid' => $mformdata->sessid, 'studentid' => $USER->id));
-
-        if ($existingattendance) {
-            // Already recorded do not save.
-            return false;
-        }
-
-        $logid = $DB->insert_record('attendance_log', $record, false);
-        $record->id = $logid;
-
-        // Update the session to show that a register has been taken, or staff may overwrite records.
-        $session = $this->get_session_info($mformdata->sessid);
-        $session->lasttaken = $now;
-        $session->lasttakenby = $USER->id;
-        $DB->update_record('attendance_sessions', $session);
-
-        // Update the users grade.
-        $this->update_users_grade(array($USER->id));
-
-        /* create url for link in log screen
-         * need to set grouptype to 0 to allow take attendance page to be called
-         * from report/log page */
-
-        $params = array(
-            'sessionid' => $this->pageparams->sessionid,
-            'grouptype' => 0);
-
-        // Log the change.
-        $event = \mod_attendance\event\attendance_taken_by_student::create(array(
-            'objectid' => $this->id,
-            'context' => $this->context,
-            'other' => $params));
-        $event->add_record_snapshot('course_modules', $this->cm);
-        $event->add_record_snapshot('attendance_sessions', $session);
-        $event->add_record_snapshot('attendance_log', $record);
-        $event->trigger();
-
-        return true;
-    }
-
-    /**
-     * Take attendance from form data.
-     *
-     * @param stdClass $data
-     */
-    public function take_from_form_data($data) {
-        global $USER;
-        // WARNING - $data is unclean - comes from direct $_POST - ideally needs a rewrite but we do some cleaning below.
-
-        $statuses = implode(',', array_keys( (array)$this->get_statuses() ));
-        $now = time();
-        $sesslog = array();
-
-        $formdata = (array)$data;
-
-        foreach ($formdata as $key => $value) {
-            // Look at Remarks field because the user options may not be passed if empty.
-            if (substr($key, 0, 7) == 'remarks') {
-                $sid = substr($key, 7);
-                if (!(is_numeric($sid))) { // Sanity check on $sid.
-                    print_error('nonnumericid', 'attendance');
-                }
-                $sesslog[$sid] = new stdClass();
-                $sesslog[$sid]->studentid = $sid; // We check is_numeric on this above.
-                if (array_key_exists('user' . $sid, $formdata) && is_numeric($formdata['user' . $sid])) {
-                    $sesslog[$sid]->statusid = $formdata['user' . $sid];
-                }
-                $sesslog[$sid]->statusset = $statuses;
-                $sesslog[$sid]->remarks = $value;
-                $sesslog[$sid]->sessionid = $this->pageparams->sessionid;
-                $sesslog[$sid]->timetaken = $now;
-                $sesslog[$sid]->takenby = $USER->id;
-            }
-        }
-
-        $this->save_log($sesslog);
-    }
 
     /**
      * Helper function to save attendance and trigger events.
@@ -777,10 +462,10 @@ class mod_attendance_structure {
                         $dbsesslog[$log->studentid]->statusset <> $log->statusset) {
 
                         $log->id = $dbsesslog[$log->studentid]->id;
-                        $DB->update_record('attendance_log', $log);
+                        $DB->update_record('attendance_evaluations', $log);
                     }
                 } else {
-                    $DB->insert_record('attendance_log', $log, false);
+                    $DB->insert_record('attendance_evaluations', $log, false);
                 }
             }
         }
@@ -809,67 +494,58 @@ class mod_attendance_structure {
     }
 
     /**
-     * Get users with enrolment status (Feature request MDL-27591)
+     * Get filtered list of users
      *
-     * @param int $groupid
-     * @param int $page
-     * @param int $sessionid
+     * params:
+     * - page (default: 0)
+     * - sessionid (default: 0)
+     * - evaluation (default: false) get evaluation for session
+     * - enrolled (default: true)
+     * - sort (ATT_SORT_DEFAULT | ATT_SORT_FIRSTNAME | ATT_SORT_LASTNAME)
+     *
+     * @param array $params
      * @return array
      */
-    public function get_users($groupid = 0, $page = 1, $sessionid = 0) : array {
+    public function get_users($params) : array {
         global $DB;
+
+        $page = isset($params['$page']) ? intval($params['$page']) : 0;
+        $sessionid = isset($params['sessionid']) ? intval($params['sessionid']) : 0;
+        $evaluation = isset($params['evaluation']) ? intval($params['evaluation']) : 0;
+        $enrolled = isset($params['enrolled']) ? boolval($params['enrolled']) : true;
+        $sort = isset($params['sort']) ?
+            intval($params['sort'])
+            : (empty($this->pageparams->sort) ?
+                ATT_SORT_DEFAULT
+                : intval($this->pageparams->sort));
+
+        switch($sort) {
+            case ATT_SORT_FIRSTNAME:
+                $orderby = $DB->sql_fullname('u.firstname', 'u.lastname') . ', u.id';
+                break;
+            case ATT_SORT_LASTNAME:
+                $orderby = 'u.lastname, u.firstname, u.id';
+                break;
+            default:
+                list($orderby, $sortparams) = users_order_by_sql('u');
+                break;
+        }
 
         $fields = array('username' , 'idnumber' , 'institution' , 'department', 'city', 'country');
         // Get user identity fields if required - doesn't return original $fields array.
-        $extrafields = get_extra_user_fields($this->context, $fields);
-        $fields = array_merge($fields, $extrafields);
-
+//        $extrafields = get_extra_user_fields($this->context, $fields);
+//        $fields = array_merge($fields, $extrafields);
         $userfields = user_picture::fields('u', $fields);
-
-        if (empty($this->pageparams->sort)) {
-            $this->pageparams->sort = ATT_SORT_DEFAULT;
-        }
-        if ($this->pageparams->sort == ATT_SORT_FIRSTNAME) {
-            $orderby = $DB->sql_fullname('u.firstname', 'u.lastname') . ', u.id';
-        } else if ($this->pageparams->sort == ATT_SORT_LASTNAME) {
-            $orderby = 'u.lastname, u.firstname, u.id';
-        } else {
-            list($orderby, $sortparams) = users_order_by_sql('u');
-        }
 
         if ($page) {
             $usersperpage = $this->pageparams->perpage;
-            if (!empty($this->cm->groupingid)) {
-                $startusers = ($page - 1) * $usersperpage;
-                if ($groupid == 0) {
-                    $groups = array_keys(groups_get_all_groups($this->cm->course, 0, $this->cm->groupingid, 'g.id'));
-                } else {
-                    $groups = $groupid;
-                }
-                $users = get_users_by_capability($this->context, 'mod/attendance:canbelisted',
-                    $userfields,
-                    $orderby, $startusers, $usersperpage, $groups,
-                    '', false, true);
-            } else {
-                $startusers = ($page - 1) * $usersperpage;
-                $users = get_enrolled_users($this->context, 'mod/attendance:canbelisted', $groupid, $userfields,
-                    $orderby, $startusers, $usersperpage);
-            }
+            $startusers = ($page - 1) * $usersperpage;
         } else {
-            if (!empty($this->cm->groupingid)) {
-                if ($groupid == 0) {
-                    $groups = array_keys(groups_get_all_groups($this->cm->course, 0, $this->cm->groupingid, 'g.id'));
-                } else {
-                    $groups = $groupid;
-                }
-                $users = get_users_by_capability($this->context, 'mod/attendance:canbelisted',
-                    $userfields,
-                    $orderby, '', '', $groups,
-                    '', false, true);
-            } else {
-                $users = get_enrolled_users($this->context, 'mod/attendance:canbelisted', $groupid, $userfields, $orderby);
-            }
+            $usersperpage = 0;
+            $startusers = 0;
         }
+        $users = get_enrolled_users($this->context, 'mod/attendance:canbelisted',
+            0, $userfields, $orderby, $startusers, $usersperpage);
 
         // Add a flag to each user indicating whether their enrolment is active.
         if (!empty($users)) {
@@ -899,6 +575,17 @@ class mod_attendance_structure {
             );
             $enrolments = $DB->get_records_sql($sql, $params);
 
+            if ($evaluation) {
+                $sessionlogs = $DB->get_records("attendance_evaluations", ['sessionid' => $sessionid]);
+                foreach ($sessionlogs as $log) {
+                    if (array_key_exists($log->studentid, $users)) {
+                        $users[$log->studentid]->duration = $log->duration;
+                        $users[$log->studentid]->remarks_course = $log->remarks_course;
+                        $users[$log->studentid]->remarks_personality = $log->remarks_personality;
+                    }
+                }
+            }
+
             foreach ($users as $user) {
                 $users[$user->id]->fullname = fullname($user);
                 $users[$user->id]->enrolmentstatus = $enrolments[$user->id]->status;
@@ -906,51 +593,18 @@ class mod_attendance_structure {
                 $users[$user->id]->enrolmentend = $enrolments[$user->id]->maxtime;
                 $users[$user->id]->type = 'standard'; // Mark as a standard (not a temporary) user.
                 $users[$user->id]->booked = $enrolments[$user->id]->booked;
+                $users[$user->id]->profileurl = $this->url_userprofile(['userid' => $user->id]);
+
             }
         }
 
-        // Add the 'temporary' users to this list.
-        $tempusers = $DB->get_records('attendance_tempusers', array('courseid' => $this->course->id));
-        foreach ($tempusers as $tempuser) {
-            $users[$tempuser->studentid] = self::tempuser_to_user($tempuser);
+
+        foreach ($users as $user) {
+            $user->picturebigurl = new moodle_url("/user/pix.php/{$user->id}/f1.jpg", []);
+            $user->picturesmallurl = new moodle_url("/user/pix.php/{$user->id}/f2", []);
         }
 
         return $users;
-    }
-
-    /**
-     * Convert a tempuser record into a user object.
-     *
-     * @param stdClass $tempuser
-     * @return object
-     */
-    protected static function tempuser_to_user($tempuser) {
-        global $CFG;
-
-        $ret = (object)array(
-            'id' => $tempuser->studentid,
-            'firstname' => $tempuser->fullname,
-            'email' => $tempuser->email,
-            'username' => '',
-            'enrolmentstatus' => 0,
-            'enrolmentstart' => 0,
-            'enrolmentend' => 0,
-            'picture' => 0,
-            'type' => 'temporary',
-            'booked' => 0,
-        );
-        $allfields = get_all_user_name_fields();
-        if (!empty($CFG->showuseridentity)) {
-            $allfields = array_merge($allfields, explode(',', $CFG->showuseridentity));
-        }
-
-        foreach ($allfields as $namefield) {
-            if (!isset($ret->$namefield)) {
-                $ret->$namefield = '';
-            }
-        }
-
-        return $ret;
     }
 
     /**
@@ -964,13 +618,11 @@ class mod_attendance_structure {
 
         $user = $DB->get_record('user', array('id' => $userid), '*', MUST_EXIST);
 
-        // Look for 'temporary' users and return their details from the attendance_tempusers table.
-        if ($user->idnumber == 'tempghost') {
-            $tempuser = $DB->get_record('attendance_tempusers', array('studentid' => $userid), '*', MUST_EXIST);
-            return self::tempuser_to_user($tempuser);
-        }
-
         $user->type = 'standard';
+        $user->sws = $this->get_user_sws($userid);
+        $user->swspercent = round($user->sws / 7 * 100);
+        $user->swslong = get_string('sws_level_'.$user->sws, 'attendance');
+        $user->swsshort = get_string('sws_short', 'attendance', $user->sws);
 
         // See CONTRIB-4868.
         $mintime = 'MIN(CASE WHEN (ue.timestart > :zerotime) THEN ue.timestart ELSE ue.timecreated END)';
@@ -996,37 +648,26 @@ class mod_attendance_structure {
             $user->enrolmentstart = 0;
             $user->enrolmentend = 0;
         }
-
+        $user->profileurl = $this->url_userprofile(['userid' => $user->id]);
+        $user->picturebigurl = new moodle_url("/user/pix.php/{$user->id}/f1.jpg", []);
+        $user->picturesmallurl = new moodle_url("/user/pix.php/{$user->id}/f2", []);
         return $user;
     }
 
     /**
-     * Get possible statuses.
-     *
-     * @param bool $onlyvisible
-     * @param bool $allsets
-     * @return array
+     * Get SWS of give user.
+     * @param $userid
+     * @return false|mixed
+     * @throws dml_exception
      */
-    public function get_statuses($onlyvisible = true, $allsets = false) : array {
-        if (!isset($this->statuses)) {
-            // Get the statuses for the current set only.
-            $statusset = 0;
-            if (isset($this->pageparams->statusset)) {
-                $statusset = $this->pageparams->statusset;
-            } else if (isset($this->pageparams->sessionid)) {
-                $sessioninfo = $this->get_session_info($this->pageparams->sessionid);
-                $statusset = $sessioninfo->statusset;
-            }
-            $this->statuses = attendance_get_statuses($this->id, $onlyvisible, $statusset);
-            $this->allstatuses = attendance_get_statuses($this->id, $onlyvisible);
-        }
-
-        // Return all sets, if requested.
-        if ($allsets) {
-            return $this->allstatuses;
-        }
-        return $this->statuses;
+    public function get_user_sws($userid) {
+        global $DB;
+        return intval($DB->get_field_sql(
+            'SELECT sws FROM mdl_attendance_sws WHERE userid = :userid ORDER BY timemodified DESC LIMIT 1',
+            ['userid' => $userid]));
     }
+
+
 
     /**
      * Get session info.
@@ -1042,9 +683,20 @@ class mod_attendance_structure {
         if (empty($this->sessioninfo[$sessionid]->description)) {
             $this->sessioninfo[$sessionid]->description = get_string('nodescription', 'attendance');
         } else {
-            $this->sessioninfo[$sessionid]->description = file_rewrite_pluginfile_urls($this->sessioninfo[$sessionid]->description,
+            $this->sessioninfo[$sessionid]->description = file_rewrite_pluginfile_urls(strip_tags($this->sessioninfo[$sessionid]->description),
                 'pluginfile.php', $this->context->id, 'mod_attendance', 'session', $this->sessioninfo[$sessionid]->id);
         }
+        $blocklength = 30; // minutes per block (attendance selector will offer attendance time in blocks)
+        $durationoptions = [];
+        for ($i = $blocklength * 60; $i < $this->sessioninfo[$sessionid]->duration; $i += $blocklength * 60) {
+            $durationoptions[] = ['caption' => gmdate("H:i", $i), 'value' => $i];
+        }
+        $durationoptions[] = [
+            'caption' => gmdate("H:i", $this->sessioninfo[$sessionid]->duration),
+            'value' => $this->sessioninfo[$sessionid]->duration,
+            'selected' => true
+        ];
+        $this->sessioninfo[$sessionid]->durationoptions = $durationoptions;
         return $this->sessioninfo[$sessionid];
     }
 
@@ -1081,16 +733,10 @@ class mod_attendance_structure {
     public function get_session_log($sessionid) : array {
         global $DB;
 
-        return $DB->get_records('attendance_log', array('sessionid' => $sessionid), '', 'studentid,statusid,remarks,id,statusset');
+        return $DB->get_records('attendance_evaluations', array('sessionid' => $sessionid), '', 'studentid,statusid,remarks,id,statusset');
     }
 
-    /**
-     * Update user grade.
-     * @param array $userids
-     */
-    public function update_users_grade($userids) {
-        attendance_update_users_grade($this, $userids);
-    }
+
 
     /**
      * Get filtered log.
@@ -1110,7 +756,7 @@ class mod_attendance_structure {
             $sql = "SELECT ats.id, ats.sessdate, ats.groupid, al.statusid, al.remarks,
                            ats.preventsharediptime, ats.preventsharedip
                   FROM {attendance_sessions} ats
-                  JOIN {attendance_log} al ON ats.id = al.sessionid AND al.studentid = :uid
+                  JOIN {attendance_evaluations} al ON ats.id = al.sessionid AND al.studentid = :uid
                   LEFT JOIN {groups_members} gm ON gm.userid = al.studentid AND gm.groupid = ats.groupid
                  WHERE $where AND (ats.groupid = 0 or gm.id is NOT NULL)
               ORDER BY ats.sessdate ASC";
@@ -1126,7 +772,7 @@ class mod_attendance_structure {
             $sql = "SELECT ats.id, ats.sessdate, ats.groupid, al.statusid, al.remarks,
                            ats.preventsharediptime, ats.preventsharedip
                   FROM {attendance_sessions} ats
-                  JOIN {attendance_log} al
+                  JOIN {attendance_evaluations} al
                     ON ats.id = al.sessionid AND al.studentid = :uid
                  WHERE $where
               ORDER BY ats.sessdate ASC";
@@ -1165,23 +811,18 @@ class mod_attendance_structure {
         // DISTINCT on a the description field.
         $id = $DB->sql_concat(':value', 'ats.id');
         if ($this->get_group_mode()) {
-            $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description,
-                           al.statusid, al.remarks, ats.studentscanmark, ats.autoassignstatus,
-                           ats.preventsharedip, ats.preventsharediptime, ats.rotateqrcode,
+            $sql = "SELECT $id, ats.id, ats.sessdate, ats.duration, ats.description,
                            ats.roomid, ats.maxattendants
                       FROM {attendance_sessions} ats
-                RIGHT JOIN {attendance_log} al
+                RIGHT JOIN {attendance_evaluations} al
                         ON ats.id = al.sessionid AND al.studentid = :uid
-                 LEFT JOIN {groups_members} gm ON gm.userid = al.studentid AND gm.groupid = ats.groupid
                      WHERE $where AND (ats.groupid = 0 or gm.id is NOT NULL)
                   ORDER BY ats.sessdate ASC";
         } else {
-            $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, ats.statusset,
-                           al.statusid, al.remarks, ats.studentscanmark, ats.autoassignstatus,
-                           ats.preventsharedip, ats.preventsharediptime, ats.rotateqrcode,
+            $sql = "SELECT $id, ats.id, ats.sessdate, ats.duration, ats.description, 
                            ats.roomid, ats.maxattendants
                       FROM {attendance_sessions} ats
-                RIGHT JOIN {attendance_log} al
+                RIGHT JOIN {attendance_evaluations} al
                         ON ats.id = al.sessionid AND al.studentid = :uid
                      WHERE $where
                   ORDER BY ats.sessdate ASC";
@@ -1208,13 +849,11 @@ class mod_attendance_structure {
         } else {
             $where = "ats.attendanceid = :aid AND ats.sessdate >= :csdate AND ats.groupid $gsql";
         }
-        $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, ats.statusset,
-                       al.statusid, al.remarks, ats.studentscanmark, ats.autoassignstatus,
-                       ats.preventsharedip, ats.preventsharediptime, ats.rotateqrcode,
+        $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description,
                        ats.roomid, ats.maxattendants, atr.name AS roomname, atr.description AS roomdescription, atr.bookable,
                        (SELECT COUNT(*) FROM {attendance_bookings} as atb WHERE atb.sessionid = ats.id) as bookedspots
                   FROM {attendance_sessions} ats
-             LEFT JOIN {attendance_log} al
+             LEFT JOIN {attendance_evaluations} al
                     ON ats.id = al.sessionid AND al.studentid = :uid
              LEFT JOIN {attendance_rooms} atr
                     ON ats.roomid = atr.id
@@ -1252,7 +891,7 @@ class mod_attendance_structure {
         }
 
         list($sql, $params) = $DB->get_in_or_equal($sessionsids);
-        $DB->delete_records_select('attendance_log', "sessionid $sql", $params);
+        $DB->delete_records_select('attendance_evaluations', "sessionid $sql", $params);
         $DB->delete_records_list('attendance_sessions', 'id', $sessionsids);
 
         $bookings = $DB->get_records_list('attendance_bookings', 'sessionid', $sessionsids);
@@ -1299,89 +938,6 @@ class mod_attendance_structure {
         $sessions->close();
     }
 
-    /**
-     * Check if the email address is already in use by either another temporary user,
-     * or a real user.
-     *
-     * @param string $email the address to check for
-     * @param int $tempuserid optional the ID of the temporary user (to avoid matching against themself)
-     * @return null|string the error message to display, null if there is no error
-     */
-    public static function check_existing_email($email, $tempuserid = 0) {
-        global $DB;
-
-        if (empty($email)) {
-            return null; // Fine to create temporary users without an email address.
-        }
-        if ($tempuser = $DB->get_record('attendance_tempusers', array('email' => $email), 'id')) {
-            if ($tempuser->id != $tempuserid) {
-                return get_string('tempexists', 'attendance');
-            }
-        }
-        if ($DB->record_exists('user', array('email' => $email))) {
-            return get_string('userexists', 'attendance');
-        }
-
-        return null;
-    }
-
-    /**
-     * Gets the status to use when auto-marking.
-     *
-     * @param int $time the time the user first accessed the course.
-     * @param int $sessionid the related sessionid to check.
-     * @return int the statusid to assign to this user.
-     */
-    public function get_automark_status($time, $sessionid) {
-        $statuses = $this->get_statuses();
-        // Statuses are returned highest grade first, find the first high grade we can assign to this user.
-
-        // Get status to use when unmarked.
-        $session = $this->sessioninfo[$sessionid];
-        $duration = $session->duration;
-        if (empty($duration)) {
-            $duration = get_config('attendance', 'studentscanmarksessiontimeend') * 60;
-        }
-        if ($time > $session->sessdate + $duration) {
-            // This session closed after the users access - use the unmarked state.
-            foreach ($statuses as $status) {
-                if (!empty($status->setunmarked)) {
-                    return $status->id;
-                }
-            }
-        } else {
-            foreach ($statuses as $status) {
-                if ($status->studentavailability !== '0' &&
-                    $this->sessioninfo[$sessionid]->sessdate + ($status->studentavailability * 60) > $time) {
-
-                    // Found first status we could set.
-                    return $status->id;
-                }
-            }
-        }
-        return;
-    }
-
-    /**
-     * Gets the lowgrade threshold to use.
-     *
-     */
-    public function get_lowgrade_threshold() {
-        if (!isset($this->lowgradethreshold)) {
-            $this->lowgradethreshold = 1;
-
-            if ($this->grade > 0) {
-                $gradeitem = grade_item::fetch(array('courseid' => $this->course->id, 'itemtype' => 'mod',
-                    'itemmodule' => 'attendance', 'iteminstance' => $this->id));
-                if ($gradeitem->gradepass > 0 && $gradeitem->grademax != $gradeitem->grademin) {
-                    $this->lowgradethreshold = ($gradeitem->gradepass - $gradeitem->grademin) /
-                        ($gradeitem->grademax - $gradeitem->grademin);
-                }
-            }
-        }
-
-        return $this->lowgradethreshold;
-    }
 
     /**
      * Gets an array of existing rooms

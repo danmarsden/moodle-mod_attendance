@@ -469,7 +469,7 @@ class mod_attendance_external extends external_api {
         $session = self::get_session_structure();
         $session['courseid'] = new external_value(PARAM_INT, 'Course moodle id.');
         $session['statuses'] = new external_multiple_structure(new external_single_structure($statuses));
-        $session['attendance_log'] = new external_multiple_structure(new external_single_structure($attendancelog));
+        $session['attendance_evaluations'] = new external_multiple_structure(new external_single_structure($attendancelog));
         $session['users'] = new external_multiple_structure(new external_single_structure($users));
 
         return new external_single_structure($session);
@@ -663,6 +663,84 @@ class mod_attendance_external extends external_api {
             'errortitle' => new external_value(PARAM_TEXT, 'title for error message'),
             'errormessage' => new external_value(PARAM_TEXT, 'text for error message'),
             'errorconfirm' => new external_value(PARAM_TEXT, 'error message confirm button caption')
+        ));
+    }
+
+
+    /**
+     * Update evaluation.
+     * @param int $sessionid
+     * @param array $updates
+     * @return array new status of booking
+     * @throws coding_exception
+     * @throws dml_exception
+     */
+    public static function update_evaluation(
+        int $sessionid,
+        array $updates
+    ) : array {
+        global $DB, $USER;
+
+        foreach ($updates as $update) {
+            $remarkscourse = trim(strip_tags($remarkscourse));
+            $remarkspersonality = trim(strip_tags($remarkspersonality));
+
+            $params = [
+                'sessionid' => $sessionid,
+                'studentid' => $update['userid'],
+                'duration' => boolval($update['attendance']) ? intval($update['duration']) : 0,
+                'remarks_course' => trim(strip_tags($update['remarks_course'])),
+                'remarks_personality' => trim(strip_tags($update['remarks_personality'])),
+                'timetaken' => time(),
+                'takenby' => $USER->id,
+            ];
+
+
+            $id = $DB->get_field('attendance_evaluations', 'id', ['sessionid' => $sessionid, 'studentid' => $update['userid']]);
+            if ($id) {
+                $DB->update_record('attendance_evaluations', array_merge(['id' => $id], $params));
+            } else {
+                $id = $DB->insert_record('attendance_evaluations', $params);
+                if (!$id) {
+                    throw new coding_exception('Error putting attendance into db.');
+                }
+            }
+        }
+
+        return array(
+            'sessionid' => $sessionid,
+        );
+
+    }
+
+    /**
+     * Describes update_evaluation user parameters.
+     *
+     * @return external_function_parameters
+     */
+    public static function update_evaluation_parameters() {
+        return new external_function_parameters([
+            'sessionid' => new external_value(PARAM_INT, 'Session id'),
+            'updates' => new external_multiple_structure(
+                new external_single_structure([
+                    'userid' => new external_value(PARAM_INT, 'user id'),
+                    'attendance' => new external_value(PARAM_TEXT, 'attendet this session?'),
+                    'duration' => new external_value(PARAM_TEXT, 'attention duration in seconds'),
+                    'remarks_course' => new external_value(PARAM_TEXT, 'remark for course wide view'),
+                    'remarks_personality' => new external_value(PARAM_TEXT, 'remark on personality can only be seen by school managers'),
+                ], 'list of updates', VALUE_REQUIRED)
+            ),
+        ]);
+    }
+
+    /**
+     * Describes update_evaluation return values.
+     *
+     * @return external_single_structure
+     */
+    public static function update_evaluation_returns() {
+        return new external_single_structure(array(
+            'sessionid' => new external_value(PARAM_INT, 'sessionid of the manipulated log'),
         ));
     }
 

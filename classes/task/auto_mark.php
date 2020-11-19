@@ -70,16 +70,7 @@ class auto_mark extends \core\task\scheduled_task {
                     $sessionover = true;
                 }
 
-                // Store cm/att/course in cachefields so we don't make unnecessary db calls.
-                // Would probably be nice to grab this stuff outside of the loop.
-                // Make sure this status set has something to setunmarked.
-                $setunmarked = $DB->get_field('attendance_statuses', 'id',
-                    array('attendanceid' => $session->attendanceid, 'setnumber' => $session->statusset,
-                          'setunmarked' => 1, 'deleted' => 0));
-                if (empty($setunmarked)) {
-                    mtrace("No unmarked status configured for session id: ".$session->id);
-                    continue;
-                }
+
                 if (empty($cacheatt[$session->attendanceid])) {
                     $cacheatt[$session->attendanceid] = $DB->get_record('attendance', array('id' => $session->attendanceid));
                 }
@@ -142,9 +133,9 @@ class auto_mark extends \core\task\scheduled_task {
                 $att = new \mod_attendance_structure($cacheatt[$session->attendanceid],
                     $cachecm[$session->attendanceid], $cachecourse[$courseid], $context, $pageparams);
 
-                $users = $att->get_users($session->groupid, 0);
+                $users = $att->get_users(['groupid' => $session->groupid, 'page'=> 0]);
 
-                $existinglog = $DB->get_recordset('attendance_log', array('sessionid' => $session->id));
+                $existinglog = $DB->get_recordset('attendance_evaluations', array('sessionid' => $session->id));
                 $updated = 0;
 
                 foreach ($existinglog as $log) {
@@ -161,7 +152,7 @@ class auto_mark extends \core\task\scheduled_task {
                                 $log->takenby = 0;
                                 $log->remarks = get_string('autorecorded', 'attendance');
 
-                                $DB->update_record('attendance_log', $log);
+                                $DB->update_record('attendance_evaluations', $log);
                                 $updated++;
                                 $donesomething = true;
                             }
@@ -189,7 +180,7 @@ class auto_mark extends \core\task\scheduled_task {
                         }
                         if (!empty($newlog->statusid)) {
                             $newlog->studentid = $user->id;
-                            $DB->insert_record('attendance_log', $newlog);
+                            $DB->insert_record('attendance_evaluations', $newlog);
                             $added++;
                             $donesomething = true;
                         }

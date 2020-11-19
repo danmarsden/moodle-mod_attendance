@@ -47,10 +47,9 @@ class mod_attendance_observer {
             attendance_delete_calendar_events($sessids);
         }
         if ($sessids) {
-            $DB->delete_records_list('attendance_log', 'sessionid', $sessids);
+            $DB->delete_records_list('attendance_evaluations', 'sessionid', $sessids);
         }
         if ($attids) {
-            $DB->delete_records_list('attendance_statuses', 'attendanceid', $attids);
             $DB->delete_records_list('attendance_sessions', 'attendanceid', $attids);
         }
     }

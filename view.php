@@ -30,11 +30,7 @@ $pageparams = new mod_attendance_view_page_params();
 
 $id                     = required_param('id', PARAM_INT);
 $pageparams->studentid  = optional_param('studentid', null, PARAM_INT);
-$pageparams->mode       = optional_param('mode',
-    get_config('attendance', 'enablerooms') === "1" ?
-        mod_attendance_view_page_params::MODE_THIS_BOOKING
-        : mod_attendance_view_page_params::MODE_THIS_COURSE,
-    PARAM_INT);
+$pageparams->mode       = optional_param('mode', mod_attendance_view_page_params::MODE_THIS_BOOKING,PARAM_INT);
 $pageparams->view       = optional_param('view', null, PARAM_INT);
 $pageparams->curdate    = optional_param('curdate', null, PARAM_INT);
 
@@ -58,7 +54,7 @@ if (!$pageparams->studentid) {
         'mod/attendance:changeattendances'
     );
     if (has_any_capability($capabilities, $context)) {
-        redirect($att->url_manage());
+        redirect($att->url_evaluation());
     } else if (has_capability('mod/attendance:viewreports', $context)) {
         redirect($att->url_report());
     }
@@ -73,7 +69,7 @@ if (get_config('attendance', 'enablerooms') == "1") {
 } else {
     $PAGE->navbar->add(get_string('attendancereport', 'attendance'));
 }
-$PAGE->requires->js('/mod/attendance/js/rooms/rooms.js');
+$PAGE->requires->js('/mod/attendance/js/rooms.js');
 
 $output = $PAGE->get_renderer('mod_attendance');
 

@@ -46,7 +46,7 @@ class attendance_taken extends \core\event\base {
     protected function init() {
         $this->data['crud'] = 'u';
         $this->data['edulevel'] = self::LEVEL_TEACHING;
-        $this->data['objecttable'] = 'attendance_log';
+        $this->data['objecttable'] = 'attendance_evaluations';
     }
 
     /**

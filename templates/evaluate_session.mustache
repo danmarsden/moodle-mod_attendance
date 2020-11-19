@@ -1,0 +1,135 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template mod_attendance/rooms
+
+0 = {stdClass} [22]
+ id = "2"
+ picture = "0"
+ firstname = "Admin"
+ lastname = "User"
+ firstnamephonetic = ""
+ lastnamephonetic = ""
+ middlename = ""
+ alternatename = ""
+ imagealt = null
+ email = "moodle.local@omnitopos.net"
+ username = "admin"
+ idnumber = ""
+ institution = ""
+ department = ""
+ city = ""
+ country = ""
+ fullname = "Admin User"
+ enrolmentstatus = "0"
+ enrolmentstart = "1602690999"
+ enrolmentend = "0"
+ type = "standard"
+ booked = "0"
+/pluginfile.php/547/user/icon/f1
+}}
+<div id="mod_attendance_evaluation_list" class="hidden">
+    <div class="fullwidth mt-4">
+        <h4>{{#str}}evaluate_session, attendance{{/str}}</h4>
+    </div>
+    {{#str}}evaluation_help, attendance{{/str}}
+    <div class="card mt-3 bg-light">
+        <div class="card-body p-2 shadow-sm">
+            <div class="row">
+                <div class="col-lg-6 col-sm-12">
+                    <div class="col-lg-3">
+                        <div class="float-left ">{{#str}}allstudents, attendance{{/str}}</div>
+                    </div>
+                    <div class="float-right">
+                        <select data-module="mod_attendance"  data-userid="0" data-field="duration" type="text" class="form-control float-left">
+                            {{#durationoptions}}
+                                <option value="{{value}}" {{#selected}}selected{{/selected}}>{{caption}}</option>
+                            {{/durationoptions}}
+                        </select>
+                    </div>
+                    <div class="float-right align-right mr-4" style="width:20px">
+                        <input data-module="mod_attendance"  data-userid="0" data-field="attendance" type="checkbox" class="float-left form-control" />
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    {{#users}}
+        <div class="card mt-3 bg-light">
+            <div class="card-body p-2 shadow-sm">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <a href="{{&profileurl}}">
+                        <div class="float-left">
+                            <img style="width:35px;height:35px;" class="rounded-circle border mr-2" src="{{picturesmallurl}}" />
+                        </div>
+                        <div class="float-left font-weight-bold">{{firstname}} {{lastname}} </div>
+                        </a>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="float-right">
+                            <select {{^duration}}disabled="disabled"{{/duration}} data-module="mod_attendance"
+                                    data-userid="{{id}}" data-field="duration" class="form-control float-left">
+                                {{#durationoptions}}
+                                <option value="{{value}}" {{#selected}}selected{{/selected}}>{{caption}}</option>
+                                {{/durationoptions}}
+                            </select>
+                        </div>
+                        <div class="float-right align-right mr-4" style="width:20px">
+                            <input {{#duration}}checked{{/duration}} data-module="mod_attendance" data-userid="{{id}}" data-field="attendance" type="checkbox" class="float-left form-control" />
+                        </div>
+                    </div>
+                    <div class="col-lg-3 mt-sm-2 mt-lg-0 pr-lg-1">
+                            <input data-module="mod_attendance"  data-userid="{{id}}" data-field="remarks_course"
+                                   placeholder="{{#str}}courseremark, attendance{{/str}}"
+                                   value="{{remarks_course}}"
+                                   type="text" class="form-control" />
+                    </div>
+                    <div class="col-lg-3 mt-sm-2 mt-lg-0 pl-lg-1">
+                        <input data-module="mod_attendance"  data-userid="{{id}}" data-field="remarks_personality"
+                               placeholder="{{#str}}personalityremark, attendance{{/str}}"
+                               value="{{remarks_personality}}"
+                               type="text" class="form-control" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    {{/users}}
+    {{#users?}}
+        <hr />
+        <div class="">
+            <input type="button" class="btn btn-secondary" value="{{#str}}back{{/str}}" />
+            <input type="button" class="btn btn-primary" value="{{#str}}finishevaluation, attendance{{/str}}" />
+        </div>
+    {{/users?}}
+    {{^users}}
+        <div class="card bg-light p-2 mt-4 ">
+            <div class="card-body p-2 text-center">
+                {{#str}}nostudents, attendance{{/str}}
+            </div>
+        </div>
+    {{/users}}
+</div>
+<div id="mod_attendance_evaluation_loading">
+    <div class="card bg-light p-2 mt-4 ">
+        <div class="card-body p-2 text-center">
+            {{#str}}loadingpleasewait, attendance{{/str}}
+        </div>
+    </div>
+</div>
+

@@ -240,10 +240,9 @@ class mod_attendance_summary {
         }
 
         $sql = " SELECT atl.studentid AS userid, COUNT(DISTINCT ats.id) AS numtakensessions,
-                        SUM(stg.grade) AS points, SUM(stm.maxgrade) AS maxpoints
+                        SUM(stm.maxgrade) AS maxpoints
                    FROM {attendance_sessions} ats
-                   JOIN {attendance_log} atl ON (atl.sessionid = ats.id)
-                   JOIN {attendance_statuses} stg ON (stg.id = atl.statusid AND stg.deleted = 0 AND stg.visible = 1)
+                   JOIN {attendance_evaluations} atl ON (atl.sessionid = ats.id)
                    JOIN (SELECT setnumber, MAX(grade) AS maxgrade
                            FROM {attendance_statuses}
                           WHERE attendanceid = :attid2
@@ -302,10 +301,9 @@ class mod_attendance_summary {
             $where .= ' AND ats.groupid = 0';
         }
 
-        $sql = "SELECT atl.studentid AS userid, sts.setnumber, sts.acronym, COUNT(*) AS numtakensessions
+        $sql = "SELECT atl.studentid AS userid, COUNT(*) AS numtakensessions
                   FROM {attendance_sessions} ats
-                  JOIN {attendance_log} atl ON (atl.sessionid = ats.id)
-                  JOIN {attendance_statuses} sts
+                  JOIN {attendance_evaluations} atl ON (atl.sessionid = ats.id)
                     ON (sts.attendanceid = ats.attendanceid AND
                         sts.id = atl.statusid AND
                         sts.deleted = 0 AND sts.visible = 1)
@@ -314,7 +312,7 @@ class mod_attendance_summary {
                    AND ats.sessdate >= :cstartdate
                    AND ats.lasttaken != 0
                    {$where}
-              GROUP BY atl.studentid, sts.setnumber, sts.acronym";
+              GROUP BY atl.studentid";
         $this->userstakensessionsbyacronym = array();
         $records = $DB->get_recordset_sql($sql, $params);
         foreach ($records as $rec) {

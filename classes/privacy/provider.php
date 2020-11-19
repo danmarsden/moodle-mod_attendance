@@ -51,7 +51,7 @@ final class provider implements
      */
     public static function get_metadata(collection $collection) : collection {
         $collection->add_database_table(
-            'attendance_log',
+            'attendance_evaluations',
             [
                 'sessionid' => 'privacy:metadata:sessionid',
                 'studentid' => 'privacy:metadata:studentid',
@@ -108,7 +108,7 @@ final class provider implements
                  JOIN {attendance} a ON cm.instance = a.id
                  JOIN {attendance_sessions} asess ON asess.attendanceid = a.id
                  JOIN {context} ctx ON cm.id = ctx.instanceid AND ctx.contextlevel = :contextlevel
-                 JOIN {attendance_log} al ON asess.id = al.sessionid AND (al.studentid = :userid OR al.takenby = :takenbyid)",
+                 JOIN {attendance_evaluations} al ON asess.id = al.sessionid AND (al.studentid = :userid OR al.takenby = :takenbyid)",
             [
                 'modulename' => 'attendance',
                 'contextlevel' => CONTEXT_MODULE,
@@ -136,7 +136,7 @@ final class provider implements
                  JOIN {attendance} a ON cm.instance = a.id
                  JOIN {attendance_sessions} asess ON asess.attendanceid = a.id
                  JOIN {context} ctx ON cm.id = ctx.instanceid AND ctx.contextlevel = :contextlevel
-                 JOIN {attendance_log} al ON asess.id = al.sessionid
+                 JOIN {attendance_evaluations} al ON asess.id = al.sessionid
                  WHERE ctx.id = :contextid";
 
         $params = [
@@ -152,7 +152,7 @@ final class provider implements
                  JOIN {attendance} a ON cm.instance = a.id
                  JOIN {attendance_sessions} asess ON asess.attendanceid = a.id
                  JOIN {context} ctx ON cm.id = ctx.instanceid AND ctx.contextlevel = :contextlevel
-                 JOIN {attendance_log} al ON asess.id = al.sessionid
+                 JOIN {attendance_evaluations} al ON asess.id = al.sessionid
                  WHERE ctx.id = :contextid";
 
         $userlist->add_from_sql('takenby', $sql, $params);
@@ -176,7 +176,7 @@ final class provider implements
 
         // Delete all information recorded against sessions associated with this module.
         $DB->delete_records_select(
-            'attendance_log',
+            'attendance_evaluations',
             "sessionid IN (SELECT id FROM {attendance_sessions} WHERE attendanceid = :attendanceid",
             [
                 'attendanceid' => $cm->instance
@@ -239,7 +239,7 @@ final class provider implements
 
         // Delete records where user was marked as attending.
         $DB->delete_records_select(
-            'attendance_log',
+            'attendance_evaluations',
             "studentid $insql",
             $inparams
         );
@@ -264,7 +264,7 @@ final class provider implements
 
         // Now for teachers remove relation for marking.
         $DB->set_field_select(
-            'attendance_log',
+            'attendance_evaluations',
             'takenby',
             2,
             "takenby $insql",
@@ -295,14 +295,12 @@ final class provider implements
                     asess.description,
                     ctx.id as contextid,
                     a.name as attendancename,
-                    a.id as attendanceid,
-                    statuses.description as statusdesc, statuses.grade as statusgrade
+                    a.id as attendanceid
                     FROM {course_modules} cm
                     JOIN {attendance} a ON cm.instance = a.id
                     JOIN {attendance_sessions} asess ON asess.attendanceid = a.id
-                    JOIN {attendance_log} al on (al.sessionid = asess.id AND (studentid = :studentid OR al.takenby = :takenby))
+                    JOIN {attendance_evaluations} al on (al.sessionid = asess.id AND (studentid = :studentid OR al.takenby = :takenby))
                     JOIN {context} ctx ON cm.id = ctx.instanceid
-                    JOIN {attendance_statuses} statuses ON statuses.id = al.statusid
                     WHERE (ctx.id {$contextsql})";
 
         $attendances = $DB->get_records_sql($sql, $params + $contextparams);
@@ -358,7 +356,7 @@ final class provider implements
         // Delete records where user was marked as attending.
         list($sessionsql, $sessionparams) = $DB->get_in_or_equal($sessionids, SQL_PARAMS_NAMED);
         $DB->delete_records_select(
-            'attendance_log',
+            'attendance_evaluations',
             "(studentid = :studentid) AND sessionid $sessionsql",
             ['studentid' => $userid] + $sessionparams
         );
@@ -366,7 +364,7 @@ final class provider implements
         // Get every log record where user took the attendance.
         $attendancetakenids = array_keys(
             $DB->get_records_sql(
-                "SELECT * from {attendance_log}
+                "SELECT * from {attendance_evaluations}
                  WHERE takenby = :takenbyid AND sessionid $sessionsql",
                 ['takenbyid' => $userid] + $sessionparams
             )
@@ -379,7 +377,7 @@ final class provider implements
         // Don't delete the record from the log, but update to site admin taking attendance.
         list($attendancetakensql, $attendancetakenparams) = $DB->get_in_or_equal($attendancetakenids, SQL_PARAMS_NAMED);
         $DB->set_field_select(
-            'attendance_log',
+            'attendance_evaluations',
             'takenby',
             2,
             "id $attendancetakensql",

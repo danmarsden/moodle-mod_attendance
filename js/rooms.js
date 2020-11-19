@@ -9,6 +9,8 @@ require(['core/first', 'jquery', 'jqueryui', 'core/ajax', 'core/notification'], 
 
     $(document).ready(function() {
 
+        console.log("rooms");
+
         function modAttendanceGetRoomCapacity() {
             var selectedroomid = $('#id_roomid').val();
             ajax.call([{

@@ -115,7 +115,7 @@ class attendance_handler {
                                              $session->groupid, 'u.id, u.firstname, u.lastname');
         $session->attendance_log = array();
 
-        if ($attendancelog = $DB->get_records('attendance_log', array('sessionid' => $sessionid),
+        if ($attendancelog = $DB->get_records('attendance_evaluations', array('sessionid' => $sessionid),
                                               '', 'studentid, statusid, remarks, id')) {
             $session->attendance_log = $attendancelog;
         }
@@ -143,11 +143,11 @@ class attendance_handler {
         $record->statusid = $statusid;
         $record->studentid = $studentid;
 
-        if ($attendancelog = $DB->get_record('attendance_log', array('sessionid' => $sessionid, 'studentid' => $studentid))) {
+        if ($attendancelog = $DB->get_record('attendance_evaluations', array('sessionid' => $sessionid, 'studentid' => $studentid))) {
             $record->id = $attendancelog->id;
-            $DB->update_record('attendance_log', $record);
+            $DB->update_record('attendance_evaluations', $record);
         } else {
-            $DB->insert_record('attendance_log', $record);
+            $DB->insert_record('attendance_evaluations', $record);
         }
 
         if ($attendancesession = $DB->get_record('attendance_sessions', array('id' => $sessionid))) {

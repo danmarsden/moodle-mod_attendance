@@ -61,6 +61,11 @@ class mod_attendance_sessions_page_params {
      */
     const ACTION_DELETE_HIDDEN     = 6;
 
+    /**
+     *  Evaluate a session
+     */
+    const ACTION_EVALUATE          = 7;
+
     /** @var int view mode of taking attendance page*/
     public $action;
 }

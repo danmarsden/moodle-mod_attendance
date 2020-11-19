@@ -18,12 +18,13 @@
  * Manage attendance sessions
  *
  * @package    mod_attendance
- * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
+ * @copyright  2020 Florian Metzger-Noel (github.com/flocko-motion)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 require_once(dirname(__FILE__).'/../../config.php');
 require_once(dirname(__FILE__).'/locallib.php');
+$PAGE->requires->js('/mod/attendance/js/evaluation.js');
 
 $pageparams = new mod_attendance_manage_page_params();
 
@@ -31,7 +32,11 @@ $id                         = required_param('id', PARAM_INT);
 $from                       = optional_param('from', null, PARAM_ALPHANUMEXT);
 $pageparams->view           = optional_param('view', null, PARAM_INT);
 $pageparams->curdate        = optional_param('curdate', null, PARAM_INT);
+$pageparams->action         = optional_param('action',  null, PARAM_INT);
+$pageparams->sessionid      = optional_param('sessionid',  null, PARAM_INT);
 $pageparams->perpage        = get_config('attendance', 'resultsperpage');
+
+if(!$pageparams->sessionid) $pageparams->action = null;
 
 $cm             = get_coursemodule_from_id('attendance', $id, 0, false, MUST_EXIST);
 $course         = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
@@ -40,8 +45,6 @@ $att            = $DB->get_record('attendance', array('id' => $cm->instance), '*
 require_login($course, true, $cm);
 
 $context = context_module::instance($cm->id);
-
-// security
 $capabilities = array(
     'mod/attendance:manageattendances',
     'mod/attendance:takeattendances',
@@ -55,7 +58,7 @@ if (!has_any_capability($capabilities, $context)) {
 $pageparams->init($cm);
 $att = new mod_attendance_structure($att, $cm, $course, $context, $pageparams);
 
-$PAGE->set_url($att->url_manage());
+$PAGE->set_url($att->url_evaluation());
 $PAGE->set_title($course->shortname. ": ".$att->name);
 $PAGE->set_heading($course->fullname);
 $PAGE->set_cacheable(true);
@@ -63,32 +66,39 @@ $PAGE->force_settings_menu(true);
 $PAGE->navbar->add($att->name);
 
 
-$tabs = new attendance_tabs($att, attendance_tabs::TAB_SESSIONS);
-
-$filtercontrols = new attendance_filter_controls($att);
-
-$sessiondata = new attendance_sessions_data($att);
-
+$tabs = new attendance_tabs($att, attendance_tabs::TAB_EVALUATION);
 $title = get_string('attendanceforthecourse', 'attendance').' :: ' .format_string($course->fullname);
 $header = new mod_attendance_header($att, $title);
-
-// Output starts here.
-
 $output = $PAGE->get_renderer('mod_attendance');
 echo $output->header();
 echo $output->render($header);
 mod_attendance_notifyqueue::show();
 echo $output->render($tabs);
 
-$templatecontext = (object)[
-    'sessgroupselector' => $output->render_sess_group_selector($filtercontrols),
-    'curdatecontrols' => $output->render_curdate_controls($filtercontrols),
-    'pagingcontrols' => $output->render_paging_controls($filtercontrols),
-    'viewcontrols' => $output->render_view_controls($filtercontrols),
-    'sessions' => $sessiondata->sessions,
-    'sessionsbydate' => $sessiondata->sessionsbydate,
-];
-echo $OUTPUT->render_from_template('mod_attendance/manage', $templatecontext);
+switch ($att->pageparams->action) {
+    case mod_attendance_sessions_page_params::ACTION_EVALUATE:
+        $evaluationdata = new attendance_evaluation_data($att);
+        $usersvalues = array_values($evaluationdata->users);
+        $templatecontext = (object)[
+            'session' => $evaluationdata->session,
+            'durationoptions' => $evaluationdata->session->durationoptions,
+            'users' => $usersvalues,
+            'users?' => count($usersvalues) > 0,
+        ];
+        echo '<input type="hidden" data-module="mod_attendance" data-sessionid value="'.$evaluationdata->session->id.'" />';
+        echo $OUTPUT->render_from_template('mod_attendance/evaluate_session', $templatecontext);
+        break;
+    default:
+        $pageparams->startdate = 0;
+        $pageparams->enddate = time();
+        $sessiondata = new attendance_sessions_data($att);
+        $templatecontext = (object)[
+            'sessions' => $sessiondata->sessions,
+            'sessionsbydate' => $sessiondata->sessionsbydate,
+        ];
+        echo $OUTPUT->render_from_template('mod_attendance/evaluation', $templatecontext);
+       break;
+}
 
 echo $output->footer();
 

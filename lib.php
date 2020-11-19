@@ -54,41 +54,6 @@ function attendance_supports($feature) {
     }
 }
 
-/**
- * Add default set of statuses to the new attendance.
- *
- * @param int $attid - id of attendance instance.
- */
-function att_add_default_statuses($attid) {
-    global $DB;
-
-    $statuses = $DB->get_recordset('attendance_statuses', array('attendanceid' => 0), 'id');
-    foreach ($statuses as $st) {
-        $rec = $st;
-        $rec->attendanceid = $attid;
-        $DB->insert_record('attendance_statuses', $rec);
-    }
-    $statuses->close();
-}
-
-/**
- * Add default set of warnings to the new attendance.
- *
- * @param int $id - id of attendance instance.
- */
-function attendance_add_default_warnings($id) {
-    global $DB, $CFG;
-    require_once($CFG->dirroot.'/mod/attendance/locallib.php');
-
-    $warnings = $DB->get_recordset('attendance_warning',
-        array('idnumber' => 0), 'id');
-    foreach ($warnings as $n) {
-        $rec = $n;
-        $rec->idnumber = $id;
-        $DB->insert_record('attendance_warning', $rec);
-    }
-    $warnings->close();
-}
 
 /**
  * Add new attendance instance.
@@ -108,12 +73,6 @@ function attendance_add_instance($attendance) {
     }
 
     $attendance->id = $DB->insert_record('attendance', $attendance);
-
-    att_add_default_statuses($attendance->id);
-
-    attendance_add_default_warnings($attendance->id);
-
-    attendance_grade_item_update($attendance);
 
     return $attendance->id;
 }
@@ -157,7 +116,7 @@ function attendance_delete_instance($id) {
         if (attendance_existing_calendar_events_ids($sessids)) {
             attendance_delete_calendar_events($sessids);
         }
-        $DB->delete_records_list('attendance_log', 'sessionid', $sessids);
+        $DB->delete_records_list('attendance_evaluations', 'sessionid', $sessids);
         $DB->delete_records('attendance_sessions', array('attendanceid' => $id));
     }
     $DB->delete_records('attendance_statuses', array('attendanceid' => $id));
@@ -185,9 +144,6 @@ function attendance_reset_course_form_definition(&$mform) {
     $mform->addElement('checkbox', 'reset_attendance_sessions', get_string('deletesessions', 'attendance'));
     $mform->disabledIf('reset_attendance_sessions', 'reset_attendance_log', 'notchecked');
 
-    $mform->addElement('checkbox', 'reset_attendance_statuses', get_string('resetstatuses', 'attendance'));
-    $mform->setAdvanced('reset_attendance_statuses');
-    $mform->disabledIf('reset_attendance_statuses', 'reset_attendance_log', 'notchecked');
 }
 
 /**
@@ -217,7 +173,7 @@ function attendance_reset_userdata($data) {
         $sess = $DB->get_records_list('attendance_sessions', 'attendanceid', $attids, '', 'id');
         if (!empty($sess)) {
             list($sql, $params) = $DB->get_in_or_equal(array_keys($sess));
-            $DB->delete_records_select('attendance_log', "sessionid $sql", $params);
+            $DB->delete_records_select('attendance_evaluations', "sessionid $sql", $params);
             list($sql, $params) = $DB->get_in_or_equal($attids);
             $DB->set_field_select('attendance_sessions', 'lasttaken', 0, "attendanceid $sql", $params);
             if (empty($data->reset_attendance_sessions)) {
@@ -233,18 +189,6 @@ function attendance_reset_userdata($data) {
         }
     }
 
-    if (!empty($data->reset_attendance_statuses)) {
-        $DB->delete_records_list('attendance_statuses', 'attendanceid', $attids);
-        foreach ($attids as $attid) {
-            att_add_default_statuses($attid);
-        }
-
-        $status[] = array(
-            'component' => get_string('modulenameplural', 'attendance'),
-            'item' => get_string('sessions', 'attendance'),
-            'error' => false
-        );
-    }
 
     if (!empty($data->reset_attendance_sessions)) {
         $sessionsids = array_keys($DB->get_records_list('attendance_sessions', 'attendanceid', $attids, '', 'id'));
@@ -478,32 +422,8 @@ function attendance_print_settings_tabs($selected = 'settings') {
     $tabs[] = new tabobject('settings', "{$CFG->wwwroot}/{$CFG->admin}/settings.php?section=modsettingattendance",
         get_string('settings', 'attendance'), get_string('settings'), false);
 
-    $tabs[] = new tabobject('defaultstatus', $CFG->wwwroot.'/mod/attendance/defaultstatus.php',
-        get_string('defaultstatus', 'attendance'), get_string('defaultstatus', 'attendance'), false);
-
-    if (get_config('attendance', 'enablerooms')) {
-        $tabs[] = new tabobject('rooms', $CFG->wwwroot.'/mod/attendance/rooms.php',
-            get_string('rooms', 'attendance'), get_string('rooms', 'attendance'), false);
-    }
-
-    if (get_config('attendance', 'enablewarnings')) {
-        $tabs[] = new tabobject('defaultwarnings', $CFG->wwwroot . '/mod/attendance/warnings.php',
-            get_string('defaultwarnings', 'attendance'), get_string('defaultwarnings', 'attendance'), false);
-    }
-
-    $tabs[] = new tabobject('coursesummary', $CFG->wwwroot.'/mod/attendance/coursesummary.php',
-        get_string('coursesummary', 'attendance'), get_string('coursesummary', 'attendance'), false);
-
-    if (get_config('attendance', 'enablewarnings')) {
-        $tabs[] = new tabobject('absentee', $CFG->wwwroot . '/mod/attendance/absentee.php',
-            get_string('absenteereport', 'attendance'), get_string('absenteereport', 'attendance'), false);
-    }
-
-    $tabs[] = new tabobject('resetcalendar', $CFG->wwwroot.'/mod/attendance/resetcalendar.php',
-        get_string('resetcalendar', 'attendance'), get_string('resetcalendar', 'attendance'), false);
-
-    $tabs[] = new tabobject('importsessions', $CFG->wwwroot . '/mod/attendance/import/sessions.php',
-        get_string('importsessions', 'attendance'), get_string('importsessions', 'attendance'), false);
+    $tabs[] = new tabobject('rooms', $CFG->wwwroot.'/mod/attendance/rooms.php',
+        get_string('rooms', 'attendance'), get_string('rooms', 'attendance'), false);
 
     ob_start();
     print_tabs(array($tabs), $selected);

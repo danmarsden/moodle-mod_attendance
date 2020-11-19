@@ -24,7 +24,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$functions = array(
+$functions = [
     'mod_attendance_add_attendance' => array(
         'classname'    => 'mod_attendance_external',
         'methodname'   => 'add_attendance',
@@ -96,8 +96,19 @@ $functions = array(
         'ajax'        => true,
         'capabilities' => '',
         'loginrequired' => true
-    )
-);
+    ),
+
+    'mod_attendance_update_evaluation' => [
+        'classname'   => 'mod_attendance_external',
+        'methodname'  => 'update_evaluation',
+        'classpath'   => 'mod/attendance/externallib.php',
+        'description' => 'Method to process input from evaluation take',
+        'type'        => 'write',
+        'ajax'        => true,
+        'capabilities' => '',
+        'loginrequired' => true
+    ],
+];
 
 
 // We define the services to install as pre-build services. A pre-build service is not editable by administrator.
