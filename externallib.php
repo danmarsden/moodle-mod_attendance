@@ -712,6 +712,7 @@ class mod_attendance_external extends external_api {
         );
 
     }
+    // tst
 
     /**
      * Describes update_evaluation user parameters.
