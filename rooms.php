@@ -17,7 +17,7 @@
 /**
  * Shows a list of all rooms
  *
- * @package   mod_attendance
+ * @package   mod_presence
  * @copyright 2020 Florian Metzger-Noel (github.com/flocko-motion)
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -26,52 +26,52 @@
 require_once(__DIR__.'/../../config.php');
 
 require_once($CFG->libdir.'/adminlib.php');
-require_once($CFG->dirroot.'/mod/attendance/lib.php');
-require_once($CFG->dirroot.'/mod/attendance/locallib.php');
-require_once($CFG->dirroot.'/mod/attendance/classes/form/editroom.php');
+require_once($CFG->dirroot.'/mod/presence/lib.php');
+require_once($CFG->dirroot.'/mod/presence/locallib.php');
+require_once($CFG->dirroot.'/mod/presence/classes/form/editroom.php');
 
 admin_externalpage_setup('managemodules');
 
-$url = new moodle_url('/mod/attendance/rooms.php');
+$url = new moodle_url('/mod/presence/rooms.php');
 $deleteroomid = optional_param('del', null, PARAM_INT);
 $deleteroomconfirm = optional_param('confirm', null, PARAM_INT);
 
 if ($deleteroomid && $deleteroomconfirm) {
     try {
-        $DB->set_field('attendance_sessions', 'roomid', 0, ['roomid' => $deleteroomid]);
-        $DB->delete_records('attendance_rooms', ['id' => $deleteroomid]);
-        redirect($CFG->wwwroot . '/mod/attendance/rooms.php',
-            get_string('roomdeletesuccess', 'mod_attendance'),
+        $DB->set_field('presence_sessions', 'roomid', 0, ['roomid' => $deleteroomid]);
+        $DB->delete_records('presence_rooms', ['id' => $deleteroomid]);
+        redirect($CFG->wwwroot . '/mod/presence/rooms.php',
+            get_string('roomdeletesuccess', 'mod_presence'),
             null,
             \core\notification::SUCCESS);
     } catch (dml_exception $d) {
-        redirect($CFG->wwwroot . '/mod/attendance/rooms.php',
-            get_string('roomdeleteerror', 'mod_attendance'),
+        redirect($CFG->wwwroot . '/mod/presence/rooms.php',
+            get_string('roomdeleteerror', 'mod_presence'),
             null,
             \core\notification::ERROR);
     }
 }
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading(get_string('rooms', 'mod_attendance'));
-echo  attendance_print_settings_tabs('rooms');
+echo $OUTPUT->heading(get_string('rooms', 'mod_presence'));
+echo  presence_print_settings_tabs('rooms');
 
 if ($deleteroomid && !$deleteroomconfirm) {
     try {
-        $room = $DB->get_record_select('attendance_rooms', "id = :id", ['id' => $deleteroomid]);
-        echo $OUTPUT->confirm(get_string('roomdeleteconfirm', 'mod_attendance', $room->name),
-            new moodle_url('/mod/attendance/rooms.php', ['del' => $deleteroomid, 'confirm' => 1]),
-            new moodle_url('/mod/attendance/rooms.php')
+        $room = $DB->get_record_select('presence_rooms', "id = :id", ['id' => $deleteroomid]);
+        echo $OUTPUT->confirm(get_string('roomdeleteconfirm', 'mod_presence', $room->name),
+            new moodle_url('/mod/presence/rooms.php', ['del' => $deleteroomid, 'confirm' => 1]),
+            new moodle_url('/mod/presence/rooms.php')
         );
     } catch (dml_exception $d) {
-        \core\notification::error(get_string('error:roomdelete', 'mod_attendance'));
+        \core\notification::error(get_string('error:roomdelete', 'mod_presence'));
     }
 } else {
     try {
-        $rooms = array_values($DB->get_records('attendance_rooms', null, 'name ASC'));
+        $rooms = array_values($DB->get_records('presence_rooms', null, 'name ASC'));
         foreach ($rooms as $room) {
-            $room->url_edit = new moodle_url('/mod/attendance/editroom.php', ['id' => $room->id]);
-            $room->url_delete = new moodle_url('/mod/attendance/rooms.php', ['del' => $room->id]);
+            $room->url_edit = new moodle_url('/mod/presence/editroom.php', ['id' => $room->id]);
+            $room->url_delete = new moodle_url('/mod/presence/rooms.php', ['del' => $room->id]);
             $room->is_bookable = $room->bookable ? get_string('yes') : get_string('no');
         }
     } catch (dml_exception $e) {
@@ -80,13 +80,13 @@ if ($deleteroomid && !$deleteroomconfirm) {
 
     $templatecontext = (object)[
         'rooms' => $rooms,
-        'name' => get_string('roomname', 'mod_attendance'),
+        'name' => get_string('roomname', 'mod_presence'),
         'description' => get_string('description'),
-        'capacity' => get_string('roomcapacity', 'mod_attendance'),
-        'bookable' => get_string('roombookable', 'mod_attendance'),
-        'url_add' => new moodle_url('/mod/attendance/editroom.php'),
-        'button_addroom' => get_string('roomadd', 'mod_attendance'),
+        'capacity' => get_string('roomcapacity', 'mod_presence'),
+        'bookable' => get_string('roombookable', 'mod_presence'),
+        'url_add' => new moodle_url('/mod/presence/editroom.php'),
+        'button_addroom' => get_string('roomadd', 'mod_presence'),
     ];
-    echo $OUTPUT->render_from_template('mod_attendance/rooms', $templatecontext);
+    echo $OUTPUT->render_from_template('mod_presence/rooms', $templatecontext);
 }
 echo $OUTPUT->footer();

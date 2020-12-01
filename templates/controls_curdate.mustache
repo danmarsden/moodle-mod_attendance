@@ -1,0 +1,45 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template mod_presence/rooms
+
+
+}}
+{{&script}}
+<div class="input-group mb-3">
+    <div class="input-group-prepend">
+        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fa fa-calendar"></i> {{curviewname}}</button>
+        <div class="dropdown-menu">
+            {{#views}}<a class="dropdown-item" href="{{&link}}">{{viewname}}</a>{{/views}}
+        </div>
+    </div>
+    <div class="input-group-prepend" id="button-addon3">
+        {{#prev_url}}
+        <a href="{{&prev_url}}">
+            <button class="btn btn-outline-secondary" type="button"><i class="fa fa-chevron-left"></i></button>
+        </a>
+        {{/prev_url}}
+        {{&datepicker}}
+        {{#next_url}}
+        <a href="{{&next_url}}">
+            <button class="btn btn-outline-secondary " type="button"><i class="fa fa-chevron-right"></i></button>
+        </a>
+        {{/next_url}}
+    </div>
+</div>
+

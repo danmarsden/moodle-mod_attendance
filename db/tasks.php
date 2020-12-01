@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Attendance module tasks.
+ * presence module tasks.
  *
- * @package    mod_attendance
+ * @package    mod_presence
  * @copyright  2017 Dan Marsden
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -26,7 +26,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $tasks = array(
     array(
-        'classname' => 'mod_attendance\task\auto_mark',
+        'classname' => 'mod_presence\task\auto_mark',
         'blocking' => 0,
         'minute' => '8',
         'hour' => '*',
@@ -34,7 +34,7 @@ $tasks = array(
         'dayofweek' => '*',
         'month' => '*'),
     array(
-        'classname' => 'mod_attendance\task\notify',
+        'classname' => 'mod_presence\task\notify',
         'blocking' => 0,
         'minute' => '30',
         'hour' => '1',
@@ -42,7 +42,7 @@ $tasks = array(
         'dayofweek' => '*',
         'month' => '*'),
         array(
-        'classname' => 'mod_attendance\task\clear_temporary_passwords',
+        'classname' => 'mod_presence\task\clear_temporary_passwords',
         'blocking' => 0,
         'minute' => '0',
         'hour' => '1',

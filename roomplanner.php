@@ -15,17 +15,37 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information
+ * Manage presence sessions
  *
  * @package    mod_presence
  * @copyright  2020 Florian Metzger-Noel (github.com/flocko-motion)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-defined('MOODLE_INTERNAL') || die();
 
-$plugin->version  = 2020112701;
-$plugin->requires = 2019072500; // Requires 3.8.
-$plugin->release = '3.8.4';
-$plugin->maturity  = MATURITY_STABLE;
-$plugin->cron     = 0;
-$plugin->component = 'mod_presence';
+require_once(dirname(__FILE__).'/../../config.php');
+require_once(dirname(__FILE__).'/locallib.php');
+require_once(dirname(__FILE__) . '/classes/calendar.php');
+
+$capabilities = array(
+    'mod/presence:view',
+);
+
+$pageparams = new mod_presence_manage_page_params();
+$pageparams->curdate        = optional_param('curdate', null, PARAM_INT);
+
+presence_init_page([
+    'url' => new moodle_url('/mod/presence/roomplanner.php'),
+    'tab' => presence_tabs::TAB_ROOMPLANNER,
+]);
+
+$cal = new mod_presence\calendar($presence);
+$roomplan = $cal->get_room_planner_schedule();
+
+$params = [
+    'hasrooms' => boolval(count($cal->get_rooms())),
+    'roomslist' => array_values($cal->get_rooms()),
+    'roomplan' => array_values($roomplan),
+];
+echo $OUTPUT->render_from_template('mod_presence/roomplanner', $params);
+echo $output->footer();
+

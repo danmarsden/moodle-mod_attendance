@@ -15,42 +15,40 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template mod_attendance/rooms
+    @template mod_presence/rooms
 
 
 }}
-<div class="text-center fullwidth mt-4">
-    <div>{{&sessgroupselector}}</div>
-    <div>{{&pagingcontrols}}</div>
-    <div class="p-1">{{&viewcontrols}}</div>
+<div class="fullwidth mt-4">
+    <h4>{{#str}}sessions, presence{{/str}}</h4>
+    <div class="mt-3 clearfix">
+        <div class="float-left mr-2">{{&curdatecontrols}}</div>
+        <div class="float-left mr-2">
+            <a href="{{&addsessionurl}}"><button class="btn btn-primary">{{#str}}addsession, presence{{/str}}</button></a>
+        </div>
+        <div class="float-left">{{&pagingcontrols}}</div>
+    </div>
 </div>
-{{#curdatecontrols}}
-<div class="text-center fullwidth m-2">
-    <div>{{&curdatecontrols}}</div>
-</div>
-{{/curdatecontrols}}
 {{#sessionsbydate}}
     <h5 class="card-title mt-4">{{date}}</h5>
     {{#sessions}}
         <div class="card mt-3 bg-light shadow-sm">
             <div class="card-body p-2">
-                <div class="row">
-                    <div class="col-lg-2 col-md-3 col-sm-3">
-                        <div class="overflow-hidden text-nowrap bold" style="width:100%;">{{timefrom}} - {{timeto}}</div>
-                        <div class="overflow-hidden text-nowrap">{{roomname}}</div>
-                        <div class="">
-                            {{#pix}}i/users, core, {{/pix}} {{bookings}}
-                            {{#maxattendants}}
-                              / {{maxattendants}}
-                            {{/maxattendants}}
-                        </div>
-
+                <div class="float-left">
+                    <div class="overflow-hidden text-nowrap bold" style="width:100%;">{{timefrom}} - {{timeto}}</div>
+                    <div class="overflow-hidden text-nowrap">{{roomname}}</div>
+                    <div class="">
+                        {{#pix}}i/users, core, {{/pix}} {{bookings}}
+                        {{#maxattendants}}
+                            / {{maxattendants}}
+                        {{/maxattendants}}
                     </div>
-                    <div class="col-lg-7 col-md-5 col-sm-5">{{&description}}</div>
-                    <div class="col-lg-3 col-md-4 col-sm-4 my-auto text-right">
-                        {{#urledit}}<a href="{{&urledit}}"><button class="btn btn-secondary align-middle ">{{#pix}}i/edit, core, {{/pix}}{{#str}}edit{{/str}}</button></a>{{/urledit}}
-                        {{#urldelete}}<a href="{{&urldelete}}"><button class="btn btn-secondary align-middle my-auto">{{#pix}}i/delete, core, {{/pix}}{{#str}}delete{{/str}}</button></a>{{/urldelete}}
-                    </div>
+                </div>
+                <div class="float-left ml-2">{{&description}}</div>
+                <div class="float-right">
+                {{#urldelete}}<a href="{{&urldelete}}"><button class="float-right btn btn-secondary m-2"><i class="fa fa-times"></i></button></a>{{/urldelete}}
+                {{#urledit}}<a href="{{&urledit}}"><button class="float-right btn btn-secondary m-2"><i class="fa fa-pencil"></i></button></a>{{/urledit}}
+<!--                <button class="float-right btn btn-primary m-2"><i class="fa fa-users"></i></button>-->
                 </div>
             </div>
         </div>
@@ -59,7 +57,7 @@
 {{^sessionsbydate}}
     <div class="card bg-light p-2 mt-4 shadow-sm">
         <div class="card-body p-2 text-center">
-        {{#str}}sessionnoneinspan, attendance{{/str}}
+        {{#str}}sessionnoneinspan, presence{{/str}}
         </div>
     </div>
 {{/sessionsbydate}}

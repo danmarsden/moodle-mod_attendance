@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * local functions and constants for module attendance
+ * local functions and constants for module presence
  *
- * @package   mod_attendance
+ * @package   mod_presence
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -27,40 +27,70 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/gradelib.php');
 require_once(dirname(__FILE__).'/renderhelpers.php');
 
-define('ATT_VIEW_DAYS', 1);
-define('ATT_VIEW_WEEKS', 2);
-define('ATT_VIEW_MONTHS', 3);
-define('ATT_VIEW_ALLPAST', 4);
-define('ATT_VIEW_ALL', 5);
-define('ATT_VIEW_NOTPRESENT', 6);
-define('ATT_VIEW_SUMMARY', 7);
-define('ATT_VIEW_ALLFUTURE', 8);
+define('PRESENCE_VIEW_DAYS', 1);
+define('PRESENCE_VIEW_WEEKS', 2);
+define('PRESENCE_VIEW_MONTHS', 3);
+define('PRESENCE_VIEW_ALLPAST', 4);
+define('PRESENCE_VIEW_ALL', 5);
+define('PRESENCE_VIEW_NOTPRESENT', 6);
+define('PRESENCE_VIEW_SUMMARY', 7);
+define('PRESENCE_VIEW_ALLFUTURE', 8);
 
-define('ATT_SORT_DEFAULT', 0);
-define('ATT_SORT_LASTNAME', 1);
-define('ATT_SORT_FIRSTNAME', 2);
+define('PRESENCE_SORT_DEFAULT', 0);
+define('PRESENCE_SORT_LASTNAME', 1);
+define('PRESENCE_SORT_FIRSTNAME', 2);
 
-define('ATT_ROOMS_MAX_CAPACITY', 1000);
-
-define('ATTENDANCE_AUTOMARK_DISABLED', 0);
-define('ATTENDANCE_AUTOMARK_ALL', 1);
-define('ATTENDANCE_AUTOMARK_CLOSE', 2);
-
-define('ATTENDANCE_SHAREDIP_DISABLED', 0);
-define('ATTENDANCE_SHAREDIP_MINUTES', 1);
-define('ATTENDANCE_SHAREDIP_FORCE', 2);
-
-// Max number of sessions available in the warnings set form to trigger warnings.
-define('ATTENDANCE_MAXWARNAFTER', 100);
-
+define('PRESENCE_ROOMS_MAX_CAPACITY', 1000);
 
 /**
- * Get users courses and the relevant attendances.
+ * Boilerplate code for an presence page
+ * @param array p
+ */
+
+function presence_init_page($p) {
+    global $id, $presence, $capabilities, $cm, $context, $course, $output, $pageparams, $DB, $PAGE;
+    $id             = required_param('id', PARAM_INT);
+    $cm             = get_coursemodule_from_id('presence', $id, 0, false, MUST_EXIST);
+    $course         = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
+    $presence            = $DB->get_record('presence', array('id' => $cm->instance), '*', MUST_EXIST);
+
+    require_login($course, true, $cm);
+
+    $context = context_module::instance($cm->id);
+
+    if (!has_any_capability($capabilities, $context)) {
+        $url = new moodle_url('/mod/presence/view.php', array('id' => $cm->id));
+        redirect($url);
+    }
+
+    $pageparams->init($cm);
+    $presence = new mod_presence_structure($presence, $cm, $course, $context, $pageparams);
+
+    $PAGE->set_title($course->shortname. ": ".$presence->name);
+    $PAGE->set_heading($course->fullname);
+    $PAGE->set_cacheable(true);
+    $PAGE->force_settings_menu(true);
+    $PAGE->set_url($p['url']);
+    // $PAGE->navbar->add($presence->name);
+
+    $tabs = new presence_tabs($presence, $p['tab']);
+    $title = get_string('presenceforthecourse', 'presence'); // .' :: ' .format_string($course->fullname);
+    $header = new mod_presence_header($presence, $title);
+
+    $output = $PAGE->get_renderer('mod_presence');
+    echo $output->header();
+    echo $output->render($header);
+    mod_presence_notifyqueue::show();
+    echo $output->render($tabs);
+}
+
+/**
+ * Get users courses and the relevant presences.
  *
  * @param int $userid
  * @return array
  */
-function attendance_get_user_courses_attendances($userid) {
+function presence_get_user_courses_presences($userid) {
     global $DB;
 
     $usercourses = enrol_get_users_courses($userid);
@@ -69,7 +99,7 @@ function attendance_get_user_courses_attendances($userid) {
 
     $sql = "SELECT att.id as attid, att.course as courseid, course.fullname as coursefullname,
                    course.startdate as coursestartdate, att.name as attname, att.grade as attgrade
-              FROM {attendance} att
+              FROM {presence} att
               JOIN {course} course
                    ON att.course = course.id
              WHERE att.course $usql
@@ -87,7 +117,7 @@ function attendance_get_user_courses_attendances($userid) {
  * @param float $total - total value.
  * @return float the calculated fraction.
  */
-function attendance_calc_fraction($part, $total) {
+function presence_calc_fraction($part, $total) {
     if ($total == 0) {
         return 0;
     } else {
@@ -100,9 +130,9 @@ function attendance_calc_fraction($part, $total) {
  *
  * @param integer $statusid
  */
-function attendance_has_logs_for_status($statusid) {
+function presence_has_logs_for_status($statusid) {
     global $DB;
-    return $DB->record_exists('attendance_evaluations', array('statusid' => $statusid));
+    return $DB->record_exists('presence_evaluations', array('statusid' => $statusid));
 }
 
 /**
@@ -110,9 +140,9 @@ function attendance_has_logs_for_status($statusid) {
  *
  * @param MoodleQuickForm $mform
  */
-function attendance_form_sessiondate_selector (MoodleQuickForm $mform) {
+function presence_form_sessiondate_selector (MoodleQuickForm $mform) {
 
-    $mform->addElement('date_selector', 'sessiondate', get_string('sessiondate', 'attendance'));
+    $mform->addElement('date_selector', 'sessiondate', get_string('sessiondate', 'presence'));
 
     for ($i = 0; $i <= 23; $i++) {
         $hours[$i] = sprintf("%02d", $i);
@@ -122,32 +152,24 @@ function attendance_form_sessiondate_selector (MoodleQuickForm $mform) {
     }
 
     $sesendtime = array();
-    if (!right_to_left()) {
-        $sesendtime[] =& $mform->createElement('static', 'from', '', get_string('from', 'attendance'));
-        $sesendtime[] =& $mform->createElement('select', 'starthour', get_string('hour', 'form'), $hours, false, true);
-        $sesendtime[] =& $mform->createElement('select', 'startminute', get_string('minute', 'form'), $minutes, false, true);
-        $sesendtime[] =& $mform->createElement('static', 'to', '', get_string('to', 'attendance'));
-        $sesendtime[] =& $mform->createElement('select', 'endhour', get_string('hour', 'form'), $hours, false, true);
-        $sesendtime[] =& $mform->createElement('select', 'endminute', get_string('minute', 'form'), $minutes, false, true);
-    } else {
-        $sesendtime[] =& $mform->createElement('static', 'from', '', get_string('from', 'attendance'));
-        $sesendtime[] =& $mform->createElement('select', 'startminute', get_string('minute', 'form'), $minutes, false, true);
-        $sesendtime[] =& $mform->createElement('select', 'starthour', get_string('hour', 'form'), $hours, false, true);
-        $sesendtime[] =& $mform->createElement('static', 'to', '', get_string('to', 'attendance'));
-        $sesendtime[] =& $mform->createElement('select', 'endminute', get_string('minute', 'form'), $minutes, false, true);
-        $sesendtime[] =& $mform->createElement('select', 'endhour', get_string('hour', 'form'), $hours, false, true);
-    }
-    $mform->addGroup($sesendtime, 'sestime', get_string('time', 'attendance'), array(' '), true);
+    $sesendtime[] =& $mform->createElement('static', 'from', '', get_string('from', 'presence'));
+    $sesendtime[] =& $mform->createElement('select', 'starthour', get_string('hour', 'form'), $hours, false, true);
+    $sesendtime[] =& $mform->createElement('select', 'startminute', get_string('minute', 'form'), $minutes, false, true);
+    $sesendtime[] =& $mform->createElement('static', 'to', '', get_string('to', 'presence'));
+    $sesendtime[] =& $mform->createElement('select', 'endhour', get_string('hour', 'form'), $hours, false, true);
+    $sesendtime[] =& $mform->createElement('select', 'endminute', get_string('minute', 'form'), $minutes, false, true);
+
+    $mform->addGroup($sesendtime, 'sestime', get_string('time', 'presence'), array(' '), true);
 }
 
 /**
  * Helper function to add room options to add/update forms.
  *
  * @param MoodleQuickForm $mform
- * @param mod_attendance_structure $att
+ * @param mod_presence_structure $presence
  * @param stdClass $sess
  */
-function attendance_form_session_room (MoodleQuickForm $mform, mod_attendance_structure $att, $sess = null) {
+function presence_form_session_room (MoodleQuickForm $mform, mod_presence_structure $presence, $sess = null) {
     if (!$sess) {
         $sess = new stdClass();
         $sess->roomid = 0;
@@ -156,16 +178,14 @@ function attendance_form_session_room (MoodleQuickForm $mform, mod_attendance_st
 
     }
 
-    $mform->addElement('header', 'headerrooms', get_string('roombooking', 'attendance'));
-    $mform->setExpanded('headerrooms');
 
-    $options = [0 => ''] + $att->get_room_names(true, true);
+    $options = [0 => ''] + $presence->get_room_names(true, true);
     $mform->addElement('select', 'roomid',
-        get_string('roomselect', 'attendance'), $options);
+        get_string('roomselect', 'presence'), $options);
     $mform->setType('roomid', PARAM_INT);
 
     $mform->addElement('select', 'maxattendants',
-        get_string('roomattendantsmax', 'attendance'), attendance_room_capacities());
+        get_string('roomattendantsmax', 'presence'), presence_room_capacities());
     $mform->setType('maxattendants', PARAM_INT);
 
     $mform->addElement('hidden', 'bookings', $sess->bookings);
@@ -182,7 +202,7 @@ function attendance_form_session_room (MoodleQuickForm $mform, mod_attendance_st
  * @param int $length The length of the string to be created.
  * @return string
  */
-function attendance_random_string($length=6) {
+function presence_random_string($length=6) {
     $randombytes = random_bytes_emulate($length);
     $pool = 'abcdefghijklmnopqrstuvwxyz';
     $pool .= '0123456789';
@@ -196,14 +216,14 @@ function attendance_random_string($length=6) {
 }
 
 /**
- * Generate worksheet for Attendance export
+ * Generate worksheet for presence export
  *
  * @param stdclass $data The data for the report
  * @param string $filename The name of the file
  * @param string $format excel|ods
  *
  */
-function attendance_exporttotableed($data, $filename, $format) {
+function presence_exporttotableed($data, $filename, $format) {
     global $CFG;
 
     if ($format === 'excel') {
@@ -218,7 +238,7 @@ function attendance_exporttotableed($data, $filename, $format) {
     // Sending HTTP headers.
     $workbook->send($filename);
     // Creating the first worksheet.
-    $myxls = $workbook->add_worksheet(get_string('modulenameplural', 'attendance'));
+    $myxls = $workbook->add_worksheet(get_string('modulenameplural', 'presence'));
     // Format types.
     $formatbc = $workbook->add_format();
     $formatbc->set_bold(1);
@@ -252,13 +272,13 @@ function attendance_exporttotableed($data, $filename, $format) {
 }
 
 /**
- * Generate csv for Attendance export
+ * Generate csv for presence export
  *
  * @param stdclass $data The data for the report
  * @param string $filename The name of the file
  *
  */
-function attendance_exporttocsv($data, $filename) {
+function presence_exporttocsv($data, $filename) {
     $filename .= ".txt";
 
     header("Content-Type: application/download\n");
@@ -278,36 +298,25 @@ function attendance_exporttocsv($data, $filename) {
 
 /**
  * Get session data for form.
- * @param stdClass $formdata moodleform - attendance form.
- * @param mod_attendance_structure $att - used to get attendance level subnet.
+ * @param stdClass $formdata moodleform - presence form.
+ * @param mod_presence_structure $presence - used to get presence level subnet.
  * @return array.
  */
-function attendance_construct_sessions_data_for_add($formdata, mod_attendance_structure $att) {
-    global $CFG;
+function presence_construct_sessions_data_for_add($formdata, mod_presence_structure $presence) {
+    global $CFG, $DB;
 
     $sesstarttime = $formdata->sestime['starthour'] * HOURSECS + $formdata->sestime['startminute'] * MINSECS;
     $sesendtime = $formdata->sestime['endhour'] * HOURSECS + $formdata->sestime['endminute'] * MINSECS;
     $sessiondate = $formdata->sessiondate + $sesstarttime;
     $duration = $sesendtime - $sesstarttime;
-    if (empty(get_config('attendance', 'enablewarnings'))) {
-        $absenteereport = get_config('attendance', 'absenteereport_default');
-    } else {
-        $absenteereport = empty($formdata->absenteereport) ? 0 : 1;
-    }
-
     $now = time();
+    $calendarevent = intval($formdata->calendarevent);
 
-    if (empty(get_config('attendance', 'studentscanmark'))) {
-        $formdata->studentscanmark = 0;
-    }
-
-    $calendarevent = 0;
-    if (isset($formdata->calendarevent)) { // Calendar event should be created.
-        $calendarevent = 1;
-    }
-
-    $sessions = array();
+    $sessions = [];
     if (isset($formdata->addmultiply)) {
+
+        $calgroup = $DB->get_field_sql('SELECT MAX(calgroup) FROM {presence_sessions}') + 1;
+
         $startdate = $sessiondate;
         $enddate = $formdata->sessionenddate + DAYSECS; // Because enddate in 0:0am.
 
@@ -335,163 +344,45 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
                     $sess->sessdate = make_timestamp($dinfo['year'], $dinfo['mon'], $dinfo['mday'],
                         $formdata->sestime['starthour'], $formdata->sestime['startminute']);
                     $sess->duration = $duration;
-                    $sess->descriptionitemid = $formdata->sdescription['itemid'];
-                    $sess->description = $formdata->sdescription['text'];
-                    $sess->descriptionformat = $formdata->sdescription['format'];
+                    $sess->description = $formdata->sdescription;
                     $sess->calendarevent = $calendarevent;
                     $sess->timemodified = $now;
                     $sess->roomid = intval($formdata->roomid);
-                    $sess->absenteereport = $absenteereport;
-                    $sess->studentpassword = '';
-                    $sess->includeqrcode = 0;
-                    $sess->rotateqrcode = 0;
-                    $sess->rotateqrcodesecret = '';
-
-                    if (!empty($formdata->usedefaultsubnet)) {
-                        $sess->subnet = $att->subnet;
-                    } else {
-                        $sess->subnet = $formdata->subnet;
-                    }
-                    $sess->automark = $formdata->automark;
-                    $sess->automarkcompleted = 0;
-                    if (!empty($formdata->preventsharedip)) {
-                        $sess->preventsharedip = $formdata->preventsharedip;
-                    }
-                    if (!empty($formdata->preventsharediptime)) {
-                        $sess->preventsharediptime = $formdata->preventsharediptime;
-                    }
-
-                    if (isset($formdata->studentscanmark)) { // Students will be able to mark their own attendance.
-                        $sess->studentscanmark = 1;
-                        if (isset($formdata->autoassignstatus)) {
-                            $sess->autoassignstatus = 1;
-                        }
-
-                        if (!empty($formdata->randompassword)) {
-                            $sess->studentpassword = attendance_random_string();
-                        } else if (!empty($formdata->studentpassword)) {
-                            $sess->studentpassword = $formdata->studentpassword;
-                        }
-                        if (!empty($formdata->includeqrcode)) {
-                            $sess->includeqrcode = $formdata->includeqrcode;
-                        }
-                        if (!empty($formdata->rotateqrcode)) {
-                            $sess->rotateqrcode = $formdata->rotateqrcode;
-                            $sess->studentpassword = attendance_random_string();
-                            $sess->rotateqrcodesecret = attendance_random_string();
-                        }
-                        if (!empty($formdata->preventsharedip)) {
-                            $sess->preventsharedip = $formdata->preventsharedip;
-                        }
-                        if (!empty($formdata->preventsharediptime)) {
-                            $sess->preventsharediptime = $formdata->preventsharediptime;
-                        }
-                    } else {
-                        $sess->subnet = '';
-                        $sess->automark = 0;
-                        $sess->automarkcompleted = 0;
-                        $sess->preventsharedip = 0;
-                        $sess->preventsharediptime = '';
-                    }
-                    $sess->statusset = $formdata->statusset;
-
-                    attendance_fill_groupid($formdata, $sessions, $sess);
+                    $sess->maxattendants = intval($formdata->maxattendants);
+                    $sess->calgroup = $calgroup;
+                    $sessions[] = $sess;
                 }
                 $sdate += DAYSECS;
             } else {
                 $startweek += WEEKSECS * $formdata->period;
                 $sdate = $startweek;
             }
+
         }
     } else {
         $sess = new stdClass();
         $sess->sessdate = $sessiondate;
         $sess->duration = $duration;
-        $sess->descriptionitemid = $formdata->sdescription['itemid'];
-        $sess->description = $formdata->sdescription['text'];
-        $sess->descriptionformat = $formdata->sdescription['format'];
+        $sess->description = $formdata->sdescription;
         $sess->calendarevent = $calendarevent;
         $sess->timemodified = $now;
         $sess->roomid = intval($formdata->roomid);
-        $sess->studentscanmark = 0;
-        $sess->autoassignstatus = 0;
-        $sess->subnet = '';
-        $sess->studentpassword = '';
-        $sess->automark = 0;
-        $sess->automarkcompleted = 0;
-        $sess->absenteereport = $absenteereport;
-        $sess->includeqrcode = 0;
-        $sess->rotateqrcode = 0;
-        $sess->rotateqrcodesecret = '';
-
-        if (!empty($formdata->usedefaultsubnet)) {
-            $sess->subnet = $att->subnet;
-        } else {
-            $sess->subnet = $formdata->subnet;
-        }
-
-        if (!empty($formdata->automark)) {
-            $sess->automark = $formdata->automark;
-        }
-        if (!empty($formdata->preventsharedip)) {
-            $sess->preventsharedip = $formdata->preventsharedip;
-        }
-        if (!empty($formdata->preventsharediptime)) {
-            $sess->preventsharediptime = $formdata->preventsharediptime;
-        }
-
-        if (isset($formdata->studentscanmark) && !empty($formdata->studentscanmark)) {
-            // Students will be able to mark their own attendance.
-            $sess->studentscanmark = 1;
-            if (isset($formdata->autoassignstatus) && !empty($formdata->autoassignstatus)) {
-                $sess->autoassignstatus = 1;
-            }
-            if (!empty($formdata->randompassword)) {
-                $sess->studentpassword = attendance_random_string();
-            } else if (!empty($formdata->studentpassword)) {
-                $sess->studentpassword = $formdata->studentpassword;
-            }
-            if (!empty($formdata->includeqrcode)) {
-                $sess->includeqrcode = $formdata->includeqrcode;
-            }
-            if (!empty($formdata->rotateqrcode)) {
-                $sess->rotateqrcode = $formdata->rotateqrcode;
-                $sess->studentpassword = attendance_random_string();
-                $sess->rotateqrcodesecret = attendance_random_string();
-            }
-            if (!empty($formdata->usedefaultsubnet)) {
-                $sess->subnet = $att->subnet;
-            } else {
-                $sess->subnet = $formdata->subnet;
-            }
-
-            if (!empty($formdata->automark)) {
-                $sess->automark = $formdata->automark;
-            }
-            if (!empty($formdata->preventsharedip)) {
-                $sess->preventsharedip = $formdata->preventsharedip;
-            }
-            if (!empty($formdata->preventsharediptime)) {
-                $sess->preventsharediptime = $formdata->preventsharediptime;
-            }
-        }
-        $sess->statusset = $formdata->statusset;
-
-        attendance_fill_groupid($formdata, $sessions, $sess);
+        $sess->maxattendants = intval($formdata->maxattendants);
+        $sessions[] = $sess;
     }
 
     return $sessions;
 }
 
 /**
- * Helper function for attendance_construct_sessions_data_for_add().
+ * Helper function for presence_construct_sessions_data_for_add().
  *
  * @param stdClass $formdata
  * @param stdClass $sessions
  * @param stdClass $sess
  */
-function attendance_fill_groupid($formdata, &$sessions, $sess) {
-    if ($formdata->sessiontype == mod_attendance_structure::SESSION_COMMON) {
+function presence_fill_groupid($formdata, &$sessions, $sess) {
+    if ($formdata->sessiontype == mod_presence_structure::SESSION_COMMON) {
         $sess = clone $sess;
         $sess->groupid = 0;
         $sessions[] = $sess;
@@ -511,7 +402,7 @@ function attendance_fill_groupid($formdata, &$sessions, $sess) {
  * @param string $orderby - optional order by param
  * @return stdClass
  */
-function attendance_course_users_points($courseids = array(), $orderby = '') {
+function presence_course_users_points($courseids = array(), $orderby = '') {
     global $DB;
 
     $where = '';
@@ -531,17 +422,17 @@ function attendance_course_users_points($courseids = array(), $orderby = '') {
     $sql = "SELECT courseid, coursename, sum(points) / sum(maxpoints) as percentage FROM (
 SELECT a.id, a.course as courseid, c.fullname as coursename, atl.studentid AS userid, COUNT(DISTINCT ats.id) AS numtakensessions,
                         SUM(stg.grade) AS points, SUM(stm.maxgrade) AS maxpoints
-                   FROM {attendance_sessions} ats
-                   JOIN {attendance} a ON a.id = ats.attendanceid
+                   FROM {presence_sessions} ats
+                   JOIN {presence} a ON a.id = ats.presenceid
                    JOIN {course} c ON c.id = a.course
-                   JOIN {attendance_evaluations} atl ON (atl.sessionid = ats.id)
-                   JOIN {attendance_statuses} stg ON (stg.id = atl.statusid AND stg.deleted = 0 AND stg.visible = 1)
-                   JOIN (SELECT attendanceid, setnumber, MAX(grade) AS maxgrade
-                           FROM {attendance_statuses}
+                   JOIN {presence_evaluations} atl ON (atl.sessionid = ats.id)
+                   JOIN {presence_statuses} stg ON (stg.id = atl.statusid AND stg.deleted = 0 AND stg.visible = 1)
+                   JOIN (SELECT presenceid, setnumber, MAX(grade) AS maxgrade
+                           FROM {presence_statuses}
                           WHERE deleted = 0
                             AND visible = 1
-                         GROUP BY attendanceid, setnumber) stm
-                     ON (stm.setnumber = ats.statusset AND stm.attendanceid = ats.attendanceid)
+                         GROUP BY presenceid, setnumber) stm
+                     ON (stm.setnumber = ats.statusset AND stm.presenceid = ats.presenceid)
                   {$joingroup}
                   WHERE ats.sessdate >= c.startdate
                     AND ats.lasttaken != 0
@@ -558,7 +449,7 @@ SELECT a.id, a.course as courseid, c.fullname as coursename, atl.studentid AS us
  * @param object $record db record of details
  * @return array - the content of the fields after templating.
  */
-function attendance_template_variables($record) {
+function presence_template_variables($record) {
     $templatevars = array(
         '/%coursename%/' => $record->coursename,
         '/%courseid%/' => $record->courseid,
@@ -566,7 +457,7 @@ function attendance_template_variables($record) {
         '/%userlastname%/' => $record->lastname,
         '/%userid%/' => $record->userid,
         '/%warningpercent%/' => $record->warningpercent,
-        '/%attendancename%/' => $record->aname,
+        '/%presencename%/' => $record->aname,
         '/%cmid%/' => $record->cmid,
         '/%numtakensessions%/' => $record->numtakensessions,
         '/%points%/' => $record->points,
@@ -595,37 +486,17 @@ function attendance_template_variables($record) {
  *
  * @param int $time - unix timestamp.
  */
-function attendance_strftimehm($time) {
-    $mins = userdate($time, '%M');
+function presence_strftimehm($time) {
+//    $mins = userdate($time, '%M');
+//
+//    if ($mins == '00') {
+//        $format = get_string('strftimeh', 'presence');
+//    } else {
+//        $format = get_string('strftimehm', 'presence');
+//    }
 
-    if ($mins == '00') {
-        $format = get_string('strftimeh', 'attendance');
-    } else {
-        $format = get_string('strftimehm', 'attendance');
-    }
+    $userdate = userdate($time, get_string('strftimetime', 'langconfig'));
 
-    $userdate = userdate($time, $format);
-
-    // Some Lang packs use %p to suffix with AM/PM but not all strftime support this.
-    // Check if %p is in use and make sure it's being respected.
-    if (stripos($format, '%p')) {
-        // Check if $userdate did something with %p by checking userdate against the same format without %p.
-        $formatwithoutp = str_ireplace('%p', '', $format);
-        if (userdate($time, $formatwithoutp) == $userdate) {
-            // The date is the same with and without %p - we have a problem.
-            if (userdate($time, '%H') > 11) {
-                $userdate .= 'pm';
-            } else {
-                $userdate .= 'am';
-            }
-        }
-        // Some locales and O/S don't respect correct intended case of %p vs %P
-        // This can cause problems with behat which expects AM vs am.
-        if (strpos($format, '%p')) { // Should be upper case according to PHP spec.
-            $userdate = str_replace('am', 'AM', $userdate);
-            $userdate = str_replace('pm', 'PM', $userdate);
-        }
-    }
 
     return $userdate;
 }
@@ -636,9 +507,9 @@ function attendance_strftimehm($time) {
  * @param int $datetime - unix timestamp.
  * @param int $duration - number of seconds.
  */
-function attendance_construct_session_time($datetime, $duration) {
-    $starttime = attendance_strftimehm($datetime);
-    $endtime = attendance_strftimehm($datetime + $duration);
+function presence_construct_session_time($datetime, $duration) {
+    $starttime = presence_strftimehm($datetime);
+    $endtime = presence_strftimehm($datetime + $duration);
 
     return $starttime . ($duration > 0 ? ' - ' . $endtime : '');
 }
@@ -651,8 +522,8 @@ function attendance_construct_session_time($datetime, $duration) {
  * @return string.
  */
 function construct_session_full_date_time($datetime, $duration) {
-    $sessinfo = userdate($datetime, get_string('strftimedmyw', 'attendance'));
-    $sessinfo .= ' '.attendance_construct_session_time($datetime, $duration);
+    $sessinfo = userdate($datetime, get_string('strftimedate', 'langconfig'));
+    $sessinfo .= ', '.presence_construct_session_time($datetime, $duration);
 
     return $sessinfo;
 }
@@ -661,11 +532,11 @@ function construct_session_full_date_time($datetime, $duration) {
  * Returns description of method result value.
  * @return array of room capacity options
  */
-function attendance_room_capacities() {
+function presence_room_capacities() {
     $options = [];
     $options[0] = '';
     $i = 1;
-    for ($n = 1; $n <= ATT_ROOMS_MAX_CAPACITY; $n += $n < 20 ? 1 : ($n < 50 ? 5 : ($n < 200 ? 10 : ($n < 500 ? 50 : 100)))) {
+    for ($n = 1; $n <= PRESENCE_ROOMS_MAX_CAPACITY; $n += $n < 20 ? 1 : ($n < 50 ? 5 : ($n < 200 ? 10 : ($n < 500 ? 50 : 100)))) {
         $options[$i++] = $n;
     }
     return $options;
@@ -674,18 +545,54 @@ function attendance_room_capacities() {
 /**
  * Returns array of session ids that the user has booked.
  */
-function attendance_sessionsbooked() {
+function presence_sessionsbooked() {
     global $DB, $USER;
-    return $DB->get_fieldset_select('attendance_bookings', 'sessionid', 'userid = ?', array($USER->id));
+    return $DB->get_fieldset_select('presence_bookings', 'sessionid', 'userid = ?', array($USER->id));
 }
 
 
 /**
  * Returns int how many bookings exist for given session.
  * @param int $sessionid
+ * @return int
  */
-function attendance_sessionbookings($sessionid) {
+function presence_sessionbookings(int $sessionid) : int {
     global $DB;
-    return intval($DB->get_field_sql('SELECT COUNT(*) FROM {attendance_bookings} WHERE sessionid = :sessionid',
+    return intval($DB->get_field_sql('SELECT COUNT(*) FROM {presence_bookings} WHERE sessionid = :sessionid',
         array('sessionid' => $sessionid)));
+}
+
+/**
+ * Finish evaluation of given session.
+ * @param mod_presence_structure $presence
+ * @param int $sessionid
+ */
+function presence_finish_evaluation($presence, $sessionid) {
+    global $DB, $USER;
+    $DB->update_record('presence_sessions', (object)[
+        'id' => $sessionid,
+        'presenceid' => $presence->id,
+        'lastevaluated' => time(),
+        'lastevaluatedby' => $USER->id,
+    ]);
+}
+
+/**
+ * Finish evaluation of given session.
+ * @param mod_presence_structure $presence
+ */
+function presence_finish_all_evaluations($presence) {
+    global $DB, $USER;
+    $evaluations = $DB->get_records_select('presence_sessions',
+        'sessdate < :now AND presenceid = :presenceid AND lastevaluatedby = 0', [
+            'now' => time(),
+            'presenceid' => $presence->id,
+        ]);
+    foreach ($evaluations as $evaluation) {
+        $DB->update_record('presence_sessions', (object)[
+            'id' => $evaluation->id,
+            'lastevaluated' => time(),
+            'lastevaluatedby' => $USER->id,
+        ]);
+    }
 }

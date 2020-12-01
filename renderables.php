@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Attendance module renderable components are defined here
+ * presence module renderable components are defined here
  *
- * @package    mod_attendance
+ * @package    mod_presence
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -28,15 +28,15 @@ require_once(dirname(__FILE__).'/locallib.php');
 
 
 /**
- * Represents info about attendance tabs.
+ * Represents info about presence tabs.
  *
- * Proxy class for security reasons (renderers must not have access to all attendance methods)
+ * Proxy class for security reasons (renderers must not have access to all presence methods)
  *
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
  */
-class attendance_tabs implements renderable {
+class presence_tabs implements renderable {
     /** Sessions tab */
     const TAB_SESSIONS      = 1;
     /** Add tab */
@@ -55,20 +55,24 @@ class attendance_tabs implements renderable {
     const TAB_WARNINGS = 8;
     /** Absentee tab */
     const TAB_ABSENTEE      = 9;
+    /** Booking tab  */
+    const TAB_BOOKING   = 10;
+    /** Room planner tab */
+    const TAB_ROOMPLANNER = 11;
     /** @var int current tab */
     public $currenttab;
 
-    /** @var stdClass attendance */
-    private $att;
+    /** @var stdClass presence */
+    private $presence;
 
     /**
-     * Prepare info about sessions for attendance taking into account view parameters.
+     * Prepare info about sessions for presence taking into account view parameters.
      *
-     * @param mod_attendance_structure $att
-     * @param int $currenttab - one of attendance_tabs constants
+     * @param mod_presence_structure $presence
+     * @param int $currenttab - one of presence_tabs constants
      */
-    public function  __construct(mod_attendance_structure $att, $currenttab=null) {
-        $this->att = $att;
+    public function  __construct(mod_presence_structure $presence, $currenttab=null) {
+        $this->presence = $presence;
         $this->currenttab = $currenttab;
     }
 
@@ -78,35 +82,45 @@ class attendance_tabs implements renderable {
      */
     public function get_tabs() {
         $toprow = array();
-        $context = $this->att->context;
+        $context = $this->presence->context;
         $capabilities = array(
-            'mod/attendance:manageattendances',
-            'mod/attendance:takeattendances',
-            'mod/attendance:changeattendances'
+            'mod/presence:managepresences',
+            'mod/presence:takepresences',
+            'mod/presence:changepresences'
         );
 
-        if (has_capability('mod/attendance:manageattendances', $context)) {
-            $toprow[] = new tabobject(self::TAB_EVALUATION, $this->att->url_evaluation()->out(),
-                get_string('evaluation', 'attendance'));
+        if (has_capability('mod/presence:view', $context)) {
+            $toprow[] = new tabobject(self::TAB_BOOKING, $this->presence->url_view()->out(),
+                get_string('book', 'presence'));
+        }
+
+        if (has_capability('mod/presence:managepresences', $context)) {
+            $toprow[] = new tabobject(self::TAB_EVALUATION, $this->presence->url_evaluation()->out(),
+                get_string('evaluation', 'presence'));
         }
 
         if (has_any_capability($capabilities, $context)) {
-            $toprow[] = new tabobject(self::TAB_SESSIONS, $this->att->url_manage()->out(),
-                            get_string('sessions', 'attendance'));
+            $toprow[] = new tabobject(self::TAB_SESSIONS, $this->presence->url_manage()->out(),
+                            get_string('sessions', 'presence'));
         }
 
-        if (has_capability('mod/attendance:manageattendances', $context)) {
+        if ($this->currenttab == self::TAB_ADD && has_capability('mod/presence:managepresences', $context)) {
             $toprow[] = new tabobject(self::TAB_ADD,
-                            $this->att->url_sessions()->out(true,
-                                array('action' => mod_attendance_sessions_page_params::ACTION_ADD)),
-                                get_string('addsession', 'attendance'));
+                            $this->presence->url_sessions()->out(true,
+                                array('action' => mod_presence_sessions_page_params::ACTION_ADD)),
+                                get_string('addsession', 'presence'));
         }
 
-        if ($this->currenttab == self::TAB_UPDATE && has_capability('mod/attendance:manageattendances', $context)) {
+        if ($this->currenttab == self::TAB_UPDATE && has_capability('mod/presence:managepresences', $context)) {
             $toprow[] = new tabobject(self::TAB_UPDATE,
-                            $this->att->url_sessions()->out(true,
-                                array('action' => mod_attendance_sessions_page_params::ACTION_UPDATE)),
-                                get_string('changesession', 'attendance'));
+                            $this->presence->url_sessions()->out(true,
+                                array('action' => mod_presence_sessions_page_params::ACTION_UPDATE)),
+                                get_string('changesession', 'presence'));
+        }
+
+        if (has_capability('mod/presence:view', $context)) {
+            $toprow[] = new tabobject(self::TAB_ROOMPLANNER, $this->presence->url_roomplanner()->out(),
+                get_string('roomplanner', 'presence'));
         }
 
         return array($toprow);
@@ -114,11 +128,11 @@ class attendance_tabs implements renderable {
 }
 
 /**
- * Class attendance_filter_controls
+ * Class presence_filter_controls
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class attendance_filter_controls implements renderable {
+class presence_filter_controls implements renderable {
     /** @var int current view mode */
     public $pageparams;
     /** @var stdclass  */
@@ -137,60 +151,60 @@ class attendance_filter_controls implements renderable {
     private $urlpath;
     /** @var array  */
     private $urlparams;
-    /** @var mod_attendance_structure */
-    public $att;
+    /** @var mod_presence_structure */
+    public $presence;
 
     /**
-     * attendance_filter_controls constructor.
-     * @param mod_attendance_structure $att
+     * presence_filter_controls constructor.
+     * @param mod_presence_structure $presence
      * @param bool $report
      */
-    public function __construct(mod_attendance_structure $att, $report = false) {
+    public function __construct(mod_presence_structure $presence, $report = false) {
         global $PAGE;
 
-        $this->pageparams = $att->pageparams;
+        $this->pageparams = $presence->pageparams;
 
-        $this->cm = $att->cm;
+        $this->cm = $presence->cm;
 
-        // This is a report control only if $reports is true and the attendance block can be graded.
+        // This is a report control only if $reports is true and the presence block can be graded.
         $this->reportcontrol = $report;
 
-        $this->curdate = $att->pageparams->curdate;
+        $this->curdate = $presence->pageparams->curdate;
 
-        $date = usergetdate($att->pageparams->curdate);
+        $date = usergetdate($presence->pageparams->curdate);
         $mday = $date['mday'];
         $mon = $date['mon'];
         $year = $date['year'];
 
         switch ($this->pageparams->view) {
-            case ATT_VIEW_DAYS:
-                $format = get_string('strftimedm', 'attendance');
+            case PRESENCE_VIEW_DAYS:
+                $format = get_string('strftimedm', 'presence');
                 $this->prevcur = make_timestamp($year, $mon, $mday - 1);
                 $this->nextcur = make_timestamp($year, $mon, $mday + 1);
-                $this->curdatetxt = userdate($att->pageparams->startdate, $format);
+                $this->curdatetxt = userdate($presence->pageparams->startdate, $format);
                 break;
-            case ATT_VIEW_WEEKS:
-                $format = get_string('strftimedm', 'attendance');
-                $this->prevcur = $att->pageparams->startdate - WEEKSECS;
-                $this->nextcur = $att->pageparams->startdate + WEEKSECS;
-                $this->curdatetxt = userdate($att->pageparams->startdate, $format).
-                                    " - ".userdate($att->pageparams->enddate, $format);
+            case PRESENCE_VIEW_WEEKS:
+                $format = get_string('strftimedm', 'presence');
+                $this->prevcur = $presence->pageparams->startdate - WEEKSECS;
+                $this->nextcur = $presence->pageparams->startdate + WEEKSECS;
+                $this->curdatetxt = userdate($presence->pageparams->startdate, $format).
+                                    " - ".userdate($presence->pageparams->enddate, $format);
                 break;
-            case ATT_VIEW_MONTHS:
+            case PRESENCE_VIEW_MONTHS:
                 $format = '%B';
                 $this->prevcur = make_timestamp($year, $mon - 1);
                 $this->nextcur = make_timestamp($year, $mon + 1);
-                $this->curdatetxt = userdate($att->pageparams->startdate, $format);
+                $this->curdatetxt = userdate($presence->pageparams->startdate, $format);
                 break;
         }
 
         $this->urlpath = $PAGE->url->out_omit_querystring();
-        $params = $att->pageparams->get_significant_params();
+        $params = $presence->pageparams->get_significant_params();
         $params['curdate'] = time();
-        $params['id'] = $att->cm->id;
+        $params['id'] = $presence->cm->id;
         $this->urlparams = $params;
 
-        $this->att = $att;
+        $this->presence = $presence;
     }
 
     /**
@@ -229,7 +243,7 @@ class attendance_filter_controls implements renderable {
      * @return int
      */
     public function get_group_mode() {
-        return $this->att->get_group_mode();
+        return $this->presence->get_group_mode();
     }
 
     /**
@@ -237,7 +251,7 @@ class attendance_filter_controls implements renderable {
      * @return mixed
      */
     public function get_sess_groups_list() {
-        return $this->att->pageparams->get_sess_groups_list();
+        return $this->presence->pageparams->get_sess_groups_list();
     }
 
     /**
@@ -245,17 +259,17 @@ class attendance_filter_controls implements renderable {
      * @return mixed
      */
     public function get_current_sesstype() {
-        return $this->att->pageparams->get_current_sesstype();
+        return $this->presence->pageparams->get_current_sesstype();
     }
 }
 
 /**
- * Represents info about attendance sessions taking into account view parameters.
+ * Represents info about presence sessions
  *
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class attendance_sessions_data implements renderable {
+class presence_sessions_data implements renderable {
     /** @var array of sessions*/
     public $sessions;
 
@@ -266,33 +280,33 @@ class attendance_sessions_data implements renderable {
     /** @var  int */
     public $hiddensesscount;
 
-    /** @var mod_attendance_structure */
-    public $att;
+    /** @var mod_presence_structure */
+    public $presence;
     /** @var array */
     public $sessionsbydate;
 
     /**
-     * Prepare info about attendance sessions taking into account view parameters.
+     * Prepare info about presence sessions taking into account view parameters.
      *
-     * @param mod_attendance_structure $att instance
+     * @param mod_presence_structure $presence instance
      */
-    public function __construct(mod_attendance_structure $att) {
+    public function __construct(mod_presence_structure $presence) {
 
-        $this->sessions = $att->get_filtered_sessions();
+        $this->sessions = $presence->get_filtered_sessions();
 
         $this->sessionsbydate = array();
         $olddate = null;
         $dateid = -1;
         foreach ($this->sessions as $session) {
-            // TODO: instead of YYYY-MM-DD use local date format
-            $date = date("Y-m-d", $session->sessdate);
+            $date = userdate($session->sessdate, get_string('strftimedatefullshort', 'langconfig'));
+
             if ($date != $olddate) {
                 $this->sessionsbydate[++$dateid] = array("date" => $date, "sessions" => array());
                 $olddate = $date;
             }
             $this->sessionsbydate[$dateid]["sessions"][] = $session;
         }
-        $this->att = $att;
+        $this->presence = $presence;
     }
 
     /**
@@ -304,7 +318,7 @@ class attendance_sessions_data implements renderable {
      */
     public function url_sessions($sessionid=null, $action=null) {
         die("depreceated");
-        return url_helpers::url_sessions($this->att, $sessionid, $action);
+        return url_helpers::url_sessions($this->presence, $sessionid, $action);
     }
 }
 
@@ -314,33 +328,54 @@ class attendance_sessions_data implements renderable {
  * @copyright  2020 Florian Metzger-Noel (github.com/flocko-motion)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class attendance_evaluation_data implements renderable {
+class presence_evaluation_data implements renderable {
     /** @var array  */
     public $users;
     /** @var array|null|stdClass  */
     public $pageparams;
     /** @var stdclass  */
     public $cm;
-    /** @var mod_attendance_structure  */
-    public $att;
+    /** @var mod_presence_structure  */
+    public $presence;
     /** @var stdClass */
     public $session;
+    /** @var string */
+    public $urlfinish;
 
     /**
-     * attendance_take_data constructor.
-     * @param mod_attendance_structure $att
+     * presence_take_data constructor.
+     * @param mod_presence_structure $presence
      */
-    public function  __construct(mod_attendance_structure $att) {
-        $this->users = $att->get_users([
-            'page' => $att->pageparams->page,
-            'sessionid' => $att->pageparams->sessionid,
+    public function  __construct(mod_presence_structure $presence) {
+        $this->users = $presence->get_users([
+            'page' => $presence->pageparams->page,
+            'sessionid' => $presence->pageparams->sessionid,
             'evaluation' => 1,
         ]);
-        $this->cm = $att->cm;
-        $this->session = $att->get_session_info($att->pageparams->sessionid);
-        $this->pageparams = $att->pageparams;
+        $bookings = 0;
+        foreach ($this->users as $user) {
+            if (intval($user->booked)) {
+                $bookings++;
+            }
+        }
 
-        $this->att = $att;
+        if ($bookings > 0) {
+            foreach ($this->users as $k => $user) {
+                if (!$user->booked) {
+                    unset ($this->users[$k]);
+                }
+            }
+        }
+
+
+        $this->cm = $presence->cm;
+        $this->session = $presence->get_session_info($presence->pageparams->sessionid);
+        $this->pageparams = $presence->pageparams;
+        $this->urlfinish = $presence->url_evaluation([
+            'sessionid' => $presence->pageparams->sessionid,
+            'action' => mod_presence_sessions_page_params::ACTION_EVALUATE_FINISH ,
+        ]);
+        $this->presence = $presence;
     }
 }
 
@@ -350,65 +385,76 @@ class attendance_evaluation_data implements renderable {
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class attendance_user_data implements renderable {
+class presence_user_data implements renderable {
     /** @var mixed|object  */
     public $user;
     /** @var array|null|stdClass  */
     public $pageparams;
     /** @var array  */
     public $statuses;
-    /** @var attendance_filter_controls  */
+    /** @var presence_filter_controls  */
     public $filtercontrols;
     /** @var array  */
     public $sessionslog;
     /** @var array  */
     public $groups;
     /** @var array  */
-    public $coursesatts;
+    public $coursespresences;
     /** @var string  */
     private $urlpath;
     /** @var array */
     private $urlparams;
 
     /**
-     * attendance_user_data constructor.
-     * @param mod_attendance_structure $att
+     * presence_user_data constructor.
+     * @param mod_presence_structure $presence
      * @param int $userid
      * @param boolean $mobile - this is called by the mobile code, don't generate everything.
      */
-    public function  __construct(mod_attendance_structure $att, $userid, $mobile = false) {
-        $this->user = $att->get_user($userid);
+    public function  __construct(mod_presence_structure $presence, $userid, $mobile = false) {
+        $this->user = $presence->get_user($userid);
 
-        $this->pageparams = $att->pageparams;
+        $this->pageparams = $presence->pageparams;
 
-        if ($this->pageparams->mode == mod_attendance_view_page_params::MODE_THIS_COURSE
-                || $this->pageparams->mode == mod_attendance_view_page_params::MODE_THIS_BOOKING) {
-            $this->statuses = $att->get_statuses(true, true);
+        if ($this->pageparams->mode == mod_presence_view_page_params::MODE_THIS_COURSE
+                || $this->pageparams->mode == mod_presence_view_page_params::MODE_THIS_BOOKING) {
 
-            if (!$mobile) {
+            $this->filtercontrols = new presence_filter_controls($presence);
+            $this->sessionslog = $presence->get_user_filtered_sessions_log_extended($userid);
 
-                $this->filtercontrols = new attendance_filter_controls($att);
+            $this->sessionsbydate = [];
+            $olddate = null;
+            $dateid = -1;
+            foreach ($this->sessionslog as $session) {
+                $session->timefrom = userdate($session->sessdat, get_string('strftimetime', 'langconfig'));
+                $session->timeto = userdate($session->sessdat + $session->duration, get_string('strftimetime', 'langconfig'));
+                $date = userdate($session->sessdate, get_string('strftimedatefullshort', 'langconfig'));
+
+                if ($date != $olddate) {
+                    $this->sessionsbydate[++$dateid] = array("date" => $date, "sessions" => array());
+                    $olddate = $date;
+                }
+                $this->sessionsbydate[$dateid]["sessions"][] = $session;
             }
-            $this->sessionslog = $att->get_user_filtered_sessions_log_extended($userid);
-            $this->groups = groups_get_all_groups($att->course->id);
+
         } else {
-            $this->coursesatts = attendance_get_user_courses_attendances($userid);
-            $this->statuses = array();
-            foreach ($this->coursesatts as $atid => $ca) {
+            die('depreceated:'.__LINE__.'@'.__FILE__);
+            $this->coursespresences = presence_get_user_courses_presences($userid);
+            foreach ($this->coursespresences as $atid => $ca) {
                 // Check to make sure the user can view this cm.
                 $modinfo = get_fast_modinfo($ca->courseid);
-                if (!$modinfo->instances['attendance'][$ca->attid]->uservisible) {
-                    unset($this->coursesatts[$atid]);
+                if (!$modinfo->instances['presence'][$ca->presenceid]->uservisible) {
+                    unset($this->coursespresences[$atid]);
                     continue;
                 } else {
-                    $this->coursesatts[$atid]->cmid = $modinfo->instances['attendance'][$ca->attid]->get_course_module_record()->id;
+                    $this->coursespresences[$atid]->cmid = $modinfo->instances['presence'][$ca->presenceid]->get_course_module_record()->id;
                 }
-                $this->statuses[$ca->attid] = attendance_get_statuses($ca->attid);
+                $this->statuses[$ca->presenceid] = presence_get_statuses($ca->presenceid);
             }
         }
-        $this->urlpath = $att->url_view()->out_omit_querystring();
-        $params = $att->pageparams->get_significant_params();
-        $params['id'] = $att->cm->id;
+        $this->urlpath = $presence->url_view()->out_omit_querystring();
+        $params = $presence->pageparams->get_significant_params();
+        $params['id'] = $presence->cm->id;
         $this->urlparams = $params;
     }
 
@@ -427,7 +473,7 @@ class attendance_user_data implements renderable {
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class attendance_report_data implements renderable {
+class presence_report_data implements renderable {
     /** @var array|null|stdClass  */
     public $pageparams;
     /** @var array  */
@@ -444,33 +490,33 @@ class attendance_report_data implements renderable {
     public $usersgroups = array();
     /** @var array  */
     public $sessionslog = array();
-    /** @var mod_attendance_structure  */
-    public $att;
+    /** @var mod_presence_structure  */
+    public $presence;
 
     /**
-     * attendance_report_data constructor.
-     * @param mod_attendance_structure $att
+     * presence_report_data constructor.
+     * @param mod_presence_structure $presence
      */
-    public function  __construct(mod_attendance_structure $att) {
-        $this->pageparams = $att->pageparams;
+    public function  __construct(mod_presence_structure $presence) {
+        $this->pageparams = $presence->pageparams;
 
-        $this->users = $att->get_users(['groupid' => $att->pageparams->group, 'page' => $att->pageparams->page]);
+        $this->users = $presence->get_users(['groupid' => $presence->pageparams->group, 'page' => $presence->pageparams->page]);
 
-        if (isset($att->pageparams->userids)) {
+        if (isset($presence->pageparams->userids)) {
             foreach ($this->users as $key => $user) {
-                if (!in_array($user->id, $att->pageparams->userids)) {
+                if (!in_array($user->id, $presence->pageparams->userids)) {
                     unset($this->users[$key]);
                 }
             }
         }
 
-        $this->groups = groups_get_all_groups($att->course->id);
+        $this->groups = groups_get_all_groups($presence->course->id);
 
-        $this->sessions = $att->get_filtered_sessions();
+        $this->sessions = $presence->get_filtered_sessions();
 
 
 
-        $this->att = $att;
+        $this->presence = $presence;
     }
 
     /**
@@ -480,7 +526,7 @@ class attendance_report_data implements renderable {
      * @return mixed
      */
     public function url_take($sessionid, $grouptype) {
-        return url_helpers::url_take($this->att, $sessionid, $grouptype);
+        return url_helpers::url_take($this->presence, $sessionid, $grouptype);
     }
 
     /**
@@ -489,7 +535,7 @@ class attendance_report_data implements renderable {
      * @return mixed
      */
     public function url_view($params=array()) {
-        return url_helpers::url_view($this->att, $params);
+        return url_helpers::url_view($this->presence, $params);
     }
 
     /**
@@ -500,7 +546,7 @@ class attendance_report_data implements renderable {
     public function url($params=array()) {
         $params = array_merge($params, $this->pageparams->get_significant_params());
 
-        return $this->att->url_report($params);
+        return $this->presence->url_report($params);
     }
 
 }
@@ -511,28 +557,28 @@ class attendance_report_data implements renderable {
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class attendance_preferences_data implements renderable {
+class presence_preferences_data implements renderable {
     /** @var array  */
     public $statuses;
-    /** @var mod_attendance_structure  */
-    private $att;
+    /** @var mod_presence_structure  */
+    private $presence;
     /** @var array  */
     public $errors;
 
     /**
-     * attendance_preferences_data constructor.
-     * @param mod_attendance_structure $att
+     * presence_preferences_data constructor.
+     * @param mod_presence_structure $presence
      * @param array $errors
      */
-    public function __construct(mod_attendance_structure $att, $errors) {
-        $this->statuses = $att->get_statuses(false);
+    public function __construct(mod_presence_structure $presence, $errors) {
+        $this->statuses = $presence->get_statuses(false);
         $this->errors = $errors;
 
         foreach ($this->statuses as $st) {
-            $st->haslogs = attendance_has_logs_for_status($st->id);
+            $st->haslogs = presence_has_logs_for_status($st->id);
         }
 
-        $this->att = $att;
+        $this->presence = $presence;
     }
 
     /**
@@ -543,10 +589,10 @@ class attendance_preferences_data implements renderable {
      */
     public function url($params=array(), $significantparams=true) {
         if ($significantparams) {
-            $params = array_merge($this->att->pageparams->get_significant_params(), $params);
+            $params = array_merge($this->presence->pageparams->get_significant_params(), $params);
         }
 
-        return $this->att->url_preferences($params);
+        return $this->presence->url_preferences($params);
     }
 }
 
@@ -556,14 +602,14 @@ class attendance_preferences_data implements renderable {
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class attendance_default_statusset implements renderable {
+class presence_default_statusset implements renderable {
     /** @var array  */
     public $statuses;
     /** @var array  */
     public $errors;
 
     /**
-     * attendance_default_statusset constructor.
+     * presence_default_statusset constructor.
      * @param array $statuses
      * @param array $errors
      */
@@ -578,7 +624,7 @@ class attendance_default_statusset implements renderable {
      * @return moodle_url
      */
     public function url($params) {
-        return new moodle_url('/mod/attendance/defaultstatus.php', $params);
+        return new moodle_url('/mod/presence/defaultstatus.php', $params);
     }
 }
 
@@ -588,19 +634,19 @@ class attendance_default_statusset implements renderable {
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class attendance_set_selector implements renderable {
+class presence_set_selector implements renderable {
     /** @var int  */
     public $maxstatusset;
-    /** @var mod_attendance_structure  */
-    private $att;
+    /** @var mod_presence_structure  */
+    private $presence;
 
     /**
-     * attendance_set_selector constructor.
-     * @param mod_attendance_structure $att
+     * presence_set_selector constructor.
+     * @param mod_presence_structure $presence
      * @param int $maxstatusset
      */
-    public function __construct(mod_attendance_structure $att, $maxstatusset) {
-        $this->att = $att;
+    public function __construct(mod_presence_structure $presence, $maxstatusset) {
+        $this->presence = $presence;
         $this->maxstatusset = $maxstatusset;
     }
 
@@ -613,7 +659,7 @@ class attendance_set_selector implements renderable {
         $params = array();
         $params['statusset'] = $statusset;
 
-        return $this->att->url_preferences($params);
+        return $this->presence->url_preferences($params);
     }
 
     /**
@@ -621,8 +667,8 @@ class attendance_set_selector implements renderable {
      * @return int
      */
     public function get_current_statusset() {
-        if (isset($this->att->pageparams->statusset)) {
-            return $this->att->pageparams->statusset;
+        if (isset($this->presence->pageparams->statusset)) {
+            return $this->presence->pageparams->statusset;
         }
         return 0;
     }
@@ -633,7 +679,7 @@ class attendance_set_selector implements renderable {
      * @return string
      */
     public function get_status_name($statusset) {
-        return attendance_get_setname($this->att->id, $statusset, true);
+        return presence_get_setname($this->presence->id, $statusset, true);
     }
 }
 
@@ -646,72 +692,72 @@ class attendance_set_selector implements renderable {
 class url_helpers {
     /**
      * Url take.
-     * @param stdClass $att
+     * @param stdClass $presence
      * @param int $sessionid
      * @param int $grouptype
      * @return mixed
      */
-    public static function url_take($att, $sessionid, $grouptype) {
+    public static function url_take($presence, $sessionid, $grouptype) {
         $params = array('sessionid' => $sessionid);
         if (isset($grouptype)) {
             $params['grouptype'] = $grouptype;
         }
 
-        return $att->url_take($params);
+        return $presence->url_take($params);
     }
 
     /**
      * Must be called without or with both parameters
-     * @param stdClass $att
+     * @param stdClass $presence
      * @param null $sessionid
      * @param null $action
      * @return mixed
      */
-    public static function url_sessions($att, $sessionid=null, $action=null) {
+    public static function url_sessions($presence, $sessionid=null, $action=null) {
         if (isset($sessionid) && isset($action)) {
             $params = array('sessionid' => $sessionid, 'action' => $action);
         } else {
             $params = array();
         }
 
-        return $att->url_sessions($params);
+        return $presence->url_sessions($params);
     }
 
     /**
      * Must be called without or with both parameters
-     * @param stdClass $att
+     * @param stdClass $presence
      * @param null $sessionid
      * @param null $action
      * @return mixed
      */
-    public static function url_evaluation($att, $sessionid=null, $action=null) {
+    public static function url_evaluation($presence, $sessionid=null, $action=null) {
         if (isset($sessionid) && isset($action)) {
             $params = array('sessionid' => $sessionid, 'action' => $action);
         } else {
             $params = array();
         }
 
-        return $att->url_evaluation($params);
+        return $presence->url_evaluation($params);
     }
 
     /**
      * Url view helper.
-     * @param stdClass $att
+     * @param stdClass $presence
      * @param array $params
      * @return mixed
      */
-    public static function url_view($att, $params=array()) {
-        return $att->url_view($params);
+    public static function url_view($presence, $params=array()) {
+        return $presence->url_view($params);
     }
 }
 
 /**
- * Data structure representing an attendance password icon.
+ * Data structure representing an presence password icon.
  *
  * @copyright 2017 Dan Marsden
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class attendance_password_icon implements renderable, templatable {
+class presence_password_icon implements renderable, templatable {
 
     /**
      * @var string text to show
@@ -744,7 +790,7 @@ class attendance_password_icon implements renderable, templatable {
      */
     public function export_for_template(renderer_base $output) {
 
-        $title = get_string('password', 'attendance');
+        $title = get_string('password', 'presence');
 
         $data = new stdClass();
         $data->heading = '';
@@ -757,10 +803,10 @@ class attendance_password_icon implements renderable, templatable {
         }
 
         $data->alt = $title;
-        $data->icon = (new pix_icon($pix, '', 'attendance'))->export_for_template($output);
+        $data->icon = (new pix_icon($pix, '', 'presence'))->export_for_template($output);
         $data->linktext = '';
         $data->title = $title;
-        $data->url = (new moodle_url('/mod/attendance/password.php', [
+        $data->url = (new moodle_url('/mod/presence/password.php', [
             'session' => $this->sessionid]))->out(false);
 
         $data->ltr = !right_to_left();

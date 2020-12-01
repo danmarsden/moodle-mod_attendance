@@ -15,7 +15,7 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template mod_attendance/rooms
+    @template mod_presence/rooms
 
 0 = {stdClass} [22]
  id = "2"
@@ -42,27 +42,87 @@
  booked = "0"
 /pluginfile.php/547/user/icon/f1
 }}
-<div id="mod_attendance_evaluation_list" class="hidden">
+
+<div id="mod_presence_evaluation_list" class="hidden">
     <div class="fullwidth mt-4">
-        <h4>{{#str}}evaluate_session, attendance{{/str}}</h4>
+        <h4>{{#str}}evaluate_session, presence{{/str}}</h4>
+        {{#str}}evaluation_help, presence{{/str}}
+        <div class="mt-3">
+            <a href="#">
+                <button class="btn btn-primary" data-toggle="modal" data-target="#mod_presence_add_modal">{{#str}}addstudents, presence{{/str}}</button>
+            </a>
+        </div>
     </div>
-    {{#str}}evaluation_help, attendance{{/str}}
+
+    <!-- Modal -->
+    <div class="modal fade" id="mod_presence_add_modal" tabindex="-1" role="dialog" aria-labelledby="mod_presence_add_modal_label" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="mod_presence_add_modal_label">{{#str}}addstudent, presence{{/str}}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div data-view="mod_presence_add_user">
+                    <div class="modal-body">
+                        <input class="form-control" data-module="mod_presence_add" placeholder="{{#str}}typename, presence{{/str}}.."/>
+                        <div class="list-group" data-module="mod_presence_add" >
+                            <button type="button" data-template="true" class="list-group-item list-group-item-action p-2 hidden">
+                                <span class="float-left">NAME</span>
+                                <span class="float-right badge badge-secondary">TYPE</span>
+                            </button>
+                        </div>
+                        <div data-module="mod_presence_add_list" class="border border-secondary p-1 mt-4 bg-light hidden">
+                            <div data-template="true" class="badge badge-secondary shadow-sm p-2 mt-1 mb-1 hidden text-left">
+                                <span>NAME</span>
+                                <i class="fa fa-times-circle float-right" style="cursor: pointer;"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="mod_presence_add_save" type="button" class="btn btn-primary" data-dismiss="modal">{{#str}}save{{/str}}</button>
+                    </div>
+                </div>
+                <div data-view="mod_presence_new_user" class="hidden">
+                    <div class="modal-body" data-module="mod_presence_add_new">
+                        <h5 class="mb-3">{{#str}}newstudent, presence{{/str}}: <span id="modPresenceNewName"></span></h5>
+                        <div class="form-group">
+                            <label for="modPresenceNewEmail">{{#str}}email{{/str}}</label>
+                            <input type="email" class="form-control" id="modPresenceNewEmail" aria-describedby="modPresenceNewEmailHelp">
+                            <small id="modPresenceNewEmailHelp" class="form-text text-muted">{{#str}}optional{{/str}}</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="modPresenceNewPhone">{{#str}}phone{{/str}}</label>
+                            <input type="text" class="form-control" id="modPresenceNewPhone" aria-describedby="modPresenceNewPhoneHelp">
+                            <small id="modPresenceNewPhoneHelp" class="form-text text-muted">{{#str}}optional{{/str}}</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="mod_presence_new_user_cancel" class="btn btn-secondary">{{#str}}cancel{{/str}}</button>
+                        <button id="mod_presence_new_user_submit" class="btn btn-primary">{{#str}}addstudent{{/str}}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="card mt-3 bg-light">
         <div class="card-body p-2 shadow-sm">
             <div class="row">
                 <div class="col-lg-6 col-sm-12">
                     <div class="col-lg-3">
-                        <div class="float-left ">{{#str}}allstudents, attendance{{/str}}</div>
+                        <div class="float-left ">{{#str}}allstudents, presence{{/str}}</div>
                     </div>
                     <div class="float-right">
-                        <select data-module="mod_attendance"  data-userid="0" data-field="duration" type="text" class="form-control float-left">
+                        <select data-module="mod_presence_evaluate" data-userid="0" data-field="duration" type="text" class="form-control float-left">
                             {{#durationoptions}}
                                 <option value="{{value}}" {{#selected}}selected{{/selected}}>{{caption}}</option>
                             {{/durationoptions}}
                         </select>
                     </div>
                     <div class="float-right align-right mr-4" style="width:20px">
-                        <input data-module="mod_attendance"  data-userid="0" data-field="attendance" type="checkbox" class="float-left form-control" />
+                        <input data-module="mod_presence_evaluate"  data-userid="0" data-field="presence" type="checkbox" class="float-left form-control" />
                     </div>
                 </div>
 
@@ -83,7 +143,7 @@
                     </div>
                     <div class="col-lg-3">
                         <div class="float-right">
-                            <select {{^duration}}disabled="disabled"{{/duration}} data-module="mod_attendance"
+                            <select {{^duration}}disabled="disabled"{{/duration}} data-module="mod_presence_evaluate"
                                     data-userid="{{id}}" data-field="duration" class="form-control float-left">
                                 {{#durationoptions}}
                                 <option value="{{value}}" {{#selected}}selected{{/selected}}>{{caption}}</option>
@@ -91,18 +151,18 @@
                             </select>
                         </div>
                         <div class="float-right align-right mr-4" style="width:20px">
-                            <input {{#duration}}checked{{/duration}} data-module="mod_attendance" data-userid="{{id}}" data-field="attendance" type="checkbox" class="float-left form-control" />
+                            <input {{#duration}}checked{{/duration}} data-module="mod_presence_evaluate" data-userid="{{id}}" data-field="presence" type="checkbox" class="float-left form-control" />
                         </div>
                     </div>
                     <div class="col-lg-3 mt-sm-2 mt-lg-0 pr-lg-1">
-                            <input data-module="mod_attendance"  data-userid="{{id}}" data-field="remarks_course"
-                                   placeholder="{{#str}}courseremark, attendance{{/str}}"
+                            <input data-module="mod_presence_evaluate"  data-userid="{{id}}" data-field="remarks_course"
+                                   placeholder="{{#str}}courseremark, presence{{/str}}"
                                    value="{{remarks_course}}"
                                    type="text" class="form-control" />
                     </div>
                     <div class="col-lg-3 mt-sm-2 mt-lg-0 pl-lg-1">
-                        <input data-module="mod_attendance"  data-userid="{{id}}" data-field="remarks_personality"
-                               placeholder="{{#str}}personalityremark, attendance{{/str}}"
+                        <input data-module="mod_presence_evaluate"  data-userid="{{id}}" data-field="remarks_personality"
+                               placeholder="{{#str}}personalityremark, presence{{/str}}"
                                value="{{remarks_personality}}"
                                type="text" class="form-control" />
                     </div>
@@ -113,22 +173,22 @@
     {{#users?}}
         <hr />
         <div class="">
-            <input type="button" class="btn btn-secondary" value="{{#str}}back{{/str}}" />
-            <input type="button" class="btn btn-primary" value="{{#str}}finishevaluation, attendance{{/str}}" />
+            <input type="button" class="btn btn-secondary" value="{{#str}}back{{/str}}" data-presence-action="back" />
+            <a href="{{&urlfinish}}"><button type="button" class="btn btn-primary">{{#str}}finishevaluation, presence{{/str}}</button></a>
         </div>
     {{/users?}}
     {{^users}}
         <div class="card bg-light p-2 mt-4 ">
             <div class="card-body p-2 text-center">
-                {{#str}}nostudents, attendance{{/str}}
+                {{#str}}nostudents, presence{{/str}}
             </div>
         </div>
     {{/users}}
 </div>
-<div id="mod_attendance_evaluation_loading">
+<div id="mod_presence_evaluation_loading">
     <div class="card bg-light p-2 mt-4 ">
         <div class="card-body p-2 text-center">
-            {{#str}}loadingpleasewait, attendance{{/str}}
+            {{#str}}loadingpleasewait, presence{{/str}}
         </div>
     </div>
 </div>

@@ -20,18 +20,11 @@
 
 
 }}
-<div class="fullwidth mt-4">
-    <h4>{{#str}}evaluation, presence{{/str}}</h4>
-    <div class="mt-3">
-        <a href="{{&buttonurl}}">
-            <button class="btn btn-secondary">{{buttoncaption}}</button>
-        </a>
-        <a href="{{&urlfinishall}}" class="ml-1">
-            <button class="btn btn-primary">{{#str}}finishallevaluations, presence{{/str}}</button>
-        </a>
-    </div>
+<div class="fullwidth mt-4 mb-3">
+    <h4>{{#str}}sessionbooktitle, presence{{/str}}</h4>
 </div>
 
+<!--
 {{#sessionsbydate}}
     <h5 class="card-title mt-4">{{date}}</h5>
     {{#sessions}}
@@ -54,14 +47,14 @@
                         {{#urlevaluate}}
                             <a href="{{&urlevaluate}}">
                                 {{^evaluated}}
-                                <button class="btn btn-primary align-middle my-auto">
-                                    <i class="fa fa-pencil"></i>
-                                </button>
+                                    <button class="btn btn-primary align-middle my-auto">
+                                        {{#pix}}i/edit, core, {{/pix}} {{#str}}evaluate, presence{{/str}}
+                                    </button>
                                 {{/evaluated}}
                                 {{#evaluated}}
-                                <button class="btn btn-secondary align-middle my-auto">
-                                    <i class="fa fa-pencil"></i>
-                                </button>
+                                    <button class="btn btn-secondary align-middle my-auto">
+                                        {{#pix}}i/edit, core, {{/pix}} {{#str}}reevaluate, presence{{/str}}
+                                    </button>
                                 {{/evaluated}}
                             </a>
                         {{/urlevaluate}}
@@ -78,6 +71,7 @@
         </div>
     </div>
 {{/sessionsbydate}}
+-->
 
 
 

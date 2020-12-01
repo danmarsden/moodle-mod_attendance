@@ -15,25 +15,25 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file contains an event for when an attendance session is updated.
+ * This file contains an event for when an presence session is updated.
  *
- * @package    mod_attendance
+ * @package    mod_presence
  * @copyright  2014 onwards Dan Marsden
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_attendance\event;
+namespace mod_presence\event;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Event for when an attendance session is updated.
+ * Event for when an presence session is updated.
  *
  * @property-read array $other {
  *      Extra information about event properties.
  *
  *      string mode Mode of the report viewed.
  * }
- * @package    mod_attendance
+ * @package    mod_presence
  * @since      Moodle 2.7
  * @copyright  2013 onwards Dan Marsden
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -46,7 +46,7 @@ class session_updated extends \core\event\base {
     protected function init() {
         $this->data['crud'] = 'u';
         $this->data['edulevel'] = self::LEVEL_TEACHING;
-        $this->data['objecttable'] = 'attendance_sessions';
+        $this->data['objecttable'] = 'presence_sessions';
     }
 
     /**
@@ -55,7 +55,7 @@ class session_updated extends \core\event\base {
      * @return string
      */
     public function get_description() {
-        return 'User with id ' . $this->userid . ' updated attendance session with instanceid ' .
+        return 'User with id ' . $this->userid . ' updated presence session with instanceid ' .
             $this->objectid;
     }
 
@@ -65,7 +65,7 @@ class session_updated extends \core\event\base {
      * @return string
      */
     public static function get_name() {
-        return get_string('eventsessionupdated', 'mod_attendance');
+        return get_string('eventsessionupdated', 'mod_presence');
     }
 
     /**
@@ -74,7 +74,7 @@ class session_updated extends \core\event\base {
      * @return \moodle_url
      */
     public function get_url() {
-        return new \moodle_url('/mod/attendance/sessions.php', array('id' => $this->contextinstanceid,
+        return new \moodle_url('/mod/presence/sessions.php', array('id' => $this->contextinstanceid,
                                                                      'sessionid' => $this->other['sessionid'],
                                                                      'action' => $this->other['action']));
     }
@@ -85,7 +85,7 @@ class session_updated extends \core\event\base {
      * @return array of parameters to be passed to legacy add_to_log() function.
      */
     protected function get_legacy_logdata() {
-        return array($this->courseid, 'attendance', 'session updated', $this->get_url(),
+        return array($this->courseid, 'presence', 'session updated', $this->get_url(),
             $this->other['info'], $this->contextinstanceid);
     }
 
@@ -95,7 +95,7 @@ class session_updated extends \core\event\base {
      * @return array of parameters for object mapping.
      */
     public static function get_objectid_mapping() {
-        return array('db' => 'attendance', 'restore' => 'attendance');
+        return array('db' => 'presence', 'restore' => 'presence');
     }
 
     /**
@@ -106,13 +106,13 @@ class session_updated extends \core\event\base {
      */
     protected function validate_data() {
         if (empty($this->other['info'])) {
-            throw new \coding_exception('The event mod_attendance\\event\\session_updated must specify info.');
+            throw new \coding_exception('The event mod_presence\\event\\session_updated must specify info.');
         }
         if (empty($this->other['sessionid'])) {
-            throw new \coding_exception('The event mod_attendance\\event\\session_updated must specify sessionid.');
+            throw new \coding_exception('The event mod_presence\\event\\session_updated must specify sessionid.');
         }
         if (empty($this->other['action'])) {
-            throw new \coding_exception('The event mod_attendance\\event\\session_updated must specify action.');
+            throw new \coding_exception('The event mod_presence\\event\\session_updated must specify action.');
         }
         parent::validate_data();
     }

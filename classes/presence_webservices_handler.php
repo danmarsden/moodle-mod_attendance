@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Web Services for Attendance plugin.
+ * Web Services for presence plugin.
  *
- * @package    mod_attendance
+ * @package    mod_presence
  * @copyright  2015 Caio Bressan Doneda
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -30,47 +30,47 @@ require_once(dirname(__FILE__).'/../../../lib/sessionlib.php');
 require_once(dirname(__FILE__).'/../../../lib/datalib.php');
 
 /**
- * Class attendance_handler
+ * Class presence_handler
  * @copyright  2015 Caio Bressan Doneda
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class attendance_handler {
+class presence_handler {
     /**
-     * For this user, this method searches in all the courses that this user has permission to take attendance,
+     * For this user, this method searches in all the courses that this user has permission to take presence,
      * looking for today sessions and returns the courses with the sessions.
      * @param int $userid
      * @return array
      */
     public static function get_courses_with_today_sessions($userid) {
         $usercourses = enrol_get_users_courses($userid);
-        $attendanceinstance = get_all_instances_in_courses('attendance', $usercourses);
+        $presenceinstance = get_all_instances_in_courses('presence', $usercourses);
 
         $coursessessions = array();
 
-        foreach ($attendanceinstance as $attendance) {
-            $context = context_course::instance($attendance->course);
-            if (has_capability('mod/attendance:takeattendances', $context, $userid)) {
-                $course = $usercourses[$attendance->course];
-                if (!isset($course->attendance_instance)) {
-                    $course->attendance_instance = array();
+        foreach ($presenceinstance as $presence) {
+            $context = context_course::instance($presence->course);
+            if (has_capability('mod/presence:takepresences', $context, $userid)) {
+                $course = $usercourses[$presence->course];
+                if (!isset($course->presence_instance)) {
+                    $course->presence_instance = array();
                 }
 
-                $att = new stdClass();
-                $att->id = $attendance->id;
-                $att->course = $attendance->course;
-                $att->name = $attendance->name;
-                $att->grade = $attendance->grade;
+                $presence = new stdClass();
+                $presence->id = $presence->id;
+                $presence->course = $presence->course;
+                $presence->name = $presence->name;
+                $presence->grade = $presence->grade;
 
                 $cm = new stdClass();
-                $cm->id = $attendance->coursemodule;
+                $cm->id = $presence->coursemodule;
 
-                $att = new mod_attendance_structure($att, $cm, $course, $context);
-                $course->attendance_instance[$att->id] = array();
-                $course->attendance_instance[$att->id]['name'] = $att->name;
-                $todaysessions = $att->get_today_sessions();
+                $presence = new mod_presence_structure($presence, $cm, $course, $context);
+                $course->presence_instance[$presence->id] = array();
+                $course->presence_instance[$presence->id]['name'] = $presence->name;
+                $todaysessions = $presence->get_today_sessions();
 
                 if (!empty($todaysessions)) {
-                    $course->attendance_instance[$att->id]['today_sessions'] = $todaysessions;
+                    $course->presence_instance[$presence->id]['today_sessions'] = $todaysessions;
                     $coursessessions[$course->id] = $course;
                 }
             }
@@ -92,14 +92,14 @@ class attendance_handler {
             $courses[$c->id] = new stdClass();
             $courses[$c->id]->shortname = $c->shortname;
             $courses[$c->id]->fullname = $c->fullname;
-            $courses[$c->id]->attendance_instances = $c->attendance_instance;
+            $courses[$c->id]->presence_instances = $c->presence_instance;
         }
 
         return $courses;
     }
 
     /**
-     * For this session, returns all the necessary data to take an attendance.
+     * For this session, returns all the necessary data to take an presence.
      *
      * @param int $sessionid
      * @return mixed
@@ -107,17 +107,17 @@ class attendance_handler {
     public static function get_session($sessionid) {
         global $DB;
 
-        $session = $DB->get_record('attendance_sessions', array('id' => $sessionid));
-        $session->courseid = $DB->get_field('attendance', 'course', array('id' => $session->attendanceid));
-        $session->statuses = attendance_get_statuses($session->attendanceid, true, $session->statusset);
+        $session = $DB->get_record('presence_sessions', array('id' => $sessionid));
+        $session->courseid = $DB->get_field('presence', 'course', array('id' => $session->presenceid));
+        $session->statuses = presence_get_statuses($session->presenceid, true, $session->statusset);
         $coursecontext = context_course::instance($session->courseid);
-        $session->users = get_enrolled_users($coursecontext, 'mod/attendance:canbelisted',
+        $session->users = get_enrolled_users($coursecontext, 'mod/presence:canbelisted',
                                              $session->groupid, 'u.id, u.firstname, u.lastname');
-        $session->attendance_log = array();
+        $session->presence_log = array();
 
-        if ($attendancelog = $DB->get_records('attendance_evaluations', array('sessionid' => $sessionid),
+        if ($presencelog = $DB->get_records('presence_evaluations', array('sessionid' => $sessionid),
                                               '', 'studentid, statusid, remarks, id')) {
-            $session->attendance_log = $attendancelog;
+            $session->presence_log = $presencelog;
         }
 
         return $session;
@@ -143,19 +143,19 @@ class attendance_handler {
         $record->statusid = $statusid;
         $record->studentid = $studentid;
 
-        if ($attendancelog = $DB->get_record('attendance_evaluations', array('sessionid' => $sessionid, 'studentid' => $studentid))) {
-            $record->id = $attendancelog->id;
-            $DB->update_record('attendance_evaluations', $record);
+        if ($presencelog = $DB->get_record('presence_evaluations', array('sessionid' => $sessionid, 'studentid' => $studentid))) {
+            $record->id = $presencelog->id;
+            $DB->update_record('presence_evaluations', $record);
         } else {
-            $DB->insert_record('attendance_evaluations', $record);
+            $DB->insert_record('presence_evaluations', $record);
         }
 
-        if ($attendancesession = $DB->get_record('attendance_sessions', array('id' => $sessionid))) {
-            $attendancesession->lasttaken = time();
-            $attendancesession->lasttakenby = $takenbyid;
-            $attendancesession->timemodified = time();
+        if ($presencesession = $DB->get_record('presence_sessions', array('id' => $sessionid))) {
+            $presencesession->lasttaken = time();
+            $presencesession->lasttakenby = $takenbyid;
+            $presencesession->timemodified = time();
 
-            $DB->update_record('attendance_sessions', $attendancesession);
+            $DB->update_record('presence_sessions', $presencesession);
         }
     }
 }

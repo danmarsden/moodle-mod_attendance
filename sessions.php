@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Adding attendance sessions
+ * Adding presence sessions
  *
- * @package    mod_attendance
+ * @package    mod_presence
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -26,202 +26,174 @@ require_once(dirname(__FILE__).'/../../config.php');
 require_once(dirname(__FILE__).'/locallib.php');
 require_once($CFG->dirroot.'/lib/formslib.php');
 
+$capabilities = array(
+    'mod/presence:managepresences',
+);
 
-$pageparams = new mod_attendance_sessions_page_params();
-
+$pageparams = new mod_presence_sessions_page_params();
 $id                     = required_param('id', PARAM_INT);
 $pageparams->action     = required_param('action', PARAM_INT);
+$pageparams->maxattendants = optional_param('maxattendants', 0, PARAM_INT);
 
-if (optional_param('deletehiddensessions', false, PARAM_TEXT)) {
-    $pageparams->action = mod_attendance_sessions_page_params::ACTION_DELETE_HIDDEN;
-}
+presence_init_page([
+    'url' => new moodle_url('/mod/presence/manage.php'),
+    'tab' => $pageparams->action == mod_presence_sessions_page_params::ACTION_ADD ?
+        presence_tabs::TAB_ADD : presence_tabs::TAB_UPDATE,
+]);
 
-if (empty($pageparams->action)) {
-    // The form on manage.php can submit with the "choose" option - this should be fixed in the long term,
-    // but in the meantime show a useful error and redirect when it occurs.
-    $url = new moodle_url('/mod/attendance/view.php', array('id' => $id));
-    redirect($url, get_string('invalidaction', 'mod_attendance'), 2);
-}
-
-$cm             = get_coursemodule_from_id('attendance', $id, 0, false, MUST_EXIST);
-$course         = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
-$att            = $DB->get_record('attendance', array('id' => $cm->instance), '*', MUST_EXIST);
-
-require_login($course, true, $cm);
-
-$context = context_module::instance($cm->id);
-require_capability('mod/attendance:manageattendances', $context);
-
-$att = new mod_attendance_structure($att, $cm, $course, $context, $pageparams);
-
-$PAGE->set_url($att->url_sessions(array('action' => $pageparams->action)));
-$PAGE->set_title($course->shortname. ": ".$att->name);
-$PAGE->set_heading($course->fullname);
-$PAGE->force_settings_menu(true);
-$PAGE->set_cacheable(true);
-$PAGE->navbar->add($att->name);
-$PAGE->requires->js('/mod/attendance/js/rooms.js');
-
-$currenttab = attendance_tabs::TAB_ADD;
-$formparams = array('course' => $course, 'cm' => $cm, 'modcontext' => $context, 'att' => $att);
-switch ($att->pageparams->action) {
-    case mod_attendance_sessions_page_params::ACTION_ADD:
-        $url = $att->url_sessions(array('action' => mod_attendance_sessions_page_params::ACTION_ADD));
-        $mform = new \mod_attendance\form\addsession($url, $formparams);
+$formparams = array('course' => $course, 'cm' => $cm, 'modcontext' => $context, 'att' => $presence);
+switch ($presence->pageparams->action) {
+    case mod_presence_sessions_page_params::ACTION_ADD:
+        $PAGE->requires->js('/mod/presence/js/rooms.js');
+        $url = $presence->url_sessions(array('action' => mod_presence_sessions_page_params::ACTION_ADD));
+        $mform = new \mod_presence\form\addsession($url, $formparams);
 
         if ($mform->is_cancelled()) {
-            redirect($att->url_manage());
+            redirect($presence->url_manage());
         }
 
         if ($formdata = $mform->get_data()) {
-            $sessions = attendance_construct_sessions_data_for_add($formdata, $att);
-            $att->add_sessions($sessions);
+            $formdata->maxattendants = $pageparams->maxattendants;
+            $sessions = presence_construct_sessions_data_for_add($formdata, $presence);
+            $presence->add_sessions($sessions);
             if (count($sessions) == 1) {
-                $message = get_string('sessiongenerated', 'attendance');
+                $message = get_string('sessiongenerated', 'presence');
             } else {
-                $message = get_string('sessionsgenerated', 'attendance', count($sessions));
+                $message = get_string('sessionsgenerated', 'presence', count($sessions));
             }
 
-            mod_attendance_notifyqueue::notify_success($message);
+            mod_presence_notifyqueue::notify_success($message);
             // Redirect to the sessions tab always showing all sessions.
-            $SESSION->attcurrentattview[$cm->course] = ATT_VIEW_ALL;
-            redirect($att->url_manage());
+            $SESSION->presencecurrentpresenceview[$cm->course] = PRESENCE_VIEW_ALL;
+            redirect($presence->url_manage());
         }
         break;
-    case mod_attendance_sessions_page_params::ACTION_UPDATE:
+    case mod_presence_sessions_page_params::ACTION_UPDATE:
+        $PAGE->requires->js('/mod/presence/js/rooms.js');
         $sessionid = required_param('sessionid', PARAM_INT);
-
-        $url = $att->url_sessions(array('action' => mod_attendance_sessions_page_params::ACTION_UPDATE, 'sessionid' => $sessionid));
+        $url = $presence->url_sessions(array('action' => mod_presence_sessions_page_params::ACTION_UPDATE, 'sessionid' => $sessionid));
         $formparams['sessionid'] = $sessionid;
-        $mform = new \mod_attendance\form\updatesession($url, $formparams);
+        $mform = new \mod_presence\form\updatesession($url, $formparams);
 
         if ($mform->is_cancelled()) {
-            redirect($att->url_manage());
+            redirect($presence->url_manage());
         }
 
         if ($formdata = $mform->get_data()) {
-            if (empty($formdata->autoassignstatus)) {
-                $formdata->autoassignstatus = 0;
-            }
-            $att->update_session_from_form_data($formdata, $sessionid);
+            $formdata->maxattendants = $pageparams->maxattendants;
+            $presence->update_session_from_form_data($formdata, $sessionid);
 
-            mod_attendance_notifyqueue::notify_success(get_string('sessionupdated', 'attendance'));
-            redirect($att->url_manage());
+            mod_presence_notifyqueue::notify_success(get_string('sessionupdated', 'presence'));
+            redirect($presence->url_manage());
         }
-        $currenttab = attendance_tabs::TAB_UPDATE;
+        $currenttab = presence_tabs::TAB_UPDATE;
         break;
-    case mod_attendance_sessions_page_params::ACTION_DELETE:
+    case mod_presence_sessions_page_params::ACTION_DELETE:
         $sessionid = required_param('sessionid', PARAM_INT);
         $confirm   = optional_param('confirm', null, PARAM_INT);
 
         if (isset($confirm) && confirm_sesskey()) {
-            $att->delete_sessions(array($sessionid));
-            redirect($att->url_manage(), get_string('sessiondeleted', 'attendance'));
+            $presence->delete_sessions(array($sessionid));
+            redirect($presence->url_manage(), get_string('sessiondeleted', 'presence'));
         }
 
-        $sessinfo = $att->get_session_info($sessionid);
+        $sessinfo = $presence->get_session_info($sessionid);
 
-        $message = get_string('deletecheckfull', 'attendance', get_string('session', 'attendance'));
+        $message = get_string('deletecheckfull', 'presence', get_string('session', 'presence'));
         $message .= str_repeat(html_writer::empty_tag('br'), 2);
-        $message .= userdate($sessinfo->sessdate, get_string('strftimedmyhm', 'attendance'));
+        $message .= userdate($sessinfo->sessdate, get_string('strftimedatetime', 'langconfig'));
         $message .= html_writer::empty_tag('br');
         $message .= $sessinfo->description;
 
-        $params = array('action' => $att->pageparams->action, 'sessionid' => $sessionid, 'confirm' => 1, 'sesskey' => sesskey());
+        $params = array('action' => $presence->pageparams->action, 'sessionid' => $sessionid, 'confirm' => 1, 'sesskey' => sesskey());
 
-        echo $OUTPUT->header();
-        echo $OUTPUT->heading(get_string('attendanceforthecourse', 'attendance').' :: ' .format_string($course->fullname));
-        echo $OUTPUT->confirm($message, $att->url_sessions($params), $att->url_manage());
+        echo $OUTPUT->confirm($message, $presence->url_sessions($params), $presence->url_manage());
         echo $OUTPUT->footer();
         exit;
-    case mod_attendance_sessions_page_params::ACTION_DELETE_SELECTED:
+    case mod_presence_sessions_page_params::ACTION_DELETE_SELECTED:
         $confirm    = optional_param('confirm', null, PARAM_INT);
-        $message = get_string('deletecheckfull', 'attendance', get_string('sessions', 'attendance'));
+        $message = get_string('deletecheckfull', 'presence', get_string('sessions', 'presence'));
 
         if (isset($confirm) && confirm_sesskey()) {
             $sessionsids = required_param('sessionsids', PARAM_ALPHANUMEXT);
             $sessionsids = explode('_', $sessionsids);
-            if ($att->pageparams->action == mod_attendance_sessions_page_params::ACTION_DELETE_SELECTED) {
-                $att->delete_sessions($sessionsids);
-                attendance_update_users_grade($att);
-                redirect($att->url_manage(), get_string('sessiondeleted', 'attendance'));
+            if ($presence->pageparams->action == mod_presence_sessions_page_params::ACTION_DELETE_SELECTED) {
+                $presence->delete_sessions($sessionsids);
+                presence_update_users_grade($presence);
+                redirect($presence->url_manage(), get_string('sessiondeleted', 'presence'));
             }
         }
         $sessid = optional_param_array('sessid', '', PARAM_SEQUENCE);
         if (empty($sessid)) {
-            print_error('nosessionsselected', 'attendance', $att->url_manage());
+            print_error('nosessionsselected', 'presence', $presence->url_manage());
         }
-        $sessionsinfo = $att->get_sessions_info($sessid);
+        $sessionsinfo = $presence->get_sessions_info($sessid);
 
         $message .= html_writer::empty_tag('br');
         foreach ($sessionsinfo as $sessinfo) {
             $message .= html_writer::empty_tag('br');
-            $message .= userdate($sessinfo->sessdate, get_string('strftimedmyhm', 'attendance'));
+            $message .= userdate($sessinfo->sessdate, get_string('strftimedmyhm', 'presence'));
             $message .= html_writer::empty_tag('br');
             $message .= $sessinfo->description;
         }
 
         $sessionsids = implode('_', $sessid);
-        $params = array('action' => $att->pageparams->action, 'sessionsids' => $sessionsids,
+        $params = array('action' => $presence->pageparams->action, 'sessionsids' => $sessionsids,
                         'confirm' => 1, 'sesskey' => sesskey());
 
-        echo $OUTPUT->header();
-        echo $OUTPUT->heading(get_string('attendanceforthecourse', 'attendance').' :: ' .format_string($course->fullname));
-        echo $OUTPUT->confirm($message, $att->url_sessions($params), $att->url_manage());
+        echo $OUTPUT->confirm($message, $presence->url_sessions($params), $presence->url_manage());
         echo $OUTPUT->footer();
         exit;
-    case mod_attendance_sessions_page_params::ACTION_CHANGE_DURATION:
-        $sessid = optional_param_array('sessid', '', PARAM_SEQUENCE);
-        $ids = optional_param('ids', '', PARAM_ALPHANUMEXT);
-
-        $slist = !empty($sessid) ? implode('_', $sessid) : '';
-
-        $url = $att->url_sessions(array('action' => mod_attendance_sessions_page_params::ACTION_CHANGE_DURATION));
-        $formparams['ids'] = $slist;
-        $mform = new mod_attendance\form\duration($url, $formparams);
-
-        if ($mform->is_cancelled()) {
-            redirect($att->url_manage());
-        }
-
-        if ($formdata = $mform->get_data()) {
-            $sessionsids = explode('_', $ids);
-            $duration = $formdata->durtime['hours'] * HOURSECS + $formdata->durtime['minutes'] * MINSECS;
-            $att->update_sessions_duration($sessionsids, $duration);
-            redirect($att->url_manage(), get_string('sessionupdated', 'attendance'));
-        }
-
-        if ($slist === '') {
-            print_error('nosessionsselected', 'attendance', $att->url_manage());
-        }
-
-        break;
-    case mod_attendance_sessions_page_params::ACTION_DELETE_HIDDEN:
-        $confirm  = optional_param('confirm', null, PARAM_INT);
-        if ($confirm && confirm_sesskey()) {
-            $sessions = $att->get_hidden_sessions();
-            $att->delete_sessions(array_keys($sessions));
-            redirect($att->url_manage(), get_string('hiddensessionsdeleted', 'attendance'));
-        }
-
-        $a = new stdClass();
-        $a->count = $att->get_hidden_sessions_count();
-        $a->date = userdate($course->startdate);
-        $message = get_string('confirmdeletehiddensessions', 'attendance', $a);
-
-        $params = array('action' => $att->pageparams->action, 'confirm' => 1, 'sesskey' => sesskey());
-        echo $OUTPUT->header();
-        echo $OUTPUT->heading(get_string('attendanceforthecourse', 'attendance').' :: ' .format_string($course->fullname));
-        echo $OUTPUT->confirm($message, $att->url_sessions($params), $att->url_manage());
-        echo $OUTPUT->footer();
-        exit;
+//    case mod_presence_sessions_page_params::ACTION_CHANGE_DURATION:
+//        $sessid = optional_param_array('sessid', '', PARAM_SEQUENCE);
+//        $ids = optional_param('ids', '', PARAM_ALPHANUMEXT);
+//
+//        $slist = !empty($sessid) ? implode('_', $sessid) : '';
+//
+//        $url = $presence->url_sessions(array('action' => mod_presence_sessions_page_params::ACTION_CHANGE_DURATION));
+//        $formparams['ids'] = $slist;
+//        $mform = new mod_presence\form\duration($url, $formparams);
+//
+//        if ($mform->is_cancelled()) {
+//            redirect($presence->url_manage());
+//        }
+//
+//        if ($formdata = $mform->get_data()) {
+//            $sessionsids = explode('_', $ids);
+//            $duration = $formdata->durtime['hours'] * HOURSECS + $formdata->durtime['minutes'] * MINSECS;
+//            $presence->update_sessions_duration($sessionsids, $duration);
+//            redirect($presence->url_manage(), get_string('sessionupdated', 'presence'));
+//        }
+//
+//        if ($slist === '') {
+//            print_error('nosessionsselected', 'presence', $presence->url_manage());
+//        }
+//
+//        break;
+//    case mod_presence_sessions_page_params::ACTION_DELETE_HIDDEN:
+//        $confirm  = optional_param('confirm', null, PARAM_INT);
+//        if ($confirm && confirm_sesskey()) {
+//            $sessions = $presence->get_hidden_sessions();
+//            $presence->delete_sessions(array_keys($sessions));
+//            redirect($presence->url_manage(), get_string('hiddensessionsdeleted', 'presence'));
+//        }
+//
+//        $a = new stdClass();
+//        $a->count = $presence->get_hidden_sessions_count();
+//        $a->date = userdate($course->startdate);
+//        $message = get_string('confirmdeletehiddensessions', 'presence', $a);
+//
+//        $params = array('action' => $presence->pageparams->action, 'confirm' => 1, 'sesskey' => sesskey());
+//        echo $OUTPUT->confirm($message, $presence->url_sessions($params), $presence->url_manage());
+//        echo $OUTPUT->footer();
+//        exit;
 }
 
-$output = $PAGE->get_renderer('mod_attendance');
-$tabs = new attendance_tabs($att, $currenttab);
-echo $output->header();
-echo $output->heading(get_string('attendanceforthecourse', 'attendance').' :: ' .format_string($course->fullname));
-echo $output->render($tabs);
+//$output = $PAGE->get_renderer('mod_presence');
+//$tabs = new presence_tabs($presence, $currenttab);
+//echo $output->header();
+//echo $output->heading(get_string('presenceforthecourse', 'presence').' :: ' .format_string($course->fullname));
+//echo $output->render($tabs);
 
 $mform->display();
 

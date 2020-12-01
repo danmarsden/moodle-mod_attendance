@@ -15,25 +15,25 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file contains an event for when an attendance session is added.
+ * This file contains an event for when an presence session is added.
  *
- * @package    mod_attendance
+ * @package    mod_presence
  * @copyright  2014 onwards Dan Marsden
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_attendance\event;
+namespace mod_presence\event;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Event for when an attendance session is added
+ * Event for when an presence session is added
  *
  * @property-read array $other {
  *      Extra information about event properties.
  *
  *      string mode Mode of the report viewed.
  * }
- * @package    mod_attendance
+ * @package    mod_presence
  * @since      Moodle 2.7
  * @copyright  2013 onwards Dan Marsden
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -46,7 +46,7 @@ class session_added extends \core\event\base {
     protected function init() {
         $this->data['crud'] = 'c';
         $this->data['edulevel'] = self::LEVEL_TEACHING;
-        $this->data['objecttable'] = 'attendance_sessions';
+        $this->data['objecttable'] = 'presence_sessions';
     }
 
     /**
@@ -65,7 +65,7 @@ class session_added extends \core\event\base {
      * @return string
      */
     public static function get_name() {
-        return get_string('eventsessionadded', 'mod_attendance');
+        return get_string('eventsessionadded', 'mod_presence');
     }
 
     /**
@@ -74,7 +74,7 @@ class session_added extends \core\event\base {
      * @return \moodle_url
      */
     public function get_url() {
-        return new \moodle_url('/mod/attendance/manage.php', array('id' => $this->contextinstanceid));
+        return new \moodle_url('/mod/presence/manage.php', array('id' => $this->contextinstanceid));
     }
 
     /**
@@ -83,7 +83,7 @@ class session_added extends \core\event\base {
      * @return array of parameters to be passed to legacy add_to_log() function.
      */
     protected function get_legacy_logdata() {
-        return array($this->courseid, 'attendance', 'report', 'report.php?id=' . $this->objectid,
+        return array($this->courseid, 'presence', 'report', 'report.php?id=' . $this->objectid,
             $this->other['info'], $this->contextinstanceid);
     }
 
@@ -93,7 +93,7 @@ class session_added extends \core\event\base {
      * @return array of parameters for object mapping.
      */
     public static function get_objectid_mapping() {
-        return array('db' => 'attendance', 'restore' => 'attendance');
+        return array('db' => 'presence', 'restore' => 'presence');
     }
 
     /**
@@ -104,7 +104,7 @@ class session_added extends \core\event\base {
      */
     protected function validate_data() {
         if (empty($this->other['info'])) {
-            throw new \coding_exception('The event mod_attendance\\event\\session_added must specify info.');
+            throw new \coding_exception('The event mod_presence\\event\\session_added must specify info.');
         }
         parent::validate_data();
     }

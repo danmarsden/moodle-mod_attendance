@@ -17,16 +17,16 @@
 /**
  * This file contains the forms to add session.
  *
- * @package   mod_attendance
+ * @package   mod_presence
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-namespace mod_attendance\form;
+namespace mod_presence\form;
 
 defined('MOODLE_INTERNAL') || die();
 
 use moodleform;
-use mod_attendance_structure;
+use mod_presence_structure;
 use DateTime;
 use DateInterval;
 use DatePeriod;
@@ -52,36 +52,15 @@ class addsession extends moodleform {
         $course        = $this->_customdata['course'];
         $cm            = $this->_customdata['cm'];
         $modcontext    = $this->_customdata['modcontext'];
-        $att           = $this->_customdata['att'];
+        $presence           = $this->_customdata['att'];
 
-        $pluginconfig = get_config('attendance');
+        $pluginconfig = get_config('presence');
 
-        $mform->addElement('header', 'general', get_string('addsession', 'attendance'));
-
-        $mform->addElement('hidden', 'sessiontypedescription', get_string('sessiontype', 'attendance'),
-                          get_string('commonsession', 'attendance'));
-        $mform->addHelpButton('sessiontypedescription', 'sessiontype', 'attendance');
-        $mform->addElement('hidden', 'sessiontype', mod_attendance_structure::SESSION_COMMON);
-        $mform->setType('sessiontype', PARAM_INT);
-
-        attendance_form_sessiondate_selector($mform);
-
-        $maxfiles = 0; // intval(get_config('enableunlimitedfiles', 'mod_attendance')) ? EDITOR_UNLIMITED_FILES : 0;
-        $mform->addElement('editor', 'sdescription', get_string('description', 'attendance'), array('rows' => 1, 'columns' => 80),
-                            array('maxfiles' => $maxfiles, 'noclean' => true, 'context' => $modcontext));
-        $mform->setType('sdescription', PARAM_TEXT);
-
-        $mform->addElement('hidden', 'calendarevent', '', get_string('calendarevent', 'attendance'));
-        $mform->addHelpButton('calendarevent', 'calendarevent', 'attendance');
-        $mform->setDefault('calendarevent', $pluginconfig->calendarevent_default);
+        presence_form_sessiondate_selector($mform);
 
         // For multiple sessions.
-        $mform->addElement('header', 'headeraddmultiplesessions', get_string('addmultiplesessions', 'attendance'));
-        if (!empty($pluginconfig->multisessionexpanded)) {
-            $mform->setExpanded('headeraddmultiplesessions');
-        }
-        $mform->addElement('checkbox', 'addmultiply', '', get_string('repeatasfollows', 'attendance'));
-        $mform->addHelpButton('addmultiply', 'createmultiplesessions', 'attendance');
+        $mform->addElement('checkbox', 'addmultiply', '', get_string('repeatasfollows', 'presence'));
+        $mform->addHelpButton('addmultiply', 'createmultiplesessions', 'presence');
 
         $sdays = array();
         if ($CFG->calendar_startwday === '0') { // Week start from sunday.
@@ -96,29 +75,32 @@ class addsession extends moodleform {
         if ($CFG->calendar_startwday !== '0') { // Week start from sunday.
             $sdays[] =& $mform->createElement('checkbox', 'Sun', '', get_string('sunday', 'calendar'));
         }
-        $mform->addGroup($sdays, 'sdays', get_string('repeaton', 'attendance'), array('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'), true);
-        $mform->disabledIf('sdays', 'addmultiply', 'notchecked');
+        $mform->addGroup($sdays, 'sdays', get_string('repeaton', 'presence'), array('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'), true);
+        $mform->hideIf('sdays', 'addmultiply', 'notchecked');
 
-        $period = array(1 => 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-            21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36);
+        $period = array(1 => 1, 2, 3, 4);
         $periodgroup = array();
         $periodgroup[] =& $mform->createElement('select', 'period', '', $period, false, true);
-        $periodgroup[] =& $mform->createElement('static', 'perioddesc', '', get_string('week', 'attendance'));
-        $mform->addGroup($periodgroup, 'periodgroup', get_string('repeatevery', 'attendance'), array(' '), false);
-        $mform->disabledIf('periodgroup', 'addmultiply', 'notchecked');
+        $periodgroup[] =& $mform->createElement('static', 'perioddesc', '', get_string('week', 'presence'));
+        $mform->addGroup($periodgroup, 'periodgroup', get_string('repeatevery', 'presence'), array(' '), false);
+        $mform->hideIf('periodgroup', 'addmultiply', 'notchecked');
 
-        $mform->addElement('date_selector', 'sessionenddate', get_string('repeatuntil', 'attendance'));
-        $mform->disabledIf('sessionenddate', 'addmultiply', 'notchecked');
+        $mform->addElement('date_selector', 'sessionenddate', get_string('repeatuntil', 'presence'),
+        ['startyear' => date('Y'), 'stopyear' => date('Y') + 1]);
+        $mform->hideIf('sessionenddate', 'addmultiply', 'notchecked');
 
-        $mform->addElement('hidden', 'coursestartdate', $course->startdate);
-        $mform->setType('coursestartdate', PARAM_INT);
 
-        $mform->addElement('hidden', 'previoussessiondate', 0);
-        $mform->setType('previoussessiondate', PARAM_INT);
+        $maxfiles = 0; // intval(get_config('enableunlimitedfiles', 'mod_presence')) ? EDITOR_UNLIMITED_FILES : 0;
+        $mform->addElement('textarea', 'sdescription', get_string('description', 'presence'), array('rows' => 2, 'columns' => 80),
+                            array('maxfiles' => $maxfiles, 'noclean' => true, 'context' => $modcontext));
+        $mform->setType('sdescription', PARAM_TEXT);
 
-        attendance_form_session_room($mform, $att);
+        presence_form_session_room($mform, $presence);
 
-        $this->add_action_buttons(true, get_string('add', 'attendance'));
+        $mform->addElement('html', '<div id="presence_collisions"></div>');
+
+
+        $this->add_action_buttons(true, get_string('add', 'presence'));
     }
 
     /**
@@ -133,35 +115,31 @@ class addsession extends moodleform {
         $sesstarttime = $data['sestime']['starthour'] * HOURSECS + $data['sestime']['startminute'] * MINSECS;
         $sesendtime = $data['sestime']['endhour'] * HOURSECS + $data['sestime']['endminute'] * MINSECS;
         if ($sesendtime < $sesstarttime) {
-            $errors['sestime'] = get_string('invalidsessionendtime', 'attendance');
+            $errors['sestime'] = get_string('invalidsessionendtime', 'presence');
         }
 
         if (!empty($data['addmultiply']) && $data['sessiondate'] != 0 && $data['sessionenddate'] != 0 &&
                 $data['sessionenddate'] < $data['sessiondate']) {
-            $errors['sessionenddate'] = get_string('invalidsessionenddate', 'attendance');
-        }
-
-        if ($data['sessiontype'] == mod_attendance_structure::SESSION_GROUP and empty($data['groups'])) {
-            $errors['groups'] = get_string('errorgroupsnotselected', 'attendance');
+            $errors['sessionenddate'] = get_string('invalidsessionenddate', 'presence');
         }
 
         $addmulti = isset($data['addmultiply']) ? (int)$data['addmultiply'] : 0;
         if (($addmulti != 0) && (!array_key_exists('sdays', $data) || empty($data['sdays']))) {
             $data['sdays'] = array();
-            $errors['sdays'] = get_string('required', 'attendance');
+            $errors['sdays'] = get_string('required', 'presence');
         }
         if (isset($data['sdays'])) {
             if (!$this->checkweekdays($data['sessiondate'], $data['sessionenddate'], $data['sdays']) ) {
-                $errors['sdays'] = get_string('checkweekdays', 'attendance');
+                $errors['sdays'] = get_string('checkweekdays', 'presence');
             }
         }
         if ($addmulti && ceil(($data['sessionenddate'] - $data['sessiondate']) / YEARSECS) > 1) {
-            $errors['sessionenddate'] = get_string('timeahead', 'attendance');
+            $errors['sessionenddate'] = get_string('timeahead', 'presence');
         }
         $sessstart = $data['sessiondate'] + $sesstarttime;
         if ($sessstart < $data['coursestartdate'] && $sessstart != $data['previoussessiondate']) {
-            $errors['sessiondate'] = get_string('priorto', 'attendance',
-                userdate($data['coursestartdate'], get_string('strftimedmyhm', 'attendance')));
+            $errors['sessiondate'] = get_string('priorto', 'presence',
+                userdate($data['coursestartdate'], get_string('strftimedmyhm', 'presence')));
             $this->_form->setConstant('previoussessiondate', $sessstart);
         }
 

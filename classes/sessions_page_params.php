@@ -16,9 +16,9 @@
 
 
 /**
- * Class definition for mod_attendance_sessions_page_params
+ * Class definition for mod_presence_sessions_page_params
  *
- * @package   mod_attendance
+ * @package   mod_presence
  * @copyright  2016 Dan Marsden http://danmarsden.com
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -30,7 +30,7 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright  2016 Dan Marsden http://danmarsden.com
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_attendance_sessions_page_params {
+class mod_presence_sessions_page_params {
     /**
      *  Add Session.
      */
@@ -62,10 +62,24 @@ class mod_attendance_sessions_page_params {
     const ACTION_DELETE_HIDDEN     = 6;
 
     /**
-     *  Evaluate a session
+     *  Evaluate a session.
      */
     const ACTION_EVALUATE          = 7;
 
-    /** @var int view mode of taking attendance page*/
+    /**
+     *  Finish evaluation of a session.
+     */
+    const ACTION_EVALUATE_FINISH   = 8;
+
+    /**
+     *  Finish evaluation of all sessions.
+     */
+    const ACTION_EVALUATE_FINISH_ALL   = 9;
+
+    /** @var int view mode of taking presence page*/
     public $action;
+
+    public function init() {
+
+    }
 }

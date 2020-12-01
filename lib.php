@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Library of functions and constants for module attendance
+ * Library of functions and constants for module presence
  *
- * @package   mod_attendance
+ * @package   mod_presence
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -32,7 +32,7 @@ require_once(dirname(__FILE__) . '/classes/calendar_helpers.php');
  * @param string $feature FEATURE_xx constant for requested feature
  * @return mixed true if the feature is supported, null if unknown
  */
-function attendance_supports($feature) {
+function presence_supports($feature) {
     switch($feature) {
         case FEATURE_GRADE_HAS_GRADE:
             return true;
@@ -56,76 +56,76 @@ function attendance_supports($feature) {
 
 
 /**
- * Add new attendance instance.
+ * Add new presence instance.
  *
- * @param stdClass $attendance
+ * @param stdClass $presence
  * @return bool|int
  */
-function attendance_add_instance($attendance) {
+function presence_add_instance($presence) {
     global $DB;
 
-    $attendance->timemodified = time();
+    $presence->timemodified = time();
 
     // Default grade (similar to what db fields defaults if no grade attribute is passed),
     // but we need it in object for grading update.
-    if (!isset($attendance->grade)) {
-        $attendance->grade = 100;
+    if (!isset($presence->grade)) {
+        $presence->grade = 100;
     }
+    $presence->name = get_string('modulename', 'presence');
+    $presence->id = $DB->insert_record('presence', $presence);
 
-    $attendance->id = $DB->insert_record('attendance', $attendance);
-
-    return $attendance->id;
+    return $presence->id;
 }
 
 /**
- * Update existing attendance instance.
+ * Update existing presence instance.
  *
- * @param stdClass $attendance
+ * @param stdClass $presence
  * @return bool
  */
-function attendance_update_instance($attendance) {
+function presence_update_instance($presence) {
     global $DB;
 
-    $attendance->timemodified = time();
-    $attendance->id = $attendance->instance;
+    $presence->timemodified = time();
+    $presence->id = $presence->instance;
 
-    if (! $DB->update_record('attendance', $attendance)) {
+    if (! $DB->update_record('presence', $presence)) {
         return false;
     }
 
-    attendance_grade_item_update($attendance);
+    presence_grade_item_update($presence);
 
     return true;
 }
 
 /**
- * Delete existing attendance
+ * Delete existing presence
  *
  * @param int $id
  * @return bool
  */
-function attendance_delete_instance($id) {
+function presence_delete_instance($id) {
     global $DB, $CFG;
-    require_once($CFG->dirroot.'/mod/attendance/locallib.php');
+    require_once($CFG->dirroot.'/mod/presence/locallib.php');
 
-    if (! $attendance = $DB->get_record('attendance', array('id' => $id))) {
+    if (! $presence = $DB->get_record('presence', array('id' => $id))) {
         return false;
     }
 
-    if ($sessids = array_keys($DB->get_records('attendance_sessions', array('attendanceid' => $id), '', 'id'))) {
-        if (attendance_existing_calendar_events_ids($sessids)) {
-            attendance_delete_calendar_events($sessids);
+    if ($sessids = array_keys($DB->get_records('presence_sessions', array('presenceid' => $id), '', 'id'))) {
+        if (presence_existing_calendar_events_ids($sessids)) {
+            presence_delete_calendar_events($sessids);
         }
-        $DB->delete_records_list('attendance_evaluations', 'sessionid', $sessids);
-        $DB->delete_records('attendance_sessions', array('attendanceid' => $id));
+        $DB->delete_records_list('presence_evaluations', 'sessionid', $sessids);
+        $DB->delete_records('presence_sessions', array('presenceid' => $id));
     }
-    $DB->delete_records('attendance_statuses', array('attendanceid' => $id));
+    $DB->delete_records('presence_statuses', array('presenceid' => $id));
 
-    $DB->delete_records('attendance_warning', array('idnumber' => $id));
+    $DB->delete_records('presence_warning', array('idnumber' => $id));
 
-    $DB->delete_records('attendance', array('id' => $id));
+    $DB->delete_records('presence', array('id' => $id));
 
-    attendance_grade_item_delete($attendance);
+    presence_grade_item_delete($presence);
 
     return true;
 }
@@ -134,15 +134,15 @@ function attendance_delete_instance($id) {
  * Called by course/reset.php
  * @param moodleform $mform form passed by reference
  */
-function attendance_reset_course_form_definition(&$mform) {
-    $mform->addElement('header', 'attendanceheader', get_string('modulename', 'attendance'));
+function presence_reset_course_form_definition(&$mform) {
+    $mform->addElement('header', 'presenceheader', get_string('modulename', 'presence'));
 
-    $mform->addElement('static', 'description', get_string('description', 'attendance'),
-                                get_string('resetdescription', 'attendance'));
-    $mform->addElement('checkbox', 'reset_attendance_log', get_string('deletelogs', 'attendance'));
+    $mform->addElement('static', 'description', get_string('description', 'presence'),
+                                get_string('resetdescription', 'presence'));
+    $mform->addElement('checkbox', 'reset_presence_log', get_string('deletelogs', 'presence'));
 
-    $mform->addElement('checkbox', 'reset_attendance_sessions', get_string('deletesessions', 'attendance'));
-    $mform->disabledIf('reset_attendance_sessions', 'reset_attendance_log', 'notchecked');
+    $mform->addElement('checkbox', 'reset_presence_sessions', get_string('deletesessions', 'presence'));
+    $mform->disabledIf('reset_presence_sessions', 'reset_presence_log', 'notchecked');
 
 }
 
@@ -152,54 +152,54 @@ function attendance_reset_course_form_definition(&$mform) {
  * @param stdClass $course
  * @return array
  */
-function attendance_reset_course_form_defaults($course) {
-    return array('reset_attendance_log' => 0, 'reset_attendance_statuses' => 0, 'reset_attendance_sessions' => 0);
+function presence_reset_course_form_defaults($course) {
+    return array('reset_presence_log' => 0, 'reset_presence_statuses' => 0, 'reset_presence_sessions' => 0);
 }
 
 /**
- * Reset user data within attendance.
+ * Reset user data within presence.
  *
  * @param stdClass $data
  * @return array
  */
-function attendance_reset_userdata($data) {
+function presence_reset_userdata($data) {
     global $DB;
 
     $status = array();
 
-    $attids = array_keys($DB->get_records('attendance', array('course' => $data->courseid), '', 'id'));
+    $presenceids = array_keys($DB->get_records('presence', array('course' => $data->courseid), '', 'id'));
 
-    if (!empty($data->reset_attendance_log)) {
-        $sess = $DB->get_records_list('attendance_sessions', 'attendanceid', $attids, '', 'id');
+    if (!empty($data->reset_presence_log)) {
+        $sess = $DB->get_records_list('presence_sessions', 'presenceid', $presenceids, '', 'id');
         if (!empty($sess)) {
             list($sql, $params) = $DB->get_in_or_equal(array_keys($sess));
-            $DB->delete_records_select('attendance_evaluations', "sessionid $sql", $params);
-            list($sql, $params) = $DB->get_in_or_equal($attids);
-            $DB->set_field_select('attendance_sessions', 'lasttaken', 0, "attendanceid $sql", $params);
-            if (empty($data->reset_attendance_sessions)) {
+            $DB->delete_records_select('presence_evaluations', "sessionid $sql", $params);
+            list($sql, $params) = $DB->get_in_or_equal($presenceids);
+            $DB->set_field_select('presence_sessions', 'lasttaken', 0, "presenceid $sql", $params);
+            if (empty($data->reset_presence_sessions)) {
                 // If sessions are being retained, clear automarkcompleted value.
-                $DB->set_field_select('attendance_sessions', 'automarkcompleted', 0, "attendanceid $sql", $params);
+                $DB->set_field_select('presence_sessions', 'automarkcompleted', 0, "presenceid $sql", $params);
             }
 
             $status[] = array(
-                'component' => get_string('modulenameplural', 'attendance'),
-                'item' => get_string('attendancedata', 'attendance'),
+                'component' => get_string('modulenameplural', 'presence'),
+                'item' => get_string('presencedata', 'presence'),
                 'error' => false
             );
         }
     }
 
 
-    if (!empty($data->reset_attendance_sessions)) {
-        $sessionsids = array_keys($DB->get_records_list('attendance_sessions', 'attendanceid', $attids, '', 'id'));
-        if (attendance_existing_calendar_events_ids($sessionsids)) {
-            attendance_delete_calendar_events($sessionsids);
+    if (!empty($data->reset_presence_sessions)) {
+        $sessionsids = array_keys($DB->get_records_list('presence_sessions', 'presenceid', $presenceids, '', 'id'));
+        if (presence_existing_calendar_events_ids($sessionsids)) {
+            presence_delete_calendar_events($sessionsids);
         }
-        $DB->delete_records_list('attendance_sessions', 'attendanceid', $attids);
+        $DB->delete_records_list('presence_sessions', 'presenceid', $presenceids);
 
         $status[] = array(
-            'component' => get_string('modulenameplural', 'attendance'),
-            'item' => get_string('statuses', 'attendance'),
+            'component' => get_string('modulenameplural', 'presence'),
+            'item' => get_string('statuses', 'presence'),
             'error' => false
         );
     }
@@ -216,15 +216,15 @@ function attendance_reset_userdata($data) {
  * @param stdClass $course - full course record.
  * @param stdClass $user - full user record
  * @param stdClass $mod
- * @param stdClass $attendance
+ * @param stdClass $presence
  * @return stdClass.
  */
-function attendance_user_outline($course, $user, $mod, $attendance) {
+function presence_user_outline($course, $user, $mod, $presence) {
     global $CFG;
     require_once(dirname(__FILE__).'/locallib.php');
     require_once($CFG->libdir.'/gradelib.php');
 
-    $grades = grade_get_grades($course->id, 'mod', 'attendance', $attendance->id, $user->id);
+    $grades = grade_get_grades($course->id, 'mod', 'presence', $presence->id, $user->id);
 
     $result = new stdClass();
     if (!empty($grades->items[0]->grades)) {
@@ -233,8 +233,8 @@ function attendance_user_outline($course, $user, $mod, $attendance) {
     } else {
         $result->time = 0;
     }
-    if (has_capability('mod/attendance:canbelisted', $mod->context, $user->id)) {
-        $summary = new mod_attendance_summary($attendance->id, $user->id);
+    if (has_capability('mod/presence:canbelisted', $mod->context, $user->id)) {
+        $summary = new mod_presence_summary($presence->id, $user->id);
         $usersummary = $summary->get_all_sessions_summary_for($user->id);
 
         $result->info = $usersummary->pointsallsessions;
@@ -249,37 +249,37 @@ function attendance_user_outline($course, $user, $mod, $attendance) {
  * @param stdClass $course
  * @param stdClass $user
  * @param stdClass $mod
- * @param stdClass $attendance
+ * @param stdClass $presence
  */
-function attendance_user_complete($course, $user, $mod, $attendance) {
+function presence_user_complete($course, $user, $mod, $presence) {
     global $CFG;
 
     require_once(dirname(__FILE__).'/renderhelpers.php');
     require_once($CFG->libdir.'/gradelib.php');
 
-    if (has_capability('mod/attendance:canbelisted', $mod->context, $user->id)) {
-        echo construct_full_user_stat_html_table($attendance, $user);
+    if (has_capability('mod/presence:canbelisted', $mod->context, $user->id)) {
+        echo construct_full_user_stat_html_table($presence, $user);
     }
 }
 
 /**
  * Dummy function - must exist to allow quick editing of module name.
  *
- * @param stdClass $attendance
+ * @param stdClass $presence
  * @param int $userid
  * @param bool $nullifnone
  */
-function attendance_update_grades($attendance, $userid=0, $nullifnone=true) {
+function presence_update_grades($presence, $userid=0, $nullifnone=true) {
     // We need this function to exist so that quick editing of module name is passed to gradebook.
 }
 /**
- * Create grade item for given attendance
+ * Create grade item for given presence
  *
- * @param stdClass $attendance object with extra cmidnumber
+ * @param stdClass $presence object with extra cmidnumber
  * @param mixed $grades optional array/object of grade(s); 'reset' means reset grades in gradebook
  * @return int 0 if ok, error code otherwise
  */
-function attendance_grade_item_update($attendance, $grades=null) {
+function presence_grade_item_update($presence, $grades=null) {
     global $CFG, $DB;
 
     require_once('locallib.php');
@@ -288,27 +288,27 @@ function attendance_grade_item_update($attendance, $grades=null) {
         require_once($CFG->libdir.'/gradelib.php');
     }
 
-    if (!isset($attendance->courseid)) {
-        $attendance->courseid = $attendance->course;
+    if (!isset($presence->courseid)) {
+        $presence->courseid = $presence->course;
     }
-    if (!$DB->get_record('course', array('id' => $attendance->course))) {
+    if (!$DB->get_record('course', array('id' => $presence->course))) {
         error("Course is misconfigured");
     }
 
-    if (!empty($attendance->cmidnumber)) {
-        $params = array('itemname' => $attendance->name, 'idnumber' => $attendance->cmidnumber);
+    if (!empty($presence->cmidnumber)) {
+        $params = array('itemname' => $presence->name, 'idnumber' => $presence->cmidnumber);
     } else {
         // MDL-14303.
-        $params = array('itemname' => $attendance->name);
+        $params = array('itemname' => $presence->name);
     }
 
-    if ($attendance->grade > 0) {
+    if ($presence->grade > 0) {
         $params['gradetype'] = GRADE_TYPE_VALUE;
-        $params['grademax']  = $attendance->grade;
+        $params['grademax']  = $presence->grade;
         $params['grademin']  = 0;
-    } else if ($attendance->grade < 0) {
+    } else if ($presence->grade < 0) {
         $params['gradetype'] = GRADE_TYPE_SCALE;
-        $params['scaleid']   = -$attendance->grade;
+        $params['scaleid']   = -$presence->grade;
 
     } else {
         $params['gradetype'] = GRADE_TYPE_NONE;
@@ -319,55 +319,55 @@ function attendance_grade_item_update($attendance, $grades=null) {
         $grades = null;
     }
 
-    return grade_update('mod/attendance', $attendance->courseid, 'mod', 'attendance', $attendance->id, 0, $grades, $params);
+    return grade_update('mod/presence', $presence->courseid, 'mod', 'presence', $presence->id, 0, $grades, $params);
 }
 
 /**
- * Delete grade item for given attendance
+ * Delete grade item for given presence
  *
- * @param object $attendance object
- * @return object attendance
+ * @param object $presence object
+ * @return object presence
  */
-function attendance_grade_item_delete($attendance) {
+function presence_grade_item_delete($presence) {
     global $CFG;
     require_once($CFG->libdir.'/gradelib.php');
 
-    if (!isset($attendance->courseid)) {
-        $attendance->courseid = $attendance->course;
+    if (!isset($presence->courseid)) {
+        $presence->courseid = $presence->course;
     }
 
-    return grade_update('mod/attendance', $attendance->courseid, 'mod', 'attendance',
-                        $attendance->id, 0, null, array('deleted' => 1));
+    return grade_update('mod/presence', $presence->courseid, 'mod', 'presence',
+                        $presence->id, 0, null, array('deleted' => 1));
 }
 
 /**
- * This function returns if a scale is being used by one attendance
+ * This function returns if a scale is being used by one presence
  * it it has support for grading and scales. Commented code should be
  * modified if necessary. See book, glossary or journal modules
  * as reference.
  *
- * @param int $attendanceid
+ * @param int $presenceid
  * @param int $scaleid
- * @return boolean True if the scale is used by any attendance
+ * @return boolean True if the scale is used by any presence
  */
-function attendance_scale_used ($attendanceid, $scaleid) {
+function presence_scale_used ($presenceid, $scaleid) {
     return false;
 }
 
 /**
- * Checks if scale is being used by any instance of attendance
+ * Checks if scale is being used by any instance of presence
  *
  * This is used to find out if scale used anywhere
  *
  * @param int $scaleid
  * @return bool true if the scale is used by any book
  */
-function attendance_scale_used_anywhere($scaleid) {
+function presence_scale_used_anywhere($scaleid) {
     return false;
 }
 
 /**
- * Serves the attendance sessions descriptions files.
+ * Serves the presence sessions descriptions files.
  *
  * @param object $course
  * @param object $cm
@@ -377,7 +377,7 @@ function attendance_scale_used_anywhere($scaleid) {
  * @param bool $forcedownload
  * @return bool false if file not found, does not return if found - justsend the file
  */
-function attendance_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload) {
+function presence_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload) {
     global $DB;
 
     if ($context->contextlevel != CONTEXT_MODULE) {
@@ -386,7 +386,7 @@ function attendance_pluginfile($course, $cm, $context, $filearea, $args, $forced
 
     require_login($course, false, $cm);
 
-    if (!$DB->record_exists('attendance', array('id' => $cm->instance))) {
+    if (!$DB->record_exists('presence', array('id' => $cm->instance))) {
         return false;
     }
 
@@ -397,13 +397,13 @@ function attendance_pluginfile($course, $cm, $context, $filearea, $args, $forced
     }
 
     $sessid = (int)array_shift($args);
-    if (!$DB->record_exists('attendance_sessions', array('id' => $sessid))) {
+    if (!$DB->record_exists('presence_sessions', array('id' => $sessid))) {
         return false;
     }
 
     $fs = get_file_storage();
     $relativepath = implode('/', $args);
-    $fullpath = "/$context->id/mod_attendance/$filearea/$sessid/$relativepath";
+    $fullpath = "/$context->id/mod_presence/$filearea/$sessid/$relativepath";
     if (!$file = $fs->get_file_by_hash(sha1($fullpath)) or $file->is_directory()) {
         return false;
     }
@@ -411,19 +411,19 @@ function attendance_pluginfile($course, $cm, $context, $filearea, $args, $forced
 }
 
 /**
- * Print tabs on attendance settings page.
+ * Print tabs on presence settings page.
  *
  * @param string $selected - current selected tab.
  */
-function attendance_print_settings_tabs($selected = 'settings') {
+function presence_print_settings_tabs($selected = 'settings') {
     global $CFG;
     // Print tabs for different settings pages.
     $tabs = array();
-    $tabs[] = new tabobject('settings', "{$CFG->wwwroot}/{$CFG->admin}/settings.php?section=modsettingattendance",
-        get_string('settings', 'attendance'), get_string('settings'), false);
+    $tabs[] = new tabobject('settings', "{$CFG->wwwroot}/{$CFG->admin}/settings.php?section=modsettingpresence",
+        get_string('settings', 'presence'), get_string('settings'), false);
 
-    $tabs[] = new tabobject('rooms', $CFG->wwwroot.'/mod/attendance/rooms.php',
-        get_string('rooms', 'attendance'), get_string('rooms', 'attendance'), false);
+    $tabs[] = new tabobject('rooms', $CFG->wwwroot.'/mod/presence/rooms.php',
+        get_string('rooms', 'presence'), get_string('rooms', 'presence'), false);
 
     ob_start();
     print_tabs(array($tabs), $selected);
@@ -434,12 +434,12 @@ function attendance_print_settings_tabs($selected = 'settings') {
 }
 
 /**
- * Helper function to remove a user from the thirdpartyemails record of the attendance_warning table.
+ * Helper function to remove a user from the thirdpartyemails record of the presence_warning table.
  *
  * @param array $warnings - list of warnings to parse.
  * @param int $userid - User id of user to remove.
  */
-function attendance_remove_user_from_thirdpartyemails($warnings, $userid) {
+function presence_remove_user_from_thirdpartyemails($warnings, $userid) {
     global $DB;
 
     // Update the third party emails list for all the relevant warnings.
@@ -458,6 +458,6 @@ function attendance_remove_user_from_thirdpartyemails($warnings, $userid) {
 
     // Sadly need to update each individually, no way to bulk update as all the thirdpartyemails field can be different.
     foreach ($updatedwarnings as $updatedwarning) {
-        $DB->update_record('attendance_warning', $updatedwarning);
+        $DB->update_record('presence_warning', $updatedwarning);
     }
 }

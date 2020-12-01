@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/attendance/db" VERSION="20201119" COMMENT="XMLDB file for Moodle mod/attendance"
+<XMLDB PATH="mod/presence/db" VERSION="20201128" COMMENT="XMLDB file for Moodle mod/presence"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
   <TABLES>
-    <TABLE NAME="attendance" COMMENT="Attendance module table">
+    <TABLE NAME="presence" COMMENT="presence module table">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" COMMENT="id of the table, please edit me"/>
         <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="grade" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="100" SEQUENCE="false" COMMENT="This is maximum grade for instance"/>
-        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The time the settings for this attendance instance were last modified."/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The time the settings for this presence instance were last modified."/>
         <FIELD NAME="intro" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="This field is a requirement for activity modules."/>
         <FIELD NAME="introformat" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="This field is a requirement for activity modules."/>
         <FIELD NAME="subnet" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Default subnet used when creating sessions."/>
@@ -19,22 +19,23 @@
         <FIELD NAME="showextrauserdetails" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="Define if extra user details should be shown in reports."/>
       </FIELDS>
       <KEYS>
-        <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="Primary key for attendance"/>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="Primary key for presence"/>
       </KEYS>
       <INDEXES>
         <INDEX NAME="course" UNIQUE="false" FIELDS="course"/>
       </INDEXES>
     </TABLE>
-    <TABLE NAME="attendance_sessions" COMMENT="attendance_sessions table">
+    <TABLE NAME="presence_sessions" COMMENT="presence_sessions table">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="attendanceid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="presenceid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="sessdate" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="duration" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="description" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="descriptionformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="caleventid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="calgroup" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="A series of calendar events has a common group id so that they can be edited together"/>
         <FIELD NAME="calendarevent" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false"/>
         <FIELD NAME="roomid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="maxattendants" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
@@ -43,35 +44,35 @@
         <FIELD NAME="lastevaluatedby" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
-        <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="Primary key for attendance_sessions"/>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="Primary key for presence_sessions"/>
       </KEYS>
       <INDEXES>
-        <INDEX NAME="attendanceid" UNIQUE="false" FIELDS="attendanceid"/>
+        <INDEX NAME="presenceid" UNIQUE="false" FIELDS="presenceid"/>
         <INDEX NAME="sessdate" UNIQUE="false" FIELDS="sessdate"/>
         <INDEX NAME="caleventid" UNIQUE="false" FIELDS="caleventid"/>
         <INDEX NAME="roomid" UNIQUE="false" FIELDS="roomid"/>
       </INDEXES>
     </TABLE>
-    <TABLE NAME="attendance_evaluations" COMMENT="attendance_evaluations table retrofitted from MySQL">
+    <TABLE NAME="presence_evaluations" COMMENT="presence_evaluations table retrofitted from MySQL">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="sessionid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="studentid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="duration" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="timetaken" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="When attendance of this student was taken"/>
+        <FIELD NAME="timetaken" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="When presence of this student was taken"/>
         <FIELD NAME="takenby" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="remarks_course" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="remarks_personality" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
-        <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="Primary key for attendance_evaluations"/>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="Primary key for presence_evaluations"/>
       </KEYS>
       <INDEXES>
         <INDEX NAME="sessionid" UNIQUE="false" FIELDS="sessionid"/>
         <INDEX NAME="studentid" UNIQUE="false" FIELDS="studentid"/>
       </INDEXES>
     </TABLE>
-    <TABLE NAME="attendance_rooms" COMMENT="definitions of physical rooms where sessions can take place">
+    <TABLE NAME="presence_rooms" COMMENT="definitions of physical rooms where sessions can take place">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="name" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false" COMMENT="name of the room"/>
@@ -86,7 +87,7 @@
         <INDEX NAME="name" UNIQUE="true" FIELDS="name"/>
       </INDEXES>
     </TABLE>
-    <TABLE NAME="attendance_bookings" COMMENT="which users signed up to partake in which session?">
+    <TABLE NAME="presence_bookings" COMMENT="which users signed up to partake in which session?">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="sessionid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
@@ -98,7 +99,7 @@
         <KEY NAME="user_session" TYPE="unique" FIELDS="userid, sessionid"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="attendance_sws" COMMENT="SWS (&quot;Science of Self&quot;) is a psychological teaching concept. Each level between 1-7 represents a development level of a students personality.">
+    <TABLE NAME="presence_sws" COMMENT="SWS (&quot;Science of Self&quot;) is a psychological teaching concept. Each level between 1-7 represents a development level of a students personality.">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
@@ -112,6 +113,22 @@
       <INDEXES>
         <INDEX NAME="userid" UNIQUE="false" FIELDS="userid"/>
       </INDEXES>
+    </TABLE>
+    <TABLE NAME="presence_user" COMMENT="Additional user fields for presence plugin">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="strengths" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="List of strengths of this user"/>
+        <FIELD NAME="statusremark" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="usermodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign-unique" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="usermodified" TYPE="foreign" FIELDS="usermodified" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
     </TABLE>
   </TABLES>
 </XMLDB>

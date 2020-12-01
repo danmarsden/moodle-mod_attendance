@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Class definition for mod_attendance_manage_page_params
+ * Class definition for mod_presence_manage_page_params
  *
- * @package   mod_attendance
+ * @package   mod_presence
  * @copyright  2016 Dan Marsden http://danmarsden.com
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -29,12 +29,12 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright  2016 Dan Marsden http://danmarsden.com
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_attendance_manage_page_params extends mod_attendance_page_with_filter_controls {
+class mod_presence_manage_page_params extends mod_presence_page_with_filter_controls {
     /**
-     * mod_attendance_manage_page_params constructor.
+     * mod_presence_manage_page_params constructor.
      */
     public function  __construct() {
-        $this->selectortype = mod_attendance_page_with_filter_controls::SELECTOR_SESS_TYPE;
+        $this->selectortype = mod_presence_page_with_filter_controls::SELECTOR_SESS_TYPE;
     }
 
     /**

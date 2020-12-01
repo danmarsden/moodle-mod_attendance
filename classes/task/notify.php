@@ -15,22 +15,22 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Attendance task - Send warnings.
+ * presence task - Send warnings.
  *
- * @package    mod_attendance
+ * @package    mod_presence
  * @copyright  2017 onwards Dan Marsden http://danmarsden.com
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_attendance\task;
+namespace mod_presence\task;
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/mod/attendance/lib.php');
-require_once($CFG->dirroot . '/mod/attendance/locallib.php');
+require_once($CFG->dirroot . '/mod/presence/lib.php');
+require_once($CFG->dirroot . '/mod/presence/locallib.php');
 /**
  * Task class
  *
- * @package    mod_attendance
+ * @package    mod_presence
  * @copyright  2017 onwards Dan Marsden http://danmarsden.com
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -42,7 +42,7 @@ class notify extends \core\task\scheduled_task {
      */
     public function get_name() {
         // Shown in admin screens.
-        return get_string('notifytask', 'mod_attendance');
+        return get_string('notifytask', 'mod_presence');
     }
 
     /**
@@ -50,18 +50,18 @@ class notify extends \core\task\scheduled_task {
      */
     public function execute() {
         global $DB;
-        if (empty(get_config('attendance', 'enablewarnings'))) {
+        if (empty(get_config('presence', 'enablewarnings'))) {
             return; // Warnings not enabled.
         }
         $now = time(); // Store current time to use in queries so they all match nicely.
 
         $orderby = 'ORDER BY cm.id, atl.studentid, n.warningpercent ASC';
 
-        // Get records for attendance sessions that have been updated since last time this task ran.
-        // Note: this returns all users for these sessions - even if the users attendance wasn't changed
+        // Get records for presence sessions that have been updated since last time this task ran.
+        // Note: this returns all users for these sessions - even if the users presence wasn't changed
         // since last time we ran, before sending a notification we check to see if the users have
-        // updated attendance logs since last time they were notified.
-        $records = attendance_get_users_to_notify(array(), $orderby, true);
+        // updated presence logs since last time they were notified.
+        $records = presence_get_users_to_notify(array(), $orderby, true);
         $sentnotifications = array();
         $thirdpartynotifications = array();
         $numsentusers = 0;
@@ -72,24 +72,24 @@ class notify extends \core\task\scheduled_task {
             }
 
             if (!empty($record->emailuser)) {
-                // Only send one warning to this user from each attendance in this run.
+                // Only send one warning to this user from each presence in this run.
                 // Flag any higher percent notifications as sent.
                 if (empty($sentnotifications[$record->userid]) || !in_array($record->aid, $sentnotifications[$record->userid])) {
 
                     // If has previously been sent a warning, check to see if this user has
-                    // attendance updated since the last time the notification was sent.
+                    // presence updated since the last time the notification was sent.
                     if (!empty($record->timesent)) {
                         $sql = "SELECT *
-                              FROM {attendance_evaluations} l
-                              JOIN {attendance_sessions} s ON s.id = l.sessionid
-                             WHERE s.attendanceid = ? AND studentid = ? AND timetaken > ?";
+                              FROM {presence_evaluations} l
+                              JOIN {presence_sessions} s ON s.id = l.sessionid
+                             WHERE s.presenceid = ? AND studentid = ? AND timetaken > ?";
                         if (!$DB->record_exists_sql($sql, array($record->aid, $record->userid, $record->timesent))) {
                             continue; // Skip this record and move to the next user.
                         }
                     }
 
                     // Convert variables in emailcontent.
-                    $record = attendance_template_variables($record);
+                    $record = presence_template_variables($record);
                     $user = $DB->get_record('user', array('id' => $record->userid));
                     $from = \core_user::get_noreply_user();
                     $oldforcelang = force_current_language($user->lang);
@@ -103,7 +103,7 @@ class notify extends \core\task\scheduled_task {
                     $numsentusers++;
                 }
             }
-            // Only send one warning to this user from each attendance in this run. - flag any higher percent notifications as sent.
+            // Only send one warning to this user from each presence in this run. - flag any higher percent notifications as sent.
             $thirdpartyusers = array();
             if (!empty($record->thirdpartyemails)) {
                 $sendto = explode(',', $record->thirdpartyemails);
@@ -118,13 +118,13 @@ class notify extends \core\task\scheduled_task {
                     $thirdpartyusers[$senduser][] = $record->notifyid;
 
                     // Check user is allowed to receive warningemails.
-                    if (has_capability('mod/attendance:warningemails', $context, $senduser)) {
+                    if (has_capability('mod/presence:warningemails', $context, $senduser)) {
                         if (empty($thirdpartynotifications[$senduser])) {
                             $thirdpartynotifications[$senduser] = array();
                         }
                         if (!isset($thirdpartynotifications[$senduser][$record->aid . '_' . $record->userid])) {
                             $thirdpartynotifications[$senduser][$record->aid . '_' . $record->userid]
-                                = get_string('thirdpartyemailtext', 'attendance', $record);
+                                = get_string('thirdpartyemailtext', 'presence', $record);
                         }
                     } else {
                         mtrace("user".$senduser. "does not have capablity in cm".$record->cmid);
@@ -135,7 +135,7 @@ class notify extends \core\task\scheduled_task {
             $notify->userid = $record->userid;
             $notify->notifyid = $record->notifyid;
             $notify->timesent = $now;
-            $DB->insert_record('attendance_warning_done', $notify);
+            $DB->insert_record('presence_warning_done', $notify);
         }
         if (!empty($numsentusers)) {
             mtrace($numsentusers ." user emails sent");
@@ -145,9 +145,9 @@ class notify extends \core\task\scheduled_task {
                 $user = $DB->get_record('user', array('id' => $sendid));
                 if (empty($user) || !empty($user->deleted)) {
                     // Clean this user up and remove from the notification list.
-                    $warnings = $DB->get_records_list('attendance_warning', 'id', $thirdpartyusers[$sendid]);
+                    $warnings = $DB->get_records_list('presence_warning', 'id', $thirdpartyusers[$sendid]);
                     if (!empty($warnings)) {
-                        attendance_remove_user_from_thirdpartyemails($warnings, $sendid);
+                        presence_remove_user_from_thirdpartyemails($warnings, $sendid);
                     }
                     // Don't send and skip to next notification.
                     continue;
@@ -157,9 +157,9 @@ class notify extends \core\task\scheduled_task {
                 $oldforcelang = force_current_language($user->lang);
 
                 $emailcontent = implode("\n", $notifications);
-                $emailcontent .= "\n\n".get_string('thirdpartyemailtextfooter', 'attendance');
+                $emailcontent .= "\n\n".get_string('thirdpartyemailtextfooter', 'presence');
                 $emailcontent = format_text($emailcontent);
-                $emailsubject = get_string('thirdpartyemailsubject', 'attendance');
+                $emailsubject = get_string('thirdpartyemailsubject', 'presence');
 
                 email_to_user($user, $from, $emailsubject, $emailcontent, $emailcontent);
                 force_current_language($oldforcelang);

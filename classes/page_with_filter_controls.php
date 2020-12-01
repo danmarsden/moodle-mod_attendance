@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Class definition for mod_attendance_page_with_filter_controls
+ * Class definition for mod_presence_page_with_filter_controls
  *
- * @package   mod_attendance
+ * @package   mod_presence
  * @copyright  2016 Dan Marsden http://danmarsden.com
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -29,7 +29,7 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright  2016 Dan Marsden http://danmarsden.com
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_attendance_page_with_filter_controls {
+class mod_presence_page_with_filter_controls {
     /** No filter. */
     const SELECTOR_NONE         = 1;
 
@@ -86,7 +86,7 @@ class mod_attendance_page_with_filter_controls {
     public function init($cm) {
         $this->cm = $cm;
         if (empty($this->defaultview)) {
-            $this->defaultview = get_config('attendance', 'defaultview');
+            $this->defaultview = get_config('presence', 'defaultview');
         }
         $this->init_view();
         $this->init_curdate();
@@ -100,9 +100,9 @@ class mod_attendance_page_with_filter_controls {
         global $SESSION;
 
         if (isset($this->view)) {
-            $SESSION->attcurrentattview[$this->cm->course] = $this->view;
-        } else if (isset($SESSION->attcurrentattview[$this->cm->course])) {
-            $this->view = $SESSION->attcurrentattview[$this->cm->course];
+            $SESSION->presencecurrentpresenceview[$this->cm->course] = $this->view;
+        } else if (isset($SESSION->presencecurrentpresenceview[$this->cm->course])) {
+            $this->view = $SESSION->presencecurrentpresenceview[$this->cm->course];
         } else {
             $this->view = $this->defaultview;
         }
@@ -115,9 +115,9 @@ class mod_attendance_page_with_filter_controls {
         global $SESSION;
 
         if (isset($this->curdate)) {
-            $SESSION->attcurrentattdate[$this->cm->course] = $this->curdate;
-        } else if (isset($SESSION->attcurrentattdate[$this->cm->course])) {
-            $this->curdate = $SESSION->attcurrentattdate[$this->cm->course];
+            $SESSION->presencecurrentpresencedate[$this->cm->course] = $this->curdate;
+        } else if (isset($SESSION->presencecurrentpresencedate[$this->cm->course])) {
+            $this->curdate = $SESSION->presencecurrentpresencedate[$this->cm->course];
         } else {
             $this->curdate = time();
         }
@@ -140,32 +140,32 @@ class mod_attendance_page_with_filter_controls {
         $year = $date['year'];
 
         switch ($this->view) {
-            case ATT_VIEW_DAYS:
+            case PRESENCE_VIEW_DAYS:
                 $this->startdate = make_timestamp($year, $mon, $mday);
                 $this->enddate = make_timestamp($year, $mon, $mday + 1);
                 break;
-            case ATT_VIEW_WEEKS:
+            case PRESENCE_VIEW_WEEKS:
                 $this->startdate = make_timestamp($year, $mon, $mday - $wday);
                 $this->enddate = make_timestamp($year, $mon, $mday + 7 - $wday) - 1;
                 break;
-            case ATT_VIEW_MONTHS:
+            case PRESENCE_VIEW_MONTHS:
                 $this->startdate = make_timestamp($year, $mon);
                 $this->enddate = make_timestamp($year, $mon + 1);
                 break;
-            case ATT_VIEW_ALLPAST:
+            case PRESENCE_VIEW_ALLPAST:
                 $this->startdate = 1;
                 $this->enddate = time();
                 break;
-            case ATT_VIEW_ALLFUTURE:
+            case PRESENCE_VIEW_ALLFUTURE:
                 $this->startdate = time();
                 $this->enddate = PHP_INT_MAX;
                 break;
-            case ATT_VIEW_ALL:
-            case ATT_VIEW_NOTPRESENT:
+            case PRESENCE_VIEW_ALL:
+            case PRESENCE_VIEW_NOTPRESENT:
                 $this->startdate = 0;
                 $this->enddate = 0;
                 break;
-            case ATT_VIEW_SUMMARY:
+            case PRESENCE_VIEW_SUMMARY:
                 $this->startdate = 1;
                 $this->enddate = 1;
                 break;
@@ -178,16 +178,16 @@ class mod_attendance_page_with_filter_controls {
     private function calc_sessgroupslist_sesstype() {
         global $SESSION;
 
-        if (!property_exists($SESSION, 'attsessiontype')) {
-            $SESSION->attsessiontype = array($this->cm->course => self::SESSTYPE_ALL);
-        } else if (!array_key_exists($this->cm->course, $SESSION->attsessiontype)) {
-            $SESSION->attsessiontype[$this->cm->course] = self::SESSTYPE_ALL;
+        if (!property_exists($SESSION, 'presencesessiontype')) {
+            $SESSION->presencesessiontype = array($this->cm->course => self::SESSTYPE_ALL);
+        } else if (!array_key_exists($this->cm->course, $SESSION->presencesessiontype)) {
+            $SESSION->presencesessiontype[$this->cm->course] = self::SESSTYPE_ALL;
         }
 
         $group = optional_param('group', self::SESSTYPE_NO_VALUE, PARAM_INT);
         if ($this->selectortype == self::SELECTOR_SESS_TYPE) {
             if ($group > self::SESSTYPE_NO_VALUE) {
-                $SESSION->attsessiontype[$this->cm->course] = $group;
+                $SESSION->presencesessiontype[$this->cm->course] = $group;
                 if ($group > self::SESSTYPE_ALL) {
                     // Set activegroup in $SESSION.
                     groups_get_activity_group($this->cm, true);
@@ -199,17 +199,17 @@ class mod_attendance_page_with_filter_controls {
                 }
                 $this->sesstype = $group;
             } else {
-                $this->sesstype = $SESSION->attsessiontype[$this->cm->course];
+                $this->sesstype = $SESSION->presencesessiontype[$this->cm->course];
             }
         } else if ($this->selectortype == self::SELECTOR_GROUP) {
             if ($group == 0) {
-                $SESSION->attsessiontype[$this->cm->course] = self::SESSTYPE_ALL;
+                $SESSION->presencesessiontype[$this->cm->course] = self::SESSTYPE_ALL;
                 $this->sesstype = self::SESSTYPE_ALL;
             } else if ($group > 0) {
-                $SESSION->attsessiontype[$this->cm->course] = $group;
+                $SESSION->presencesessiontype[$this->cm->course] = $group;
                 $this->sesstype = $group;
             } else {
-                $this->sesstype = $SESSION->attsessiontype[$this->cm->course];
+                $this->sesstype = $SESSION->presencesessiontype[$this->cm->course];
             }
         }
 
@@ -243,10 +243,10 @@ class mod_attendance_page_with_filter_controls {
 
         if ($allowedgroups) {
             if ($groupmode == VISIBLEGROUPS or has_capability('moodle/site:accessallgroups', $PAGE->context)) {
-                $this->sessgroupslist[self::SESSTYPE_ALL] = get_string('all', 'attendance');
+                $this->sessgroupslist[self::SESSTYPE_ALL] = get_string('all', 'presence');
             }
             // Show Common groups always.
-            $this->sessgroupslist[self::SESSTYPE_COMMON] = get_string('commonsessions', 'attendance');
+            $this->sessgroupslist[self::SESSTYPE_COMMON] = get_string('commonsessions', 'presence');
             foreach ($allowedgroups as $group) {
                 $this->sessgroupslist[$group->id] = get_string('group') . ': ' . format_string($group->name);
             }

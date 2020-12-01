@@ -1,7 +1,7 @@
 /* global M */
 // eslint-disable-next-line camelcase
-M.mod_attendance = M.mod_attendance || {};
-M.mod_attendance.groupfilter = {
+M.mod_presence = M.mod_presence || {};
+M.mod_presence.groupfilter = {
     groupmappings: null,
 
     init: function(opts) {

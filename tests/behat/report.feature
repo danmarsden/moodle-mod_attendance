@@ -1,11 +1,11 @@
-@javascript @mod @uon @mod_attendance
+@javascript @mod @uon @mod_presence
 Feature: Visiting reports
   As a teacher I visit the reports
 
   Background:
     Given the following "courses" exist:
       | fullname | shortname | summary                             | category | timecreated   | timemodified  |
-      | Course 1 | C1        | Prove the attendance activity works | 0        | ##yesterday## | ##yesterday## |
+      | Course 1 | C1        | Prove the presence activity works | 0        | ##yesterday## | ##yesterday## |
     And the following "users" exist:
       | username    | firstname | lastname | email            | idnumber | department       | institution |
       | student1    | Student   | 1  | student1@asd.com | 1234     | computer science | University of Nottingham |
@@ -15,13 +15,13 @@ Feature: Visiting reports
       | C1     | student1 | student        | ##yesterday## |
       | C1     | teacher1 | editingteacher | ##yesterday## |
     And the following config values are set as admin:
-      | enablewarnings | 1 | attendance |
+      | enablewarnings | 1 | presence |
 
     And I log in as "teacher1"
     And I am on "Course 1" course homepage with editing mode on
-    And I add a "Attendance" to section "1" and I fill the form with:
-      | Name        | Attendance       |
-    And I follow "Attendance"
+    And I add a "presence" to section "1" and I fill the form with:
+      | Name        | presence       |
+    And I follow "presence"
     And I follow "Add session"
     And I set the following fields to these values:
       | id_sestime_starthour | 01 |
@@ -35,10 +35,10 @@ Feature: Visiting reports
     And I click on "id_submitbutton" "button"
     And I log out
 
-  Scenario: Teacher takes attendance
+  Scenario: Teacher takes presence
     Given I log in as "teacher1"
     And I am on "Course 1" course homepage
-    And I follow "Attendance"
+    And I follow "presence"
     And I navigate to "Edit settings" in current page administration
     Then I set the following fields to these values:
       | id_grade_modgrade_type  | Point |
@@ -53,11 +53,11 @@ Feature: Visiting reports
     And I follow "Course 1"
     And "-" "text" should exist in the "Student 1" "table_row"
 
-    When I follow "Attendance"
-    Then I click on "Take attendance" "link" in the "1AM - 2AM" "table_row"
+    When I follow "presence"
+    Then I click on "Take presence" "link" in the "1AM - 2AM" "table_row"
     # Late
     And I click on "td.cell.c4 input" "css_element" in the "Student 1" "table_row"
-    And I press "Save attendance"
+    And I press "Save presence"
 
     When I follow "Report"
     Then "1 / 2" "text" should exist in the "Student 1" "table_row"
@@ -69,7 +69,7 @@ Feature: Visiting reports
 
     And I log out
 
-  Scenario: Teacher take attendance of group session
+  Scenario: Teacher take presence of group session
     Given the following "groups" exist:
       | course | name   | idnumber |
       | C1     | Group1 | Group1   |
@@ -79,7 +79,7 @@ Feature: Visiting reports
 
     When I log in as "teacher1"
     And I am on "Course 1" course homepage
-    And I follow "Attendance"
+    And I follow "presence"
     And I navigate to "Edit settings" in current page administration
     And I set the following fields to these values:
       | id_grade_modgrade_type  | Point |
@@ -87,11 +87,11 @@ Feature: Visiting reports
       | id_groupmode            | Visible groups |
     And I press "Save and display"
 
-    When I follow "Attendance"
-    Then I click on "Take attendance" "link" in the "1AM - 2AM" "table_row"
+    When I follow "presence"
+    Then I click on "Take presence" "link" in the "1AM - 2AM" "table_row"
     # Excused
     And I click on "td.cell.c4 input" "css_element" in the "Student 1" "table_row"
-    And I press "Save attendance"
+    And I press "Save presence"
 
     When I follow "Add session"
     And I set the following fields to these values:
@@ -103,10 +103,10 @@ Feature: Visiting reports
     Then I should see "3AM - 4AM"
     And "Group: Group1" "text" should exist in the "3AM - 4AM" "table_row"
 
-    When I click on "Take attendance" "link" in the "3AM - 4AM" "table_row"
+    When I click on "Take presence" "link" in the "3AM - 4AM" "table_row"
     # Present
     And I click on "td.cell.c3 input" "css_element" in the "Student 1" "table_row"
-    And I press "Save attendance"
+    And I press "Save presence"
 
     When I follow "Report"
     Then "3 / 4" "text" should exist in the "Student 1" "table_row"
@@ -121,17 +121,17 @@ Feature: Visiting reports
   Scenario: Teacher visit summary report and absentee report
     Given I log in as "teacher1"
     And I am on "Course 1" course homepage
-    And I follow "Attendance"
+    And I follow "presence"
     And I navigate to "Edit settings" in current page administration
     And I set the following fields to these values:
        | id_grade_modgrade_type  | Point |
        | id_grade_modgrade_point | 50   |
     And I press "Save and display"
 
-    When I click on "Take attendance" "link" in the "1AM - 2AM" "table_row"
+    When I click on "Take presence" "link" in the "1AM - 2AM" "table_row"
     # Late
     And I click on "td.cell.c4 input" "css_element" in the "Student 1" "table_row"
-    And I press "Save attendance"
+    And I press "Save presence"
 
     When I follow "Add session"
     And I set the following fields to these values:
@@ -140,10 +140,10 @@ Feature: Visiting reports
     And I click on "id_submitbutton" "button"
     Then I should see "3AM - 4AM"
 
-    When I click on "Take attendance" "link" in the "3AM - 4AM" "table_row"
+    When I click on "Take presence" "link" in the "3AM - 4AM" "table_row"
     # Present
     And I click on "td.cell.c3 input" "css_element" in the "Student 1" "table_row"
-    And I press "Save attendance"
+    And I press "Save presence"
 
     When I follow "Add session"
     And I set the following fields to these values:
@@ -168,17 +168,17 @@ Feature: Visiting reports
   Scenario: Student visit user report
     Given I log in as "teacher1"
     And I am on "Course 1" course homepage
-    And I follow "Attendance"
+    And I follow "presence"
     And I navigate to "Edit settings" in current page administration
     Then I set the following fields to these values:
       | id_grade_modgrade_type  | Point |
       | id_grade_modgrade_point | 50   |
     And I press "Save and display"
 
-    When I click on "Take attendance" "link" in the "1AM - 2AM" "table_row"
+    When I click on "Take presence" "link" in the "1AM - 2AM" "table_row"
     # Late
     And I click on "td.cell.c4 input" "css_element" in the "Student 1" "table_row"
-    And I press "Save attendance"
+    And I press "Save presence"
 
     When I follow "Add session"
     And I set the following fields to these values:
@@ -186,10 +186,10 @@ Feature: Visiting reports
       | id_sestime_endhour   | 04 |
     And I click on "id_submitbutton" "button"
 
-    When I click on "Take attendance" "link" in the "3AM - 4AM" "table_row"
+    When I click on "Take presence" "link" in the "3AM - 4AM" "table_row"
     # Present
     And I click on "td.cell.c3 input" "css_element" in the "Student 1" "table_row"
-    And I press "Save attendance"
+    And I press "Save presence"
 
     When I follow "Add session"
     And I set the following fields to these values:
@@ -201,8 +201,8 @@ Feature: Visiting reports
 
     When I log in as "student1"
     And I am on "Course 1" course homepage
-    And I follow "Attendance"
-    And I click on "All" "link" in the ".attfiltercontrols" "css_element"
+    And I follow "presence"
+    And I click on "All" "link" in the ".presencefiltercontrols" "css_element"
 
     Then "2" "text" should exist in the "Taken sessions" "table_row"
     And "3 / 4" "text" should exist in the "Points over taken sessions:" "table_row"

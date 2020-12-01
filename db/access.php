@@ -17,7 +17,7 @@
 /**
  * Capability definitions for this module.
  *
- * @package   mod_attendance
+ * @package   mod_presence
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -25,7 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $capabilities = array(
-    'mod/attendance:view' => array(
+    'mod/presence:view' => array(
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes' => array(
@@ -36,7 +36,7 @@ $capabilities = array(
         )
     ),
 
-    'mod/attendance:addinstance' => array(
+    'mod/presence:addinstance' => array(
         'riskbitmask' => RISK_XSS,
         'captype' => 'write',
         'contextlevel' => CONTEXT_COURSE,
@@ -47,7 +47,7 @@ $capabilities = array(
         'clonepermissionsfrom' => 'moodle/course:manageactivities'
     ),
 
-    'mod/attendance:viewreports' => array(
+    'mod/presence:viewreports' => array(
         'riskbitmask' => RISK_PERSONAL,
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
@@ -58,7 +58,7 @@ $capabilities = array(
         )
     ),
 
-    'mod/attendance:takeattendances' => array(
+    'mod/presence:takepresences' => array(
         'riskbitmask' => RISK_DATALOSS,
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
@@ -69,7 +69,7 @@ $capabilities = array(
         )
     ),
 
-    'mod/attendance:changeattendances' => array(
+    'mod/presence:changepresences' => array(
         'riskbitmask' => RISK_DATALOSS,
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
@@ -80,7 +80,7 @@ $capabilities = array(
         )
     ),
 
-    'mod/attendance:manageattendances' => array(
+    'mod/presence:managepresences' => array(
         'riskbitmask' => RISK_CONFIG,
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
@@ -90,7 +90,7 @@ $capabilities = array(
         )
     ),
 
-    'mod/attendance:changepreferences' => array(
+    'mod/presence:changepreferences' => array(
         'riskbitmask' => RISK_CONFIG,
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
@@ -100,7 +100,7 @@ $capabilities = array(
         )
     ),
 
-    'mod/attendance:export' => array(
+    'mod/presence:export' => array(
         'riskbitmask' => RISK_PERSONAL,
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
@@ -111,7 +111,7 @@ $capabilities = array(
     ),
 
 
-    'mod/attendance:canbelisted' => array(
+    'mod/presence:canbelisted' => array(
         'riskbitmask' => RISK_PERSONAL,
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
@@ -121,7 +121,7 @@ $capabilities = array(
     ),
 
     // Allow teachers to manage temporary users.
-    'mod/attendance:managetemporaryusers' => array(
+    'mod/presence:managetemporaryusers' => array(
         'riskbitmask' => RISK_DATALOSS,
 
         'captype' => 'write',
@@ -133,7 +133,7 @@ $capabilities = array(
         )
     ),
     // Allow access to site level reports.
-    'mod/attendance:viewsummaryreports' => array(
+    'mod/presence:viewsummaryreports' => array(
         'riskbitmask' => RISK_PERSONAL,
         'captype' => 'read',
         'contextlevel' => CONTEXT_COURSECAT,
@@ -142,7 +142,7 @@ $capabilities = array(
         )
     ),
     // Users that can receive extra warning e-mails.
-    'mod/attendance:warningemails' => array(
+    'mod/presence:warningemails' => array(
         'riskbitmask' => RISK_DATALOSS,
 
         'captype' => 'write',
@@ -154,7 +154,7 @@ $capabilities = array(
         )
     ),
 
-    'mod/attendance:managerooms' => array(
+    'mod/presence:managerooms' => array(
         'riskbitmask' => RISK_DATALOSS,
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,

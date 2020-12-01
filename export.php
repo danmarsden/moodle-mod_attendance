@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Export attendance sessions
+ * Export presence sessions
  *
- * @package   mod_attendance
+ * @package   mod_presence
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -32,39 +32,39 @@ require_once($CFG->libdir.'/formslib.php');
 
 $id             = required_param('id', PARAM_INT);
 
-$cm             = get_coursemodule_from_id('attendance', $id, 0, false, MUST_EXIST);
+$cm             = get_coursemodule_from_id('presence', $id, 0, false, MUST_EXIST);
 $course         = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
-$att            = $DB->get_record('attendance', array('id' => $cm->instance), '*', MUST_EXIST);
+$presence            = $DB->get_record('presence', array('id' => $cm->instance), '*', MUST_EXIST);
 
 require_login($course, true, $cm);
 
 $context = context_module::instance($cm->id);
-require_capability('mod/attendance:export', $context);
+require_capability('mod/presence:export', $context);
 
-$att = new mod_attendance_structure($att, $cm, $course, $context);
+$presence = new mod_presence_structure($presence, $cm, $course, $context);
 
-$PAGE->set_url($att->url_export());
-$PAGE->set_title($course->shortname. ": ".$att->name);
+$PAGE->set_url($presence->url_export());
+$PAGE->set_title($course->shortname. ": ".$presence->name);
 $PAGE->set_heading($course->fullname);
 $PAGE->force_settings_menu(true);
 $PAGE->set_cacheable(true);
-$PAGE->navbar->add(get_string('export', 'attendance'));
+$PAGE->navbar->add(get_string('export', 'presence'));
 
 $formparams = array('course' => $course, 'cm' => $cm, 'modcontext' => $context);
-$mform = new mod_attendance\form\export($att->url_export(), $formparams);
+$mform = new mod_presence\form\export($presence->url_export(), $formparams);
 
 if ($formdata = $mform->get_data()) {
 
-    $pageparams = new mod_attendance_page_with_filter_controls();
+    $pageparams = new mod_presence_page_with_filter_controls();
     $pageparams->init($cm);
     $pageparams->page = 0;
     $pageparams->group = $formdata->group;
-    $pageparams->set_current_sesstype($formdata->group ? $formdata->group : mod_attendance_page_with_filter_controls::SESSTYPE_ALL);
+    $pageparams->set_current_sesstype($formdata->group ? $formdata->group : mod_presence_page_with_filter_controls::SESSTYPE_ALL);
     if (isset($formdata->includeallsessions)) {
         if (isset($formdata->includenottaken)) {
-            $pageparams->view = ATT_VIEW_ALL;
+            $pageparams->view = PRESENCE_VIEW_ALL;
         } else {
-            $pageparams->view = ATT_VIEW_ALLPAST;
+            $pageparams->view = PRESENCE_VIEW_ALLPAST;
             $pageparams->curdate = time();
         }
         $pageparams->init_start_end_date();
@@ -75,18 +75,18 @@ if ($formdata = $mform->get_data()) {
     if ($formdata->selectedusers) {
         $pageparams->userids = $formdata->users;
     }
-    $att->pageparams = $pageparams;
+    $presence->pageparams = $pageparams;
 
-    $reportdata = new attendance_report_data($att);
+    $reportdata = new presence_report_data($presence);
     if ($reportdata->users) {
         $filename = clean_filename($course->shortname.'_'.
-            get_string('modulenameplural', 'attendance').
+            get_string('modulenameplural', 'presence').
             '_'.userdate(time(), '%Y%m%d-%H%M'));
 
         $group = $formdata->group ? $reportdata->groups[$formdata->group] : 0;
         $data = new stdClass;
         $data->tabhead = array();
-        $data->course = $att->course->fullname;
+        $data->course = $presence->course->fullname;
         $data->group = $group ? $group->name : get_string('allparticipants');
 
         $data->tabhead[] = get_string('lastname');
@@ -101,7 +101,7 @@ if ($formdata = $mform->get_data()) {
         if (isset($formdata->ident)) {
             foreach (array_keys($formdata->ident) as $opt) {
                 if ($opt == 'id') {
-                    $data->tabhead[] = get_string('studentid', 'attendance');
+                    $data->tabhead[] = get_string('studentid', 'presence');
                 } else if (in_array($opt, array_column($customfields, 'shortname'))) {
                     foreach ($customfields as $customfield) {
                         if ($opt == $customfield->shortname) {
@@ -116,12 +116,12 @@ if ($formdata = $mform->get_data()) {
 
         if (count($reportdata->sessions) > 0) {
             foreach ($reportdata->sessions as $sess) {
-                $text = userdate($sess->sessdate, get_string('strftimedmyhm', 'attendance'));
+                $text = userdate($sess->sessdate, get_string('strftimedmyhm', 'presence'));
                 $text .= ' ';
                 if (!empty($sess->groupid) && empty($reportdata->groups[$sess->groupid])) {
-                    $text .= get_string('deletedgroup', 'attendance');
+                    $text .= get_string('deletedgroup', 'presence');
                 } else {
-                    $text .= $sess->groupid ? $reportdata->groups[$sess->groupid]->name : get_string('commonsession', 'attendance');
+                    $text .= $sess->groupid ? $reportdata->groups[$sess->groupid]->name : get_string('commonsession', 'presence');
                 }
                 if (isset($formdata->includedescription) && !empty($sess->description)) {
                     $text .= " ". strip_tags($sess->description);
@@ -132,7 +132,7 @@ if ($formdata = $mform->get_data()) {
                 }
             }
         } else {
-            print_error('sessionsnotfound', 'attendance', $att->url_manage());
+            print_error('sessionsnotfound', 'presence', $presence->url_manage());
         }
 
         $setnumber = -1;
@@ -144,9 +144,9 @@ if ($formdata = $mform->get_data()) {
             $data->tabhead[] = $sts->acronym;
         }
 
-        $data->tabhead[] = get_string('takensessions', 'attendance');
-        $data->tabhead[] = get_string('points', 'attendance');
-        $data->tabhead[] = get_string('percentage', 'attendance');
+        $data->tabhead[] = get_string('takensessions', 'presence');
+        $data->tabhead[] = get_string('points', 'presence');
+        $data->tabhead[] = get_string('percentage', 'presence');
 
         $i = 0;
         $data->table = array();
@@ -201,20 +201,20 @@ if ($formdata = $mform->get_data()) {
         }
 
         if ($formdata->format === 'text') {
-            attendance_exporttocsv($data, $filename);
+            presence_exporttocsv($data, $filename);
         } else {
-            attendance_exporttotableed($data, $filename, $formdata->format);
+            presence_exporttotableed($data, $filename, $formdata->format);
         }
         exit;
     } else {
-        print_error('studentsnotfound', 'attendance', $att->url_manage());
+        print_error('studentsnotfound', 'presence', $presence->url_manage());
     }
 }
 
-$output = $PAGE->get_renderer('mod_attendance');
-$tabs = new attendance_tabs($att, attendance_tabs::TAB_EXPORT);
+$output = $PAGE->get_renderer('mod_presence');
+$tabs = new presence_tabs($presence, presence_tabs::TAB_EXPORT);
 echo $output->header();
-echo $output->heading(get_string('attendanceforthecourse', 'attendance').' :: ' .format_string($course->fullname));
+echo $output->heading(get_string('presenceforthecourse', 'presence').' :: ' .format_string($course->fullname));
 echo $output->render($tabs);
 
 $mform->display();

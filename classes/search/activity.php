@@ -15,21 +15,21 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Search area for mod_attendance activities.
+ * Search area for mod_presence activities.
  *
- * @package    mod_attendance
+ * @package    mod_presence
  * @copyright  2016 Dan Marsden
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_attendance\search;
+namespace mod_presence\search;
 
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Search area for mod_attendance activities.
+ * Search area for mod_presence activities.
  *
- * @package    mod_attendance
+ * @package    mod_presence
  * @copyright  2016 Dan Marsden
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

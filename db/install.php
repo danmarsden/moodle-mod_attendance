@@ -17,7 +17,7 @@
 /**
  * post installation hook for adding data.
  *
- * @package    mod_attendance
+ * @package    mod_presence
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -27,6 +27,6 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * Post installation procedure
  */
-function xmldb_attendance_install() {
+function xmldb_presence_install() {
     return $result;
 }

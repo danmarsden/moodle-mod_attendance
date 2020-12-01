@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Manage attendance sessions
+ * Manage presence sessions
  *
- * @package    mod_attendance
+ * @package    mod_presence
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -25,70 +25,41 @@
 require_once(dirname(__FILE__).'/../../config.php');
 require_once(dirname(__FILE__).'/locallib.php');
 
-$pageparams = new mod_attendance_manage_page_params();
+$capabilities = array(
+    'mod/presence:managepresences',
+    'mod/presence:takepresences',
+    'mod/presence:changepresences'
+);
 
+$pageparams = new mod_presence_manage_page_params();
 $id                         = required_param('id', PARAM_INT);
 $from                       = optional_param('from', null, PARAM_ALPHANUMEXT);
 $pageparams->view           = optional_param('view', null, PARAM_INT);
 $pageparams->curdate        = optional_param('curdate', null, PARAM_INT);
-$pageparams->perpage        = get_config('attendance', 'resultsperpage');
+$pageparams->perpage        = get_config('presence', 'resultsperpage');
 
-$cm             = get_coursemodule_from_id('attendance', $id, 0, false, MUST_EXIST);
-$course         = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
-$att            = $DB->get_record('attendance', array('id' => $cm->instance), '*', MUST_EXIST);
+//$cm             = get_coursemodule_from_id('presence', $id, 0, false, MUST_EXIST);
+//$course         = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
 
-require_login($course, true, $cm);
+presence_init_page([
+    'url' => new moodle_url('/mod/presence/manage.php'),
+    'tab' => presence_tabs::TAB_SESSIONS,
+]);
+$presence = $DB->get_record('presence', array('id' => $cm->instance), '*', MUST_EXIST);
+$presence = new mod_presence_structure($presence, $cm, $course, $context, $pageparams);
+$filtercontrols = new presence_filter_controls($presence);
+$sessiondata = new presence_sessions_data($presence);
 
-$context = context_module::instance($cm->id);
-
-// security
-$capabilities = array(
-    'mod/attendance:manageattendances',
-    'mod/attendance:takeattendances',
-    'mod/attendance:changeattendances'
-);
-if (!has_any_capability($capabilities, $context)) {
-    $url = new moodle_url('/mod/attendance/view.php', array('id' => $cm->id));
-    redirect($url);
-}
-
-$pageparams->init($cm);
-$att = new mod_attendance_structure($att, $cm, $course, $context, $pageparams);
-
-$PAGE->set_url($att->url_manage());
-$PAGE->set_title($course->shortname. ": ".$att->name);
-$PAGE->set_heading($course->fullname);
-$PAGE->set_cacheable(true);
-$PAGE->force_settings_menu(true);
-$PAGE->navbar->add($att->name);
-
-
-$tabs = new attendance_tabs($att, attendance_tabs::TAB_SESSIONS);
-
-$filtercontrols = new attendance_filter_controls($att);
-
-$sessiondata = new attendance_sessions_data($att);
-
-$title = get_string('attendanceforthecourse', 'attendance').' :: ' .format_string($course->fullname);
-$header = new mod_attendance_header($att, $title);
-
-// Output starts here.
-
-$output = $PAGE->get_renderer('mod_attendance');
-echo $output->header();
-echo $output->render($header);
-mod_attendance_notifyqueue::show();
-echo $output->render($tabs);
 
 $templatecontext = (object)[
     'sessgroupselector' => $output->render_sess_group_selector($filtercontrols),
     'curdatecontrols' => $output->render_curdate_controls($filtercontrols),
     'pagingcontrols' => $output->render_paging_controls($filtercontrols),
-    'viewcontrols' => $output->render_view_controls($filtercontrols),
+    'addsessionurl' => $presence->url_sessions()->out(true, ['action' => mod_presence_sessions_page_params::ACTION_ADD]),
     'sessions' => $sessiondata->sessions,
     'sessionsbydate' => $sessiondata->sessionsbydate,
 ];
-echo $OUTPUT->render_from_template('mod_attendance/manage', $templatecontext);
+echo $OUTPUT->render_from_template('mod_presence/manage', $templatecontext);
 
 echo $output->footer();
 

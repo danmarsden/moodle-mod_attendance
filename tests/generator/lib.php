@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * mod_attendance data generator
+ * mod_presence data generator
  *
- * @package    mod_attendance
+ * @package    mod_presence
  * @category   test
  * @copyright  2013 Davo Smith, Synergy Learning
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -26,25 +26,25 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * mod_attendance data generator
+ * mod_presence data generator
  *
- * @package    mod_attendance
+ * @package    mod_presence
  * @category   test
  * @copyright  2013 Davo Smith, Synergy Learning
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_attendance_generator extends testing_module_generator {
+class mod_presence_generator extends testing_module_generator {
 
     /**
-     * Create new attendance module instance
+     * Create new presence module instance
      *
      * @param array|stdClass $record
      * @param array $options
-     * @return stdClass mod_attendance_structure
+     * @return stdClass mod_presence_structure
      */
     public function create_instance($record = null, array $options = null) {
         global $CFG, $DB;
-        require_once($CFG->dirroot.'/mod/attendance/lib.php');
+        require_once($CFG->dirroot.'/mod/presence/lib.php');
 
         $this->instancecount++;
         $i = $this->instancecount;
@@ -56,7 +56,7 @@ class mod_attendance_generator extends testing_module_generator {
             throw new coding_exception('module generator requires $record->course');
         }
         if (!isset($record->name)) {
-            $record->name = get_string('pluginname', 'attendance').' '.$i;
+            $record->name = get_string('pluginname', 'presence').' '.$i;
         }
         if (!isset($record->grade)) {
             $record->grade = 100;

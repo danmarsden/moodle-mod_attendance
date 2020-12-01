@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Attendance module renderering methods
+ * presence module renderering methods
  *
- * @package    mod_attendance
+ * @package    mod_presence
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -31,31 +31,31 @@ require_once($CFG->libdir.'/tablelib.php');
 require_once($CFG->libdir.'/moodlelib.php');
 
 /**
- * Attendance module renderer class
+ * presence module renderer class
  *
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_attendance_renderer extends plugin_renderer_base {
-    // External API - methods to render attendance renderable components.
+class mod_presence_renderer extends plugin_renderer_base {
+    // External API - methods to render presence renderable components.
 
     /**
-     * Renders tabs for attendance
+     * Renders tabs for presence
      *
-     * @param attendance_tabs $atttabs - tabs to display
+     * @param presence_tabs $presencetabs - tabs to display
      * @return string html code
      */
-    protected function render_attendance_tabs(attendance_tabs $atttabs) {
-        return print_tabs($atttabs->get_tabs(), $atttabs->currenttab, null, null, true);
+    protected function render_presence_tabs(presence_tabs $presencetabs) {
+        return print_tabs($presencetabs->get_tabs(), $presencetabs->currenttab, null, null, true);
     }
 
     /**
-     * Renders filter controls for attendance
+     * Renders filter controls for presence
      *
-     * @param attendance_filter_controls $fcontrols - filter controls data to display
+     * @param presence_filter_controls $fcontrols - filter controls data to display
      * @return string html code
      */
-    protected function render_attendance_filter_controls(attendance_filter_controls $fcontrols) {
+    protected function render_presence_filter_controls(presence_filter_controls $fcontrols) {
         $filtertable = new html_table();
         $filtertable->attributes['class'] = ' ';
         $filtertable->width = '100%';
@@ -70,7 +70,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $filtertable->data[0][] = $this->render_view_controls($fcontrols);
 
         $o = html_writer::table($filtertable);
-        $o = $this->output->container($o, 'attfiltercontrols');
+        $o = $this->output->container($o, 'presencefiltercontrols');
 
         return $o;
     }
@@ -78,23 +78,23 @@ class mod_attendance_renderer extends plugin_renderer_base {
     /**
      * Render group selector
      *
-     * @param attendance_filter_controls $fcontrols
+     * @param presence_filter_controls $fcontrols
      * @return mixed|string
      */
-    public function render_sess_group_selector(attendance_filter_controls $fcontrols) {
+    public function render_sess_group_selector(presence_filter_controls $fcontrols) {
         switch ($fcontrols->pageparams->selectortype) {
-            case mod_attendance_page_with_filter_controls::SELECTOR_SESS_TYPE:
+            case mod_presence_page_with_filter_controls::SELECTOR_SESS_TYPE:
                 $sessgroups = $fcontrols->get_sess_groups_list();
                 if ($sessgroups) {
                     $select = new single_select($fcontrols->url(), 'group', $sessgroups,
                                                 $fcontrols->get_current_sesstype(), null, 'selectgroup');
-                    $select->label = get_string('sessions', 'attendance');
+                    $select->label = get_string('sessions', 'presence');
                     $output = $this->output->render($select);
 
                     return html_writer::tag('div', $output, array('class' => 'groupselector'));
                 }
                 break;
-            case mod_attendance_page_with_filter_controls::SELECTOR_GROUP:
+            case mod_presence_page_with_filter_controls::SELECTOR_GROUP:
                 return groups_print_activity_menu($fcontrols->cm, $fcontrols->url(), true);
         }
 
@@ -104,10 +104,10 @@ class mod_attendance_renderer extends plugin_renderer_base {
     /**
      * Render paging controls.
      *
-     * @param attendance_filter_controls $fcontrols
+     * @param presence_filter_controls $fcontrols
      * @return string
      */
-    public function render_paging_controls(attendance_filter_controls $fcontrols) {
+    public function render_paging_controls(presence_filter_controls $fcontrols) {
         $pagingcontrols = '';
 
         $group = 0;
@@ -115,7 +115,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $group = $fcontrols->pageparams->group;
         }
 
-        $totalusers = count_enrolled_users(context_module::instance($fcontrols->cm->id), 'mod/attendance:canbelisted', $group);
+        $totalusers = count_enrolled_users(context_module::instance($fcontrols->cm->id), 'mod/presence:canbelisted', $group);
 
         if (empty($fcontrols->pageparams->page) || !$fcontrols->pageparams->page || !$totalusers ||
             empty($fcontrols->pageparams->perpage)) {
@@ -133,9 +133,9 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $a = new stdClass();
         $a->page = $fcontrols->pageparams->page;
         $a->numpages = $numberofpages;
-        $text = get_string('pageof', 'attendance', $a);
+        $text = get_string('pageof', 'presence', $a);
         $pagingcontrols .= html_writer::tag('span', $text,
-                                            array('class' => 'attbtn'));
+                                            array('class' => 'presencebtn'));
         if ($fcontrols->pageparams->page < $numberofpages) {
             $pagingcontrols .= html_writer::link($fcontrols->url(array('curdate' => $fcontrols->curdate,
                                                                        'page' => $fcontrols->pageparams->page + 1)),
@@ -148,92 +148,96 @@ class mod_attendance_renderer extends plugin_renderer_base {
     /**
      * Render date controls.
      *
-     * @param attendance_filter_controls $fcontrols
+     * @param presence_filter_controls $fcontrols
      * @return string
      */
-    public function render_curdate_controls(attendance_filter_controls $fcontrols) {
-        global $CFG;
-
-        $curdatecontrols = '';
-        if ($fcontrols->curdatetxt) {
-            $this->page->requires->strings_for_js(array('calclose', 'caltoday'), 'attendance');
-            $jsvals = array(
-                    'cal_months'    => explode(',', get_string('calmonths', 'attendance')),
-                    'cal_week_days' => explode(',', get_string('calweekdays', 'attendance')),
-                    'cal_start_weekday' => $CFG->calendar_startwday,
-                    'cal_cur_date'  => $fcontrols->curdate);
-            $curdatecontrols = html_writer::script(js_writer::set_variable('M.attendance', $jsvals));
-
-            $this->page->requires->js('/mod/attendance/calendar.js');
-
-            $params = array(
-                    'title' => get_string('calshow', 'attendance'),
-                    'id'    => 'show',
-                    'class' => 'btn btn-secondary',
-                    'type'  => 'button');
-            $buttonform = html_writer::link($fcontrols->url(array('curdate' => $fcontrols->prevcur)),
-                $this->output->larrow());
-            $buttonform .= html_writer::tag('button', $fcontrols->curdatetxt, $params);
-            foreach ($fcontrols->url_params(array('curdate' => '')) as $name => $value) {
-                $params = array(
-                        'type'  => 'hidden',
-                        'id'    => $name,
-                        'name'  => $name,
-                        'value' => $value);
-                $buttonform .= html_writer::empty_tag('input', $params);
-            }
-            $params = array(
-                    'id'        => 'currentdate',
-                    'action'    => $fcontrols->url_path(),
-                    'method'    => 'post'
-            );
-
-            $buttonform .= html_writer::link($fcontrols->url(array('curdate' => $fcontrols->nextcur)),
-                $this->output->rarrow());
-            $buttonform = html_writer::tag('form', $buttonform, $params);
-            $curdatecontrols .= $buttonform;
-        }
-
-        return $curdatecontrols;
+    public function render_view_controls(presence_filter_controls $fcontrols) {
+        die('depreceated');
     }
 
     /**
      * Render view controls.
      *
-     * @param attendance_filter_controls $fcontrols
+     * @param presence_filter_controls $fcontrols
      * @return string
      */
-    public function render_view_controls(attendance_filter_controls $fcontrols) {
-        $views[ATT_VIEW_ALL] = get_string('all', 'attendance');
-        $views[ATT_VIEW_ALLPAST] = get_string('allpast', 'attendance');
-        $views[ATT_VIEW_ALLFUTURE] = get_string('allfuture', 'attendance');
-        $views[ATT_VIEW_MONTHS] = get_string('months', 'attendance');
-        $views[ATT_VIEW_WEEKS] = get_string('weeks', 'attendance');
-        $views[ATT_VIEW_DAYS] = get_string('days', 'attendance');
-        $viewcontrols = '';
-        foreach ($views as $key => $sview) {
-            if ($key != $fcontrols->pageparams->view) {
-                $link = html_writer::link($fcontrols->url(array('view' => $key, 'mode' => $fcontrols->pageparams->mode)), $sview);
-                $viewcontrols .= html_writer::tag('span', $link, array('class' => 'attbtn'));
-            } else {
-                $viewcontrols .= html_writer::tag('span', $sview, array('class' => 'attcurbtn'));
+    public function render_curdate_controls(presence_filter_controls $fcontrols) {
+        global $CFG, $OUTPUT;
+        $this->page->requires->js('/mod/presence/calendar.js');
+        $this->page->requires->strings_for_js(array('calclose', 'caltoday'), 'presence');
+
+        $templatedata = [
+            'views' => [],
+            'script' => '',
+        ];
+
+        if ($fcontrols->curdatetxt) {
+            $jsvals = array(
+                'cal_months'    => explode(',', get_string('calmonths', 'presence')),
+                'cal_week_days' => explode(',', get_string('calweekdays', 'presence')),
+                'cal_start_weekday' => $CFG->calendar_startwday,
+                'cal_cur_date'  => $fcontrols->curdate);
+            $templatedata['script'] .= html_writer::script(js_writer::set_variable('M.presence', $jsvals));
+
+            $templatedata['prev_url'] = $fcontrols->url(array('curdate' => $fcontrols->prevcur));
+            $templatedata['next_url'] = $fcontrols->url(array('curdate' => $fcontrols->nextcur));
+
+            $params = array(
+                'title' => get_string('calshow', 'presence'),
+                'id'    => 'show',
+                'class' => 'btn btn-outline-secondary',
+                'type'  => 'button');
+
+            $buttonform .= html_writer::tag('button', $fcontrols->curdatetxt, $params);
+            foreach ($fcontrols->url_params(array('curdate' => '')) as $name => $value) {
+                $params = array(
+                    'type'  => 'hidden',
+                    'id'    => $name,
+                    'name'  => $name,
+                    'value' => $value);
+                $buttonform .= html_writer::empty_tag('input', $params);
             }
+            $params = array(
+                'id'        => 'currentdate',
+                'action'    => $fcontrols->url_path(),
+                'method'    => 'post'
+            );
+            $buttonform = html_writer::tag('form', $buttonform, $params);
+            $templatedata['datepicker'] = $buttonform;
         }
 
-        return html_writer::tag('nobr', $viewcontrols);
+
+
+        $views[PRESENCE_VIEW_ALL] = get_string('all', 'presence');
+        $views[PRESENCE_VIEW_ALLPAST] = get_string('allpast', 'presence');
+        $views[PRESENCE_VIEW_ALLFUTURE] = get_string('allfuture', 'presence');
+        $views[PRESENCE_VIEW_MONTHS] = get_string('months', 'presence');
+        $views[PRESENCE_VIEW_WEEKS] = get_string('weeks', 'presence');
+        $views[PRESENCE_VIEW_DAYS] = get_string('days', 'presence');
+
+        $templatedata['curviewname'] = $views[$fcontrols->pageparams->view];
+        foreach ($views as $key => $sview) {
+            $templatedata['views'][] = [
+                'viewtype' => $key,
+                'viewname' => $sview,
+                'link' => $fcontrols->url(array('view' => $key, 'mode' => $fcontrols->pageparams->mode)),
+                'active' => ($key == $fcontrols->pageparams->view),
+            ];
+        }
+        return $OUTPUT->render_from_template('mod_presence/controls_curdate', $templatedata);
     }
 
     /**
-     * Renders attendance sessions managing table
+     * Renders presence sessions managing table
      *
-     * @param attendance_sessions_data $sessdata to display
+     * @param presence_sessions_data $sessdata to display
      * @return string html code
      */
-    protected function render_attendance_manage_data(attendance_sessions_data $sessdata) {
+    protected function render_presence_manage_data(presence_sessions_data $sessdata) {
         $o = $this->render_sess_manage_table($sessdata) . $this->render_sess_manage_control($sessdata);
         $o = html_writer::tag('form', $o, array('method' => 'post', 'action' => $sessdata->url_sessions()->out()));
-        $o = $this->output->container($o, 'generalbox attwidth');
-        $o = $this->output->container($o, 'attsessions_manage_table');
+        $o = $this->output->container($o, 'generalbox presencewidth');
+        $o = $this->output->container($o, 'presencesessions_manage_table');
 
         return $o;
     }
@@ -241,22 +245,22 @@ class mod_attendance_renderer extends plugin_renderer_base {
     /**
      * Render session manage table.
      *
-     * @param attendance_sessions_data $sessdata
+     * @param presence_sessions_data $sessdata
      * @return string
      */
-    protected function render_sess_manage_table(attendance_sessions_data $sessdata) {
-        $this->page->requires->js_init_call('M.mod_attendance.init_manage');
+    protected function render_sess_manage_table(presence_sessions_data $sessdata) {
+        $this->page->requires->js_init_call('M.mod_presence.init_manage');
 
         $table = new html_table();
         $table->width = '100%';
         $table->head = array_merge([
                 '#',
-                get_string('date', 'attendance'),
-                get_string('time', 'attendance'),
-                get_string('sessiontypeshort', 'attendance'),
-                get_string('description', 'attendance'),
-                get_string('room', 'attendance'),
-                get_string('roomattendants', 'attendance'),
+                get_string('date', 'presence'),
+                get_string('time', 'presence'),
+                get_string('sessiontypeshort', 'presence'),
+                get_string('description', 'presence'),
+                get_string('room', 'presence'),
+                get_string('roomattendants', 'presence'),
                 get_string('actions'),
                 html_writer::checkbox('cb_selector', 0, false, '', array('id' => 'cb_selector')),
             ]);
@@ -275,19 +279,19 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
             if ($sess->groupid) {
                 if (empty($sessdata->groups[$sess->groupid])) {
-                    $table->data[$sess->id][] = get_string('deletedgroup', 'attendance');
+                    $table->data[$sess->id][] = get_string('deletedgroup', 'presence');
                     // Remove actions and links on date/time.
                     $dta['actions'] = '';
-                    $dta['date'] = userdate($sess->sessdate, get_string('strftimedmyw', 'attendance'));
+                    $dta['date'] = userdate($sess->sessdate, get_string('strftimedmyw', 'presence'));
                     $dta['time'] = $this->construct_time($sess->sessdate, $sess->duration);
                 } else {
                     $table->data[$sess->id][] = get_string('group') . ': ' . $sessdata->groups[$sess->groupid]->name;
                 }
             } else {
-                $table->data[$sess->id][] = get_string('commonsession', 'attendance');
+                $table->data[$sess->id][] = get_string('commonsession', 'presence');
             }
             $table->data[$sess->id][] = $sess->description;
-            $table->data[$sess->id][] = $sessdata->att->get_room_name($sess->roomid);
+            $table->data[$sess->id][] = $sessdata->presence->get_room_name($sess->roomid);
             if ($sess->maxattendants) {
                 $table->data[$sess->id][] = $sess->maxattendants ? $sess->bookings . ' / ' . $sess->maxattendants : '';
             } else if ($sess->bookings) {
@@ -297,7 +301,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             }
             $table->data[$sess->id][] = $dta['actions'];
             $table->data[$sess->id][] = html_writer::checkbox('sessid[]', $sess->id, false, '',
-                                                              array('class' => 'attendancesesscheckbox'));
+                                                              array('class' => 'presencesesscheckbox'));
         }
 
         return html_writer::table($table);
@@ -306,27 +310,27 @@ class mod_attendance_renderer extends plugin_renderer_base {
     /**
      * Implementation of user image rendering.
      *
-     * @param attendance_password_icon $helpicon A help icon instance
+     * @param presence_password_icon $helpicon A help icon instance
      * @return string HTML fragment
      */
-    protected function render_attendance_password_icon(attendance_password_icon $helpicon) {
-        return $this->render_from_template('attendance/attendance_password_icon', $helpicon->export_for_template($this));
+    protected function render_presence_password_icon(presence_password_icon $helpicon) {
+        return $this->render_from_template('presence/presence_password_icon', $helpicon->export_for_template($this));
     }
     /**
      * Construct date time actions.
      *
-     * @param attendance_sessions_data $sessdata
+     * @param presence_sessions_data $sessdata
      * @param stdClass $sess
      * @return array
      */
-    private function construct_date_time_actions(attendance_sessions_data $sessdata, $sess) {
+    private function construct_date_time_actions(presence_sessions_data $sessdata, $sess) {
         $actions = '';
         if ((!empty($sess->studentpassword) || ($sess->includeqrcode == 1)) &&
-            (has_capability('mod/attendance:manageattendances', $sessdata->att->context) ||
-            has_capability('mod/attendance:takeattendances', $sessdata->att->context) ||
-            has_capability('mod/attendance:changeattendances', $sessdata->att->context))) {
+            (has_capability('mod/presence:managepresences', $sessdata->presence->context) ||
+            has_capability('mod/presence:takepresences', $sessdata->presence->context) ||
+            has_capability('mod/presence:changepresences', $sessdata->presence->context))) {
 
-            $icon = new attendance_password_icon($sess->studentpassword, $sess->id);
+            $icon = new presence_password_icon($sess->studentpassword, $sess->id);
 
             if ($sess->includeqrcode == 1||$sess->rotateqrcode == 1) {
                 $icon->includeqrcode = 1;
@@ -337,36 +341,36 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $actions .= $this->render($icon);
         }
 
-        $date = userdate($sess->sessdate, get_string('strftimedmyw', 'attendance'));
+        $date = userdate($sess->sessdate, get_string('strftimedmyw', 'presence'));
         $time = $this->construct_time($sess->sessdate, $sess->duration);
         if ($sess->lasttaken > 0) {
-            if (has_capability('mod/attendance:changeattendances', $sessdata->att->context)) {
+            if (has_capability('mod/presence:changepresences', $sessdata->presence->context)) {
                 $url = $sessdata->url_take($sess->id, $sess->groupid);
-                $title = get_string('changeattendance', 'attendance');
+                $title = get_string('changepresence', 'presence');
 
                 $date = html_writer::link($url, $date, array('title' => $title));
                 $time = html_writer::link($url, $time, array('title' => $title));
 
-                $actions .= $this->output->action_icon($url, new pix_icon('redo', $title, 'attendance'));
+                $actions .= $this->output->action_icon($url, new pix_icon('redo', $title, 'presence'));
             } else {
                 $date = '<i>' . $date . '</i>';
                 $time = '<i>' . $time . '</i>';
             }
         } else {
-            if (has_capability('mod/attendance:takeattendances', $sessdata->att->context)) {
+            if (has_capability('mod/presence:takepresences', $sessdata->presence->context)) {
                 $url = $sessdata->url_take($sess->id, $sess->groupid);
-                $title = get_string('takeattendance', 'attendance');
+                $title = get_string('takepresence', 'presence');
                 $actions .= $this->output->action_icon($url, new pix_icon('t/go', $title));
             }
         }
 
-        if (has_capability('mod/attendance:manageattendances', $sessdata->att->context)) {
-            $url = $sessdata->url_sessions($sess->id, mod_attendance_sessions_page_params::ACTION_UPDATE);
-            $title = get_string('editsession', 'attendance');
+        if (has_capability('mod/presence:managepresences', $sessdata->presence->context)) {
+            $url = $sessdata->url_sessions($sess->id, mod_presence_sessions_page_params::ACTION_UPDATE);
+            $title = get_string('editsession', 'presence');
             $actions .= $this->output->action_icon($url, new pix_icon('t/edit', $title));
 
-            $url = $sessdata->url_sessions($sess->id, mod_attendance_sessions_page_params::ACTION_DELETE);
-            $title = get_string('deletesession', 'attendance');
+            $url = $sessdata->url_sessions($sess->id, mod_presence_sessions_page_params::ACTION_DELETE);
+            $title = get_string('deletesession', 'presence');
             $actions .= $this->output->action_icon($url, new pix_icon('t/delete', $title));
         }
 
@@ -376,30 +380,30 @@ class mod_attendance_renderer extends plugin_renderer_base {
     /**
      * Render session manage control.
      *
-     * @param attendance_sessions_data $sessdata
+     * @param presence_sessions_data $sessdata
      * @return string
      */
-    protected function render_sess_manage_control(attendance_sessions_data $sessdata) {
+    protected function render_sess_manage_control(presence_sessions_data $sessdata) {
         $table = new html_table();
         $table->attributes['class'] = ' ';
         $table->width = '100%';
         $table->align = array('left', 'right');
 
-        $table->data[0][] = $this->output->help_icon('hiddensessions', 'attendance',
-                get_string('hiddensessions', 'attendance').': '.$sessdata->hiddensessionscount);
+        $table->data[0][] = $this->output->help_icon('hiddensessions', 'presence',
+                get_string('hiddensessions', 'presence').': '.$sessdata->hiddensessionscount);
 
-        if (has_capability('mod/attendance:manageattendances', $sessdata->att->context)) {
+        if (has_capability('mod/presence:managepresences', $sessdata->presence->context)) {
             if ($sessdata->hiddensessionscount > 0) {
                 $attributes = array(
                         'type'  => 'submit',
                         'name'  => 'deletehiddensessions',
                         'class' => 'btn btn-secondary',
-                        'value' => get_string('deletehiddensessions', 'attendance'));
+                        'value' => get_string('deletehiddensessions', 'presence'));
                 $table->data[1][] = html_writer::empty_tag('input', $attributes);
             }
 
-            $options = array(mod_attendance_sessions_page_params::ACTION_DELETE_SELECTED => get_string('delete'),
-                mod_attendance_sessions_page_params::ACTION_CHANGE_DURATION => get_string('changeduration', 'attendance'));
+            $options = array(mod_presence_sessions_page_params::ACTION_DELETE_SELECTED => get_string('delete'),
+                mod_presence_sessions_page_params::ACTION_CHANGE_DURATION => get_string('changeduration', 'presence'));
 
             $controls = html_writer::select($options, 'action');
             $attributes = array(
@@ -409,7 +413,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
                     'class' => 'btn btn-secondary');
             $controls .= html_writer::empty_tag('input', $attributes);
         } else {
-            $controls = get_string('youcantdo', 'attendance'); // You can't do anything.
+            $controls = get_string('youcantdo', 'presence'); // You can't do anything.
         }
         $table->data[0][] = $controls;
 
@@ -419,18 +423,18 @@ class mod_attendance_renderer extends plugin_renderer_base {
     /**
      * Render take data.
      *
-     * @param attendance_take_data $takedata
+     * @param presence_take_data $takedata
      * @return string
      */
-    protected function render_attendance_take_data(attendance_take_data $takedata) {
-        user_preference_allow_ajax_update('mod_attendance_statusdropdown', PARAM_TEXT);
+    protected function render_presence_take_data(presence_take_data $takedata) {
+        user_preference_allow_ajax_update('mod_presence_statusdropdown', PARAM_TEXT);
 
-        $controls = $this->render_attendance_take_controls($takedata);
+        $controls = $this->render_presence_take_controls($takedata);
         $table = html_writer::start_div('no-overflow');
-        if ($takedata->pageparams->viewmode == mod_attendance_take_page_params::SORTED_LIST) {
-            $table .= $this->render_attendance_take_list($takedata);
+        if ($takedata->pageparams->viewmode == mod_presence_take_page_params::SORTED_LIST) {
+            $table .= $this->render_presence_take_list($takedata);
         } else {
-            $table .= $this->render_attendance_take_grid($takedata);
+            $table .= $this->render_presence_take_grid($takedata);
         }
         $table .= html_writer::input_hidden_params($takedata->url(array('sesskey' => sesskey(),
                                                                         'page' => $takedata->pageparams->page,
@@ -440,11 +444,11 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $params = array(
                 'type'  => 'submit',
                 'class' => 'btn btn-primary',
-                'value' => get_string('save', 'attendance'));
+                'value' => get_string('save', 'presence'));
         $table .= html_writer::tag('center', html_writer::empty_tag('input', $params));
 
         $table = html_writer::tag('form', $table, array('method' => 'post', 'action' => $takedata->url_path(),
-                                                        'id' => 'attendancetakeform'));
+                                                        'id' => 'presencetakeform'));
 
         foreach ($takedata->statuses as $status) {
             $sessionstats[$status->id] = 0;
@@ -470,16 +474,16 @@ class mod_attendance_renderer extends plugin_renderer_base {
     /**
      * Render take controls.
      *
-     * @param attendance_take_data $takedata
+     * @param presence_take_data $takedata
      * @return string
      */
-    protected function render_attendance_take_controls(attendance_take_data $takedata) {
+    protected function render_presence_take_controls(presence_take_data $takedata) {
 
         $urlparams = array('id' => $takedata->cm->id,
             'sessionid' => $takedata->pageparams->sessionid,
             'grouptype' => $takedata->pageparams->grouptype);
-        $url = new moodle_url('/mod/attendance/import/marksessions.php', $urlparams);
-        $return = $this->output->single_button($url, get_string('uploadattendance', 'attendance'));
+        $url = new moodle_url('/mod/presence/import/marksessions.php', $urlparams);
+        $return = $this->output->single_button($url, get_string('uploadpresence', 'presence'));
 
         $table = new html_table();
         $table->attributes['class'] = ' ';
@@ -494,14 +498,14 @@ class mod_attendance_renderer extends plugin_renderer_base {
     /**
      * Construct take session info.
      *
-     * @param attendance_take_data $takedata
+     * @param presence_take_data $takedata
      * @return string
      */
-    private function construct_take_session_info(attendance_take_data $takedata) {
+    private function construct_take_session_info(presence_take_data $takedata) {
         $sess = $takedata->sessioninfo;
         $date = userdate($sess->sessdate, get_string('strftimedate'));
-        $starttime = attendance_strftimehm($sess->sessdate);
-        $endtime = attendance_strftimehm($sess->sessdate + $sess->duration);
+        $starttime = presence_strftimehm($sess->sessdate);
+        $endtime = presence_strftimehm($sess->sessdate + $sess->duration);
         $time = html_writer::tag('nobr', $starttime . ($sess->duration > 0 ? ' - ' . $endtime : ''));
         $sessinfo = $date.' '.$time;
         $sessinfo .= html_writer::empty_tag('br');
@@ -514,15 +518,15 @@ class mod_attendance_renderer extends plugin_renderer_base {
     /**
      * Construct take controls.
      *
-     * @param attendance_take_data $takedata
+     * @param presence_take_data $takedata
      * @return string
      */
-    private function construct_take_controls(attendance_take_data $takedata) {
+    private function construct_take_controls(presence_take_data $takedata) {
 
         $controls = '';
         $context = context_module::instance($takedata->cm->id);
         $group = 0;
-        if ($takedata->pageparams->grouptype != mod_attendance_structure::SESSION_COMMON) {
+        if ($takedata->pageparams->grouptype != mod_presence_structure::SESSION_COMMON) {
             $group = $takedata->pageparams->grouptype;
         } else {
             if ($takedata->pageparams->group) {
@@ -536,13 +540,13 @@ class mod_attendance_renderer extends plugin_renderer_base {
             } else {
                 $groups = $group;
             }
-            $users = get_users_by_capability($context, 'mod/attendance:canbelisted',
+            $users = get_users_by_capability($context, 'mod/presence:canbelisted',
                             'u.id, u.firstname, u.lastname, u.email',
                             '', '', '', $groups,
                             '', false, true);
             $totalusers = count($users);
         } else {
-            $totalusers = count_enrolled_users($context, 'mod/attendance:canbelisted', $group);
+            $totalusers = count_enrolled_users($context, 'mod/presence:canbelisted', $group);
         }
         $usersperpage = $takedata->pageparams->perpage;
         if (!empty($takedata->pageparams->page) && $takedata->pageparams->page && $totalusers && $usersperpage) {
@@ -556,16 +560,16 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $a = new stdClass();
             $a->page = $takedata->pageparams->page;
             $a->numpages = $numberofpages;
-            $text = get_string('pageof', 'attendance', $a);
+            $text = get_string('pageof', 'presence', $a);
             $controls .= html_writer::tag('span', $text,
-                                          array('class' => 'attbtn'));
+                                          array('class' => 'presencebtn'));
             if ($takedata->pageparams->page < $numberofpages) {
                 $controls .= html_writer::link($takedata->url(array('page' => $takedata->pageparams->page + 1,
                             'perpage' => $takedata->pageparams->perpage)), $this->output->rarrow());
             }
         }
 
-        if ($takedata->pageparams->grouptype == mod_attendance_structure::SESSION_COMMON and
+        if ($takedata->pageparams->grouptype == mod_presence_structure::SESSION_COMMON and
                 ($takedata->groupmode == VISIBLEGROUPS or
                 ($takedata->groupmode and has_capability('moodle/site:accessallgroups', $context)))) {
             $controls .= groups_print_activity_menu($takedata->cm, $takedata->url(), true);
@@ -574,28 +578,28 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $controls .= html_writer::empty_tag('br');
 
         $options = array(
-            mod_attendance_take_page_params::SORTED_LIST   => get_string('sortedlist', 'attendance'),
-            mod_attendance_take_page_params::SORTED_GRID   => get_string('sortedgrid', 'attendance'));
+            mod_presence_take_page_params::SORTED_LIST   => get_string('sortedlist', 'presence'),
+            mod_presence_take_page_params::SORTED_GRID   => get_string('sortedgrid', 'presence'));
         $select = new single_select($takedata->url(), 'viewmode', $options, $takedata->pageparams->viewmode, null);
-        $select->set_label(get_string('viewmode', 'attendance'));
+        $select->set_label(get_string('viewmode', 'presence'));
         $select->class = 'singleselect inline';
         $controls .= $this->output->render($select);
 
-        if ($takedata->pageparams->viewmode == mod_attendance_take_page_params::SORTED_LIST) {
+        if ($takedata->pageparams->viewmode == mod_presence_take_page_params::SORTED_LIST) {
             $options = array(
-                    0 => get_string('donotusepaging', 'attendance'),
-                   get_config('attendance', 'resultsperpage') => get_config('attendance', 'resultsperpage'));
+                    0 => get_string('donotusepaging', 'presence'),
+                   get_config('presence', 'resultsperpage') => get_config('presence', 'resultsperpage'));
             $select = new single_select($takedata->url(), 'perpage', $options, $takedata->pageparams->perpage, null);
             $select->class = 'singleselect inline';
             $controls .= $this->output->render($select);
         }
 
-        if ($takedata->pageparams->viewmode == mod_attendance_take_page_params::SORTED_GRID) {
-            $options = array (1 => '1 '.get_string('column', 'attendance'), '2 '.get_string('columns', 'attendance'),
-                                   '3 '.get_string('columns', 'attendance'), '4 '.get_string('columns', 'attendance'),
-                                   '5 '.get_string('columns', 'attendance'), '6 '.get_string('columns', 'attendance'),
-                                   '7 '.get_string('columns', 'attendance'), '8 '.get_string('columns', 'attendance'),
-                                   '9 '.get_string('columns', 'attendance'), '10 '.get_string('columns', 'attendance'));
+        if ($takedata->pageparams->viewmode == mod_presence_take_page_params::SORTED_GRID) {
+            $options = array (1 => '1 '.get_string('column', 'presence'), '2 '.get_string('columns', 'presence'),
+                                   '3 '.get_string('columns', 'presence'), '4 '.get_string('columns', 'presence'),
+                                   '5 '.get_string('columns', 'presence'), '6 '.get_string('columns', 'presence'),
+                                   '7 '.get_string('columns', 'presence'), '8 '.get_string('columns', 'presence'),
+                                   '9 '.get_string('columns', 'presence'), '10 '.get_string('columns', 'presence'));
             $select = new single_select($takedata->url(), 'gridcols', $options, $takedata->pageparams->gridcols, null);
             $select->class = 'singleselect inline';
             $controls .= $this->output->render($select);
@@ -607,12 +611,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
             $options = array();
             foreach ($takedata->sessions4copy as $sess) {
-                $start = attendance_strftimehm($sess->sessdate);
-                $end = $sess->duration ? ' - '.attendance_strftimehm($sess->sessdate + $sess->duration) : '';
+                $start = presence_strftimehm($sess->sessdate);
+                $end = $sess->duration ? ' - '.presence_strftimehm($sess->sessdate + $sess->duration) : '';
                 $options[$sess->id] = $start . $end;
             }
             $select = new single_select($takedata->url(array(), array('copyfrom')), 'copyfrom', $options);
-            $select->set_label(get_string('copyfrom', 'attendance'));
+            $select->set_label(get_string('copyfrom', 'presence'));
             $select->class = 'singleselect inline';
             $controls .= $this->output->render($select);
         }
@@ -627,24 +631,24 @@ class mod_attendance_renderer extends plugin_renderer_base {
      */
     private function statusdropdown() {
 
-        $pref = get_user_preferences('mod_attendance_statusdropdown');
+        $pref = get_user_preferences('mod_presence_statusdropdown');
         if (empty($pref)) {
             $pref = 'unselected';
         }
         $options = array_merge(
             [
-                'all' => get_string('statusall', 'attendance'),
-                'unselected' => get_string('statusunselected', 'attendance')
+                'all' => get_string('statusall', 'presence'),
+                'unselected' => get_string('statusunselected', 'presence')
             ],
             $enablerooms ? [
-                'booked' => get_string('statusbooked', 'attendance'),
-                'unbooked' => get_string('statusunbooked', 'attendance'),
+                'booked' => get_string('statusbooked', 'presence'),
+                'unbooked' => get_string('statusunbooked', 'presence'),
             ] : []
         );
 
         $select = new \single_select(new \moodle_url('/'), 'setallstatus-select', $options,
             $pref, null, 'setallstatus-select');
-        $select->label = get_string('setallstatuses', 'attendance');
+        $select->label = get_string('setallstatuses', 'presence');
 
         return $select;
     }
@@ -652,10 +656,10 @@ class mod_attendance_renderer extends plugin_renderer_base {
     /**
      * Render take list.
      *
-     * @param attendance_take_data $takedata
+     * @param presence_take_data $takedata
      * @return string
      */
-    protected function render_attendance_take_list(attendance_take_data $takedata) {
+    protected function render_presence_take_list(presence_take_data $takedata) {
         global $CFG;
 
         $table = new html_table();
@@ -671,7 +675,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $table->wrap[1] = 'nowrap';
         // Check if extra useridentity fields need to be added.
         $extrasearchfields = array();
-        if (!empty($CFG->showuseridentity) && has_capability('moodle/site:viewuseridentity', $takedata->att->context)) {
+        if (!empty($CFG->showuseridentity) && has_capability('moodle/site:viewuseridentity', $takedata->presence->context)) {
             $extrasearchfields = explode(',', $CFG->showuseridentity);
         }
         foreach ($extrasearchfields as $field) {
@@ -680,7 +684,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         }
         foreach ($takedata->statuses as $st) {
             $table->head[] = html_writer::link("#", $st->acronym, array('id' => 'checkstatus'.$st->id,
-                'title' => get_string('setallstatusesto', 'attendance', $st->description)));
+                'title' => get_string('setallstatusesto', 'presence', $st->description)));
             $table->align[] = 'center';
             $table->size[] = '20px';
             // JS to select all radios of this status and prevent default behaviour of # link.
@@ -688,12 +692,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 require(['jquery'], function($) {
                     $('#checkstatus".$st->id."').click(function(e) {
                      if ($('select[name=\"setallstatus-select\"] option:selected').val() == 'all') {
-                            $('#attendancetakeform').find('.st".$st->id."').prop('checked', true);
-                            M.util.set_user_preference('mod_attendance_statusdropdown','all');
+                            $('#presencetakeform').find('.st".$st->id."').prop('checked', true);
+                            M.util.set_user_preference('mod_presence_statusdropdown','all');
                         }
                         else {
-                            $('#attendancetakeform').find('input:indeterminate.st".$st->id."').prop('checked', true);
-                            M.util.set_user_preference('mod_attendance_statusdropdown','unselected');
+                            $('#presencetakeform').find('input:indeterminate.st".$st->id."').prop('checked', true);
+                            M.util.set_user_preference('mod_presence_statusdropdown','unselected');
                         }
                         e.preventDefault();
                     });
@@ -701,7 +705,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
         }
 
-        $table->head[] = get_string('remarks', 'attendance');
+        $table->head[] = get_string('remarks', 'presence');
         $table->align[] = 'center';
         $table->size[] = '20px';
         $table->attributes['class'] = 'generaltable takelist';
@@ -721,7 +725,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $attribs = array(
                 'id' => 'radiocheckstatus'.$st->id,
                 'type' => 'radio',
-                'title' => get_string('setallstatusesto', 'attendance', $st->description),
+                'title' => get_string('setallstatusesto', 'presence', $st->description),
                 'name' => 'setallstatuses',
                 'class' => "st{$st->id}",
             );
@@ -732,18 +736,18 @@ class mod_attendance_renderer extends plugin_renderer_base {
                     $('#radiocheckstatus".$st->id."').click(function(e) {
                         console.log(".$st->id.");
                         var mode = $('select[name=\"setallstatus-select\"] option:selected').val();
-                        M.util.set_user_preference('mod_attendance_statusdropdown', mode);
+                        M.util.set_user_preference('mod_presence_statusdropdown', mode);
                         if (mode == 'all') {
-                            $('#attendancetakeform').find('.st".$st->id."').prop('checked', true);
+                            $('#presencetakeform').find('.st".$st->id."').prop('checked', true);
                         }
                         else if(mode == 'unselected') {
-                            $('#attendancetakeform').find('input:indeterminate.st".$st->id."').prop('checked', true);
+                            $('#presencetakeform').find('input:indeterminate.st".$st->id."').prop('checked', true);
                         }
                         else if(mode == 'booked') {
-                            $('#attendancetakeform').find('.st".$st->id."[data-booked=1]').prop('checked', true);
+                            $('#presencetakeform').find('.st".$st->id."[data-booked=1]').prop('checked', true);
                         }
                         else if(mode == 'unbooked') {
-                            $('#attendancetakeform').find('.st".$st->id."[data-booked=0]').prop('checked', true);
+                            $('#presencetakeform').find('.st".$st->id."[data-booked=0]').prop('checked', true);
                         }
                     });
                 });");
@@ -792,10 +796,10 @@ class mod_attendance_renderer extends plugin_renderer_base {
     /**
      * Render take grid.
      *
-     * @param attendance_take_data $takedata
+     * @param presence_take_data $takedata
      * @return string
      */
-    protected function render_attendance_take_grid(attendance_take_data $takedata) {
+    protected function render_presence_take_grid(presence_take_data $takedata) {
         $table = new html_table();
         for ($i = 0; $i < $takedata->pageparams->gridcols; $i++) {
             $table->align[] = 'center';
@@ -808,24 +812,24 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $head[] = html_writer::div($this->output->render($this->statusdropdown()), 'setallstatuses');
         foreach ($takedata->statuses as $st) {
             $head[] = html_writer::link("#", $st->acronym, array('id' => 'checkstatus'.$st->id,
-                                              'title' => get_string('setallstatusesto', 'attendance', $st->description)));
+                                              'title' => get_string('setallstatusesto', 'presence', $st->description)));
             // JS to select all radios of this status and prevent default behaviour of # link.
             $this->page->requires->js_amd_inline("
                  require(['jquery'], function($) {
                      $('#checkstatus".$st->id."').click(function(e) {
                          var mode = $('select[name=\"setallstatus-select\"] option:selected').val();
-                         M.util.set_user_preference('mod_attendance_statusdropdown','unselected');
+                         M.util.set_user_preference('mod_presence_statusdropdown','unselected');
                          if (mode == 'unselected') {
-                             $('#attendancetakeform').find('input:indeterminate.st".$st->id."').prop('checked', true);
+                             $('#presencetakeform').find('input:indeterminate.st".$st->id."').prop('checked', true);
                          }
                          else if (mode == 'all') {
-                             $('#attendancetakeform').find('.st".$st->id."').prop('checked', true);
+                             $('#presencetakeform').find('.st".$st->id."').prop('checked', true);
                          }
                          else if(mode == 'booked') {
-                             $('#attendancetakeform').find('.st".$st->id."[data-booked=1]').prop('checked', true);
+                             $('#presencetakeform').find('.st".$st->id."[data-booked=1]').prop('checked', true);
                          }
                          else if(mode == 'unbooked') {
-                             $('#attendancetakeform').find('.st".$st->id."[data-booked=0]').prop('checked', true);
+                             $('#presencetakeform').find('.st".$st->id."[data-booked=0]').prop('checked', true);
                          }
                          e.preventDefault();
                      });
@@ -880,17 +884,17 @@ class mod_attendance_renderer extends plugin_renderer_base {
         global $CFG;
 
         $url = $data->url();
-        if ($data->pageparams->sort == ATT_SORT_LASTNAME) {
-            $url->param('sort', ATT_SORT_FIRSTNAME);
+        if ($data->pageparams->sort == PRESENCE_SORT_LASTNAME) {
+            $url->param('sort', PRESENCE_SORT_FIRSTNAME);
             $firstname = html_writer::link($url, get_string('firstname'));
             $lastname = get_string('lastname');
-        } else if ($data->pageparams->sort == ATT_SORT_FIRSTNAME) {
+        } else if ($data->pageparams->sort == PRESENCE_SORT_FIRSTNAME) {
             $firstname = get_string('firstname');
-            $url->param('sort', ATT_SORT_LASTNAME);
+            $url->param('sort', PRESENCE_SORT_LASTNAME);
             $lastname = html_writer::link($url, get_string('lastname'));
         } else {
-            $firstname = html_writer::link($data->url(array('sort' => ATT_SORT_FIRSTNAME)), get_string('firstname'));
-            $lastname = html_writer::link($data->url(array('sort' => ATT_SORT_LASTNAME)), get_string('lastname'));
+            $firstname = html_writer::link($data->url(array('sort' => PRESENCE_SORT_FIRSTNAME)), get_string('firstname'));
+            $lastname = html_writer::link($data->url(array('sort' => PRESENCE_SORT_LASTNAME)), get_string('lastname'));
         }
 
         if ($CFG->fullnamedisplay == 'lastname firstname') {
@@ -905,19 +909,19 @@ class mod_attendance_renderer extends plugin_renderer_base {
     /**
      * Construct take user controls.
      *
-     * @param attendance_take_data $takedata
+     * @param presence_take_data $takedata
      * @param stdClass $user
      * @return array
      */
-    private function construct_take_user_controls(attendance_take_data $takedata, $user) {
+    private function construct_take_user_controls(presence_take_data $takedata, $user) {
         $celldata = array();
         if ($user->enrolmentend and $user->enrolmentend < $takedata->sessioninfo->sessdate) {
-            $celldata['text'] = get_string('enrolmentend', 'attendance', userdate($user->enrolmentend, '%d.%m.%Y'));
+            $celldata['text'] = get_string('enrolmentend', 'presence', userdate($user->enrolmentend, '%d.%m.%Y'));
             $celldata['colspan'] = count($takedata->statuses) + 1;
             $celldata['class'] = 'userwithoutenrol';
         } else if (!$user->enrolmentend and $user->enrolmentstatus == ENROL_USER_SUSPENDED) {
             // No enrolmentend and ENROL_USER_SUSPENDED.
-            $celldata['text'] = get_string('enrolmentsuspended', 'attendance');
+            $celldata['text'] = get_string('enrolmentsuspended', 'presence');
             $celldata['colspan'] = count($takedata->statuses) + 1;
             $celldata['class'] = 'userwithoutenrol';
         } else {
@@ -939,7 +943,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
                 $input = html_writer::empty_tag('input', $params);
 
-                if ($takedata->pageparams->viewmode == mod_attendance_take_page_params::SORTED_GRID) {
+                if ($takedata->pageparams->viewmode == mod_presence_take_page_params::SORTED_GRID) {
                     $input = html_writer::tag('nobr', $input . $st->acronym);
                 }
 
@@ -955,7 +959,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $celldata['text'][] = html_writer::empty_tag('input', $params);
 
             if ($user->enrolmentstart > $takedata->sessioninfo->sessdate + $takedata->sessioninfo->duration) {
-                $celldata['warning'] = get_string('enrolmentstart', 'attendance',
+                $celldata['warning'] = get_string('enrolmentstart', 'presence',
                                                   userdate($user->enrolmentstart, '%H:%M %d.%m.%Y'));
                 $celldata['class'] = 'userwithoutenrol';
             }
@@ -967,22 +971,22 @@ class mod_attendance_renderer extends plugin_renderer_base {
     /**
      * Render header.
      *
-     * @param mod_attendance_header $header
+     * @param mod_presence_header $header
      * @return string
      */
-    protected function render_mod_attendance_header(mod_attendance_header $header) {
+    protected function render_mod_presence_header(mod_presence_header $header) {
         if (!$header->should_render()) {
             return '';
         }
 
-        $attendance = $header->get_attendance();
+        $presence = $header->get_presence();
 
-        $heading = format_string($header->get_title(), false, ['context' => $attendance->context]);
+        $heading = format_string($header->get_title(), false, ['context' => $presence->context]);
         $o = $this->output->heading($heading);
 
-        $o .= $this->output->box_start('generalbox boxaligncenter', 'intro');
-        $o .= format_module_intro('attendance', $attendance, $attendance->cm->id);
-        $o .= $this->output->box_end();
+//        $o .= $this->output->box_start('generalbox boxaligncenter', 'intro');
+//        # $o .= format_module_intro('presence', $presence, $presence->cm->id);
+//        $o .= $this->output->box_end();
 
         return $o;
     }
@@ -990,13 +994,13 @@ class mod_attendance_renderer extends plugin_renderer_base {
     /**
      * Render user data.
      *
-     * @param attendance_user_data $userdata
+     * @param presence_user_data $userdata
      * @return string
      */
-    protected function render_attendance_user_data(attendance_user_data $userdata) {
+    protected function render_presence_user_data(presence_user_data $userdata) {
         global $USER;
 
-        $o = $this->render_user_report_tabs($userdata);
+        // $o = $this->render_user_report_tabs($userdata);
 
         if ($USER->id == $userdata->user->id) {
 
@@ -1021,28 +1025,28 @@ class mod_attendance_renderer extends plugin_renderer_base {
     /**
      * Render user report tabs.
      *
-     * @param attendance_user_data $userdata
+     * @param presence_user_data $userdata
      * @return string
      */
-    protected function render_user_report_tabs(attendance_user_data $userdata) {
+    protected function render_user_report_tabs(presence_user_data $userdata) {
         $tabs = array();
 
         $prefixresults = "";
 
-        $tabs[] = new tabobject(mod_attendance_view_page_params::MODE_THIS_BOOKING,
-            $userdata->url()->out(true, array('mode' => mod_attendance_view_page_params::MODE_THIS_BOOKING)),
-            get_string('sessions', 'attendance'));
-        $prefixresults = get_string('results', 'attendance') . ': ';
+        $tabs[] = new tabobject(mod_presence_view_page_params::MODE_THIS_BOOKING,
+            $userdata->url()->out(true, array('mode' => mod_presence_view_page_params::MODE_THIS_BOOKING)),
+            get_string('sessions', 'presence'));
+        $prefixresults = get_string('results', 'presence') . ': ';
 
-        /*$tabs[] = new tabobject(mod_attendance_view_page_params::MODE_THIS_COURSE,
-                        $userdata->url()->out(true, array('mode' => mod_attendance_view_page_params::MODE_THIS_COURSE)),
-                        $prefixresults. get_string('thiscourse', 'attendance'));
+        /*$tabs[] = new tabobject(mod_presence_view_page_params::MODE_THIS_COURSE,
+                        $userdata->url()->out(true, array('mode' => mod_presence_view_page_params::MODE_THIS_COURSE)),
+                        $prefixresults. get_string('thiscourse', 'presence'));
 
         // Skip the 'all courses' tab for 'temporary' users.
         if ($userdata->user->type == 'standard') {
-            $tabs[] = new tabobject(mod_attendance_view_page_params::MODE_ALL_COURSES,
-                            $userdata->url()->out(true, array('mode' => mod_attendance_view_page_params::MODE_ALL_COURSES)),
-                            $prefixresults . get_string('allcourses', 'attendance'));
+            $tabs[] = new tabobject(mod_presence_view_page_params::MODE_ALL_COURSES,
+                            $userdata->url()->out(true, array('mode' => mod_presence_view_page_params::MODE_ALL_COURSES)),
+                            $prefixresults . get_string('allcourses', 'presence'));
         }*/
 
         return print_tabs(array($tabs), $userdata->pageparams->mode, null, null, true);
@@ -1051,102 +1055,19 @@ class mod_attendance_renderer extends plugin_renderer_base {
     /**
      * Construct user data.
      *
-     * @param attendance_user_data $userdata
+     * @param presence_user_data $userdata
      * @return string
      */
-    private function construct_user_data(attendance_user_data $userdata) {
+    private function construct_user_data(presence_user_data $userdata) {
         global $USER;
         $o = '';
         if ($USER->id <> $userdata->user->id) {
             $o = html_writer::tag('h2', fullname($userdata->user));
         }
 
-        if ($userdata->pageparams->mode == mod_attendance_view_page_params::MODE_THIS_COURSE) {
-            $o .= $this->render_attendance_filter_controls($userdata->filtercontrols);
-            $o .= $this->construct_user_sessions_log($userdata);
-            $o .= html_writer::empty_tag('hr');
-            $o .= construct_user_data_stat($userdata->summary->get_all_sessions_summary_for($userdata->user->id),
-                $userdata->pageparams->view);
-        } else if ($userdata->pageparams->mode == mod_attendance_view_page_params::MODE_ALL_COURSES) {
-            $table = new html_table();
-            $table->head  = array(get_string('course'),
-                get_string('pluginname', 'mod_attendance'),
-                get_string('sessionscompleted', 'attendance'),
-                get_string('pointssessionscompleted', 'attendance'),
-                get_string('percentagesessionscompleted', 'attendance'));
-            $table->align = array('left', 'left', 'center', 'center', 'center');
-            $table->colclasses = array('colcourse', 'colatt', 'colsessionscompleted',
-                                       'colpointssessionscompleted', 'colpercentagesessionscompleted');
-
-            $table2 = clone($table); // Duplicate table for ungraded sessions.
-            $totalattendance = 0;
-            $totalpercentage = 0;
-            foreach ($userdata->coursesatts as $ca) {
-                $row = new html_table_row();
-                $courseurl = new moodle_url('/course/view.php', array('id' => $ca->courseid));
-                $row->cells[] = html_writer::link($courseurl, $ca->coursefullname);
-                $attendanceurl = new moodle_url('/mod/attendance/view.php', array('id' => $ca->cmid,
-                                                                                      'studentid' => $userdata->user->id,
-                                                                                      'view' => ATT_VIEW_ALL));
-                $row->cells[] = html_writer::link($attendanceurl, $ca->attname);
-                $usersummary = new stdClass();
-                if (isset($userdata->summary[$ca->attid])) {
-                    $usersummary = $userdata->summary[$ca->attid]->get_all_sessions_summary_for($userdata->user->id);
-
-                    $row->cells[] = $usersummary->numtakensessions;
-                    $row->cells[] = $usersummary->pointssessionscompleted;
-                    if (empty($usersummary->numtakensessions)) {
-                        $row->cells[] = '-';
-                    } else {
-                        $row->cells[] = $usersummary->percentagesessionscompleted;
-                    }
-
-                }
-                if (empty($ca->attgrade)) {
-                    $table2->data[] = $row;
-                } else {
-                    $table->data[] = $row;
-                    if ($usersummary->numtakensessions > 0) {
-                        $totalattendance++;
-                        $totalpercentage = $totalpercentage + format_float($usersummary->takensessionspercentage * 100);
-                    }
-                }
-            }
-            $row = new html_table_row();
-            if (empty($totalattendance)) {
-                $average = '-';
-            } else {
-                $average = format_float($totalpercentage / $totalattendance).'%';
-            }
-
-            $col = new html_table_cell(get_string('averageattendancegraded', 'mod_attendance'));
-            $col->attributes['class'] = 'averageattendance';
-            $col->colspan = 4;
-
-            $col2 = new html_table_cell($average);
-            $col2->style = 'text-align: center';
-            $row->cells = array($col, $col2);
-            $table->data[] = $row;
-
-            if (!empty($table2->data) && !empty($table->data)) {
-                // Print graded header if both tables are being shown.
-                $o .= html_writer::div("<h3>".get_string('graded', 'mod_attendance')."</h3>");
-            }
-            if (!empty($table->data)) {
-                // Don't bother printing the table if no sessions are being shown.
-                $o .= html_writer::table($table);
-            }
-
-            if (!empty($table2->data)) {
-                // Don't print this if it doesn't contain any data.
-                $o .= html_writer::div("<h3>".get_string('ungraded', 'mod_attendance')."</h3>");
-                $o .= html_writer::table($table2);
-            }
-        } else if ($userdata->pageparams->mode == mod_attendance_view_page_params::MODE_THIS_BOOKING) {
-            $o .= $this->render_attendance_filter_controls($userdata->filtercontrols);
-            $o .= $this->construct_user_sessions_bookable($userdata);
-            $o .= html_writer::empty_tag('hr');
-        }
+        // $o .= $this->render_presence_filter_controls($userdata->filtercontrols);
+        $o .= $this->construct_user_sessions_bookable($userdata);
+        $o .= html_writer::empty_tag('hr');
 
         return $o;
     }
@@ -1154,69 +1075,60 @@ class mod_attendance_renderer extends plugin_renderer_base {
     /**
      * Construct user session booking list.
      *
-     * @param attendance_user_data $userdata
+     * @param presence_user_data $userdata
      * @return string
      */
-    private function construct_user_sessions_bookable(attendance_user_data $userdata) {
+    private function construct_user_sessions_bookable(presence_user_data $userdata) {
         global $USER;
         $context = context_module::instance($userdata->filtercontrols->cm->id);
 
         $table = new html_table();
-        $table->attributes['class'] = 'generaltable attwidth boxaligncenter';
+        $table->attributes['class'] = 'generaltable presencewidth boxaligncenter';
         $table->head = array();
         $table->align = array();
         $table->size = array();
         $table->colclasses = array();
 
         $table->head[] = get_string('date');
-        $table->head[] = get_string('description', 'attendance');
-        $table->head[] = get_string('room', 'attendance');
-        $table->head[] = get_string('sessionbookedspots', 'attendance');
+        $table->head[] = get_string('description', 'presence');
+        $table->head[] = get_string('room', 'presence');
+        $table->head[] = get_string('sessionbookedspots', 'presence');
         $table->head[] = get_string('action');
 
         $table->align = array_merge($table->align, array('', 'left', 'left', 'center', 'center'));
         $table->colclasses = array_merge($table->colclasses, array('datecol', 'desccol', '', '', ''));
         $table->size = array_merge($table->size, array('1px', '*', '*', '*', '100px'));
 
-        $bookedsessionids = attendance_sessionsbooked();
+        $bookedsessionids = presence_sessionsbooked();
 
         $i = 0;
         foreach ($userdata->sessionslog as $sess) {
             $i++;
 
             $row = new html_table_row();
-            $row->cells[] = userdate($sess->sessdate, get_string('strftimedmyw', 'attendance')) .
+            $row->cells[] = userdate($sess->sessdate, get_string('strftimedmyw', 'presence')) .
                 " ". $this->construct_time($sess->sessdate, $sess->duration);
             $row->cells[] = $sess->description;
             $row->cells[] = $sess->roomname;
-            $cellbookedspots = html_writer::tag('span', $sess->bookedspots, array('data-att-book-session' => $sess->id));
+            $cellbookedspots = html_writer::tag('span', $sess->bookedspots, array('data-presence-book-session' => $sess->id));
             if ($sess->maxattendants > 0) {
                 $cellbookedspots .= "  / {$sess->maxattendants}";
             }
             $row->cells[] = $cellbookedspots;
             $actions = '';
             if ($sess->sessdate > time()) {
-                $actions .= html_writer::tag('button', get_string('sessionbook', 'attendance'),
-                        array('data-att-book-session' => $sess->id,
-                            'data-att-book-action' => 1,
+                $actions .= html_writer::tag('button', get_string('sessionbook', 'presence'),
+                        array('data-presence-book-session' => $sess->id,
+                            'data-presence-book-action' => 1,
                             'type' => 'button',
                             'class' => 'btn btn-secondary' . (in_array($sess->id, $bookedsessionids) ? ' hidden' : '')));
-                $actions .= html_writer::tag('button', get_string('sessionunbook', 'attendance'),
-                        array('data-att-book-session' => $sess->id,
-                            'data-att-book-action' => -1,
+                $actions .= html_writer::tag('button', get_string('sessionunbook', 'presence'),
+                        array('data-presence-book-session' => $sess->id,
+                            'data-presence-book-action' => -1,
                             'type' => 'button',
                             'class' => 'btn btn-primary' . (in_array($sess->id, $bookedsessionids) ? '' : ' hidden')));
             }
             $row->cells[] = $actions;
-
-            if (has_capability('mod/attendance:takeattendances', $context)) {
-                $params = array('id' => $userdata->filtercontrols->cm->id,
-                    'sessionid' => $sess->id,
-                    'grouptype' => $sess->groupid);
-                $url = new moodle_url('/mod/attendance/take.php', $params);
-                $icon = $this->output->pix_icon('redo', get_string('changeattendance', 'attendance'), 'attendance');
-                $row->cells[] = html_writer::link($url, $icon);
-            }
 
             $table->data[] = $row;
         }
@@ -1227,10 +1139,10 @@ class mod_attendance_renderer extends plugin_renderer_base {
     /**
      * Construct user sessions log.
      *
-     * @param attendance_user_data $userdata
+     * @param presence_user_data $userdata
      * @return string
      */
-    private function construct_user_sessions_log(attendance_user_data $userdata) {
+    private function construct_user_sessions_log(presence_user_data $userdata) {
         global $USER;
         $context = context_module::instance($userdata->filtercontrols->cm->id);
 
@@ -1241,34 +1153,34 @@ class mod_attendance_renderer extends plugin_renderer_base {
         }
 
         $table = new html_table();
-        $table->attributes['class'] = 'generaltable attwidth boxaligncenter';
+        $table->attributes['class'] = 'generaltable presencewidth boxaligncenter';
         $table->head = array();
         $table->align = array();
         $table->size = array();
         $table->colclasses = array();
         if (!$shortform) {
-            $table->head[] = get_string('sessiontypeshort', 'attendance');
+            $table->head[] = get_string('sessiontypeshort', 'presence');
             $table->align[] = '';
             $table->size[] = '1px';
             $table->colclasses[] = '';
         }
         $table->head[] = get_string('date');
-        $table->head[] = get_string('description', 'attendance');
-        $table->head[] = get_string('status', 'attendance');
-        $table->head[] = get_string('points', 'attendance');
-        $table->head[] = get_string('remarks', 'attendance');
+        $table->head[] = get_string('description', 'presence');
+        $table->head[] = get_string('status', 'presence');
+        $table->head[] = get_string('points', 'presence');
+        $table->head[] = get_string('remarks', 'presence');
 
         $table->align = array_merge($table->align, array('', 'left', 'center', 'center', 'center'));
         $table->colclasses = array_merge($table->colclasses, array('datecol', 'desccol', 'statuscol', 'pointscol', 'remarkscol'));
         $table->size = array_merge($table->size, array('1px', '*', '*', '1px', '*'));
 
-        if (has_capability('mod/attendance:takeattendances', $context)) {
+        if (has_capability('mod/presence:takepresences', $context)) {
             $table->head[] = get_string('action');
             $table->align[] = '';
             $table->size[] = '';
         }
 
-        $statussetmaxpoints = attendance_get_statusset_maxpoints($userdata->statuses);
+        $statussetmaxpoints = presence_get_statusset_maxpoints($userdata->statuses);
 
         $i = 0;
         foreach ($userdata->sessionslog as $sess) {
@@ -1279,12 +1191,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 if ($sess->groupid) {
                     $sessiontypeshort = get_string('group') . ': ' . $userdata->groups[$sess->groupid]->name;
                 } else {
-                    $sessiontypeshort = get_string('commonsession', 'attendance');
+                    $sessiontypeshort = get_string('commonsession', 'presence');
                 }
 
                 $row->cells[] = html_writer::tag('nobr', $sessiontypeshort);
             }
-            $row->cells[] = userdate($sess->sessdate, get_string('strftimedmyw', 'attendance')) .
+            $row->cells[] = userdate($sess->sessdate, get_string('strftimedmyw', 'presence')) .
              " ". $this->construct_time($sess->sessdate, $sess->duration);
             $row->cells[] = $sess->description;
             if (!empty($sess->statusid)) {
@@ -1294,20 +1206,20 @@ class mod_attendance_renderer extends plugin_renderer_base {
                                     format_float($statussetmaxpoints[$status->setnumber], 1, true, true);
                 $row->cells[] = $sess->remarks;
             } else if (($sess->sessdate + $sess->duration) < $userdata->user->enrolmentstart) {
-                $cell = new html_table_cell(get_string('enrolmentstart', 'attendance',
+                $cell = new html_table_cell(get_string('enrolmentstart', 'presence',
                                             userdate($userdata->user->enrolmentstart, '%d.%m.%Y')));
                 $cell->colspan = 3;
                 $row->cells[] = $cell;
             } else if ($userdata->user->enrolmentend and $sess->sessdate > $userdata->user->enrolmentend) {
-                $cell = new html_table_cell(get_string('enrolmentend', 'attendance',
+                $cell = new html_table_cell(get_string('enrolmentend', 'presence',
                                             userdate($userdata->user->enrolmentend, '%d.%m.%Y')));
                 $cell->colspan = 3;
                 $row->cells[] = $cell;
             } else {
-                list($canmark, $reason) = attendance_can_student_mark($sess, false);
+                list($canmark, $reason) = presence_can_student_mark($sess, false);
                 if ($canmark) {
                     if ($sess->rotateqrcode == 1) {
-                        $url = new moodle_url('/mod/attendance/attendance.php');
+                        $url = new moodle_url('/mod/presence/presence.php');
                         $output = html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'sessid',
                                 'value' => $sess->id));
                         $output .= html_writer::empty_tag('input', array('type' => 'text', 'name' => 'qrpass',
@@ -1318,11 +1230,11 @@ class mod_attendance_renderer extends plugin_renderer_base {
                         $cell = new html_table_cell(html_writer::tag('form', $output,
                             array('action' => $url->out(), 'method' => 'get')));
                     } else {
-                        // Student can mark their own attendance.
-                        // URL to the page that lets the student modify their attendance.
-                        $url = new moodle_url('/mod/attendance/attendance.php',
+                        // Student can mark their own presence.
+                        // URL to the page that lets the student modify their presence.
+                        $url = new moodle_url('/mod/presence/presence.php',
                                 array('sessid' => $sess->id, 'sesskey' => sesskey()));
-                        $cell = new html_table_cell(html_writer::link($url, get_string('submitattendance', 'attendance')));
+                        $cell = new html_table_cell(html_writer::link($url, get_string('submitpresence', 'presence')));
                     }
                     $cell->colspan = 3;
                     $row->cells[] = $cell;
@@ -1333,12 +1245,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 }
             }
 
-            if (has_capability('mod/attendance:takeattendances', $context)) {
+            if (has_capability('mod/presence:takepresences', $context)) {
                 $params = array('id' => $userdata->filtercontrols->cm->id,
                     'sessionid' => $sess->id,
                     'grouptype' => $sess->groupid);
-                $url = new moodle_url('/mod/attendance/take.php', $params);
-                $icon = $this->output->pix_icon('redo', get_string('changeattendance', 'attendance'), 'attendance');
+                $url = new moodle_url('/mod/presence/take.php', $params);
+                $icon = $this->output->pix_icon('redo', get_string('changepresence', 'presence'), 'presence');
                 $row->cells[] = html_writer::link($url, $icon);
             }
 
@@ -1356,7 +1268,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
      * @return string
      */
     private function construct_time($datetime, $duration) {
-        $time = html_writer::tag('nobr', attendance_construct_session_time($datetime, $duration));
+        $time = html_writer::tag('nobr', presence_construct_session_time($datetime, $duration));
 
         return $time;
     }
@@ -1364,21 +1276,21 @@ class mod_attendance_renderer extends plugin_renderer_base {
     /**
      * Render report data.
      *
-     * @param attendance_report_data $reportdata
+     * @param presence_report_data $reportdata
      * @return string
      */
-    protected function render_attendance_report_data(attendance_report_data $reportdata) {
+    protected function render_presence_report_data(presence_report_data $reportdata) {
         global $COURSE;
 
         // Initilise Javascript used to (un)check all checkboxes.
-        $this->page->requires->js_init_call('M.mod_attendance.init_manage');
+        $this->page->requires->js_init_call('M.mod_presence.init_manage');
 
         $table = new html_table();
-        $table->attributes['class'] = 'generaltable attwidth attreport';
+        $table->attributes['class'] = 'generaltable presencewidth presencereport';
 
         $userrows = $this->get_user_rows($reportdata);
 
-        if ($reportdata->pageparams->view == ATT_VIEW_SUMMARY) {
+        if ($reportdata->pageparams->view == PRESENCE_VIEW_SUMMARY) {
             $sessionrows = array();
         } else {
             $sessionrows = $this->get_session_rows($reportdata);
@@ -1418,7 +1330,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $output = html_writer::empty_tag('input', array('name' => 'sesskey', 'type' => 'hidden', 'value' => sesskey()));
             $output .= html_writer::empty_tag('input', array('name' => 'id', 'type' => 'hidden', 'value' => $COURSE->id));
             $output .= html_writer::empty_tag('input', array('name' => 'returnto', 'type' => 'hidden', 'value' => s(me())));
-            $output .= html_writer::start_div('attendancereporttable');
+            $output .= html_writer::start_div('presencereporttable');
             $output .= html_writer::table($table).html_writer::tag('div', get_string('users').': '.count($reportdata->users));
             $output .= html_writer::end_div();
             $output .= html_writer::tag('div',
@@ -1426,7 +1338,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
                                                                    'value' => get_string('messageselectadd'),
                                                                    'class' => 'btn btn-secondary')),
                     array('class' => 'buttons'));
-            $url = new moodle_url('/mod/attendance/messageselect.php');
+            $url = new moodle_url('/mod/presence/messageselect.php');
             return html_writer::tag('form', $output, array('action' => $url->out(), 'method' => 'post'));
         } else {
             return html_writer::table($table).html_writer::tag('div', get_string('users').': '.count($reportdata->users));
@@ -1434,31 +1346,31 @@ class mod_attendance_renderer extends plugin_renderer_base {
     }
 
     /**
-     * Build and return the rows that will make up the left part of the attendance report.
+     * Build and return the rows that will make up the left part of the presence report.
      * This consists of student names, as well as header cells for these columns.
      *
-     * @param attendance_report_data $reportdata the report data
+     * @param presence_report_data $reportdata the report data
      * @return array Array of html_table_row objects
      */
-    protected function get_user_rows(attendance_report_data $reportdata) {
+    protected function get_user_rows(presence_report_data $reportdata) {
         $rows = array();
 
         $bulkmessagecapability = has_capability('moodle/course:bulkmessaging', $this->page->context);
-        $extrafields = get_extra_user_fields($reportdata->att->context);
+        $extrafields = get_extra_user_fields($reportdata->presence->context);
         $showextrauserdetails = $reportdata->pageparams->showextrauserdetails;
         $params = $reportdata->pageparams->get_significant_params();
         $text = get_string('users');
         if ($extrafields) {
             if ($showextrauserdetails) {
                 $params['showextrauserdetails'] = 0;
-                $url = $reportdata->att->url_report($params);
+                $url = $reportdata->presence->url_report($params);
                 $text .= $this->output->action_icon($url, new pix_icon('t/switch_minus',
-                            get_string('hideextrauserdetails', 'attendance')), null, null);
+                            get_string('hideextrauserdetails', 'presence')), null, null);
             } else {
                 $params['showextrauserdetails'] = 1;
-                $url = $reportdata->att->url_report($params);
+                $url = $reportdata->presence->url_report($params);
                 $text .= $this->output->action_icon($url, new pix_icon('t/switch_plus',
-                            get_string('showextrauserdetails', 'attendance')), null, null);
+                            get_string('showextrauserdetails', 'presence')), null, null);
                 $extrafields = array();
             }
         }
@@ -1493,7 +1405,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $row = new html_table_row();
             $text = '';
             if ($bulkmessagecapability) {
-                $text .= html_writer::checkbox('user'.$user->id, 'on', false, '', array('class' => 'attendancesesscheckbox'));
+                $text .= html_writer::checkbox('user'.$user->id, 'on', false, '', array('class' => 'presencesesscheckbox'));
             }
             $text .= html_writer::link($reportdata->url_view(array('studentid' => $user->id)), fullname($user));
             $cell = $this->build_data_cell($text, false, false, null, null, false);
@@ -1507,7 +1419,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         }
 
         $row = new html_table_row();
-        $text = ($reportdata->pageparams->view == ATT_VIEW_SUMMARY) ? '' : get_string('summary');
+        $text = ($reportdata->pageparams->view == PRESENCE_VIEW_SUMMARY) ? '' : get_string('summary');
         $cell = $this->build_data_cell($text, false, true, $usercolspan);
         $cell->attributes['class'] = $cell->attributes['class'] . ' headcol';
         $row->cells[] = $cell;
@@ -1520,14 +1432,14 @@ class mod_attendance_renderer extends plugin_renderer_base {
     }
 
     /**
-     * Build and return the rows that will make up the summary part of the attendance report.
+     * Build and return the rows that will make up the summary part of the presence report.
      * This consists of countings for each status set acronyms, as well as header cells for these columns.
      *
-     * @param attendance_report_data $reportdata the report data
+     * @param presence_report_data $reportdata the report data
      * @param boolean $startwithcontrast true if the first column must start with contrast (bgcolor)
      * @return array Array of html_table_row objects
      */
-    protected function get_acronym_rows(attendance_report_data $reportdata, $startwithcontrast=false) {
+    protected function get_acronym_rows(presence_report_data $reportdata, $startwithcontrast=false) {
         $rows = array();
 
         $summarycells = array();
@@ -1541,7 +1453,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             if ($sts->setnumber != $setnumber) {
                 $contrast = !$contrast;
                 $setnumber = $sts->setnumber;
-                $text = attendance_get_setname($reportdata->att->id, $setnumber, false);
+                $text = presence_get_setname($reportdata->presence->id, $setnumber, false);
                 $cell = $this->build_header_cell($text, $contrast);
                 $row1->cells[] = $cell;
             }
@@ -1555,7 +1467,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $rows[] = $row2;
 
         foreach ($reportdata->users as $user) {
-            if ($reportdata->pageparams->view == ATT_VIEW_SUMMARY) {
+            if ($reportdata->pageparams->view == PRESENCE_VIEW_SUMMARY) {
                 $usersummary = $reportdata->summary->get_all_sessions_summary_for($user->id);
             } else {
                 $usersummary = $reportdata->summary->get_taken_sessions_summary_for($user->id);
@@ -1580,51 +1492,51 @@ class mod_attendance_renderer extends plugin_renderer_base {
     }
 
     /**
-     * Build and return the rows that will make up the summary part of the attendance report.
+     * Build and return the rows that will make up the summary part of the presence report.
      * This consists of counts and percentages for taken sessions (all sessions for summary report),
      * as well as header cells for these columns.
      *
-     * @param attendance_report_data $reportdata the report data
+     * @param presence_report_data $reportdata the report data
      * @param boolean $startwithcontrast true if the first column must start with contrast (bgcolor)
      * @return array Array of html_table_row objects
      */
-    protected function get_summary_rows(attendance_report_data $reportdata, $startwithcontrast=false) {
+    protected function get_summary_rows(presence_report_data $reportdata, $startwithcontrast=false) {
         $rows = array();
 
         $contrast = $startwithcontrast;
         $summarycells = array();
 
         $row1 = new html_table_row();
-        $helpicon = $this->output->help_icon('oversessionstaken', 'attendance');
-        $row1->cells[] = $this->build_header_cell(get_string('oversessionstaken', 'attendance') . $helpicon, $contrast, true, 3);
+        $helpicon = $this->output->help_icon('oversessionstaken', 'presence');
+        $row1->cells[] = $this->build_header_cell(get_string('oversessionstaken', 'presence') . $helpicon, $contrast, true, 3);
 
         $row2 = new html_table_row();
-        $row2->cells[] = $this->build_header_cell(get_string('sessions', 'attendance'), $contrast);
-        $row2->cells[] = $this->build_header_cell(get_string('points', 'attendance'), $contrast);
-        $row2->cells[] = $this->build_header_cell(get_string('percentage', 'attendance'), $contrast);
+        $row2->cells[] = $this->build_header_cell(get_string('sessions', 'presence'), $contrast);
+        $row2->cells[] = $this->build_header_cell(get_string('points', 'presence'), $contrast);
+        $row2->cells[] = $this->build_header_cell(get_string('percentage', 'presence'), $contrast);
         $summarycells[] = $this->build_data_cell('', $contrast);
         $summarycells[] = $this->build_data_cell('', $contrast);
         $summarycells[] = $this->build_data_cell('', $contrast);
 
-        if ($reportdata->pageparams->view == ATT_VIEW_SUMMARY) {
+        if ($reportdata->pageparams->view == PRESENCE_VIEW_SUMMARY) {
             $contrast = !$contrast;
 
-            $helpicon = $this->output->help_icon('overallsessions', 'attendance');
-            $row1->cells[] = $this->build_header_cell(get_string('overallsessions', 'attendance') . $helpicon, $contrast, true, 3);
+            $helpicon = $this->output->help_icon('overallsessions', 'presence');
+            $row1->cells[] = $this->build_header_cell(get_string('overallsessions', 'presence') . $helpicon, $contrast, true, 3);
 
-            $row2->cells[] = $this->build_header_cell(get_string('sessions', 'attendance'), $contrast);
-            $row2->cells[] = $this->build_header_cell(get_string('points', 'attendance'), $contrast);
-            $row2->cells[] = $this->build_header_cell(get_string('percentage', 'attendance'), $contrast);
+            $row2->cells[] = $this->build_header_cell(get_string('sessions', 'presence'), $contrast);
+            $row2->cells[] = $this->build_header_cell(get_string('points', 'presence'), $contrast);
+            $row2->cells[] = $this->build_header_cell(get_string('percentage', 'presence'), $contrast);
             $summarycells[] = $this->build_data_cell('', $contrast);
             $summarycells[] = $this->build_data_cell('', $contrast);
             $summarycells[] = $this->build_data_cell('', $contrast);
 
             $contrast = !$contrast;
-            $helpicon = $this->output->help_icon('maxpossible', 'attendance');
-            $row1->cells[] = $this->build_header_cell(get_string('maxpossible', 'attendance') . $helpicon, $contrast, true, 2);
+            $helpicon = $this->output->help_icon('maxpossible', 'presence');
+            $row1->cells[] = $this->build_header_cell(get_string('maxpossible', 'presence') . $helpicon, $contrast, true, 2);
 
-            $row2->cells[] = $this->build_header_cell(get_string('points', 'attendance'), $contrast);
-            $row2->cells[] = $this->build_header_cell(get_string('percentage', 'attendance'), $contrast);
+            $row2->cells[] = $this->build_header_cell(get_string('points', 'presence'), $contrast);
+            $row2->cells[] = $this->build_header_cell(get_string('percentage', 'presence'), $contrast);
             $summarycells[] = $this->build_data_cell('', $contrast);
             $summarycells[] = $this->build_data_cell('', $contrast);
         }
@@ -1633,7 +1545,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $rows[] = $row2;
 
         foreach ($reportdata->users as $user) {
-            if ($reportdata->pageparams->view == ATT_VIEW_SUMMARY) {
+            if ($reportdata->pageparams->view == PRESENCE_VIEW_SUMMARY) {
                 $usersummary = $reportdata->summary->get_all_sessions_summary_for($user->id);
             } else {
                 $usersummary = $reportdata->summary->get_taken_sessions_summary_for($user->id);
@@ -1645,7 +1557,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $row->cells[] = $this->build_data_cell($usersummary->pointssessionscompleted, $contrast);
             $row->cells[] = $this->build_data_cell(format_float($usersummary->takensessionspercentage * 100) . '%', $contrast);
 
-            if ($reportdata->pageparams->view == ATT_VIEW_SUMMARY) {
+            if ($reportdata->pageparams->view == PRESENCE_VIEW_SUMMARY) {
                 $contrast = !$contrast;
                 $row->cells[] = $this->build_data_cell($usersummary->numallsessions, $contrast);
                 $text = $usersummary->pointsallsessions;
@@ -1667,34 +1579,34 @@ class mod_attendance_renderer extends plugin_renderer_base {
     }
 
     /**
-     * Build and return the rows that will make up the attendance report.
+     * Build and return the rows that will make up the presence report.
      * This consists of details for each selected session, as well as header and summary cells for these columns.
      *
-     * @param attendance_report_data $reportdata the report data
+     * @param presence_report_data $reportdata the report data
      * @param boolean $startwithcontrast true if the first column must start with contrast (bgcolor)
      * @return array Array of html_table_row objects
      */
-    protected function get_session_rows(attendance_report_data $reportdata, $startwithcontrast=false) {
+    protected function get_session_rows(presence_report_data $reportdata, $startwithcontrast=false) {
 
         $rows = array();
 
         $row = new html_table_row();
 
         $showsessiondetails = $reportdata->pageparams->showsessiondetails;
-        $text = get_string('sessions', 'attendance');
+        $text = get_string('sessions', 'presence');
         $params = $reportdata->pageparams->get_significant_params();
         if (count($reportdata->sessions) > 1) {
             if ($showsessiondetails) {
                 $params['showsessiondetails'] = 0;
-                $url = $reportdata->att->url_report($params);
+                $url = $reportdata->presence->url_report($params);
                 $text .= $this->output->action_icon($url, new pix_icon('t/switch_minus',
-                            get_string('hidensessiondetails', 'attendance')), null, null);
+                            get_string('hidensessiondetails', 'presence')), null, null);
                 $colspan = count($reportdata->sessions);
             } else {
                 $params['showsessiondetails'] = 1;
-                $url = $reportdata->att->url_report($params);
+                $url = $reportdata->presence->url_report($params);
                 $text .= $this->output->action_icon($url, new pix_icon('t/switch_plus',
-                            get_string('showsessiondetails', 'attendance')), null, null);
+                            get_string('showsessiondetails', 'presence')), null, null);
                 $colspan = 1;
             }
         } else {
@@ -1704,13 +1616,13 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $params = $reportdata->pageparams->get_significant_params();
         if ($reportdata->pageparams->sessiondetailspos == 'left') {
             $params['sessiondetailspos'] = 'right';
-            $url = $reportdata->att->url_report($params);
-            $text .= $this->output->action_icon($url, new pix_icon('t/right', get_string('moveright', 'attendance')),
+            $url = $reportdata->presence->url_report($params);
+            $text .= $this->output->action_icon($url, new pix_icon('t/right', get_string('moveright', 'presence')),
                 null, null);
         } else {
             $params['sessiondetailspos'] = 'left';
-            $url = $reportdata->att->url_report($params);
-            $text = $this->output->action_icon($url, new pix_icon('t/left', get_string('moveleft', 'attendance')),
+            $url = $reportdata->presence->url_report($params);
+            $text = $this->output->action_icon($url, new pix_icon('t/left', get_string('moveleft', 'presence')),
                     null, null) . $text;
         }
 
@@ -1720,35 +1632,35 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $row = new html_table_row();
         if ($showsessiondetails && !empty($reportdata->sessions)) {
             foreach ($reportdata->sessions as $sess) {
-                $sesstext = userdate($sess->sessdate, get_string('strftimedm', 'attendance'));
+                $sesstext = userdate($sess->sessdate, get_string('strftimedm', 'presence'));
                 $sesstext .= html_writer::empty_tag('br');
-                $sesstext .= attendance_strftimehm($sess->sessdate);
+                $sesstext .= presence_strftimehm($sess->sessdate);
                 $capabilities = array(
-                    'mod/attendance:takeattendances',
-                    'mod/attendance:changeattendances'
+                    'mod/presence:takepresences',
+                    'mod/presence:changepresences'
                 );
-                if (is_null($sess->lasttaken) and has_any_capability($capabilities, $reportdata->att->context)) {
+                if (is_null($sess->lasttaken) and has_any_capability($capabilities, $reportdata->presence->context)) {
                     $sesstext = html_writer::link($reportdata->url_take($sess->id, $sess->groupid), $sesstext,
-                        array('class' => 'attendancereporttakelink'));
+                        array('class' => 'presencereporttakelink'));
                 }
-                $sesstext .= html_writer::empty_tag('br', array('class' => 'attendancereportseparator'));
+                $sesstext .= html_writer::empty_tag('br', array('class' => 'presencereportseparator'));
                 if (!empty($sess->description) &&
-                    !empty(get_config('attendance', 'showsessiondescriptiononreport'))) {
+                    !empty(get_config('presence', 'showsessiondescriptiononreport'))) {
                     $sesstext .= html_writer::tag('small', format_text($sess->description),
-                        array('class' => 'attendancereportcommon'));
+                        array('class' => 'presencereportcommon'));
                 }
                 if ($sess->groupid) {
                     if (empty($reportdata->groups[$sess->groupid])) {
-                        $sesstext .= html_writer::tag('small', get_string('deletedgroup', 'attendance'),
-                            array('class' => 'attendancereportgroup'));
+                        $sesstext .= html_writer::tag('small', get_string('deletedgroup', 'presence'),
+                            array('class' => 'presencereportgroup'));
                     } else {
                         $sesstext .= html_writer::tag('small', $reportdata->groups[$sess->groupid]->name,
-                            array('class' => 'attendancereportgroup'));
+                            array('class' => 'presencereportgroup'));
                     }
 
                 } else {
-                    $sesstext .= html_writer::tag('small', get_string('commonsession', 'attendance'),
-                        array('class' => 'attendancereportcommon'));
+                    $sesstext .= html_writer::tag('small', get_string('commonsession', 'presence'),
+                        array('class' => 'presencereportcommon'));
                 }
 
                 $row->cells[] = $this->build_header_cell($sesstext, false, true, null, null, false);
@@ -1764,7 +1676,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 $cellsgenerator = new user_sessions_cells_html_generator($reportdata, $user);
                 foreach ($cellsgenerator->get_cells(true) as $cell) {
                     if ($cell instanceof html_table_cell) {
-                        $cell->attributes['class'] .= ' center';
+                        $cell->presenceributes['class'] .= ' center';
                         $row->cells[] = $cell;
                     } else {
                         $row->cells[] = $this->build_data_cell($cell);
@@ -1906,10 +1818,10 @@ class mod_attendance_renderer extends plugin_renderer_base {
     /**
      * Output the status set selector.
      *
-     * @param attendance_set_selector $sel
+     * @param presence_set_selector $sel
      * @return string
      */
-    protected function render_attendance_set_selector(attendance_set_selector $sel) {
+    protected function render_presence_set_selector(presence_set_selector $sel) {
         $current = $sel->get_current_statusset();
         $selected = null;
         $opts = array();
@@ -1922,7 +1834,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             }
         }
         $newurl = $sel->url($sel->maxstatusset + 1);
-        $opts[$newurl->out(false)] = get_string('newstatusset', 'mod_attendance');
+        $opts[$newurl->out(false)] = get_string('newstatusset', 'mod_presence');
         if ($current == $sel->maxstatusset + 1) {
             $selected = $newurl->out(false);
         }
@@ -1936,23 +1848,23 @@ class mod_attendance_renderer extends plugin_renderer_base {
      * @param stdClass $prefdata
      * @return string
      */
-    protected function render_attendance_preferences_data($prefdata) {
-        $this->page->requires->js('/mod/attendance/module.js');
+    protected function render_presence_preferences_data($prefdata) {
+        $this->page->requires->js('/mod/presence/module.js');
 
         $table = new html_table();
         $table->width = '100%';
         $table->head = array('#',
-                             get_string('acronym', 'attendance'),
+                             get_string('acronym', 'presence'),
                              get_string('description'),
-                             get_string('points', 'attendance'));
+                             get_string('points', 'presence'));
         $table->align = array('center', 'center', 'center', 'center', 'center', 'center');
 
-        $table->head[] = get_string('studentavailability', 'attendance').
-            $this->output->help_icon('studentavailability', 'attendance');
+        $table->head[] = get_string('studentavailability', 'presence').
+            $this->output->help_icon('studentavailability', 'presence');
         $table->align[] = 'center';
 
-        $table->head[] = get_string('setunmarked', 'attendance').
-            $this->output->help_icon('setunmarked', 'attendance');
+        $table->head[] = get_string('setunmarked', 'presence').
+            $this->output->help_icon('setunmarked', 'presence');
         $table->align[] = 'center';
 
         $table->head[] = get_string('action');
@@ -1963,10 +1875,10 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $emptydescription = '';
             if (isset($prefdata->errors[$st->id]) && !empty(($prefdata->errors[$st->id]))) {
                 if (empty($prefdata->errors[$st->id]['acronym'])) {
-                    $emptyacronym = $this->construct_notice(get_string('emptyacronym', 'mod_attendance'), 'notifyproblem');
+                    $emptyacronym = $this->construct_notice(get_string('emptyacronym', 'mod_presence'), 'notifyproblem');
                 }
                 if (empty($prefdata->errors[$st->id]['description'])) {
-                    $emptydescription = $this->construct_notice(get_string('emptydescription', 'mod_attendance') , 'notifyproblem');
+                    $emptydescription = $this->construct_notice(get_string('emptydescription', 'mod_presence') , 'notifyproblem');
                 }
             }
             $cells = array();
@@ -1995,19 +1907,19 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $table->data[$i][] = $this->construct_text_input('newgrade', 4, 4);
         $table->data[$i][] = $this->construct_text_input('newstudentavailability', 4, 5);
 
-        $table->data[$i][] = $this->construct_preferences_button(get_string('add', 'attendance'),
-            mod_attendance_preferences_page_params::ACTION_ADD);
+        $table->data[$i][] = $this->construct_preferences_button(get_string('add', 'presence'),
+            mod_presence_preferences_page_params::ACTION_ADD);
 
         $o = html_writer::table($table);
         $o .= html_writer::input_hidden_params($prefdata->url(array(), false));
         // We should probably rewrite this to use mforms but for now add sesskey.
         $o .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()))."\n";
 
-        $o .= $this->construct_preferences_button(get_string('update', 'attendance'),
-                                                  mod_attendance_preferences_page_params::ACTION_SAVE);
+        $o .= $this->construct_preferences_button(get_string('update', 'presence'),
+                                                  mod_presence_preferences_page_params::ACTION_SAVE);
         $o = html_writer::tag('form', $o, array('id' => 'preferencesform', 'method' => 'post',
                                                 'action' => $prefdata->url(array(), false)->out_omit_querystring()));
-        $o = $this->output->container($o, 'generalbox attwidth');
+        $o = $this->output->container($o, 'generalbox presencewidth');
 
         return $o;
     }
@@ -2015,11 +1927,11 @@ class mod_attendance_renderer extends plugin_renderer_base {
     /**
      * Render default statusset.
      *
-     * @param attendance_default_statusset $prefdata
+     * @param presence_default_statusset $prefdata
      * @return string
      */
-    protected function render_attendance_default_statusset(attendance_default_statusset $prefdata) {
-        return $this->render_attendance_preferences_data($prefdata);
+    protected function render_presence_default_statusset(presence_default_statusset $prefdata) {
+        return $this->render_presence_preferences_data($prefdata);
     }
 
     /**
@@ -2028,7 +1940,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
      * @param stdClass $prefdata
      * @return string
      */
-    protected function render_attendance_pref($prefdata) {
+    protected function render_presence_pref($prefdata) {
 
     }
 
@@ -2063,18 +1975,18 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $params = array('sesskey' => sesskey(),
                         'statusid' => $st->id);
         if ($st->visible) {
-            $params['action'] = mod_attendance_preferences_page_params::ACTION_HIDE;
+            $params['action'] = mod_presence_preferences_page_params::ACTION_HIDE;
             $showhideicon = $this->output->action_icon(
                     $prefdata->url($params),
                     new pix_icon("t/hide", get_string('hide')));
         } else {
-            $params['action'] = mod_attendance_preferences_page_params::ACTION_SHOW;
+            $params['action'] = mod_presence_preferences_page_params::ACTION_SHOW;
             $showhideicon = $this->output->action_icon(
                     $prefdata->url($params),
                     new pix_icon("t/show", get_string('show')));
         }
         if (empty($st->haslogs)) {
-            $params['action'] = mod_attendance_preferences_page_params::ACTION_DELETE;
+            $params['action'] = mod_presence_preferences_page_params::ACTION_DELETE;
             $deleteicon = $this->output->action_icon(
                     $prefdata->url($params),
                     new pix_icon("t/delete", get_string('delete')));
@@ -2097,7 +2009,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
                 'type'      => 'submit',
                 'value'     => $text,
                 'class'     => 'btn btn-secondary',
-                'onclick'   => 'M.mod_attendance.set_preferences_action('.$action.')');
+                'onclick'   => 'M.mod_presence.set_preferences_action('.$action.')');
         return html_writer::empty_tag('input', $attributes);
     }
 
@@ -2130,7 +2042,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             if (isset($opts['size'])) {
                 $attrib['width'] = $attrib['height'] = $opts['size'];
             }
-            return $this->output->pix_icon('ghost', '', 'mod_attendance', $attrib);
+            return $this->output->pix_icon('ghost', '', 'mod_presence', $attrib);
         }
 
         return $this->output->user_picture($user, $opts);

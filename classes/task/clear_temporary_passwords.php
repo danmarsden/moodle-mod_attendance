@@ -15,20 +15,20 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Attendance task - clear temporary passwords.
+ * presence task - clear temporary passwords.
  *
- * @package    mod_attendance
+ * @package    mod_presence
  * @copyright  2019 Maksud R
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_attendance\task;
+namespace mod_presence\task;
 defined('MOODLE_INTERNAL') || die();
 
 /**
  * clear_temporary_passwords class, used to clean up the temporary passwords.
  *
- * @package    mod_attendance
+ * @package    mod_presence
  * @copyright  2019 Maksud R
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -39,7 +39,7 @@ class clear_temporary_passwords extends \core\task\scheduled_task {
      * @return string
      */
     public function get_name() {
-        return get_string('rotateqrcode_cleartemppass_task', 'mod_attendance');
+        return get_string('rotateqrcode_cleartemppass_task', 'mod_presence');
     }
 
     /**
@@ -49,6 +49,6 @@ class clear_temporary_passwords extends \core\task\scheduled_task {
         global $DB;
 
         $params = array('currenttime' => time());
-        $DB->delete_records_select('attendance_rotate_passwords', 'expirytime < :currenttime', $params);
+        $DB->delete_records_select('presence_rotate_passwords', 'expirytime < :currenttime', $params);
     }
 }

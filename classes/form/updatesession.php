@@ -17,12 +17,12 @@
 /**
  * Update form
  *
- * @package    mod_attendance
+ * @package    mod_presence
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_attendance\form;
+namespace mod_presence\form;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -46,18 +46,18 @@ class updatesession extends \moodleform {
 
         $modcontext    = $this->_customdata['modcontext'];
         $sessionid     = $this->_customdata['sessionid'];
-        $att           = $this->_customdata['att'];
+        $presence           = $this->_customdata['att'];
 
-        if (!$sess = $DB->get_record('attendance_sessions', array('id' => $sessionid) )) {
+        if (!$sess = $DB->get_record('presence_sessions', array('id' => $sessionid) )) {
             error('No such session in this course');
         }
 
-        $attendancesubnet = $DB->get_field('attendance', 'subnet', array('id' => $sess->attendanceid));
-        $maxfiles = intval(get_config('enableunlimitedfiles', 'mod_attendance')) ? EDITOR_UNLIMITED_FILES : 0;
+        $presencesubnet = $DB->get_field('presence', 'subnet', array('id' => $sess->presenceid));
+        $maxfiles = intval(get_config('enableunlimitedfiles', 'mod_presence')) ? EDITOR_UNLIMITED_FILES : 0;
         $defopts = array('maxfiles' => $maxfiles, 'noclean' => true, 'context' => $modcontext);
-        $sess = file_prepare_standard_editor($sess, 'description', $defopts, $modcontext, 'mod_attendance', 'session', $sess->id);
+        $sess = file_prepare_standard_editor($sess, 'description', $defopts, $modcontext, 'mod_presence', 'session', $sess->id);
 
-        $sess->bookings = attendance_sessionbookings($sess->id);
+        $sess->bookings = presence_sessionbookings($sess->id);
 
         $starttime = $sess->sessdate - usergetmidnight($sess->sessdate);
         $starthour = floor($starttime / HOURSECS);
@@ -72,25 +72,25 @@ class updatesession extends \moodleform {
             'sessiondate' => $sess->sessdate,
             'sestime' => array('starthour' => $starthour, 'startminute' => $startminute,
             'endhour' => $endhour, 'endminute' => $endminute),
-            'sdescription' => $sess->description_editor,
+            'sdescription' => $sess->description,
             'calendarevent' => $sess->calendarevent,
             'roomid' => $sess->roomid,
             'maxattendants' => $sess->maxattendants,
         );
 
-        $mform->addElement('header', 'general', get_string('changesession', 'attendance'));
+        $mform->addElement('header', 'general', get_string('changesession', 'presence'));
 
 
         $olddate = construct_session_full_date_time($sess->sessdate, $sess->duration);
-        $mform->addElement('static', 'olddate', get_string('olddate', 'attendance'), $olddate);
+        $mform->addElement('static', 'olddate', get_string('olddate', 'presence'), $olddate);
 
-        attendance_form_sessiondate_selector($mform);
+        presence_form_sessiondate_selector($mform);
 
-        $mform->addElement('editor', 'sdescription', get_string('description', 'attendance'),
-                           array('rows' => 1, 'columns' => 80), $defopts);
+        $mform->addElement('textarea', 'sdescription', get_string('description', 'presence'),
+                           array('rows' => 2, 'columns' => 100), $defopts);
         $mform->setType('sdescription', PARAM_RAW);
 
-        attendance_form_session_room($mform, $att, $sess);
+        presence_form_session_room($mform, $presence, $sess);
 
         $mform->setDefaults($data);
         $this->add_action_buttons(true);
@@ -108,7 +108,7 @@ class updatesession extends \moodleform {
         $sesstarttime = $data['sestime']['starthour'] * HOURSECS + $data['sestime']['startminute'] * MINSECS;
         $sesendtime = $data['sestime']['endhour'] * HOURSECS + $data['sestime']['endminute'] * MINSECS;
         if ($sesendtime < $sesstarttime) {
-            $errors['sestime'] = get_string('invalidsessionendtime', 'attendance');
+            $errors['sestime'] = get_string('invalidsessionendtime', 'presence');
         }
 
         return $errors;

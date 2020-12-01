@@ -1,21 +1,21 @@
-@javascript @mod @uon @mod_attendance
-Feature: Teachers and Students can record session attendance
-  In order to record session attendance
+@javascript @mod @uon @mod_presence
+Feature: Teachers and Students can record session presence
+  In order to record session presence
   As a student
-  I need to be able to mark my own attendance to a session
+  I need to be able to mark my own presence to a session
   And as a teacher
-  I need to be able to mark any students attendance to a session
-  In order to report on session attendance
+  I need to be able to mark any students presence to a session
+  In order to report on session presence
   As a teacher
-  I need to be able to export session attendance and run reports
-  In order to contact students with poor attendance
+  I need to be able to export session presence and run reports
+  In order to contact students with poor presence
   As a teacher
-  I need the ability to message a group of students with low attendance
+  I need the ability to message a group of students with low presence
 
   Background:
     Given the following "courses" exist:
       | fullname | shortname | summary                             | category | timecreated   | timemodified  |
-      | Course 1 | C1        | Prove the attendance activity works | 0        | ##yesterday## | ##yesterday## |
+      | Course 1 | C1        | Prove the presence activity works | 0        | ##yesterday## | ##yesterday## |
     And the following "users" exist:
       | username    | firstname | lastname | email            | idnumber | department       | institution |
       | student1    | Sam       | Student  | student1@asd.com | 1234     | computer science | University of Nottingham |
@@ -29,20 +29,20 @@ Feature: Teachers and Students can record session attendance
     And I am on "Course 1" course homepage with editing mode on
     And I follow "Add a block"
     And I follow "Administration"
-    And I add a "Attendance" to section "1" and I fill the form with:
-      | Name        | Attendance       |
+    And I add a "presence" to section "1" and I fill the form with:
+      | Name        | presence       |
     And I log out
     And I log in as "student1"
     And I am on "Course 1" course homepage
-    And I should see "Attendance"
+    And I should see "presence"
     And I log out
 
-  Scenario: Students can mark their own attendance and teacher can hide specific status from students.
+  Scenario: Students can mark their own presence and teacher can hide specific status from students.
     Given I log in as "teacher1"
     And I am on "Course 1" course homepage
-    And I follow "Attendance"
+    And I follow "presence"
     And I follow "Add"
-    And I set the field "Allow students to record own attendance" to "1"
+    And I set the field "Allow students to record own presence" to "1"
     And I set the following fields to these values:
       | id_sestime_starthour | 00 |
       | id_sestime_endhour   | 23 |
@@ -51,21 +51,21 @@ Feature: Teachers and Students can record session attendance
     And I log out
     And I log in as "student1"
     And I am on "Course 1" course homepage
-    And I follow "Attendance"
-    And I follow "Submit attendance"
+    And I follow "presence"
+    And I follow "Submit presence"
     And I should see "Excused"
     And I log out
     And I log in as "teacher1"
     And I am on "Course 1" course homepage
-    And I follow "Attendance"
+    And I follow "presence"
     And I follow "Status set"
     And I set the field with xpath "//*[@id='preferencesform']/table/tbody/tr[3]/td[5]/input" to "0"
     And I press "Update"
     And I log out
     And I log in as "student1"
     And I am on "Course 1" course homepage
-    And I follow "Attendance"
-    And I follow "Submit attendance"
+    And I follow "presence"
+    And I follow "Submit presence"
     And I should not see "Excused"
     And I set the field "Present" to "1"
     And I press "Save changes"
@@ -76,12 +76,12 @@ Feature: Teachers and Students can record session attendance
     And I expand "Reports" node
     And I follow "Logs"
     And I click on "Get these logs" "button"
-    Then "Attendance taken by student" "link" should exist
+    Then "presence taken by student" "link" should exist
 
   Scenario: Teachers can view below % report and send a message
     Given I log in as "teacher1"
     And I am on "Course 1" course homepage
-    And I follow "Attendance"
+    And I follow "presence"
     And I follow "Add"
     And I set the following fields to these values:
       | id_sestime_starthour | 01 |
@@ -97,7 +97,7 @@ Feature: Teachers and Students can record session attendance
     And I expand "Reports" node
     And I follow "Logs"
     And I click on "Get these logs" "button"
-    Then "Attendance report viewed" "link" should exist
+    Then "presence report viewed" "link" should exist
 
   Scenario: Export report includes id number, department and institution
     Given I log in as "admin"
@@ -108,7 +108,7 @@ Feature: Teachers and Students can record session attendance
     And I log out
     And I log in as "teacher1"
     And I am on "Course 1" course homepage
-    And I follow "Attendance"
+    And I follow "presence"
     And I follow "Add"
     And I set the following fields to these values:
       | id_sestime_starthour | 01 |
@@ -129,7 +129,7 @@ Feature: Teachers and Students can record session attendance
       | Name       | Super field |
     And I click on "Save changes" "button"
 
-    And I navigate to "Plugins > Activity modules > Attendance" in site administration
+    And I navigate to "Plugins > Activity modules > presence" in site administration
     And the "Export custom user profile fields" select box should contain "Super field"
 
   Scenario: Test adding custom user profile
@@ -143,12 +143,12 @@ Feature: Teachers and Students can record session attendance
     And I click on "Save changes" "button"
 
     And the following config values are set as admin:
-    | customexportfields | superfield | attendance |
+    | customexportfields | superfield | presence |
 
     And I log out
     And I log in as "teacher1"
     And I am on "Course 1" course homepage
-    And I follow "Attendance"
+    And I follow "presence"
     And I follow "Add"
     And I set the following fields to these values:
       | id_sestime_starthour | 01 |

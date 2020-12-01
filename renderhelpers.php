@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Attendance module renderering helpers
+ * presence module renderering helpers
  *
- * @package    mod_attendance
+ * @package    mod_presence
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -44,10 +44,10 @@ class user_sessions_cells_generator {
 
     /**
      * Set up params.
-     * @param attendance_report_data $reportdata - reportdata.
+     * @param presence_report_data $reportdata - reportdata.
      * @param stdClass $user - user record.
      */
-    public function  __construct(attendance_report_data $reportdata, $user) {
+    public function  __construct(presence_report_data $reportdata, $user) {
         $this->reportdata = $reportdata;
         $this->user = $user;
     }
@@ -75,14 +75,14 @@ class user_sessions_cells_generator {
                 }
             } else {
                 if ($this->user->enrolmentstart > ($sess->sessdate + $sess->duration)) {
-                    $starttext = get_string('enrolmentstart', 'attendance', userdate($this->user->enrolmentstart, '%d.%m.%Y'));
+                    $starttext = get_string('enrolmentstart', 'presence', userdate($this->user->enrolmentstart, '%d.%m.%Y'));
                     $this->construct_enrolments_info_cell($starttext);
                 } else if ($this->user->enrolmentend and $this->user->enrolmentend < $sess->sessdate) {
-                    $endtext = get_string('enrolmentend', 'attendance', userdate($this->user->enrolmentend, '%d.%m.%Y'));
+                    $endtext = get_string('enrolmentend', 'presence', userdate($this->user->enrolmentend, '%d.%m.%Y'));
                     $this->construct_enrolments_info_cell($endtext);
                 } else if (!$this->user->enrolmentend and $this->user->enrolmentstatus == ENROL_USER_SUSPENDED) {
                     // No enrolmentend and ENROL_USER_SUSPENDED.
-                    $suspendext = get_string('enrolmentsuspended', 'attendance', userdate($this->user->enrolmentend, '%d.%m.%Y'));
+                    $suspendext = get_string('enrolmentsuspended', 'presence', userdate($this->user->enrolmentend, '%d.%m.%Y'));
                     $this->construct_enrolments_info_cell($suspendext);
                 } else {
                     if ($sess->groupid == 0 or array_key_exists($sess->groupid, $this->reportdata->usersgroups[$this->user->id])) {
@@ -179,7 +179,7 @@ class user_sessions_cells_html_generator extends user_sessions_cells_generator {
      */
     protected function construct_existing_status_cell($text) {
         $this->close_open_cell_if_needed();
-        $this->cells[] = html_writer::span($text, 'attendancestatus-'.$text);
+        $this->cells[] = html_writer::span($text, 'presencestatus-'.$text);
     }
 
     /**
@@ -313,58 +313,58 @@ class user_sessions_cells_text_generator extends user_sessions_cells_generator {
  * Used to construct user summary.
  *
  * @param stdclass $usersummary - data for summary.
- * @param int $view - ATT_VIEW_ALL|ATT_VIEW_
+ * @param int $view - PRESENCE_VIEW_ALL|PRESENCE_VIEW_
  * @return string.
  */
 function construct_user_data_stat($usersummary, $view) {
     $stattable = new html_table();
-    $stattable->attributes['class'] = 'attlist';
+    $stattable->attributes['class'] = 'presencelist';
     $row = new html_table_row();
     $row->attributes['class'] = 'normal';
-    $row->cells[] = get_string('sessionscompleted', 'attendance') . ':';
+    $row->cells[] = get_string('sessionscompleted', 'presence') . ':';
     $row->cells[] = $usersummary->numtakensessions;
     $stattable->data[] = $row;
 
     $row = new html_table_row();
     $row->attributes['class'] = 'normal';
-    $row->cells[] = get_string('pointssessionscompleted', 'attendance') . ':';
+    $row->cells[] = get_string('pointssessionscompleted', 'presence') . ':';
     $row->cells[] = $usersummary->pointssessionscompleted;
     $stattable->data[] = $row;
 
     $row = new html_table_row();
     $row->attributes['class'] = 'normal';
-    $row->cells[] = get_string('percentagesessionscompleted', 'attendance') . ':';
+    $row->cells[] = get_string('percentagesessionscompleted', 'presence') . ':';
     $row->cells[] = $usersummary->percentagesessionscompleted;
     $stattable->data[] = $row;
 
-    if ($view == ATT_VIEW_ALL) {
+    if ($view == PRESENCE_VIEW_ALL) {
         $row = new html_table_row();
         $row->attributes['class'] = 'highlight';
-        $row->cells[] = get_string('sessionstotal', 'attendance') . ':';
+        $row->cells[] = get_string('sessionstotal', 'presence') . ':';
         $row->cells[] = $usersummary->numallsessions;
         $stattable->data[] = $row;
 
         $row = new html_table_row();
         $row->attributes['class'] = 'highlight';
-        $row->cells[] = get_string('pointsallsessions', 'attendance') . ':';
+        $row->cells[] = get_string('pointsallsessions', 'presence') . ':';
         $row->cells[] = $usersummary->pointsallsessions;
         $stattable->data[] = $row;
 
         $row = new html_table_row();
         $row->attributes['class'] = 'highlight';
-        $row->cells[] = get_string('percentageallsessions', 'attendance') . ':';
+        $row->cells[] = get_string('percentageallsessions', 'presence') . ':';
         $row->cells[] = $usersummary->allsessionspercentage;
         $stattable->data[] = $row;
 
         $row = new html_table_row();
         $row->attributes['class'] = 'normal';
-        $row->cells[] = get_string('maxpossiblepoints', 'attendance') . ':';
+        $row->cells[] = get_string('maxpossiblepoints', 'presence') . ':';
         $row->cells[] = $usersummary->maxpossiblepoints;
         $stattable->data[] = $row;
 
         $row = new html_table_row();
         $row->attributes['class'] = 'normal';
-        $row->cells[] = get_string('maxpossiblepercentage', 'attendance') . ':';
+        $row->cells[] = get_string('maxpossiblepercentage', 'presence') . ':';
         $row->cells[] = $usersummary->maxpossiblepercentage;
         $stattable->data[] = $row;
     }
@@ -375,12 +375,12 @@ function construct_user_data_stat($usersummary, $view) {
 /**
  * Returns html user summary
  *
- * @param stdclass $attendance - attendance record.
+ * @param stdclass $presence - presence record.
  * @param stdclass $user - user record
  * @return string.
  *
  */
-function construct_full_user_stat_html_table($attendance, $user) {
-    $summary = new mod_attendance_summary($attendance->id, $user->id);
-    return construct_user_data_stat($summary->get_all_sessions_summary_for($user->id), ATT_VIEW_ALL);
+function construct_full_user_stat_html_table($presence, $user) {
+    $summary = new mod_presence_summary($presence->id, $user->id);
+    return construct_user_data_stat($summary->get_all_sessions_summary_for($user->id), PRESENCE_VIEW_ALL);
 }

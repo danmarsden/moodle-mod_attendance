@@ -1,5 +1,5 @@
 {
-    "moodle-mod_attendance-groupfilter": {
+    "moodle-mod_presence-groupfilter": {
         "requires": [
             "base",
             "node"

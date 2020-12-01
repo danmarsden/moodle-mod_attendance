@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Class definition for mod_attendance_preferences_page_params
+ * Class definition for mod_presence_preferences_page_params
  *
- * @package   mod_attendance
+ * @package   mod_presence
  * @copyright  2016 Dan Marsden http://danmarsden.com
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -29,7 +29,7 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright  2016 Dan Marsden http://danmarsden.com
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_attendance_preferences_page_params {
+class mod_presence_preferences_page_params {
     /** Add */
     const ACTION_ADD              = 1;
     /** Delete */
@@ -41,7 +41,7 @@ class mod_attendance_preferences_page_params {
     /** Save */
     const ACTION_SAVE             = 5;
 
-    /** @var int view mode of taking attendance page*/
+    /** @var int view mode of taking presence page*/
     public $action;
 
     /** @var int */

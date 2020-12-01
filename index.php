@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * redjrects to the first Attendance in the course.
+ * redjrects to the first presence in the course.
  *
- * @package   mod_attendance
+ * @package   mod_presence
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -29,13 +29,13 @@ $id = required_param('id', PARAM_INT);
 $course = $DB->get_record('course', array('id' => $id), '*', MUST_EXIST);
 require_login($course);
 
-$PAGE->set_url('/mod/attendance/index.php', array('id' => $id));
+$PAGE->set_url('/mod/presence/index.php', array('id' => $id));
 $PAGE->set_pagelayout('incourse');
 
-\mod_attendance\event\course_module_instance_list_viewed::create_from_course($course)->trigger();
+\mod_presence\event\course_module_instance_list_viewed::create_from_course($course)->trigger();
 
 // Print the header.
-$strplural = get_string("modulename", "attendance");
+$strplural = get_string("modulename", "presence");
 $PAGE->navbar->add($strplural);
 $PAGE->set_title($strplural);
 $PAGE->set_heading($course->fullname);
@@ -44,9 +44,9 @@ echo $OUTPUT->heading(format_string($strplural));
 
 $context = context_course::instance($course->id);
 
-require_capability('mod/attendance:view', $context);
+require_capability('mod/presence:view', $context);
 
-if (! $atts = get_all_instances_in_course("attendance", $course)) {
+if (! $presences = get_all_instances_in_course("presence", $course)) {
     $url = new moodle_url('/course/view.php', array('id' => $course->id));
     notice(get_string('thereareno', 'moodle', $strplural), $url);
     die;
@@ -70,15 +70,15 @@ if ($usesections) {
     $table->align = array ("left");
 }
 
-foreach ($atts as $att) {
-    // Get the responses of each attendance.
-    $viewurl = new moodle_url('/mod/attendance/view.php', array('id' => $att->coursemodule));
+foreach ($presences as $presence) {
+    // Get the responses of each presence.
+    $viewurl = new moodle_url('/mod/presence/view.php', array('id' => $presence->coursemodule));
 
-    $dimmedclass = $att->visible ? '' : 'class="dimmed"';
-    $link = '<a '.$dimmedclass.' href="'.$viewurl->out().'">'.$att->name.'</a>';
+    $dimmedclass = $presence->visible ? '' : 'class="dimmed"';
+    $link = '<a '.$dimmedclass.' href="'.$viewurl->out().'">'.$presence->name.'</a>';
 
     if ($usesections) {
-        $tabledata = array (get_section_name($course, $att->section), $link);
+        $tabledata = array (get_section_name($course, $presence->section), $link);
     } else {
         $tabledata = array ($link);
     }

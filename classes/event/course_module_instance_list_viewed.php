@@ -15,20 +15,20 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * The mod_attendance instance list viewed event.
+ * The mod_presence instance list viewed event.
  *
- * @package    mod_attendance
+ * @package    mod_presence
  * @copyright  2018 Dan Marsden
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_attendance\event;
+namespace mod_presence\event;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * The mod_attendance instance list viewed event class.
+ * The mod_presence instance list viewed event class.
  *
- * @package    mod_attendance
+ * @package    mod_presence
  * @copyright  2018 Dan Marsden
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

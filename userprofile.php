@@ -15,77 +15,70 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Manage attendance sessions
+ * Manage presence sessions
  *
- * @package    mod_attendance
+ * @package    mod_presence
  * @copyright  2020 Florian Metzger-Noel (github.com/flocko-motion)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 require_once(dirname(__FILE__).'/../../config.php');
 require_once(dirname(__FILE__).'/locallib.php');
-// $PAGE->requires->js('/mod/attendance/js/userprofile.js');
+$PAGE->requires->js('/mod/presence/js/presence.js');
+$PAGE->requires->js('/mod/presence/js/userprofile.js');
 
-$pageparams = new mod_attendance_manage_page_params();
+$capabilities = array(
+    'mod/presence:managepresences',
+    'mod/presence:takepresences',
+    'mod/presence:changepresences'
+);
 
+$pageparams = new mod_presence_manage_page_params();
 $id                         = required_param('id', PARAM_INT);
 $userid                     = required_param('userid', PARAM_INT);
 
-$cm             = get_coursemodule_from_id('attendance', $id, 0, false, MUST_EXIST);
-$course         = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
-$att            = $DB->get_record('attendance', array('id' => $cm->instance), '*', MUST_EXIST);
-
-require_login($course, true, $cm);
-
-$context = context_module::instance($cm->id);
-$capabilities = array(
-    'mod/attendance:manageattendances',
-    'mod/attendance:takeattendances',
-    'mod/attendance:changeattendances'
-);
-if (!has_any_capability($capabilities, $context)) {
-    $url = new moodle_url('/mod/attendance/view.php', array('id' => $cm->id));
-    redirect($url);
-}
+presence_init_page([
+    'url' => new moodle_url('/mod/presence/evaluation.php'),
+    'tab' => presence_tabs::TAB_EVALUATION,
+]);
 
 $pageparams->init($cm);
-$att = new mod_attendance_structure($att, $cm, $course, $context, $pageparams);
+$presence = new mod_presence_structure(
+    $DB->get_record('presence', array('id' => $cm->instance), '*', MUST_EXIST),
+    $cm, $course, $context, $pageparams);
 
-$PAGE->set_url($att->url_evaluation());
-$PAGE->set_title($course->shortname. ": ".$att->name);
-$PAGE->set_heading($course->fullname);
-$PAGE->set_cacheable(true);
-$PAGE->force_settings_menu(true);
-$PAGE->navbar->add($att->name);
+$user = $presence->get_user($userid);
 
-
-$tabs = new attendance_tabs($att, attendance_tabs::TAB_EVALUATION);
-$title = get_string('attendanceforthecourse', 'attendance').' :: ' .format_string($course->fullname);
-$header = new mod_attendance_header($att, $title);
-$output = $PAGE->get_renderer('mod_attendance');
-echo $output->header();
-echo $output->render($header);
-mod_attendance_notifyqueue::show();
-echo $output->render($tabs);
-
-$user = $att->get_user($userid);
-
-$days = (time() - $user->firstaccess) / (3600 * 24);
+$days = (time() - $user->timecreated) / (3600 * 24);
 if ($days >= 365) {
-    $user->signedupsince = get_string('signedupfor_years', 'attendance', floor($days / 365));
+    $user->signedupsince = get_string('signedupfor_years', 'presence', floor($days / 365));
 } else if ($days >= 31) {
-    $user->signedupsince = get_string('signedupfor_months', 'attendance', floor($days / 30.42));
+    $user->signedupsince = get_string('signedupfor_months', 'presence', floor($days / 30.42));
 } else if ($days >= 14) {
-    $user->signedupsince = get_string('signedupfor_weeks', 'attendance', floor($days / 7));
+    $user->signedupsince = get_string('signedupfor_weeks', 'presence', floor($days / 7));
 } else {
-    $user->signedupsince = get_string('signedupfor_days', 'attendance', floor($days));
+    $user->signedupsince = get_string('signedupfor_days', 'presence', floor($days));
 }
+$presences = $presence->get_attendet_sessions($userid);
 
+
+function presence_lang_to_html($strid, $component = null) {
+    echo '<DATA data-type="presence_str" data-key="'.htmlentities($strid).'" data-value="'.htmlentities(get_string($strid, $component)).'" />';
+}
+presence_lang_to_html("error");
+presence_lang_to_html("success");
+presence_lang_to_html("messagesent", "presence");
+presence_lang_to_html("messageempty", "presence");
+presence_lang_to_html("errorsavingdata", "presence");
 
 $templatecontext = [
     'user' => $user,
+    'courseremarks' => $presence->get_course_remarks($userid),
+    'sessions' => $presences['sessions'],
+    'sessions?' => count($presences['sessions']),
+    'totalhours' => $presences['totalhours'],
 ];
-echo $OUTPUT->render_from_template('mod_attendance/userprofile', $templatecontext);
+echo $OUTPUT->render_from_template('mod_presence/userprofile', $templatecontext);
 
 echo $output->footer();
 

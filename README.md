@@ -1,14 +1,14 @@
-[![Build Status](https://travis-ci.org/flocko-motion/moodle-mod_attendance.svg?branch=main)](https://travis-ci.org/flocko-motion/moodle-mod_attendance)
+[![Build Status](https://travis-ci.org/flocko-motion/moodle-mod_presence.svg?branch=main)](https://travis-ci.org/flocko-motion/moodle-mod_presence)
 
 # ABOUT
 
-This is a hard fork of the attendance module maintaned by Dan Marsden http://danmarsden.com
+This is a hard fork of the presence module maintaned by Dan Marsden http://danmarsden.com
 and previously developed by Dmitry Pupinin (Novosibirsk, Russia) and Artem Andreev (Taganrog, Russia).
     
 # GOAL OF THIS FORK
 
-This version of the attendance module is made for tracking attendance of students in session which take place
-in rooms. Attendance is tracked in hours. Teachers evaluate session which took place and register which students 
+This version of the presence module is made for tracking presence of students in session which take place
+in rooms. presence is tracked in hours. Teachers evaluate session which took place and register which students 
 attendet for how long. If students showed up for a class which weren't enrolled, yet, or which aren't even registered
 in moodle, yet, teachers can do all that with a minimal amount of actions. 
 

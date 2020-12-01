@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Attendance event handler definition.
+ * presence event handler definition.
  *
- * @package mod_attendance
+ * @package mod_presence
  * @category event
  * @copyright 2017 Dan Marsden
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -30,7 +30,7 @@ $observers = array(
 
     array(
         'eventname'   => '\core\event\course_content_deleted',
-        'callback'    => 'mod_attendance_observer::course_content_deleted',
+        'callback'    => 'mod_presence_observer::course_content_deleted',
     ),
 
 );

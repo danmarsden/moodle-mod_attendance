@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Test for attendance plugin related to the "rooms" feature
+ * Test for presence plugin related to the "rooms" feature
  *
- * @package    mod_attendance
+ * @package    mod_presence
  * @category   test
  * @copyright  2020 Florian Metzger-Noel (github.com/flocko-motion)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -27,19 +27,19 @@ defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 require_once($CFG->dirroot . '/webservice/tests/helpers.php');
-require_once($CFG->dirroot . '/mod/attendance/classes/attendance_webservices_handler.php');
-require_once($CFG->dirroot . '/mod/attendance/classes/structure.php');
-require_once($CFG->dirroot . '/mod/attendance/externallib.php');
+require_once($CFG->dirroot . '/mod/presence/classes/presence_webservices_handler.php');
+require_once($CFG->dirroot . '/mod/presence/classes/structure.php');
+require_once($CFG->dirroot . '/mod/presence/externallib.php');
 
 /**
  * This class contains the test cases for the "rooms" feature extension.
  *
- * @package    mod_attendance
+ * @package    mod_presence
  * @category   test
  * @copyright  2020 Florian Metzger-Noel (github.com/flocko-motion)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_attendance_rooms_tests extends externallib_advanced_testcase
+class mod_presence_rooms_tests extends externallib_advanced_testcase
 {
 
     /**
@@ -47,6 +47,6 @@ class mod_attendance_rooms_tests extends externallib_advanced_testcase
      * TODO: write tests.
      */
     public function test_get_courses_with_today_sessions() {
-        $options = mod_attendance_external::get_room_capacities();
+        $options = mod_presence_external::get_room_capacities();
     }
 }

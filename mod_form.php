@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Forms for updating/adding attendance
+ * Forms for updating/adding presence
  *
- * @package    mod_attendance
+ * @package    mod_presence
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -31,7 +31,7 @@ require_once($CFG->dirroot.'/course/moodleform_mod.php');
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_attendance_mod_form extends moodleform_mod {
+class mod_presence_mod_form extends moodleform_mod {
 
     /**
      * Called to define this moodle form
@@ -39,9 +39,9 @@ class mod_attendance_mod_form extends moodleform_mod {
      * @return void
      */
     public function definition() {
-        $attendanceconfig = get_config('attendance');
-        if (!isset($attendanceconfig->subnet)) {
-            $attendanceconfig->subnet = '';
+        $presenceconfig = get_config('presence');
+        if (!isset($presenceconfig->subnet)) {
+            $presenceconfig->subnet = '';
         }
         $mform    =& $this->_form;
 
@@ -50,26 +50,11 @@ class mod_attendance_mod_form extends moodleform_mod {
         $mform->addElement('text', 'name', get_string('name'), array('size' => '64'));
         $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', null, 'required', null, 'client');
-        $mform->setDefault('name', get_string('modulename', 'attendance'));
+        $mform->setDefault('name', get_string('modulename', 'presence'));
 
         $this->standard_intro_elements();
 
-        // Grade settings.
-        $this->standard_grading_coursemodule_elements();
-
         $this->standard_coursemodule_elements(true);
-
-        // IP address.
-        if (get_config('attendance', 'subnetactivitylevel')) {
-            $mform->addElement('header', 'security', get_string('extrarestrictions', 'attendance'));
-            $mform->addElement('text', 'subnet', get_string('defaultsubnet', 'attendance'), array('size' => '164'));
-            $mform->setType('subnet', PARAM_TEXT);
-            $mform->addHelpButton('subnet', 'defaultsubnet', 'attendance');
-            $mform->setDefault('subnet', $attendanceconfig->subnet);
-        } else {
-            $mform->addElement('hidden', 'subnet', '');
-            $mform->setType('subnet', PARAM_TEXT);
-        }
 
         $this->add_action_buttons();
     }

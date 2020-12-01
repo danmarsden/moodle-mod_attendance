@@ -1,7 +1,7 @@
 {
-    "name": "moodle-mod_attendance-groupfilter",
+    "name": "moodle-mod_presence-groupfilter",
     "builds": {
-        "moodle-mod_attendance-groupfilter": {
+        "moodle-mod_presence-groupfilter": {
             "jsfiles": [
                 "groupfilter.js"
             ]

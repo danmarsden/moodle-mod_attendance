@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Class definition for mod_attendance_header
+ * Class definition for mod_presence_header
  *
- * @package    mod_attendance
+ * @package    mod_presence
  * @author     Daniel Thee Roperto <daniel.roperto@catalyst-au.net>
  * @copyright  2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -28,36 +28,36 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * Used to render the page header.
  *
- * @package    mod_attendance
+ * @package    mod_presence
  * @author     Daniel Thee Roperto <daniel.roperto@catalyst-au.net>
  * @copyright  2017 Catalyst IT Australia {@link http://www.catalyst-au.net}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_attendance_header implements renderable {
-    /** @var mod_attendance_structure */
-    private $attendance;
+class mod_presence_header implements renderable {
+    /** @var mod_presence_structure */
+    private $presence;
 
     /** @var string */
     private $title;
 
     /**
-     * mod_attendance_header constructor.
+     * mod_presence_header constructor.
      *
-     * @param mod_attendance_structure $attendance
+     * @param mod_presence_structure $presence
      * @param null                     $title
      */
-    public function __construct(mod_attendance_structure $attendance, $title = null) {
-        $this->attendance = $attendance;
+    public function __construct(mod_presence_structure $presence, $title = null) {
+        $this->presence = $presence;
         $this->title = $title;
     }
 
     /**
-     * Gets the attendance data.
+     * Gets the presence data.
      *
-     * @return mod_attendance_structure
+     * @return mod_presence_structure
      */
-    public function get_attendance() {
-        return $this->attendance;
+    public function get_presence() {
+        return $this->presence;
     }
 
     /**
@@ -66,7 +66,7 @@ class mod_attendance_header implements renderable {
      * @return string
      */
     public function get_title() {
-        return is_null($this->title) ? $this->attendance->name : $this->title;
+        return is_null($this->title) ? $this->presence->name : $this->title;
     }
 
     /**
@@ -75,6 +75,6 @@ class mod_attendance_header implements renderable {
      * @return bool
      */
     public function should_render() {
-        return !is_null($this->title) || !empty($this->attendance->intro);
+        return !is_null($this->title) || !empty($this->presence->intro);
     }
 }

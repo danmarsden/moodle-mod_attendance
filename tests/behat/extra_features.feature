@@ -1,10 +1,10 @@
-@mod @mod_attendance @javascript
-Feature: Test the various new features in the attendance module
+@mod @mod_presence @javascript
+Feature: Test the various new features in the presence module
 
   Background:
     Given the following "courses" exist:
       | fullname | shortname | summary                             | category | timecreated   | timemodified  |
-      | Course 1 | C1        | Prove the attendance activity works | 0        | ##yesterday## | ##yesterday## |
+      | Course 1 | C1        | Prove the presence activity works | 0        | ##yesterday## | ##yesterday## |
     And the following "users" exist:
       | username | firstname | lastname | email                |
       | teacher1 | Teacher   | 1        | teacher1@example.com |
@@ -22,16 +22,16 @@ Feature: Test the various new features in the attendance module
 
     And I log in as "teacher1"
     And I am on "Course 1" course homepage with editing mode on
-    And I add a "Attendance" to section "1" and I fill the form with:
-      | Name | Test attendance |
-    And I add a "Attendance" to section "1" and I fill the form with:
-      | Name | Test2 attendance |
+    And I add a "presence" to section "1" and I fill the form with:
+      | Name | Test presence |
+    And I add a "presence" to section "1" and I fill the form with:
+      | Name | Test2 presence |
     And I log out
 
   Scenario: A teacher can create and update temporary users
     Given I log in as "teacher1"
     And I am on "Course 1" course homepage
-    And I follow "Test attendance"
+    And I follow "Test presence"
     And I follow "Temporary users"
 
     When I set the following fields to these values:
@@ -60,10 +60,10 @@ Feature: Test the various new features in the attendance module
     Then I should not see "Temporary user 1"
     And I should see "Temporary user 2"
 
-  Scenario: A teacher can take attendance for temporary users
+  Scenario: A teacher can take presence for temporary users
     Given I log in as "teacher1"
     And I am on "Course 1" course homepage
-    And I follow "Test attendance"
+    And I follow "Test presence"
     And I follow "Temporary users"
     And I set the following fields to these values:
       | Full name | Temporary user 1 |
@@ -79,7 +79,7 @@ Feature: Test the various new features in the attendance module
       | id_addmultiply | 0 |
     And I click on "submitbutton" "button"
 
-    And I follow "Take attendance"
+    And I follow "Take presence"
     # Present
     And I click on "td.cell.c3 input" "css_element" in the "Student 1" "table_row"
     # Late
@@ -88,7 +88,7 @@ Feature: Test the various new features in the attendance module
     And I click on "td.cell.c5 input" "css_element" in the "Temporary user 1" "table_row"
     # Absent
     And I click on "td.cell.c6 input" "css_element" in the "Temporary user 2" "table_row"
-    And I press "Save attendance"
+    And I press "Save presence"
     And I follow "Report"
     And "P" "text" should exist in the "Student 1" "table_row"
     And "L" "text" should exist in the "Student 2" "table_row"
@@ -99,7 +99,7 @@ Feature: Test the various new features in the attendance module
     And I should see "Absent"
 
     # Merge user.
-    When I follow "Test attendance"
+    When I follow "Test presence"
     And I follow "Temporary users"
     And I click on "Merge user" "link" in the "Temporary user 2" "table_row"
     And I set the field "Participant" to "Student 3"
@@ -126,7 +126,7 @@ Feature: Test the various new features in the attendance module
 
     And I log in as "teacher1"
     And I am on "Course 1" course homepage
-    And I follow "Test attendance"
+    And I follow "Test presence"
     And I follow "Add"
     And I set the following fields to these values:
       | id_addmultiply | 0 |
@@ -149,7 +149,7 @@ Feature: Test the various new features in the attendance module
   Scenario: A teacher can create and use multiple status lists
     Given I log in as "teacher1"
     And I am on "Course 1" course homepage
-    And I follow "Test attendance"
+    And I follow "Test presence"
     And I follow "Status set"
     And I set the field "jump" to "New set of statuses"
     And I set the field with xpath "//*[@id='preferencesform']/table/tbody/tr[1]/td[2]/input" to "G"
@@ -183,50 +183,50 @@ Feature: Test the various new features in the attendance module
       | id_sestime_endhour        | 13 |
     And I click on "submitbutton" "button"
 
-    When I click on "Take attendance" "link" in the "10AM" "table_row"
+    When I click on "Take presence" "link" in the "10AM" "table_row"
     Then "Set status to «Present»" "link" should exist
     And "Set status to «Late»" "link" should exist
     And "Set status to «Excused»" "link" should exist
     And "Set status to «Absent»" "link" should exist
 
     When I follow "Sessions"
-    And I click on "Take attendance" "link" in the "12PM" "table_row"
+    And I click on "Take presence" "link" in the "12PM" "table_row"
     Then "Set status to «Great»" "link" should exist
     And "Set status to «OK»" "link" should exist
     And "Set status to «Bad»" "link" should exist
 
-  Scenario: A teacher can use the radio buttons to set attendance values for all users
+  Scenario: A teacher can use the radio buttons to set presence values for all users
     Given I log in as "teacher1"
     And I am on "Course 1" course homepage
-    And I follow "Test attendance"
+    And I follow "Test presence"
     And I follow "Add"
     And I set the following fields to these values:
       | id_addmultiply | 0 |
     And I click on "submitbutton" "button"
-    And I click on "Take attendance" "link"
+    And I click on "Take presence" "link"
     And I set the field "Set status for" to "all"
     When I click on "setallstatuses" "field" in the ".takelist tbody td.c3" "css_element"
-    And I press "Save attendance"
+    And I press "Save presence"
     And I follow "Report"
     Then "L" "text" should exist in the "Student 1" "table_row"
     And "L" "text" should exist in the "Student 2" "table_row"
     And "L" "text" should exist in the "Student 3" "table_row"
 
-  Scenario: A teacher can use the radio buttons to set attendance values for unselected users
+  Scenario: A teacher can use the radio buttons to set presence values for unselected users
     Given I log in as "teacher1"
     And I am on "Course 1" course homepage
-    And I follow "Test2 attendance"
+    And I follow "Test2 presence"
     And I follow "Add"
     And I set the following fields to these values:
       | id_addmultiply | 0 |
     And I click on "submitbutton" "button"
-    And I click on "Take attendance" "link"
+    And I click on "Take presence" "link"
     And I set the field "Set status for" to "unselected"
     # Set student 1 as present.
     And I click on "td.cell.c3 input" "css_element" in the "Student 1" "table_row"
     And I click on "setallstatuses" "field" in the ".takelist tbody td.c3" "css_element"
     And I wait until the page is ready
-    And I press "Save attendance"
+    And I press "Save presence"
     When I follow "Report"
     Then "P" "text" should exist in the "Student 1" "table_row"
     And "L" "text" should exist in the "Student 2" "table_row"

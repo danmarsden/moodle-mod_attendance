@@ -42,11 +42,11 @@ YUI().use('yui2-container', 'yui2-calendar', function(Y) {
                     }
                 });
 
-                dialog = new YAHOO.widget.Dialog("attcalendarcontainer", {
+                dialog = new YAHOO.widget.Dialog("presencecalendarcontainer", {
                     visible: false,
                     context: ["show", "tl", "bl"],
-                    buttons: [{text: M.util.get_string('caltoday', 'attendance'), handler: resetHandler, isDefault: true},
-                             {text: M.util.get_string('calclose', 'attendance'), handler: closeHandler}],
+                    buttons: [{text: M.util.get_string('caltoday', 'presence'), handler: resetHandler, isDefault: true},
+                             {text: M.util.get_string('calclose', 'presence'), handler: closeHandler}],
                     draggable: false,
                     close: false
                 });
@@ -73,10 +73,10 @@ YUI().use('yui2-container', 'yui2-calendar', function(Y) {
                     hide_blank_weeks: true // Enable, to demonstrate how we handle changing height, using changeContent.
                 });
 
-                calendar.cfg.setProperty("start_weekday", M.attendance.cal_start_weekday);
-                calendar.cfg.setProperty("MONTHS_LONG", M.attendance.cal_months);
-                calendar.cfg.setProperty("WEEKDAYS_SHORT", M.attendance.cal_week_days);
-                calendar.select(new Date(M.attendance.cal_cur_date * 1000));
+                calendar.cfg.setProperty("start_weekday", M.presence.cal_start_weekday);
+                calendar.cfg.setProperty("MONTHS_LONG", M.presence.cal_months);
+                calendar.cfg.setProperty("WEEKDAYS_SHORT", M.presence.cal_week_days);
+                calendar.select(new Date(M.presence.cal_cur_date * 1000));
                 calendar.render();
 
                 calendar.selectEvent.subscribe(function() {

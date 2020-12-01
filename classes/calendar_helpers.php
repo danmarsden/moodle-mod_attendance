@@ -16,7 +16,7 @@
 /**
  * Calendar related functions
  *
- * @package    mod_attendance
+ * @package    mod_presence
  * @copyright  2016 Vyacheslav Strelkov
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -31,41 +31,41 @@ require_once(dirname(__FILE__).'/../../../calendar/lib.php');
  * @param stdClass $session initial sessions to take data from
  * @return bool result of calendar event creation
  */
-function attendance_create_calendar_event(&$session) {
+function presence_create_calendar_event(&$session) {
     global $DB;
 
     // We don't want to create multiple calendar events for 1 session.
     if ($session->caleventid) {
         return $session->caleventid;
     }
-    if (empty(get_config('attendance', 'enablecalendar')) || $session->calendarevent === 0) {
-        // Calendar events are not used, or event not required for this session.
-        return true;
-    }
 
-    $attendance = $DB->get_record('attendance', array('id' => $session->attendanceid));
+
+    $presence = $DB->get_record('presence', array('id' => $session->presenceid));
+    $course = $DB->get_record('course', ['id' => $presence->course]);
+
+
 
     $caleventdata = new stdClass();
-    $caleventdata->name           = $attendance->name;
-    $caleventdata->courseid       = $attendance->course;
-    $caleventdata->groupid        = $session->groupid;
-    $caleventdata->instance       = $session->attendanceid;
+    $caleventdata->name           = $course->shortname ? $course->shortname : $course->fullname;
+    $caleventdata->courseid       = $presence->course;
+    $caleventdata->groupid        = 0;
+    $caleventdata->instance       = $session->presenceid;
     $caleventdata->timestart      = $session->sessdate;
     $caleventdata->timeduration   = $session->duration;
     $caleventdata->description    = $session->description;
-    $caleventdata->format         = $session->descriptionformat;
-    $caleventdata->eventtype      = 'attendance';
+    $caleventdata->format         = 0;
+    $caleventdata->eventtype      = 'presence';
     $caleventdata->timemodified   = time();
-    $caleventdata->modulename     = 'attendance';
-
-    if (!empty($session->groupid)) {
-        $caleventdata->name .= " (". get_string('group', 'group') ." ". groups_get_group_name($session->groupid) .")";
+    $caleventdata->modulename     = 'presence';
+    if ($session->roomid) {
+        $room = $DB->get_record('presence_rooms', ['id' => $session->roomid]);
+        $caleventdata->location   = $room->name;
     }
 
     $calevent = new stdClass();
     if ($calevent = calendar_event::create($caleventdata, false)) {
         $session->caleventid = $calevent->id;
-        $DB->set_field('attendance_sessions', 'caleventid', $session->caleventid, array('id' => $session->id));
+        $DB->set_field('presence_sessions', 'caleventid', $session->caleventid, array('id' => $session->id));
         return true;
     } else {
         return false;
@@ -79,20 +79,16 @@ function attendance_create_calendar_event(&$session) {
  *
  * @param array $sessionsids array of sessions ids
  */
-function attendance_create_calendar_events($sessionsids) {
+function presence_create_calendar_events($sessionsids) {
     global $DB;
 
-    if (empty(get_config('attendance', 'enablecalendar'))) {
-        // Calendar events are not used.
-        return true;
-    }
 
-    $sessions = $DB->get_recordset_list('attendance_sessions', 'id', $sessionsids);
+    $sessions = $DB->get_recordset_list('presence_sessions', 'id', $sessionsids);
 
     foreach ($sessions as $session) {
-        attendance_create_calendar_event($session);
+        presence_create_calendar_event($session);
         if ($session->caleventid) {
-            $DB->update_record('attendance_sessions', $session);
+            $DB->update_record('presence_sessions', $session);
         }
     }
 }
@@ -103,36 +99,13 @@ function attendance_create_calendar_events($sessionsids) {
  * @param stdClass $session Session data
  * @return bool result of updating
  */
-function attendance_update_calendar_event($session) {
+function presence_update_calendar_event($session) {
     global $DB;
 
     $caleventid = $session->caleventid;
     $timeduration = $session->duration;
     $timestart = $session->sessdate;
 
-    if (empty(get_config('attendance', 'enablecalendar'))) {
-        // Calendar events are not used.
-        return true;
-    }
-
-    // Should there even be an event?
-    if ($session->calendarevent == 0) {
-        if ($session->caleventid != 0) {
-            // There is an existing event we should delete, calendarevent just got turned off.
-            $DB->delete_records_list('event', 'id', array($caleventid));
-            $session->caleventid = 0;
-            $DB->update_record('attendance_sessions', $session);
-            return true;
-        } else {
-            // This should be the common case when session does not want event.
-            return true;
-        }
-    }
-
-    // Do we need new event (calendarevent option has just been turned on)?
-    if ($session->caleventid == 0) {
-        return attendance_create_calendar_event($session);
-    }
 
     // Boring update.
     $caleventdata = new stdClass();
@@ -140,6 +113,7 @@ function attendance_update_calendar_event($session) {
     $caleventdata->timestart      = $timestart;
     $caleventdata->timemodified   = time();
     $caleventdata->description    = $session->description;
+    $caleventdata->location       = $session->location;
 
     $calendarevent = calendar_event::load($caleventid);
     if ($calendarevent) {
@@ -155,17 +129,17 @@ function attendance_update_calendar_event($session) {
  * @param array $sessionsids array of sessions ids
  * @return bool result of updating
  */
-function attendance_delete_calendar_events($sessionsids) {
+function presence_delete_calendar_events($sessionsids) {
     global $DB;
-    $caleventsids = attendance_existing_calendar_events_ids($sessionsids);
+    $caleventsids = presence_existing_calendar_events_ids($sessionsids);
     if ($caleventsids) {
         $DB->delete_records_list('event', 'id', $caleventsids);
     }
 
-    $sessions = $DB->get_recordset_list('attendance_sessions', 'id', $sessionsids);
+    $sessions = $DB->get_recordset_list('presence_sessions', 'id', $sessionsids);
     foreach ($sessions as $session) {
         $session->caleventid = 0;
-        $DB->update_record('attendance_sessions', $session);
+        $DB->update_record('presence_sessions', $session);
     }
 }
 
@@ -175,9 +149,9 @@ function attendance_delete_calendar_events($sessionsids) {
  * @param array $sessionsids of sessions ids
  * @return array | bool array of existing calendar events or false if none found
  */
-function attendance_existing_calendar_events_ids($sessionsids) {
+function presence_existing_calendar_events_ids($sessionsids) {
     global $DB;
-    $caleventsids = array_keys($DB->get_records_list('attendance_sessions', 'id', $sessionsids, '', 'caleventid'));
+    $caleventsids = array_keys($DB->get_records_list('presence_sessions', 'id', $sessionsids, '', 'caleventid'));
     $existingcaleventsids = array_filter($caleventsids);
     if (! empty($existingcaleventsids)) {
         return $existingcaleventsids;
@@ -192,43 +166,35 @@ function attendance_existing_calendar_events_ids($sessionsids) {
  * @param stdClass $booking id of the booking
  * @return bool result of calendar event creation
  */
-function attendance_create_calendar_event_booking($booking) {
+function presence_create_calendar_event_booking($booking) {
     global $DB, $USER;
 
-    if (empty(get_config('attendance', 'enablecalendar'))) {
-        // Calendar events are not used.
-        return true;
-    }
-
-    $attendance = $DB->get_record('attendance', array('id' => $booking->session->attendanceid));
-    $room = $DB->get_record('attendance_rooms', array('id' => $booking->session->roomid));
-    $course = $DB->get_record('course', array('id' => $attendance->course));
+    $presence = $DB->get_record('presence', array('id' => $booking->session->presenceid));
+    $room = $DB->get_record('presence_rooms', array('id' => $booking->session->roomid));
+    $course = $DB->get_record('course', array('id' => $presence->course));
     $caleventdata = new stdClass();
-    $caleventdata->name           = get_string("bookedcalprefix" , "attendance")
-        .($course->shortname ? $course->shortname : $course->fullname);
+    $caleventdata->name           = // get_string("bookedcalprefix" , "presence") .
+        ($course->shortname ? $course->shortname : $course->fullname);
     $caleventdata->type           = CALENDAR_EVENT_TYPE_STANDARD;
-    $caleventdata->courseid       = 0;
+    $caleventdata->courseid       = 0; // $presence->course;
     $caleventdata->groupid        = 0;
     $caleventdata->userid         = $USER->id;
-    $caleventdata->instance       = $booking->session->attendanceid;
+    $caleventdata->instance       = $booking->session->presenceid;
     $caleventdata->timestart      = $booking->session->sessdate;
     $caleventdata->timeduration   = $booking->session->duration;
-    $caleventdata->description    = '<p>'. get_string("bookedcaldescription", "attendance") .'</p>'
+    $caleventdata->description    = '<p>'. get_string("bookedcaldescription", "presence") .'</p>'
         .'<p>'.$course->fullname.'</p>'
         . $booking->session->description;
     $caleventdata->format         = $booking->session->descriptionformat;
-    $caleventdata->eventtype      = 'attendancebooking';
+    $caleventdata->eventtype      = 'user'; // 'presencebooking';
     $caleventdata->timemodified   = time();
-    $caleventdata->modulename     = 'attendance';
+    $caleventdata->modulename     = ''; //'presence';
     if ($room) {
         $caleventdata->location   = $room->name;
     }
-    if (!empty($session->groupid)) {
-        $caleventdata->name .= " (". get_string('group', 'group') ." ". groups_get_group_name($session->groupid) .")";
-    }
 
     if ($calevent = calendar_event::create($caleventdata, false)) {
-        $DB->set_field('attendance_bookings', 'caleventid', $calevent->id, array('id' => $booking->id));
+        $DB->set_field('presence_bookings', 'caleventid', $calevent->id, array('id' => $booking->id));
         return true;
     }
     return false;
@@ -240,7 +206,7 @@ function attendance_create_calendar_event_booking($booking) {
  * @param stdClass $booking booking to delete cal event for
  * @return bool result of calendar event creation
  */
-function attendance_delete_calendar_event_booking($booking) {
+function presence_delete_calendar_event_booking($booking) {
     global $DB, $USER;
     if (intval($booking->caleventid)) {
         $DB->delete_records('event', ['id' => $booking->caleventid, 'userid' => $USER->id]);

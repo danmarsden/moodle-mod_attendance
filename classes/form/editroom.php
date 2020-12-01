@@ -17,7 +17,7 @@
 /**
  * Form for editing a room
  *
- * @package     mod_attendance
+ * @package     mod_presence
  * @copyright   Florian Metzger-Noel (github.com/flocko-motion)
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -45,7 +45,7 @@ class editroom extends moodleform {
 
         $mform->addElement('hidden', 'id', $this->_customdata->id);
 
-        $mform->addElement('text', 'name', get_string('roomname', 'mod_attendance'));
+        $mform->addElement('text', 'name', get_string('roomname', 'mod_presence'));
         $mform->setType('name', PARAM_NOTAGS);
         $mform->setDefault('name', trim($this->_customdata->name));
         $mform->addRule('name', get_string('required'), 'required', null, 'client');
@@ -56,16 +56,16 @@ class editroom extends moodleform {
         $mform->setDefault('description', $this->_customdata->description);
 
         $mform->addElement('select', 'capacity',
-            get_string('roomcapacity', 'mod_attendance'), attendance_room_capacities());
+            get_string('roomcapacity', 'mod_presence'), presence_room_capacities());
         $mform->setType('capacity', PARAM_INT);
         $mform->setDefault('capacity', $this->_customdata->capacity);
-        $mform->addRule('capacity', get_string('mustbenumericorempty', 'mod_attendance'), 'numeric', null, 'client');
+        $mform->addRule('capacity', get_string('mustbenumericorempty', 'mod_presence'), 'numeric', null, 'client');
 
         $options = [
             0 => get_string('no'),
             1 => get_string('yes'),
         ];
-        $mform->addElement('select', 'bookable', get_string('roombookable', 'mod_attendance'), $options);
+        $mform->addElement('select', 'bookable', get_string('roombookable', 'mod_presence'), $options);
         $mform->setDefault('bookable', $this->_customdata->bookable);
 
         $this->add_action_buttons();

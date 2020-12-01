@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Class definition for mod_attendance_report_page_params
+ * Class definition for mod_presence_report_page_params
  *
- * @package   mod_attendance
+ * @package   mod_presence
  * @copyright  2016 Dan Marsden http://danmarsden.com
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -29,7 +29,7 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright  2016 Dan Marsden http://danmarsden.com
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_attendance_report_page_params extends mod_attendance_page_with_filter_controls {
+class mod_presence_report_page_params extends mod_presence_page_with_filter_controls {
     /** @var int */
     public $group;
     /** @var int */
@@ -42,7 +42,7 @@ class mod_attendance_report_page_params extends mod_attendance_page_with_filter_
     public $sessiondetailspos;
 
     /**
-     * mod_attendance_report_page_params constructor.
+     * mod_presence_report_page_params constructor.
      */
     public function  __construct() {
         $this->selectortype = self::SELECTOR_GROUP;
@@ -60,7 +60,7 @@ class mod_attendance_report_page_params extends mod_attendance_page_with_filter_
             $this->group = $this->get_current_sesstype() > 0 ? $this->get_current_sesstype() : 0;
         }
         if (!isset($this->sort)) {
-            $this->sort = ATT_SORT_DEFAULT;
+            $this->sort = PRESENCE_SORT_DEFAULT;
         }
     }
 
@@ -71,7 +71,7 @@ class mod_attendance_report_page_params extends mod_attendance_page_with_filter_
     public function get_significant_params() {
         $params = array();
 
-        if ($this->sort != ATT_SORT_DEFAULT) {
+        if ($this->sort != PRESENCE_SORT_DEFAULT) {
             $params['sort'] = $this->sort;
         }
 

@@ -15,17 +15,17 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template mod_attendance/rooms
+    @template mod_presence/rooms
 
 
 
 }}
 {{#user}}
-<div id="mod_attendance_evaluation_list" class="hidden">
+<div id="mod_presence_user_profile" data-presence-userid="{{id}}">
     <div class="fullwidth mt-4">
-        <h4>{{#str}}userprofile, attendance{{/str}}</h4>
+        <h4>{{#str}}userprofile, presence{{/str}}</h4>
     </div>
-    <input type="button" class="mt-3 btn btn-primary" value="{{#str}}back{{/str}}"/>
+    <input type="button" data-presence-action="back" class="mt-3 btn btn-primary" value="{{#str}}back{{/str}}"/>
     <div class="card mt-3 bg-light shadow-sm">
         <div class="card-body p-2">
                 <div class="float-left">
@@ -35,74 +35,145 @@
                     <div class="overflow-hidden text-nowrap font-weight-bold">{{firstname}} {{lastname}}</div>
                     <div class="overflow-hidden text-nowrap">{{signedupsince}}</div>
                     <div class="overflow-hidden text-nowrap mt-1">
-                        <a href="#" id="attendance_message_show"><i class="fa fa-envelope-o"></i> {{#str}}messageuser, attendance{{/str}}</a>
+                        <a href="#" id="presence_message_show"><i class="fa fa-envelope-o"></i> {{#str}}messageuser, presence{{/str}}</a>
                     </div>
                 </div>
         </div>
-        <div class="card-body p-2 hidden" id="attendance_message_form">
-            {{#str}}send_desc, attendance{{/str}}
-            <textarea class="form-control mb-1" rows="5"></textarea>
-            <button class="btn btn-secondary " type="button" id="attendance_message_cancel">
+        <div class="card-body p-2 hidden" id="presence_message_form">
+            {{#str}}send_desc, presence{{/str}}
+            <textarea id="presence_message_text" class="form-control mb-1" rows="5"></textarea>
+            <button class="btn btn-secondary " type="button" id="presence_message_cancel">
                 <i class="fa fa-times"></i> {{#str}}cancel{{/str}}
             </button>
-            <button class="btn btn-primary" type="button" id="attendance_message_send">
-                <i class="fa fa-envelope-o"></i> {{#str}}send, attendance{{/str}}
+            <button class="btn btn-primary" type="button" id="presence_message_send">
+                <i class="fa fa-envelope-o"></i> {{#str}}send, presence{{/str}}
             </button>
         </div>
     </div>
-    <h5 class="mt-3">{{#str}}statusremark, attendance{{/str}}</h5>
+    <h5 class="mt-3">{{#str}}statusremark, presence{{/str}}</h5>
     <div class="card mt-3 bg-light shadow-sm">
         <div class="card-body p-1">
             <div class="input-group">
-                <input type="text" class="form-control" placeholder="{{#str}}statusremark_placeholder, attendance{{/str}}"
-                       aria-label="Recipient's username" aria-describedby="basic-addon2">
+                <input id="presence_status_input" maxlength="160" type="text" value="{{statusremark}}" class="form-control" placeholder="{{#str}}statusremark_placeholder, presence{{/str}}" >
                 <div class="input-group-append">
-                    <button class="btn btn-outline-secondary" type="button">{{#str}}save{{/str}}</button>
+                    <button id="presence_status_save" class="btn btn-primary" type="button">{{#str}}save{{/str}}</button>
                 </div>
             </div>
         </div>
     </div>
-    <h5 class="mt-3">{{#str}}strengths, attendance{{/str}}</h5>
+    <h5 class="mt-3">{{#str}}strengths, presence{{/str}}</h5>
     <div class="card mt-3 bg-light shadow-sm">
         <div class="card-body p-2">
-            (requires addition of custom field to user table: https://docs.moodle.org/dev/Custom_fields_API)
+            <div class="input-group">
+                <input id="presence_strengths_input" maxlength="160" type="text" value="{{strengths}}" class="form-control" placeholder="{{#str}}strengths_placeholder, presence{{/str}}">
+                <div class="input-group-append">
+                    <button id="presence_strengths_save" class="btn btn-primary" type="button">{{#str}}save{{/str}}</button>
+                </div>
+            </div>
         </div>
     </div>
-    <h5 class="mt-3">{{#str}}sws, attendance{{/str}}</h5>
+    <h5 class="mt-3">{{#str}}sws, presence{{/str}}</h5>
     <div class="card mt-3 bg-light shadow-sm">
         <div class="card-body p-2">
-            {{swsshort}}: {{swslong}}
+            <div id="presence_sws_textual"><span id="presence_sws_textshort">{{swstextshort}}</span>: <span id="presence_sws_text">{{swstext}}</span></div>
             <div class="progress">
                 <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+                     id="presence_sws_bar"
                      aria-valuenow="{{sws}}" aria-valuemin="0" aria-valuemax="7" style="width: {{swspercent}}%"></div>
             </div>
-
+            <div id="presence_sws_display">
+                <div class="mt-1" id="presence_sws_show">
+                    <a href="#" id="presence_sws_edit">{{#str}}edit{{/str}}</a>
+                </div>
+            </div>
+            <div id="presence_sws_editor" class="hidden">
+                <hr />
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="presence_sws_options" id="presence_sws_options_1" value="1">
+                    <label class="form-check-label" for="presence_sws_options_1">1 - {{#str}}sws_level_1, presence{{/str}}</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="presence_sws_options" id="presence_sws_options_2" value="2">
+                    <label class="form-check-label" for="presence_sws_options_2">2 - {{#str}}sws_level_2, presence{{/str}}</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="presence_sws_options" id="presence_sws_options_3" value="3">
+                    <label class="form-check-label" for="presence_sws_options_3">3 - {{#str}}sws_level_3, presence{{/str}}</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="presence_sws_options" id="presence_sws_options_4" value="4">
+                    <label class="form-check-label" for="presence_sws_options_4">4 - {{#str}}sws_level_4, presence{{/str}}</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="presence_sws_options" id="presence_sws_options_5" value="5">
+                    <label class="form-check-label" for="presence_sws_options_5">5 - {{#str}}sws_level_5, presence{{/str}}</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="presence_sws_options" id="presence_sws_options_6" value="6">
+                    <label class="form-check-label" for="presence_sws_options_6">6 - {{#str}}sws_level_6, presence{{/str}}</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="presence_sws_options" id="presence_sws_options_7" value="7">
+                    <label class="form-check-label" for="presence_sws_options_7">7 - {{#str}}sws_level_7, presence{{/str}}</label>
+                </div>
+                <div class="mt-2">
+                    <button class="btn btn-secondary " type="button" id="presence_sws_cancel">
+                        <i class="fa fa-times"></i> {{#str}}cancel{{/str}}
+                    </button>
+                    <button class="btn btn-primary" type="button" id="presence_sws_save">
+                        <i class="fa fa-check"></i> {{#str}}save{{/str}}
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
-    <h5 class="mt-3">{{#str}}remarks_course, attendance{{/str}}</h5>
+    <h5 class="mt-3">{{#str}}remarks_course, presence{{/str}}</h5>
+    {{#courseremarks}}
     <div class="card mt-3 bg-light shadow-sm">
         <div class="card-body p-2">
-            placeholder, placeholder, placeholder
+            <div class="float-left font-italic">
+                <q>{{remark}}</q>
+            </div>
+            <div class="float-right">
+                <img style="width:35px;height:35px;" class="rounded-circle border mr-2" src="{{picturesmallurl}}" />
+            </div>
+            <div class="float-right mr-2 text-right">
+                <div class="overflow-hidden text-nowrap small">{{takenbyname}}</div>
+                <div class="overflow-hidden text-nowrap small">{{date}}</div>
+            </div>
         </div>
     </div>
-    <div class="card mt-3 bg-light shadow-sm">
-        <div class="card-body p-2">
-            placeholder, placeholder, placeholder
+    {{/courseremarks}}
+    <h5 class="mt-3">{{#str}}presence_course, presence{{/str}}</h5>
+    <div class="card mt-3 bg-light shadow-sm p-1">
+        <div class="card-body p-0">
+            {{#sessions?}}
+            <table class="table table-striped m-0">
+                <thead>
+                    <tr><th scope="col">{{#str}}date{{/str}}</th><th scope="col">{{#str}}topic{{/str}}</th></tr>
+                </thead>
+                <tbody>
+                    {{#sessions}}
+                    <tr><td>{{date}}</td><td>{{description}}</td></tr>
+                    {{/sessions}}
+                </tbody>
+                <thead>
+                    <tr><th scope="col" colspan="2">{{#str}}total{{/str}}: {{totalhours}} {{#str}}hours{{/str}}</th></tr>
+                </thead>
+            </table>
+            {{/sessions?}}
+            {{^sessions?}}
+                {{#str}}noattendetsessions, presence{{/str}}
+            {{/sessions?}}
         </div>
     </div>
-    <h5 class="mt-3">{{#str}}attendance_course, attendance{{/str}}</h5>
-    <div class="card mt-3 bg-light shadow-sm">
-        <div class="card-body p-2">
-            placeholder, placeholder, placeholder
-        </div>
-    </div>
-    <input type="button" class="mt-3 btn btn-primary" value="{{#str}}back{{/str}}"/>
+    <input type="button" data-presence-action="back" class="mt-3 btn btn-primary" value="{{#str}}back{{/str}}"/>
 </div>
 {{/user}}
 {{^user}}
     <div class="card bg-light p-2 mt-4 shadow-sm">
         <div class="card-body p-2 text-center">
-            {{#str}}usernotfound, attendance{{/str}}
+            {{#str}}usernotfound, presence{{/str}}
         </div>
     </div>
 {{/user}}

@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Class definition for mod_attendance_view_page_params
+ * Class definition for mod_presence_view_page_params
  *
- * @package   mod_attendance
+ * @package   mod_presence
  * @copyright  2016 Dan Marsden http://danmarsden.com
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -25,12 +25,12 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * contains functions/constants used by attendance view page.
+ * contains functions/constants used by presence view page.
  *
  * @copyright  2016 Dan Marsden http://danmarsden.com
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_attendance_view_page_params extends mod_attendance_page_with_filter_controls {
+class mod_presence_view_page_params extends mod_presence_page_with_filter_controls {
     /** Only This course - reports */
     const MODE_THIS_COURSE  = 0;
 
@@ -47,10 +47,10 @@ class mod_attendance_view_page_params extends mod_attendance_page_with_filter_co
     public $mode;
 
     /**
-     * mod_attendance_view_page_params constructor.
+     * mod_presence_view_page_params constructor.
      */
     public function  __construct() {
-        $this->defaultview = ATT_VIEW_MONTHS;
+        $this->defaultview = PRESENCE_VIEW_MONTHS;
     }
 
     /**

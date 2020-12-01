@@ -17,7 +17,7 @@
 /**
  * Notify queue
  *
- * @package   mod_attendance
+ * @package   mod_presence
  * @copyright 2015 Antonio Carlos Mariani <antonio.c.mariani@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -30,7 +30,7 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright 2015 Antonio Carlos Mariani <antonio.c.mariani@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_attendance_notifyqueue {
+class mod_presence_notifyqueue {
 
     /**
      * Show (print) the pending messages and clear them
@@ -38,11 +38,11 @@ class mod_attendance_notifyqueue {
     public static function show() {
         global $SESSION, $OUTPUT;
 
-        if (isset($SESSION->mod_attendance_notifyqueue)) {
-            foreach ($SESSION->mod_attendance_notifyqueue as $message) {
+        if (isset($SESSION->mod_presence_notifyqueue)) {
+            foreach ($SESSION->mod_presence_notifyqueue as $message) {
                 echo $OUTPUT->notification($message->message, 'notify'.$message->type);
             }
-            unset($SESSION->mod_attendance_notifyqueue);
+            unset($SESSION->mod_presence_notifyqueue);
         }
     }
 
@@ -82,12 +82,12 @@ class mod_attendance_notifyqueue {
     private static function queue_message($message, $messagetype=\core\output\notification::NOTIFY_INFO) {
         global $SESSION;
 
-        if (!isset($SESSION->mod_attendance_notifyqueue)) {
-            $SESSION->mod_attendance_notifyqueue = array();
+        if (!isset($SESSION->mod_presence_notifyqueue)) {
+            $SESSION->mod_presence_notifyqueue = array();
         }
         $m = new stdclass();
         $m->type = $messagetype;
         $m->message = $message;
-        $SESSION->mod_attendance_notifyqueue[] = $m;
+        $SESSION->mod_presence_notifyqueue[] = $m;
     }
 }

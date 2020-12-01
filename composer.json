@@ -1,10 +1,10 @@
 {
-    "name": "danmarsden/moodle-mod_attendance",
+    "name": "danmarsden/moodle-mod_presence",
     "type": "moodle-mod",
     "require": {
         "composer/installers": "~1.0"
     },
     "extra": {
-        "installer-name": "attendance"
+        "installer-name": "presence"
     }
 }

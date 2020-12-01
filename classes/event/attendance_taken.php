@@ -15,30 +15,30 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file contains an event for when an attendance is taken.
+ * This file contains an event for when an presence is taken.
  *
- * @package    mod_attendance
+ * @package    mod_presence
  * @copyright  2014 onwards Dan Marsden
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_attendance\event;
+namespace mod_presence\event;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Event for when an attendance is taken.
+ * Event for when an presence is taken.
  *
  * @property-read array $other {
  *      Extra information about event properties.
  *
  *    string mode Mode of the report viewed.
  * }
- * @package    mod_attendance
+ * @package    mod_presence
  * @since      Moodle 2.7
  * @copyright  2013 onwards Dan Marsden
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class attendance_taken extends \core\event\base {
+class presence_taken extends \core\event\base {
 
     /**
      * Init method.
@@ -46,7 +46,7 @@ class attendance_taken extends \core\event\base {
     protected function init() {
         $this->data['crud'] = 'u';
         $this->data['edulevel'] = self::LEVEL_TEACHING;
-        $this->data['objecttable'] = 'attendance_evaluations';
+        $this->data['objecttable'] = 'presence_evaluations';
     }
 
     /**
@@ -55,7 +55,7 @@ class attendance_taken extends \core\event\base {
      * @return string
      */
     public function get_description() {
-        return 'User with id ' . $this->userid . ' took attendance with instanceid ' .
+        return 'User with id ' . $this->userid . ' took presence with instanceid ' .
             $this->objectid;
     }
 
@@ -65,7 +65,7 @@ class attendance_taken extends \core\event\base {
      * @return string
      */
     public static function get_name() {
-        return get_string('eventtaken', 'mod_attendance');
+        return get_string('eventtaken', 'mod_presence');
     }
 
     /**
@@ -74,7 +74,7 @@ class attendance_taken extends \core\event\base {
      * @return \moodle_url
      */
     public function get_url() {
-        return new \moodle_url('/mod/attendance/take.php', array('id' => $this->contextinstanceid,
+        return new \moodle_url('/mod/presence/take.php', array('id' => $this->contextinstanceid,
                                                                  'sessionid' => $this->other['sessionid'],
                                                                  'grouptype' => $this->other['grouptype']));
     }
@@ -85,7 +85,7 @@ class attendance_taken extends \core\event\base {
      * @return array of parameters to be passed to legacy add_to_log() function.
      */
     protected function get_legacy_logdata() {
-        return array($this->courseid, 'attendance', 'taken', $this->get_url(),
+        return array($this->courseid, 'presence', 'taken', $this->get_url(),
             '', $this->contextinstanceid);
     }
 
@@ -95,7 +95,7 @@ class attendance_taken extends \core\event\base {
      * @return array of parameters for object mapping.
      */
     public static function get_objectid_mapping() {
-        return array('db' => 'attendance', 'restore' => 'attendance');
+        return array('db' => 'presence', 'restore' => 'presence');
     }
 
     /**
@@ -106,7 +106,7 @@ class attendance_taken extends \core\event\base {
      */
     protected function validate_data() {
         if (empty($this->other['sessionid'])) {
-            throw new \coding_exception('The event mod_attendance\\event\\attendance_taken must specify sessionid.');
+            throw new \coding_exception('The event mod_presence\\event\\presence_taken must specify sessionid.');
         }
         parent::validate_data();
     }

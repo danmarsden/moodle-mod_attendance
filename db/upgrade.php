@@ -17,7 +17,7 @@
 /**
  * upgrade processes for this module.
  *
- * @package   mod_attendance
+ * @package   mod_presence
  * @copyright 2011 Artem Andreev <andreev.artem@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -26,11 +26,11 @@ defined('MOODLE_INTERNAL') || die();
 require_once(dirname(__FILE__) . '/upgradelib.php');
 
 /**
- * upgrade this attendance instance - this function could be skipped but it will be needed later
- * @param int $oldversion The old version of the attendance module
+ * upgrade this presence instance - this function could be skipped but it will be needed later
+ * @param int $oldversion The old version of the presence module
  * @return bool
  */
-function xmldb_attendance_upgrade($oldversion=0) {
+function xmldb_presence_upgrade($oldversion=0) {
 
     global $DB;
     $dbman = $DB->get_manager(); // Loads ddl manager and xmldb classes.

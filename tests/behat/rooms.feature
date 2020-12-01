@@ -1,4 +1,4 @@
-@mod @uon @mod_attendance @mod_attendance_preferences
+@mod @uon @mod_presence @mod_presence_preferences
 Feature: Teachers can't change status variables to have empty acronyms or descriptions
   In order to update status variables
   As a teacher
@@ -7,7 +7,7 @@ Feature: Teachers can't change status variables to have empty acronyms or descri
   Background:
     Given the following "courses" exist:
       | fullname | shortname | summary                             | category | timecreated   | timemodified  |
-      | Course 1 | C1        | Prove the attendance activity works | 0        | ##yesterday## | ##yesterday## |
+      | Course 1 | C1        | Prove the presence activity works | 0        | ##yesterday## | ##yesterday## |
     And the following "users" exist:
       | username    | firstname | lastname |
       | student1    | Sam       | Student  |
@@ -17,7 +17,7 @@ Feature: Teachers can't change status variables to have empty acronyms or descri
       | C1     | student1 | student        | ##yesterday## |
       | C1     | teacher1 | editingteacher | ##yesterday## |
     And I log in as "admin"
-    And I navigate to "Plugins > Attendance" in site administration
+    And I navigate to "Plugins > presence" in site administration
     And I set the field "Enable rooms management" to "1"
     And I click on "Save changes" "button"
     And I should see "Changes saved"
@@ -30,12 +30,12 @@ Feature: Teachers can't change status variables to have empty acronyms or descri
     And I log out
 
   @javascript
-  Scenario: Modified default status set added to new attendance
+  Scenario: Modified default status set added to new presence
     Given I log in as "admin"
     And I am on "Course 1" course homepage with editing mode on
-    And I add a "Attendance" to section "1" and I fill the form with:
-      | Name        | Attendance1       |
-    And I follow "Attendance1"
+    And I add a "presence" to section "1" and I fill the form with:
+      | Name        | presence1       |
+    And I follow "presence1"
     And I follow "Status set"
     Then the field with xpath "//*[@id='preferencesform']/table/tbody/tr[2]/td[3]/input" matches value "customstatusdescription"
 
