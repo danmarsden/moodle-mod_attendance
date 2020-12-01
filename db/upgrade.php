@@ -31,11 +31,20 @@ require_once(dirname(__FILE__) . '/upgradelib.php');
  * @return bool
  */
 function xmldb_presence_upgrade($oldversion=0) {
-
     global $DB;
-    $dbman = $DB->get_manager(); // Loads ddl manager and xmldb classes.
 
-    $result = true;
+    $dbman = $DB->get_manager();
 
+    if ($oldversion < 2020112701) {
+        // Define key spaceid (foreign) to be dropped form room_slot.
+        $table = new xmldb_table('presence_sws');
+        // Define field eventid to be added to room_slot.
+        $field = new xmldb_field('courseid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, 'userid');
+
+        // Conditionally launch add field eventid.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+    }
     return $result;
 }
