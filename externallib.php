@@ -750,12 +750,13 @@ class mod_presence_external extends external_api {
     /**
      * Set new sws level for a given user.
      * @param int $userid
+     * @param int $courseid
      * @param string $status
      * @param string $strengths
      * @param int $sws
      * @return array new status of sws
      */
-    public static function update_user(int $userid, string $status, string $strengths, int $sws) : array {
+    public static function update_user(int $userid, int $courseid, string $status, string $strengths, int $sws) : array {
         global $DB, $USER;
         if (!$userid) {
             throw new invalid_parameter_exception('Illegal parameters.');
@@ -777,10 +778,11 @@ class mod_presence_external extends external_api {
         ]);
 
         if ($sws > 0) {
-            $DB->delete_records_select('presence_sws', 'userid = :userid AND timemodified >= :timefrom AND timemodified < :timeto', [
+            $DB->delete_records_select('presence_sws', 'userid = :userid AND timemodified >= :timefrom AND timemodified < :timeto AND courseid = :courseid', [
                 'userid' => $userid,
                 'timefrom' => strtotime(date('Y-m-d')),
                 'timeto' => strtotime(date('Y-m-d')) + (3600 * 24),
+                'courseid' => $courseid,
             ]);
 
             $DB->insert_record('presence_sws', (object)[
@@ -788,6 +790,7 @@ class mod_presence_external extends external_api {
                 'sws' => max(1, min(7, $sws)),
                 'timemodified' => time(),
                 'modifiedby' => $USER->id,
+                'courseid' => $courseid,
             ]);
         }
         return [
@@ -808,6 +811,7 @@ class mod_presence_external extends external_api {
     public static function update_user_parameters() {
         return new external_function_parameters([
             'userid' => new external_value(PARAM_INT, 'User id'),
+            'courseid' => new external_value(PARAM_INT, 'Course id'),
             'status' => new external_value(PARAM_RAW, 'New status'),
             'strengths' => new external_value(PARAM_RAW, 'New strenghts'),
             'sws' => new external_value(PARAM_INT, 'New SWS level'),

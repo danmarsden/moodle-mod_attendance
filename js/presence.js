@@ -18,5 +18,10 @@ require(['core/first', 'jquery', 'jqueryui', 'core/ajax', 'core/notification'], 
             return $('data[data-type=presence_str][data-key='+str+']').attr('data-value');
         };
 
+        // eslint-disable-next-line no-unused-vars
+        window.get_var = function(str) {
+            return $('data[data-type=presence_var][data-key='+str+']').attr('data-value');
+        };
+
     });
 });

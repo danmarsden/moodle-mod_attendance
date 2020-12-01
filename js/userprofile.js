@@ -76,6 +76,7 @@ require(['core/first', 'jquery', 'jqueryui', 'core/ajax', 'core/notification'], 
                 methodname: 'mod_presence_update_user',
                 args: {
                     'userid': userid,
+                    'courseid': window.get_var("courseid"),
                     'status': $('#presence_status_input').val(),
                     'strengths': $('#presence_strengths_input').val(),
                     'sws': sws,

@@ -24,6 +24,7 @@
 
 require_once(dirname(__FILE__).'/../../config.php');
 require_once(dirname(__FILE__).'/locallib.php');
+require_once(dirname(__FILE__).'/classes/tools.php');
 $PAGE->requires->js('/mod/presence/js/presence.js');
 $PAGE->requires->js('/mod/presence/js/userprofile.js');
 
@@ -62,14 +63,14 @@ if ($days >= 365) {
 $presences = $presence->get_attendet_sessions($userid);
 
 
-function presence_lang_to_html($strid, $component = null) {
-    echo '<DATA data-type="presence_str" data-key="'.htmlentities($strid).'" data-value="'.htmlentities(get_string($strid, $component)).'" />';
-}
-presence_lang_to_html("error");
-presence_lang_to_html("success");
-presence_lang_to_html("messagesent", "presence");
-presence_lang_to_html("messageempty", "presence");
-presence_lang_to_html("errorsavingdata", "presence");
+
+\mod_presence\tools::lang_to_html("error");
+\mod_presence\tools::lang_to_html("success");
+\mod_presence\tools::lang_to_html("messagesent", "presence");
+\mod_presence\tools::lang_to_html("messageempty", "presence");
+\mod_presence\tools::lang_to_html("errorsavingdata", "presence");
+\mod_presence\tools::var_val_to_html("courseid", $course->id);
+
 
 $templatecontext = [
     'user' => $user,

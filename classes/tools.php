@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -15,17 +16,26 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information
+ * Class definition for mod_presence\tools
  *
  * @package    mod_presence
- * @copyright  2020 Florian Metzger-Noel (github.com/flocko-motion)
+ * @author     Florian Metzger-Noel (github.com/flocko-motion)
+ * @copyright  2020
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+
+namespace mod_presence;
+
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version  = 2020120102;
-$plugin->requires = 2019072500; // Requires 3.8.
-$plugin->release = '3.8.4';
-$plugin->maturity  = MATURITY_STABLE;
-$plugin->cron     = 0;
-$plugin->component = 'mod_presence';
+class tools
+{
+    public static function lang_to_html($strid, $component = null) {
+        echo '<DATA data-type="presence_str" data-key="'.htmlentities($strid).'" data-value="'.htmlentities(get_string($strid, $component)).'" />';
+    }
+
+    public static function var_val_to_html($var, $val) {
+        echo '<DATA data-type="presence_var" data-key="'.htmlentities($var).'" data-value="'.htmlentities($val).'" />';
+    }
+}

@@ -35,16 +35,16 @@ function xmldb_presence_upgrade($oldversion=0) {
 
     $dbman = $DB->get_manager();
 
-    if ($oldversion < 2020112701) {
+    if ($oldversion < 2020120102) {
         // Define key spaceid (foreign) to be dropped form room_slot.
         $table = new xmldb_table('presence_sws');
         // Define field eventid to be added to room_slot.
-        $field = new xmldb_field('courseid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, 'userid');
+        $field = new xmldb_field('courseid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 0);
 
         // Conditionally launch add field eventid.
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
     }
-    return $result;
+    return true;
 }
