@@ -1,0 +1,109 @@
+name: Moodle Plugin CI
+
+# Run this workflow every time a new commit pushed to your repository
+on: push
+
+jobs:
+  selftest:
+    name: CI test (make validate)
+    runs-on: ubuntu-18.04
+
+    steps:
+    - name: Check out repository code
+      uses: actions/checkout@v2
+
+    - name: Setup PHP 7.3
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: 7.3
+
+    - name: Initialise
+      run: make init
+
+    - name: Validate
+      run: make validate
+
+  citest:
+    name: CI test
+    needs: selftest
+    runs-on: ubuntu-18.04
+
+    services:
+      postgres:
+        image: postgres:9.6
+        env:
+          POSTGRES_USER: 'postgres'
+          POSTGRES_HOST_AUTH_METHOD: 'trust'
+        # Health check to wait for postgres to start.
+        ports:
+        - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 3
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - php: '7.4'
+            moodle-branch: 'master'
+          - php: '7.4'
+            moodle-branch: 'MOODLE_311_STABLE'
+          - php: '7.4'
+            moodle-branch: 'MOODLE_310_STABLE'
+          - php: '7.4'
+            moodle-branch: 'MOODLE_39_STABLE'
+          - php: '7.4'
+
+    steps:
+    - name: Check out repository code
+      uses: actions/checkout@v2
+
+    - name: Install node
+      uses: actions/setup-node@v1
+      with:
+        node-version: '14.15.0'
+
+    - name: Setup PHP ${{ matrix.php }}
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php }}
+        extensions: pgsql, zip, gd, xmlrpc, soap
+        coverage: none
+
+    - name: Initialise moodle-plugin-ci
+      run: |
+        make init
+        cp -R tests/Fixture/moodle-local_travis ../moodle-local_travis
+        echo $(cd bin; pwd) >> $GITHUB_PATH
+        echo $(cd vendor/bin; pwd) >> $GITHUB_PATH
+        echo "TRAVIS_BUILD_DIR="$(cd ../moodle-local_travis; pwd) >> $GITHUB_ENV
+        # PHPUnit depends on en_AU.UTF-8 locale
+        sudo locale-gen en_AU.UTF-8
+    - name: Install moodle-plugin-ci
+      run: moodle-plugin-ci install -vvv
+      env:
+        DB: 'pgsql'
+        MOODLE_BRANCH: ${{ matrix.moodle-branch }}
+        IGNORE_PATHS: 'ignore'
+        IGNORE_NAMES: 'ignore_name.php'
+        MUSTACHE_IGNORE_NAMES: 'broken.mustache'
+
+    - name: Run Integration tests
+      env:
+        MOODLE_BRANCH: ${{ matrix.moodle-branch }}
+      run: |
+        make test-phpunit
+        moodle-plugin-ci phplint
+        moodle-plugin-ci phpcpd
+        moodle-plugin-ci phpmd
+        moodle-plugin-ci codechecker
+        moodle-plugin-ci validate
+        moodle-plugin-ci savepoints
+        moodle-plugin-ci mustache
+        moodle-plugin-ci grunt ||  [ \
+            "$MOODLE_BRANCH" != 'master' -a \
+            "$MOODLE_BRANCH" != 'MOODLE_310_STABLE' -a \
+            "$MOODLE_BRANCH" != 'MOODLE_39_STABLE' ]
+        moodle-plugin-ci phpdoc
+        moodle-plugin-ci phpunit --coverage-text
+        moodle-plugin-ci behat --profile default
+        moodle-plugin-ci behat --profile chrome
