@@ -81,10 +81,10 @@ class updatesession extends \moodleform {
         $mform->addElement('header', 'general', get_string('changesession', 'presence'));
 
 
-        $olddate = construct_session_full_date_time($sess->sessdate, $sess->duration);
-        $mform->addElement('static', 'olddate', get_string('olddate', 'presence'), $olddate);
+        // $olddate = construct_session_full_date_time($sess->sessdate, $sess->duration);
+        // $mform->addElement('static', 'olddate', get_string('date', 'presence'), $olddate);
 
-        presence_form_sessiondate_selector($mform);
+        presence_form_sessiondate_selector($mform, false, $sess);
 
         $mform->addElement('textarea', 'sdescription', get_string('description', 'presence'),
                            array('rows' => 2, 'columns' => 100), $defopts);

@@ -39,6 +39,7 @@ presence_init_page([
     'url' => new moodle_url('/mod/presence/manage.php'),
     'tab' => $pageparams->action == mod_presence_sessions_page_params::ACTION_ADD ?
         presence_tabs::TAB_ADD : presence_tabs::TAB_UPDATE,
+    'printheader' => false,
 ]);
 
 $formparams = array('course' => $course, 'cm' => $cm, 'modcontext' => $context, 'att' => $presence);
@@ -66,6 +67,8 @@ switch ($presence->pageparams->action) {
             // Redirect to the sessions tab always showing all sessions.
             $SESSION->presencecurrentpresenceview[$cm->course] = PRESENCE_VIEW_ALL;
             redirect($presence->url_manage());
+        } else {
+            presence_print_header();
         }
         break;
     case mod_presence_sessions_page_params::ACTION_UPDATE:
@@ -85,10 +88,13 @@ switch ($presence->pageparams->action) {
 
             mod_presence_notifyqueue::notify_success(get_string('sessionupdated', 'presence'));
             redirect($presence->url_manage());
+        } else {
+            presence_print_header();
         }
         $currenttab = presence_tabs::TAB_UPDATE;
         break;
     case mod_presence_sessions_page_params::ACTION_DELETE:
+
         $sessionid = required_param('sessionid', PARAM_INT);
         $confirm   = optional_param('confirm', null, PARAM_INT);
 
@@ -96,6 +102,7 @@ switch ($presence->pageparams->action) {
             $presence->delete_sessions(array($sessionid));
             redirect($presence->url_manage(), get_string('sessiondeleted', 'presence'));
         }
+        presence_print_header();
 
         $sessinfo = $presence->get_session_info($sessionid);
 
@@ -111,6 +118,7 @@ switch ($presence->pageparams->action) {
         echo $OUTPUT->footer();
         exit;
     case mod_presence_sessions_page_params::ACTION_DELETE_SELECTED:
+        presence_print_header();
         $confirm    = optional_param('confirm', null, PARAM_INT);
         $message = get_string('deletecheckfull', 'presence', get_string('sessions', 'presence'));
 
@@ -144,56 +152,10 @@ switch ($presence->pageparams->action) {
         echo $OUTPUT->confirm($message, $presence->url_sessions($params), $presence->url_manage());
         echo $OUTPUT->footer();
         exit;
-//    case mod_presence_sessions_page_params::ACTION_CHANGE_DURATION:
-//        $sessid = optional_param_array('sessid', '', PARAM_SEQUENCE);
-//        $ids = optional_param('ids', '', PARAM_ALPHANUMEXT);
-//
-//        $slist = !empty($sessid) ? implode('_', $sessid) : '';
-//
-//        $url = $presence->url_sessions(array('action' => mod_presence_sessions_page_params::ACTION_CHANGE_DURATION));
-//        $formparams['ids'] = $slist;
-//        $mform = new mod_presence\form\duration($url, $formparams);
-//
-//        if ($mform->is_cancelled()) {
-//            redirect($presence->url_manage());
-//        }
-//
-//        if ($formdata = $mform->get_data()) {
-//            $sessionsids = explode('_', $ids);
-//            $duration = $formdata->durtime['hours'] * HOURSECS + $formdata->durtime['minutes'] * MINSECS;
-//            $presence->update_sessions_duration($sessionsids, $duration);
-//            redirect($presence->url_manage(), get_string('sessionupdated', 'presence'));
-//        }
-//
-//        if ($slist === '') {
-//            print_error('nosessionsselected', 'presence', $presence->url_manage());
-//        }
-//
-//        break;
-//    case mod_presence_sessions_page_params::ACTION_DELETE_HIDDEN:
-//        $confirm  = optional_param('confirm', null, PARAM_INT);
-//        if ($confirm && confirm_sesskey()) {
-//            $sessions = $presence->get_hidden_sessions();
-//            $presence->delete_sessions(array_keys($sessions));
-//            redirect($presence->url_manage(), get_string('hiddensessionsdeleted', 'presence'));
-//        }
-//
-//        $a = new stdClass();
-//        $a->count = $presence->get_hidden_sessions_count();
-//        $a->date = userdate($course->startdate);
-//        $message = get_string('confirmdeletehiddensessions', 'presence', $a);
-//
-//        $params = array('action' => $presence->pageparams->action, 'confirm' => 1, 'sesskey' => sesskey());
-//        echo $OUTPUT->confirm($message, $presence->url_sessions($params), $presence->url_manage());
-//        echo $OUTPUT->footer();
-//        exit;
+    default:
+        presence_print_header();
+        break;
 }
-
-//$output = $PAGE->get_renderer('mod_presence');
-//$tabs = new presence_tabs($presence, $currenttab);
-//echo $output->header();
-//echo $output->heading(get_string('presenceforthecourse', 'presence').' :: ' .format_string($course->fullname));
-//echo $output->render($tabs);
 
 $mform->display();
 

@@ -532,8 +532,6 @@ class mod_presence_external extends external_api {
         $student = $DB->get_record('user', array('id' => $params['studentid']), '*', MUST_EXIST);
         $takenby = $DB->get_record('user', array('id' => $params['takenbyid']), '*', MUST_EXIST);
 
-        // TODO: Verify statusset and statusid.
-
         return presence_handler::update_user_status($params['sessionid'], $params['studentid'], $params['takenbyid'],
             $params['statusid'], $params['statusset']);
     }

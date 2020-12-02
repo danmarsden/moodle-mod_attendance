@@ -381,6 +381,9 @@ class mod_presence_structure {
         $sess->lasttakenby = 0;
         $sess->roomid = 0;
         $sess->maxattendants = 0;
+        $sess->mustevaluate = 0;
+        $sess->lastevaluated = 0;
+        $sess->lastevaluatedby = 0;
 
         $event->add_record_snapshot('presence_sessions', $sess);
         $event->trigger();
@@ -412,6 +415,8 @@ class mod_presence_structure {
         if ($formdata->roomid) {
             $room = $DB->get_record('presence_rooms', ['id' => $formdata->roomid]);
             $sess->location   = $room->name;
+        } else {
+            $sess->location = '';
         }
 
         $sess->timemodified = time();
@@ -664,7 +669,7 @@ class mod_presence_structure {
     public function get_user_sws($userid) {
         global $DB;
         return max(1, intval($DB->get_field_sql(
-            'SELECT sws FROM mdl_presence_sws WHERE userid = :userid ORDER BY timemodified DESC LIMIT 1',
+            'SELECT sws FROM {presence_sws} WHERE userid = :userid ORDER BY timemodified DESC LIMIT 1',
             ['userid' => $userid])));
     }
 
@@ -680,7 +685,7 @@ class mod_presence_structure {
                 SELECT atte.id, atte.takenby, atte.timetaken, atte.remarks_course AS remark, u.firstname, u.lastname
                   FROM {presence_evaluations} atte
                   JOIN {presence_sessions} atts ON atte.sessionid = atts.id
-                  JOIN mdl_user u ON atte.takenby = u.id
+                  JOIN {user} u ON atte.takenby = u.id
                    AND atte.studentid = :userid
                    AND atts.presenceid = :presenceid
                  WHERE LENGTH(atte.remarks_course) > 0
@@ -914,7 +919,7 @@ class mod_presence_structure {
                 $sess->description = file_rewrite_pluginfile_urls($sess->description,
                     'pluginfile.php', $this->context->id, 'mod_presence', 'session', $sess->id);
             }
-
+            if (!isset($sess->sessdat)) $sess->sessdat = null;
         }
 
         // We have two merged arrays, each is sorted - but the merged array is not sorted. Let's do that now.

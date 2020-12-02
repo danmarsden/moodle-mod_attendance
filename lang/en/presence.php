@@ -96,6 +96,7 @@ $string['description'] = 'Description';
 $string['display'] = 'Display';
 $string['displaymode'] = 'Display mode';
 $string['done'] = 'Done';
+$string['donotusepaging'] = 'Don\'t use paging';
 $string['duration'] = 'Duration';
 $string['editsession'] = 'Edit Session';
 $string['edituser'] = 'Edit user';

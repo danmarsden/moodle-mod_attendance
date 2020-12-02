@@ -22,9 +22,12 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-
 require_once(dirname(__FILE__).'/../../config.php');
+require_once(dirname(__FILE__).'/classes/view_page_params.php');
+$pageparams = new mod_presence_view_page_params();
+
 require_once(dirname(__FILE__).'/locallib.php');
+
 $PAGE->requires->js('/mod/presence/js/rooms.js');
 
 

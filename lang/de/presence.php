@@ -86,6 +86,7 @@ $string['description'] = 'Beschreibung';
 $string['display'] = 'Anzeige';
 $string['displaymode'] = 'Anzeigemodus';
 $string['done'] = 'Erledigt';
+$string['donotusepaging'] = 'Seiten blättern deaktivieren';
 $string['duration'] = 'Dauer';
 $string['editsession'] = 'Bearbeite Lerneinheit';
 $string['edituser'] = 'Bearbeite Teilnehmer';

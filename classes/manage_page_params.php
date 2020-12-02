@@ -35,6 +35,7 @@ class mod_presence_manage_page_params extends mod_presence_page_with_filter_cont
      */
     public function  __construct() {
         $this->selectortype = mod_presence_page_with_filter_controls::SELECTOR_SESS_TYPE;
+        $this->showfinished = 0;
         $this->page = 0;
     }
 

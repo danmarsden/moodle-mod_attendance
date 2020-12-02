@@ -23,6 +23,7 @@
  */
 
 defined('MOODLE_INTERNAL') || die();
+require_once(dirname(__FILE__).'/../locallib.php');
 
 /**
  * contains functions/constants used by presence view page.

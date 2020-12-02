@@ -188,7 +188,7 @@ class mod_presence_renderer extends plugin_renderer_base {
                 'class' => 'btn btn-outline-secondary',
                 'type'  => 'button');
 
-            $buttonform .= html_writer::tag('button', $fcontrols->curdatetxt, $params);
+            $buttonform = html_writer::tag('button', $fcontrols->curdatetxt, $params);
             foreach ($fcontrols->url_params(array('curdate' => '')) as $name => $value) {
                 $params = array(
                     'type'  => 'hidden',
@@ -1004,7 +1004,7 @@ class mod_presence_renderer extends plugin_renderer_base {
 
         if ($USER->id == $userdata->user->id) {
 
-            $o .= $this->construct_user_data($userdata);
+            $o = $this->construct_user_data($userdata);
 
         } else {
 
@@ -1016,7 +1016,7 @@ class mod_presence_renderer extends plugin_renderer_base {
             $table->data[0][] = $this->user_picture($userdata->user, array('size' => 100));
             $table->data[0][] = $this->construct_user_data($userdata);
 
-            $o .= html_writer::table($table);
+            $o = html_writer::table($table);
         }
 
         return $o;

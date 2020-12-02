@@ -137,11 +137,11 @@ class addsession extends moodleform {
             $errors['sessionenddate'] = get_string('timeahead', 'presence');
         }
         $sessstart = $data['sessiondate'] + $sesstarttime;
-        if ($sessstart < $data['coursestartdate'] && $sessstart != $data['previoussessiondate']) {
-            $errors['sessiondate'] = get_string('priorto', 'presence',
-                userdate($data['coursestartdate'], get_string('strftimedmyhm', 'presence')));
-            $this->_form->setConstant('previoussessiondate', $sessstart);
-        }
+//        if ($sessstart < $data['coursestartdate'] && $sessstart != $data['previoussessiondate']) {
+//            $errors['sessiondate'] = get_string('priorto', 'presence',
+//                userdate($data['coursestartdate'], get_string('strftimedmyhm', 'presence')));
+//            $this->_form->setConstant('previoussessiondate', $sessstart);
+//        }
 
         return $errors;
     }

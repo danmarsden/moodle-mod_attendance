@@ -48,7 +48,7 @@ define('PRESENCE_ROOMS_MAX_CAPACITY', 1000);
  */
 
 function presence_init_page($p) {
-    global $id, $presence, $capabilities, $cm, $context, $course, $output, $pageparams, $DB, $PAGE;
+    global $id, $presence, $capabilities, $cm, $context, $course, $output, $pageparams, $DB, $PAGE, $tabs, $header;
     $id             = required_param('id', PARAM_INT);
     $cm             = get_coursemodule_from_id('presence', $id, 0, false, MUST_EXIST);
     $course         = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
@@ -77,11 +77,19 @@ function presence_init_page($p) {
     $title = get_string('presenceforthecourse', 'presence'); // .' :: ' .format_string($course->fullname);
     $header = new mod_presence_header($presence, $title);
 
+    if (!isset($p['printheader']) || $p['printheader']) {
+        presence_print_header();
+    }
+}
+
+function presence_print_header() {
+    global $PAGE, $tabs, $header, $output;
     $output = $PAGE->get_renderer('mod_presence');
     echo $output->header();
     echo $output->render($header);
     mod_presence_notifyqueue::show();
     echo $output->render($tabs);
+
 }
 
 /**
@@ -140,7 +148,7 @@ function presence_has_logs_for_status($statusid) {
  *
  * @param MoodleQuickForm $mform
  */
-function presence_form_sessiondate_selector (MoodleQuickForm $mform) {
+function presence_form_sessiondate_selector (MoodleQuickForm $mform, $dateselector = true, $sess = null) {
 
     $mform->addElement('date_selector', 'sessiondate', get_string('sessiondate', 'presence'));
 
@@ -310,7 +318,6 @@ function presence_construct_sessions_data_for_add($formdata, mod_presence_struct
     $sessiondate = $formdata->sessiondate + $sesstarttime;
     $duration = $sesendtime - $sesstarttime;
     $now = time();
-    $calendarevent = intval($formdata->calendarevent);
 
     $sessions = [];
     if (isset($formdata->addmultiply)) {
@@ -345,7 +352,6 @@ function presence_construct_sessions_data_for_add($formdata, mod_presence_struct
                         $formdata->sestime['starthour'], $formdata->sestime['startminute']);
                     $sess->duration = $duration;
                     $sess->description = $formdata->sdescription;
-                    $sess->calendarevent = $calendarevent;
                     $sess->timemodified = $now;
                     $sess->roomid = intval($formdata->roomid);
                     $sess->maxattendants = intval($formdata->maxattendants);
@@ -364,10 +370,10 @@ function presence_construct_sessions_data_for_add($formdata, mod_presence_struct
         $sess->sessdate = $sessiondate;
         $sess->duration = $duration;
         $sess->description = $formdata->sdescription;
-        $sess->calendarevent = $calendarevent;
         $sess->timemodified = $now;
         $sess->roomid = intval($formdata->roomid);
         $sess->maxattendants = intval($formdata->maxattendants);
+        $sess->calgroup = 0;
         $sessions[] = $sess;
     }
 

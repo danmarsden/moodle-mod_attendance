@@ -86,7 +86,8 @@ require(['core/first', 'jquery', 'jqueryui', 'core/ajax', 'core/notification'], 
             var days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
             var daysChecked = [];
             for (var i in days) {
-                daysChecked[i] = Number($('#id_sdays_' + days[i]).prop('checked'));
+                var checked =  Number($('#id_sdays_' + days[i]).prop('checked'));
+                daysChecked[i] = checked ? checked : 0;
             }
 
             var from = new Date(
@@ -96,6 +97,7 @@ require(['core/first', 'jquery', 'jqueryui', 'core/ajax', 'core/notification'], 
                 $('#id_sestime_starthour').val(),
                 $('#id_sestime_startminute').val()
             ).getTime() / 1000;
+            if (from == null) from = 0;
 
 
 
@@ -106,12 +108,19 @@ require(['core/first', 'jquery', 'jqueryui', 'core/ajax', 'core/notification'], 
                 $('#id_sestime_endhour').val(),
                 $('#id_sestime_endminute').val()
             ).getTime() / 1000;
+            if (to == null) to = 0;
 
             var repeatUntil = new Date(
                 $('#id_sessionenddate_year').val(),
                 $('#id_sessionenddate_month').val() - 1,
                 $('#id_sessionenddate_day').val()
             ).getTime() / 1000;
+
+            var repeat = Number($('#id_addmultiply').prop('checked'));
+            if (isNaN(repeat)) repeat = 0;
+
+            var repeatperiod = Number($('#id_period').val());
+            if (isNaN(repeatperiod)) repeatperiod = 0;
 
             ajax.call([{
                 methodname: 'mod_presence_check_doublebooking',
@@ -120,10 +129,10 @@ require(['core/first', 'jquery', 'jqueryui', 'core/ajax', 'core/notification'], 
                     'roomid': roomid,
                     'from': from,
                     'to': to,
-                    'repeat': Number($('#id_addmultiply').prop('checked')),
+                    'repeat': repeat,
                     'repeatdays': daysChecked.join(','),
-                    'repeatperiod': Number($('#id_period').val()),
-                    'repeatuntil': repeatUntil,
+                    'repeatperiod': repeatperiod,
+                    'repeatuntil': repeatUntil ? repeatUntil : 0,
                 },
             }])[0].done(function(result) {
                 console.log(result);
