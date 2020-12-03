@@ -81,3 +81,5 @@ jobs:
           moodle-plugin-ci phpdoc || true
           moodle-plugin-ci phpunit || true
           moodle-plugin-ci behat --profile chrome || true
+        env:
+          MUSTACHE_IGNORE_NAMES: mobile_teacher_form.mustache
