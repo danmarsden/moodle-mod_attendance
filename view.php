@@ -29,10 +29,13 @@ require_once(dirname(__FILE__).'/locallib.php');
 $pageparams = new mod_attendance_view_page_params();
 
 $id                     = required_param('id', PARAM_INT);
+$edit                   = optional_param('edit', -1, PARAM_BOOL);
 $pageparams->studentid  = optional_param('studentid', null, PARAM_INT);
 $pageparams->mode       = optional_param('mode', mod_attendance_view_page_params::MODE_THIS_COURSE, PARAM_INT);
 $pageparams->view       = optional_param('view', null, PARAM_INT);
 $pageparams->curdate    = optional_param('curdate', null, PARAM_INT);
+$pageparams->groupby    = optional_param('groupby', 'course', PARAM_ALPHA);
+$pageparams->sesscourses = optional_param('sesscourses', 'current', PARAM_ALPHA);
 
 $cm             = get_coursemodule_from_id('attendance', $id, 0, false, MUST_EXIST);
 $course         = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
@@ -60,14 +63,6 @@ if (!$pageparams->studentid) {
     }
 }
 
-$PAGE->set_url($att->url_view());
-$PAGE->set_title($course->shortname. ": ".$att->name);
-$PAGE->set_heading($course->fullname);
-$PAGE->set_cacheable(true);
-$PAGE->navbar->add(get_string('attendancereport', 'attendance'));
-
-$output = $PAGE->get_renderer('mod_attendance');
-
 if (isset($pageparams->studentid) && $USER->id != $pageparams->studentid) {
     // Only users with proper permissions should be able to see any user's individual report.
     require_capability('mod/attendance:viewreports', $context);
@@ -75,6 +70,36 @@ if (isset($pageparams->studentid) && $USER->id != $pageparams->studentid) {
 } else {
     // A valid request to see another users report has not been sent, show the user's own.
     $userid = $USER->id;
+}
+
+$url = $att->url_view($pageparams->get_significant_params());
+$PAGE->set_url($url);
+
+$buttons = '';
+$capabilities = array('mod/attendance:takeattendances', 'mod/attendance:changeattendances');
+if (has_any_capability($capabilities, $context) &&
+    $pageparams->mode == mod_attendance_view_page_params::MODE_ALL_SESSIONS) {
+
+    if (!isset($USER->attendanceediting)) {
+        $USER->attendanceediting = false;
+    }
+
+    if (($edit == 1) and confirm_sesskey()) {
+        $USER->attendanceediting = true;
+    } else if ($edit == 0 and confirm_sesskey()) {
+        $USER->attendanceediting = false;
+    }
+
+    if ($USER->attendanceediting) {
+        $options['edit'] = 0;
+        $string = get_string('turneditingoff');
+    } else {
+        $options['edit'] = 1;
+        $string = get_string('turneditingon');
+    }
+    $options['sesskey'] = sesskey();
+    $button = new single_button(new moodle_url($PAGE->url, $options), $string, 'post');
+    $PAGE->set_button($OUTPUT->render($button));
 }
 
 $userdata = new attendance_user_data($att, $userid);
@@ -87,21 +112,43 @@ $filterparams = array(
     'enddate' => $userdata->pageparams->enddate
 );
 $params = array_merge($userdata->pageparams->get_significant_params(), $filterparams);
+
+$header = new mod_attendance_header($att);
+
 if (empty($userdata->pageparams->studentid)) {
     $relateduserid = $USER->id;
 } else {
     $relateduserid = $userdata->pageparams->studentid;
 }
 
-// Trigger viewed event.
-$event = \mod_attendance\event\session_report_viewed::create(array(
-    'relateduserid' => $relateduserid,
-    'context' => $context,
-    'other' => $params));
-$event->add_record_snapshot('course_modules', $cm);
-$event->trigger();
+if (($formdata = data_submitted()) && confirm_sesskey() && $edit == -1) {
+    $userdata->take_sessions_from_form_data($formdata);
 
-$header = new mod_attendance_header($att);
+    // Trigger updated event.
+    $event = \mod_attendance\event\session_report_updated::create(array(
+        'relateduserid' => $relateduserid,
+        'context' => $context,
+        'other' => $params));
+    $event->add_record_snapshot('course_modules', $cm);
+    $event->trigger();
+
+    redirect($url, get_string('attendancesuccess', 'attendance'));
+} else {
+    // Trigger viewed event.
+    $event = \mod_attendance\event\session_report_viewed::create(array(
+        'relateduserid' => $relateduserid,
+        'context' => $context,
+        'other' => $params));
+    $event->add_record_snapshot('course_modules', $cm);
+    $event->trigger();
+}
+
+$PAGE->set_title($course->shortname. ": ".$att->name);
+$PAGE->set_heading($course->fullname);
+$PAGE->set_cacheable(true);
+$PAGE->navbar->add(get_string('attendancereport', 'attendance'));
+
+$output = $PAGE->get_renderer('mod_attendance');
 
 echo $output->header();
 

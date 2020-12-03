@@ -4,6 +4,7 @@
     margin-left: 2px;
     margin-right: 2px;
     padding: 5px;
+    display: inline-block;
 }
 
 .path-mod-attendance .attcurbtn {
@@ -16,7 +17,6 @@
     margin-bottom: 10px;
     margin-left: auto;
     margin-right: auto;
-    width: 90%;
 }
 
 .path-mod-attendance .attfiltercontrols #currentdate {
@@ -52,6 +52,10 @@
 
 .path-mod-attendance .takegrid .fullname {
     font-size: 0.8em;
+}
+
+.path-mod-attendance div.allsessionssummary + form#attendancetakeform > div {
+    width: 100%;
 }
 
 .path-mod-attendance table.controls {
@@ -105,8 +109,26 @@
     background-color: #eee;
     padding: 30px 10px;
 }
+.path-mod-attendance table.userinfobox .userpicture {
+    margin: 0;
+}
 .path-mod-attendance table.attlist td.c0 {
     text-align: right;
+}
+.path-mod-attendance table.allsessions tr.grouper td {
+    background-color: #eee;
+}
+.path-mod-attendance table.allsessions td.groupheading {
+    font-weight: bold;
+}
+.path-mod-attendance .allsessionssummary > * {
+    display: inline-block;
+}
+.path-mod-attendance .allsessionssummary .float-right {
+    float: right;
+}
+.path-mod-attendance .allsessionssummary .float-left {
+    float: left;
 }
 
 #page-mod-attendance-preferences .generalbox {

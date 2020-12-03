@@ -55,7 +55,7 @@ class session_report_viewed extends \core\event\base {
      * @return string
      */
     public function get_description() {
-        return 'User with id ' . $this->userid . ' viewed attendance sessions for student with id ' .
+        return 'User with id ' . $this->userid . ' ' . $this->action . ' attendance sessions for student with id ' .
             $this->relateduserid;
     }
 
@@ -74,12 +74,16 @@ class session_report_viewed extends \core\event\base {
      * @return \moodle_url
      */
     public function get_url() {
-        // Mode is optional.
+        // Mode, groupby, sesscourses are optional.
         $mode = empty($this->other['mode']) ? "" : $this->other['mode'];
+        $groupby = empty($this->other['groupby']) ? "" : $this->other['groupby'];
+        $sesscourses = empty($this->other['sesscourses']) ? "" : $this->other['sesscourses'];
         return new \moodle_url('/mod/attendance/view.php', array('id' => $this->contextinstanceid,
                                                                  'studentid' => $this->relateduserid,
                                                                  'mode' => $mode,
                                                                  'view' => $this->other['view'],
+                                                                 'groupby' => $groupby,
+                                                                 'sesscourses' => $sesscourses,
                                                                  'curdate' => $this->other['curdate']));
     }
 
@@ -89,7 +93,7 @@ class session_report_viewed extends \core\event\base {
      * @return array of parameters to be passed to legacy add_to_log() function.
      */
     protected function get_legacy_logdata() {
-        return array($this->courseid, 'attendance', 'student sessions viewed', $this->get_url(),
+        return array($this->courseid, 'attendance', 'student sessions ' . $this->action, $this->get_url(),
             'student id ' . $this->relateduserid, $this->contextinstanceid);
     }
 
@@ -119,17 +123,17 @@ class session_report_viewed extends \core\event\base {
      */
     protected function validate_data() {
         if (!isset($this->relateduserid)) {
-            throw new \coding_exception('The event mod_attendance\\event\\session_report_viewed must specify relateduserid.');
+            throw new \coding_exception('The event ' . $this->eventname . ' must specify relateduserid.');
         }
         // View params can be left out as defaults will be the same when log event is viewed as when
         // it was stored.
         // filter params are important, but stored in session so default effectively unknown,
         // hence required here.
         if (!isset($this->other['view'])) {
-            throw new \coding_exception('The event mod_attendance\\event\\session_report_viewed must specify view.');
+            throw new \coding_exception('The event ' . $this->eventname . ' must specify view.');
         }
         if (!isset($this->other['curdate'])) {
-            throw new \coding_exception('The event mod_attendance\\event\\session_report_viewed must specify curdate.');
+            throw new \coding_exception('The event ' . $this->eventname . ' must specify curdate.');
         }
         parent::validate_data();
     }
