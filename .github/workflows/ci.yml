@@ -80,4 +80,4 @@ jobs:
           moodle-plugin-ci grunt || true
           moodle-plugin-ci phpdoc || true
           moodle-plugin-ci phpunit || true
-          moodle-plugin-ci behat || true
+          moodle-plugin-ci behat --profile chrome || true
