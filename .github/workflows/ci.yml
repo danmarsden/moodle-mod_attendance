@@ -65,21 +65,37 @@ jobs:
           # TODO: Omitted MOODLE_BRANCH results in regex failure, investigate.
           MOODLE_BRANCH: 'master'
 
-      - name: Run Integration tests
-        run: |
-          # Currently it stops if any command return non 0 exit status, needs a
-          # wrapper to collect exit statuses and list result and the end.
-          # For testing purposes at this stage, just assume each command succeeds.
-          moodle-plugin-ci phplint || true
-          moodle-plugin-ci phpcpd || true
-          moodle-plugin-ci phpmd || true
-          moodle-plugin-ci codechecker || true
-          moodle-plugin-ci validate || true
-          moodle-plugin-ci savepoints || true
-          moodle-plugin-ci mustache || true
-          moodle-plugin-ci grunt || true
-          moodle-plugin-ci phpdoc || true
-          moodle-plugin-ci phpunit || true
-          moodle-plugin-ci behat --profile chrome || true
+      - name: Run phplint
+        run: moodle-plugin-ci phplint
+
+      - name: Run phpcpd
+        run: moodle-plugin-ci phpcpd || true
+
+      - name: Run phpmd
+        run: moodle-plugin-ci phpmd
+
+      - name: Run codechecker
+        run: moodle-plugin-ci codechecker
+
+      - name: Run validate
+        run: moodle-plugin-ci validate
+
+      - name: Run savepoints
+        run: moodle-plugin-ci savepoints
+
+      - name: Run mustache
+        run: moodle-plugin-ci phpcpd || true
         env:
           MUSTACHE_IGNORE_NAMES: mobile_teacher_form.mustache
+
+      - name: Run grunt
+        run: moodle-plugin-ci grunt
+
+      - name: Run phpdoc
+        run: moodle-plugin-ci phpdoc
+
+      - name: Run phpunit
+        run: moodle-plugin-ci phpunit
+
+      - name: Run behat
+        run: moodle-plugin-ci behat --profile chrome
