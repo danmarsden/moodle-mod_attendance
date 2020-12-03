@@ -600,9 +600,10 @@ class attendance_user_data implements renderable {
 
                 $formkey = 'user'.$stid.'sess'.$sessid;
                 $attid = $dbsession->attendanceid;
-                $statusset = array_filter($this->statuses[$attid], function($x) use($dbsession) {
-                                                                       return $x->setnumber === $dbsession->statusset;
-                                                                   });
+                $statusset = array_filter($this->statuses[$attid],
+                    function($x) use($dbsession) {
+                        return $x->setnumber === $dbsession->statusset;
+                    });
                 $sessionatt[$sessid] = $attid;
                 $formlog = new stdClass();
                 if (array_key_exists($formkey, $formdata) && is_numeric($formdata[$formkey])) {

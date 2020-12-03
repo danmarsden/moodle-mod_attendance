@@ -1567,10 +1567,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
                     foreach ($userdata->statuses[$sess->attendanceid] as $attstatus) {
                         if ($attstatus->setnumber === $sess->statusset) {
                             if (!array_key_exists($attstatus->acronym, $stats['date'][$weekformat]['statuses'])) {
-                                $stats['date'][$weekformat]['statuses'][$attstatus->acronym] = array('count' => 0, 'description' => $attstatus->description);
+                                $stats['date'][$weekformat]['statuses'][$attstatus->acronym] =
+                                    array('count' => 0, 'description' => $attstatus->description);
                             }
                             if (!array_key_exists($attstatus->acronym, $stats['overall']['statuses'])) {
-                                $stats['overall']['statuses'][$attstatus->acronym] = array('count' => 0, 'description' => $attstatus->description);
+                                $stats['overall']['statuses'][$attstatus->acronym] =
+                                    array('count' => 0, 'description' => $attstatus->description);
                             }
                         }
                     }
@@ -1618,10 +1620,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
                     foreach ($userdata->statuses[$sess->attendanceid] as $attstatus) {
                         if ($attstatus->setnumber === $sess->statusset) {
                             if (!array_key_exists($attstatus->acronym, $stats['course'][$sess->courseid]['statuses'])) {
-                                $stats['course'][$sess->courseid]['statuses'][$attstatus->acronym] = array('count' => 0, 'description' => $attstatus->description);
+                                $stats['course'][$sess->courseid]['statuses'][$attstatus->acronym] =
+                                    array('count' => 0, 'description' => $attstatus->description);
                             }
                             if (!array_key_exists($attstatus->acronym, $stats['overall']['statuses'])) {
-                                $stats['overall']['statuses'][$attstatus->acronym] = array('count' => 0, 'description' => $attstatus->description);
+                                $stats['overall']['statuses'][$attstatus->acronym] =
+                                    array('count' => 0, 'description' => $attstatus->description);
                             }
                         }
                     }
@@ -1657,10 +1661,12 @@ class mod_attendance_renderer extends plugin_renderer_base {
                     foreach ($userdata->statuses[$sess->attendanceid] as $attstatus) {
                         if ($attstatus->setnumber === $sess->statusset) {
                             if (!array_key_exists($attstatus->acronym, $stats['activity'][$sess->cmid]['statuses'])) {
-                                $stats['activity'][$sess->cmid]['statuses'][$attstatus->acronym] = array('count' => 0, 'description' => $attstatus->description);
+                                $stats['activity'][$sess->cmid]['statuses'][$attstatus->acronym] =
+                                    array('count' => 0, 'description' => $attstatus->description);
                             }
                             if (!array_key_exists($attstatus->acronym, $stats['overall']['statuses'])) {
-                                $stats['overall']['statuses'][$attstatus->acronym] = array('count' => 0, 'description' => $attstatus->description);
+                                $stats['overall']['statuses'][$attstatus->acronym] =
+                                    array('count' => 0, 'description' => $attstatus->description);
                             }
                         }
                     }
@@ -1779,7 +1785,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
                     }
                     $row->cells[] = $cell;
                     $courseurl = new moodle_url('/course/view.php', array('id' => $sess->courseid));
-                    $cell = new html_table_cell(get_string('course', 'attendance') . ": " . html_writer::link($courseurl, $sess->cname));
+                    $cell = new html_table_cell(get_string('course', 'attendance') . ": " .
+                        html_writer::link($courseurl, $sess->cname));
                     $cell->colspan = $colcount - $summarywidth;
                     $cell->rowspan = 2;
                     $cell->attributes['class'] = 'groupheading';
@@ -1821,7 +1828,8 @@ class mod_attendance_renderer extends plugin_renderer_base {
                     $attendanceurl = new moodle_url('/mod/attendance/view.php', array('id' => $sess->cmid,
                                                                                       'studentid' => $userdata->user->id,
                                                                                       'view' => ATT_VIEW_ALL));
-                    $cell = new html_table_cell(get_string('pluginname', 'mod_attendance') . ": " . html_writer::link($attendanceurl, $sess->attname));
+                    $cell = new html_table_cell(get_string('pluginname', 'mod_attendance') .
+                        ": " . html_writer::link($attendanceurl, $sess->attname));
                     $cell->colspan = $colcount - $summarywidth;
                     $cell->rowspan = 2;
                     $cell->attributes['class'] = 'groupheading';
