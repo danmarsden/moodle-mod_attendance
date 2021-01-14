@@ -994,7 +994,7 @@ SELECT a.id, a.course as courseid, c.fullname as coursename, atl.studentid AS us
  * @return stdClass
  */
 function attendance_get_users_to_notify($courseids = array(), $orderby = '', $allfornotify = false) {
-    global $DB;
+    global $DB, $CFG;
 
     $joingroup = 'LEFT JOIN {groups_members} gm ON (gm.userid = atl.studentid AND gm.groupid = ats.groupid)';
     $where = ' AND (ats.groupid = 0 or gm.id is NOT NULL)';
@@ -1011,11 +1011,19 @@ function attendance_get_users_to_notify($courseids = array(), $orderby = '', $al
         $having .= ' AND n.maxwarn > COUNT(DISTINCT ns.id) ';
     }
 
-    $unames = get_all_user_name_fields(true);
-    $unames2 = get_all_user_name_fields(true, 'u');
+    $unames = get_all_user_name_fields(true).',';
+    $unames2 = get_all_user_name_fields(true, 'u').',';
+
+    if (!empty($CFG->showuseridentity)) {
+        $extrafields = explode(',', $CFG->showuseridentity);
+        foreach ($extrafields as $field) {
+            $unames .= $field . ', ';
+            $unames2 .= 'u.' . $field . ', ';
+        }
+    }
 
     $idfield = $DB->sql_concat('cm.id', 'atl.studentid', 'n.id');
-    $sql = "SELECT {$idfield} as uniqueid, a.id as aid, {$unames2}, a.name as aname, cm.id as cmid, c.id as courseid,
+    $sql = "SELECT {$idfield} as uniqueid, a.id as aid, {$unames2} a.name as aname, cm.id as cmid, c.id as courseid,
                     c.fullname as coursename, atl.studentid AS userid, n.id as notifyid, n.warningpercent, n.emailsubject,
                     n.emailcontent, n.emailcontentformat, n.emailuser, n.thirdpartyemails, n.warnafter, n.maxwarn,
                      COUNT(DISTINCT ats.id) AS numtakensessions, SUM(stg.grade) AS points, SUM(stm.maxgrade) AS maxpoints,
@@ -1041,7 +1049,7 @@ function attendance_get_users_to_notify($courseids = array(), $orderby = '', $al
                   WHERE ats.absenteereport = 1 {$where}
                 GROUP BY uniqueid, a.id, a.name, a.course, c.fullname, atl.studentid, n.id, n.warningpercent,
                          n.emailsubject, n.emailcontent, n.emailcontentformat, n.warnafter, n.maxwarn,
-                         n.emailuser, n.thirdpartyemails, cm.id, c.id, {$unames2}, ns.userid
+                         n.emailuser, n.thirdpartyemails, cm.id, c.id, {$unames2} ns.userid
                 HAVING n.warnafter <= COUNT(DISTINCT ats.id) AND n.warningpercent > ((SUM(stg.grade) / SUM(stm.maxgrade)) * 100)
                 {$having}
                       {$orderby}";
@@ -1049,11 +1057,11 @@ function attendance_get_users_to_notify($courseids = array(), $orderby = '', $al
     if (!$allfornotify) {
         $idfield = $DB->sql_concat('cmid', 'userid');
         // Only show one record per attendance for teacher reports.
-        $sql = "SELECT DISTINCT {$idfield} as id, {$unames}, aid, cmid, courseid, aname, coursename, userid,
+        $sql = "SELECT DISTINCT {$idfield} as id, {$unames} aid, cmid, courseid, aname, coursename, userid,
                         numtakensessions, percent, MAX(timesent) as timesent
               FROM ({$sql}) as m
          GROUP BY id, aid, cmid, courseid, aname, userid, numtakensessions,
-                  percent, coursename, {$unames} {$orderby}";
+                  percent, {$unames} coursename {$orderby}";
     }
 
     return $DB->get_records_sql($sql, $params);

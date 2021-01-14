@@ -83,14 +83,28 @@ if (!$table->is_downloading($download, $exportfilename)) {
     }
 
 }
-
-$table->define_columns(array('coursename', 'aname', 'userid', 'numtakensessions', 'percent', 'timesent'));
-$table->define_headers(array(get_string('course'),
+$columns = array('coursename', 'aname', 'userid');
+$headers = array(get_string('course'),
     get_string('pluginname', 'attendance'),
-    get_string('user'),
+    get_string('user'));
+
+$extrafields = array();
+if (!empty($CFG->showuseridentity) && has_capability('moodle/site:viewuseridentity', $context)) {
+    $extrafields = explode(',', $CFG->showuseridentity);
+    foreach ($extrafields as $field) {
+        $columns[] = $field;
+        $headers[] = get_string($field);
+    }
+}
+$columns = array_merge($columns, array('numtakensessions', 'percent', 'timesent'));
+$headers = array_merge($headers, array(
     get_string('takensessions', 'attendance'),
     get_string('averageattendance', 'attendance'),
     get_string('triggered', 'attendance')));
+
+$table->define_columns($columns);
+$table->define_headers($headers);
+
 $table->sortable(true);
 $table->set_attribute('cellspacing', '0');
 $table->set_attribute('class', 'generaltable generalbox');
@@ -119,28 +133,37 @@ if (!empty($sort)) {
 
 $records = attendance_get_users_to_notify($courses, $orderby);
 foreach ($records as $record) {
+    $row = array();
     if (!$table->is_downloading($download, $exportfilename)) {
         $url = new moodle_url('/mod/attendance/index.php', array('id' => $record->courseid));
-        $name = html_writer::link($url, $record->coursename);
+        $row[] = html_writer::link($url, $record->coursename);
 
         $url = new moodle_url('/mod/attendance/view.php', array('studentid' => $record->userid,
             'id' => $record->cmid, 'view' => ATT_VIEW_ALL));
-        $attendancename = html_writer::link($url, $record->aname);
+        $row[] = html_writer::link($url, $record->aname);
 
-        $username = html_writer::link($url, fullname($record));
+        $row[] = html_writer::link($url, fullname($record));
     } else {
-        $name = $record->coursename;
-        $attendancename = $record->aname;
-        $username = fullname($record);
+        $row[] = $record->coursename;
+        $row[] = $record->aname;
+        $row[] = fullname($record);
     }
-
-    $percent = round($record->percent * 100)."%";
+    foreach ($extrafields as $field) {
+        if (isset($record->$field)) {
+            $row[] = $record->$field;
+        } else {
+            $row[] = '';
+        }
+    }
+    $row[] = $record->numtakensessions;
+    $row[] = round($record->percent * 100)."%";
     $timesent = "-";
     if (!empty($record->timesent)) {
         $timesent = userdate($record->timesent);
     }
+    $row[] = $timesent;
 
-    $table->add_data(array($name, $attendancename, $username, $record->numtakensessions, $percent, $timesent));
+    $table->add_data($row);
 }
 $table->finish_output();
 
