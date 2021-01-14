@@ -122,14 +122,18 @@ foreach ($records as $record) {
     if (!$table->is_downloading($download, $exportfilename)) {
         $url = new moodle_url('/mod/attendance/index.php', array('id' => $record->courseid));
         $name = html_writer::link($url, $record->coursename);
+
+        $url = new moodle_url('/mod/attendance/view.php', array('studentid' => $record->userid,
+            'id' => $record->cmid, 'view' => ATT_VIEW_ALL));
+        $attendancename = html_writer::link($url, $record->aname);
+
+        $username = html_writer::link($url, fullname($record));
     } else {
         $name = $record->coursename;
+        $attendancename = $record->aname;
+        $username = fullname($record);
     }
-    $url = new moodle_url('/mod/attendance/view.php', array('studentid' => $record->userid,
-                                                                'id' => $record->cmid, 'view' => ATT_VIEW_ALL));
-    $attendancename = html_writer::link($url, $record->aname);
 
-    $username = html_writer::link($url, fullname($record));
     $percent = round($record->percent * 100)."%";
     $timesent = "-";
     if (!empty($record->timesent)) {
