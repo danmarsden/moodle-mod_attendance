@@ -2198,7 +2198,10 @@ class mod_attendance_renderer extends plugin_renderer_base {
 
         $row = new html_table_row();
         $text = ($reportdata->pageparams->view == ATT_VIEW_SUMMARY) ? '' : get_string('summary');
-        $cell = $this->build_data_cell($text, false, true, $usercolspan);
+        // START UCLA MOD: CCLE-9110 - Attendance module render issue.
+        // $cell = $this->build_data_cell($text, false, true, $usercolspan);
+        $cell = $this->build_data_cell($text, false, true);
+        // END UCLA MOD: CCLE-9110.
         $cell->attributes['class'] = $cell->attributes['class'] . ' headcol';
         $row->cells[] = $cell;
         if (!empty($usercolspan)) {

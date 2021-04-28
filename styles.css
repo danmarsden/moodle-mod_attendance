@@ -281,14 +281,21 @@
     overflow-x: scroll;
     overflow-y: visible;
     padding: 0;
-    margin-left: 180px;
+    /* START UCLA MOD: CCLE-9110 - Attendance module render issue. */
+    /* margin-left: 180px; */
+    /* END UCLA MOD: CCLE-9110. */
 }
 
 #page-mod-attendance-report .attendancereporttable .headcol {
-    position: absolute;
+    /* START UCLA MOD: CCLE-9110 - Attendance module render issue. */
+    /* position: absolute; */
+    position: sticky;
     width: 200px;
     left: 0;
-    top: auto;
+    /* top: auto; */
+    vertical-align: top;
+    background: white;
+    /* END UCLA MOD: CCLE-9110. */
     border-top-width: 1px;
 }
 
