@@ -281,14 +281,14 @@
     overflow-x: scroll;
     overflow-y: visible;
     padding: 0;
-    margin-left: 180px;
 }
 
 #page-mod-attendance-report .attendancereporttable .headcol {
-    position: absolute;
+    position: sticky;
     width: 200px;
     left: 0;
-    top: auto;
+    vertical-align: top;
+    background: white;
     border-top-width: 1px;
 }
 
