@@ -70,10 +70,8 @@ if (get_config('attendance', 'enablecalendar')) {
     }
 } else {
     if ($action == 'delete' && confirm_sesskey()) {
-        $caleventids = $DB->get_records_select_menu('attendance_sessions', 'caleventid > 0', array(),
-                                                     '', 'caleventid, caleventid as id2');
-        $DB->delete_records_list('event', 'id', $caleventids);
-        $DB->execute("UPDATE {attendance_sessions} set caleventid = 0");
+        // Attendance isn't using Calendar - delete anything that was created.
+        $DB->delete_records('event', ['modulename' => 'attendance', 'eventtype' => 'attendance']);
         echo $OUTPUT->notification(get_string('eventsdeleted', 'mod_attendance'), 'notifysuccess');
     } else {
         // Check to see if there are any events that need to be deleted.

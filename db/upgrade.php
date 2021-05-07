@@ -640,5 +640,16 @@ function xmldb_attendance_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2020072900, 'attendance');
     }
 
+    if ($oldversion < 2021050700) {
+        // Restore process sometimes creates orphan attendance calendar events - clean them up.
+        $sql = "modulename = 'attendance' AND id NOT IN (SELECT caleventid
+                                                           FROM {attendance_sessions})";
+        $DB->delete_records_select('event', $sql);
+
+        // Attendance savepoint reached.
+        upgrade_mod_savepoint(true, 2021050700, 'attendance');
+    }
+
+
     return $result;
 }

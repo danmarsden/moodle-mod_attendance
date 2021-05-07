@@ -178,7 +178,7 @@ class restore_attendance_activity_structure_step extends restore_activity_struct
     }
 
     /**
-     * Once the database tables have been fully restored, restore the files
+     * Once the database tables have been fully restored, restore the files and clean up any calendar stuff.
      * @return void
      */
     protected function after_execute() {

@@ -110,4 +110,28 @@ class restore_attendance_activity_task extends restore_activity_task {
 
         return $rules;
     }
+
+    /**
+     * After restore - clean up any incorrect calendar items that have been restored.
+     * @throws dml_exception
+     */
+    public function after_restore() {
+        global $DB;
+        $attendanceid = $this->get_activityid();
+        $courseid = $this->get_courseid();
+        if (empty($courseid) || empty($attendanceid)) {
+            return;
+        }
+        if (empty(get_config('attendance', 'enablecalendar'))) {
+            // Attendance isn't using Calendar - delete anything that was created.
+            $DB->delete_records('event', ['modulename' => 'attendance', 'instance' => $attendanceid, 'courseid' => $courseid]);
+        } else {
+            // Clean up any orphaned events.
+            $sql = "modulename = 'attendance' AND courseid = :courseid AND id NOT IN (SELECT caleventid
+                                                                                        FROM {attendance_sessions}
+                                                                                       WHERE attendanceid = :attendanceid)";
+            $params = ['courseid' => $courseid, 'attendanceid' => $attendanceid];
+            $DB->delete_records_select('event', $sql, $params);
+        }
+    }
 }
