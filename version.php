@@ -29,3 +29,4 @@ $plugin->release = '3.9.1';
 $plugin->maturity  = MATURITY_STABLE;
 $plugin->cron     = 0;
 $plugin->component = 'mod_attendance';
+$plugin->supported = [38, 310];

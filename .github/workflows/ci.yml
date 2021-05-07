@@ -27,8 +27,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-versions: ['7.3', '7.4']
-        database: ['pgsql', 'mariadb']
+        include:
+          - php: '7.1'
+            moodle-branch: 'MOODLE_38_STABLE'
+            database: 'pgsql'
+          - php: '7.2'
+            moodle-branch: 'MOODLE_39_STABLE'
+            database: 'mariadb'
+          - php: '7.4'
+            moodle-branch: 'MOODLE_310_STABLE'
+            database: 'pgsql'
+
     steps:
       - name: Check out repository code
         uses: actions/checkout@v2
@@ -45,7 +54,7 @@ jobs:
       - name: Setup PHP environment
         uses: shivammathur/setup-php@v2 #https://github.com/shivammathur/setup-php
         with:
-          php-version: ${{ matrix.php-versions }}
+          php-version: ${{ matrix.php }}
           extensions: mbstring, pgsql, mysqli
           tools: phpunit
 
@@ -63,7 +72,7 @@ jobs:
         env:
           DB: ${{ matrix.database }}
           # TODO: Omitted MOODLE_BRANCH results in regex failure, investigate.
-          MOODLE_BRANCH: 'master'
+          MOODLE_BRANCH: ${{ matrix.moodle-branch }}
 
       - name: Run phplint
         run: moodle-plugin-ci phplint
