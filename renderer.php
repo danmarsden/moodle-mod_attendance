@@ -2134,7 +2134,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $rows = array();
 
         $bulkmessagecapability = has_capability('moodle/course:bulkmessaging', $this->page->context);
-        $extrafields = get_extra_user_fields($reportdata->att->context);
+        $extrafields = \core_user\fields::for_identity($reportdata->att->context)->get_required_fields();
         $showextrauserdetails = $reportdata->pageparams->showextrauserdetails;
         $params = $reportdata->pageparams->get_significant_params();
         $text = get_string('users');

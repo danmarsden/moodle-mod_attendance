@@ -111,7 +111,7 @@ class export extends \moodleform {
             $checkedfields['ident[id]'] = true;
         }
 
-        $extrafields = get_extra_user_fields($modcontext);
+        $extrafields = \core_user\fields::for_identity($modcontext)->get_required_fields();
         foreach ($extrafields as $field) {
             $ident[] =& $mform->createElement('checkbox',  $field, '', get_string( $field));
             $mform->setType($field, PARAM_NOTAGS);

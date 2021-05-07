@@ -802,11 +802,8 @@ class mod_attendance_structure {
         global $DB;
 
         $fields = array('username' , 'idnumber' , 'institution' , 'department', 'city', 'country');
-        // Get user identity fields if required - doesn't return original $fields array.
-        $extrafields = get_extra_user_fields($this->context, $fields);
-        $fields = array_merge($fields, $extrafields);
-
-        $userfields = user_picture::fields('u', $fields);
+        $userf = \core_user\fields::for_identity($this->context)->with_userpic()->excluding(...$fields);
+        $userfields = $userf->get_sql('u', false, '', 'id', false)->selects;
 
         if (empty($this->pageparams->sort)) {
             $this->pageparams->sort = ATT_SORT_DEFAULT;
