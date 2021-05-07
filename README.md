@@ -15,7 +15,8 @@ The git branches here support the following versions.
 | Mooodle 3.5   | MOODLE_35_STABLE |
 | Mooodle 3.6   | MOODLE_36_STABLE |
 | Moodle 3.7 | MOODLE_37_STABLE |
-| Moodle 3.8 and higher | main |
+| Moodle 3.8 - 3.10 | MOODLE_38_STABLE |
+| Moodle 3.11 and higher | MOODLE_311_STABLE |
 
 # PURPOSE
 The Attendance module allows teachers to maintain a record of attendance, replacing or supplementing a paper-based attendance register.
