@@ -122,7 +122,7 @@ class export extends \moodleform {
         $customfields = profile_get_custom_fields();
 
         foreach ($customfields as $field) {
-            if ((is_siteadmin($USER) || $field->visible == PROFILE_VISIBLE_ALL)
+            if ((is_siteadmin($USER) || $field->visible == PROFILE_VISIBLE_ALL || $field->visible == PROFILE_VISIBLE_TEACHERS)
             && in_array($field->shortname, explode(',', $adminsetfields))) {
                 $ident[] =& $mform->createElement('checkbox', $field->shortname, '',
                     format_string($field->name, true, array('context' => $modcontext)));
