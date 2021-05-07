@@ -93,7 +93,7 @@ switch ($att->pageparams->action) {
         break;
     case mod_attendance_preferences_page_params::ACTION_DELETE:
         if (attendance_has_logs_for_status($att->pageparams->statusid)) {
-            print_error('cantdeletestatus', 'attendance', "attsettings.php?id=$id");
+            throw new moodle_exception('cantdeletestatus', 'attendance', "attsettings.php?id=$id");
         }
 
         $confirm    = optional_param('confirm', null, PARAM_INT);

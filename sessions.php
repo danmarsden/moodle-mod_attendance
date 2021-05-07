@@ -148,7 +148,7 @@ switch ($att->pageparams->action) {
         }
         $sessid = optional_param_array('sessid', '', PARAM_SEQUENCE);
         if (empty($sessid)) {
-            print_error('nosessionsselected', 'attendance', $att->url_manage());
+            throw new moodle_exception('nosessionsselected', 'mod_attendance', $att->url_manage());
         }
         $sessionsinfo = $att->get_sessions_info($sessid);
 
@@ -191,7 +191,7 @@ switch ($att->pageparams->action) {
         }
 
         if ($slist === '') {
-            print_error('nosessionsselected', 'attendance', $att->url_manage());
+            throw new moodle_exception('nosessionsselected', 'mod_attendance', $att->url_manage());
         }
 
         break;

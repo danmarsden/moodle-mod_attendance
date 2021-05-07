@@ -56,9 +56,8 @@ if (!empty($messagebody['text'])) {
     $messagebody = $messagebody['text'];
 }
 $PAGE->set_url($url);
-if (!$course = $DB->get_record('course', array('id' => $id))) {
-    print_error('invalidcourseid');
-}
+$course = $DB->get_record('course', array('id' => $id), '*', MUST_EXIST);
+
 require_login($course);
 $coursecontext = context_course::instance($id);   // Course context.
 $systemcontext = context_system::instance();   // SYSTEM context.

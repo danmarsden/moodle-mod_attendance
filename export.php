@@ -132,7 +132,7 @@ if ($formdata = $mform->get_data()) {
                 }
             }
         } else {
-            print_error('sessionsnotfound', 'attendance', $att->url_manage());
+            throw new moodle_exception('sessionsnotfound', 'mod_attendance', $att->url_manage());
         }
 
         $setnumber = -1;
@@ -207,7 +207,7 @@ if ($formdata = $mform->get_data()) {
         }
         exit;
     } else {
-        print_error('studentsnotfound', 'attendance', $att->url_manage());
+        throw new moodle_exception('studentsnotfound', 'mod_attendance', $att->url_manage());
     }
 }
 

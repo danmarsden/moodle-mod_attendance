@@ -550,7 +550,7 @@ class mod_attendance_structure {
         global $DB;
 
         if (!$sess = $DB->get_record('attendance_sessions', array('id' => $sessionid) )) {
-            print_error('No such session in this course');
+            throw new moodle_exception('No such session in this course');
         }
 
         $sesstarttime = $formdata->sestime['starthour'] * HOURSECS + $formdata->sestime['startminute'] * MINSECS;
@@ -720,7 +720,7 @@ class mod_attendance_structure {
             if (substr($key, 0, 7) == 'remarks') {
                 $sid = substr($key, 7);
                 if (!(is_numeric($sid))) { // Sanity check on $sid.
-                    print_error('nonnumericid', 'attendance');
+                    throw new moodle_exception('nonnumericid', 'attendance');
                 }
                 $sesslog[$sid] = new stdClass();
                 $sesslog[$sid]->studentid = $sid; // We check is_numeric on this above.

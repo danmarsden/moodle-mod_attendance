@@ -54,7 +54,7 @@ if ($attforsession->rotateqrcode == 1) {
         // Check the token.
         if ($secrethash !== $_COOKIE[$cookiename]) {
             // Flag error.
-            print_error('qr_cookie_error', 'mod_attendance', $url);
+            throw new moodle_exception('qr_cookie_error', 'mod_attendance', $url);
         }
     } else {
         // Check password.
@@ -73,7 +73,7 @@ if ($attforsession->rotateqrcode == 1) {
             setcookie($cookiename, $secrethash, time() + (60 * 5), "/");
         } else {
             // Flag error.
-            print_error('qr_pass_wrong', 'mod_attendance', $url);
+            throw new moodle_exception('qr_pass_wrong', 'mod_attendance', $url);
         }
     }
 }
@@ -103,7 +103,7 @@ if ($attforsession->autoassignstatus && (empty($attforsession->studentpassword))
     $statusid = attendance_session_get_highest_status($att, $attforsession);
     $url = new moodle_url('/mod/attendance/view.php', array('id' => $cm->id));
     if (empty($statusid)) {
-        print_error('attendance_no_status', 'mod_attendance', $url);
+        throw new moodle_exception('attendance_no_status', 'mod_attendance', $url);
     }
     $take = new stdClass();
     $take->status = $statusid;
@@ -114,7 +114,7 @@ if ($attforsession->autoassignstatus && (empty($attforsession->studentpassword))
         // Redirect back to the view page.
         redirect($url, get_string('studentmarked', 'attendance'));
     } else {
-        print_error('attendance_already_submitted', 'mod_attendance', $url);
+        throw new moodle_exception('attendance_already_submitted', 'mod_attendance', $url);
     }
 }
 
@@ -136,7 +136,7 @@ if (!empty($qrpass) && !empty($attforsession->autoassignstatus)) {
     $fromform->status = attendance_session_get_highest_status($att, $attforsession);
     if (empty($fromform->status)) {
         $url = new moodle_url('/mod/attendance/view.php', array('id' => $cm->id));
-        print_error('attendance_no_status', 'mod_attendance', $url);
+        throw new moodle_exception('attendance_no_status', 'mod_attendance', $url);
     }
 
     if (!empty($fromform->status)) {
@@ -147,7 +147,7 @@ if (!empty($qrpass) && !empty($attforsession->autoassignstatus)) {
             // Redirect back to the view page.
             redirect($url, get_string('studentmarked', 'attendance'));
         } else {
-            print_error('attendance_already_submitted', 'mod_attendance', $url);
+            throw new moodle_exception('attendance_already_submitted', 'mod_attendance', $url);
         }
     }
 }
@@ -181,7 +181,7 @@ if ($mform->is_cancelled()) {
         $fromform->status = attendance_session_get_highest_status($att, $attforsession);
         if (empty($fromform->status)) {
             $url = new moodle_url('/mod/attendance/view.php', array('id' => $cm->id));
-            print_error('attendance_no_status', 'mod_attendance', $url);
+            throw new moodle_exception('attendance_no_status', 'mod_attendance', $url);
         }
     }
 
@@ -193,7 +193,7 @@ if ($mform->is_cancelled()) {
             // Redirect back to the view page.
             redirect($url, get_string('studentmarked', 'attendance'));
         } else {
-            print_error('attendance_already_submitted', 'mod_attendance', $url);
+            throw new moodle_exception('attendance_already_submitted', 'mod_attendance', $url);
         }
     }
 
