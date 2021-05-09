@@ -1010,9 +1010,9 @@ function attendance_get_users_to_notify($courseids = array(), $orderby = '', $al
         // Exclude warnings that have already sent the max num.
         $having .= ' AND n.maxwarn > COUNT(DISTINCT ns.id) ';
     }
-
-    $unames = get_all_user_name_fields(true).',';
-    $unames2 = get_all_user_name_fields(true, 'u').',';
+    $userfieldsapi = \core_user\fields::for_name();
+    $unames = $userfieldsapi->get_sql('', false, '', '', false)->selects.',';
+    $unames2 = $userfieldsapi->get_sql('u', false, '', '', false)->selects.',';
 
     if (!empty($CFG->showuseridentity)) {
         $extrafields = explode(',', $CFG->showuseridentity);
@@ -1089,7 +1089,7 @@ function attendance_template_variables($record) {
         '/%maxpoints%/' => $record->maxpoints,
         '/%percent%/' => $record->percent,
     );
-    $extrauserfields = get_all_user_name_fields();
+    $extrauserfields = \core_user\fields::get_name_fields();
     foreach ($extrauserfields as $extra) {
         $templatevars['/%'.$extra.'%/'] = $record->$extra;
     }

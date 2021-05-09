@@ -909,7 +909,7 @@ class mod_attendance_structure {
             'picture' => 0,
             'type' => 'temporary',
         );
-        $allfields = get_all_user_name_fields();
+        $allfields = \core_user\fields::get_name_fields();
         if (!empty($CFG->showuseridentity)) {
             $allfields = array_merge($allfields, explode(',', $CFG->showuseridentity));
         }

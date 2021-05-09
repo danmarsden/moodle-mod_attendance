@@ -60,7 +60,9 @@ class export extends \moodleform {
         }
 
         // Restrict the export to the selected users.
-        $namefields = get_all_user_name_fields(true, 'u');
+        $userfieldsapi = \core_user\fields::for_name();
+        $namefields = $userfieldsapi->get_sql('u', false, '', '', false)->selects;
+
         $allusers = get_enrolled_users($modcontext, 'mod/attendance:canbelisted', 0, 'u.id,'.$namefields);
         $userlist = array();
         foreach ($allusers as $user) {
