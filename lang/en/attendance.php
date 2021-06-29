@@ -81,6 +81,7 @@ If "Yes" students will be automatically marked depending on their first access t
 If "Set unmarked at end of session" any students who have not marked their attendance will be set to the unmarked status selected.';
 $string['automarkall'] = 'Yes';
 $string['automarkclose'] = 'Set unmarked at end of session';
+$string['onactivitycompletion'] = 'On activity completion';
 $string['automarktask'] = 'Check for attendance sessions that require auto marking';
 $string['autorecorded'] = 'system auto recorded';
 $string['averageattendance'] = 'Average attendance';

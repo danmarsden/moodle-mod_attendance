@@ -42,6 +42,8 @@ define('ATT_SORT_FIRSTNAME', 2);
 define('ATTENDANCE_AUTOMARK_DISABLED', 0);
 define('ATTENDANCE_AUTOMARK_ALL', 1);
 define('ATTENDANCE_AUTOMARK_CLOSE', 2);
+define('ATTENDANCE_AUTOMARK_ACTIVITYCOMPLETION', 3);
+
 
 define('ATTENDANCE_SHAREDIP_DISABLED', 0);
 define('ATTENDANCE_SHAREDIP_MINUTES', 1);
@@ -49,6 +51,7 @@ define('ATTENDANCE_SHAREDIP_FORCE', 2);
 
 // Max number of sessions available in the warnings set form to trigger warnings.
 define('ATTENDANCE_MAXWARNAFTER', 100);
+
 
 /**
  * Get statuses,
@@ -1150,12 +1153,16 @@ function attendance_session_get_highest_status(mod_attendance_structure $att, $a
  * @return array
  */
 function attendance_get_automarkoptions() {
-    $options = array();
+
+    $options = array();    
+
     $options[ATTENDANCE_AUTOMARK_DISABLED] = get_string('noautomark', 'attendance');
     if (strpos(get_config('tool_log', 'enabled_stores'), 'logstore_standard') !== false) {
         $options[ATTENDANCE_AUTOMARK_ALL] = get_string('automarkall', 'attendance');
     }
     $options[ATTENDANCE_AUTOMARK_CLOSE] = get_string('automarkclose', 'attendance');
+    $options[ATTENDANCE_AUTOMARK_ACTIVITYCOMPLETION] = get_string('onactivitycompletion', 'attendance');
+
     return $options;
 }
 
