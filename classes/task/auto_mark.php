@@ -34,6 +34,7 @@ require_once($CFG->dirroot . '/mod/attendance/locallib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class auto_mark extends \core\task\scheduled_task {
+
     /**
      * Returns localised general event name.
      *
@@ -76,10 +77,12 @@ class auto_mark extends \core\task\scheduled_task {
                 $setunmarked = $DB->get_field('attendance_statuses', 'id',
                     array('attendanceid' => $session->attendanceid, 'setnumber' => $session->statusset,
                           'setunmarked' => 1, 'deleted' => 0));
+
                 if (empty($setunmarked)) {
                     mtrace("No unmarked status configured for session id: ".$session->id);
                     continue;
                 }
+
                 if (empty($cacheatt[$session->attendanceid])) {
                     $cacheatt[$session->attendanceid] = $DB->get_record('attendance', array('id' => $session->attendanceid));
                 }
@@ -101,6 +104,9 @@ class auto_mark extends \core\task\scheduled_task {
                     $pageparams->grouptype  = 1;
                 }
                 $pageparams->sessionid  = $session->id;
+
+                $att = new \mod_attendance_structure($cacheatt[$session->attendanceid],
+                $cachecm[$session->attendanceid], $cachecourse[$courseid], $context, $pageparams);
 
                 if ($session->automark == 1) {
                     $userfirstacess = array();
@@ -136,12 +142,39 @@ class auto_mark extends \core\task\scheduled_task {
                         }
                     }
                     $logusers->close();
+
+                } else if ($session->automark == 3) {
+
+                    $completedusers = array();
+                    $newlog = new \stdClass();
+                    $newlog->timetaken = $now;
+                    $newlog->takenby = 0;
+                    $newlog->sessionid = $session->id;
+                    $newlog->remarks = get_string('autorecorded', 'attendance');
+                    $newlog->statusset = implode(',', array_keys( (array)$att->get_statuses()));
+
+                    // Get users who have completed the course in this session.
+                    $completedusers[] = $DB->get_record('course_modules_completion', array(
+                                                        'coursemoduleid' => $session->automarkcmid,
+                                                        'completionstate' => 1
+                                                        ));
+
+                    if (!empty($completedusers)) {
+
+                        // Get automark status the users and update the attendance log.
+                        foreach ($completedusers as $completionuser) {
+
+                            $newlog->statusid = $att->get_automark_status($completionuser->timemodified, $session->id);
+
+                            if (!empty($newlog->statusid)) {
+                                $newlog->studentid = $completionuser->userid;
+                                $DB->insert_record('attendance_log', $newlog);
+                            }
+                        }
+                    }
                 }
 
                 // Get all unmarked students.
-                $att = new \mod_attendance_structure($cacheatt[$session->attendanceid],
-                    $cachecm[$session->attendanceid], $cachecourse[$courseid], $context, $pageparams);
-
                 $users = $att->get_users($session->groupid, 0);
 
                 $existinglog = $DB->get_recordset('attendance_log', array('sessionid' => $session->id));

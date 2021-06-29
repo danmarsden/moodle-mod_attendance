@@ -76,11 +76,13 @@ $string['attrecords'] = 'Attendances records';
 $string['autoassignstatus'] = 'Automatically select highest status available';
 $string['autoassignstatus_help'] = 'If this is selected, students will automatically be assigned the highest available grade.';
 $string['automark'] = 'Automatic marking';
+$string['selectactivity'] = 'Select activity';
 $string['automark_help'] = 'Allows marking to be completed automatically.
 If "Yes" students will be automatically marked depending on their first access to the course.
 If "Set unmarked at end of session" any students who have not marked their attendance will be set to the unmarked status selected.';
 $string['automarkall'] = 'Yes';
 $string['automarkclose'] = 'Set unmarked at end of session';
+$string['onactivitycompletion'] = 'On activity completion';
 $string['automarktask'] = 'Check for attendance sessions that require auto marking';
 $string['autorecorded'] = 'system auto recorded';
 $string['averageattendance'] = 'Average attendance';

@@ -41,7 +41,7 @@ class updatesession extends \moodleform {
      */
     public function definition() {
 
-        global $DB;
+        global $DB, $COURSE;
         $mform    =& $this->_form;
 
         $modcontext    = $this->_customdata['modcontext'];
@@ -147,6 +147,12 @@ class updatesession extends \moodleform {
         $mform->addElement('select', 'automark', get_string('automark', 'attendance'), $options2);
         $mform->setType('automark', PARAM_INT);
         $mform->addHelpButton('automark', 'automark', 'attendance');
+
+        $automarkcmoptions2 = attendance_get_coursemodulenames($COURSE->id);
+
+        $mform->addElement('select', 'automarkcmid', get_string('selectactivity', 'attendance'), $automarkcmoptions2);
+        $mform->setType('automarkcmid', PARAM_INT);
+        $mform->hideif('automarkcmid', 'automark', 'neq', '3');
 
         if (!empty($studentscanmark)) {
             $mform->addElement('text', 'studentpassword', get_string('studentpassword', 'attendance'));

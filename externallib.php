@@ -255,6 +255,7 @@ class mod_attendance_external extends external_api {
         $sess->subnet = $attendance->subnet;
         $sess->statusset = 0;
         $sess->groupid = $groupid;
+        $sess->automarkcmid = 0;
 
         $sessionid = $attendance->add_session($sess);
         return array('sessionid' => $sessionid);
