@@ -1167,6 +1167,37 @@ function attendance_get_automarkoptions() {
 }
 
 /**
+ * Get course module names associated to this course, if they're visible and complete.
+ * @param int $id - course id.
+ * @return array $automarkcmoptions - list of course module names associated to this course.
+ */
+function attendance_get_coursemodulenames($id) {
+
+    global $DB;
+    $automarkcmoptions = [];
+
+    $sql = "SELECT DISTINCT m.name
+            FROM {course_modules} cm
+            JOIN {modules} m ON m.id = cm.module   
+            WHERE cm.course = :cmcourse
+            AND cm.visible = :cmvisible
+            AND cm.completion = :cmcompletion";
+
+    $coursemodulenames = $DB->get_records_sql($sql, array(
+                                                'cmcourse' => $id,
+                                                'cmvisible' => 1,
+                                                'cmcompletion' => 1
+                                            ));
+    if($coursemodulenames){
+        foreach($coursemodulenames as $coursemodulename){
+            $automarkcmoptions[] = $coursemodulename->name;
+        }
+    }
+
+    return $automarkcmoptions;
+}
+
+/**
  * Get available sharedip options.
  *
  * @return array
