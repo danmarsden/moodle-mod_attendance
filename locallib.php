@@ -1176,7 +1176,7 @@ function attendance_get_coursemodulenames($id) {
     global $DB;
     $automarkcmoptions = [];
 
-    $sql = "SELECT DISTINCT m.name
+    $sql = "SELECT DISTINCT cm.module, m.name
             FROM {course_modules} cm
             JOIN {modules} m ON m.id = cm.module   
             WHERE cm.course = :cmcourse
@@ -1190,7 +1190,7 @@ function attendance_get_coursemodulenames($id) {
                                             ));
     if($coursemodulenames){
         foreach($coursemodulenames as $coursemodulename){
-            $automarkcmoptions[] = $coursemodulename->name;
+            $automarkcmoptions[$coursemodulename->module] = $coursemodulename->name;
         }
     }
 
