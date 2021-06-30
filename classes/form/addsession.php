@@ -240,6 +240,12 @@ class addsession extends moodleform {
             $mform->addElement('checkbox', 'autoassignstatus', '', get_string('autoassignstatus', 'attendance'));
             $mform->addHelpButton('autoassignstatus', 'autoassignstatus', 'attendance');
             $mform->hideif('autoassignstatus', 'studentscanmark', 'notchecked');
+
+            $automarkcmoptions = array( 0 => 'activity 1', 1 => 'activity 2');
+            $mform->addElement('select', 'automarkcmid', get_string('selectactivity', 'attendance'), $automarkcmoptions);
+            $mform->setType('automarkcmid', PARAM_INT);
+            $mform->hideif('automarkcmid', 'automark', 'neq', '3');
+
             if (isset($pluginconfig->autoassignstatus)) {
                 $mform->setDefault('autoassignstatus', $pluginconfig->autoassignstatus);
             }

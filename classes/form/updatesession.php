@@ -148,6 +148,11 @@ class updatesession extends \moodleform {
         $mform->setType('automark', PARAM_INT);
         $mform->addHelpButton('automark', 'automark', 'attendance');
 
+        $automarkcmoptions2 = array( 0 => 'activity 1', 1 => 'activity 2');
+        $mform->addElement('select', 'automarkcmid', get_string('selectactivity', 'attendance'), $automarkcmoptions2);
+        $mform->setType('automarkcmid', PARAM_INT);
+        $mform->hideif('automarkcmid', 'automark', 'neq', '3');
+
         if (!empty($studentscanmark)) {
             $mform->addElement('text', 'studentpassword', get_string('studentpassword', 'attendance'));
             $mform->setType('studentpassword', PARAM_TEXT);
