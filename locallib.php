@@ -784,6 +784,7 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
                     $sess->rotateqrcode = 0;
                     $sess->rotateqrcodesecret = '';
 
+
                     if (!empty($formdata->usedefaultsubnet)) {
                         $sess->subnet = $att->subnet;
                     } else {
@@ -791,6 +792,12 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
                     }
                     $sess->automark = $formdata->automark;
                     $sess->automarkcompleted = 0;
+
+                    if(!empty($formdata->automarkcmid)){
+                        $sess->automarkcmid = $formdata->automarkcmid;
+                    } else {
+                        $sess->automarkcmid = 0;
+                    }
                     if (!empty($formdata->preventsharedip)) {
                         $sess->preventsharedip = $formdata->preventsharedip;
                     }
@@ -855,6 +862,13 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
         $sess->studentpassword = '';
         $sess->automark = 0;
         $sess->automarkcompleted = 0;
+
+        if(!empty($formdata->automarkcmid)){
+            $sess->automarkcmid = $formdata->automarkcmid;
+        } else {
+            $sess->automarkcmid = 0;
+        }
+
         $sess->absenteereport = $absenteereport;
         $sess->includeqrcode = 0;
         $sess->rotateqrcode = 0;
