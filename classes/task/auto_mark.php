@@ -102,6 +102,9 @@ class auto_mark extends \core\task\scheduled_task {
                 }
                 $pageparams->sessionid  = $session->id;
 
+                $att = new \mod_attendance_structure($cacheatt[$session->attendanceid],
+                $cachecm[$session->attendanceid], $cachecourse[$courseid], $context, $pageparams);
+            
                 if ($session->automark == 1) {
                     $userfirstacess = array();
                     // If set to do full automarking, get all users that have accessed course during session open.
@@ -136,12 +139,33 @@ class auto_mark extends \core\task\scheduled_task {
                         }
                     }
                     $logusers->close();
+
+                } elseif ($session->automark == 3) {
+
+                    // select all users that have completed the linked activity (and the time they completed the activity) 
+                    global $DB;
+                    $user = array();
+                    $linkeduser = array();
+                
+                    $sql = "SELECT DISTINCT cm.timemodified, cm.userid
+                            FROM {course_modules_completion} cm
+                            WHERE cm.coursemoduleid = :cmcoursemoduleid";
+                
+                    $linkedusers = $DB->get_records_sql($sql, array(
+                                                                'cmcoursemoduleid' => $id
+                                                            ));
+                    if($linkedusers){
+                        foreach($linkedusers as $linkeduser) {
+                            $user[$linkeduser->userid] = $att->get_automark_status($linkeduser->timemodified, $session->id);
+
+                            // update automarkcompleted status with this value 
+
+                        }
+                    }
+                    
                 }
 
                 // Get all unmarked students.
-                $att = new \mod_attendance_structure($cacheatt[$session->attendanceid],
-                    $cachecm[$session->attendanceid], $cachecourse[$courseid], $context, $pageparams);
-
                 $users = $att->get_users($session->groupid, 0);
 
                 $existinglog = $DB->get_recordset('attendance_log', array('sessionid' => $session->id));
