@@ -599,6 +599,7 @@ $string['tuseremail'] = 'Email';
 $string['tusername'] = 'Full name';
 $string['ungraded'] = 'Ungraded sessions';
 $string['unknowngroup'] = 'Unknown group';
+$string['unknownstatus'] = 'Unknown status id: {$a}';
 $string['update'] = 'Update';
 $string['uploadattendance'] = 'Upload attendance by CSV';
 $string['usedefaultsubnet'] = 'Use default';
