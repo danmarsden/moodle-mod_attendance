@@ -724,7 +724,7 @@ class attendance_report_data implements renderable {
         $this->sessions = $att->get_filtered_sessions();
 
         $this->statuses = $att->get_statuses(true, true);
-        $this->allstatuses = $att->get_statuses(false, true);
+        $this->allstatuses = attendance_get_statuses($att->id, false);
 
         if ($att->pageparams->view == ATT_VIEW_SUMMARY) {
             $this->summary = new mod_attendance_summary($att->id);
