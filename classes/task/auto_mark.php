@@ -34,6 +34,8 @@ require_once($CFG->dirroot . '/mod/attendance/locallib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class auto_mark extends \core\task\scheduled_task {
+
+
     /**
      * Returns localised general event name.
      *
@@ -76,10 +78,13 @@ class auto_mark extends \core\task\scheduled_task {
                 $setunmarked = $DB->get_field('attendance_statuses', 'id',
                     array('attendanceid' => $session->attendanceid, 'setnumber' => $session->statusset,
                           'setunmarked' => 1, 'deleted' => 0));
+
                 if (empty($setunmarked)) {
                     mtrace("No unmarked status configured for session id: ".$session->id);
                     continue;
                 }
+
+
                 if (empty($cacheatt[$session->attendanceid])) {
                     $cacheatt[$session->attendanceid] = $DB->get_record('attendance', array('id' => $session->attendanceid));
                 }
@@ -142,24 +147,30 @@ class auto_mark extends \core\task\scheduled_task {
 
                 } elseif ($session->automark == 3) {
 
-                    // select all users that have completed the linked activity (and the time they completed the activity) 
-                    global $DB;
-                    $user = array();
-                    $linkeduser = array();
-                
-                    $sql = "SELECT DISTINCT cm.timemodified, cm.userid
-                            FROM {course_modules_completion} cm
-                            WHERE cm.coursemoduleid = :cmcoursemoduleid";
-                
-                    $linkedusers = $DB->get_records_sql($sql, array(
-                                                                'cmcoursemoduleid' => $id
-                                                            ));
-                    if($linkedusers){
-                        foreach($linkedusers as $linkeduser) {
-                            $user[$linkeduser->userid] = $att->get_automark_status($linkeduser->timemodified, $session->id);
+                    $completedusers = array();
+                    $newlog = new \stdClass();
+                    $newlog->timetaken = $now;
+                    $newlog->takenby = 0;
+                    $newlog->sessionid = $session->id;
+                    $newlog->remarks = get_string('autorecorded', 'attendance');
+                    $newlog->statusset = implode(',', array_keys( (array)$att->get_statuses()));
 
-                            // update automarkcompleted status with this value 
+                    // add a translation step to turn the the session module id into it's actual cmid 
 
+
+                    // Get users who have completed the course in this session.
+                    $completedusers = $DB->get_record('course_modules_completion', array('coursemoduleid' => $session->automarkcmid));
+
+                    // var_dump('completed users are as follows : ');
+                    // var_dump($session);die;
+
+                    // Get automark status the users and update the attendance log
+                    foreach ($completedusers as $completion) {
+                        $$newlog->statusid = $att->get_automark_status($completion->timemodified, $session->id);
+
+                        if (!empty($newlog->statusid)) {
+                            $newlog->studentid = $user->id;
+                            $DB->insert_record('attendance_log', $newlog);
                         }
                     }
                     
