@@ -79,10 +79,10 @@ class auto_mark extends \core\task\scheduled_task {
                     array('attendanceid' => $session->attendanceid, 'setnumber' => $session->statusset,
                           'setunmarked' => 1, 'deleted' => 0));
 
-                if (empty($setunmarked)) {
-                    mtrace("No unmarked status configured for session id: ".$session->id);
-                    continue;
-                }
+                // if (empty($setunmarked)) {
+                //     mtrace("No unmarked status configured for session id: ".$session->id);
+                //     continue;
+                // }
 
 
                 if (empty($cacheatt[$session->attendanceid])) {
@@ -147,6 +147,7 @@ class auto_mark extends \core\task\scheduled_task {
 
                 } elseif ($session->automark == 3) {
 
+                    global $DB;
                     $completedusers = array();
                     $newlog = new \stdClass();
                     $newlog->timetaken = $now;
@@ -156,18 +157,21 @@ class auto_mark extends \core\task\scheduled_task {
                     $newlog->statusset = implode(',', array_keys( (array)$att->get_statuses()));
 
                     // Get users who have completed the course in this session.
-                    $completedusers = $DB->get_record('course_modules_completion', array('coursemoduleid' => $session->automarkcmid));
+                    $completedusers[] = $DB->get_record('course_modules_completion', array('coursemoduleid' => $session->automarkcmid));
 
-                    // Get automark status the users and update the attendance log.
-                    foreach ($completedusers as $completion) {
-                        $$newlog->statusid = $att->get_automark_status($completion->timemodified, $session->id);
+                    if (!empty($completedusers)) {
 
-                        if (!empty($newlog->statusid)) {
-                            $newlog->studentid = $user->id;
-                            $DB->insert_record('attendance_log', $newlog);
+                        // Get automark status the users and update the attendance log.
+                        foreach ($completedusers as $completionuser) {
+
+                            $newlog->statusid = $att->get_automark_status($completionuser->timemodified, $session->id);
+
+                            if (!empty($newlog->statusid)) {
+                                $newlog->studentid = $completionuser->userid;
+                                $DB->insert_record('attendance_log', $newlog);
+                            }
                         }
-                    }
-                    
+                    } 
                 }
 
                 // Get all unmarked students.
