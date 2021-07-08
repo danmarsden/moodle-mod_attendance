@@ -79,10 +79,10 @@ class auto_mark extends \core\task\scheduled_task {
                     array('attendanceid' => $session->attendanceid, 'setnumber' => $session->statusset,
                           'setunmarked' => 1, 'deleted' => 0));
 
-                // if (empty($setunmarked)) {
-                //     mtrace("No unmarked status configured for session id: ".$session->id);
-                //     continue;
-                // }
+                if (empty($setunmarked)) {
+                    mtrace("No unmarked status configured for session id: ".$session->id);
+                    continue;
+                }
 
 
                 if (empty($cacheatt[$session->attendanceid])) {
@@ -147,7 +147,6 @@ class auto_mark extends \core\task\scheduled_task {
 
                 } elseif ($session->automark == 3) {
 
-                    global $DB;
                     $completedusers = array();
                     $newlog = new \stdClass();
                     $newlog->timetaken = $now;
