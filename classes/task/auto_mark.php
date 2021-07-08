@@ -155,16 +155,10 @@ class auto_mark extends \core\task\scheduled_task {
                     $newlog->remarks = get_string('autorecorded', 'attendance');
                     $newlog->statusset = implode(',', array_keys( (array)$att->get_statuses()));
 
-                    // add a translation step to turn the the session module id into it's actual cmid 
-
-
                     // Get users who have completed the course in this session.
                     $completedusers = $DB->get_record('course_modules_completion', array('coursemoduleid' => $session->automarkcmid));
 
-                    // var_dump('completed users are as follows : ');
-                    // var_dump($session);die;
-
-                    // Get automark status the users and update the attendance log
+                    // Get automark status the users and update the attendance log.
                     foreach ($completedusers as $completion) {
                         $$newlog->statusid = $att->get_automark_status($completion->timemodified, $session->id);
 
