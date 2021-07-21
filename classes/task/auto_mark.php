@@ -35,7 +35,6 @@ require_once($CFG->dirroot . '/mod/attendance/locallib.php');
  */
 class auto_mark extends \core\task\scheduled_task {
 
-
     /**
      * Returns localised general event name.
      *
@@ -83,7 +82,6 @@ class auto_mark extends \core\task\scheduled_task {
                     mtrace("No unmarked status configured for session id: ".$session->id);
                     continue;
                 }
-
 
                 if (empty($cacheatt[$session->attendanceid])) {
                     $cacheatt[$session->attendanceid] = $DB->get_record('attendance', array('id' => $session->attendanceid));
@@ -156,8 +154,11 @@ class auto_mark extends \core\task\scheduled_task {
                     $newlog->statusset = implode(',', array_keys( (array)$att->get_statuses()));
 
                     // Get users who have completed the course in this session.
-                    $completedusers[] = $DB->get_record('course_modules_completion', array('coursemoduleid' => $session->automarkcmid));
-
+                    $completedusers[] = $DB->get_record('course_modules_completion', array(
+                                                        'coursemoduleid' => $session->automarkcmid,
+                                                        'completionstate' => 1
+                                                        ));
+                                                        
                     if (!empty($completedusers)) {
 
                         // Get automark status the users and update the attendance log.

@@ -221,11 +221,6 @@ class addsession extends moodleform {
         $mform->setType('automarkcmid', PARAM_INT);
         $mform->hideif('automarkcmid', 'automark', 'neq', '3');
 
-        // $linkeduser = attendance_get_user_coursemodulenames(5);
-        // var_dump($linkeduser->timemodified);die;
-
-        // var_dump($linkeduser);die;
-
         if (!empty($studentscanmark)) {
             $mgroup = array();
 

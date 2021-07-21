@@ -52,7 +52,6 @@ define('ATTENDANCE_SHAREDIP_FORCE', 2);
 // Max number of sessions available in the warnings set form to trigger warnings.
 define('ATTENDANCE_MAXWARNAFTER', 100);
 
-
 /**
  * Get statuses,
  *
@@ -1204,7 +1203,7 @@ function attendance_get_coursemodulenames($id) {
                                             ));
     if($coursemodulenames){
         foreach($coursemodulenames as $coursemodulename) {
-            $automarkcmoptions[$coursemodulename->id] = $coursemodulename->name;
+            $automarkcmoptions[$coursemodulename->id] = format_string($coursemodulename->name);
         }
     }
 

@@ -657,7 +657,9 @@ function xmldb_attendance_upgrade($oldversion=0) {
         $field = new xmldb_field('automarkcmid', XMLDB_TYPE_CHAR, '10', null, null, null, null, 'rotateqrcodesecret');
 
         // Launch change of precision for field statusset.
-        $dbman->change_field_precision($table, $field);
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
 
         // Attendance savepoint reached.
         upgrade_mod_savepoint(true, 2021060700, 'attendance');
