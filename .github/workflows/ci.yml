@@ -66,35 +66,45 @@ jobs:
           MOODLE_BRANCH: 'master'
 
       - name: Run phplint
+        if: ${{ always() }}
         run: moodle-plugin-ci phplint
 
       - name: Run phpcpd
+        if: ${{ always() }}
         run: moodle-plugin-ci phpcpd || true
 
       - name: Run phpmd
+       if: ${{ always() }}
         run: moodle-plugin-ci phpmd
 
       - name: Run codechecker
+        if: ${{ always() }}
         run: moodle-plugin-ci codechecker
 
       - name: Run validate
+        if: ${{ always() }}
         run: moodle-plugin-ci validate
 
       - name: Run savepoints
+        if: ${{ always() }}
         run: moodle-plugin-ci savepoints
 
       - name: Run mustache
+        if: ${{ always() }}
         run: moodle-plugin-ci phpcpd || true
         env:
           MUSTACHE_IGNORE_NAMES: mobile_teacher_form.mustache
 
       - name: Run grunt
+        if: ${{ always() }}
         run: moodle-plugin-ci grunt
 
       - name: Run phpdoc
+        if: ${{ always() }}
         run: moodle-plugin-ci phpdoc
 
       - name: Run phpunit
+        if: ${{ always() }}
         run: | 
              moodle-plugin-ci phpunit
              cd moodle
@@ -102,4 +112,5 @@ jobs:
              vendor/bin/phpunit --fail-on-risky --disallow-test-output --testsuite core_privacy_testsuite --filter provider_testcase 
 
       - name: Run behat
+        if: ${{ always() }}
         run: moodle-plugin-ci behat --profile chrome
