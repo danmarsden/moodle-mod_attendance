@@ -74,7 +74,7 @@ jobs:
         run: moodle-plugin-ci phpcpd || true
 
       - name: Run phpmd
-       if: ${{ always() }}
+        if: ${{ always() }}
         run: moodle-plugin-ci phpmd
 
       - name: Run codechecker
