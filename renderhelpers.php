@@ -68,7 +68,12 @@ class user_sessions_cells_generator {
                     $this->construct_existing_status_cell($this->reportdata->statuses[$statusid]->acronym .
                                 " ({$points}/{$maxpoints})");
                 } else {
-                    $this->construct_hidden_status_cell($this->reportdata->allstatuses[$statusid]->acronym);
+                    if (!empty($this->reportdata->allstatuses[$statusid] && isset($this->reportdata->allstatuses[$statusid]->acronym))) {
+                        $statusac = $this->reportdata->allstatuses[$statusid]->acronym;
+                    } else {
+                        $statusac = get_string('unknownstatus', 'mod_attendance', $statusid);
+                    }
+                    $this->construct_hidden_status_cell($statusac);
                 }
                 if ($remarks) {
                     $this->construct_remarks_cell($this->reportdata->sessionslog[$this->user->id][$sess->id]->remarks);

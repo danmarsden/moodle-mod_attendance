@@ -457,10 +457,11 @@ class sessions {
 
                         foreach ($sessions as $index => $sess) {
                             // Check for duplicate sessions.
-                            if ($this->session_exists($sess)) {
+                            if ($this->session_exists($sess, $att->id)) {
                                 mod_attendance_notifyqueue::notify_message(get_string('sessionduplicate', 'attendance', (array(
                                     'course' => $session->course,
-                                    'activity' => $cm->name
+                                    'activity' => $cm->name,
+                                    'date' => construct_session_full_date_time($sess->sessdate, $sess->duration)
                                 ))));
                                 unset($sessions[$index]);
                             } else {
@@ -504,19 +505,16 @@ class sessions {
      * Check if an identical session exists.
      *
      * @param stdClass $session
+     * @param int $attid
      * @return boolean
      */
-    private function session_exists(stdClass $session) {
+    private function session_exists(stdClass $session, $attid) {
         global $DB;
 
-        $check = clone $session;
-
-        // Remove the properties that aren't useful to check.
-        unset($check->description);
-        unset($check->descriptionitemid);
-        unset($check->timemodified);
-        $check = (array) $check;
-
+        $check = ['attendanceid' => $attid,
+                  'sessdate' => $session->sessdate,
+                  'duration' => $session->duration,
+                  'groupid' => $session->groupid];
         if ($DB->record_exists('attendance_sessions', $check)) {
             return true;
         }

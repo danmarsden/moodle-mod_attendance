@@ -1,14 +1,14 @@
 name: Run all tests
 
 # Run this workflow every time a new commit pushed to your repository
-on: push
+on: [push, pull_request]
 
 jobs:
   setup:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:9.6
+        image: postgres:10
         env:
           POSTGRES_USER: 'postgres'
           POSTGRES_HOST_AUTH_METHOD: 'trust'
@@ -17,7 +17,7 @@ jobs:
           - 5432:5432
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 3
       mariadb:
-        image: mariadb:10
+        image: mariadb:10.5
         env:
           MYSQL_USER: 'root'
           MYSQL_ALLOW_EMPTY_PASSWORD: "true"
@@ -66,36 +66,51 @@ jobs:
           MOODLE_BRANCH: 'master'
 
       - name: Run phplint
+        if: ${{ always() }}
         run: moodle-plugin-ci phplint
 
       - name: Run phpcpd
+        if: ${{ always() }}
         run: moodle-plugin-ci phpcpd || true
 
       - name: Run phpmd
+        if: ${{ always() }}
         run: moodle-plugin-ci phpmd
 
       - name: Run codechecker
+        if: ${{ always() }}
         run: moodle-plugin-ci codechecker
 
       - name: Run validate
+        if: ${{ always() }}
         run: moodle-plugin-ci validate
 
       - name: Run savepoints
+        if: ${{ always() }}
         run: moodle-plugin-ci savepoints
 
       - name: Run mustache
+        if: ${{ always() }}
         run: moodle-plugin-ci phpcpd || true
         env:
           MUSTACHE_IGNORE_NAMES: mobile_teacher_form.mustache
 
       - name: Run grunt
+        if: ${{ always() }}
         run: moodle-plugin-ci grunt
 
       - name: Run phpdoc
+        if: ${{ always() }}
         run: moodle-plugin-ci phpdoc
 
       - name: Run phpunit
-        run: moodle-plugin-ci phpunit
+        if: ${{ always() }}
+        run: | 
+             moodle-plugin-ci phpunit
+             cd moodle
+             vendor/bin/phpunit --fail-on-risky --disallow-test-output --filter tool_dataprivacy_metadata_registry_testcase
+             vendor/bin/phpunit --fail-on-risky --disallow-test-output --testsuite core_privacy_testsuite --filter provider_testcase 
 
       - name: Run behat
+        if: ${{ always() }}
         run: moodle-plugin-ci behat --profile chrome
