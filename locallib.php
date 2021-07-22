@@ -1205,7 +1205,6 @@ function attendance_get_coursemodulenames($id) {
             $automarkcmoptions[$coursemodulename->id] = format_string($coursemodulename->name);
         }
     }
-
     return $automarkcmoptions;
 }
 
