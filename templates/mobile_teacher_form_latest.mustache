@@ -52,54 +52,53 @@
     <%#showmessage%>
         <%#messages%>
             <span class="messages">
-                <ion-item>
-                    {{ 'plugin.mod_attendance.<% string %>' | translate }}
+                <ion-item class="ion-text-wrap">
+                    <ion-label>{{ 'plugin.mod_attendance.<% string %>' | translate }}</ion-label>
                 </ion-item>
             </span>
         <%/messages%>
     <%/showmessage%>
     <span class="attendance_selectall">
-                <ion-item>
-                    {{ 'plugin.mod_attendance.setallstatuses' | translate }}
-                </ion-item>
-    <ion-list radio-group>
+        <ion-item class="ion-text-wrap">
+            <ion-label>{{ 'plugin.mod_attendance.setallstatuses' | translate }}</ion-label>
+        </ion-item>
+        <ion-radio-group [(ngModel)]="CONTENT_OTHERDATA.statusall" (ionChange)="<% selectall %>">
         <%#statuses%>
 
-        <span class="radiolabel">
-                <ion-item>
-                    <ion-label><% acronym %></ion-label>
-                    <ion-radio (ionSelect)="<% selectall %>" value="<% stid %>"></ion-radio>
-                </ion-item>
-            </span>
-        <%/statuses%>
-    </ion-list>
-    </span>
-    <%#users%>
-    <span class="attendance_user_row">
-    <!-- User and status of the submission. -->
-    <span ion-item text-wrap title="<% fullname %>">
-        <ion-avatar item-start>
-            <img src="<% profileimageurl %>" core-external-content role="presentation" onError="this.src='assets/img/user-avatar.png'">
-        </ion-avatar>
-        <h2><% fullname %></h2>
-        <ng-container *ngTemplateOutlet="submissionStatus"></ng-container>
-    </span>
-    <ion-list radio-group [(ngModel)]="CONTENT_OTHERDATA.status<% userid %>">
-        <%#statuses%>
-        <span class="radiolabel">
-                <ion-item>
+            <span class="radiolabel">
+                <ion-item class="ion-text-wrap">
                     <ion-label><% acronym %></ion-label>
                     <ion-radio value="<% stid %>"></ion-radio>
                 </ion-item>
             </span>
         <%/statuses%>
-    </ion-list>
+        </ion-radio-group>
+    </span>
+    <%#users%>
+    <span class="attendance_user_row">
+    <!-- User and status of the submission. -->
+    <ion-item class="ion-text-wrap" title="<% fullname %>">
+        <ion-avatar slot="start">
+            <img src="<% profileimageurl %>" core-external-content role="presentation" onError="this.src='assets/img/user-avatar.png'">
+        </ion-avatar>
+        <ion-label>
+            <h2><% fullname %></h2>
+        </ion-label>
+    </ion-item>
+    <ion-radio-group [(ngModel)]="CONTENT_OTHERDATA.status<% userid %>">
+        <%#statuses%>
+        <span class="radiolabel">
+            <ion-item class="ion-text-wrap">
+                <ion-label><% acronym %></ion-label>
+                <ion-radio value="<% stid %>"></ion-radio>
+            </ion-item>
+        </span>
+        <%/statuses%>
+    </ion-radio-group>
     </span>
     <%/users%>
-    <ion-item>
-        <button ion-button core-site-plugins-new-content component="mod_attendance" method="mobile_view_activity" [args]="{cmid: <% cmid %>, courseid: <% courseid %>, sessid: <% sessid %><% btnargs %>}">
-            {{ 'plugin.mod_attendance.submitattendance' | translate }}
-        </button>
-    </ion-item>
+    <ion-button class="ion-margin" expand="block" core-site-plugins-new-content component="mod_attendance" method="mobile_view_activity" [args]="{cmid: <% cmid %>, courseid: <% courseid %>, sessid: <% sessid %><% btnargs %>}">
+        {{ 'plugin.mod_attendance.submitattendance' | translate }}
+    </ion-button>
 
 </div>
