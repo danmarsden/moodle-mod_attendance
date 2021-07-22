@@ -107,7 +107,7 @@ class auto_mark extends \core\task\scheduled_task {
 
                 $att = new \mod_attendance_structure($cacheatt[$session->attendanceid],
                 $cachecm[$session->attendanceid], $cachecourse[$courseid], $context, $pageparams);
-            
+
                 if ($session->automark == 1) {
                     $userfirstacess = array();
                     // If set to do full automarking, get all users that have accessed course during session open.
@@ -143,7 +143,7 @@ class auto_mark extends \core\task\scheduled_task {
                     }
                     $logusers->close();
 
-                } elseif ($session->automark == 3) {
+                } else if ($session->automark == 3) {
 
                     $completedusers = array();
                     $newlog = new \stdClass();
@@ -158,7 +158,7 @@ class auto_mark extends \core\task\scheduled_task {
                                                         'coursemoduleid' => $session->automarkcmid,
                                                         'completionstate' => 1
                                                         ));
-                                                        
+
                     if (!empty($completedusers)) {
 
                         // Get automark status the users and update the attendance log.
@@ -171,7 +171,7 @@ class auto_mark extends \core\task\scheduled_task {
                                 $DB->insert_record('attendance_log', $newlog);
                             }
                         }
-                    } 
+                    }
                 }
 
                 // Get all unmarked students.

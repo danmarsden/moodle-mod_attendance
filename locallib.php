@@ -783,7 +783,6 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
                     $sess->rotateqrcode = 0;
                     $sess->rotateqrcodesecret = '';
 
-
                     if (!empty($formdata->usedefaultsubnet)) {
                         $sess->subnet = $att->subnet;
                     } else {
@@ -792,7 +791,7 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
                     $sess->automark = $formdata->automark;
                     $sess->automarkcompleted = 0;
 
-                    if(!empty($formdata->automarkcmid)){
+                    if (!empty($formdata->automarkcmid)) {
                         $sess->automarkcmid = $formdata->automarkcmid;
                     } else {
                         $sess->automarkcmid = 0;
@@ -862,7 +861,7 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
         $sess->automark = 0;
         $sess->automarkcompleted = 0;
 
-        if(!empty($formdata->automarkcmid)){
+        if (!empty($formdata->automarkcmid)) {
             $sess->automarkcmid = $formdata->automarkcmid;
         } else {
             $sess->automarkcmid = 0;
@@ -1167,7 +1166,7 @@ function attendance_session_get_highest_status(mod_attendance_structure $att, $a
  */
 function attendance_get_automarkoptions() {
 
-    $options = array();    
+    $options = array();
 
     $options[ATTENDANCE_AUTOMARK_DISABLED] = get_string('noautomark', 'attendance');
     if (strpos(get_config('tool_log', 'enabled_stores'), 'logstore_standard') !== false) {
@@ -1191,7 +1190,7 @@ function attendance_get_coursemodulenames($id) {
 
     $sql = "SELECT DISTINCT cm.id, cm.module, m.name
             FROM {course_modules} cm
-            JOIN {modules} m ON m.id = cm.module   
+            JOIN {modules} m ON m.id = cm.module
             WHERE cm.course = :cmcourse
             AND cm.visible = :cmvisible
             AND cm.completion = :cmcompletion";
@@ -1201,8 +1200,8 @@ function attendance_get_coursemodulenames($id) {
                                                 'cmvisible' => 1,
                                                 'cmcompletion' => 1
                                             ));
-    if($coursemodulenames){
-        foreach($coursemodulenames as $coursemodulename) {
+    if ($coursemodulenames) {
+        foreach ($coursemodulenames as $coursemodulename) {
             $automarkcmoptions[$coursemodulename->id] = format_string($coursemodulename->name);
         }
     }
