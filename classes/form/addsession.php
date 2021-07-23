@@ -46,7 +46,7 @@ class addsession extends moodleform {
      */
     public function definition() {
 
-        global $CFG, $USER;
+        global $CFG, $USER, $DB;
         $mform    =& $this->_form;
 
         $course        = $this->_customdata['course'];
@@ -215,6 +215,12 @@ class addsession extends moodleform {
         $mform->addHelpButton('automark', 'automark', 'attendance');
         $mform->setDefault('automark', $this->_customdata['att']->automark);
 
+        $automarkcmoptions = attendance_get_coursemodulenames($course->id);
+
+        $mform->addElement('select', 'automarkcmid', get_string('selectactivity', 'attendance'), $automarkcmoptions);
+        $mform->setType('automarkcmid', PARAM_INT);
+        $mform->hideif('automarkcmid', 'automark', 'neq', '3');
+
         if (!empty($studentscanmark)) {
             $mgroup = array();
 
@@ -240,6 +246,7 @@ class addsession extends moodleform {
             $mform->addElement('checkbox', 'autoassignstatus', '', get_string('autoassignstatus', 'attendance'));
             $mform->addHelpButton('autoassignstatus', 'autoassignstatus', 'attendance');
             $mform->hideif('autoassignstatus', 'studentscanmark', 'notchecked');
+
             if (isset($pluginconfig->autoassignstatus)) {
                 $mform->setDefault('autoassignstatus', $pluginconfig->autoassignstatus);
             }

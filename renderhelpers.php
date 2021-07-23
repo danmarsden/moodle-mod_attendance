@@ -68,7 +68,8 @@ class user_sessions_cells_generator {
                     $this->construct_existing_status_cell($this->reportdata->statuses[$statusid]->acronym .
                                 " ({$points}/{$maxpoints})");
                 } else {
-                    if (!empty($this->reportdata->allstatuses[$statusid] && isset($this->reportdata->allstatuses[$statusid]->acronym))) {
+                    if (!empty($this->reportdata->allstatuses[$statusid] &&
+                        isset($this->reportdata->allstatuses[$statusid]->acronym))) {
                         $statusac = $this->reportdata->allstatuses[$statusid]->acronym;
                     } else {
                         $statusac = get_string('unknownstatus', 'mod_attendance', $statusid);
