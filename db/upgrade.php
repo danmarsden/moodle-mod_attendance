@@ -654,7 +654,7 @@ function xmldb_attendance_upgrade($oldversion=0) {
 
         // Changing precision of field statusset on table attendance_log to (1333).
         $table = new xmldb_table('attendance_sessions');
-        $field = new xmldb_field('automarkcmid', XMLDB_TYPE_CHAR, '10', null, null, null, null, 'rotateqrcodesecret');
+        $field = new xmldb_field('automarkcmid', XMLDB_TYPE_CHAR, '10', null, false, null, null, 'rotateqrcodesecret');
 
         // Launch change of precision for field statusset.
         if (!$dbman->field_exists($table, $field)) {

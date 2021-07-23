@@ -534,6 +534,9 @@ class mod_attendance_structure {
             $sess->rotateqrcode = 0;
             $sess->rotateqrcodesecret = '';
         }
+        if (!isset($sess->automarkcmid)) {
+            $sess->automarkcmid = null;
+        }
         $event->add_record_snapshot('attendance_sessions', $sess);
         $event->trigger();
 
