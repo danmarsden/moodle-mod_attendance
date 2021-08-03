@@ -57,6 +57,7 @@ $string['attendance:viewreports'] = 'Viewing Reports';
 $string['attendance:viewsummaryreports'] = 'View course summary reports';
 $string['attendance:warningemails'] = 'Can be subscribed to emails with absentee users';
 $string['attendance_already_submitted'] = 'Your attendance has already been set.';
+$string['attendance_bad_group'] = 'You tried to set attendance at an event that is for a group you are not a member of.';
 $string['attendance_no_status'] = 'No valid status was available - you may be too late to record attendance.';
 $string['attendancedata'] = 'Attendance data';
 $string['attendancefile'] = 'Attendance file (csv format)';
