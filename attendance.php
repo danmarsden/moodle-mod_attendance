@@ -58,9 +58,22 @@ if ($attforsession->rotateqrcode == 1) {
         }
     } else {
         // Check password.
-        $sql = 'SELECT * FROM {attendance_rotate_passwords}'.
-            ' WHERE attendanceid = ? AND expirytime > ? ORDER BY expirytime ASC';
-        $qrpassdatabase = $DB->get_records_sql($sql, ['attendanceid' => $id, time() - $attconfig->rotateqrcodeexpirymargin], 0, 2);
+        $sql = "SELECT atrp.* 
+                  FROM {attendance_rotate_passwords} atrp
+                  JOIN {attendance_sessions} ats
+                    ON atrp.attendanceid = ats.id
+             LEFT JOIN {groups_members} gm
+                    ON (ats.groupid = gm.groupid AND gm.userid = :uid)
+                 WHERE (gm.userid IS NOT NULL OR ats.groupid = 0)
+                   AND atrp.attendanceid = :sessid
+                   AND atrp.expirytime > :expiry
+              ORDER BY atrp.expirytime ASC";
+        $params = array(
+            'uid'    => $USER->id,
+            'sessid' => $id,
+            'expiry' => time() - $attconfig->rotateqrcodeexpirymargin,
+        );
+        $qrpassdatabase = $DB->get_records_sql($sql, $params, 0, 2);
 
         foreach ($qrpassdatabase as $qrpasselement) {
             if ($qrpass == $qrpasselement->password) {
@@ -119,36 +132,47 @@ if ($attforsession->autoassignstatus && (empty($attforsession->studentpassword))
 }
 
 if (!empty($qrpass) && !empty($attforsession->autoassignstatus)) {
-    $fromform = new stdClass();
-
-    // Check if password required and if set correctly.
-    if (!empty($attforsession->studentpassword) &&
-        $attforsession->studentpassword !== $qrpass) {
-
-        $url = new moodle_url('/mod/attendance/attendance.php', array('sessid' => $id, 'sesskey' => sesskey()));
-        redirect($url, get_string('incorrectpassword', 'mod_attendance'), null, \core\output\notification::NOTIFY_ERROR);
+    if ($attforsession->groupid != 0) {
+        $sessionusergroups = $DB->get_records('groups_members', array('groupid' => $attforsession->groupid, 'userid' => $USER->id), 'userid');
     }
-
-    // Set the password and session id in the form, because they are saved in the attendance log.
-    $fromform->studentpassword = $qrpass;
-    $fromform->sessid = $attforsession->id;
-
-    $fromform->status = attendance_session_get_highest_status($att, $attforsession);
-    if (empty($fromform->status)) {
-        $url = new moodle_url('/mod/attendance/view.php', array('id' => $cm->id));
-        throw new moodle_exception('attendance_no_status', 'mod_attendance', $url);
+    else {
+        $sessionusergroups = array(1);
     }
+    if (count($sessionusergroups) != 0) {
+        $fromform = new stdClass();
 
-    if (!empty($fromform->status)) {
-        $success = $att->take_from_student($fromform);
+        // Check if password required and if set correctly.
+        if (!empty($attforsession->studentpassword) &&
+            $attforsession->studentpassword !== $qrpass) {
 
-        $url = new moodle_url('/mod/attendance/view.php', array('id' => $cm->id));
-        if ($success) {
-            // Redirect back to the view page.
-            redirect($url, get_string('studentmarked', 'attendance'));
-        } else {
-            throw new moodle_exception('attendance_already_submitted', 'mod_attendance', $url);
+            $url = new moodle_url('/mod/attendance/attendance.php', array('sessid' => $id, 'sesskey' => sesskey()));
+            redirect($url, get_string('incorrectpassword', 'mod_attendance'), null, \core\output\notification::NOTIFY_ERROR);
         }
+
+        // Set the password and session id in the form, because they are saved in the attendance log.
+        $fromform->studentpassword = $qrpass;
+        $fromform->sessid = $attforsession->id;
+
+        $fromform->status = attendance_session_get_highest_status($att, $attforsession);
+        if (empty($fromform->status)) {
+            $url = new moodle_url('/mod/attendance/view.php', array('id' => $cm->id));
+            throw new moodle_exception('attendance_no_status', 'mod_attendance', $url);
+        }
+
+        if (!empty($fromform->status)) {
+            $success = $att->take_from_student($fromform);
+
+            $url = new moodle_url('/mod/attendance/view.php', array('id' => $cm->id));
+            if ($success) {
+                // Redirect back to the view page.
+                redirect($url, get_string('studentmarked', 'attendance'));
+            } else {
+                throw new moodle_exception('attendance_already_submitted', 'mod_attendance', $url);
+            }
+        }
+    }
+    else {
+        throw new moodle_exception('attendance_bad_group', 'mod_attendance', $url);
     }
 }
 
