@@ -9,7 +9,7 @@ name: Releasing in the Plugins directory
 on:
   push:
     paths:
-      - '/version.php'
+      - 'version.php'
 
 defaults:
   run:
