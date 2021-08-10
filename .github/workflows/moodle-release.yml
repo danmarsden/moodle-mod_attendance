@@ -29,19 +29,11 @@ jobs:
         ports:
           - 5432:5432
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 3
-      mariadb:
-        image: mariadb:10.5
-        env:
-          MYSQL_USER: 'root'
-          MYSQL_ALLOW_EMPTY_PASSWORD: "true"
-        ports:
-          - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval 10s --health-timeout 5s --health-retries 3
     strategy:
       fail-fast: true
       matrix:
-        php-versions: ['7.3', '7.4']
-        database: ['pgsql', 'mariadb']
+        php-versions: ['7.4']
+        database: ['pgsql']
     steps:
       - name: Check out repository code
         uses: actions/checkout@v2
