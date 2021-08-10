@@ -16,19 +16,118 @@ defaults:
     shell: bash
 
 jobs:
-  release-at-moodle-org:
+  setup:
     runs-on: ubuntu-latest
-    env:
-      PLUGIN: mod_attendance
-      BRANCH: MOODLE_311_STABLE
-      CURL: curl -s
-      ENDPOINT: https://moodle.org/webservice/rest/server.php
-      TOKEN: ${{ secrets.MOODLE_ORG_TOKEN }}
-      FUNCTION: local_plugins_add_version
 
+    services:
+      postgres:
+        image: postgres:10
+        env:
+          POSTGRES_USER: 'postgres'
+          POSTGRES_HOST_AUTH_METHOD: 'trust'
+        # Health check to wait for postgres to start.
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 3
+      mariadb:
+        image: mariadb:10.5
+        env:
+          MYSQL_USER: 'root'
+          MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval 10s --health-timeout 5s --health-retries 3
+    strategy:
+      fail-fast: true
+      matrix:
+        php-versions: ['7.3', '7.4']
+        database: ['pgsql', 'mariadb']
     steps:
-      - name: Call the service function
+      - name: Check out repository code
+        uses: actions/checkout@v2
+        with:
+          # Clone in plugin subdir, so we can setup CI in default directory.
+          path: plugin
+
+      - name: Install node
+        uses: actions/setup-node@v1
+        with:
+          # TODO: Check if we can support .nvmrc
+          node-version: '14.15.0'
+
+      - name: Setup PHP environment
+        uses: shivammathur/setup-php@v2 #https://github.com/shivammathur/setup-php
+        with:
+          php-version: ${{ matrix.php-versions }}
+          extensions: mbstring, pgsql, mysqli
+          tools: phpunit
+
+      - name: Deploy moodle-plugin-ci
+        run: |
+          composer create-project -n --no-dev --prefer-dist moodlehq/moodle-plugin-ci ci ^3
+          # Add dirs to $PATH
+          echo $(cd ci/bin; pwd) >> $GITHUB_PATH
+          echo $(cd ci/vendor/bin; pwd) >> $GITHUB_PATH
+          # PHPUnit depends on en_AU.UTF-8 locale
+          sudo locale-gen en_AU.UTF-8
+      - name: Install moodle-plugin-ci
+        # Need explicit IP to stop mysql client fail on attempt to use unix socket.
+        run: moodle-plugin-ci install -vvv --plugin ./plugin --db-host=127.0.0.1
+        env:
+          DB: ${{ matrix.database }}
+          # TODO: Omitted MOODLE_BRANCH results in regex failure, investigate.
+          MOODLE_BRANCH: 'master'
+
+      - name: Run phplint
+        run: moodle-plugin-ci phplint
+
+      - name: Run phpcpd
+        run: moodle-plugin-ci phpcpd || true
+
+      - name: Run phpmd
+        run: moodle-plugin-ci phpmd
+
+      - name: Run codechecker
+        run: moodle-plugin-ci codechecker
+
+      - name: Run validate
+        run: moodle-plugin-ci validate
+
+      - name: Run savepoints
+        run: moodle-plugin-ci savepoints
+
+      - name: Run mustache
+        run: moodle-plugin-ci phpcpd || true
+        env:
+          MUSTACHE_IGNORE_NAMES: mobile_teacher_form.mustache
+
+      - name: Run grunt
+        run: moodle-plugin-ci grunt
+
+      - name: Run phpdoc
+        run: moodle-plugin-ci phpdoc
+
+      - name: Run phpunit
+        run: |
+          moodle-plugin-ci phpunit
+          cd moodle
+          vendor/bin/phpunit --fail-on-risky --disallow-test-output --filter tool_dataprivacy_metadata_registry_testcase
+          vendor/bin/phpunit --fail-on-risky --disallow-test-output --testsuite core_privacy_testsuite --filter provider_testcase
+
+      - name: Run behat
+        run: moodle-plugin-ci behat --profile chrome
+
+
+      - name: Release at Moodle.org by calling the service function
         id: add-version
+        env:
+          PLUGIN: mod_attendance
+          BRANCH: MOODLE_311_STABLE
+          CURL: curl -s
+          ENDPOINT: https://moodle.org/webservice/rest/server.php
+          TOKEN: ${{ secrets.MOODLE_ORG_TOKEN }}
+          FUNCTION: local_plugins_add_version
+
         run: |
           ZIPURL="https://github.com/danmarsden/moodle-mod_attendance/archive/refs/heads/{BRANCH}.zip"
           RESPONSE=$(${CURL} ${ENDPOINT} --data-urlencode "wstoken=${TOKEN}" \
