@@ -805,7 +805,7 @@ class mod_attendance_structure {
         global $DB;
 
         $fields = array('username' , 'idnumber' , 'institution' , 'department', 'city', 'country');
-        $userf = \core_user\fields::for_identity($this->context)->with_userpic()->including(...$fields);
+        $userf = \core_user\fields::for_identity($this->context, false)->with_userpic()->including(...$fields);
         $userfields = $userf->get_sql('u', false, '', 'id', false)->selects;
 
         if (empty($this->pageparams->sort)) {

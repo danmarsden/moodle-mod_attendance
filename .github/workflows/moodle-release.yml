@@ -121,7 +121,7 @@ jobs:
           FUNCTION: local_plugins_add_version
 
         run: |
-          ZIPURL="https://github.com/danmarsden/moodle-mod_attendance/archive/refs/heads/{BRANCH}.zip"
+          ZIPURL="https://github.com/danmarsden/moodle-mod_attendance/archive/refs/heads/${BRANCH}.zip"
           RESPONSE=$(${CURL} ${ENDPOINT} --data-urlencode "wstoken=${TOKEN}" \
                                          --data-urlencode "wsfunction=${FUNCTION}" \
                                          --data-urlencode "moodlewsrestformat=json" \
