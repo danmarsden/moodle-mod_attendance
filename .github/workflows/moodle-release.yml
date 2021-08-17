@@ -130,7 +130,7 @@ jobs:
                                          --data-urlencode "vcssystem=git" \
                                          --data-urlencode "vcsrepositoryurl=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" \
                                          --data-urlencode "vcstag=${TAGNAME}" \
-                                         --data-urlencode "changelogurl=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commits/{BRANCH}" \
+                                         --data-urlencode "changelogurl=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commits/${BRANCH}" \
                                          --data-urlencode "altdownloadurl=${ZIPURL}")
           echo "::set-output name=response::${RESPONSE}"
       - name: Evaluate the response
