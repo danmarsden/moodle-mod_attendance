@@ -1184,25 +1184,18 @@ function attendance_get_automarkoptions() {
  * @return array $automarkcmoptions - list of course module names associated to this course.
  */
 function attendance_get_coursemodulenames($id) {
-
-    global $DB;
+    $coursecontext = context_course::instance($id);
+    $modinfo = get_fast_modinfo($coursecontext->instanceid);
     $automarkcmoptions = [];
-
-    $sql = "SELECT DISTINCT cm.id, cm.module, m.name
-            FROM {course_modules} cm
-            JOIN {modules} m ON m.id = cm.module
-            WHERE cm.course = :cmcourse
-            AND cm.visible = :cmvisible
-            AND cm.completion = :cmcompletion";
-
-    $coursemodulenames = $DB->get_records_sql($sql, array(
-                                                'cmcourse' => $id,
-                                                'cmvisible' => 1,
-                                                'cmcompletion' => 1
-                                            ));
-    if ($coursemodulenames) {
-        foreach ($coursemodulenames as $coursemodulename) {
-            $automarkcmoptions[$coursemodulename->id] = format_string($coursemodulename->name);
+    foreach ($modinfo->get_instances() as $instances) {
+        foreach ($instances as $cm) {
+            if (!$cm->uservisible) {
+                continue;
+            }
+            if (empty($cm->completion)) {
+                continue;
+            }
+            $automarkcmoptions[$cm->id] = shorten_text($cm->get_formatted_name()). ' ';
         }
     }
     return $automarkcmoptions;
