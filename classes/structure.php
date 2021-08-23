@@ -619,6 +619,10 @@ class mod_attendance_structure {
             $sess->preventsharediptime = $formdata->preventsharediptime;
         }
 
+        if (!empty($formdata->automarkcmid)) {
+            $sess->automarkcmid = $formdata->automarkcmid;
+        }
+
         $sess->timemodified = time();
         $DB->update_record('attendance_sessions', $sess);
 

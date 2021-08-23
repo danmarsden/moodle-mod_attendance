@@ -650,7 +650,7 @@ function xmldb_attendance_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2021050700, 'attendance');
     }
 
-    if ($oldversion < 2021060700) {
+    if ($oldversion < 2021082400) {
 
         // Changing precision of field statusset on table attendance_log to (1333).
         $table = new xmldb_table('attendance_sessions');
@@ -662,7 +662,7 @@ function xmldb_attendance_upgrade($oldversion=0) {
         }
 
         // Attendance savepoint reached.
-        upgrade_mod_savepoint(true, 2021060700, 'attendance');
+        upgrade_mod_savepoint(true, 2021082400, 'attendance');
     }
 
     return $result;

@@ -80,6 +80,7 @@ class updatesession extends \moodleform {
             'preventsharediptime' => $sess->preventsharediptime,
             'includeqrcode' => $sess->includeqrcode,
             'rotateqrcode' => $sess->rotateqrcode,
+            'automarkcmid' => $sess->automarkcmid
         );
         if ($sess->subnet == $attendancesubnet) {
             $data['usedefaultsubnet'] = 1;
