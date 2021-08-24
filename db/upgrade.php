@@ -665,5 +665,31 @@ function xmldb_attendance_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2021082400, 'attendance');
     }
 
+    if ($oldversion < 2021082401) {
+
+        // Changing the default of field automarkcmid on table attendance_sessions to 0.
+        $table = new xmldb_table('attendance_sessions');
+        $field = new xmldb_field('automarkcmid', XMLDB_TYPE_INTEGER, '10', null, null, null, '0', 'rotateqrcodesecret');
+
+        // Launch change of default for field automarkcmid.
+        $dbman->change_field_default($table, $field);
+
+        // Attendance savepoint reached.
+        upgrade_mod_savepoint(true, 2021082401, 'attendance');
+    }
+
+    if ($oldversion < 2021082402) {
+
+        // Changing the default of field ipaddress on table attendance_log to .
+        $table = new xmldb_table('attendance_log');
+        $field = new xmldb_field('ipaddress', XMLDB_TYPE_CHAR, '45', null, null, null, '', 'remarks');
+
+        // Launch change of default for field ipaddress.
+        $dbman->change_field_default($table, $field);
+
+        // Attendance savepoint reached.
+        upgrade_mod_savepoint(true, 2021082402, 'attendance');
+    }
+
     return $result;
 }
