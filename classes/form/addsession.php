@@ -207,19 +207,20 @@ class addsession extends moodleform {
             $mform->addElement('hidden', 'studentscanmark', '0');
             $mform->settype('studentscanmark', PARAM_INT);
         }
+        if ($DB->record_exists('attendance_statuses', ['attendanceid' => $this->_customdata['att']->id, 'setunmarked' => 1])) {
+            $options = attendance_get_automarkoptions();
 
-        $options = attendance_get_automarkoptions();
+            $mform->addElement('select', 'automark', get_string('automark', 'attendance'), $options);
+            $mform->setType('automark', PARAM_INT);
+            $mform->addHelpButton('automark', 'automark', 'attendance');
+            $mform->setDefault('automark', $this->_customdata['att']->automark);
 
-        $mform->addElement('select', 'automark', get_string('automark', 'attendance'), $options);
-        $mform->setType('automark', PARAM_INT);
-        $mform->addHelpButton('automark', 'automark', 'attendance');
-        $mform->setDefault('automark', $this->_customdata['att']->automark);
+            $automarkcmoptions = attendance_get_coursemodulenames($course->id);
 
-        $automarkcmoptions = attendance_get_coursemodulenames($course->id);
-
-        $mform->addElement('select', 'automarkcmid', get_string('selectactivity', 'attendance'), $automarkcmoptions);
-        $mform->setType('automarkcmid', PARAM_INT);
-        $mform->hideif('automarkcmid', 'automark', 'neq', '3');
+            $mform->addElement('select', 'automarkcmid', get_string('selectactivity', 'attendance'), $automarkcmoptions);
+            $mform->setType('automarkcmid', PARAM_INT);
+            $mform->hideif('automarkcmid', 'automark', 'neq', '3');
+        }
 
         if (!empty($studentscanmark)) {
             $mgroup = array();
