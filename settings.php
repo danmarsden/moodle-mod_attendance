@@ -106,6 +106,10 @@ if ($ADMIN->fulltree) {
         get_string('enablewarnings', 'attendance'),
         get_string('enablewarnings_desc', 'attendance'), 0));
 
+    $settings->add(new admin_setting_configcheckbox('attendance/automark_useempty',
+        get_string('automarkuseempty', 'attendance'),
+        get_string('automarkuseempty_desc', 'attendance'), 1));
+
     $fields = array('id' => get_string('studentid', 'attendance'));
     $customfields = profile_get_custom_fields();
     foreach ($customfields as $field) {

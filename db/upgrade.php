@@ -691,5 +691,15 @@ function xmldb_attendance_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2021082402, 'attendance');
     }
 
+    if ($oldversion < 2021082600) {
+        // Check if auto-marking in use, and if so, set automark_useempty = 0 to prevent changes in existing behaviour.
+        if ($DB->record_exists_select('attendance_sessions', 'automark > 0')) {
+            set_config('automark_useempty', '0', 'attendance');
+        }
+
+        // Attendance savepoint reached.
+        upgrade_mod_savepoint(true, 2021082600, 'attendance');
+    }
+
     return $result;
 }
