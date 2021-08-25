@@ -49,7 +49,7 @@ class auto_mark extends \core\task\scheduled_task {
      * Execte the task.
      */
     public function execute() {
-        global $DB;
+        global $DB, $CFG;
         // Create some cache vars - might be nice to restructure this and make a smaller number of sql calls.
         $cachecm = array();
         $cacheatt = array();
@@ -79,7 +79,9 @@ class auto_mark extends \core\task\scheduled_task {
                           'setunmarked' => 1, 'deleted' => 0));
 
                 if (empty($setunmarked)) {
-                    mtrace("No unmarked status configured for session id: ".$session->id);
+                    $coursemodule = get_coursemodule_from_instance('attendance', $session->attendanceid);
+                    $url = $CFG->wwwroot.'/mod/attendance/preferences.php?id='.$coursemodule->id;
+                    mtrace("No unmarked status configured for session id: ".$session->id. " to fix, go to: ".$url);
                     continue;
                 }
 
