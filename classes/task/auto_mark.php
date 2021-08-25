@@ -144,8 +144,6 @@ class auto_mark extends \core\task\scheduled_task {
                     $logusers->close();
 
                 } else if ($session->automark == 3) {
-
-                    $completedusers = array();
                     $newlog = new \stdClass();
                     $newlog->timetaken = $now;
                     $newlog->takenby = 0;
@@ -154,22 +152,19 @@ class auto_mark extends \core\task\scheduled_task {
                     $newlog->statusset = implode(',', array_keys( (array)$att->get_statuses()));
 
                     // Get users who have completed the course in this session.
-                    $completedusers[] = $DB->get_record('course_modules_completion', array(
-                                                        'coursemoduleid' => $session->automarkcmid,
-                                                        'completionstate' => 1
-                                                        ));
+                    $completedusers = $DB->get_records_select('course_modules_completion',
+                        'coursemoduleid = ? AND completionstate > 0', [$session->automarkcmid]);
 
-                    if (!empty($completedusers)) {
-
-                        // Get automark status the users and update the attendance log.
-                        foreach ($completedusers as $completionuser) {
-
-                            $newlog->statusid = $att->get_automark_status($completionuser->timemodified, $session->id);
-
-                            if (!empty($newlog->statusid)) {
-                                $newlog->studentid = $completionuser->userid;
-                                $DB->insert_record('attendance_log', $newlog);
-                            }
+                    // Get automark status the users and update the attendance log.
+                    foreach ($completedusers as $completionuser) {
+                        if (empty($completionuser->timemodified) || (empty($completionuser->userid))) {
+                            // Time modified or userid not set - we can't calculate for this record.
+                            continue;
+                        }
+                        $newlog->studentid = $completionuser->userid;
+                        $newlog->statusid = $att->get_automark_status($completionuser->timemodified, $session->id);
+                        if (!empty($newlog->statusid)) {
+                            $DB->insert_record('attendance_log', $newlog);
                         }
                     }
                 }
