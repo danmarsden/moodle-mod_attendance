@@ -26,6 +26,7 @@ namespace mod_attendance\task;
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/mod/attendance/locallib.php');
+require_once($CFG->libdir . '/grouplib.php');
 /**
  * get_scores class, used to get scores for submitted files.
  *
@@ -146,6 +147,9 @@ class auto_mark extends \core\task\scheduled_task {
                     $logusers->close();
 
                 } else if ($session->automark == 3) {
+                    $existinglog = $DB->get_records_menu('attendance_log',
+                        ['sessionid' => $session->id], '', 'studentid, statusid');
+
                     $newlog = new \stdClass();
                     $newlog->timetaken = $now;
                     $newlog->takenby = 0;
@@ -161,6 +165,18 @@ class auto_mark extends \core\task\scheduled_task {
                     foreach ($completedusers as $completionuser) {
                         if (empty($completionuser->timemodified) || (empty($completionuser->userid))) {
                             // Time modified or userid not set - we can't calculate for this record.
+                            continue;
+                        }
+                        if (!empty($existinglog[$completionuser->userid])) {
+                            // Status already set for this user.
+                            continue;
+                        }
+                        if (!has_capability('mod/attendance:canbelisted', $context, $completionuser->userid)) {
+                            // This user can't be listed in this attendance - skip them.
+                            continue;
+                        }
+                        if (!empty($session->groupid) && !groups_is_member($session->groupid, $completionuser->userid)) {
+                            // This is a group session, and the user is not a member of the group.
                             continue;
                         }
                         $newlog->studentid = $completionuser->userid;
