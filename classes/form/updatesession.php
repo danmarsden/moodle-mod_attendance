@@ -154,6 +154,9 @@ class updatesession extends \moodleform {
         $mform->addElement('select', 'automarkcmid', get_string('selectactivity', 'attendance'), $automarkcmoptions2);
         $mform->setType('automarkcmid', PARAM_INT);
         $mform->hideif('automarkcmid', 'automark', 'neq', '3');
+        if (!empty($sess->automarkcompleted)) {
+            $mform->hardFreeze('automarkcmid,automark,studentscanmark');
+        }
 
         if (!empty($studentscanmark)) {
             $mform->addElement('text', 'studentpassword', get_string('studentpassword', 'attendance'));
