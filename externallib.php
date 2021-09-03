@@ -563,31 +563,7 @@ class mod_attendance_external extends external_api {
      * @return external_multiple_structure
      */
     public static function get_sessions_returns() {
-        $statuses = array('id' => new external_value(PARAM_INT, 'Status id.'),
-                          'attendanceid' => new external_value(PARAM_INT, 'Attendance id.'),
-                          'acronym' => new external_value(PARAM_TEXT, 'Status acronym.'),
-                          'description' => new external_value(PARAM_TEXT, 'Status description.'),
-                          'grade' => new external_value(PARAM_FLOAT, 'Status grade.'),
-                          'visible' => new external_value(PARAM_INT, 'Status visibility.'),
-                          'deleted' => new external_value(PARAM_INT, 'informs if this session was deleted.'),
-                          'setnumber' => new external_value(PARAM_INT, 'Set number.'));
-
-        $users = array('id' => new external_value(PARAM_INT, 'User id.'),
-                       'firstname' => new external_value(PARAM_TEXT, 'User first name.'),
-                       'lastname' => new external_value(PARAM_TEXT, 'User last name.'));
-
-        $attendancelog = array('studentid' => new external_value(PARAM_INT, 'Student id.'),
-                                'statusid' => new external_value(PARAM_TEXT, 'Status id (last time).'),
-                                'remarks' => new external_value(PARAM_TEXT, 'Last remark.'),
-                                'id' => new external_value(PARAM_TEXT, 'log id.'));
-
-        $session = self::get_session_structure();
-        $session['courseid'] = new external_value(PARAM_INT, 'Course moodle id.');
-        $session['statuses'] = new external_multiple_structure(new external_single_structure($statuses));
-        $session['attendance_log'] = new external_multiple_structure(new external_single_structure($attendancelog));
-        $session['users'] = new external_multiple_structure(new external_single_structure($users));
-
-         return new external_multiple_structure(new external_single_structure(($session)));
+        return new external_multiple_structure(self::get_session_returns());
     }
 
     /**
