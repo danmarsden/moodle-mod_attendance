@@ -471,4 +471,40 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
         $this->assertInstanceOf('\core\event\calendar_event_created', $events[0]);
         $this->assertInstanceOf('\mod_attendance\event\session_added', $events[1]);
     }
+
+    public function test_get_sessions() {
+        $this->resetAfterTest(true);
+
+        $courseswithsessions = attendance_handler::get_courses_with_today_sessions($this->teacher->id);
+        $courseswithsessions = external_api::clean_returnvalue(mod_attendance_external::get_courses_with_today_sessions_returns(),
+            $courseswithsessions);
+
+        foreach($courseswithsessions as $course) {
+
+            $attendanceinstances = $course['attendance_instances'];
+
+            foreach($attendanceinstances as $attendanceinstance) {
+
+                $sessionsinfo = $attendanceinstance['today_sessions'];
+
+                foreach($sessionsinfo as $sessioninfo) {
+
+                    $sessions = attendance_handler::get_sessions($sessioninfo['attendanceid']);
+                    $sessions = external_api::clean_returnvalue(mod_attendance_external::get_sessions_returns(),
+                        $sessions);
+
+                    foreach($sessions as $session) {
+                        $sessiontocompareagainst = attendance_handler::get_session($session['id']);
+                        $sessiontocompareagainst = external_api::clean_returnvalue(mod_attendance_external::get_session_returns(),
+                            $sessiontocompareagainst);
+
+                        $this->assertEquals($this->attendance->id, $session['attendanceid']);
+                        $this->assertEquals($sessiontocompareagainst['id'], $session['id']);
+                        $this->assertEquals(count($session['users']), count($sessiontocompareagainst['users']));
+                    }
+                }
+            }
+        }
+        
+    }
 }
