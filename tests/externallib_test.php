@@ -479,21 +479,21 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
         $courseswithsessions = external_api::clean_returnvalue(mod_attendance_external::get_courses_with_today_sessions_returns(),
             $courseswithsessions);
 
-        foreach($courseswithsessions as $course) {
+        foreach ($courseswithsessions as $course) {
 
             $attendanceinstances = $course['attendance_instances'];
 
-            foreach($attendanceinstances as $attendanceinstance) {
+            foreach ($attendanceinstances as $attendanceinstance) {
 
                 $sessionsinfo = $attendanceinstance['today_sessions'];
 
-                foreach($sessionsinfo as $sessioninfo) {
+                foreach ($sessionsinfo as $sessioninfo) {
 
                     $sessions = attendance_handler::get_sessions($sessioninfo['attendanceid']);
                     $sessions = external_api::clean_returnvalue(mod_attendance_external::get_sessions_returns(),
                         $sessions);
 
-                    foreach($sessions as $session) {
+                    foreach ($sessions as $session) {
                         $sessiontocompareagainst = attendance_handler::get_session($session['id']);
                         $sessiontocompareagainst = external_api::clean_returnvalue(mod_attendance_external::get_session_returns(),
                             $sessiontocompareagainst);
@@ -504,7 +504,6 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
                     }
                 }
             }
-        }
-        
+        } 
     }
 }

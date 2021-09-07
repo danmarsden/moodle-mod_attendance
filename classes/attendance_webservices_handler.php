@@ -172,7 +172,7 @@ class attendance_handler {
 
         $sessionsinfo = array();
 
-        foreach($sessions as $session) {
+        foreach ($sessions as $session) {
             $sessionsinfo[$session->id] = self::get_session($session->id);
         }
 
