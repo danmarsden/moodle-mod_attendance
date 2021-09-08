@@ -504,6 +504,6 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
                     }
                 }
             }
-        } 
+        }
     }
 }

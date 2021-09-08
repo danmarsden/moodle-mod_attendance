@@ -576,7 +576,7 @@ class mod_attendance_external extends external_api {
 
          $params = self::validate_parameters(self::get_sessions_parameters(), array(
             'attendanceid' => $attendanceid,
-        ));
+         ));
 
         return attendance_handler::get_sessions($params['attendanceid']);
     }
