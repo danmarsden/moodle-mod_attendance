@@ -1,10 +1,11 @@
-@mod @mod_attendance @javascript
+@mod @mod_attendance
 Feature: Test the various new features in the attendance module
 
   Background:
     Given the following "courses" exist:
       | fullname | shortname | summary                             | category | timecreated   | timemodified  |
       | Course 1 | C1        | Prove the attendance activity works | 0        | ##yesterday## | ##yesterday## |
+      | Course 2 | C2        | Prove the attendance activity works | 0        | ##yesterday## | ##yesterday## |
     And the following "users" exist:
       | username | firstname | lastname | email                |
       | teacher1 | Teacher   | 1        | teacher1@example.com |
@@ -19,19 +20,25 @@ Feature: Test the various new features in the attendance module
       | C1     | student1 | student        | ##yesterday## |
       | C1     | student2 | student        | ##yesterday## |
       | C1     | student3 | student        | ##yesterday## |
+      | C2     | teacher1 | editingteacher | ##yesterday## |
+      | C2     | student1 | student        | ##yesterday## |
+      | C2     | student2 | student        | ##yesterday## |
+      | C2     | student3 | student        | ##yesterday## |
+    And the following "activity" exists:
+      | activity | attendance            |
+      | course   | C1                    |
+      | idnumber | 00001                 |
+      | name     | Test attendance       |
 
-    And I log in as "teacher1"
-    And I am on "Course 1" course homepage with editing mode on
-    And I add a "Attendance" to section "1" and I fill the form with:
-      | Name | Test attendance |
-    And I add a "Attendance" to section "1" and I fill the form with:
-      | Name | Test2 attendance |
-    And I log out
+    And the following "activity" exists:
+      | activity | attendance            |
+      | course   | C2                    |
+      | idnumber | 00002                 |
+      | name     | Test2attendance      |
 
+  @javascript
   Scenario: A teacher can create and update temporary users
-    Given I log in as "teacher1"
-    And I am on "Course 1" course homepage
-    And I follow "Test attendance"
+    Given I am on the "Test attendance" "mod_attendance > View" page logged in as "teacher1"
     And I follow "Temporary users"
 
     When I set the following fields to these values:
@@ -60,10 +67,9 @@ Feature: Test the various new features in the attendance module
     Then I should not see "Temporary user 1"
     And I should see "Temporary user 2"
 
+  @javascript
   Scenario: A teacher can take attendance for temporary users
-    Given I log in as "teacher1"
-    And I am on "Course 1" course homepage
-    And I follow "Test attendance"
+    Given I am on the "Test attendance" "mod_attendance > View" page logged in as "teacher1"
     And I follow "Temporary users"
     And I set the following fields to these values:
       | Full name | Temporary user 1 |
@@ -99,7 +105,7 @@ Feature: Test the various new features in the attendance module
     And I should see "Absent"
 
     # Merge user.
-    When I follow "Test attendance"
+    And I am on the "Test attendance" "mod_attendance > View" page
     And I follow "Temporary users"
     And I click on "Merge user" "link" in the "Temporary user 2" "table_row"
     And I set the field "Participant" to "Student 3"
@@ -112,6 +118,7 @@ Feature: Test the various new features in the attendance module
     And "A" "text" should exist in the "Student 3" "table_row"
     Then I should not see "Temporary user 2"
 
+  @javascript
   Scenario: A teacher can select a subset of users for export
     Given the following "groups" exist:
       | course | name   | idnumber |
@@ -124,9 +131,7 @@ Feature: Test the various new features in the attendance module
       | Group2 | student2 |
       | Group2 | student3 |
 
-    And I log in as "teacher1"
-    And I am on "Course 1" course homepage
-    And I follow "Test attendance"
+    And I am on the "Test attendance" "mod_attendance > View" page logged in as "teacher1"
     And I follow "Add"
     And I set the following fields to these values:
       | id_addmultiply | 0 |
@@ -146,10 +151,9 @@ Feature: Test the various new features in the attendance module
     And the "Users to export" select box should not contain "Student 1"
     # Ideally the download would be tested here, but that is difficult to configure.
 
+  @javascript
   Scenario: A teacher can create and use multiple status lists
-    Given I log in as "teacher1"
-    And I am on "Course 1" course homepage
-    And I follow "Test attendance"
+    Given I am on the "Test attendance" "mod_attendance > View" page logged in as "teacher1"
     And I follow "Status set"
     And I set the field "jump" to "New set of statuses"
     And I set the field with xpath "//*[@id='preferencesform']/table/tbody/tr[1]/td[2]/input" to "G"
@@ -195,10 +199,9 @@ Feature: Test the various new features in the attendance module
     And "Set status to «OK»" "link" should exist
     And "Set status to «Bad»" "link" should exist
 
+  @javascript
   Scenario: A teacher can use the radio buttons to set attendance values for all users
-    Given I log in as "teacher1"
-    And I am on "Course 1" course homepage
-    And I follow "Test attendance"
+    Given I am on the "Test attendance" "mod_attendance > View" page logged in as "teacher1"
     And I follow "Add"
     And I set the following fields to these values:
       | id_addmultiply | 0 |
@@ -212,10 +215,9 @@ Feature: Test the various new features in the attendance module
     And "L" "text" should exist in the "Student 2" "table_row"
     And "L" "text" should exist in the "Student 3" "table_row"
 
+  @javascript
   Scenario: A teacher can use the radio buttons to set attendance values for unselected users
-    Given I log in as "teacher1"
-    And I am on "Course 1" course homepage
-    And I follow "Test2 attendance"
+    Given I am on the "Test2attendance" "mod_attendance > View" page logged in as "teacher1"
     And I follow "Add"
     And I set the following fields to these values:
       | id_addmultiply | 0 |

@@ -1,4 +1,4 @@
-@mod @mod_attendance @javascript
+@mod @mod_attendance
 Feature: Test the calendar related features in the attendance module
 
   Background:
@@ -13,18 +13,18 @@ Feature: Test the calendar related features in the attendance module
       | course | user        | role           | timestart     |
       | C1     | student1    | student        | ##yesterday## |
       | C1     | teacher1    | editingteacher | ##yesterday## |
-
+    And the following "activity" exists:
+      | activity | attendance            |
+      | course   | C1                    |
+      | idnumber | 00001                 |
+      | name     | Test attendance       |
     And I log in as "teacher1"
-    And I am on "Course 1" course homepage with editing mode on
-    And I add the "Upcoming events" block
-    And I add a "Attendance" to section "1" and I fill the form with:
-      | Name | Test attendance |
-    And I log out
 
+  @javascript
   Scenario: Calendar events can be created automatically with sessions creation
-    Given I log in as "teacher1"
-    And I am on "Course 1" course homepage
-    And I follow "Test attendance"
+    Given I am on "Course 1" course homepage with editing mode on
+    And I add the "Calendar" block
+    And I am on the "Test attendance" "mod_attendance > View" page
     And I follow "Add session"
     And I set the following fields to these values:
       | id_sestime_starthour   | 23 |
@@ -33,9 +33,5 @@ Feature: Test the calendar related features in the attendance module
       | id_sestime_endminute   | 55 |
     And I click on "id_submitbutton" "button"
     And I am on "Course 1" course homepage
-    And I follow "Go to calendar"
-    And I should see "Test attendance"
-    And I log out
-    And I log in as "student1"
-    And I follow "Go to calendar"
+    And I click on "Full calendar" "link"
     Then I should see "Test attendance"

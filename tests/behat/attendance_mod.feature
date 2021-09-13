@@ -1,4 +1,4 @@
-@javascript @mod @uon @mod_attendance
+@mod @mod_attendance
 Feature: Teachers and Students can record session attendance
   In order to record session attendance
   As a student
@@ -37,10 +37,9 @@ Feature: Teachers and Students can record session attendance
     And I should see "Attendance"
     And I log out
 
+  @javascript
   Scenario: Students can mark their own attendance and teacher can hide specific status from students.
-    Given I log in as "teacher1"
-    And I am on "Course 1" course homepage
-    And I follow "Attendance"
+    Given I am on the "Attendance" "mod_attendance > View" page logged in as "teacher1"
     And I follow "Add"
     And I set the field "Allow students to record own attendance" to "1"
     And I set the following fields to these values:
@@ -49,22 +48,16 @@ Feature: Teachers and Students can record session attendance
       | id_sestime_endminute | 55 |
     And I click on "id_submitbutton" "button"
     And I log out
-    And I log in as "student1"
-    And I am on "Course 1" course homepage
-    And I follow "Attendance"
+    And I am on the "Attendance" "mod_attendance > View" page logged in as "student1"
     And I follow "Submit attendance"
     And I should see "Excused"
     And I log out
-    And I log in as "teacher1"
-    And I am on "Course 1" course homepage
-    And I follow "Attendance"
+    And I am on the "Attendance" "mod_attendance > View" page logged in as "teacher1"
     And I follow "Status set"
     And I set the field with xpath "//*[@id='preferencesform']/table/tbody/tr[3]/td[5]/input" to "0"
     And I press "Update"
     And I log out
-    And I log in as "student1"
-    And I am on "Course 1" course homepage
-    And I follow "Attendance"
+    And I am on the "Attendance" "mod_attendance > View" page logged in as "student1"
     And I follow "Submit attendance"
     And I should not see "Excused"
     And I set the field "Present" to "1"
@@ -78,10 +71,9 @@ Feature: Teachers and Students can record session attendance
     And I click on "Get these logs" "button"
     Then "Attendance taken by student" "link" should exist
 
+  @javascript
   Scenario: Teachers can view below % report and send a message
-    Given I log in as "teacher1"
-    And I am on "Course 1" course homepage
-    And I follow "Attendance"
+    Given I am on the "Attendance" "mod_attendance > View" page logged in as "teacher1"
     And I follow "Add"
     And I set the following fields to these values:
       | id_sestime_starthour | 01 |
@@ -99,6 +91,7 @@ Feature: Teachers and Students can record session attendance
     And I click on "Get these logs" "button"
     Then "Attendance report viewed" "link" should exist
 
+  @javascript
   Scenario: Export report includes id number, department and institution
     Given I log in as "admin"
     And I navigate to "Users > Permissions > User policies" in site administration
@@ -106,9 +99,7 @@ Feature: Teachers and Students can record session attendance
       | showuseridentity | idnumber,email,phone1,phone2,department,institution |
 
     And I log out
-    And I log in as "teacher1"
-    And I am on "Course 1" course homepage
-    And I follow "Attendance"
+    And I am on the "Attendance" "mod_attendance > View" page logged in as "teacher1"
     And I follow "Add"
     And I set the following fields to these values:
       | id_sestime_starthour | 01 |
@@ -119,6 +110,7 @@ Feature: Teachers and Students can record session attendance
     And the field "id_ident_institution" matches value "1"
     And the field "id_ident_department" matches value "1"
 
+  @javascript
   Scenario: Test enabling custom user profile field
     # Add custom field.
     Given I log in as "admin"
@@ -133,6 +125,7 @@ Feature: Teachers and Students can record session attendance
     And I navigate to "Plugins > Activity modules > Attendance" in site administration
     And the "Export custom user profile fields" select box should contain "Super field"
 
+  @javascript
   Scenario: Test adding custom user profile
     # Add custom field.
     Given I log in as "admin"
@@ -148,9 +141,7 @@ Feature: Teachers and Students can record session attendance
     | customexportfields | superfield | attendance |
 
     And I log out
-    And I log in as "teacher1"
-    And I am on "Course 1" course homepage
-    And I follow "Attendance"
+    And I am on the "Attendance" "mod_attendance > View" page logged in as "teacher1"
     And I follow "Add"
     And I set the following fields to these values:
       | id_sestime_starthour | 01 |
