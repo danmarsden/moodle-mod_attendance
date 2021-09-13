@@ -67,13 +67,19 @@ $functions = array(
         'description' => 'Method that retrieves the session data',
         'type'        => 'read',
     ),
-
     'mod_attendance_update_user_status' => array(
         'classname'   => 'mod_attendance_external',
         'methodname'  => 'update_user_status',
         'classpath'   => 'mod/attendance/externallib.php',
         'description' => 'Method that updates the user status in a session.',
         'type'        => 'write',
+    ),
+    'mod_attendance_get_sessions' => array(
+        'classname'   => 'mod_attendance_external',
+        'methodname'  => 'get_sessions',
+        'classpath'   => 'mod/attendance/externallib.php',
+        'description' => 'Method that retrieves the sessions in an attendance instance.',
+        'type'        => 'read',
     )
 );
 
@@ -88,7 +94,8 @@ $services = array(
             'mod_attendance_remove_session',
             'mod_attendance_get_courses_with_today_sessions',
             'mod_attendance_get_session',
-            'mod_attendance_update_user_status'
+            'mod_attendance_update_user_status',
+            'mod_attendance_get_sessions'
         ),
         'restrictedusers' => 0,
         'enabled' => 1,

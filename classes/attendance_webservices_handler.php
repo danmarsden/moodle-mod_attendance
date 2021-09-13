@@ -158,4 +158,24 @@ class attendance_handler {
             $DB->update_record('attendance_sessions', $attendancesession);
         }
     }
+
+    /**
+     * For this attendance instance, returns all sessions.
+     *
+     * @param int $attendanceid
+     * @return mixed
+     */
+    public static function get_sessions($attendanceid) {
+        global $DB;
+
+        $sessions = $DB->get_records('attendance_sessions', array('attendanceid' => $attendanceid), 'id ASC');
+
+        $sessionsinfo = array();
+
+        foreach ($sessions as $session) {
+            $sessionsinfo[$session->id] = self::get_session($session->id);
+        }
+
+        return $sessionsinfo;
+    }
 }
