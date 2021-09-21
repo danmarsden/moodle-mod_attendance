@@ -924,7 +924,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $lastname = html_writer::link($url, get_string('lastname'));
             $idnumber = get_string('idnumber');
         } else if ($data->pageparams->sort == ATT_SORT_LASTNAME) {
-			$lastname = get_string('lastname');
+            $lastname = get_string('lastname');
             $url->param('sort', ATT_SORT_IDNUMBER);
             $idnumber = html_writer::link($url, get_string('idnumber'));
             $url->param('sort', ATT_SORT_FIRSTNAME);
@@ -936,17 +936,16 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $url->param('sort', ATT_SORT_IDNUMBER);
             $idnumber = html_writer::link($url, get_string('idnumber'));
         } else {
-	    $idnumber = html_writer::link($data->url(array('sort' => ATT_SORT_IDNUMBER)), get_string('idnumber'));
+	        $idnumber = html_writer::link($data->url(array('sort' => ATT_SORT_IDNUMBER)), get_string('idnumber'));
             $firstname = html_writer::link($data->url(array('sort' => ATT_SORT_FIRSTNAME)), get_string('firstname'));
             $lastname = html_writer::link($data->url(array('sort' => ATT_SORT_LASTNAME)), get_string('lastname'));
         }
-
 
         if ($CFG->fullnamedisplay == 'idnumber firstname lastname') {
             $fullnamehead = "$idnumber / $firstname / $lastname";
         } else if ($CFG->fullnamedisplay == 'firstname lastname idnumber') {
             $fullnamehead = "$firstname / $lastname / $idnumber";
-        }  else {
+        } else {
             $fullnamehead = "$firstname / $lastname / $idnumber";
         }
 

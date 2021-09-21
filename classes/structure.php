@@ -817,7 +817,7 @@ class mod_attendance_structure {
         }
         if ($this->pageparams->sort == ATT_SORT_IDNUMBER) {
             $orderby = $DB->sql_fullname('u.idnumber', 'u.lastname') . ', u.id';
-        }else if ($this->pageparams->sort == ATT_SORT_FIRSTNAME) {
+        } else if ($this->pageparams->sort == ATT_SORT_FIRSTNAME) {
             $orderby = $DB->sql_fullname('u.firstname', 'u.idnumber') . ', u.id';
         } else if ($this->pageparams->sort == ATT_SORT_LASTNAME) {
             $orderby = 'u.lastname, u.idnumber, u.id';
