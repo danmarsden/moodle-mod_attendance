@@ -815,10 +815,12 @@ class mod_attendance_structure {
         if (empty($this->pageparams->sort)) {
             $this->pageparams->sort = ATT_SORT_DEFAULT;
         }
-        if ($this->pageparams->sort == ATT_SORT_FIRSTNAME) {
-            $orderby = $DB->sql_fullname('u.firstname', 'u.lastname') . ', u.id';
+        if ($this->pageparams->sort == ATT_SORT_IDNUMBER) {
+            $orderby = $DB->sql_fullname('u.idnumber', 'u.lastname') . ', u.id';
+        }else if ($this->pageparams->sort == ATT_SORT_FIRSTNAME) {
+            $orderby = $DB->sql_fullname('u.firstname', 'u.idnumber') . ', u.id';
         } else if ($this->pageparams->sort == ATT_SORT_LASTNAME) {
-            $orderby = 'u.lastname, u.firstname, u.id';
+            $orderby = 'u.lastname, u.idnumber, u.id';
         } else {
             list($orderby, $sortparams) = users_order_by_sql('u');
         }
