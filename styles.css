@@ -300,3 +300,36 @@
 .attendancereporttable img.icon {
     padding-left: 5px;
 }
+
+/* Make tableheader sticky. */
+#page-mod-attendance-manage th,
+#page-mod-attendance-report th,
+#page-mod-attendance-preferences th,
+#page-mod-attendance-view th {
+    position: sticky;
+    position: -webkit-sticky;
+    background: white;
+    top: 49px;
+}
+
+/* At this size, the navbar is not visible when scrolling down. */
+@media (max-width: 576px) and (max-height: 320px) {
+    #page-mod-attendance-manage th,
+    #page-mod-attendance-report th,
+    #page-mod-attendance-preferences th,
+    #page-mod-attendance-view th {
+        top: 0px;
+    }
+}
+
+/* If overflow is not visible, the sticky tableheader does not work. */
+#page-mod-attendance-manage #region-main,
+#page-mod-attendance-report #region-main,
+#page-mod-attendance-preferences #region-main,
+#page-mod-attendance-view #region-main {
+    overflow: visible;
+}
+
+#page-mod-attendance-report .attendancereporttable {
+    overflow-x: visible;
+}
