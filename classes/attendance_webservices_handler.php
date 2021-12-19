@@ -65,11 +65,12 @@ class attendance_handler {
                 $cm->id = $attendance->coursemodule;
 
                 $att = new mod_attendance_structure($att, $cm, $course, $context);
-                $course->attendance_instance[$att->id] = array();
-                $course->attendance_instance[$att->id]['name'] = $att->name;
+                
                 $todaysessions = $att->get_today_sessions();
 
                 if (!empty($todaysessions)) {
+                    $course->attendance_instance[$att->id] = array();
+                    $course->attendance_instance[$att->id]['name'] = $att->name;
                     $course->attendance_instance[$att->id]['today_sessions'] = $todaysessions;
                     $coursessessions[$course->id] = $course;
                 }
