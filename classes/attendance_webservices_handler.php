@@ -65,7 +65,6 @@ class attendance_handler {
                 $cm->id = $attendance->coursemodule;
 
                 $att = new mod_attendance_structure($att, $cm, $course, $context);
-                
                 $todaysessions = $att->get_today_sessions();
 
                 if (!empty($todaysessions)) {
