@@ -1382,3 +1382,64 @@ function attendance_return_passwords($session) {
     $sql = 'SELECT * FROM {attendance_rotate_passwords} WHERE attendanceid = ? AND expirytime > ? ORDER BY expirytime ASC';
     return json_encode($DB->get_records_sql($sql, ['attendanceid' => $session->id, time()], $strictness = IGNORE_MISSING));
 }
+
+/**
+ * Nasty hack function to get the course from either the referring page (called by webservice) or from optional_param.
+ *
+ * @return false|stdClass
+ * @throws coding_exception
+ * @throws dml_exception
+ */
+function attendace_get_course_helper() {
+    global $CFG, $COURSE, $PAGE;
+
+    // Check if loaded in current url.
+    $courseid = optional_param('course', '0', PARAM_INT);
+    if (!empty($courseid) && $courseid != SITEID) {
+        $course = get_course($courseid);
+        return $course;
+    }
+
+    // Check if set by course global.
+    if (!empty($COURSE) && $COURSE->id != SITEID) {
+        return $COURSE;
+    }
+
+    // See if $PAGE is set, and if it relates to a course context.
+    if (!empty($PAGE)) {
+        try { // Don't trigger an exception if we can't get a coursecontext.
+            $coursecontext = $PAGE->context->get_course_context(false);
+            if (!empty($coursecontext) && !empty($coursecontext->instanceid) && $coursecontext->instanceid != SITEID) {
+                return get_course($coursecontext->instanceid);
+            }
+            // @codingStandardsIgnoreStart
+        } catch (coding_exception $e) {
+            // We get the course another way below.
+        }
+        // @codingStandardsIgnoreEnd
+    }
+
+    // Finally check if set in HTTP_REFERRER - will be a webservice call from the dashboard page.
+    $referrer = get_local_referer(false);
+    if (!empty($referrer) &&
+        strpos($referrer, $CFG->wwwroot.'/local/vxg_dashboard/index.php') === 0) {
+
+        $urlcomponents = parse_url($referrer);
+        if (!empty($urlcomponents['query'])) {
+            parse_str($urlcomponents['query'], $params);
+            if (!empty($params['course']) && $params['course'] != SITEID) {
+                $course = get_course((int)$params['course']);
+                return $course;
+            } else if (!empty($params['contextid'])) {
+                $context = context::instance_by_id($params['contextid'], IGNORE_MISSING);
+                if (!empty($context)) {
+                    $coursecontext = $context->get_course_context(false);
+                    if (!empty($coursecontext) && !empty($coursecontext->instanceid) && $coursecontext->instanceid != SITEID) {
+                        return get_course($coursecontext->instanceid);
+                    }
+                }
+            }
+        }
+    }
+    return false;
+}
