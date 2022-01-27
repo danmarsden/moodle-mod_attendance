@@ -634,3 +634,7 @@ $string['week'] = 'week(s)';
 $string['weekcommencing'] = 'Week commencing';
 $string['weeks'] = 'Weeks';
 $string['youcantdo'] = 'You can\'t do anything';
+$string['lasttaken'] = 'Attendances last taken';
+$string['timemodified'] = 'Time modified';
+$string['sessionname'] = 'Session name';
+$string['timetaken'] = 'Time attendance taken';
