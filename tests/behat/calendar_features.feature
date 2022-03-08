@@ -33,5 +33,5 @@ Feature: Test the calendar related features in the attendance module
       | id_sestime_endminute   | 55 |
     And I click on "id_submitbutton" "button"
     And I am on "Course 1" course homepage
-    And I click on "Full calendar" "link"
+    And I click on "This month" "link"
     Then I should see "Test attendance"
