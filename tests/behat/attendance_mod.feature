@@ -27,8 +27,6 @@ Feature: Teachers and Students can record session attendance
 
     And I log in as "teacher1"
     And I am on "Course 1" course homepage with editing mode on
-    And I follow "Add a block"
-    And I follow "Administration"
     And I add a "Attendance" to section "1" and I fill the form with:
       | Name        | Attendance       |
     And I log out

@@ -37,8 +37,8 @@ Feature: Visiting reports
     And I log out
 
   Scenario: Teacher takes attendance
-    Given I am on the "Attendance" "mod_attendance > View" page logged in as "teacher1"
-    And I navigate to "Edit settings" in current page administration
+    Given I am logged in as "teacher1"
+    And I am on the "Attendance" "attendance activity editing" page
     Then I set the following fields to these values:
       | id_grade_modgrade_type  | Point |
       | id_grade_modgrade_point | 50   |
@@ -75,8 +75,8 @@ Feature: Visiting reports
     And the following "group members" exist:
       | group  | user     |
       | Group1 | student1 |
-    And I am on the "Attendance" "mod_attendance > View" page logged in as "teacher1"
-    And I navigate to "Edit settings" in current page administration
+    And I am logged in as "teacher1"
+    And I am on the "Attendance" "attendance activity editing" page
     And I set the following fields to these values:
       | id_grade_modgrade_type  | Point |
       | id_grade_modgrade_point | 50   |
@@ -114,8 +114,8 @@ Feature: Visiting reports
     And I log out
 
   Scenario: Teacher visit summary report and absentee report
-    Given I am on the "Attendance" "mod_attendance > View" page logged in as "teacher1"
-    And I navigate to "Edit settings" in current page administration
+    Given I am logged in as "teacher1"
+    And I am on the "Attendance" "attendance activity editing" page
     And I set the following fields to these values:
        | id_grade_modgrade_type  | Point |
        | id_grade_modgrade_point | 50   |
@@ -159,8 +159,8 @@ Feature: Visiting reports
     And I log out
 
   Scenario: Student visit user report
-    Given I am on the "Attendance" "mod_attendance > View" page logged in as "teacher1"
-    And I navigate to "Edit settings" in current page administration
+    Given I am logged in as "teacher1"
+    And I am on the "Attendance" "attendance activity editing" page
     Then I set the following fields to these values:
       | id_grade_modgrade_type  | Point |
       | id_grade_modgrade_point | 50   |
