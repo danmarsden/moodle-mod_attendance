@@ -49,6 +49,8 @@ function attendance_supports($feature) {
         // Artem Andreev: AFAIK it's not tested.
         case FEATURE_COMPLETION_TRACKS_VIEWS:
             return false;
+        case FEATURE_MOD_PURPOSE:
+            return MOD_PURPOSE_ADMINISTRATION;
         default:
             return null;
     }
