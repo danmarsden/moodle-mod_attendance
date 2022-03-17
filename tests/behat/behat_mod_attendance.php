@@ -54,7 +54,9 @@ class behat_mod_attendance extends behat_question_base {
             case 'view':
                 return new moodle_url('/mod/attendance/view.php',
                         ['id' => $this->get_cm_by_attendance_name($identifier)->id]);
-
+            case 'report':
+                return new moodle_url('/mod/attendance/report.php',
+                       ['id' => $this->get_cm_by_attendance_name($identifier)->id]);
             default:
                 throw new Exception('Unrecognised attendance page type "' . $type . '."');
         }

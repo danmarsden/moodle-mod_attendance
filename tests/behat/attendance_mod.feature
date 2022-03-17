@@ -77,7 +77,7 @@ Feature: Teachers and Students can record session attendance
       | id_sestime_starthour | 01 |
       | id_sestime_endhour   | 02 |
     And I click on "id_submitbutton" "button"
-    And I follow "Report"
+    And I am on the "Attendance" "mod_attendance > Report" page
     And I follow "Below"
     And I set the field "cb_selector" to "1"
     And I click on "Send a message" "button"
