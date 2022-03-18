@@ -64,8 +64,8 @@ Feature: Teachers and Students can record session attendance
     And I log out
     When I log in as "teacher1"
     And I am on "Course 1" course homepage
-    And I expand "Reports" node
-    And I follow "Logs"
+    And I navigate to "Reports" in current page administration
+    And I select "Logs" from the "Report type" singleselect
     And I click on "Get these logs" "button"
     Then "Attendance taken by student" "link" should exist
 
@@ -83,9 +83,9 @@ Feature: Teachers and Students can record session attendance
     And I click on "Send a message" "button"
     And I should see "Message body"
     And I should see "student1@asd.com"
-    And I follow "Course 1"
-    And I expand "Reports" node
-    And I follow "Logs"
+    And I am on "Course 1" course homepage
+    And I navigate to "Reports" in current page administration
+    And I select "Logs" from the "Report type" singleselect
     And I click on "Get these logs" "button"
     Then "Attendance report viewed" "link" should exist
 
