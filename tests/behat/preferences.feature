@@ -28,30 +28,30 @@ Feature: Teachers can't change status variables to have empty acronyms or descri
     Given I am on the "Attendancepreftest" "mod_attendance > View" page logged in as "teacher1"
     And I follow "Status set"
     # Set the second status acronym to be empty
-    And I set the field with xpath "//*[@id='preferencesform']/table/tbody/tr[2]/td[2]/input" to ""
+    And I set the field with xpath "//*[@id='statusrow2']/td[2]/input" to ""
     # Set the second status description to be empty
-    And I set the field with xpath "//*[@id='preferencesform']/table/tbody/tr[2]/td[3]/input" to ""
+    And I set the field with xpath "//*[@id='statusrow2']/td[3]/input" to ""
     # Set the second status grade to be empty
-    And I set the field with xpath "//*[@id='preferencesform']/table/tbody/tr[2]/td[4]/input" to ""
+    And I set the field with xpath "//*[@id='statusrow2']/td[4]/input" to ""
     And I click on "Update" "button" in the "#preferencesform" "css_element"
-    And I should see "Empty acronyms are not allowed" in the "//*[@id='preferencesform']/table/tbody/tr[2]/td[2]/p" "xpath_element"
-    And I should see "Empty descriptions are not allowed" in the "//*[@id='preferencesform']/table/tbody/tr[2]/td[3]/p" "xpath_element"
+    And I should see "Empty acronyms are not allowed" in the "//*[@id='statusrow2']/td[2]/p" "xpath_element"
+    And I should see "Empty descriptions are not allowed" in the "//*[@id='statusrow2']/td[3]/p" "xpath_element"
     And I click on "Update" "button" in the "#preferencesform" "css_element"
 
     # Set the first status acronym to be empty
-    And I set the field with xpath "//*[@id='preferencesform']/table/tbody/tr[1]/td[2]/input" to ""
+    And I set the field with xpath "//*[@id='statusrow1']/td[2]/input" to ""
     # Set the first status description to be empty
-    And I set the field with xpath "//*[@id='preferencesform']/table/tbody/tr[1]/td[3]/input" to ""
+    And I set the field with xpath "//*[@id='statusrow1']/td[3]/input" to ""
     # Set the first status grade to be empty
-    And I set the field with xpath "//*[@id='preferencesform']/table/tbody/tr[1]/td[4]/input" to ""
+    And I set the field with xpath "//*[@id='statusrow1']/td[4]/input" to ""
     # Set the third status acronym to be empty
-    And I set the field with xpath "//*[@id='preferencesform']/table/tbody/tr[3]/td[2]/input" to ""
+    And I set the field with xpath "//*[@id='statusrow3']/td[2]/input" to ""
     # Set the third status description to be empty
-    And I set the field with xpath "//*[@id='preferencesform']/table/tbody/tr[3]/td[3]/input" to ""
+    And I set the field with xpath "//*[@id='statusrow3']/td[3]/input" to ""
     # Set the third status grade to be empty
-    And I set the field with xpath "//*[@id='preferencesform']/table/tbody/tr[3]/td[4]/input" to ""
+    And I set the field with xpath "//*[@id='statusrow3']/td[4]/input" to ""
     When I click on "Update" "button" in the "#preferencesform" "css_element"
-    Then I should see "Empty acronyms are not allowed" in the "//*[@id='preferencesform']/table/tbody/tr[1]/td[2]/p" "xpath_element"
-    And I should see "Empty descriptions are not allowed" in the "//*[@id='preferencesform']/table/tbody/tr[1]/td[3]/p" "xpath_element"
-    And I should see "Empty acronyms are not allowed" in the "//*[@id='preferencesform']/table/tbody/tr[3]/td[2]/p" "xpath_element"
-    And I should see "Empty descriptions are not allowed" in the "//*[@id='preferencesform']/table/tbody/tr[3]/td[3]/p" "xpath_element"
+    Then I should see "Empty acronyms are not allowed" in the "//*[@id='statusrow1']/td[2]/p" "xpath_element"
+    And I should see "Empty descriptions are not allowed" in the "//*[@id='statusrow1']/td[3]/p" "xpath_element"
+    And I should see "Empty acronyms are not allowed" in the "//*[@id='statusrow3']/td[2]/p" "xpath_element"
+    And I should see "Empty descriptions are not allowed" in the "//*[@id='statusrow3']/td[3]/p" "xpath_element"
