@@ -52,7 +52,7 @@ Feature: Teachers and Students can record session attendance
     And I log out
     And I am on the "Attendance" "mod_attendance > View" page logged in as "teacher1"
     And I follow "Status set"
-    And I set the field with xpath "//*[@id='preferencesform']/table/tbody/tr[3]/td[5]/input" to "0"
+    And I set the field with xpath "//*[@id='statusrow3']/td[5]/input" to "0"
     And I press "Update"
     And I log out
     And I am on the "Attendance" "mod_attendance > View" page logged in as "student1"
