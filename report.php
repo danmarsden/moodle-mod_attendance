@@ -63,7 +63,7 @@ $PAGE->navbar->add(get_string('report', 'attendance'));
 $output = $PAGE->get_renderer('mod_attendance');
 $tabs = new mod_attendance\output\tabs($att, mod_attendance\output\tabs::TAB_REPORT);
 $filtercontrols = new mod_attendance\output\filter_controls($att, true);
-$reportdata = new attendance_report_data($att);
+$reportdata = new mod_attendance\output\report_data($att);
 
 // Trigger a report viewed event.
 $event = \mod_attendance\event\report_viewed::create(array(

@@ -139,7 +139,7 @@ class mobile {
             array($attendance->id, $timefrom, $timeto));
 
         if (!empty($sessions)) {
-            $userdata = new \attendance_user_data($att, $USER->id, true);
+            $userdata = new user_data($att, $USER->id, true);
             foreach ($sessions as $sess) {
                 if (!$isteacher && empty($userdata->sessionslog['c'.$sess->id])) {
                     // This session isn't viewable to this student - probably a group session.

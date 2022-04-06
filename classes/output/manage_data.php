@@ -25,7 +25,7 @@
 namespace mod_attendance\output;
 
 use renderable;
-use url_helpers;
+use mod_attendance\local\url_helpers;
 use mod_attendance_structure;
 
 /**

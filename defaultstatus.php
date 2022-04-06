@@ -125,7 +125,7 @@ switch ($action) {
 }
 
 $statuses = attendance_get_statuses(0, false);
-$prefdata = new attendance_default_statusset($statuses, $errors);
+$prefdata = new mod_attendance\output\default_statusset($statuses, $errors);
 echo $output->render($prefdata);
 
 echo $OUTPUT->footer();

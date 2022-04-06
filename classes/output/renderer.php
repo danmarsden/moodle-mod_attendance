@@ -30,11 +30,6 @@ use mod_attendance_take_page_params;
 use mod_attendance_page_with_filter_controls;
 use mod_attendance_preferences_page_params;
 use mod_attendance_structure;
-use attendance_user_data;
-use attendance_password_icon;
-use attendance_report_data;
-use attendance_set_selector;
-use attendance_default_statusset;
 use mod_attendance_sessions_page_params;
 use user_sessions_cells_html_generator;
 use html_table;
@@ -395,10 +390,10 @@ class renderer extends plugin_renderer_base {
     /**
      * Implementation of user image rendering.
      *
-     * @param attendance_password_icon $helpicon A help icon instance
+     * @param password_icon $helpicon A help icon instance
      * @return string HTML fragment
      */
-    protected function render_attendance_password_icon(attendance_password_icon $helpicon) {
+    protected function render_password_icon(password_icon $helpicon) {
         return $this->render_from_template('attendance/attendance_password_icon', $helpicon->export_for_template($this));
     }
     /**
@@ -415,7 +410,7 @@ class renderer extends plugin_renderer_base {
             has_capability('mod/attendance:takeattendances', $sessdata->att->context) ||
             has_capability('mod/attendance:changeattendances', $sessdata->att->context))) {
 
-            $icon = new attendance_password_icon($sess->studentpassword, $sess->id);
+            $icon = new password_icon($sess->studentpassword, $sess->id);
 
             if ($sess->includeqrcode == 1||$sess->rotateqrcode == 1) {
                 $icon->includeqrcode = 1;
@@ -1088,10 +1083,10 @@ class renderer extends plugin_renderer_base {
     /**
      * Render user data.
      *
-     * @param attendance_user_data $userdata
+     * @param user_data $userdata
      * @return string
      */
-    protected function render_attendance_user_data(attendance_user_data $userdata) {
+    protected function render_user_data(user_data $userdata) {
         global $USER;
 
         $o = $this->render_user_report_tabs($userdata);
@@ -1120,10 +1115,10 @@ class renderer extends plugin_renderer_base {
     /**
      * Render user report tabs.
      *
-     * @param attendance_user_data $userdata
+     * @param user_data $userdata
      * @return string
      */
-    protected function render_user_report_tabs(attendance_user_data $userdata) {
+    protected function render_user_report_tabs(user_data $userdata) {
         $tabs = array();
 
         $tabs[] = new tabobject(mod_attendance_view_page_params::MODE_THIS_COURSE,
@@ -1146,10 +1141,10 @@ class renderer extends plugin_renderer_base {
     /**
      * Construct user data.
      *
-     * @param attendance_user_data $userdata
+     * @param user_data $userdata
      * @return string
      */
-    private function construct_user_data(attendance_user_data $userdata) {
+    private function construct_user_data(user_data $userdata) {
         global $USER;
         $o = '';
         if ($USER->id <> $userdata->user->id) {
@@ -1261,10 +1256,10 @@ class renderer extends plugin_renderer_base {
     /**
      * Construct user sessions log.
      *
-     * @param attendance_user_data $userdata
+     * @param user_data $userdata
      * @return string
      */
-    private function construct_user_sessions_log(attendance_user_data $userdata) {
+    private function construct_user_sessions_log(user_data $userdata) {
         global $USER;
         $context = context_module::instance($userdata->filtercontrols->cm->id);
 
@@ -1385,10 +1380,10 @@ class renderer extends plugin_renderer_base {
     /**
      * Construct table showing all sessions, not limited to current course.
      *
-     * @param attendance_user_data $userdata
+     * @param user_data $userdata
      * @return string
      */
-    private function construct_user_allsessions_log(attendance_user_data $userdata) {
+    private function construct_user_allsessions_log(user_data $userdata) {
         global $USER;
 
         $allsessions = new stdClass();
@@ -2050,10 +2045,10 @@ class renderer extends plugin_renderer_base {
     /**
      * Render report data.
      *
-     * @param attendance_report_data $reportdata
+     * @param report_data $reportdata
      * @return string
      */
-    protected function render_attendance_report_data(attendance_report_data $reportdata) {
+    protected function render_report_data(report_data $reportdata) {
         global $COURSE;
 
         // Initilise Javascript used to (un)check all checkboxes.
@@ -2123,10 +2118,10 @@ class renderer extends plugin_renderer_base {
      * Build and return the rows that will make up the left part of the attendance report.
      * This consists of student names, as well as header cells for these columns.
      *
-     * @param attendance_report_data $reportdata the report data
+     * @param report_data $reportdata the report data
      * @return array Array of html_table_row objects
      */
-    protected function get_user_rows(attendance_report_data $reportdata) {
+    protected function get_user_rows(report_data $reportdata) {
         $rows = array();
 
         $bulkmessagecapability = has_capability('moodle/course:bulkmessaging', $this->page->context);
@@ -2209,11 +2204,11 @@ class renderer extends plugin_renderer_base {
      * Build and return the rows that will make up the summary part of the attendance report.
      * This consists of countings for each status set acronyms, as well as header cells for these columns.
      *
-     * @param attendance_report_data $reportdata the report data
+     * @param report_data $reportdata the report data
      * @param boolean $startwithcontrast true if the first column must start with contrast (bgcolor)
      * @return array Array of html_table_row objects
      */
-    protected function get_acronym_rows(attendance_report_data $reportdata, $startwithcontrast=false) {
+    protected function get_acronym_rows(report_data $reportdata, $startwithcontrast=false) {
         $rows = array();
 
         $summarycells = array();
@@ -2270,11 +2265,11 @@ class renderer extends plugin_renderer_base {
      * This consists of counts and percentages for taken sessions (all sessions for summary report),
      * as well as header cells for these columns.
      *
-     * @param attendance_report_data $reportdata the report data
+     * @param report_data $reportdata the report data
      * @param boolean $startwithcontrast true if the first column must start with contrast (bgcolor)
      * @return array Array of html_table_row objects
      */
-    protected function get_summary_rows(attendance_report_data $reportdata, $startwithcontrast=false) {
+    protected function get_summary_rows(report_data $reportdata, $startwithcontrast=false) {
         $rows = array();
 
         $contrast = $startwithcontrast;
@@ -2356,11 +2351,11 @@ class renderer extends plugin_renderer_base {
      * Build and return the rows that will make up the attendance report.
      * This consists of details for each selected session, as well as header and summary cells for these columns.
      *
-     * @param attendance_report_data $reportdata the report data
+     * @param report_data $reportdata the report data
      * @param boolean $startwithcontrast true if the first column must start with contrast (bgcolor)
      * @return array Array of html_table_row objects
      */
-    protected function get_session_rows(attendance_report_data $reportdata, $startwithcontrast=false) {
+    protected function get_session_rows(report_data $reportdata, $startwithcontrast=false) {
 
         $rows = array();
 
@@ -2592,10 +2587,10 @@ class renderer extends plugin_renderer_base {
     /**
      * Output the status set selector.
      *
-     * @param attendance_set_selector $sel
+     * @param set_selector $sel
      * @return string
      */
-    protected function render_attendance_set_selector(attendance_set_selector $sel) {
+    protected function render_set_selector(set_selector $sel) {
         $current = $sel->get_current_statusset();
         $selected = null;
         $opts = array();
@@ -2622,7 +2617,7 @@ class renderer extends plugin_renderer_base {
      * @param stdClass $prefdata
      * @return string
      */
-    protected function render_attendance_preferences_data($prefdata) {
+    protected function render_preferences_data($prefdata) {
         $this->page->requires->js('/mod/attendance/module.js');
 
         $table = new html_table();
@@ -2701,11 +2696,11 @@ class renderer extends plugin_renderer_base {
     /**
      * Render default statusset.
      *
-     * @param attendance_default_statusset $prefdata
+     * @param default_statusset $prefdata
      * @return string
      */
-    protected function render_attendance_default_statusset(attendance_default_statusset $prefdata) {
-        return $this->render_attendance_preferences_data($prefdata);
+    protected function render_default_statusset(default_statusset $prefdata) {
+        return $this->render_preferences_data($prefdata);
     }
 
     /**

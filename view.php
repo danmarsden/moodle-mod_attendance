@@ -102,7 +102,7 @@ if (has_any_capability($capabilities, $context) &&
     $PAGE->set_button($OUTPUT->render($button));
 }
 
-$userdata = new attendance_user_data($att, $userid);
+$userdata = new mod_attendance\output\user_data($att, $userid);
 
 // Create url for link in log screen.
 $filterparams = array(

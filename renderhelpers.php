@@ -22,9 +22,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
-require_once(dirname(__FILE__).'/renderables.php');
 
 /**
  * class Template method for generating user's session's cells
@@ -44,10 +41,10 @@ class user_sessions_cells_generator {
 
     /**
      * Set up params.
-     * @param attendance_report_data $reportdata - reportdata.
+     * @param mod_attendance\output\report_data $reportdata - reportdata.
      * @param stdClass $user - user record.
      */
-    public function  __construct(attendance_report_data $reportdata, $user) {
+    public function  __construct(mod_attendance\output\report_data $reportdata, $user) {
         $this->reportdata = $reportdata;
         $this->user = $user;
     }

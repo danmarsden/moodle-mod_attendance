@@ -152,8 +152,8 @@ switch ($att->pageparams->action) {
 
 $output = $PAGE->get_renderer('mod_attendance');
 $tabs = new mod_attendance\output\tabs($att, mod_attendance\output\tabs::TAB_PREFERENCES);
-$prefdata = new attendance_preferences_data($att, array_filter($errors));
-$setselector = new attendance_set_selector($att, $maxstatusset);
+$prefdata = new mod_attendance\output\preferences_data($att, array_filter($errors));
+$setselector = new mod_attendance\output\set_selector($att, $maxstatusset);
 
 // Output starts here.
 

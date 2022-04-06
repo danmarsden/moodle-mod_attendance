@@ -28,7 +28,7 @@ use renderable;
 use mod_attendance_structure;
 use moodle_url;
 use stdClass;
-use url_helpers;
+use mod_attendance\local\url_helpers;
 /**
  * class take data.
  *

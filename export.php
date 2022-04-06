@@ -26,7 +26,6 @@ define('NO_OUTPUT_BUFFERING', true);
 
 require_once(dirname(__FILE__).'/../../config.php');
 require_once(dirname(__FILE__).'/locallib.php');
-require_once(dirname(__FILE__).'/renderables.php');
 require_once(dirname(__FILE__).'/renderhelpers.php');
 require_once($CFG->libdir.'/formslib.php');
 
@@ -80,7 +79,7 @@ if ($formdata = $mform->get_data()) {
     }
     $att->pageparams = $pageparams;
 
-    $reportdata = new attendance_report_data($att);
+    $reportdata = new mod_attendance\output\report_data($att);
     if ($reportdata->users) {
         $filename = clean_filename($course->shortname.'_'.
             get_string('modulenameplural', 'attendance').
