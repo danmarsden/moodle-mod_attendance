@@ -111,7 +111,6 @@ switch ($att->pageparams->action) {
                     ($status->description ? $status->description : get_string('nodescription', 'attendance'));
         $params = array_merge($att->pageparams->get_significant_params(), array('confirm' => 1));
         echo $OUTPUT->header();
-        echo $OUTPUT->heading(get_string('attendanceforthecourse', 'attendance').' :: ' .format_string($course->fullname));
         echo $OUTPUT->confirm($message, $att->url_preferences($params), $att->url_preferences());
         echo $OUTPUT->footer();
         exit;
@@ -161,7 +160,6 @@ echo $output->header();
 if (!empty($notification)) {
     echo $notification;
 }
-echo $output->heading(get_string('attendanceforthecourse', 'attendance').' :: '. format_string($course->fullname));
 echo $output->render($tabs);
 echo $OUTPUT->box(get_string('preferences_desc', 'attendance'), 'generalbox attendancedesc', 'notice');
 echo $output->render($setselector);

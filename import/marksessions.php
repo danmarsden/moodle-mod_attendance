@@ -115,7 +115,6 @@ if ($form->is_cancelled()) {
 
 // Output for the file upload form starts here.
 echo $output->header();
-echo $output->heading(get_string('attendanceforthecourse', 'attendance') . ' :: ' . format_string($course->fullname));
 echo $output->box(get_string('marksessionimportcsvhelp', 'attendance'));
 mod_attendance_notifyqueue::show();
 $form->display();

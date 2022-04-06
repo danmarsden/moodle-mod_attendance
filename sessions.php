@@ -129,7 +129,6 @@ switch ($att->pageparams->action) {
         $params = array('action' => $att->pageparams->action, 'sessionid' => $sessionid, 'confirm' => 1, 'sesskey' => sesskey());
 
         echo $OUTPUT->header();
-        echo $OUTPUT->heading(get_string('attendanceforthecourse', 'attendance').' :: ' .format_string($course->fullname));
         echo $OUTPUT->confirm($message, $att->url_sessions($params), $att->url_manage());
         echo $OUTPUT->footer();
         exit;
@@ -165,7 +164,6 @@ switch ($att->pageparams->action) {
                         'confirm' => 1, 'sesskey' => sesskey());
 
         echo $OUTPUT->header();
-        echo $OUTPUT->heading(get_string('attendanceforthecourse', 'attendance').' :: ' .format_string($course->fullname));
         echo $OUTPUT->confirm($message, $att->url_sessions($params), $att->url_manage());
         echo $OUTPUT->footer();
         exit;
@@ -210,7 +208,6 @@ switch ($att->pageparams->action) {
 
         $params = array('action' => $att->pageparams->action, 'confirm' => 1, 'sesskey' => sesskey());
         echo $OUTPUT->header();
-        echo $OUTPUT->heading(get_string('attendanceforthecourse', 'attendance').' :: ' .format_string($course->fullname));
         echo $OUTPUT->confirm($message, $att->url_sessions($params), $att->url_manage());
         echo $OUTPUT->footer();
         exit;
@@ -219,7 +216,6 @@ switch ($att->pageparams->action) {
 $output = $PAGE->get_renderer('mod_attendance');
 $tabs = new mod_attendance\output\tabs($att, $currenttab);
 echo $output->header();
-echo $output->heading(get_string('attendanceforthecourse', 'attendance').' :: ' .format_string($course->fullname));
 echo $output->render($tabs);
 
 $mform->display();

@@ -80,7 +80,6 @@ if ($data = $mform->get_data()) {
 
 // Output starts here.
 echo $output->header();
-echo $output->heading(get_string('tempusers', 'attendance').' : '.format_string($course->fullname));
 echo $output->render($tabs);
 $mform->display();
 

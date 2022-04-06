@@ -61,7 +61,6 @@ $string['attendance_no_status'] = 'No valid status was available - you may be to
 $string['attendancedata'] = 'Attendance data';
 $string['attendancefile'] = 'Attendance file (csv format)';
 $string['attendancefile_help'] = 'The file must be a CSV file with a header row and fields for identifying the user and the time attendance was recorded eg (email,scantime) or (username,time)';
-$string['attendanceforthecourse'] = 'Attendance for the course';
 $string['attendancegrade'] = 'Attendance grade';
 $string['attendancenotset'] = 'You must set your attendance';
 $string['attendancenotstarted'] = 'Attendance has not started yet for this course';
