@@ -24,14 +24,6 @@
 
 namespace mod_attendance\output;
 
-defined('MOODLE_INTERNAL') || die();
-
-require_once($CFG->dirroot.'/mod/attendance/locallib.php');
-require_once($CFG->dirroot.'/mod/attendance/renderables.php');
-require_once($CFG->dirroot.'/mod/attendance/renderhelpers.php');
-require_once($CFG->libdir.'/tablelib.php');
-require_once($CFG->libdir.'/moodlelib.php');
-
 use plugin_renderer_base;
 use attendance_tabs;
 use attendance_filter_controls;
