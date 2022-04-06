@@ -52,7 +52,7 @@ $PAGE->set_heading($course->fullname);
 $PAGE->set_cacheable(true);
 $PAGE->navbar->add(get_string('tempusersedit', 'attendance'));
 
-/** @var mod_attendance_renderer $output */
+/** @var mod_attendance\output\renderer $output */
 $output = $PAGE->get_renderer('mod_attendance');
 
 if ($action == 'delete') {

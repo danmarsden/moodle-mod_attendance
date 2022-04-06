@@ -22,13 +22,45 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace mod_attendance\output;
+
 defined('MOODLE_INTERNAL') || die();
 
-require_once(dirname(__FILE__).'/locallib.php');
-require_once(dirname(__FILE__).'/renderables.php');
-require_once(dirname(__FILE__).'/renderhelpers.php');
+require_once($CFG->dirroot.'/mod/attendance/locallib.php');
+require_once($CFG->dirroot.'/mod/attendance/renderables.php');
+require_once($CFG->dirroot.'/mod/attendance/renderhelpers.php');
 require_once($CFG->libdir.'/tablelib.php');
 require_once($CFG->libdir.'/moodlelib.php');
+
+use plugin_renderer_base;
+use attendance_tabs;
+use attendance_filter_controls;
+use mod_attendance_view_page_params;
+use mod_attendance_take_page_params;
+use mod_attendance_page_with_filter_controls;
+use mod_attendance_preferences_page_params;
+use mod_attendance_header;
+use mod_attendance_structure;
+use attendance_manage_data;
+use attendance_user_data;
+use attendance_password_icon;
+use attendance_take_data;
+use attendance_report_data;
+use attendance_set_selector;
+use attendance_default_statusset;
+use mod_attendance_sessions_page_params;
+use user_sessions_cells_html_generator;
+use html_table;
+use html_table_row;
+use html_table_cell;
+use html_writer;
+use single_select;
+use stdClass;
+use pix_icon;
+use moodle_url;
+use context_module;
+use tabobject;
+use js_writer;
 
 /**
  * Attendance module renderer class
@@ -36,7 +68,7 @@ require_once($CFG->libdir.'/moodlelib.php');
  * @copyright  2011 Artem Andreev <andreev.artem@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_attendance_renderer extends plugin_renderer_base {
+class renderer extends plugin_renderer_base {
     // External API - methods to render attendance renderable components.
 
     /**
@@ -1933,7 +1965,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
                         // enrolmentstatus
                         // id.
 
-                        $nastyhack = new ReflectionClass('attendance_take_data');
+                        $nastyhack = new \ReflectionClass('attendance_take_data');
                         $takedata = $nastyhack->newInstanceWithoutConstructor();
                         $takedata->sessioninfo = $sess;
                         $takedata->statuses = array_filter($userdata->statuses[$sess->attendanceid], function($x) use ($sess) {
