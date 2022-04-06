@@ -113,7 +113,6 @@ $filterparams = array(
 );
 $params = array_merge($userdata->pageparams->get_significant_params(), $filterparams);
 
-$header = new mod_attendance_header($att);
 
 if (empty($userdata->pageparams->studentid)) {
     $relateduserid = $USER->id;
@@ -151,8 +150,5 @@ $PAGE->navbar->add(get_string('attendancereport', 'attendance'));
 $output = $PAGE->get_renderer('mod_attendance');
 
 echo $output->header();
-
-echo $output->render($header);
 echo $output->render($userdata);
-
 echo $output->footer();

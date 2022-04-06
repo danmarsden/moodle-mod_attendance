@@ -83,18 +83,12 @@ $tabs = new attendance_tabs($att, attendance_tabs::TAB_SESSIONS);
 $filtercontrols = new attendance_filter_controls($att);
 $sesstable = new attendance_manage_data($att);
 
-
-$title = get_string('attendanceforthecourse', 'attendance').' :: ' .format_string($course->fullname);
-$header = new mod_attendance_header($att, $title);
-
 // Output starts here.
 
 echo $output->header();
-echo $output->render($header);
 mod_attendance_notifyqueue::show();
 echo $output->render($tabs);
 echo $output->render($filtercontrols);
 echo $output->render($sesstable);
 
 echo $output->footer();
-

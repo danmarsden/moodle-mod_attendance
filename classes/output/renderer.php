@@ -39,7 +39,6 @@ use mod_attendance_view_page_params;
 use mod_attendance_take_page_params;
 use mod_attendance_page_with_filter_controls;
 use mod_attendance_preferences_page_params;
-use mod_attendance_header;
 use mod_attendance_structure;
 use attendance_manage_data;
 use attendance_user_data;
@@ -1096,29 +1095,6 @@ class renderer extends plugin_renderer_base {
         }
 
         return $celldata;
-    }
-
-    /**
-     * Render header.
-     *
-     * @param mod_attendance_header $header
-     * @return string
-     */
-    protected function render_mod_attendance_header(mod_attendance_header $header) {
-        if (!$header->should_render()) {
-            return '';
-        }
-
-        $attendance = $header->get_attendance();
-
-        $heading = format_string($header->get_title(), false, ['context' => $attendance->context]);
-        $o = $this->output->heading($heading);
-
-        $o .= $this->output->box_start('generalbox boxaligncenter', 'intro');
-        $o .= format_module_intro('attendance', $attendance, $attendance->cm->id);
-        $o .= $this->output->box_end();
-
-        return $o;
     }
 
     /**
