@@ -61,7 +61,7 @@ $PAGE->set_cacheable(true);
 $PAGE->navbar->add(get_string('report', 'attendance'));
 
 $output = $PAGE->get_renderer('mod_attendance');
-$tabs = new attendance_tabs($att, attendance_tabs::TAB_REPORT);
+$tabs = new mod_attendance\output\tabs($att, mod_attendance\output\tabs::TAB_REPORT);
 $filtercontrols = new attendance_filter_controls($att, true);
 $reportdata = new attendance_report_data($att);
 

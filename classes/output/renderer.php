@@ -25,7 +25,6 @@
 namespace mod_attendance\output;
 
 use plugin_renderer_base;
-use attendance_tabs;
 use attendance_filter_controls;
 use mod_attendance_view_page_params;
 use mod_attendance_take_page_params;
@@ -65,10 +64,10 @@ class renderer extends plugin_renderer_base {
     /**
      * Renders tabs for attendance
      *
-     * @param attendance_tabs $atttabs - tabs to display
+     * @param mod_attendance\output\tabs $atttabs - tabs to display
      * @return string html code
      */
-    protected function render_attendance_tabs(attendance_tabs $atttabs) {
+    protected function render_tabs(tabs $atttabs) {
         return print_tabs($atttabs->get_tabs(), $atttabs->currenttab, null, null, true);
     }
 

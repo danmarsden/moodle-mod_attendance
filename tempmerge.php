@@ -92,7 +92,7 @@ if ($mform->is_cancelled()) {
 
 /** @var mod_attendance\output\renderer $output */
 $output = $PAGE->get_renderer('mod_attendance');
-$tabs = new attendance_tabs($att, attendance_tabs::TAB_TEMPORARYUSERS);
+$tabs = new mod_attendance\output\tabs($att, mod_attendance\output\tabs::TAB_TEMPORARYUSERS);
 
 echo $output->header();
 echo $output->heading(get_string('tempusermerge', 'attendance').' : '.format_string($course->fullname));

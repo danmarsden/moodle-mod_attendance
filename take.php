@@ -95,7 +95,7 @@ $PAGE->set_cacheable(true);
 $PAGE->navbar->add($att->name);
 
 $output = $PAGE->get_renderer('mod_attendance');
-$tabs = new attendance_tabs($att);
+$tabs = new mod_attendance\output\tabs($att);
 $sesstable = new attendance_take_data($att);
 
 // Output starts here.

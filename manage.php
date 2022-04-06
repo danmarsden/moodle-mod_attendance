@@ -79,7 +79,7 @@ $PAGE->force_settings_menu(true);
 $PAGE->navbar->add($att->name);
 
 $output = $PAGE->get_renderer('mod_attendance');
-$tabs = new attendance_tabs($att, attendance_tabs::TAB_SESSIONS);
+$tabs = new mod_attendance\output\tabs($att, mod_attendance\output\tabs::TAB_SESSIONS);
 $filtercontrols = new attendance_filter_controls($att);
 $sesstable = new attendance_manage_data($att);
 
