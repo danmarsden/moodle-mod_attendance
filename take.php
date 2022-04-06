@@ -96,7 +96,7 @@ $PAGE->navbar->add($att->name);
 
 $output = $PAGE->get_renderer('mod_attendance');
 $tabs = new mod_attendance\output\tabs($att);
-$sesstable = new attendance_take_data($att);
+$sesstable = new mod_attendance\output\take_data($att);
 
 // Output starts here.
 

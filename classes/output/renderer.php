@@ -30,10 +30,8 @@ use mod_attendance_take_page_params;
 use mod_attendance_page_with_filter_controls;
 use mod_attendance_preferences_page_params;
 use mod_attendance_structure;
-use attendance_manage_data;
 use attendance_user_data;
 use attendance_password_icon;
-use attendance_take_data;
 use attendance_report_data;
 use attendance_set_selector;
 use attendance_default_statusset;
@@ -328,10 +326,10 @@ class renderer extends plugin_renderer_base {
     /**
      * Renders attendance sessions managing table
      *
-     * @param attendance_manage_data $sessdata to display
+     * @param manage_data $sessdata to display
      * @return string html code
      */
-    protected function render_attendance_manage_data(attendance_manage_data $sessdata) {
+    protected function render_manage_data(manage_data $sessdata) {
         $o = $this->render_sess_manage_table($sessdata) . $this->render_sess_manage_control($sessdata);
         $o = html_writer::tag('form', $o, array('method' => 'post', 'action' => $sessdata->url_sessions()->out()));
         $o = $this->output->container($o, 'generalbox attwidth');
@@ -343,10 +341,10 @@ class renderer extends plugin_renderer_base {
     /**
      * Render session manage table.
      *
-     * @param attendance_manage_data $sessdata
+     * @param manage_data $sessdata
      * @return string
      */
-    protected function render_sess_manage_table(attendance_manage_data $sessdata) {
+    protected function render_sess_manage_table(manage_data $sessdata) {
         $this->page->requires->js_init_call('M.mod_attendance.init_manage');
 
         $table = new html_table();
@@ -406,11 +404,11 @@ class renderer extends plugin_renderer_base {
     /**
      * Construct date time actions.
      *
-     * @param attendance_manage_data $sessdata
+     * @param manage_data $sessdata
      * @param stdClass $sess
      * @return array
      */
-    private function construct_date_time_actions(attendance_manage_data $sessdata, $sess) {
+    private function construct_date_time_actions(manage_data $sessdata, $sess) {
         $actions = '';
         if ((!empty($sess->studentpassword) || ($sess->includeqrcode == 1)) &&
             (has_capability('mod/attendance:manageattendances', $sessdata->att->context) ||
@@ -467,10 +465,10 @@ class renderer extends plugin_renderer_base {
     /**
      * Render session manage control.
      *
-     * @param attendance_manage_data $sessdata
+     * @param manage_data $sessdata
      * @return string
      */
-    protected function render_sess_manage_control(attendance_manage_data $sessdata) {
+    protected function render_sess_manage_control(manage_data $sessdata) {
         $table = new html_table();
         $table->attributes['class'] = ' ';
         $table->width = '100%';
@@ -510,10 +508,10 @@ class renderer extends plugin_renderer_base {
     /**
      * Render take data.
      *
-     * @param attendance_take_data $takedata
+     * @param take_data $takedata
      * @return string
      */
-    protected function render_attendance_take_data(attendance_take_data $takedata) {
+    protected function render_take_data(take_data $takedata) {
         user_preference_allow_ajax_update('mod_attendance_statusdropdown', PARAM_TEXT);
 
         $controls = $this->render_attendance_take_controls($takedata);
@@ -559,10 +557,10 @@ class renderer extends plugin_renderer_base {
     /**
      * Render take controls.
      *
-     * @param attendance_take_data $takedata
+     * @param take_data $takedata
      * @return string
      */
-    protected function render_attendance_take_controls(attendance_take_data $takedata) {
+    protected function render_attendance_take_controls(take_data $takedata) {
 
         $urlparams = array('id' => $takedata->cm->id,
             'sessionid' => $takedata->pageparams->sessionid,
@@ -583,10 +581,10 @@ class renderer extends plugin_renderer_base {
     /**
      * Construct take session info.
      *
-     * @param attendance_take_data $takedata
+     * @param take_data $takedata
      * @return string
      */
-    private function construct_take_session_info(attendance_take_data $takedata) {
+    private function construct_take_session_info(take_data $takedata) {
         $sess = $takedata->sessioninfo;
         $date = userdate($sess->sessdate, get_string('strftimedate'));
         $starttime = attendance_strftimehm($sess->sessdate);
@@ -603,10 +601,10 @@ class renderer extends plugin_renderer_base {
     /**
      * Construct take controls.
      *
-     * @param attendance_take_data $takedata
+     * @param take_data $takedata
      * @return string
      */
-    private function construct_take_controls(attendance_take_data $takedata) {
+    private function construct_take_controls(take_data $takedata) {
 
         $controls = '';
         $context = context_module::instance($takedata->cm->id);
@@ -732,10 +730,10 @@ class renderer extends plugin_renderer_base {
     /**
      * Render take list.
      *
-     * @param attendance_take_data $takedata
+     * @param take_data $takedata
      * @return string
      */
-    protected function render_attendance_take_list(attendance_take_data $takedata) {
+    protected function render_attendance_take_list(take_data $takedata) {
         global $CFG;
         $table = new html_table();
         $table->width = '0%';
@@ -859,10 +857,10 @@ class renderer extends plugin_renderer_base {
     /**
      * Render take grid.
      *
-     * @param attendance_take_data $takedata
+     * @param take_data $takedata
      * @return string
      */
-    protected function render_attendance_take_grid(attendance_take_data $takedata) {
+    protected function render_attendance_take_grid(take_data $takedata) {
         $table = new html_table();
         for ($i = 0; $i < $takedata->pageparams->gridcols; $i++) {
             $table->align[] = 'center';
@@ -963,11 +961,11 @@ class renderer extends plugin_renderer_base {
     /**
      * Construct take user controls.
      *
-     * @param attendance_take_data $takedata
+     * @param take_data $takedata
      * @param stdClass $user
      * @return array
      */
-    private function construct_take_user_controls(attendance_take_data $takedata, $user) {
+    private function construct_take_user_controls(take_data $takedata, $user) {
         $celldata = array();
         if ($user->enrolmentend and $user->enrolmentend < $takedata->sessioninfo->sessdate) {
             $celldata['text'] = get_string('enrolmentend', 'attendance', userdate($user->enrolmentend, '%d.%m.%Y'));
@@ -1024,11 +1022,11 @@ class renderer extends plugin_renderer_base {
     /**
      * Construct take session controls.
      *
-     * @param attendance_take_data $takedata
+     * @param take_data $takedata
      * @param stdClass $user
      * @return array
      */
-    private function construct_take_session_controls(attendance_take_data $takedata, $user) {
+    private function construct_take_session_controls(take_data $takedata, $user) {
         $celldata = array();
         $celldata['remarks'] = '';
         if ($user->enrolmentend and $user->enrolmentend < $takedata->sessioninfo->sessdate) {
@@ -1931,7 +1929,7 @@ class renderer extends plugin_renderer_base {
                         // enrolmentstatus
                         // id.
 
-                        $nastyhack = new \ReflectionClass('attendance_take_data');
+                        $nastyhack = new \ReflectionClass('mod\attendance\output\take_data');
                         $takedata = $nastyhack->newInstanceWithoutConstructor();
                         $takedata->sessioninfo = $sess;
                         $takedata->statuses = array_filter($userdata->statuses[$sess->attendanceid], function($x) use ($sess) {
