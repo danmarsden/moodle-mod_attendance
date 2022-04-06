@@ -25,7 +25,6 @@
 namespace mod_attendance\output;
 
 use plugin_renderer_base;
-use attendance_filter_controls;
 use mod_attendance_view_page_params;
 use mod_attendance_take_page_params;
 use mod_attendance_page_with_filter_controls;
@@ -74,10 +73,10 @@ class renderer extends plugin_renderer_base {
     /**
      * Renders filter controls for attendance
      *
-     * @param attendance_filter_controls $fcontrols - filter controls data to display
+     * @param mod_attendance\output\filter_controls $fcontrols - filter controls data to display
      * @return string html code
      */
-    protected function render_attendance_filter_controls(attendance_filter_controls $fcontrols) {
+    protected function render_filter_controls(filter_controls $fcontrols) {
         $classes = 'attfiltercontrols';
         $filtertable = new html_table();
         $filtertable->attributes['class'] = ' ';
@@ -121,10 +120,10 @@ class renderer extends plugin_renderer_base {
     /**
      * Render group selector
      *
-     * @param attendance_filter_controls $fcontrols
+     * @param filter_controls $fcontrols
      * @return mixed|string
      */
-    protected function render_sess_group_selector(attendance_filter_controls $fcontrols) {
+    protected function render_sess_group_selector(filter_controls $fcontrols) {
         switch ($fcontrols->pageparams->selectortype) {
             case mod_attendance_page_with_filter_controls::SELECTOR_SESS_TYPE:
                 $sessgroups = $fcontrols->get_sess_groups_list();
@@ -147,10 +146,10 @@ class renderer extends plugin_renderer_base {
     /**
      * Render paging controls.
      *
-     * @param attendance_filter_controls $fcontrols
+     * @param filter_controls $fcontrols
      * @return string
      */
-    protected function render_paging_controls(attendance_filter_controls $fcontrols) {
+    protected function render_paging_controls(filter_controls $fcontrols) {
         $pagingcontrols = '';
 
         $group = 0;
@@ -191,10 +190,10 @@ class renderer extends plugin_renderer_base {
     /**
      * Render date controls.
      *
-     * @param attendance_filter_controls $fcontrols
+     * @param filter_controls $fcontrols
      * @return string
      */
-    protected function render_curdate_controls(attendance_filter_controls $fcontrols) {
+    protected function render_curdate_controls(filter_controls $fcontrols) {
         global $CFG;
 
         $curdatecontrols = '';
@@ -244,10 +243,10 @@ class renderer extends plugin_renderer_base {
     /**
      * Render grouping controls (for all sessions report).
      *
-     * @param attendance_filter_controls $fcontrols
+     * @param filter_controls $fcontrols
      * @return string
      */
-    protected function render_grouping_controls(attendance_filter_controls $fcontrols) {
+    protected function render_grouping_controls(filter_controls $fcontrols) {
         if ($fcontrols->pageparams->mode === mod_attendance_view_page_params::MODE_ALL_SESSIONS) {
             $groupoptions = array(
                 'date' => get_string('sessionsbydate', 'attendance'),
@@ -271,10 +270,10 @@ class renderer extends plugin_renderer_base {
     /**
      * Render course controls (for all sessions report).
      *
-     * @param attendance_filter_controls $fcontrols
+     * @param filter_controls $fcontrols
      * @return string
      */
-    protected function render_course_controls(attendance_filter_controls $fcontrols) {
+    protected function render_course_controls(filter_controls $fcontrols) {
         if ($fcontrols->pageparams->mode === mod_attendance_view_page_params::MODE_ALL_SESSIONS) {
             $courseoptions = array(
                 'all' => get_string('sessionsallcourses', 'attendance'),
@@ -297,10 +296,10 @@ class renderer extends plugin_renderer_base {
     /**
      * Render view controls.
      *
-     * @param attendance_filter_controls $fcontrols
+     * @param filter_controls $fcontrols
      * @return string
      */
-    protected function render_view_controls(attendance_filter_controls $fcontrols) {
+    protected function render_view_controls(filter_controls $fcontrols) {
         $views[ATT_VIEW_ALL] = get_string('all', 'attendance');
         $views[ATT_VIEW_ALLPAST] = get_string('allpast', 'attendance');
         $views[ATT_VIEW_MONTHS] = get_string('months', 'attendance');
@@ -1160,7 +1159,7 @@ class renderer extends plugin_renderer_base {
         }
 
         if ($userdata->pageparams->mode == mod_attendance_view_page_params::MODE_THIS_COURSE) {
-            $o .= $this->render_attendance_filter_controls($userdata->filtercontrols);
+            $o .= $this->render_filter_controls($userdata->filtercontrols);
             $o .= $this->construct_user_sessions_log($userdata);
             $o .= html_writer::empty_tag('hr');
             $o .= construct_user_data_stat($userdata->summary->get_all_sessions_summary_for($userdata->user->id),
@@ -1177,7 +1176,7 @@ class renderer extends plugin_renderer_base {
             $o .= html_writer::end_div();
             $o .= html_writer::end_div();
             $o .= html_writer::start_div('float-right');
-            $o .= $this->render_attendance_filter_controls($userdata->filtercontrols);
+            $o .= $this->render_filter_controls($userdata->filtercontrols);
             $o .= html_writer::end_div();
             $o .= html_writer::end_div();
             $o .= $allsessions->detail;

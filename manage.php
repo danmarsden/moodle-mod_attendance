@@ -80,7 +80,7 @@ $PAGE->navbar->add($att->name);
 
 $output = $PAGE->get_renderer('mod_attendance');
 $tabs = new mod_attendance\output\tabs($att, mod_attendance\output\tabs::TAB_SESSIONS);
-$filtercontrols = new attendance_filter_controls($att);
+$filtercontrols = new mod_attendance\output\filter_controls($att);
 $sesstable = new attendance_manage_data($att);
 
 // Output starts here.
