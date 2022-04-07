@@ -35,7 +35,6 @@ Feature: Teachers and Students can record session attendance
     And I should see "Attendance"
     And I log out
 
-  @javascript
   Scenario: Students can mark their own attendance and teacher can hide specific status from students.
     Given I am on the "Attendance" "mod_attendance > View" page logged in as "teacher1"
     And I follow "Add"
@@ -68,7 +67,6 @@ Feature: Teachers and Students can record session attendance
     And I click on "Get these logs" "button"
     Then "Attendance taken by student" "link" should exist
 
-  @javascript
   Scenario: Teachers can view below % report and send a message
     Given I am on the "Attendance" "mod_attendance > View" page logged in as "teacher1"
     And I follow "Add"
