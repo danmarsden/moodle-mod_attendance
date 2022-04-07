@@ -24,8 +24,6 @@
 
 namespace mod_attendance\form;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * class for displaying export form.
  *

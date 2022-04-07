@@ -23,8 +23,6 @@
  */
 namespace mod_attendance\form;
 
-defined('MOODLE_INTERNAL') || die();
-
 use moodleform;
 use mod_attendance_structure;
 use DateTime;

@@ -24,8 +24,6 @@
  */
 namespace mod_attendance\event;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Event for when self-marking is blocked
  *

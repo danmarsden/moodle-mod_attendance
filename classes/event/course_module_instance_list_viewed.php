@@ -23,7 +23,6 @@
  */
 
 namespace mod_attendance\event;
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * The mod_attendance instance list viewed event class.

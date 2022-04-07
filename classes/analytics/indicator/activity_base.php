@@ -25,8 +25,6 @@
 
 namespace mod_attendance\analytics\indicator;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Activity base class.
  *

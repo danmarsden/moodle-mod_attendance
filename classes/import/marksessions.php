@@ -24,7 +24,6 @@
 
 namespace mod_attendance\import;
 
-defined('MOODLE_INTERNAL') || die();
 
 use csv_import_reader;
 use mod_attendance_notifyqueue;

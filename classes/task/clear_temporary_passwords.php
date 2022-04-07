@@ -23,7 +23,6 @@
  */
 
 namespace mod_attendance\task;
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * clear_temporary_passwords class, used to clean up the temporary passwords.

@@ -24,7 +24,6 @@
 
 namespace mod_attendance\output;
 
-defined('MOODLE_INTERNAL') || die();
 /**
  * Mobile output class for the attendance.
  *
