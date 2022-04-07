@@ -62,8 +62,7 @@ Feature: Teachers and Students can record session attendance
     And I press "Save changes"
     And I should see "Self-recorded"
     And I log out
-    When I log in as "teacher1"
-    And I am on "Course 1" course homepage
+    When I am on "Course 1" course homepage logged in as "teacher1"
     And I navigate to "Reports" in current page administration
     And I select "Logs" from the "Report type" singleselect
     And I click on "Get these logs" "button"
