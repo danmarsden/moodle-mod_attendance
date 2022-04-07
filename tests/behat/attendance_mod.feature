@@ -24,16 +24,9 @@ Feature: Teachers and Students can record session attendance
       | course | user     | role           | timestart     |
       | C1     | student1 | student        | ##yesterday## |
       | C1     | teacher1 | editingteacher | ##yesterday## |
-
-    And I log in as "teacher1"
-    And I am on "Course 1" course homepage with editing mode on
-    And I add a "Attendance" to section "1" and I fill the form with:
-      | Name        | Attendance       |
-    And I log out
-    And I log in as "student1"
-    And I am on "Course 1" course homepage
-    And I should see "Attendance"
-    And I log out
+    And the following "activities" exist:
+      | activity   | name       | course |
+      | attendance | Attendance | C1     |
 
   @javascript
   Scenario: Students can mark their own attendance and teacher can hide specific status from students.
@@ -62,9 +55,10 @@ Feature: Teachers and Students can record session attendance
     And I press "Save changes"
     And I should see "Self-recorded"
     And I log out
-    When I am on "Course 1" course homepage logged in as "teacher1"
+    When I log in as "admin"
+    And I am on "Course 1" course homepage
     And I navigate to "Reports" in current page administration
-    And I select "Logs" from the "Report type" singleselect
+    And I click on "Logs" "link"
     And I click on "Get these logs" "button"
     Then "Attendance taken by student" "link" should exist
 
@@ -84,7 +78,7 @@ Feature: Teachers and Students can record session attendance
     And I should see "student1@asd.com"
     And I am on "Course 1" course homepage
     And I navigate to "Reports" in current page administration
-    And I select "Logs" from the "Report type" singleselect
+    And I click on "Logs" "link"
     And I click on "Get these logs" "button"
     Then "Attendance report viewed" "link" should exist
 
