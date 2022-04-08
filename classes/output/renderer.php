@@ -2669,15 +2669,18 @@ class renderer extends plugin_renderer_base {
             $table->data[$i]->id = "statusrow".$i;
             $i++;
         }
+        $cells = [];
+        $cells[] = '*';
+        $cells[] = $this->construct_text_input('newacronym', 2, 2);
+        $cells[] = $this->construct_text_input('newdescription', 30, 30);
+        $cells[] = $this->construct_text_input('newgrade', 4, 4);
+        $cells[] = $this->construct_text_input('newstudentavailability', 4, 5);
 
-        $table->data[$i][] = '*';
-        $table->data[$i][] = $this->construct_text_input('newacronym', 2, 2);
-        $table->data[$i][] = $this->construct_text_input('newdescription', 30, 30);
-        $table->data[$i][] = $this->construct_text_input('newgrade', 4, 4);
-        $table->data[$i][] = $this->construct_text_input('newstudentavailability', 4, 5);
-
-        $table->data[$i][] = $this->construct_preferences_button(get_string('add', 'attendance'),
+        $cells[] = $this->construct_preferences_button(get_string('add', 'attendance'),
             mod_attendance_preferences_page_params::ACTION_ADD);
+
+        $table->data[$i] = new html_table_row($cells);
+        $table->data[$i]->id = "statuslastrow";
 
         $o = html_writer::table($table);
         $o .= html_writer::input_hidden_params($prefdata->url(array(), false));
