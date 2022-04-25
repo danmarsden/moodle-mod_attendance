@@ -259,7 +259,7 @@ function attendance_form_sessiondate_selector (MoodleQuickForm $mform) {
     for ($i = 0; $i <= 23; $i++) {
         $hours[$i] = sprintf("%02d", $i);
     }
-    for ($i = 0; $i < 60; $i += 5) {
+    for ($i = 0; $i < 60; $i++) {
         $minutes[$i] = sprintf("%02d", $i);
     }
 
