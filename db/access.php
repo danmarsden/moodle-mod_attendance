@@ -100,6 +100,16 @@ $capabilities = array(
         )
     ),
 
+    'mod/attendance:import' => array(
+        'riskbitmask' => RISK_PERSONAL,
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW
+        )
+    ),
+
     'mod/attendance:export' => array(
         'riskbitmask' => RISK_PERSONAL,
         'captype' => 'read',
