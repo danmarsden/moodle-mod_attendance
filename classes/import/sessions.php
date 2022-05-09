@@ -315,52 +315,67 @@ class sessions {
                 $session->usedefaultsubnet = '';
             }
 
-            if ($mapping['studentscanmark'] == -1) {
+            $studentscanmark = $this->get_column_data($row, $mapping['studentscanmark']);
+            if ($studentscanmark == -1) {
                 $session->studentscanmark = $pluginconfig->studentscanmark_default;
             } else {
-                $session->studentscanmark = $this->get_column_data($row, $mapping['studentscanmark']);
+                $session->studentscanmark = $studentscanmark;
             }
-            if ($mapping['randompassword'] == -1) {
+
+            $randompassword = $this->get_column_data($row, $mapping['randompassword']);
+            if ($randompassword == -1) {
                 $session->randompassword = $pluginconfig->randompassword_default;
             } else {
-                $session->randompassword = $this->get_column_data($row, $mapping['randompassword']);
+                $session->randompassword = $randompassword;
             }
-            if ($mapping['automark'] == -1) {
+
+            $automark = $this->get_column_data($row, $mapping['automark']);
+            if ($automark == -1) {
                 $session->automark = $pluginconfig->automark_default;
             } else {
-                $session->automark = $this->get_column_data($row, $mapping['automark']);
+                $session->automark = $automark;
             }
-            if ($mapping['autoassignstatus'] == -1) {
+
+            $autoassignstatus = $this->get_column_data($row, $mapping['autoassignstatus']);
+            if ($autoassignstatus == -1) {
                 $session->autoassignstatus = $pluginconfig->autoassignstatus;
             } else {
-                $session->autoassignstatus = $this->get_column_data($row, $mapping['autoassignstatus']);
+                $session->autoassignstatus = $autoassignstatus;
             }
-            if ($mapping['absenteereport'] == -1) {
+
+            $absenteereport = $this->get_column_data($row, $mapping['absenteereport']);
+            if ($absenteereport == -1) {
                 $session->absenteereport = $pluginconfig->absenteereport_default;
             } else {
-                $session->absenteereport = $this->get_column_data($row, $mapping['absenteereport']);
+                $session->absenteereport = $absenteereport;
             }
-            if ($mapping['preventsharedip'] == -1) {
+
+            $preventsharedip = $this->get_column_data($row, $mapping['preventsharedip']);
+            if ($preventsharedip == -1) {
                 $session->preventsharedip = $pluginconfig->preventsharedip;
             } else {
-                $session->preventsharedip = $this->get_column_data($row, $mapping['preventsharedip']);
+                $session->preventsharedip = $preventsharedip;
             }
-            if ($mapping['preventsharediptime'] == -1) {
+
+            $preventsharediptime = $this->get_column_data($row, $mapping['preventsharediptime']);
+            if ($preventsharediptime == -1) {
                 $session->preventsharediptime = $pluginconfig->preventsharediptime;
             } else {
-                $session->preventsharediptime = $this->get_column_data($row, $mapping['preventsharediptime']);
+                $session->preventsharediptime = $preventsharediptime;
             }
 
-            if ($mapping['calendarevent'] == -1) {
+            $calendarevent = $this->get_column_data($row, $mapping['calendarevent']);
+            if ($calendarevent == -1) {
                 $session->calendarevent = $pluginconfig->calendarevent_default;
             } else {
-                $session->calendarevent = $this->get_column_data($row, $mapping['calendarevent']);
+                $session->calendarevent = $calendarevent;
             }
 
-            if ($mapping['includeqrcode'] == -1) {
+            $includeqrcode = $this->get_column_data($row, $mapping['includeqrcode']);
+            if ($includeqrcode == -1) {
                 $session->includeqrcode = $pluginconfig->includeqrcode_default;
             } else {
-                $session->includeqrcode = $this->get_column_data($row, $mapping['includeqrcode']);
+                $session->includeqrcode = $includeqrcode;
 
                 if ($session->includeqrcode == 1 && $session->studentscanmark != 1) {
                     \mod_attendance_notifyqueue::notify_problem(get_string('error:qrcode', 'attendance'));
@@ -368,10 +383,12 @@ class sessions {
                 }
 
             }
-            if ($mapping['rotateqrcode'] == -1) {
+
+            $rotateqrcode = $this->get_column_data($row, $mapping['rotateqrcode']);
+            if ($rotateqrcode == -1) {
                 $session->rotateqrcode = $pluginconfig->rotateqrcode_default;
             } else {
-                $session->rotateqrcode = $this->get_column_data($row, $mapping['rotateqrcode']);
+                $session->rotateqrcode = $rotateqrcode;
             }
 
             // Reapeating session settings.
