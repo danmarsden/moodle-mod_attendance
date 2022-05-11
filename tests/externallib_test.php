@@ -129,7 +129,6 @@ class mod_attendance_external_testcase extends externallib_advanced_testcase {
 
         // Just add the same session.
         $secondsession = clone $this->sessions[0];
-        $secondsession->sessdate += 3600;
 
         $second->add_sessions([$secondsession]);
 
