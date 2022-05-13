@@ -45,8 +45,7 @@ YUI().use('yui2-container', 'yui2-calendar', function(Y) {
                 dialog = new YAHOO.widget.Dialog("attcalendarcontainer", {
                     visible: false,
                     context: ["show", "tl", "bl"],
-                    buttons: [{text: M.util.get_string('caltoday', 'attendance'), handler: resetHandler, isDefault: true},
-                             {text: M.util.get_string('calclose', 'attendance'), handler: closeHandler}],
+                    buttons: [{text: M.util.get_string('calclose', 'attendance'), handler: closeHandler}],
                     draggable: false,
                     close: false
                 });
