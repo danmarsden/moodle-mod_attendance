@@ -120,8 +120,8 @@ if (empty($userdata->pageparams->studentid)) {
 } else {
     $relateduserid = $userdata->pageparams->studentid;
 }
-
-if (($formdata = data_submitted()) && confirm_sesskey() && $edit == -1) {
+// We check if formdata includes sesskey first because the javascript calendar does a post to the page on change.
+if (($formdata = data_submitted()) && !empty($formdata->sesskey) && confirm_sesskey() && $edit == -1) {
     $userdata->take_sessions_from_form_data($formdata);
 
     // Trigger updated event.
