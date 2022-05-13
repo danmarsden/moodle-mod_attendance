@@ -191,7 +191,7 @@ class renderer extends plugin_renderer_base {
 
         $curdatecontrols = '';
         if ($fcontrols->curdatetxt) {
-            $this->page->requires->strings_for_js(array('calclose', 'caltoday'), 'attendance');
+            $this->page->requires->strings_for_js(array('calclose'), 'attendance');
             $jsvals = array(
                     'cal_months'    => explode(',', get_string('calmonths', 'attendance')),
                     'cal_week_days' => explode(',', get_string('calweekdays', 'attendance')),

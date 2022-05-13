@@ -98,7 +98,6 @@ $string['caleventcreated'] = 'Calendar event for session successfully created';
 $string['caleventdeleted'] = 'Calendar event for session successfully deleted';
 $string['calmonths'] = 'January,February,March,April,May,June,July,August,September,October,November,December';
 $string['calshow'] = 'Choose date';
-$string['caltoday'] = 'Today';
 $string['calweekdays'] = 'Su,Mo,Tu,We,Th,Fr,Sa';
 $string['cannottakeforgroup'] = 'You can\'t take attendance for group "{$a}"';
 $string['cantaddstatus'] = 'You must set an acronym and description when adding a new status.';
