@@ -390,6 +390,9 @@ class sessions {
             } else {
                 $session->rotateqrcode = $rotateqrcode;
             }
+            if ($session->rotateqrcode) {
+                $session->includeqrcode = 0;
+            }
 
             // Reapeating session settings.
             if (empty($mapping['repeaton'])) {
