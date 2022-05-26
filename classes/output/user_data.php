@@ -118,7 +118,12 @@ class user_data implements renderable {
             $this->sessionslog = attendance_get_user_sessions_log_full($userid, $this->pageparams);
 
             foreach ($this->sessionslog as $sessid => $sess) {
-                $this->sessionslog[$sessid]->cmid = $this->coursesatts[$sess->attendanceid]->cmid;
+                if (array_key_exists($sess->attendanceid, $this->coursesatts)) {
+                    $this->sessionslog[$sessid]->cmid = $this->coursesatts[$sess->attendanceid]->cmid;
+                } else {
+                    // Session attendanceid not found in coursesatts, probably because it is not uservisible.
+                    unset($this->sessionslog[$sessid]);
+                }
             }
 
         } else {
