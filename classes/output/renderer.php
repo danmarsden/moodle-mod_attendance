@@ -1924,7 +1924,7 @@ class renderer extends plugin_renderer_base {
                         // enrolmentstatus
                         // id.
 
-                        $nastyhack = new \ReflectionClass('mod\attendance\output\take_data');
+                        $nastyhack = new \ReflectionClass('mod_attendance\output\take_data');
                         $takedata = $nastyhack->newInstanceWithoutConstructor();
                         $takedata->sessioninfo = $sess;
                         $takedata->statuses = array_filter($userdata->statuses[$sess->attendanceid], function($x) use ($sess) {
