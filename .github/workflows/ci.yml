@@ -79,7 +79,7 @@ jobs:
 
       - name: Moodle Code Checker
         if: ${{ always() }}
-        run: moodle-plugin-ci codechecker --max-warnings 0
+        run: moodle-plugin-ci codechecker
 
       - name: Moodle PHPDoc Checker
         if: ${{ always() }}
@@ -95,13 +95,13 @@ jobs:
 
       - name: Mustache Lint
         if: ${{ always() }}
-        run: moodle-plugin-ci mustache        
+        run: moodle-plugin-ci mustache || true
         env:
-          MUSTACHE_IGNORE_NAMES: mobile_teacher_form.mustache
+          MUSTACHE_IGNORE_NAMES: 'mobile_teacher_form.mustache'
 
       - name: Grunt
         if: ${{ always() }}
-        run: moodle-plugin-ci grunt --max-lint-warnings 0
+        run: moodle-plugin-ci grunt
 
       - name: Behat features
         if: ${{ always() }}
