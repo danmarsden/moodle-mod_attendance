@@ -150,6 +150,7 @@ class auto_mark extends \core\task\scheduled_task {
                     $existinglog = $DB->get_records_menu('attendance_log',
                         ['sessionid' => $session->id], '', 'studentid, statusid');
 
+                    $newlogs = [];
                     $newlog = new \stdClass();
                     $newlog->timetaken = $now;
                     $newlog->takenby = 0;
@@ -182,8 +183,11 @@ class auto_mark extends \core\task\scheduled_task {
                         $newlog->studentid = $completionuser->userid;
                         $newlog->statusid = $att->get_automark_status($completionuser->timemodified, $session->id);
                         if (!empty($newlog->statusid)) {
-                            $DB->insert_record('attendance_log', $newlog);
+                            $newlogs[] = $newlog;
                         }
+                    }
+                    if (!empty($newlogs)) {
+                        $DB->insert_records('attendance_log', $newlogs);
                     }
                 }
 
@@ -218,6 +222,7 @@ class auto_mark extends \core\task\scheduled_task {
                 $existinglog->close();
                 mtrace($updated . " session status updated");
 
+                $newlogs = [];
                 $newlog = new \stdClass();
                 $newlog->timetaken = $now;
                 $newlog->takenby = 0;
@@ -235,11 +240,14 @@ class auto_mark extends \core\task\scheduled_task {
                         }
                         if (!empty($newlog->statusid)) {
                             $newlog->studentid = $user->id;
-                            $DB->insert_record('attendance_log', $newlog);
+                            $newlogs[] = $newlog;
                             $added++;
-                            $donesomething = true;
                         }
                     }
+                }
+                if (!empty($newlogs)) {
+                    $DB->insert_records('attendance_log', $newlogs);
+                    $donesomething = true;
                 }
                 mtrace($added . " session status inserted");
 
