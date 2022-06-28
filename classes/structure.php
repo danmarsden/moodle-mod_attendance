@@ -903,6 +903,11 @@ class mod_attendance_structure {
             $users[$tempuser->studentid] = self::tempuser_to_user($tempuser);
         }
 
+        // Add custom profile field data.
+        foreach ($users as $user) {
+            profile_load_data($user);
+        }
+
         return $users;
     }
 
