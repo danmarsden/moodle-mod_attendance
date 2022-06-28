@@ -55,6 +55,8 @@ class attendance_tabs implements renderable {
     const TAB_WARNINGS = 8;
     /** Absentee tab */
     const TAB_ABSENTEE      = 9;
+    /** Import tab */
+    const TAB_IMPORT        = 10;
     /** @var int current tab */
     public $currenttab;
 
@@ -104,6 +106,11 @@ class attendance_tabs implements renderable {
             get_config('attendance', 'enablewarnings')) {
             $toprow[] = new tabobject(self::TAB_ABSENTEE, $this->att->url_absentee()->out(),
                 get_string('absenteereport', 'attendance'));
+        }
+
+        if (has_capability('mod/attendance:import', $context)) {
+            $toprow[] = new tabobject(self::TAB_IMPORT, $this->att->url_import()->out(),
+                            get_string('import', 'attendance'));
         }
 
         if (has_capability('mod/attendance:export', $context)) {

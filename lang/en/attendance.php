@@ -49,6 +49,7 @@ $string['attendance:canbelisted'] = 'Appears in the roster';
 $string['attendance:changeattendances'] = 'Changing Attendances';
 $string['attendance:changepreferences'] = 'Changing Preferences';
 $string['attendance:export'] = 'Export Reports';
+$string['attendance:import'] = 'Import sessions from file (csv)';
 $string['attendance:manageattendances'] = 'Manage Attendances';
 $string['attendance:managetemporaryusers'] = 'Manage temporary users';
 $string['attendance:takeattendances'] = 'Taking Attendances';
