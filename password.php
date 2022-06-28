@@ -64,13 +64,12 @@ if ($showpassword  && !$rotateqr) {
     attendance_renderpassword($session);
 }
 
-if ($showqr) {
-    attendance_renderqrcode($session);
-}
 
 if ($rotateqr) {
     attendance_generate_passwords($session);
     attendance_renderqrcoderotate($session);
+} else if ($showqr) {
+    attendance_renderqrcode($session);
 }
 
 echo $OUTPUT->footer();
