@@ -731,7 +731,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $extrasearchfields = explode(',', $CFG->showuseridentity);
         }
         foreach ($extrasearchfields as $field) {
-            $table->head[] = get_string($field);
+            $table->head[] = \core_user\fields::get_display_name($field);
             $table->align[] = 'left';
         }
         foreach ($takedata->statuses as $st) {
@@ -2134,7 +2134,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $rows = array();
 
         $bulkmessagecapability = has_capability('moodle/course:bulkmessaging', $this->page->context);
-        $extrafields = \core_user\fields::for_identity($reportdata->att->context)->get_required_fields();
+        $extrafields = \core_user\fields::for_identity($reportdata->att->context, true)->get_required_fields();
         $showextrauserdetails = $reportdata->pageparams->showextrauserdetails;
         $params = $reportdata->pageparams->get_significant_params();
         $text = get_string('users');
@@ -2174,7 +2174,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $row->cells[] = $cell;
 
         foreach ($extrafields as $field) {
-            $row->cells[] = $this->build_header_cell(get_string($field), false, false);
+            $row->cells[] = $this->build_header_cell(\core_user\fields::get_display_name($field), false, false);
         }
 
         $rows[] = $row;
