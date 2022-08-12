@@ -982,7 +982,7 @@ function attendance_course_users_points($courseids = array(), $orderby = '') {
         $params = array_merge($params, $inparams);
     }
 
-    $sql = "SELECT courseid, coursename, sum(points) / sum(maxpoints) as percentage FROM (
+    $sql = "SELECT courseid, coursename, sum(points) / NULLIF(sum(maxpoints),0) as percentage FROM (
 SELECT a.id, a.course as courseid, c.fullname as coursename, atl.studentid AS userid, COUNT(DISTINCT ats.id) AS numtakensessions,
                         SUM(stg.grade) AS points, SUM(stm.maxgrade) AS maxpoints
                    FROM {attendance_sessions} ats
