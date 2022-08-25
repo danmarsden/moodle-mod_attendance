@@ -999,6 +999,7 @@ SELECT a.id, a.course as courseid, c.fullname as coursename, atl.studentid AS us
                   {$joingroup}
                   WHERE ats.sessdate >= c.startdate
                     AND ats.lasttaken != 0
+                    AND stm.maxgrade > 0
                     {$where}
                 GROUP BY a.id, a.course, c.fullname, atl.studentid
                 ) p GROUP by courseid, coursename {$orderby}";
