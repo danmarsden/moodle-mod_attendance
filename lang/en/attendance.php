@@ -646,3 +646,4 @@ $string['usersessiontaken'] = 'User session taken';
 $string['userstatus'] = 'User session status';
 $string['usersessiongrade'] = 'User session grade';
 $string['usersessionremarks'] = 'User session remarks';
+$string['messagedselecteduserfailed'] = 'Failed to send a message to one or more of the users. Please turn debugging on to find out more.';
