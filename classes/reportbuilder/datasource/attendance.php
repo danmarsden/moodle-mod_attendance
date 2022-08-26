@@ -19,7 +19,7 @@ declare(strict_types=1);
 namespace mod_attendance\reportbuilder\datasource;
 
 use core_reportbuilder\datasource;
-use mod_attendance\local\entities\attendanceentity;
+use core_reportbuilder\local\entities\course;;
 use core_reportbuilder\local\entities\user;
 use core_reportbuilder\local\helpers\database;
 
@@ -48,12 +48,13 @@ class attendance extends datasource {
         global $CFG;
         require_once($CFG->dirroot.'/mod/attendance/locallib.php');
 
-        $attendanceentity = new attendanceentity();
+        $attendanceentity = new \mod_attendance\local\entities\attendance();
         $attendancealias = $attendanceentity->get_table_alias('attendance');
 
         $attendancelogalias = $attendanceentity->get_table_alias('attendance_log');
         $this->set_main_table('attendance_log', $attendancelogalias);
         $this->add_entity($attendanceentity);
+        $this->add_join($attendanceentity->attendancejoin()); // Force the join to be added so that course fields can be added first.
 
         // Add core user join.
         $userentity = new user();
@@ -61,17 +62,12 @@ class attendance extends datasource {
         $userjoin = "JOIN {user} {$useralias} ON {$useralias}.id = {$attendancelogalias}.studentid";
         $this->add_entity($userentity->add_join($userjoin));
 
-        $attendanceentityname = $attendanceentity->get_entity_name();
-        $userentityname = $userentity->get_entity_name();
+        $coursentity = new course();
+        $coursealias = $coursentity->get_table_alias('course');
+        $coursejoin = "JOIN {course} {$coursealias} ON {$coursealias}.id = {$attendancealias}.course";
+        $this->add_entity($coursentity->add_join($coursejoin));
 
-        $this->add_columns_from_entity($userentityname);
-        $this->add_filters_from_entity($userentityname);
-        $this->add_conditions_from_entity($userentityname);
-
-        $this->add_columns_from_entity($attendanceentityname);
-        $this->add_filters_from_entity($attendanceentityname);
-        $this->add_conditions_from_entity($attendanceentityname);
-
+        $this->add_all_from_entities();
     }
 
     /**
@@ -80,7 +76,13 @@ class attendance extends datasource {
      * @return string[]
      */
     public function get_default_columns(): array {
-        return [];
+        return ['course:fullname',
+                'attendance:name',
+                'user:fullname',
+                'attendance:sessiondate',
+                'attendance:timetaken',
+                'attendance:status',
+                'attendance:grade'];
     }
 
     /**

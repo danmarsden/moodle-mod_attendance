@@ -44,7 +44,7 @@ require_once($CFG->dirroot . '/course/lib.php');
  * @copyright   2022 Catalyst IT
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class attendanceentity extends base {
+class attendance extends base {
 
     /**
      * Database tables that this entity uses and their default aliases
@@ -108,37 +108,30 @@ class attendanceentity extends base {
     protected function get_all_columns(): array {
 
         $columns = [];
-        $usertablealias = $this->get_table_alias('user');
-        $coursealias = $this->get_table_alias('course');
-        $contexttablealias = $this->get_table_alias('context');
+
         $attendancealias = $this->get_table_alias('attendance');
         $attendancesessionalias = $this->get_table_alias('attendance_sessions');
         $attendancelogalias = $this->get_table_alias('attendance_log');
         $attendancestatusalias = $this->get_table_alias('attendance_statuses');
 
-        $join = "
-                    INNER JOIN {attendance_statuses} {$attendancestatusalias}
-                    ON {$attendancestatusalias}.id = {$attendancelogalias}.statusid
-                    INNER JOIN {attendance_sessions} {$attendancesessionalias}
-                    ON {$attendancesessionalias}.id = {$attendancelogalias}.sessionid
-                    INNER JOIN {attendance} {$attendancealias}
-                    ON {$attendancealias}.id = {$attendancesessionalias}.attendanceid
-                ";
+        $join = $this->attendancejoin();
 
-        // Session name column.
+        // Attendance name column.
         $columns[] = (new column(
             'name',
-            new lang_string('sessionname', 'mod_attendance'),
+            new lang_string('name', 'mod_attendance'),
             $this->get_entity_name()
         ))
             ->add_join($join)
             ->set_is_sortable(true)
             ->add_field("{$attendancealias}.name");
 
+        // Now handle session columns.
+
         // Description column.
         $columns[] = (new column(
-            'description',
-            new lang_string('description', 'mod_attendance'),
+            'sessiondescription',
+            new lang_string('sessiondescription', 'mod_attendance'),
             $this->get_entity_name()
         ))
             ->add_join($join)
@@ -148,7 +141,7 @@ class attendanceentity extends base {
         // Session date column.
         $columns[] = (new column(
             'sessiondate',
-            new lang_string('sessiondate', 'mod_attendance'),
+            new lang_string('reportsessiondate', 'mod_attendance'),
             $this->get_entity_name()
         ))
             ->add_join($join)
@@ -161,7 +154,7 @@ class attendanceentity extends base {
         // Session duration column.
         $columns[] = (new column(
             'duration',
-            new lang_string('duration', 'mod_attendance'),
+            new lang_string('reportsessionduration', 'mod_attendance'),
             $this->get_entity_name()
         ))
             ->add_join($join)
@@ -171,7 +164,7 @@ class attendanceentity extends base {
         // Session last taken column.
         $columns[] = (new column(
             'lasttaken',
-            new lang_string('lasttaken', 'mod_attendance'),
+            new lang_string('reportsessionlasttaken', 'mod_attendance'),
             $this->get_entity_name()
         ))
             ->add_join($join)
@@ -180,44 +173,12 @@ class attendanceentity extends base {
             ->add_callback(static function ($value, $row): string {
                 return userdate($value);
             });
-
-        // Time modified column.
-        $columns[] = (new column(
-            'timemodified',
-            new lang_string('timemodified', 'mod_attendance'),
-            $this->get_entity_name()
-        ))
-            ->add_join($join)
-            ->set_is_sortable(true)
-            ->add_field("{$attendancesessionalias}.timemodified")
-            ->add_callback(static function ($value, $row): string {
-                return userdate($value);
-            });
-
-        // Status column.
-        $columns[] = (new column(
-            'status',
-            new lang_string('statuses', 'mod_attendance'),
-            $this->get_entity_name()
-        ))
-            ->add_join($join)
-            ->set_is_sortable(true)
-            ->add_field("{$attendancestatusalias}.description");
-
-        // Grade column.
-        $columns[] = (new column(
-            'grade',
-            new lang_string('attendancegrade', 'mod_attendance'),
-            $this->get_entity_name()
-        ))
-            ->add_join($join)
-            ->set_is_sortable(true)
-            ->add_field("{$attendancestatusalias}.grade");
+        // Now add Log columns.
 
         // Time taken column.
         $columns[] = (new column(
             'timetaken',
-            new lang_string('timetaken', 'mod_attendance'),
+            new lang_string('usersessiontaken', 'mod_attendance'),
             $this->get_entity_name()
         ))
             ->add_join($join)
@@ -227,10 +188,32 @@ class attendanceentity extends base {
                 return userdate($value);
             });
 
+        // Now add Status columns.
+
+        // Status column.
+        $columns[] = (new column(
+            'status',
+            new lang_string('userstatus', 'mod_attendance'),
+            $this->get_entity_name()
+        ))
+            ->add_join($join)
+            ->set_is_sortable(true)
+            ->add_field("{$attendancestatusalias}.acronym");
+
+        // Grade column.
+        $columns[] = (new column(
+            'grade',
+            new lang_string('usersessiongrade', 'mod_attendance'),
+            $this->get_entity_name()
+        ))
+            ->add_join($join)
+            ->set_is_sortable(true)
+            ->add_field("{$attendancestatusalias}.grade");
+
         // Remarks column.
         $columns[] = (new column(
             'remarks',
-            new lang_string('remarks', 'mod_attendance'),
+            new lang_string('usersessionremarks', 'mod_attendance'),
             $this->get_entity_name()
         ))
             ->add_join($join)
@@ -248,28 +231,18 @@ class attendanceentity extends base {
     protected function get_all_filters(): array {
 
         $filters = [];
-        $usertablealias = $this->get_table_alias('user');
-        $coursealias = $this->get_table_alias('course');
-        $contexttablealias = $this->get_table_alias('context');
         $attendancealias = $this->get_table_alias('attendance');
         $attendancesessionalias = $this->get_table_alias('attendance_sessions');
         $attendancelogalias = $this->get_table_alias('attendance_log');
         $attendancestatusalias = $this->get_table_alias('attendance_statuses');
 
-        $join = "
-                    INNER JOIN {attendance_statuses} {$attendancestatusalias}
-                    ON {$attendancestatusalias}.id = {$attendancelogalias}.statusid
-                    INNER JOIN {attendance_sessions} {$attendancesessionalias}
-                    ON {$attendancesessionalias}.id = {$attendancelogalias}.sessionid
-                    INNER JOIN {attendance} {$attendancealias}
-                    ON {$attendancealias}.id = {$attendancesessionalias}.attendanceid
-                ";
+        $join = $this->attendancejoin();
 
         // Session name filter.
         $filters[] = (new filter(
             text::class,
             'nameselector',
-            new lang_string('sessionname', 'mod_attendance'),
+            new lang_string('name', 'mod_attendance'),
             $this->get_entity_name(),
             "{$attendancealias}.name"
         ))
@@ -278,8 +251,8 @@ class attendanceentity extends base {
         // Description filter.
         $filters[] = (new filter(
             text::class,
-            'description',
-            new lang_string('description', 'mod_attendance'),
+            'sessiondescription',
+            new lang_string('sessiondescription', 'mod_attendance'),
             $this->get_entity_name(),
             "{$attendancesessionalias}.description"
         ))
@@ -289,7 +262,7 @@ class attendanceentity extends base {
         $filters[] = (new filter(
             date::class,
             'sessiondate',
-            new lang_string('sessiondate', 'mod_attendance'),
+            new lang_string('reportsessiondate', 'mod_attendance'),
             $this->get_entity_name(),
             "{$attendancesessionalias}.sessdate"
         ))
@@ -299,7 +272,7 @@ class attendanceentity extends base {
         $filters[] = (new filter(
             duration::class,
             'duration',
-            new lang_string('duration', 'mod_attendance'),
+            new lang_string('reportsessionduration', 'mod_attendance'),
             $this->get_entity_name(),
             "{$attendancesessionalias}.duration"
         ))
@@ -309,19 +282,9 @@ class attendanceentity extends base {
         $filters[] = (new filter(
             date::class,
             'lasttaken',
-            new lang_string('lasttaken', 'mod_attendance'),
+            new lang_string('reportsessionlasttaken', 'mod_attendance'),
             $this->get_entity_name(),
             "{$attendancesessionalias}.lasttaken"
-        ))
-            ->add_join($join);
-
-        // Time modified filter.
-        $filters[] = (new filter(
-            date::class,
-            'timemodified',
-            new lang_string('timemodified', 'mod_attendance'),
-            $this->get_entity_name(),
-            "{$attendancesessionalias}.timemodified"
         ))
             ->add_join($join);
 
@@ -329,9 +292,9 @@ class attendanceentity extends base {
         $filters[] = (new filter(
             text::class,
             'status',
-            new lang_string('statuses', 'mod_attendance'),
+            new lang_string('userstatus', 'mod_attendance'),
             $this->get_entity_name(),
-            "{$attendancestatusalias}.description"
+            "{$attendancestatusalias}.acronym"
         ))
             ->add_join($join);
 
@@ -339,7 +302,7 @@ class attendanceentity extends base {
         $filters[] = (new filter(
             date::class,
             'timetaken',
-            new lang_string('timetaken', 'mod_attendance'),
+            new lang_string('usersessiontaken', 'mod_attendance'),
             $this->get_entity_name(),
             "{$attendancelogalias}.timetaken"
         ))
@@ -349,12 +312,30 @@ class attendanceentity extends base {
         $filters[] = (new filter(
             text::class,
             'remarks',
-            new lang_string('remarks', 'mod_attendance'),
+            new lang_string('usersessionremarks', 'mod_attendance'),
             $this->get_entity_name(),
             "{$attendancelogalias}.remarks"
         ))
             ->add_join($join);
 
         return $filters;
+    }
+    /**
+     * Helper function to get main join.
+     *
+     * @return string
+     */
+    public function attendancejoin() {
+        $attendancealias = $this->get_table_alias('attendance');
+        $attendancesessionalias = $this->get_table_alias('attendance_sessions');
+        $attendancelogalias = $this->get_table_alias('attendance_log');
+        $attendancestatusalias = $this->get_table_alias('attendance_statuses');
+
+        return "JOIN {attendance_statuses} {$attendancestatusalias}
+                    ON {$attendancestatusalias}.id = {$attendancelogalias}.statusid
+                JOIN {attendance_sessions} {$attendancesessionalias}
+                    ON {$attendancesessionalias}.id = {$attendancelogalias}.sessionid
+                JOIN {attendance} {$attendancealias}
+                    ON {$attendancealias}.id = {$attendancesessionalias}.attendanceid";
     }
 }
