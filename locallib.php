@@ -1241,6 +1241,16 @@ function attendance_strftimehm($time) {
     }
 
     $userdate = userdate($time, $format);
+    if (stripos($format, '%p') && empty($userdate)) {
+        // Failover - if %p is in use, but resulting time is empty (windows server), make sure a time is still returned.
+        $userdate = userdate($time, "%I:%M");
+        if (userdate($time, '%H') > 11) {
+            $userdate .= 'pm';
+        } else {
+            $userdate .= 'am';
+        }
+        return $userdate;
+    }
 
     // Some Lang packs use %p to suffix with AM/PM but not all strftime support this.
     // Check if %p is in use and make sure it's being respected.
