@@ -701,5 +701,18 @@ function xmldb_attendance_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2021082600, 'attendance');
     }
 
+    if ($oldversion < 2022082900) {
+
+        // Changing precision of field remarks on table attendance_log to (1333).
+        $table = new xmldb_table('attendance_log');
+        $field = new xmldb_field('remarks', XMLDB_TYPE_CHAR, '1333', null, null, null, null, 'takenby');
+
+        // Launch change of precision for field remarks.
+        $dbman->change_field_precision($table, $field);
+
+        // Attendance savepoint reached.
+        upgrade_mod_savepoint(true, 2022082900, 'attendance');
+    }
+
     return $result;
 }
