@@ -80,15 +80,15 @@ class user_sessions_cells_generator {
                 if ($this->user->enrolmentstart > ($sess->sessdate + $sess->duration)) {
                     $starttext = get_string('enrolmentstart', 'attendance', userdate($this->user->enrolmentstart, '%d.%m.%Y'));
                     $this->construct_enrolments_info_cell($starttext);
-                } else if ($this->user->enrolmentend and $this->user->enrolmentend < $sess->sessdate) {
+                } else if ($this->user->enrolmentend && $this->user->enrolmentend < $sess->sessdate) {
                     $endtext = get_string('enrolmentend', 'attendance', userdate($this->user->enrolmentend, '%d.%m.%Y'));
                     $this->construct_enrolments_info_cell($endtext);
-                } else if (!$this->user->enrolmentend and $this->user->enrolmentstatus == ENROL_USER_SUSPENDED) {
+                } else if (!$this->user->enrolmentend && $this->user->enrolmentstatus == ENROL_USER_SUSPENDED) {
                     // No enrolmentend and ENROL_USER_SUSPENDED.
                     $suspendext = get_string('enrolmentsuspended', 'attendance', userdate($this->user->enrolmentend, '%d.%m.%Y'));
                     $this->construct_enrolments_info_cell($suspendext);
                 } else {
-                    if ($sess->groupid == 0 or array_key_exists($sess->groupid, $this->reportdata->usersgroups[$this->user->id])) {
+                    if ($sess->groupid == 0 || array_key_exists($sess->groupid, $this->reportdata->usersgroups[$this->user->id])) {
                         $this->construct_not_taken_cell('?');
                     } else {
                         $this->construct_not_existing_for_user_session_cell('');

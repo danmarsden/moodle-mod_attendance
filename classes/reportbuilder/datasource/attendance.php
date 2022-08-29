@@ -54,7 +54,9 @@ class attendance extends datasource {
         $attendancelogalias = $attendanceentity->get_table_alias('attendance_log');
         $this->set_main_table('attendance_log', $attendancelogalias);
         $this->add_entity($attendanceentity);
-        $this->add_join($attendanceentity->attendancejoin()); // Force the join to be added so that course fields can be added first.
+
+        // Force the join to be added so that course fields can be added first.
+        $this->add_join($attendanceentity->attendancejoin());
 
         // Add core user join.
         $userentity = new user();

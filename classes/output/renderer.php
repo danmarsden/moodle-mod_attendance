@@ -647,9 +647,9 @@ class renderer extends plugin_renderer_base {
             }
         }
 
-        if ($takedata->pageparams->grouptype == mod_attendance_structure::SESSION_COMMON and
-                ($takedata->groupmode == VISIBLEGROUPS or
-                ($takedata->groupmode and has_capability('moodle/site:accessallgroups', $context)))) {
+        if ($takedata->pageparams->grouptype == mod_attendance_structure::SESSION_COMMON &&
+                ($takedata->groupmode == VISIBLEGROUPS ||
+                ($takedata->groupmode && has_capability('moodle/site:accessallgroups', $context)))) {
             $controls .= groups_print_activity_menu($takedata->cm, $takedata->url(), true);
         }
 
@@ -962,17 +962,17 @@ class renderer extends plugin_renderer_base {
      */
     private function construct_take_user_controls(take_data $takedata, $user) {
         $celldata = array();
-        if ($user->enrolmentend and $user->enrolmentend < $takedata->sessioninfo->sessdate) {
+        if ($user->enrolmentend && $user->enrolmentend < $takedata->sessioninfo->sessdate) {
             $celldata['text'] = get_string('enrolmentend', 'attendance', userdate($user->enrolmentend, '%d.%m.%Y'));
             $celldata['colspan'] = count($takedata->statuses) + 1;
             $celldata['class'] = 'userwithoutenrol';
-        } else if (!$user->enrolmentend and $user->enrolmentstatus == ENROL_USER_SUSPENDED) {
+        } else if (!$user->enrolmentend && $user->enrolmentstatus == ENROL_USER_SUSPENDED) {
             // No enrolmentend and ENROL_USER_SUSPENDED.
             $celldata['text'] = get_string('enrolmentsuspended', 'attendance');
             $celldata['colspan'] = count($takedata->statuses) + 1;
             $celldata['class'] = 'userwithoutenrol';
         } else {
-            if ($takedata->updatemode and !array_key_exists($user->id, $takedata->sessionlog)) {
+            if ($takedata->updatemode && !array_key_exists($user->id, $takedata->sessionlog)) {
                 $celldata['class'] = 'userwithoutdata';
             }
 
@@ -983,7 +983,7 @@ class renderer extends plugin_renderer_base {
                         'name'  => 'user'.$user->id,
                         'class' => 'st'.$st->id,
                         'value' => $st->id);
-                if (array_key_exists($user->id, $takedata->sessionlog) and $st->id == $takedata->sessionlog[$user->id]->statusid) {
+                if (array_key_exists($user->id, $takedata->sessionlog) && $st->id == $takedata->sessionlog[$user->id]->statusid) {
                     $params['checked'] = '';
                 }
 
@@ -1024,17 +1024,17 @@ class renderer extends plugin_renderer_base {
     private function construct_take_session_controls(take_data $takedata, $user) {
         $celldata = array();
         $celldata['remarks'] = '';
-        if ($user->enrolmentend and $user->enrolmentend < $takedata->sessioninfo->sessdate) {
+        if ($user->enrolmentend && $user->enrolmentend < $takedata->sessioninfo->sessdate) {
             $celldata['text'] = get_string('enrolmentend', 'attendance', userdate($user->enrolmentend, '%d.%m.%Y'));
             $celldata['colspan'] = count($takedata->statuses) + 1;
             $celldata['class'] = 'userwithoutenrol';
-        } else if (!$user->enrolmentend and $user->enrolmentstatus == ENROL_USER_SUSPENDED) {
+        } else if (!$user->enrolmentend && $user->enrolmentstatus == ENROL_USER_SUSPENDED) {
             // No enrolmentend and ENROL_USER_SUSPENDED.
             $celldata['text'] = get_string('enrolmentsuspended', 'attendance');
             $celldata['colspan'] = count($takedata->statuses) + 1;
             $celldata['class'] = 'userwithoutenrol';
         } else {
-            if ($takedata->updatemode and !array_key_exists($user->id, $takedata->sessionlog)) {
+            if ($takedata->updatemode && !array_key_exists($user->id, $takedata->sessionlog)) {
                 $celldata['class'] = 'userwithoutdata';
             }
 
@@ -1045,7 +1045,7 @@ class renderer extends plugin_renderer_base {
                         'name'  => 'user'.$user->id.'sess'.$takedata->sessioninfo->id,
                         'class' => 'st'.$st->id,
                         'value' => $st->id);
-                if (array_key_exists($user->id, $takedata->sessionlog) and $st->id == $takedata->sessionlog[$user->id]->statusid) {
+                if (array_key_exists($user->id, $takedata->sessionlog) && $st->id == $takedata->sessionlog[$user->id]->statusid) {
                     $params['checked'] = '';
                 }
 
@@ -1327,7 +1327,7 @@ class renderer extends plugin_renderer_base {
                                             userdate($userdata->user->enrolmentstart, '%d.%m.%Y')));
                 $cell->colspan = 3;
                 $row->cells[] = $cell;
-            } else if ($userdata->user->enrolmentend and $sess->sessdate > $userdata->user->enrolmentend) {
+            } else if ($userdata->user->enrolmentend && $sess->sessdate > $userdata->user->enrolmentend) {
                 $cell = new html_table_cell(get_string('enrolmentend', 'attendance',
                                             userdate($userdata->user->enrolmentend, '%d.%m.%Y')));
                 $cell->colspan = 3;
@@ -1973,7 +1973,7 @@ class renderer extends plugin_renderer_base {
                         userdate($userdata->user->enrolmentstart, '%d.%m.%Y')));
                         $cell->colspan = 3;
                         $row->cells[] = $cell;
-                    } else if ($userdata->user->enrolmentend and $sess->sessdate > $userdata->user->enrolmentend) {
+                    } else if ($userdata->user->enrolmentend && $sess->sessdate > $userdata->user->enrolmentend) {
                         $cell = new html_table_cell(get_string('enrolmentend', 'attendance',
                         userdate($userdata->user->enrolmentend, '%d.%m.%Y')));
                         $cell->colspan = 3;
@@ -2408,7 +2408,7 @@ class renderer extends plugin_renderer_base {
                     'mod/attendance:takeattendances',
                     'mod/attendance:changeattendances'
                 );
-                if (is_null($sess->lasttaken) and has_any_capability($capabilities, $reportdata->att->context)) {
+                if (is_null($sess->lasttaken) && has_any_capability($capabilities, $reportdata->att->context)) {
                     $sesstext = html_writer::link($reportdata->url_take($sess->id, $sess->groupid), $sesstext,
                         array('class' => 'attendancereporttakelink'));
                 }

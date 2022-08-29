@@ -84,9 +84,9 @@ if (has_any_capability($capabilities, $context) &&
         $USER->attendanceediting = false;
     }
 
-    if (($edit == 1) and confirm_sesskey()) {
+    if (($edit == 1) && confirm_sesskey()) {
         $USER->attendanceediting = true;
-    } else if ($edit == 0 and confirm_sesskey()) {
+    } else if ($edit == 0 && confirm_sesskey()) {
         $USER->attendanceediting = false;
     }
 

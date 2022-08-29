@@ -48,7 +48,7 @@ class export extends \moodleform {
 
         $groupmode = groups_get_activity_groupmode($cm, $course);
         $groups = groups_get_activity_allowed_groups($cm, $USER->id);
-        if ($groupmode == VISIBLEGROUPS or has_capability('moodle/site:accessallgroups', $modcontext)) {
+        if ($groupmode == VISIBLEGROUPS || has_capability('moodle/site:accessallgroups', $modcontext)) {
             $grouplist[0] = get_string('allparticipants');
         }
         if ($groups) {

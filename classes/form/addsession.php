@@ -83,8 +83,8 @@ class addsession extends moodleform {
                 $mform->setDefault('sessiontype', mod_attendance_structure::SESSION_COMMON);
                 break;
         }
-        if ($groupmode == SEPARATEGROUPS or $groupmode == VISIBLEGROUPS) {
-            if ($groupmode == SEPARATEGROUPS and !has_capability('moodle/site:accessallgroups', $modcontext)) {
+        if ($groupmode == SEPARATEGROUPS || $groupmode == VISIBLEGROUPS) {
+            if ($groupmode == SEPARATEGROUPS && !has_capability('moodle/site:accessallgroups', $modcontext)) {
                 $groups = groups_get_all_groups ($course->id, $USER->id, $cm->groupingid);
             } else {
                 $groups = groups_get_all_groups($course->id, 0, $cm->groupingid);
@@ -324,7 +324,7 @@ class addsession extends moodleform {
             $errors['sessionenddate'] = get_string('invalidsessionenddate', 'attendance');
         }
 
-        if ($data['sessiontype'] == mod_attendance_structure::SESSION_GROUP and empty($data['groups'])) {
+        if ($data['sessiontype'] == mod_attendance_structure::SESSION_GROUP && empty($data['groups'])) {
             $errors['groups'] = get_string('errorgroupsnotselected', 'attendance');
         }
 

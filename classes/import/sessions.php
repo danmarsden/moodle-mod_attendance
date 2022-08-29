@@ -416,7 +416,8 @@ class sessions {
             if ($course) {
                 $session->coursestartdate = $course;
             }
-            if (!empty($session->sdays) && !empty($session->period) && !empty($session->sessionenddate) && !empty($session->coursestartdate)) {
+            if (!empty($session->sdays) && !empty($session->period) &&
+                !empty($session->sessionenddate) && !empty($session->coursestartdate)) {
                 $session->addmultiply = 1;
             }
 

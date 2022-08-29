@@ -227,14 +227,14 @@ class mod_attendance_page_with_filter_controls {
             return;
         }
 
-        if ($groupmode == VISIBLEGROUPS or has_capability('moodle/site:accessallgroups', $PAGE->context)) {
+        if ($groupmode == VISIBLEGROUPS || has_capability('moodle/site:accessallgroups', $PAGE->context)) {
             $allowedgroups = groups_get_all_groups($this->cm->course, 0, $this->cm->groupingid);
         } else {
             $allowedgroups = groups_get_all_groups($this->cm->course, $USER->id, $this->cm->groupingid);
         }
 
         if ($allowedgroups) {
-            if ($groupmode == VISIBLEGROUPS or has_capability('moodle/site:accessallgroups', $PAGE->context)) {
+            if ($groupmode == VISIBLEGROUPS || has_capability('moodle/site:accessallgroups', $PAGE->context)) {
                 $this->sessgroupslist[self::SESSTYPE_ALL] = get_string('all', 'attendance');
             }
             // Show Common groups always.
