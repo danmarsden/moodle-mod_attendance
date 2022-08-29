@@ -23,6 +23,16 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+
+namespace mod_attendance\external;
+
+use externallib_advanced_testcase;
+use mod_attendance_structure;
+use stdClass;
+use attendance_handler;
+use external_api;
+use mod_attendance_external;
+
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
@@ -41,7 +51,7 @@ require_once($CFG->dirroot . '/mod/attendance/externallib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @group      mod_attendance
  */
-class mod_attendance_external_testcase extends externallib_advanced_testcase {
+class external_test extends externallib_advanced_testcase {
     /** @var core_course_category */
     protected $category;
     /** @var stdClass */
