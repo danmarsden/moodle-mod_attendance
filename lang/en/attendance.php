@@ -635,3 +635,4 @@ $string['week'] = 'week(s)';
 $string['weekcommencing'] = 'Week commencing';
 $string['weeks'] = 'Weeks';
 $string['youcantdo'] = 'You can\'t do anything';
+$string['cannottakethisgroup'] = 'You are not a member of the course group that this attendance session relates to, your attendance has not been recorded.';
