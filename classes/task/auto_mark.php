@@ -200,10 +200,10 @@ class auto_mark extends \core\task\scheduled_task {
                     if (empty($log->statusid)) {
                         if ($sessionover || !empty($userfirstaccess[$log->studentid])) {
                             // Status needs updating.
-                            if ($sessionover) {
-                                $log->statusid = $session->setunmarked;
-                            } else if (!empty($userfirstaccess[$log->studentid])) {
+                            if (!empty($userfirstaccess[$log->studentid])) {
                                 $log->statusid = $att->get_automark_status($userfirstaccess[$log->studentid], $session->id);
+                            } else if ($sessionover) {
+                                $log->statusid = $session->setunmarked;
                             }
                             if (!empty($log->statusid)) {
                                 $log->timetaken = $now;
@@ -232,10 +232,10 @@ class auto_mark extends \core\task\scheduled_task {
                 $added = 0;
                 foreach ($users as $user) {
                     if ($sessionover || !empty($userfirstaccess[$user->id])) {
-                        if ($sessionover) {
-                            $newlog->statusid = $session->setunmarked;
-                        } else if (!empty($userfirstaccess[$user->id])) {
+                        if (!empty($userfirstaccess[$user->id])) {
                             $newlog->statusid = $att->get_automark_status($userfirstaccess[$user->id], $session->id);
+                        } else if ($sessionover) {
+                            $newlog->statusid = $session->setunmarked;
                         }
                         if (!empty($newlog->statusid)) {
                             $newlog->studentid = $user->id;
