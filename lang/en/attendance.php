@@ -481,6 +481,7 @@ $string['rotateqrcodeexpirymargin_desc'] = 'Time interval (seconds) to allow exp
 $string['rotateqrcodeinterval'] = 'Rotate QR code/password interval (seconds)';
 $string['rotateqrcodeinterval_desc'] = 'Time interval (seconds) to rotate QR code/password by.';
 $string['save'] = 'Save attendance';
+$string['saveandshownext'] = 'Save and show next page';
 $string['scantime'] = 'Scan time';
 $string['scantime_help'] = 'This allows a timestamp to be included in the import file - it will attempt to convert the timestamp passed using the PHP strtotime function and then use attendance status settings to decide which status to set for the user';
 $string['search:activity'] = 'Attendance - activity information';

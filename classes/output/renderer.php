@@ -523,7 +523,7 @@ class renderer extends plugin_renderer_base {
         $params = array(
                 'type'  => 'submit',
                 'class' => 'btn btn-primary',
-                'value' => get_string('save', 'attendance'));
+                'value' => get_string('saveandshownext', 'attendance'));
         $table .= html_writer::tag('center', html_writer::empty_tag('input', $params));
         $table = html_writer::tag('form', $table, array('method' => 'post', 'action' => $takedata->url_path(),
                                                         'id' => 'attendancetakeform'));
@@ -731,14 +731,12 @@ class renderer extends plugin_renderer_base {
     protected function render_attendance_take_list(take_data $takedata) {
         global $CFG;
         $table = new html_table();
-        $table->width = '0%';
         $table->head = array(
-                '#',
                 $this->construct_fullname_head($takedata)
             );
-        $table->align = array('left', 'left');
-        $table->size = array('20px', '');
-        $table->wrap[1] = 'nowrap';
+        $table->align = array('left');
+        $table->size = array('');
+        $table->wrap[0] = 'nowrap';
         // Check if extra useridentity fields need to be added.
         $extrasearchfields = array();
         if (!empty($CFG->showuseridentity) && has_capability('moodle/site:viewuseridentity', $takedata->att->context)) {
@@ -784,7 +782,6 @@ class renderer extends plugin_renderer_base {
         }
 
         $cell = new html_table_cell(html_writer::div($this->output->render($this->statusdropdown()), 'setallstatuses'));
-        $cell->colspan = 2;
         $row->cells[] = $cell;
         foreach ($takedata->statuses as $st) {
             $attribs = array(
@@ -817,7 +814,6 @@ class renderer extends plugin_renderer_base {
         foreach ($takedata->users as $user) {
             $i++;
             $row = new html_table_row();
-            $row->cells[] = $i;
             $fullname = html_writer::link($takedata->url_view(array('studentid' => $user->id)), fullname($user));
             $fullname = $this->user_picture($user).$fullname; // Show different picture if it is a temporary user.
 
