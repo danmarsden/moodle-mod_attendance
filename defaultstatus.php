@@ -80,10 +80,11 @@ switch ($action) {
         $message .= str_repeat(html_writer::empty_tag('br'), 2);
         $message .= $status->acronym.': '.
             ($status->description ? $status->description : get_string('nodescription', 'attendance'));
+        $cancelurl = new moodle_url('/mod/attendance/defaultstatus.php');
         $confirmurl = $url;
         $confirmurl->param('confirm', 1);
 
-        echo $OUTPUT->confirm($message, $confirmurl, $url);
+        echo $OUTPUT->confirm($message, $confirmurl, $cancelurl);
         echo $OUTPUT->footer();
         exit;
     case mod_attendance_preferences_page_params::ACTION_HIDE:
