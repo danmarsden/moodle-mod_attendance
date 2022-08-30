@@ -538,3 +538,31 @@ function attendance_remove_user_from_thirdpartyemails($warnings, $userid) {
         $DB->update_record('attendance_warning', $updatedwarning);
     }
 }
+
+/**
+ * Add nodes to myprofile page.
+ *
+ * @param \core_user\output\myprofile\tree $tree Tree object
+ * @param stdClass $user user object
+ * @param bool $iscurrentuser
+ * @param stdClass $course Course object
+ *
+ * @return bool
+ */
+
+function mod_attendance_myprofile_navigation(core_user\output\myprofile\tree $tree, $user, $iscurrentuser, $course) {
+    if (empty($course)) {
+        return;
+    }
+    $cm = get_all_instances_in_course('attendance', $course, $user->id);
+    if (!empty($cm) && has_capability('mod/attendance:viewreports', context_module::instance($cm[0]->id))) {
+        $url = new moodle_url('/mod/attendance/view.php', ['id' => $cm[0]->coursemodule,
+                                                           'mode' => mod_attendance_view_page_params::MODE_THIS_COURSE,
+                                                           'studentid' => $user->id]);
+
+        $node = new core_user\output\myprofile\node('reports', 'attendanceuserreport',
+                                                    get_string('attendanceuserreport', 'attendance'),
+                                                    null, $url);
+        $tree->add_node($node);
+    }
+}

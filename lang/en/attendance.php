@@ -67,6 +67,7 @@ $string['attendancenotset'] = 'You must set your attendance';
 $string['attendancenotstarted'] = 'Attendance has not started yet for this course';
 $string['attendancepercent'] = 'Attendance percent';
 $string['attendancereport'] = 'Attendance';
+$string['attendanceuserreport'] = 'Attendance report';
 $string['attendanceslogged'] = 'Attendances logged';
 $string['attendancestaken'] = 'Attendances taken';
 $string['attendancesuccess'] = 'Attendance has been successfully taken';
