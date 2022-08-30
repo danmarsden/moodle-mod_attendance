@@ -763,10 +763,18 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
         }
 
         $wdaydesc = array(0 => 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
-
+        $lastdate = null;
         while ($sdate < $enddate) {
             if ($sdate < $startweek + WEEKSECS) {
                 $dinfo = usergetdate($sdate);
+                if (!empty($lastdate)) {
+                    $dinfo2 = usergetdate($lastdate);
+                    if ($dinfo['year'] == $dinfo2['year'] && $dinfo['mon'] == $dinfo2['mon'] && $dinfo['mday'] = $dinfo2['mday']) {
+                        // Daylight savings "oh no!".
+                        // This is nasty and abitrary - adding 6hrs - we should convert to using PHP datetime() to handle dates.
+                        $sdate += (HOURSECS * 6);
+                    }
+                }
                 if (isset($formdata->sdays) && array_key_exists($wdaydesc[$dinfo['wday']], $formdata->sdays)) {
                     $sess = new stdClass();
                     $sess->sessdate = make_timestamp($dinfo['year'], $dinfo['mon'], $dinfo['mday'],
@@ -834,6 +842,7 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
 
                     attendance_fill_groupid($formdata, $sessions, $sess);
                 }
+                $lastdate = $sdate;
                 $sdate += DAYSECS;
             } else {
                 $startweek += WEEKSECS * $formdata->period;
