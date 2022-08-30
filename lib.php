@@ -549,7 +549,6 @@ function attendance_remove_user_from_thirdpartyemails($warnings, $userid) {
  *
  * @return bool
  */
-
 function mod_attendance_myprofile_navigation(core_user\output\myprofile\tree $tree, $user, $iscurrentuser, $course) {
     if (empty($course)) {
         return;
