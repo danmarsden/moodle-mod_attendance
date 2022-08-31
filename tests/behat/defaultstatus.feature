@@ -27,5 +27,6 @@ Feature: Admin can set default status set for use in new attendance
     And I add a "Attendance" to section "1" and I fill the form with:
       | Name        | Attendance1       |
     And I am on the "Attendance1" "mod_attendance > View" page
-    And I follow "Status set"
+    And I click on "More" "link" in the ".secondary-navigation" "css_element"
+    And I select "Status set" from secondary navigation
     Then the field with xpath "//*[@id='statusrow2']/td[3]/input" matches value "customstatusdescription"

@@ -97,10 +97,8 @@ if ($form->is_cancelled()) {
 }
 
 $output = $PAGE->get_renderer('mod_attendance');
-$tabs = new mod_attendance\output\tabs($att, mod_attendance\output\tabs::TAB_IMPORT);
 echo $output->header();
 mod_attendance_notifyqueue::show();
-echo $output->render($tabs);
 
 $form->display();
 

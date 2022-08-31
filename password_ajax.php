@@ -47,7 +47,8 @@ $PAGE->set_context(context_system::instance());
 $data->heading = get_string('passwordgrp', 'attendance');
 if (isset($session->includeqrcode) && $session->includeqrcode == 1) {
     $studentattendancepage = '/mod/attendance/password.php?session=' . $session->id;
-    $data->text = html_writer::tag('p', html_writer::link($CFG->wwwroot . $studentattendancepage, get_string('showqrcode', 'attendance')));
+    $data->text = html_writer::tag('p', html_writer::link($CFG->wwwroot . $studentattendancepage,
+                                   get_string('showqrcode', 'attendance')));
 } else {
     $data->text = html_writer::span($session->studentpassword, 'student-password');
 }

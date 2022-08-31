@@ -23,12 +23,13 @@ Feature: Visiting reports
       | idnumber | 00001                 |
       | name     | Attendance    |
     And I am on the "Attendance" "mod_attendance > View" page logged in as "teacher1"
-    And I follow "Add session"
+    And I click on "Add session" "button"
     And I set the following fields to these values:
       | id_sestime_starthour | 01 |
       | id_sestime_endhour   | 02 |
     And I click on "id_submitbutton" "button"
-    And I follow "Warnings set"
+    And I click on "More" "link" in the ".secondary-navigation" "css_element"
+    And I select "Warnings set" from secondary navigation
     And I press "Add warning"
     And I set the following fields to these values:
       | id_warningpercent | 84 |
@@ -88,7 +89,7 @@ Feature: Visiting reports
     And I click on "td.cell.c4 input" "css_element" in the "Student 1" "table_row"
     And I press "Save and show next page"
 
-    When I follow "Add session"
+    When I click on "Add session" "button"
     And I set the following fields to these values:
       | id_sestime_starthour | 03 |
       | id_sestime_endhour   | 04 |
@@ -126,7 +127,7 @@ Feature: Visiting reports
     And I click on "td.cell.c3 input" "css_element" in the "Student 1" "table_row"
     And I press "Save and show next page"
 
-    When I follow "Add session"
+    When I click on "Add session" "button"
     And I set the following fields to these values:
       | id_sestime_starthour | 03 |
       | id_sestime_endhour   | 04 |
@@ -138,7 +139,7 @@ Feature: Visiting reports
     And I click on "td.cell.c2 input" "css_element" in the "Student 1" "table_row"
     And I press "Save and show next page"
 
-    When I follow "Add session"
+    When I click on "Add session" "button"
     And I set the following fields to these values:
       | id_sestime_starthour | 05 |
       | id_sestime_endhour   | 06 |
@@ -171,7 +172,7 @@ Feature: Visiting reports
     And I click on "td.cell.c3 input" "css_element" in the "Student 1" "table_row"
     And I press "Save and show next page"
 
-    When I follow "Add session"
+    When I click on "Add session" "button"
     And I set the following fields to these values:
       | id_sestime_starthour | 03 |
       | id_sestime_endhour   | 04 |
@@ -182,7 +183,7 @@ Feature: Visiting reports
     And I click on "td.cell.c2 input" "css_element" in the "Student 1" "table_row"
     And I press "Save and show next page"
 
-    When I follow "Add session"
+    When I click on "Add session" "button"
     And I set the following fields to these values:
       | id_sestime_starthour | 05 |
       | id_sestime_endhour   | 06 |

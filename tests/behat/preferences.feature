@@ -26,7 +26,8 @@ Feature: Teachers can't change status variables to have empty acronyms or descri
   @javascript
   Scenario: Teachers can add status variables
     Given I am on the "Attendancepreftest" "mod_attendance > View" page logged in as "teacher1"
-    And I follow "Status set"
+    And I click on "More" "link" in the ".secondary-navigation" "css_element"
+    And I select "Status set" from secondary navigation
     # Set the second status acronym to be empty
     And I set the field with xpath "//*[@id='statusrow2']/td[2]/input" to ""
     # Set the second status description to be empty

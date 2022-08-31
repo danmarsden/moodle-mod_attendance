@@ -63,10 +63,7 @@ if (empty($id)) {
     $PAGE->navbar->add($att->name);
 
     $output = $PAGE->get_renderer('mod_attendance');
-    $tabs = new mod_attendance\output\tabs($att, mod_attendance\output\tabs::TAB_WARNINGS);
     echo $output->header();
-    echo $output->render($tabs);
-
 }
 
 $mform = new mod_attendance\form\addwarning($url, array('notid' => $notid, 'id' => $id));

@@ -25,7 +25,7 @@ Feature: Test the calendar related features in the attendance module
     Given I am on "Course 1" course homepage with editing mode on
     And I add the "Calendar" block
     And I am on the "Test attendance" "mod_attendance > View" page
-    And I follow "Add session"
+    And I click on "Add session" "button"
     And I set the following fields to these values:
       | id_sestime_starthour   | 23 |
       | id_sestime_startminute | 00 |
