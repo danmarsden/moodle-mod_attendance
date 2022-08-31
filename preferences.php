@@ -117,6 +117,10 @@ switch ($att->pageparams->action) {
     case mod_attendance_preferences_page_params::ACTION_HIDE:
         $statuses = $att->get_statuses(false);
         $status = $statuses[$att->pageparams->statusid];
+        // Prevent hiding status if in-use.
+        if (attendance_has_logs_for_status($att->pageparams->statusid)) {
+            throw new moodle_exception('canthidestatus', 'attendance', "attsettings.php?id=$id");
+        }
         attendance_update_status($status, null, null, null, 0, $att->context, $att->cm);
         break;
     case mod_attendance_preferences_page_params::ACTION_SHOW:

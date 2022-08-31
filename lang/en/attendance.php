@@ -103,6 +103,7 @@ $string['calshow'] = 'Choose date';
 $string['calweekdays'] = 'Su,Mo,Tu,We,Th,Fr,Sa';
 $string['cannottakeforgroup'] = 'You can\'t take attendance for group "{$a}"';
 $string['cantaddstatus'] = 'You must set an acronym and description when adding a new status.';
+$string['canthidestatus'] = 'You cannot hide this status because it is already in use within this attendance activity';
 $string['categoryreport'] = 'Course category report';
 $string['changeattendance'] = 'Change attendance';
 $string['changeduration'] = 'Change duration';
