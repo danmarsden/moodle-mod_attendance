@@ -31,7 +31,7 @@ Feature: Teachers and Students can record session attendance
   @javascript
   Scenario: Students can mark their own attendance and teacher can hide specific status from students.
     Given I am on the "Attendance" "mod_attendance > View" page logged in as "teacher1"
-    And I follow "Add"
+    And I click on "Add session" "button"
     And I set the field "Allow students to record own attendance" to "1"
     And I set the following fields to these values:
       | id_sestime_starthour | 00 |
@@ -44,7 +44,8 @@ Feature: Teachers and Students can record session attendance
     And I should see "Excused"
     And I log out
     And I am on the "Attendance" "mod_attendance > View" page logged in as "teacher1"
-    And I follow "Status set"
+    And I click on "More" "link" in the ".secondary-navigation" "css_element"
+    And I select "Status set" from secondary navigation
     And I set the field with xpath "//*[@id='statusrow3']/td[5]/input" to "0"
     And I press "Update"
     And I log out
@@ -65,7 +66,7 @@ Feature: Teachers and Students can record session attendance
   @javascript
   Scenario: Teachers can view below % report and send a message
     Given I am on the "Attendance" "mod_attendance > View" page logged in as "teacher1"
-    And I follow "Add"
+    And I click on "Add session" "button"
     And I set the following fields to these values:
       | id_sestime_starthour | 01 |
       | id_sestime_endhour   | 02 |
@@ -91,7 +92,7 @@ Feature: Teachers and Students can record session attendance
 
     And I log out
     And I am on the "Attendance" "mod_attendance > View" page logged in as "teacher1"
-    And I follow "Add"
+    And I click on "Add session" "button"
     And I set the following fields to these values:
       | id_sestime_starthour | 01 |
       | id_sestime_endhour   | 02 |
@@ -133,7 +134,7 @@ Feature: Teachers and Students can record session attendance
 
     And I log out
     And I am on the "Attendance" "mod_attendance > View" page logged in as "teacher1"
-    And I follow "Add"
+    And I click on "Add session" "button"
     And I set the following fields to these values:
       | id_sestime_starthour | 01 |
       | id_sestime_endhour   | 02 |

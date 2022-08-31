@@ -54,16 +54,6 @@ class renderer extends plugin_renderer_base {
     // External API - methods to render attendance renderable components.
 
     /**
-     * Renders tabs for attendance
-     *
-     * @param mod_attendance\output\tabs $atttabs - tabs to display
-     * @return string html code
-     */
-    protected function render_tabs(tabs $atttabs) {
-        return print_tabs($atttabs->get_tabs(), $atttabs->currenttab, null, null, true);
-    }
-
-    /**
      * Renders filter controls for attendance
      *
      * @param mod_attendance\output\filter_controls $fcontrols - filter controls data to display
@@ -94,10 +84,16 @@ class renderer extends plugin_renderer_base {
             $row[] = $this->render_course_controls($fcontrols);
             $filtertable->data[] = $row;
         }
+        $addsession = '';
+        if (has_capability('mod/attendance:manageattendances', $fcontrols->att->context) && !$fcontrols->reportcontrol) {
+            $url = $fcontrols->att->url_sessions()->out(true,
+                   ['action' => mod_attendance_sessions_page_params::ACTION_ADD]);
+            $addsession = $this->output->single_button($url, get_string('addsession', 'attendance'),
+                                                       'post', ['class' => 'addsession', 'primary' => true]);
+        }
 
         $row = array();
-
-        $row[] = $this->render_sess_group_selector($fcontrols);
+        $row[] = $this->render_sess_group_selector($fcontrols). $addsession;
         $row[] = $this->render_curdate_controls($fcontrols);
         $row[] = $this->render_paging_controls($fcontrols);
         $row[] = $this->render_view_controls($fcontrols);
@@ -343,9 +339,7 @@ class renderer extends plugin_renderer_base {
         $this->page->requires->js_init_call('M.mod_attendance.init_manage');
 
         $table = new html_table();
-        $table->width = '100%';
         $table->head = array(
-                '#',
                 get_string('date', 'attendance'),
                 get_string('time', 'attendance'),
                 get_string('sessiontypeshort', 'attendance'),
@@ -353,8 +347,8 @@ class renderer extends plugin_renderer_base {
                 get_string('actions'),
                 html_writer::checkbox('cb_selector', 0, false, '', array('id' => 'cb_selector'))
             );
-        $table->align = array('', 'right', '', '', 'left', 'right', 'center');
-        $table->size = array('1px', '1px', '1px', '', '*', '120px', '1px');
+        $table->align = array('right', '', '', 'left', 'right', 'center');
+        $table->size = array('1px', '1px', '', '*', '120px', '1px');
 
         $i = 0;
         foreach ($sessdata->sessions as $key => $sess) {
@@ -362,7 +356,6 @@ class renderer extends plugin_renderer_base {
 
             $dta = $this->construct_date_time_actions($sessdata, $sess);
 
-            $table->data[$sess->id][] = $i;
             $table->data[$sess->id][] = $dta['date'];
             $table->data[$sess->id][] = $dta['time'];
             if ($sess->groupid) {

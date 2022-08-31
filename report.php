@@ -61,7 +61,6 @@ $PAGE->set_cacheable(true);
 $PAGE->navbar->add(get_string('report', 'attendance'));
 
 $output = $PAGE->get_renderer('mod_attendance');
-$tabs = new mod_attendance\output\tabs($att, mod_attendance\output\tabs::TAB_REPORT);
 $filtercontrols = new mod_attendance\output\filter_controls($att, true);
 $reportdata = new mod_attendance\output\report_data($att);
 
@@ -77,7 +76,6 @@ $event->trigger();
 
 // Output starts here.
 echo $output->header();
-echo $output->render($tabs);
 echo $output->render($filtercontrols);
 echo $output->render($reportdata);
 echo $output->footer();

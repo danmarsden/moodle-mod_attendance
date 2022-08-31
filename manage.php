@@ -79,7 +79,6 @@ $PAGE->force_settings_menu(true);
 $PAGE->navbar->add($att->name);
 
 $output = $PAGE->get_renderer('mod_attendance');
-$tabs = new mod_attendance\output\tabs($att, mod_attendance\output\tabs::TAB_SESSIONS);
 $filtercontrols = new mod_attendance\output\filter_controls($att);
 $sesstable = new mod_attendance\output\manage_data($att);
 
@@ -87,7 +86,6 @@ $sesstable = new mod_attendance\output\manage_data($att);
 
 echo $output->header();
 mod_attendance_notifyqueue::show();
-echo $output->render($tabs);
 echo $output->render($filtercontrols);
 echo $output->render($sesstable);
 

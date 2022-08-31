@@ -103,11 +103,8 @@ if ($mform->is_cancelled()) {
     redirect($att->url_managetemp());
 }
 
-$tabs = new mod_attendance\output\tabs($att, mod_attendance\output\tabs::TAB_TEMPORARYUSERS);
-
 echo $output->header();
 echo $output->heading(get_string('tempusersedit', 'attendance').' : '.format_string($course->fullname));
-echo $output->render($tabs);
 $mform->display();
 echo $output->footer($course);
 

@@ -68,9 +68,7 @@ if (!$table->is_downloading($download, $exportfilename)) {
         $pageparams = new mod_attendance_sessions_page_params();
         $att = new mod_attendance_structure($att, $cm, $course, $context, $pageparams);
         $output = $PAGE->get_renderer('mod_attendance');
-        $tabs = new mod_attendance\output\tabs($att, mod_attendance\output\tabs::TAB_ABSENTEE);
         echo $output->header();
-        echo $output->render($tabs);
     } else {
         echo $OUTPUT->header();
         echo $OUTPUT->heading(get_string('absenteereport', 'mod_attendance'));

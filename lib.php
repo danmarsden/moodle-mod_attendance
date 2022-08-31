@@ -565,3 +565,59 @@ function mod_attendance_myprofile_navigation(core_user\output\myprofile\tree $tr
         $tree->add_node($node);
     }
 }
+
+/**
+ * Adds module specific settings to the settings block
+ *
+ * @param settings_navigation $settingsnav The settings navigation object
+ * @param navigation_node $attendancenode The node to add module settings to
+ */
+function attendance_extend_settings_navigation(settings_navigation $settingsnav, navigation_node $attendancenode) {
+
+    $context = $settingsnav->get_page()->cm->context;
+    $cm = $settingsnav->get_page()->cm;
+    $nodes = [];
+    if (has_capability('mod/attendance:viewreports', $context)) {
+        $nodes[] = ['url' => new moodle_url('/mod/attendance/report.php', ['id' => $cm->id]),
+                    'title' => get_string('report', 'attendance')];
+    }
+    if (has_capability('mod/attendance:import', $context)) {
+        $nodes[] = ['url' => new moodle_url('/mod/attendance/import.php', ['id' => $cm->id]),
+                    'title' => get_string('import', 'attendance')];
+    }
+    if (has_capability('mod/attendance:export', $context)) {
+        $nodes[] = ['url' => new moodle_url('/mod/attendance/export.php', ['id' => $cm->id]),
+                    'title' => get_string('export', 'attendance')];
+    }
+
+    if (has_capability('mod/attendance:viewreports', $context) && get_config('attendance', 'enablewarnings')) {
+        $nodes[] = ['url' => new moodle_url('/mod/attendance/absentee.php', ['id' => $cm->id]),
+                    'title' => get_string('absenteereport', 'attendance')];
+    }
+    if (has_capability('mod/attendance:changepreferences', $context)) {
+        $nodes[] = ['url' => new moodle_url('/mod/attendance/preferences.php', ['id' => $cm->id]),
+                    'title' => get_string('statussetsettings', 'attendance')];
+        if (get_config('attendance', 'enablewarnings')) {
+            $nodes[] = ['url' => new moodle_url('/mod/attendance/warnings.php', ['id' => $cm->id]),
+            'title' => get_string('warnings', 'attendance')];
+        }
+    }
+
+    if (has_capability('mod/attendance:managetemporaryusers', context_module::instance($cm->id))) {
+        $nodes[] = ['url' => new moodle_url('/mod/attendance/tempusers.php', ['id' => $cm->id]),
+        'title' => get_string('tempusers', 'attendance'),
+        'more' => true];
+    }
+
+    foreach ($nodes as $node) {
+        $settingsnode = navigation_node::create($node['title'],
+                                                $node['url'],
+                                                navigation_node::TYPE_SETTING);
+        if (isset($settingsnode)) {
+            if (!empty($node->more)) {
+                $settingsnode->set_force_into_more_menu(true);
+            }
+            $attendancenode->add_node($settingsnode);
+        }
+    }
+}
