@@ -714,5 +714,20 @@ function xmldb_attendance_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2022082900, 'attendance');
     }
 
+    if ($oldversion < 2022083100) {
+
+        // Define field studentsearlyopentime to be added to attendance_sessions.
+        $table = new xmldb_table('attendance_sessions');
+        $field = new xmldb_field('studentsearlyopentime', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'studentscanmark');
+
+        // Conditionally launch add field studentsearlyopentime.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Attendance savepoint reached.
+        upgrade_mod_savepoint(true, 2022083100, 'attendance');
+    }
+
     return $result;
 }

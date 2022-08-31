@@ -256,6 +256,7 @@ class mod_attendance_external extends external_api {
         $sess->statusset = 0;
         $sess->groupid = $groupid;
         $sess->automarkcmid = 0;
+        $sess->studentsearlyopentime = get_config('attendance', 'studentsearlyopentime');
 
         $sessionid = $attendance->add_session($sess);
         return array('sessionid' => $sessionid);
@@ -377,7 +378,8 @@ class mod_attendance_external extends external_api {
                          'preventsharedip' => new external_value(PARAM_INT, 'Prevent students from sharing IP addresses.'),
                          'preventsharediptime' => new external_value(PARAM_INT, 'Time delay before IP address is allowed again.'),
                          'statusset' => new external_value(PARAM_INT, 'Session statusset.'),
-                         'includeqrcode' => new external_value(PARAM_INT, 'Include QR code when displaying password'));
+                         'includeqrcode' => new external_value(PARAM_INT, 'Include QR code when displaying password'),
+                         'studentsearlyopentime' => new external_value(PARAM_INT, 'Duration to allow session to opened early'));
 
         return $session;
     }

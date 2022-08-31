@@ -50,6 +50,11 @@ if (!empty($attforsession->groupid)) {
     }
 }
 
+if ($DB->record_exists('attendance_log', ['sessionid' => $id, 'studentid' => $USER->id])) {
+    $url = new moodle_url('/mod/attendance/view.php', ['id' => $cm->id]);
+    throw new moodle_exception('attendance_already_submitted', 'mod_attendance', $url);
+}
+
 $qrpassflag = false;
 
 // If the randomised code is on grab it.
