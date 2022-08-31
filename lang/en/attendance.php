@@ -596,6 +596,7 @@ $string['thirdpartyemailtext'] = '{$a->firstname} {$a->lastname} attendance with
 $string['thirdpartyemailtextfooter'] = 'You are receiving this because the teacher of this course has added your email to the recipient’s list';
 $string['thiscourse'] = 'This course';
 $string['time'] = 'Time';
+$string['qrcodeheader'] = 'Scan the QR code below to take your attendance';
 $string['qrcodevalidbefore'] = 'QR Code valid for:';
 $string['qrcodevalidafter'] = 'seconds';
 $string['timeahead'] = 'Multiple sessions that exceed one year cannot be created, please adjust the start and end dates.';

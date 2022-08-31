@@ -66,6 +66,7 @@ if ($showpassword  && !$rotateqr) {
 
 
 if ($rotateqr) {
+    echo html_writer::div(get_string('qrcodeheader', 'attendance'), 'qrcodeheader');
     attendance_generate_passwords($session);
     attendance_renderqrcoderotate($session);
 } else if ($showqr) {
