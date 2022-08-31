@@ -15,10 +15,9 @@ class attendance_QRCodeRotate {
         this.qrCodeHTMLElement = "";
     }
 
-    start(sessionId, qrCodeHTMLElement, textPasswordHTMLElement, timerHTMLElement) {
+    start(sessionId, qrCodeHTMLElement, timerHTMLElement) {
         this.sessionId = sessionId;
         this.qrCodeHTMLElement = qrCodeHTMLElement;
-        this.textPasswordHTMLElement = textPasswordHTMLElement;
         this.timerHTMLElement = timerHTMLElement;
         this.fetchAndRotate();
     }
@@ -38,12 +37,10 @@ class attendance_QRCodeRotate {
         var qrcodeurl = document.URL.substr(0,document.URL.lastIndexOf('/')) + '/attendance.php?qrpass=' + password + '&sessid=' + this.sessionId;
         this.qrCodeInstance.clear();
         this.qrCodeInstance.makeCode(qrcodeurl);
-        // display new password
-        this.textPasswordHTMLElement.innerHTML = '<h2>'+password+'</h2>';
     }
 
     updateTimer(timeLeft) {
-        this.timerHTMLElement.innerHTML = '<h3>Time left: '+timeLeft+'</h3>';
+        this.timerHTMLElement.innerHTML = timeLeft;
     }
 
     startRotating() {
