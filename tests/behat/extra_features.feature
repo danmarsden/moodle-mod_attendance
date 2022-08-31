@@ -196,8 +196,7 @@ Feature: Test the various new features in the attendance module
     And "Set status to «Late»" "link" should exist
     And "Set status to «Excused»" "link" should exist
     And "Set status to «Absent»" "link" should exist
-
-    When I follow "Sessions"
+    And I am on the "Test attendance" "mod_attendance > View" page
     And I click on "Take attendance" "link" in the "12PM" "table_row"
     Then "Set status to «Great»" "link" should exist
     And "Set status to «OK»" "link" should exist
