@@ -154,7 +154,8 @@ Feature: Visiting reports
     And "5 / 6" "text" should exist in the "Student 1" "table_row"
     And "83.3%" "text" should exist in the "Student 1" "table_row"
 
-    And I follow "Absentee report"
+    And I click on "More" "link" in the ".secondary-navigation" "css_element"
+    And I select "Absentee report" from secondary navigation
     And I should see "Student 1"
 
     And I log out
