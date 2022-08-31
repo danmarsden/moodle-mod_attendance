@@ -173,7 +173,7 @@ Feature: Test the various new features in the attendance module
     And I set the field with xpath "//*[@id='statuslastrow']/td[4]/input" to "0"
     And I click on "Add" "button" in the ".lastrow" "css_element"
     And I click on "Update" "button" in the "#preferencesform" "css_element"
-    And I am on the "Test attendance" "mod_attendance > View" page0
+    And I am on the "Test attendance" "mod_attendance > View" page
     And I click on "Add session" "button"
     And I set the following fields to these values:
       | id_addmultiply            | 0                      |
