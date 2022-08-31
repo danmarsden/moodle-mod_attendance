@@ -520,6 +520,9 @@ class mod_attendance_structure {
         if (!isset($sess->studentscanmark)) {
             $sess->studentscanmark = 0;
         }
+        if (!isset($sess->studentsearlyopentime)) {
+            $sess->studentsearlyopentime = 0;
+        }
         if (!isset($sess->autoassignstatus)) {
             $sess->autoassignstatus = 0;
         }
@@ -585,6 +588,7 @@ class mod_attendance_structure {
         $sess->subnet = '';
         $sess->automark = 0;
         $sess->automarkcompleted = 0;
+        $sess->studentsearlyopentime = 0;
         $sess->preventsharedip = 0;
         $sess->preventsharediptime = '';
         $sess->includeqrcode = 0;
@@ -621,6 +625,9 @@ class mod_attendance_structure {
 
         if (!empty($formdata->automark)) {
             $sess->automark = $formdata->automark;
+        }
+        if (!empty($formdata->studentsearlyopentime)) {
+            $sess->studentsearlyopentime = $formdata->studentsearlyopentime;
         }
         if (!empty($formdata->preventsharedip)) {
             $sess->preventsharedip = $formdata->preventsharedip;

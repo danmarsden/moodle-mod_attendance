@@ -589,7 +589,11 @@ function attendance_can_student_mark($sess, $log = true) {
             if (empty($duration)) {
                 $duration = $attconfig->studentscanmarksessiontimeend * 60;
             }
-            if ($sess->sessdate < time() && time() < ($sess->sessdate + $duration)) {
+            if (!isset($sess->studentsearlyopentime)) {
+                // Sanity check just in case not set in this session.
+                $sess->studentsearlyopentime = 0;
+            }
+            if (($sess->sessdate - $sess->studentsearlyopentime) < time() && time() < ($sess->sessdate + $duration)) {
                 $canmark = true;
                 $reason = '';
             }
@@ -811,6 +815,9 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
                         if (isset($formdata->autoassignstatus)) {
                             $sess->autoassignstatus = 1;
                         }
+                        if (isset($formdata->studentsearlyopentime)) {
+                            $sess->studentsearlyopentime = $formdata->studentsearlyopentime;
+                        }
 
                         if (!empty($formdata->randompassword)) {
                             $sess->studentpassword = attendance_random_string();
@@ -891,6 +898,9 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
         if (!empty($formdata->automark)) {
             $sess->automark = $formdata->automark;
         }
+        if (!empty($formdata->automark)) {
+            $sess->automark = $formdata->automark;
+        }
         if (!empty($formdata->preventsharedip)) {
             $sess->preventsharedip = $formdata->preventsharedip;
         }
@@ -929,8 +939,8 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
             if (!empty($formdata->preventsharedip)) {
                 $sess->preventsharedip = $formdata->preventsharedip;
             }
-            if (!empty($formdata->preventsharediptime)) {
-                $sess->preventsharediptime = $formdata->preventsharediptime;
+            if (!empty($formdata->studentsearlyopentime)) {
+                $sess->studentsearlyopentime = $formdata->studentsearlyopentime;
             }
         }
         $sess->statusset = $formdata->statusset;
