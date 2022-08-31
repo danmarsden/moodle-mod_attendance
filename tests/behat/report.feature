@@ -100,7 +100,7 @@ Feature: Visiting reports
 
     When I click on "Take attendance" "link" in the "3AM - 4AM" "table_row"
     # Present
-    And I click on "td.cell.c3 input" "css_element" in the "Student 1" "table_row"
+    And I click on "td.cell.c2 input" "css_element" in the "Student 1" "table_row"
     And I press "Save and show next page"
 
     And I am on the "Attendance" "mod_attendance > Report" page
@@ -123,7 +123,7 @@ Feature: Visiting reports
     And I am on the "Attendance" "mod_attendance > View" page
     When I click on "Take attendance" "link" in the "1AM - 2AM" "table_row"
     # Late
-    And I click on "td.cell.c4 input" "css_element" in the "Student 1" "table_row"
+    And I click on "td.cell.c3 input" "css_element" in the "Student 1" "table_row"
     And I press "Save and show next page"
 
     When I follow "Add session"
@@ -135,7 +135,7 @@ Feature: Visiting reports
 
     When I click on "Take attendance" "link" in the "3AM - 4AM" "table_row"
     # Present
-    And I click on "td.cell.c3 input" "css_element" in the "Student 1" "table_row"
+    And I click on "td.cell.c2 input" "css_element" in the "Student 1" "table_row"
     And I press "Save and show next page"
 
     When I follow "Add session"
@@ -168,7 +168,7 @@ Feature: Visiting reports
 
     When I click on "Take attendance" "link" in the "1AM - 2AM" "table_row"
     # Late
-    And I click on "td.cell.c4 input" "css_element" in the "Student 1" "table_row"
+    And I click on "td.cell.c3 input" "css_element" in the "Student 1" "table_row"
     And I press "Save and show next page"
 
     When I follow "Add session"
@@ -179,7 +179,7 @@ Feature: Visiting reports
 
     When I click on "Take attendance" "link" in the "3AM - 4AM" "table_row"
     # Present
-    And I click on "td.cell.c3 input" "css_element" in the "Student 1" "table_row"
+    And I click on "td.cell.c2 input" "css_element" in the "Student 1" "table_row"
     And I press "Save and show next page"
 
     When I follow "Add session"
