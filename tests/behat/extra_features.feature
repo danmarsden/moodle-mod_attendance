@@ -94,7 +94,7 @@ Feature: Test the various new features in the attendance module
     And I click on "td.cell.c5 input" "css_element" in the "Temporary user 1" "table_row"
     # Absent
     And I click on "td.cell.c6 input" "css_element" in the "Temporary user 2" "table_row"
-    And I press "Save attendance"
+    And I press "Save Save and show next page"
     And I am on the "Test attendance" "mod_attendance > Report" page
     And "P" "text" should exist in the "Student 1" "table_row"
     And "L" "text" should exist in the "Student 2" "table_row"
@@ -209,7 +209,7 @@ Feature: Test the various new features in the attendance module
     And I click on "Take attendance" "link"
     And I set the field "Set status for" to "all"
     When I click on "setallstatuses" "field" in the ".takelist tbody td.c3" "css_element"
-    And I press "Save attendance"
+    And I press "Save and show next page"
     And I am on the "Test attendance" "mod_attendance > Report" page
     Then "L" "text" should exist in the "Student 1" "table_row"
     And "L" "text" should exist in the "Student 2" "table_row"
@@ -228,7 +228,7 @@ Feature: Test the various new features in the attendance module
     And I click on "td.cell.c3 input" "css_element" in the "Student 1" "table_row"
     And I click on "setallstatuses" "field" in the ".takelist tbody td.c3" "css_element"
     And I wait until the page is ready
-    And I press "Save attendance"
+    And I press "Save and show next page"
     And I am on the "Test2attendance" "mod_attendance > Report" page
     Then "P" "text" should exist in the "Student 1" "table_row"
     And "L" "text" should exist in the "Student 2" "table_row"
