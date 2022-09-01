@@ -1656,9 +1656,6 @@ class renderer extends plugin_renderer_base {
                         $stats['activity'][$sess->cmid]['statuses'][$status->acronym]['count']++;
                         $stats['activity'][$sess->cmid]['points'] += $status->grade;
                         $stats['activity'][$sess->cmid]['maxpointstodate'] += $statussetmaxpoints[$sess->statusset];
-                        $stats['overall']['statuses'][$status->acronym]['count']++;
-                        $stats['overall']['points'] += $status->grade;
-                        $stats['overall']['maxpointstodate'] += $statussetmaxpoints[$sess->statusset];
                     }
                     $stats['activity'][$sess->cmid]['maxpoints'] += $statussetmaxpoints[$sess->statusset];
                     $stats['overall']['maxpoints'] += $statussetmaxpoints[$sess->statusset];
