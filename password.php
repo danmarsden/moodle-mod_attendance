@@ -59,9 +59,18 @@ echo $OUTPUT->header();
 $showpassword = (isset($session->studentpassword) && strlen($session->studentpassword) > 0);
 $showqr = (isset($session->includeqrcode) && $session->includeqrcode == 1);
 $rotateqr = (isset($session->rotateqrcode) && $session->rotateqrcode == 1);
+if ($rotateqr) {
+    $showpassword = false;
+}
 
-if ($showpassword  && !$rotateqr) {
-    attendance_renderpassword($session);
+if ($showpassword) {
+    if ($showqr) {
+        echo html_writer::div("<h2>".get_string('qrcodeandpasswordheader', 'attendance'), 'qrcodeheader')."</h2>";
+    } else {
+        echo html_writer::div("<h2>".get_string('passwordheader', 'attendance'), 'qrcodeheader')."</h2>";
+    }
+    echo html_writer::span($session->studentpassword, 'student-password');
+    echo html_writer::div('&nbsp;');
 }
 
 
