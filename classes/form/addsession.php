@@ -310,6 +310,10 @@ class addsession extends moodleform {
             $mform->setDefault('preventsharediptime', $pluginconfig->preventsharediptime);
         }
 
+        $handler = \mod_attendance\customfield\session_handler::create();
+        $id = 0; // This is the initial add form, we don't have an id number yet.
+        $handler->instance_form_definition($mform, $id);
+
         $this->add_action_buttons(true, get_string('add', 'attendance'));
     }
 

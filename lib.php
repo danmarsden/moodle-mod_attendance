@@ -488,6 +488,9 @@ function attendance_print_settings_tabs($selected = 'settings') {
             get_string('defaultwarnings', 'attendance'), get_string('defaultwarnings', 'attendance'), false);
     }
 
+    $tabs[] = new tabobject('customfields', $CFG->wwwroot . '/mod/attendance/customfields.php',
+        get_string('customfields', 'attendance'), get_string('customfields', 'attendance'), false);
+
     $tabs[] = new tabobject('coursesummary', $CFG->wwwroot.'/mod/attendance/coursesummary.php',
         get_string('coursesummary', 'attendance'), get_string('coursesummary', 'attendance'), false);
 
