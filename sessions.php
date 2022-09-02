@@ -73,6 +73,8 @@ switch ($att->pageparams->action) {
         if ($formdata = $mform->get_data()) {
             $sessions = attendance_construct_sessions_data_for_add($formdata, $att);
             $att->add_sessions($sessions);
+            $att->save_customfields($sessions, $formdata);
+
             if (count($sessions) == 1) {
                 $message = get_string('sessiongenerated', 'attendance');
             } else {

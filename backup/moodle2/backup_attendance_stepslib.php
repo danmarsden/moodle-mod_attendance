@@ -60,6 +60,10 @@ class backup_attendance_activity_structure_step extends backup_activity_structur
             'preventsharediptime', 'caleventid', 'calendarevent', 'includeqrcode', 'automarkcmid',
             'studentsearlyopentime'));
 
+        $customfields = new backup_nested_element('customfields');
+        $customfield = new backup_nested_element('customfield', ['id'], [
+            'sessionid', 'shortname', 'type', 'value', 'valueformat']);
+
         // XML nodes declaration - user data.
         $logs = new backup_nested_element('logs');
         $log  = new backup_nested_element('log', array('id'), array(
@@ -75,6 +79,9 @@ class backup_attendance_activity_structure_step extends backup_activity_structur
         $attendance->add_child($sessions);
         $sessions->add_child($session);
 
+        $attendance->add_child($customfields);
+        $customfields->add_child($customfield);
+
         $session->add_child($logs);
         $logs->add_child($log);
 
@@ -88,6 +95,10 @@ class backup_attendance_activity_structure_step extends backup_activity_structur
             array('idnumber' => backup::VAR_PARENTID));
 
         $session->set_source_table('attendance_sessions', array('attendanceid' => backup::VAR_PARENTID));
+
+        $handler = mod_attendance\customfield\session_handler::create();
+        $fieldsforbackup = $handler->get_instance_data_for_backup_by_activity($this->task->get_activityid());
+        $customfield->set_source_array($fieldsforbackup);
 
         // Data sources - user related data.
         if ($userinfo) {
