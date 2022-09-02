@@ -209,6 +209,12 @@ class updatesession extends \moodleform {
         $mform->setAdvanced('preventsharedgroup');
         $mform->setType('preventsharediptime', PARAM_INT);
 
+        // Add custom field data to form.
+        $handler = \mod_attendance\customfield\session_handler::create();
+        $handler->instance_form_definition($mform, $sess->id);
+        $data['id'] = $sess->id;
+        $data = $handler->instance_form_before_set_data_array($data);
+
         $mform->setDefaults($data);
         $this->add_action_buttons(true);
     }

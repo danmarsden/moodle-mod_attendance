@@ -339,23 +339,40 @@ class renderer extends plugin_renderer_base {
         $this->page->requires->js_init_call('M.mod_attendance.init_manage');
 
         $table = new html_table();
-        $table->head = array(
+        $table->head = [
+                html_writer::checkbox('cb_selector', 0, false, '', array('id' => 'cb_selector')),
                 get_string('date', 'attendance'),
                 get_string('time', 'attendance'),
                 get_string('sessiontypeshort', 'attendance'),
-                get_string('description', 'attendance'),
-                get_string('actions'),
-                html_writer::checkbox('cb_selector', 0, false, '', array('id' => 'cb_selector'))
-            );
-        $table->align = array('right', '', '', 'left', 'right', 'center');
-        $table->size = array('1px', '1px', '', '*', '120px', '1px');
+                get_string('description', 'attendance')
+        ];
+        $table->align = ['center', 'right', '', '', 'left'];
+        $table->size = ['1px', '1px', '1px', '', '*'];
+
+        // Add custom fields.
+        $customfields = [];
+        if (!empty($sessdata->sessions)) {
+            $handler = \mod_attendance\customfield\session_handler::create();
+            $customfields = $handler->get_fields_for_display(reset($sessdata->sessions)->id); // Pass first sessionid.
+            $customfieldsdata = $handler->get_instances_data(array_keys($sessdata->sessions));
+        }
+        foreach ($customfields as $field) {
+            $table->head[] = $field->get_formatted_name();
+            $table->align[] = '';
+            $table->size[] = '';
+        }
+        // Add final fields.
+        $table->head[] = get_string('actions');
+        $table->align[] = 'right';
+        $table->size[] = '120px';
 
         $i = 0;
         foreach ($sessdata->sessions as $key => $sess) {
             $i++;
 
             $dta = $this->construct_date_time_actions($sessdata, $sess);
-
+            $table->data[$sess->id][] = html_writer::checkbox('sessid[]', $sess->id, false, '',
+                                                              array('class' => 'attendancesesscheckbox'));
             $table->data[$sess->id][] = $dta['date'];
             $table->data[$sess->id][] = $dta['time'];
             if ($sess->groupid) {
@@ -372,9 +389,15 @@ class renderer extends plugin_renderer_base {
                 $table->data[$sess->id][] = get_string('commonsession', 'attendance');
             }
             $table->data[$sess->id][] = $sess->description;
+            foreach ($customfields as $field) {
+                if (isset($customfieldsdata[$sess->id][$field->get('id')])) {
+                    $table->data[$sess->id][] = $customfieldsdata[$sess->id][$field->get('id')]->get('value');
+                } else {
+                    $table->data[$sess->id][] = '';
+                }
+            }
             $table->data[$sess->id][] = $dta['actions'];
-            $table->data[$sess->id][] = html_writer::checkbox('sessid[]', $sess->id, false, '',
-                                                              array('class' => 'attendancesesscheckbox'));
+
         }
 
         return html_writer::table($table);
@@ -1272,13 +1295,35 @@ class renderer extends plugin_renderer_base {
         }
         $table->head[] = get_string('date');
         $table->head[] = get_string('description', 'attendance');
+
+        $table->align = array_merge($table->align, array('', 'left'));
+        $table->colclasses = array_merge($table->colclasses, array('datecol', 'desccol'));
+        $table->size = array_merge($table->size, array('1px', '*'));
+
+        // Add custom fields.
+        $customfields = [];
+        if (!empty($userdata->sessionslog)) {
+            $sessionids = [];
+            foreach ($userdata->sessionslog as $s) {
+                $sessionids[] = $s->id;
+            }
+            $handler = \mod_attendance\customfield\session_handler::create();
+            $customfields = $handler->get_fields_for_display(reset($sessionids)); // Pass first sessionid.
+            $customfieldsdata = $handler->get_instances_data($sessionids);
+        }
+        foreach ($customfields as $field) {
+            $table->head[] = $field->get_formatted_name();
+            $table->align[] = '';
+            $table->size[] = '';
+            $table->colclasses[] = 'customfield';
+        }
         $table->head[] = get_string('status', 'attendance');
         $table->head[] = get_string('points', 'attendance');
         $table->head[] = get_string('remarks', 'attendance');
 
-        $table->align = array_merge($table->align, array('', 'left', 'center', 'center', 'center'));
-        $table->colclasses = array_merge($table->colclasses, array('datecol', 'desccol', 'statuscol', 'pointscol', 'remarkscol'));
-        $table->size = array_merge($table->size, array('1px', '*', '*', '1px', '*'));
+        $table->align = array_merge($table->align, array('center', 'center', 'center'));
+        $table->colclasses = array_merge($table->colclasses, array('statuscol', 'pointscol', 'remarkscol'));
+        $table->size = array_merge($table->size, array('*', '1px', '*'));
 
         if (has_capability('mod/attendance:takeattendances', $context)) {
             $table->head[] = get_string('action');
@@ -1305,6 +1350,14 @@ class renderer extends plugin_renderer_base {
             $row->cells[] = userdate($sess->sessdate, get_string('strftimedmyw', 'attendance')) .
              " ". $this->construct_time($sess->sessdate, $sess->duration);
             $row->cells[] = format_string($sess->description, false);
+            foreach ($customfields as $field) {
+                if (isset($customfieldsdata[$sess->id][$field->get('id')])) {
+                    $row->cells[] = $customfieldsdata[$sess->id][$field->get('id')]->get('value');
+                } else {
+                    $row->cells[] = '';
+                }
+            }
+
             if (!empty($sess->statusid)) {
                 $status = $userdata->statuses[$sess->statusid];
                 $row->cells[] = $status->description;

@@ -718,7 +718,8 @@ function xmldb_attendance_upgrade($oldversion=0) {
 
         // Define field studentsearlyopentime to be added to attendance_sessions.
         $table = new xmldb_table('attendance_sessions');
-        $field = new xmldb_field('studentsearlyopentime', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'studentscanmark');
+        $field = new xmldb_field('studentsearlyopentime', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL,
+                                 null, '0', 'studentscanmark');
 
         // Conditionally launch add field studentsearlyopentime.
         if (!$dbman->field_exists($table, $field)) {

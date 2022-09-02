@@ -658,3 +658,4 @@ $string['usersessiongrade'] = 'User session grade';
 $string['usersessionremarks'] = 'User session remarks';
 $string['messagedselecteduserfailed'] = 'Failed to send a message to one or more of the users. Please turn debugging on to find out more.';
 $string['cannottakethisgroup'] = 'You are not a member of the course group that this attendance session relates to, your attendance has not been recorded.';
+$string['customfields'] = 'Custom session fields';
