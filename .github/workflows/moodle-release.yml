@@ -68,7 +68,7 @@ jobs:
         env:
           DB: ${{ matrix.database }}
           # TODO: Omitted MOODLE_BRANCH results in regex failure, investigate.
-          MOODLE_BRANCH: 'master'
+          MOODLE_BRANCH: 'MOODLE_400_STABLE'
 
       - name: Run phplint
         run: moodle-plugin-ci phplint
