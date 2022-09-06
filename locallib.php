@@ -769,7 +769,7 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
         $wdaydesc = array(0 => 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
 
         while ($sdate < $enddate) {
-            if ($sdate < $startweek + WEEKSECS) {
+            if ($sdate < strtotime('+1 week', $startweek)) {
                 $dinfo = usergetdate($sdate);
                 if (isset($formdata->sdays) && array_key_exists($wdaydesc[$dinfo['wday']], $formdata->sdays)) {
                     $sess = new stdClass();
@@ -841,9 +841,10 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
 
                     attendance_fill_groupid($formdata, $sessions, $sess);
                 }
-                $sdate += DAYSECS;
+
+                $sdate = strtotime("+1 day", $sdate); // Set start to tomorrow.
             } else {
-                $startweek += WEEKSECS * $formdata->period;
+                $startweek = strtotime("+".$formdata->period.' weeks', $startweek);
                 $sdate = $startweek;
             }
         }
