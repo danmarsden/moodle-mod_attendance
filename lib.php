@@ -556,9 +556,13 @@ function mod_attendance_myprofile_navigation(core_user\output\myprofile\tree $tr
     if (empty($course)) {
         return;
     }
-    $cm = get_all_instances_in_course('attendance', $course, $user->id);
-    if (!empty($cm) && has_capability('mod/attendance:viewreports', context_module::instance($cm[0]->id))) {
-        $url = new moodle_url('/mod/attendance/view.php', ['id' => $cm[0]->coursemodule,
+    $cms = get_all_instances_in_course('attendance', $course, $user->id);
+    if (empty($cms)) {
+        return;
+    }
+    $cm = reset($cms);
+    if (!empty($cm) && has_capability('mod/attendance:viewreports', context_module::instance($cm->id))) {
+        $url = new moodle_url('/mod/attendance/view.php', ['id' => $cm->coursemodule,
                                                            'mode' => mod_attendance_view_page_params::MODE_THIS_COURSE,
                                                            'studentid' => $user->id]);
 
