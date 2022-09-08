@@ -701,5 +701,16 @@ function xmldb_attendance_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2021082600, 'attendance');
     }
 
+    if ($oldversion < 2021082607) {
+        $sql = 'DELETE FROM {attendance_log}
+                 WHERE ID NOT IN (SELECT max(id)
+                                    FROM {attendance_log}
+                                GROUP BY sessionid, studentid, statusid)';
+        $DB->execute($sql);
+
+        // Attendance savepoint reached.
+        upgrade_mod_savepoint(true, 2021082607, 'attendance');
+    }
+
     return $result;
 }
