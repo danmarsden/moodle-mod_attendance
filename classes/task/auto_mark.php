@@ -150,12 +150,6 @@ class auto_mark extends \core\task\scheduled_task {
                         ['sessionid' => $session->id], '', 'studentid, statusid');
 
                     $newlogs = [];
-                    $newlog = new \stdClass();
-                    $newlog->timetaken = $now;
-                    $newlog->takenby = 0;
-                    $newlog->sessionid = $session->id;
-                    $newlog->remarks = get_string('autorecorded', 'attendance');
-                    $newlog->statusset = implode(',', array_keys( (array)$att->get_statuses()));
 
                     // Get users who have completed the course in this session.
                     $completedusers = $DB->get_records_select('course_modules_completion',
@@ -179,6 +173,12 @@ class auto_mark extends \core\task\scheduled_task {
                             // This is a group session, and the user is not a member of the group.
                             continue;
                         }
+                        $newlog = new \stdClass();
+                        $newlog->timetaken = $now;
+                        $newlog->takenby = 0;
+                        $newlog->sessionid = $session->id;
+                        $newlog->remarks = get_string('autorecorded', 'attendance');
+                        $newlog->statusset = implode(',', array_keys( (array)$att->get_statuses()));
                         $newlog->studentid = $completionuser->userid;
                         $newlog->statusid = $att->get_automark_status($completionuser->timemodified, $session->id);
                         if (!empty($newlog->statusid)) {
@@ -222,16 +222,16 @@ class auto_mark extends \core\task\scheduled_task {
                 mtrace($updated . " session status updated");
 
                 $newlogs = [];
-                $newlog = new \stdClass();
-                $newlog->timetaken = $now;
-                $newlog->takenby = 0;
-                $newlog->sessionid = $session->id;
-                $newlog->remarks = get_string('autorecorded', 'attendance');
-                $newlog->statusset = implode(',', array_keys( (array)$att->get_statuses()));
 
                 $added = 0;
                 foreach ($users as $user) {
                     if ($sessionover || !empty($userfirstaccess[$user->id])) {
+                        $newlog = new \stdClass();
+                        $newlog->timetaken = $now;
+                        $newlog->takenby = 0;
+                        $newlog->sessionid = $session->id;
+                        $newlog->remarks = get_string('autorecorded', 'attendance');
+                        $newlog->statusset = implode(',', array_keys( (array)$att->get_statuses()));
                         if (!empty($userfirstaccess[$user->id])) {
                             $newlog->statusid = $att->get_automark_status($userfirstaccess[$user->id], $session->id);
                         } else if ($sessionover) {
