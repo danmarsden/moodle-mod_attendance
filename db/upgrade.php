@@ -32,7 +32,7 @@ require_once(dirname(__FILE__) . '/upgradelib.php');
  */
 function xmldb_attendance_upgrade($oldversion=0) {
 
-    global $DB;
+    global $DB, $CFG;
     $dbman = $DB->get_manager(); // Loads ddl manager and xmldb classes.
 
     $result = true;
@@ -701,15 +701,17 @@ function xmldb_attendance_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2021082600, 'attendance');
     }
 
-    if ($oldversion < 2021082607) {
-        $sql = 'DELETE FROM {attendance_log}
-                 WHERE ID NOT IN (SELECT max(id)
-                                    FROM {attendance_log}
-                                GROUP BY sessionid, studentid, statusid)';
-        $DB->execute($sql);
+    if ($oldversion < 2021082608) {
+        if (!empty($CFG->dbfamily) && $CFG->dbfamily == 'postgres') {
+            $sql = 'DELETE FROM {attendance_log}
+            WHERE ID NOT IN (SELECT max(id)
+                               FROM {attendance_log}
+                           GROUP BY sessionid, studentid, statusid)';
+            $DB->execute($sql);
+        }
 
         // Attendance savepoint reached.
-        upgrade_mod_savepoint(true, 2021082607, 'attendance');
+        upgrade_mod_savepoint(true, 2021082608, 'attendance');
     }
 
     return $result;
