@@ -24,6 +24,7 @@
 
 namespace mod_attendance\local;
 
+use stdClass;
 /**
  * Url helpers
  *
@@ -38,9 +39,10 @@ class automark {
      * @param stdClass $course
      * @param stdClass $cm
      * @param stdClass $attendance
-     * @return void
+     * @param boolean $returnerrors
+     * @return string|void
      */
-    public static function session($session, $course, $cm, $attendance) {
+    public static function session($session, $course, $cm, $attendance, $returnerrors = false) {
         global $CFG, $DB;
         $now = time(); // Store current time to use in queries so they all match nicely.
         if ($session->sessdate + $session->duration < $now || // If session is over.
@@ -53,12 +55,23 @@ class automark {
             if ($session->sessdate + $session->duration < $now) {
                 $sessionover = true;
             }
+            if (!isset($session->setunmarked)) {
+                // Setunmarked not included in $session var, lets look it up.
+                $session->setunmarked = $DB->get_field('attendance_statuses', 'id',
+                 ['attendanceid' => $attendance->id, 'setunmarked' => 1, 'deleted' => 0, 'setnumber' => $session->statusset]);
+            }
 
             if (empty($session->setunmarked)) {
                 $coursemodule = get_coursemodule_from_instance('attendance', $session->attendanceid, $course->id);
-                $url = $CFG->wwwroot.'/mod/attendance/preferences.php?id='.$coursemodule->id;
-                mtrace("No unmarked status configured for session id: ".$session->id. " to fix, go to: ".$url);
-                return;
+                $a = new stdClass;
+                $a->sessionid = $session->id;
+                $a->url = $CFG->wwwroot.'/mod/attendance/preferences.php?id='.$coursemodule->id;;
+                if (!$returnerrors) {
+                    mtrace(get_string('nounmarkedstatusset', 'attendance', $a));
+                    return;
+                } else {
+                    return get_string('nounmarkedstatusset', 'attendance', $a);
+                }
             }
 
             $context = \context_module::instance($cm->id);
@@ -183,7 +196,9 @@ class automark {
                 unset($users[$log->studentid]);
             }
             $existinglog->close();
-            mtrace($updated . " session status updated");
+            if (!$returnerrors) {
+                mtrace($updated . " session status updated");
+            }
 
             $newlogs = [];
 
@@ -212,7 +227,9 @@ class automark {
                 $DB->insert_records('attendance_log', $newlogs);
                 $donesomething = true;
             }
-            mtrace($added . " session status inserted");
+            if (!$returnerrors) {
+                mtrace($added . " session status inserted");
+            }
 
             // Update lasttaken time and automarkcompleted for this session.
             $session->lasttaken = $now;
