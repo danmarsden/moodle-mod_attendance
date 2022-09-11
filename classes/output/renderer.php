@@ -578,6 +578,19 @@ class renderer extends plugin_renderer_base {
             'grouptype' => $takedata->pageparams->grouptype);
         $url = new moodle_url('/mod/attendance/import/marksessions.php', $urlparams);
         $return = $this->output->single_button($url, get_string('uploadattendance', 'attendance'));
+        if (!empty($takedata->sessioninfo->automark) &&
+             has_capability('mod/attendance:manualautomark', context_module::instance($takedata->cm->id)) &&
+                 ($takedata->sessioninfo->automark == ATTENDANCE_AUTOMARK_ALL || // Always allow if automark all.
+                  $takedata->sessioninfo->automark == ATTENDANCE_AUTOMARK_ACTIVITYCOMPLETION || // Always allow for activity completion.
+                  ($takedata->sessioninfo->automark == ATTENDANCE_AUTOMARK_CLOSE &&
+                   ($takedata->sessioninfo->sessdate + $takedata->sessioninfo->duration) < time())) // Only allow if session closed.
+            ) {
+            $urlparams = ['id' => $takedata->cm->id,
+                          'sessionid' => $takedata->pageparams->sessionid,
+                          'grouptype' => $takedata->pageparams->grouptype];
+            $url = new moodle_url('/mod/attendance/automark.php', $urlparams);
+            $return .= $this->output->single_button($url, get_string('manualtriggerauto', 'attendance'));
+        }
 
         $table = new html_table();
         $table->attributes['class'] = ' ';
