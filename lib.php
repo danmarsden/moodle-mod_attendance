@@ -561,7 +561,7 @@ function mod_attendance_myprofile_navigation(core_user\output\myprofile\tree $tr
         return;
     }
     $cm = reset($cms);
-    if (!empty($cm) && has_capability('mod/attendance:viewreports', context_module::instance($cm->id))) {
+    if (!empty($cm->coursemodule) && has_capability('mod/attendance:viewreports', context_module::instance($cm->coursemodule))) {
         $url = new moodle_url('/mod/attendance/view.php', ['id' => $cm->coursemodule,
                                                            'mode' => mod_attendance_view_page_params::MODE_THIS_COURSE,
                                                            'studentid' => $user->id]);
