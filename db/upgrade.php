@@ -736,7 +736,7 @@ function xmldb_attendance_upgrade($oldversion=0) {
                                FROM {attendance_log}
                            GROUP BY sessionid, studentid, statusid)';
             $DB->execute($sql);
-        } else {
+        } else if (!empty($CFG->dbfamily) && $CFG->dbfamily == 'mysql') {
             // There is probably a faster way to do this for mysql, but it works.
             $sql = "SELECT id
                       FROM {attendance_log}
