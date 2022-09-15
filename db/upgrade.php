@@ -747,6 +747,15 @@ function xmldb_attendance_upgrade($oldversion=0) {
             foreach ($records as $record) {
                 $DB->delete_records('attendance_log', ['id' => $record->id]);
             }
+        } else if (!empty($CFG->dbfamily) && $CFG->dbfamily == 'mssql') {
+            $sql = "DELETE {attendance_log}
+                    WHERE id NOT IN (
+                        SELECT max(id)
+                        FROM {attendance_log}
+                        GROUP BY sessionid, studentid, statusid
+                        )";
+            $DB->execute($sql);
+            }
         }
         // Attendance savepoint reached.
         upgrade_mod_savepoint(true, 2022090900, 'attendance');
