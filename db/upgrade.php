@@ -755,7 +755,6 @@ function xmldb_attendance_upgrade($oldversion=0) {
                         GROUP BY sessionid, studentid, statusid
                         )";
             $DB->execute($sql);
-            }
         }
         // Attendance savepoint reached.
         upgrade_mod_savepoint(true, 2022090900, 'attendance');
