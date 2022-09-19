@@ -35,7 +35,7 @@ $addons = [
                 'delegate' => 'CoreCourseModuleDelegate',
                 'method' => 'mobile_view_activity',
                 'styles' => [
-                    'url' => '/mod/attendance/mobilestyles.css',
+                    'url' => $CFG->wwwroot . '/mod/attendance/mobilestyles.css',
                     'version' => 22
                 ]
             ]
