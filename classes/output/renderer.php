@@ -1362,7 +1362,7 @@ class renderer extends plugin_renderer_base {
             }
             $row->cells[] = userdate($sess->sessdate, get_string('strftimedmyw', 'attendance')) .
              " ". $this->construct_time($sess->sessdate, $sess->duration);
-            $row->cells[] = format_string($sess->description, false);
+            $row->cells[] = format_text($sess->description);
             foreach ($customfields as $field) {
                 if (isset($customfieldsdata[$sess->id][$field->get('id')])) {
                     $row->cells[] = $customfieldsdata[$sess->id][$field->get('id')]->get('value');
