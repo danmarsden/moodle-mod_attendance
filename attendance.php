@@ -41,9 +41,9 @@ $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST)
 // Require the user is logged in.
 require_login($course, true, $cm);
 
-// If group mode is set, check if user can access this session.
+// If group mode is set, check if user is a member of this group.
 if (!empty($attforsession->groupid)) {
-    $allowedgroups = groups_get_activity_allowed_groups($cm);
+    $allowedgroups = groups_get_all_groups($cm->course, $USER->id, $cm->groupingid);
     if (!array_key_exists($attforsession->groupid, $allowedgroups)) {
          $group = groups_get_group($attforsession->groupid);
          throw new moodle_exception('cannottakethisgroup', 'attendance');
