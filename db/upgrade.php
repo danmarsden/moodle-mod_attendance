@@ -704,7 +704,7 @@ function xmldb_attendance_upgrade($oldversion=0) {
     if ($oldversion < 2021082609) {
         if (!empty($CFG->dbfamily) && $CFG->dbfamily == 'postgres') {
             $sql = 'DELETE FROM {attendance_log}
-            WHERE ID NOT IN (SELECT max(id)
+            WHERE id NOT IN (SELECT max(id)
                                FROM {attendance_log}
                            GROUP BY sessionid, studentid, statusid)';
             $DB->execute($sql);
@@ -712,7 +712,7 @@ function xmldb_attendance_upgrade($oldversion=0) {
             // There is probably a faster way to do this for mysql, but it works.
             $sql = "SELECT id
                       FROM {attendance_log}
-                      WHERE ID NOT IN (SELECT max(id)
+                      WHERE id NOT IN (SELECT max(id)
                                FROM {attendance_log}
                            GROUP BY sessionid, studentid, statusid)";
             $records = $DB->get_records_sql($sql);
