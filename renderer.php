@@ -364,7 +364,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
             } else {
                 $table->data[$sess->id][] = get_string('commonsession', 'attendance');
             }
-            $table->data[$sess->id][] = $sess->description;
+            $table->data[$sess->id][] = format_text($sess->description);
             $table->data[$sess->id][] = $dta['actions'];
             $table->data[$sess->id][] = html_writer::checkbox('sessid[]', $sess->id, false, '',
                                                               array('class' => 'attendancesesscheckbox'));
@@ -574,7 +574,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
         $sessinfo = $date.' '.$time;
         $sessinfo .= html_writer::empty_tag('br');
         $sessinfo .= html_writer::empty_tag('br');
-        $sessinfo .= $sess->description;
+        $sessinfo .= format_text($sess->description);
 
         return $sessinfo;
     }
