@@ -388,7 +388,7 @@ class renderer extends plugin_renderer_base {
             } else {
                 $table->data[$sess->id][] = get_string('commonsession', 'attendance');
             }
-            $table->data[$sess->id][] = $sess->description;
+            $table->data[$sess->id][] = format_text($sess->description);
             foreach ($customfields as $field) {
                 if (isset($customfieldsdata[$sess->id][$field->get('id')])) {
                     $table->data[$sess->id][] = $customfieldsdata[$sess->id][$field->get('id')]->get('value');
@@ -617,7 +617,7 @@ class renderer extends plugin_renderer_base {
         $sessinfo = $date.' '.$time;
         $sessinfo .= html_writer::empty_tag('br');
         $sessinfo .= html_writer::empty_tag('br');
-        $sessinfo .= $sess->description;
+        $sessinfo .= format_text($sess->description);
 
         return $sessinfo;
     }
