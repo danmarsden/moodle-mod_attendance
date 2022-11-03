@@ -1331,6 +1331,26 @@ function attendance_renderqrcode($session) {
 }
 
 /**
+* Generate student passwords for rotate QRcode
+*/
+
+function attendance_generate__rotateqrcode_studentpasswords($length=15) {
+    $randombytes = random_bytes_emulate($length);
+    $pool  = 'ABCDEFGHJKLMNPQRSTVWXYZ';
+    $pool .= 'abcdefghijkmnpqrstvwxyz';
+    $pool .= '123456789';
+    $poollen = strlen($pool);
+    $string = '';
+    for ($i = 0; $i < $length; $i++) {
+        $rand = ord($randombytes[$i]);
+        $string .= substr($pool, ($rand%($poollen)), 1);
+    }
+    return $string;
+}
+
+
+
+/**
  * Generate QR code passwords.
  *
  * @param stdClass $session
@@ -1342,7 +1362,7 @@ function attendance_generate_passwords($session) {
 
     for ($i = 0; $i < 30; $i++) {
         array_push($password, array("attendanceid" => $session->id,
-            "password" => mt_rand(1000, 10000), "expirytime" => time() + ($attconfig->rotateqrcodeinterval * $i)));
+            "password" => attendance_generate__rotateqrcode_studentpasswords(), "expirytime" => time() + ($attconfig->rotateqrcodeinterval * $i)));
     }
 
     $DB->insert_records('attendance_rotate_passwords', $password);
@@ -1353,6 +1373,7 @@ function attendance_generate_passwords($session) {
  *
  * @param stdClass $session
  */
+
 function attendance_renderqrcoderotate($session) {
     // Load required js.
     echo html_writer::tag('script', '',
