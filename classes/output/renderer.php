@@ -60,50 +60,28 @@ class renderer extends plugin_renderer_base {
      * @return string html code
      */
     protected function render_filter_controls(filter_controls $fcontrols) {
-        $classes = 'attfiltercontrols';
-        $filtertable = new html_table();
-        $filtertable->attributes['class'] = ' ';
-        $filtertable->width = '100%';
-        $filtertable->align = array('left', 'center', 'right', 'right');
+        
+        $context = new stdClass();
 
         if (property_exists($fcontrols->pageparams, 'mode') &&
             $fcontrols->pageparams->mode === mod_attendance_view_page_params::MODE_ALL_SESSIONS) {
-            $classes .= ' float-right';
-
-            $row = array();
-            $row[] = '';
-            $row[] = '';
-            $row[] = '';
-            $row[] = $this->render_grouping_controls($fcontrols);
-            $filtertable->data[] = $row;
-
-            $row = array();
-            $row[] = '';
-            $row[] = '';
-            $row[] = '';
-            $row[] = $this->render_course_controls($fcontrols);
-            $filtertable->data[] = $row;
+            $context->modeallsessions = true;
+            $context->groupingcontrols = $this->render_grouping_controls($fcontrols);
+            $context->coursecontrols = $this->render_course_controls($fcontrols);
         }
-        $addsession = '';
+
+        $context->sessgroupselector = $this->render_sess_group_selector($fcontrols);
+
         if (has_capability('mod/attendance:manageattendances', $fcontrols->att->context) && !$fcontrols->reportcontrol) {
-            $url = $fcontrols->att->url_sessions()->out(true,
-                   ['action' => mod_attendance_sessions_page_params::ACTION_ADD]);
-            $addsession = $this->output->single_button($url, get_string('addsession', 'attendance'),
-                                                       'post', ['class' => 'addsession', 'primary' => true]);
+            $url = $fcontrols->att->url_sessions()->out(true, ['action' => mod_attendance_sessions_page_params::ACTION_ADD]);
+            $context->addsession = $this->output->single_button($url, get_string('addsession', 'attendance'), 'post', ['class' => 'addsession', 'primary' => true]);
         }
 
-        $row = array();
-        $row[] = $this->render_sess_group_selector($fcontrols). $addsession;
-        $row[] = $this->render_curdate_controls($fcontrols);
-        $row[] = $this->render_paging_controls($fcontrols);
-        $row[] = $this->render_view_controls($fcontrols);
+        $context->curdatecontrols = $this->render_curdate_controls($fcontrols);
+        $context->pagingcontrols = $this->render_paging_controls($fcontrols);
+        $context->viewcontrols = $this->render_view_controls($fcontrols);
 
-        $filtertable->data[] = $row;
-
-        $o = html_writer::table($filtertable);
-        $o = $this->output->container($o, $classes);
-
-        return $o;
+        return $this->render_from_template('attendance/filter_controls', $context);
     }
 
     /**
@@ -122,7 +100,7 @@ class renderer extends plugin_renderer_base {
                     $select->label = get_string('sessions', 'attendance');
                     $output = $this->output->render($select);
 
-                    return html_writer::tag('div', $output, array('class' => 'groupselector'));
+                    return html_writer::tag('div', $output, array('class' => 'groupselector m-0'));
                 }
                 break;
             case mod_attendance_page_with_filter_controls::SELECTOR_GROUP:
@@ -251,7 +229,7 @@ class renderer extends plugin_renderer_base {
                     $groupcontrols .= html_writer::tag('span', $opttext, array('class' => 'attcurbtn'));
                 }
             }
-            return html_writer::tag('nobr', $groupcontrols);
+            return html_writer::tag('div', $groupcontrols);
         }
         return "";
     }
@@ -277,7 +255,7 @@ class renderer extends plugin_renderer_base {
                     $coursecontrols .= html_writer::tag('span', $opttext, array('class' => 'attcurbtn'));
                 }
             }
-            return html_writer::tag('nobr', $coursecontrols);
+            return html_writer::tag('div', $coursecontrols);
         }
         return "";
     }
@@ -311,7 +289,7 @@ class renderer extends plugin_renderer_base {
             }
         }
 
-        return html_writer::tag('nobr', $viewcontrols);
+        return html_writer::tag('div', $viewcontrols);
     }
 
     /**
@@ -1184,8 +1162,8 @@ class renderer extends plugin_renderer_base {
                 $userdata->pageparams->view);
         } else if ($userdata->pageparams->mode == mod_attendance_view_page_params::MODE_ALL_SESSIONS) {
             $allsessions = $this->construct_user_allsessions_log($userdata);
-            $o .= html_writer::start_div('allsessionssummary');
-            $o .= html_writer::start_div('float-left');
+            $o .= html_writer::start_div('allsessionssummary row');
+            $o .= html_writer::start_div('userinfo col-auto mr-xl-auto');
             $o .= html_writer::start_div('float-left');
             $o .= $this->user_picture($userdata->user, array('size' => 100, 'class' => 'userpicture float-left'));
             $o .= html_writer::end_div();
@@ -1193,7 +1171,7 @@ class renderer extends plugin_renderer_base {
             $o .= $allsessions->summary;
             $o .= html_writer::end_div();
             $o .= html_writer::end_div();
-            $o .= html_writer::start_div('float-right');
+            $o .= html_writer::start_div('attfiltercontrols-wrap col-12 col-xl-auto');
             $o .= $this->render_filter_controls($userdata->filtercontrols);
             $o .= html_writer::end_div();
             $o .= html_writer::end_div();
