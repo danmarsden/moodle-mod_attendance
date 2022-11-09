@@ -82,8 +82,6 @@ class renderer extends plugin_renderer_base {
         $context->viewcontrols = $this->render_view_controls($fcontrols);
 
         return $this->render_from_template('attendance/filter_controls', $context);
-
-        return $o;
     }
 
     /**
