@@ -57,7 +57,7 @@ class marksessions_confirm extends moodleform {
         $mform->addHelpButton('userfrom', 'userimportfield', 'attendance');
         // This allows the user to choose which field in the user database the identifying column will map to.
         $useroptions = array(
-            'userid'       => get_string('userid', 'attendance'),
+            'id'       => get_string('userid', 'attendance'),
             'username'     => get_string('username'),
             'idnumber' => get_string('idnumber'),
             'email'    => get_string('email')
