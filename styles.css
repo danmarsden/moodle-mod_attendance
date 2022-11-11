@@ -298,8 +298,3 @@
 #page-mod-attendance-password .qrcodeheader {
     font-size: larger;
 }
-
-#page-mod-attendance-manage .addsession {
-    display: inline-block;
-    padding-left: 1em;
-}

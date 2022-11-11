@@ -35,15 +35,15 @@
 <div class="attfiltercontrols mb-3">
 
     {{#modeallsessions}}
-        <div class="modeallsessions">
-            <div class="row justify-content-between flex-xl-column align-items-xl-end">
+        <div class="modeallsessions mb-3">
+            <div class="row mx-n2 justify-content-between flex-xl-column align-items-xl-end">
                 {{#groupingcontrols}}
-                    <div class="groupingcontrols col-auto">
+                    <div class="groupingcontrols col-auto px-2">
                         {{{groupingcontrols}}}
                     </div>
                 {{/groupingcontrols}}
                 {{#coursecontrols}}
-                    <div class="coursecontrols col-auto">
+                    <div class="coursecontrols col-auto px-2">
                         {{{coursecontrols}}}
                     </div>
                 {{/coursecontrols}}   
@@ -51,29 +51,29 @@
         </div>
     {{/modeallsessions}}
 
-    <div class="row justify-content-between">
+    <div class="row m-n2">
         {{#sessgroupselector}}
-            <div class="sessgroupselector col-auto my-2">
+            <div class="sessgroupselector col-auto p-2">
                 {{{sessgroupselector}}}
             </div>
         {{/sessgroupselector}}
         {{#addsession}}
-            <div class="addsession col-auto my-2">
+            <div class="addsession col-auto p-2">
                 {{{addsession}}}
             </div>
         {{/addsession}}
         {{#curdatecontrols}}
-            <div class="curdatecontrols col-auto my-2">
+            <div class="curdatecontrols col-auto d-flex align-items-center p-2">
                 {{{curdatecontrols}}}
             </div>
         {{/curdatecontrols}}
         {{#pagingcontrols}}
-            <div class="pagingcontrols col-auto my-2">
+            <div class="pagingcontrols col-auto d-flex align-items-center p-2 ml-md-auto">
                 {{{pagingcontrols}}}
             </div>
         {{/pagingcontrols}}
         {{#viewcontrols}}
-            <div class="viewcontrols col-auto my-2">
+            <div class="viewcontrols col-auto p-2 {{^pagingcontrols}}ml-md-auto{{/pagingcontrols}}">
                 {{{viewcontrols}}}
             </div>
         {{/viewcontrols}}

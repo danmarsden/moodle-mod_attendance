@@ -100,7 +100,7 @@ class renderer extends plugin_renderer_base {
                     $select->label = get_string('sessions', 'attendance');
                     $output = $this->output->render($select);
 
-                    return html_writer::tag('div', $output, array('class' => 'groupselector'));
+                    return html_writer::tag('div', $output, array('class' => 'groupselector m-0'));
                 }
                 break;
             case mod_attendance_page_with_filter_controls::SELECTOR_GROUP:
