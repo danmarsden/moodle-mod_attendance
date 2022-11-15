@@ -147,7 +147,7 @@ Feature: Visiting reports
     Then I should see "5AM - 6AM"
 
     And I am on the "Attendance" "mod_attendance > Report" page
-    And I click on "Summary" "link" in the "All" "table_row"
+    And I click on "Summary" "link" in the ".viewcontrols" "css_element"
 
     Then "3 / 6" "text" should exist in the "Student 1" "table_row"
     And "50.0%" "text" should exist in the "Student 1" "table_row"
