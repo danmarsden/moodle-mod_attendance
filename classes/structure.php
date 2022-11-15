@@ -840,7 +840,7 @@ class mod_attendance_structure {
      */
     public function get_users($groupid = 0, $page = 1) : array {
         global $DB, $CFG;
-        require_once($CFG->dirroot . '/user/profile/lib.php'); // For profile_load_data().
+        require_once($CFG->dirroot . '/user/profile/lib.php'); // For profile_load_data function.
 
         $fields = array('username' , 'idnumber' , 'institution' , 'department', 'city', 'country');
         $userf = \core_user\fields::for_identity($this->context, false)->with_userpic()->including(...$fields);
