@@ -72,7 +72,8 @@ class renderer extends plugin_renderer_base {
 
         $context->sessgroupselector = $this->render_sess_group_selector($fcontrols);
 
-        if (has_capability('mod/attendance:manageattendances', $fcontrols->att->context) && !$fcontrols->reportcontrol) {
+        if (empty($fcontrols->pageparams->studentid) && // Don't show add session button on user specific reports.
+            has_capability('mod/attendance:manageattendances', $fcontrols->att->context) && !$fcontrols->reportcontrol) {
             $url = $fcontrols->att->url_sessions()->out(true, ['action' => mod_attendance_sessions_page_params::ACTION_ADD]);
             $context->addsession = $this->output->single_button($url, get_string('addsession', 'attendance'), 'post',
              ['class' => 'addsession', 'primary' => true]);
