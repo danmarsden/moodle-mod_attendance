@@ -60,7 +60,7 @@ class renderer extends plugin_renderer_base {
      * @return string html code
      */
     protected function render_filter_controls(filter_controls $fcontrols) {
-        
+
         $context = new stdClass();
 
         if (property_exists($fcontrols->pageparams, 'mode') &&
@@ -74,7 +74,8 @@ class renderer extends plugin_renderer_base {
 
         if (has_capability('mod/attendance:manageattendances', $fcontrols->att->context) && !$fcontrols->reportcontrol) {
             $url = $fcontrols->att->url_sessions()->out(true, ['action' => mod_attendance_sessions_page_params::ACTION_ADD]);
-            $context->addsession = $this->output->single_button($url, get_string('addsession', 'attendance'), 'post', ['class' => 'addsession', 'primary' => true]);
+            $context->addsession = $this->output->single_button($url, get_string('addsession', 'attendance'), 'post',
+             ['class' => 'addsession', 'primary' => true]);
         }
 
         $context->curdatecontrols = $this->render_curdate_controls($fcontrols);
@@ -558,11 +559,10 @@ class renderer extends plugin_renderer_base {
         $return = $this->output->single_button($url, get_string('uploadattendance', 'attendance'));
         if (!empty($takedata->sessioninfo->automark) &&
              has_capability('mod/attendance:manualautomark', context_module::instance($takedata->cm->id)) &&
-                 ($takedata->sessioninfo->automark == ATTENDANCE_AUTOMARK_ALL || // Always allow if automark all.
-                  $takedata->sessioninfo->automark == ATTENDANCE_AUTOMARK_ACTIVITYCOMPLETION || // Always allow for activity completion.
+                 ($takedata->sessioninfo->automark == ATTENDANCE_AUTOMARK_ALL ||
+                  $takedata->sessioninfo->automark == ATTENDANCE_AUTOMARK_ACTIVITYCOMPLETION ||
                   ($takedata->sessioninfo->automark == ATTENDANCE_AUTOMARK_CLOSE &&
-                   ($takedata->sessioninfo->sessdate + $takedata->sessioninfo->duration) < time())) // Only allow if session closed.
-            ) {
+                   ($takedata->sessioninfo->sessdate + $takedata->sessioninfo->duration) < time()))) {
             $urlparams = ['id' => $takedata->cm->id,
                           'sessionid' => $takedata->pageparams->sessionid,
                           'grouptype' => $takedata->pageparams->grouptype];
