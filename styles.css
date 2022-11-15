@@ -1,8 +1,7 @@
 .path-mod-attendance .attbtn {
     border: 1px solid #aaa;
     border-radius: 5px;
-    margin-left: 2px;
-    margin-right: 2px;
+    margin: 2px;
     padding: 5px;
     display: inline-block;
 }
@@ -15,8 +14,6 @@
 
 .path-mod-attendance .attfiltercontrols {
     margin-bottom: 10px;
-    margin-left: auto;
-    margin-right: auto;
 }
 
 .path-mod-attendance .attfiltercontrols #currentdate {
@@ -120,9 +117,6 @@
 }
 .path-mod-attendance table.allsessions td.groupheading {
     font-weight: bold;
-}
-.path-mod-attendance .allsessionssummary > * {
-    display: inline-block;
 }
 .path-mod-attendance .allsessionssummary .float-right {
     float: right;
@@ -303,9 +297,4 @@
 #page-mod-attendance-password .qrcodevalid,
 #page-mod-attendance-password .qrcodeheader {
     font-size: larger;
-}
-
-#page-mod-attendance-manage .addsession {
-    display: inline-block;
-    padding-left: 1em;
 }
