@@ -190,8 +190,8 @@ function attendance_get_user_sessions_log_full($userid, $pageparams) {
             $modinfo = get_fast_modinfo($sess->courseid);
             $cmid = $modinfo->instances['attendance'][$sess->attendanceid]->get_course_module_record()->id;
             $ctx = context_module::instance($cmid);
-            $sess->description = file_rewrite_pluginfile_urls($sess->description,
-            'pluginfile.php', $ctx->id, 'mod_attendance', 'session', $sess->id);
+            $sess->description = format_text(file_rewrite_pluginfile_urls($sess->description,
+            'pluginfile.php', $ctx->id, 'mod_attendance', 'session', $sess->id));
         }
     }
 
