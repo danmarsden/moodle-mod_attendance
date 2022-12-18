@@ -195,7 +195,7 @@ class external_test extends externallib_advanced_testcase {
         $midnight = usergetmidnight(time()); // Check if this test is running during midnight.
         $session = clone $this->sessions[0];
         $session->groupid = $group->id;
-        $session->sessdate += 3600; // Make sure it appears second in the list.
+        $session->sessdate += 1; // Make sure it appears second in the list.
         $this->attendance->add_sessions([$session]);
 
         $courseswithsessions = attendance_handler::get_courses_with_today_sessions($this->teacher->id);
