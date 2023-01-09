@@ -1223,7 +1223,7 @@ class mod_attendance_renderer extends plugin_renderer_base {
                     $table->data[] = $row;
                     if ($usersummary->numtakensessions > 0) {
                         $totalattendance++;
-                        $totalpercentage = $totalpercentage + format_float($usersummary->takensessionspercentage * 100);
+                        $totalpercentage = $totalpercentage + ($usersummary->takensessionspercentage * 100);
                     }
                 }
             }
