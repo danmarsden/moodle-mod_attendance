@@ -272,8 +272,6 @@
 }
 
 #page-mod-attendance-report .attendancereporttable {
-    overflow-x: scroll;
-    overflow-y: visible;
     padding: 0;
 }
 
@@ -291,10 +289,37 @@
 
 }
 
+#page-mod-attendance-report .attendancereporttable tr:first-of-type th,
+#page-mod-attendance-manage .attsessions_manage_table tr:first-of-type th,
+#page-mod-attendance-preferences #preferencesform tr:first-of-type th,
+#page-mod-attendance-index tr:first-of-type th {
+    position: sticky;
+    top: 0;
+    background: white;
+}
+
+#page-mod-attendance-report .attendancereporttable tr:nth-of-type(2) th {
+    position: sticky;
+    top: 3rem;
+    background: white;
+}
+
+#page-mod-attendance-report .attendancereporttable tr:first-of-type .headcol,
+#page-mod-attendance-report .attendancereporttable tr:nth-of-type(2) .headcol {
+    z-index: 1;
+}
+
 .attendancereporttable img.icon {
     padding-left: 5px;
 }
 #page-mod-attendance-password .qrcodevalid,
 #page-mod-attendance-password .qrcodeheader {
     font-size: larger;
+}
+
+#page-mod-attendance-report .attendancereporttable .table-responsive,
+#page-mod-attendance-manage .attsessions_manage_table .table-responsive,
+#page-mod-attendance-preferences #preferencesform .table-responsive,
+#page-mod-attendance-index .table-responsive {
+    overflow-x: initial;
 }
