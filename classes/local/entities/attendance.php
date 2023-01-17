@@ -27,6 +27,7 @@ use core_reportbuilder\local\entities\base;
 use core_user\fields;
 use core_reportbuilder\local\helpers\user_profile_fields;
 use core_reportbuilder\local\entities\user;
+use core_reportbuilder\local\filters\number;
 use lang_string;
 use stdClass;
 
@@ -45,6 +46,9 @@ require_once($CFG->dirroot . '/course/lib.php');
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class attendance extends base {
+
+    /** @var array  */
+    private $acronyms = [];
 
     /**
      * Database tables that this entity uses and their default aliases
@@ -220,6 +224,76 @@ class attendance extends base {
             ->set_is_sortable(true)
             ->add_field("{$attendancelogalias}.remarks");
 
+        // Attendance status totals.
+        $thismonday = strtotime('monday this week');
+        $lastmonday = strtotime('monday last week');
+        foreach ($this->statusacronyms() as $acronym) {
+            list($fieldname, $fieldnamecw, $fieldnamepw) = $this->acronymfieldnames($acronym);
+
+            // Status total count column.
+            $columns[] = (new column(
+                $fieldname,
+                new lang_string('statustotalcount', 'mod_attendance', $acronym),
+                $this->get_entity_name()
+            ))
+                ->add_join($join)
+                ->add_join("LEFT JOIN (
+                    SELECT a.course, atst.id statusid, atlo.studentid, COUNT(atst.acronym) count
+                    FROM {attendance_statuses} atst
+                    JOIN {attendance_log} atlo ON atlo.statusid = atst.id
+                    JOIN {attendance} a ON a.id = atst.attendanceid AND atst.acronym = '$acronym'
+                    GROUP BY a.course, atst.id, atlo.studentid
+                ) $fieldname
+                ON $fieldname.course = $attendancealias.course
+                AND $fieldname.statusid = $attendancestatusalias.id
+                AND $fieldname.studentid = $attendancelogalias.studentid")
+                ->set_is_sortable(true)
+                ->add_field("$fieldname.count");
+
+            // Status total count in the current week column.
+            $columns[] = (new column(
+                $fieldnamecw,
+                new lang_string('statustotalcountcurrentweek', 'mod_attendance', $acronym),
+                $this->get_entity_name()
+            ))
+                ->add_join($join)
+                ->add_join("LEFT JOIN (
+                    SELECT a.course, atst.id statusid, atlo.studentid, COUNT(atst.acronym) count
+                    FROM {attendance_statuses} atst
+                    JOIN {attendance_log} atlo ON atlo.statusid = atst.id
+                    JOIN {attendance} a ON a.id = atst.attendanceid AND atst.acronym = '$acronym'
+                    AND atlo.timetaken >= $thismonday
+                    GROUP BY a.course, atst.id, atlo.studentid
+                ) $fieldnamecw
+                ON $fieldnamecw.course = $attendancealias.course
+                AND $fieldnamecw.statusid = $attendancestatusalias.id
+                AND $fieldnamecw.studentid = $attendancelogalias.studentid")
+                ->set_is_sortable(true)
+                ->add_field("{$fieldnamecw}.count");
+
+            // Status total count in the previous week column.
+            $columns[] = (new column(
+                $fieldnamepw,
+                new lang_string('statustotalcountpreviousweek', 'mod_attendance', $acronym),
+                $this->get_entity_name()
+            ))
+                ->add_join($join)
+                ->add_join("LEFT JOIN (
+                    SELECT a.course, atst.id statusid, atlo.studentid, COUNT(atst.acronym) count
+                    FROM {attendance_statuses} atst
+                    JOIN {attendance_log} atlo ON atlo.statusid = atst.id
+                    JOIN {attendance} a ON a.id = atst.attendanceid AND atst.acronym = '$acronym'
+                    AND atlo.timetaken >= $lastmonday
+                    AND atlo.timetaken < $thismonday
+                    GROUP BY a.course, atst.id, atlo.studentid
+                ) $fieldnamepw
+                ON $fieldnamepw.course = $attendancealias.course
+                AND $fieldnamepw.statusid = $attendancestatusalias.id
+                AND $fieldnamepw.studentid = $attendancelogalias.studentid")
+                ->set_is_sortable(true)
+                ->add_field("{$fieldnamepw}.count");
+        }
+
         return $columns;
     }
 
@@ -318,8 +392,78 @@ class attendance extends base {
         ))
             ->add_join($join);
 
+        $thismonday = strtotime('monday this week');
+        $lastmonday = strtotime('monday last week');
+        foreach ($this->statusacronyms() as $acronym) {
+            list($fieldname, $fieldnamecw, $fieldnamepw) = $this->acronymfieldnames($acronym);
+
+            // Status total count filter.
+            $filters[] = (new filter(
+                number::class,
+                $fieldname,
+                new lang_string('statustotalcount', 'mod_attendance', $acronym),
+                $this->get_entity_name(),
+                "{$fieldname}.count"
+            ))
+                ->add_join($join)
+                ->add_join("LEFT JOIN (
+                    SELECT a.course, atst.id statusid, atlo.studentid, COUNT(atst.acronym) count
+                    FROM {attendance_statuses} atst
+                    JOIN {attendance_log} atlo ON atlo.statusid = atst.id
+                    JOIN {attendance} a ON a.id = atst.attendanceid AND atst.acronym = '$acronym'
+                    GROUP BY a.course, atst.id, atlo.studentid
+                ) $fieldname
+                ON $fieldname.course = $attendancealias.course
+                AND $fieldname.statusid = $attendancestatusalias.id
+                AND $fieldname.studentid = $attendancelogalias.studentid");
+
+            // Status total count in the current week filter.
+            $filters[] = (new filter(
+                number::class,
+                $fieldnamecw,
+                new lang_string('statustotalcountcurrentweek', 'mod_attendance', $acronym),
+                $this->get_entity_name(),
+                "{$fieldnamecw}.count"
+            ))
+                ->add_join($join)
+                ->add_join("LEFT JOIN (
+                    SELECT a.course, atst.id statusid, atlo.studentid, COUNT(atst.acronym) count
+                    FROM {attendance_statuses} atst
+                    JOIN {attendance_log} atlo ON atlo.statusid = atst.id
+                    JOIN {attendance} a ON a.id = atst.attendanceid AND atst.acronym = '$acronym'
+                    AND atlo.timetaken >= $thismonday
+                    GROUP BY a.course, atst.id, atlo.studentid
+                ) $fieldnamecw
+                ON $fieldnamecw.course = $attendancealias.course
+                AND $fieldnamecw.statusid = $attendancestatusalias.id
+                AND $fieldnamecw.studentid = $attendancelogalias.studentid");
+
+            // Status total count in the previous week filter.
+            $filters[] = (new filter(
+                number::class,
+                $fieldnamepw,
+                new lang_string('statustotalcountpreviousweek', 'mod_attendance', $acronym),
+                $this->get_entity_name(),
+                "{$fieldnamepw}.count"
+            ))
+                ->add_join($join)
+                ->add_join("LEFT JOIN (
+                    SELECT a.course, atst.id statusid, atlo.studentid, COUNT(atst.acronym) count
+                    FROM {attendance_statuses} atst
+                    JOIN {attendance_log} atlo ON atlo.statusid = atst.id
+                    JOIN {attendance} a ON a.id = atst.attendanceid AND atst.acronym = '$acronym'
+                    AND atlo.timetaken >= $lastmonday
+                    AND atlo.timetaken < $thismonday
+                    GROUP BY a.course, atst.id, atlo.studentid
+                ) $fieldnamepw
+                ON $fieldnamepw.course = $attendancealias.course
+                AND $fieldnamepw.statusid = $attendancestatusalias.id
+                AND $fieldnamepw.studentid = $attendancelogalias.studentid");
+        }
+
         return $filters;
     }
+
     /**
      * Helper function to get main join.
      *
@@ -337,5 +481,43 @@ class attendance extends base {
                     ON {$attendancesessionalias}.id = {$attendancelogalias}.sessionid
                 JOIN {attendance} {$attendancealias}
                     ON {$attendancealias}.id = {$attendancesessionalias}.attendanceid";
+    }
+
+    /**
+     * Get a list of distinct status acronyms used across courses.
+     *
+     * @return array
+     */
+    private function statusacronyms(): array {
+        if (!empty($this->acronyms)) {
+            return $this->acronyms;
+        }
+        global $DB;
+        $statuserecords = $DB->get_records_sql('SELECT DISTINCT acronym FROM {attendance_statuses} WHERE deleted = 0');
+        foreach ($statuserecords as $statuserecord) {
+            $acronyms[] = $statuserecord->acronym;
+        }
+        $this->acronyms = $acronyms;
+        return $acronyms;
+    }
+
+    /**
+     * Return a set of fieldnames using the acronym given.
+     *
+     * Index of fieldname values.
+     * * [0] status_{$acronym}_total_count
+     * * [1] status_{$acronym}_total_count_current_week
+     * * [2] status_{$acronym}_total_count_previous_week
+     *
+     * @param string $acronym A status acronym.
+     * @return array
+     */
+    private function acronymfieldnames(string $acronym): array {
+        $fieldname = 'status_' . strtolower($acronym) . '_total_count';
+        return [
+            $fieldname,
+            $fieldname . '_current_week',
+            $fieldname . '_previous_week',
+        ];
     }
 }
