@@ -18,18 +18,10 @@ declare(strict_types=1);
 
 namespace mod_attendance\local\entities;
 
-use core_reportbuilder\local\filters\date;
-use core_reportbuilder\local\filters\duration;
-use core_reportbuilder\local\filters\text;
-use core_reportbuilder\local\report\column;
-use core_reportbuilder\local\report\filter;
 use core_reportbuilder\local\entities\base;
-use core_user\fields;
-use core_reportbuilder\local\helpers\user_profile_fields;
-use core_reportbuilder\local\entities\user;
-use core_reportbuilder\local\filters\number;
+use core_reportbuilder\local\filters\{date, duration, number, text};
+use core_reportbuilder\local\report\{column, filter};
 use lang_string;
-use stdClass;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -57,14 +49,14 @@ class attendance extends base {
      */
     protected function get_default_table_aliases(): array {
         return [
-                'user' => 'attu',
-                'context' => 'attctx',
-                'course' => 'attc',
-                'attendance' => 'att',
-                'attendance_sessions' => 'attsess',
-                'attendance_log' => 'attlog',
-                'attendance_statuses' => 'attstat',
-               ];
+            'user' => 'attu',
+            'context' => 'attctx',
+            'course' => 'attc',
+            'attendance' => 'att',
+            'attendance_sessions' => 'attsess',
+            'attendance_log' => 'attlog',
+            'attendance_statuses' => 'attstat',
+        ];
     }
 
     /**
