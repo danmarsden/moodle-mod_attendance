@@ -56,6 +56,9 @@ class studentattendance extends \moodleform {
                 unset($statuses[$status->id]);
                 $disabledduetotime = true;
             }
+            if ($status->availablebeforesession == 0  && time() < $attforsession->sessdate) {
+                unset($statuses[$status->id]);
+            }
         }
 
         $mform->addElement('hidden', 'sessid', null);
