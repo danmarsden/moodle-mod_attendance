@@ -46,7 +46,7 @@ class backup_attendance_activity_structure_step extends backup_activity_structur
 
         $statuses = new backup_nested_element('statuses');
         $status  = new backup_nested_element('status', array('id'), array(
-            'acronym', 'description', 'grade', 'studentavailability', 'setunmarked', 'visible', 'deleted', 'setnumber'));
+            'acronym', 'description', 'grade', 'studentavailability', 'availablebeforesession', 'setunmarked', 'visible', 'deleted', 'setnumber'));
 
         $warnings = new backup_nested_element('warnings');
         $warning  = new backup_nested_element('warning', array('id'), array('warningpercent', 'warnafter',

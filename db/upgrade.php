@@ -760,5 +760,20 @@ function xmldb_attendance_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2022090900, 'attendance');
     }
 
+    if ($oldversion < 2023011700) {
+
+        // Define field studentavailability to be added to attendance_statuses.
+        $table = new xmldb_table('attendance_statuses');
+        $field = new xmldb_field('availablebeforesession', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'studentavailability');
+
+        // Conditionally launch add field studentavailability.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Attendance savepoint reached.
+        upgrade_mod_savepoint(true, 2023011700, 'attendance');
+    }
+
     return $result;
 }
