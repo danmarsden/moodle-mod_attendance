@@ -114,7 +114,7 @@ jobs:
         id: add-version
         env:
           PLUGIN: mod_attendance
-          BRANCH: MOODLE_400_STABLE
+          BRANCH: MOODLE_401_STABLE
           CURL: curl -s
           ENDPOINT: https://moodle.org/webservice/rest/server.php
           TOKEN: ${{ secrets.MOODLE_ORG_TOKEN }}
