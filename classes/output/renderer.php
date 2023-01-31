@@ -76,7 +76,7 @@ class renderer extends plugin_renderer_base {
             has_capability('mod/attendance:manageattendances', $fcontrols->att->context) && !$fcontrols->reportcontrol) {
             $url = $fcontrols->att->url_sessions()->out(true, ['action' => mod_attendance_sessions_page_params::ACTION_ADD]);
             $context->addsession = $this->output->single_button($url, get_string('addsession', 'attendance'), 'post',
-             ['class' => 'addsession', 'primary' => true]);
+             ['class' => 'addsession', 'type' => 'primary']);
         }
 
         $context->curdatecontrols = $this->render_curdate_controls($fcontrols);
