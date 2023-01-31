@@ -48,17 +48,16 @@ class studentattendance extends \moodleform {
         // Check if user has access to all statuses.
         $disabledduetotime = false;
         foreach ($statuses as $status) {
-            if ($status->studentavailability === '0') {
+            if ($status->studentavailability === '0') { // Status code explictly set to 0 minutes - not shown to students.
                 unset($statuses[$status->id]);
             }
+             // If session has not started, and this status is available before session don't do any other checks.
             if (!($status->availablebeforesession == 1 && time() < $attforsession->sessdate)) {
+                // If studentavilablility is "null" and session is open, check availability of this status.
                 if (!empty($status->studentavailability) &&
                     time() > $attforsession->sessdate + ($status->studentavailability * 60)) {
                     unset($statuses[$status->id]);
                     $disabledduetotime = true;
-                }
-                if ($status->availablebeforesession == 0 && time() < $attforsession->sessdate - $attforsession->studentsearlyopentime) {
-                    unset($statuses[$status->id]);
                 }
             }
         }
