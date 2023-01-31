@@ -114,6 +114,7 @@ class attendance extends base {
         $sessiondataalias = $this->get_table_alias('session_data');
 
         $join = $this->attendancejoin();
+        $sessdatajoin = $this->sessiondatajoin();
 
         // Attendance name column.
         $columns[] = (new column(
@@ -226,6 +227,7 @@ class attendance extends base {
             $this->get_entity_name()
         ))
             ->add_join($join)
+            ->add_join($sessdatajoin)
             ->set_is_sortable(true)
             ->add_field("{$sessiondataalias}.numsessionstaken");
 
@@ -236,6 +238,7 @@ class attendance extends base {
             $this->get_entity_name()
         ))
             ->add_join($join)
+            ->add_join($sessdatajoin)
             ->add_field("{$sessiondataalias}.pointstakensessions");
 
         // Percentage over taken sessions columns.
@@ -245,6 +248,7 @@ class attendance extends base {
             $this->get_entity_name()
         ))
             ->add_join($join)
+            ->add_join($sessdatajoin)
             ->set_type(column::TYPE_FLOAT)
             ->set_is_sortable(true)
             ->add_field("{$sessiondataalias}.percentagesessionscompleted")
@@ -257,6 +261,7 @@ class attendance extends base {
             $this->get_entity_name()
         ))
             ->add_join($join)
+            ->add_join($sessdatajoin)
             ->set_is_sortable(true)
             ->add_field("{$sessiondataalias}.numsessions");
 
@@ -267,6 +272,7 @@ class attendance extends base {
             $this->get_entity_name()
         ))
             ->add_join($join)
+            ->add_join($sessdatajoin)
             ->add_field("{$sessiondataalias}.pointsallsessions");
 
         // Percentage over all sessions columns.
@@ -276,6 +282,7 @@ class attendance extends base {
             $this->get_entity_name()
         ))
             ->add_join($join)
+            ->add_join($sessdatajoin)
             ->set_type(column::TYPE_FLOAT)
             ->set_is_sortable(true)
             ->add_field("{$sessiondataalias}.percentageallsessions")
@@ -288,6 +295,7 @@ class attendance extends base {
             $this->get_entity_name()
         ))
             ->add_join($join)
+            ->add_join($sessdatajoin)
             ->set_is_sortable(true)
             ->add_field("{$sessiondataalias}.maxpossiblepoints");
 
@@ -298,6 +306,7 @@ class attendance extends base {
             $this->get_entity_name()
         ))
             ->add_join($join)
+            ->add_join($sessdatajoin)
             ->set_type(column::TYPE_FLOAT)
             ->set_is_sortable(true)
             ->add_field("{$sessiondataalias}.maxpossiblepercentage")
@@ -549,69 +558,81 @@ class attendance extends base {
      * @return string
      */
     public function attendancejoin() {
-        global $DB;
         $attendancealias = $this->get_table_alias('attendance');
         $attendancesessionalias = $this->get_table_alias('attendance_sessions');
         $attendancelogalias = $this->get_table_alias('attendance_log');
         $attendancestatusalias = $this->get_table_alias('attendance_statuses');
-        $sessiondataalias = $this->get_table_alias('session_data');
-
-        $pointsallsessionsconcat = $DB->sql_concat('studentpoints', "' / '", 'allpoints');
-        $pointstakensessionsconcat = $DB->sql_concat('studentpoints', "' / '", 'maxgrade * numsessionstaken');
 
         return "JOIN {attendance_statuses} {$attendancestatusalias}
                     ON {$attendancestatusalias}.id = {$attendancelogalias}.statusid
                 JOIN {attendance_sessions} {$attendancesessionalias}
                     ON {$attendancesessionalias}.id = {$attendancelogalias}.sessionid
                 JOIN {attendance} {$attendancealias}
-                    ON {$attendancealias}.id = {$attendancesessionalias}.attendanceid
+                    ON {$attendancealias}.id = {$attendancesessionalias}.attendanceid";
+    }
+
+    /**
+     * Helper function to get session data join.
+     *
+     * @return string
+     */
+    private function sessiondatajoin(): string {
+        global $DB;
+
+        $attendancealias = $this->get_table_alias('attendance');
+        $attendancelogalias = $this->get_table_alias('attendance_log');
+        $sessiondataalias = $this->get_table_alias('session_data');
+
+        $pointsallsessionsconcat = $DB->sql_concat('studentpoints', "' / '", 'allpoints');
+        $pointstakensessionsconcat = $DB->sql_concat('studentpoints', "' / '", 'maxgrade * numsessionstaken');
+
+        return "JOIN (
+            SELECT
+                course,
+                studentid,
+                allpoints,
+                studentpoints,
+                numsessions,
+                numsessionstaken,
+                $pointsallsessionsconcat AS pointsallsessions,
+                $pointstakensessionsconcat AS pointstakensessions,
+                maxgrade * (numsessions - numsessionstaken) + studentpoints AS maxpossiblepoints,
+                studentpoints / allpoints * 100 AS percentageallsessions,
+                studentpoints / (maxgrade * numsessionstaken) * 100 AS percentagesessionscompleted,
+                (maxgrade * (numsessions - numsessionstaken) + studentpoints) / allpoints * 100 AS maxpossiblepercentage
+            FROM (
+                SELECT
+                    a.course,
+                    atlo.studentid,
+                    sescount.count * stm.maxgrade AS allpoints,
+                    SUM(atst.grade) AS studentpoints,
+                    COUNT(DISTINCT atse.id) AS numsessionstaken,
+                    sescount.count AS numsessions,
+                    stm.maxgrade
+                FROM {attendance_sessions} atse
+                JOIN {attendance} a ON a.id = atse.attendanceid
+                JOIN {course} c ON c.id = a.course
+                JOIN {attendance_log} atlo ON atlo.sessionid = atse.id
+                JOIN {attendance_statuses} atst ON atst.id = atlo.statusid AND atst.deleted = 0 AND atst.visible = 1
                 JOIN (
-                    SELECT
-                        course,
-                        studentid,
-                        allpoints,
-                        studentpoints,
-                        numsessions,
-                        numsessionstaken,
-                        $pointsallsessionsconcat AS pointsallsessions,
-                        $pointstakensessionsconcat AS pointstakensessions,
-                        maxgrade * (numsessions - numsessionstaken) + studentpoints AS maxpossiblepoints,
-                        studentpoints / allpoints * 100 AS percentageallsessions,
-                        studentpoints / (maxgrade * numsessionstaken) * 100 AS percentagesessionscompleted,
-                        (maxgrade * (numsessions - numsessionstaken) + studentpoints) / allpoints * 100 AS maxpossiblepercentage
-                    FROM (
-                        SELECT
-                            a.course,
-                            atlo.studentid,
-                            sescount.count * stm.maxgrade AS allpoints,
-                            SUM(atst.grade) AS studentpoints,
-                            COUNT(DISTINCT atse.id) AS numsessionstaken,
-                            sescount.count AS numsessions,
-                            stm.maxgrade
-                        FROM {attendance_sessions} atse
-                        JOIN {attendance} a ON a.id = atse.attendanceid
-                        JOIN {course} c ON c.id = a.course
-                        JOIN {attendance_log} atlo ON atlo.sessionid = atse.id
-                        JOIN {attendance_statuses} atst ON atst.id = atlo.statusid AND atst.deleted = 0 AND atst.visible = 1
-                        JOIN (
-                            SELECT attendanceid, setnumber, MAX(grade) AS maxgrade
-                            FROM {attendance_statuses}
-                            WHERE deleted = 0
-                            AND visible = 1
-                            GROUP BY attendanceid, setnumber
-                        ) stm
-                            ON stm.setnumber = atse.statusset AND stm.attendanceid = atse.attendanceid
-                        JOIN (
-                            SELECT attendanceid, COUNT(1) AS count
-                            FROM {attendance_sessions}
-                            GROUP BY attendanceid
-                        ) sescount
-                            ON sescount.attendanceid = a.id
-                        GROUP BY a.course, atlo.studentid, sescount.count, stm.maxgrade
-                    ) sd
-                ) {$sessiondataalias}
-                    ON {$sessiondataalias}.course = {$attendancealias}.course
-                    AND {$sessiondataalias}.studentid = {$attendancelogalias}.studentid";
+                    SELECT attendanceid, setnumber, MAX(grade) AS maxgrade
+                    FROM {attendance_statuses}
+                    WHERE deleted = 0
+                    AND visible = 1
+                    GROUP BY attendanceid, setnumber
+                ) stm
+                    ON stm.setnumber = atse.statusset AND stm.attendanceid = atse.attendanceid
+                JOIN (
+                    SELECT attendanceid, COUNT(1) AS count
+                    FROM {attendance_sessions}
+                    GROUP BY attendanceid
+                ) sescount
+                    ON sescount.attendanceid = a.id
+                GROUP BY a.course, atlo.studentid, sescount.count, stm.maxgrade
+            ) sd
+        ) {$sessiondataalias}
+            ON {$sessiondataalias}.course = {$attendancealias}.course
+            AND {$sessiondataalias}.studentid = {$attendancelogalias}.studentid";
     }
 
     /**
