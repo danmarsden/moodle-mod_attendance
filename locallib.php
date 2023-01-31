@@ -576,19 +576,18 @@ function attendance_random_string($length=6) {
 }
 
 /**
- * Count the total number of statuses in a session with availablebeforesession enabled.
+ * Does this session have a status with availablebeforesession enabled.
  *
  * @param int $sessionid the id in attendance_sessions.
- * @return int
+ * @return boolean
  */
 function is_status_availablebeforesession($sessionid) {
     global $DB;
 
-    $attendanceid = $DB->get_field_sql('SELECT attendanceid  FROM {attendance_sessions} WHERE id = ? ', array($sessionid));
+    $attendanceid = $DB->get_field('attendance_sessions', 'attendanceid', array('id' => $sessionid));
 
-    $where = "deleted = 0 and visible = 1  and availablebeforesession = 1  and attendanceid = ?";
-    $params = array('attendanceid'   => $attendanceid);
-    return $DB->count_records_select('attendance_statuses', $where, $params);
+    return $DB->record_exists('attendance_statuses', ['deleted' => 0, 'visible' => 1, 'availablebeforesession' => 1,
+                                                      'attendanceid' => $attendanceid]);
 }
 
 /**
@@ -606,7 +605,7 @@ function attendance_can_student_mark($sess, $log = true) {
 
     if (!empty($attconfig->studentscanmark) && !empty($sess->studentscanmark)) {
         if (empty($attconfig->studentscanmarksessiontime) ||
-            (is_status_availablebeforesession($sess->id) > 0) && time() < $sess->sessdate) {
+            (is_status_availablebeforesession($sess->id)) && time() < $sess->sessdate) {
             $canmark = true;
             $reason = '';
         } else {

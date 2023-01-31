@@ -59,6 +59,10 @@ class studentattendance extends \moodleform {
                     unset($statuses[$status->id]);
                     $disabledduetotime = true;
                 }
+                // If the session isn't open yet and this status isn't available before session - hide it.
+                if ($status->availablebeforesession == 0 && time() < $attforsession->sessdate - $attforsession->studentsearlyopentime) {
+                    unset($statuses[$status->id]);
+                }
             }
         }
 
