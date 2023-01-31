@@ -428,6 +428,7 @@ function attendance_add_status($status) {
         $status->deleted = 0;
         $status->visible = 1;
         $status->setunmarked = 0;
+        $status->availablebeforesession = 0;
 
         $id = $DB->insert_record('attendance_statuses', $status);
         $status->id = $id;
@@ -487,11 +488,12 @@ function attendance_remove_status($status, $context = null, $cm = null) {
  * @param stdClass $context
  * @param stdClass $cm
  * @param int $studentavailability
+ * @param bool $availablebeforesession
  * @param bool $setunmarked
  * @return array
  */
 function attendance_update_status($status, $acronym, $description, $grade, $visible,
-                                  $context = null, $cm = null, $studentavailability = null, $setunmarked = false) {
+                                  $context = null, $cm = null, $studentavailability = null, $availablebeforesession = false, $setunmarked = false) {
     global $DB;
 
     if (empty($context)) {
@@ -528,6 +530,11 @@ function attendance_update_status($status, $acronym, $description, $grade, $visi
 
         $status->studentavailability = $studentavailability;
         $updated[] = $studentavailability;
+    }
+    if (strpos(strval($availablebeforesession), 'on') === false) {
+        $status->availablebeforesession = 0;
+    } else {
+        $status->availablebeforesession = 1;
     }
     if ($setunmarked) {
         $status->setunmarked = 1;
@@ -569,6 +576,21 @@ function attendance_random_string($length=6) {
 }
 
 /**
+ * Does this session have a status with availablebeforesession enabled.
+ *
+ * @param int $sessionid the id in attendance_sessions.
+ * @return boolean
+ */
+function is_status_availablebeforesession($sessionid) {
+    global $DB;
+
+    $attendanceid = $DB->get_field('attendance_sessions', 'attendanceid', array('id' => $sessionid));
+
+    return $DB->record_exists('attendance_statuses', ['deleted' => 0, 'visible' => 1, 'availablebeforesession' => 1,
+                                                      'attendanceid' => $attendanceid]);
+}
+
+/**
  * Check to see if this session is open for student marking.
  *
  * @param stdclass $sess the session record from attendance_sessions.
@@ -580,8 +602,10 @@ function attendance_can_student_mark($sess, $log = true) {
     $canmark = false;
     $reason = 'closed';
     $attconfig = get_config('attendance');
+
     if (!empty($attconfig->studentscanmark) && !empty($sess->studentscanmark)) {
-        if (empty($attconfig->studentscanmarksessiontime)) {
+        if (empty($attconfig->studentscanmarksessiontime) ||
+            (is_status_availablebeforesession($sess->id)) && time() < $sess->sessdate) {
             $canmark = true;
             $reason = '';
         } else {

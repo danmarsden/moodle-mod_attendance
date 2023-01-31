@@ -2663,6 +2663,10 @@ class renderer extends plugin_renderer_base {
             $this->output->help_icon('studentavailability', 'attendance');
         $table->align[] = 'center';
 
+        $table->head[] = get_string('availablebeforesession', 'attendance').
+            $this->output->help_icon('availablebeforesession', 'attendance');
+        $table->align[] = 'center';
+
         $table->head[] = get_string('setunmarked', 'attendance').
             $this->output->help_icon('setunmarked', 'attendance');
         $table->align[] = 'center';
@@ -2687,11 +2691,16 @@ class renderer extends plugin_renderer_base {
             $cells[] = $this->construct_text_input('description['.$st->id.']', 30, 30, $st->description) .
                                  $emptydescription;
             $cells[] = $this->construct_text_input('grade['.$st->id.']', 4, 4, $st->grade);
+            $cells[] = $this->construct_text_input('studentavailability['.$st->id.']', 4, 5, $st->studentavailability);
+            $checked = '';
+            if ($st->availablebeforesession) {
+                $checked = ' checked ';
+            }
+            $cells[] = '<input type="checkbox" name="availablebeforesession['.$st->id.']" '.$checked.'>';
             $checked = '';
             if ($st->setunmarked) {
                 $checked = ' checked ';
             }
-            $cells[] = $this->construct_text_input('studentavailability['.$st->id.']', 4, 5, $st->studentavailability);
             $cells[] = '<input type="radio" name="setunmarked" value="'.$st->id.'"'.$checked.'>';
 
             $cells[] = $this->construct_preferences_actions_icons($st, $prefdata);

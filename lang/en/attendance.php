@@ -565,6 +565,8 @@ $string['strftimeshortdate'] = '%d.%m.%Y';
 $string['studentavailability'] = 'Available for students (minutes)';
 $string['studentavailability_help'] = 'When students are marking their own attendance, the number of minutes after session starts that this status is available.
  <br/>If empty, this status will always be available, If set to 0 it will always be hidden to students.';
+ $string['availablebeforesession'] = 'Available before session start';
+$string['availablebeforesession_help'] = 'When students are marking their own attendance, allow this status to be chosen before the session begins. ';
 $string['studentid'] = 'Student ID';
 $string['studentmarked'] = 'Your attendance in this session has been recorded.';
 $string['studentmarking'] = 'Student recording';
