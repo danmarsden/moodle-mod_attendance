@@ -606,7 +606,7 @@ function attendance_can_student_mark($sess, $log = true) {
 
     if (!empty($attconfig->studentscanmark) && !empty($sess->studentscanmark)) {
         if (empty($attconfig->studentscanmarksessiontime) ||
-            (is_status_availablebeforesession($sess->id) > 0) && time() > $sess->sessdate - $sess->studentsearlyopentime) {
+            (is_status_availablebeforesession($sess->id) > 0) && time() < $sess->sessdate) {
             $canmark = true;
             $reason = '';
         } else {
