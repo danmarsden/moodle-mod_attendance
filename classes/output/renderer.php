@@ -2691,7 +2691,7 @@ class renderer extends plugin_renderer_base {
             $cells[] = $this->construct_text_input('description['.$st->id.']', 30, 30, $st->description) .
                                  $emptydescription;
             $cells[] = $this->construct_text_input('grade['.$st->id.']', 4, 4, $st->grade);
-            $cells[] = $this->construct_text_input('studentavailability['.$st->id.']', 4, 5, $st->studentavailability);
+            $cells[] = $this->construct_studentavailability($st);
             $checked = '';
             if ($st->availablebeforesession) {
                 $checked = ' checked ';
@@ -2835,6 +2835,15 @@ class renderer extends plugin_renderer_base {
     private function construct_notice($text, $class = 'notifymessage') {
         $attributes = array('class' => $class);
         return html_writer::tag('p', $text, $attributes);
+    }
+
+    /**
+     * Construct studentavailablity form element.
+     * @param stdClass $st
+     * @return string;
+     */
+    protected function construct_studentavailability($st) {
+        return $this->construct_text_input('studentavailability['.$st->id.']', 4, 5, $st->studentavailability);
     }
 
     /**
