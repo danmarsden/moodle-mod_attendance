@@ -68,6 +68,7 @@ class updatesession extends \moodleform {
             'sdescription' => $sess->description_editor,
             'calendarevent' => $sess->calendarevent,
             'studentscanmark' => $sess->studentscanmark,
+            'allowupdatestatus' => $sess->allowupdatestatus,
             'studentpassword' => $sess->studentpassword,
             'autoassignstatus' => $sess->autoassignstatus,
             'subnet' => $sess->subnet,
@@ -137,13 +138,17 @@ class updatesession extends \moodleform {
         if (!empty($studentscanmark)) {
             $mform->addElement('checkbox', 'studentscanmark', '', get_string('studentscanmark', 'attendance'));
             $mform->addHelpButton('studentscanmark', 'studentscanmark', 'attendance');
-
+            $mform->addElement('checkbox', 'allowupdatestatus', '', get_string('allowupdatestatus', 'attendance'));
+            $mform->addHelpButton('allowupdatestatus', 'allowupdatestatus', 'attendance');
+            $mform->hideif('allowupdatestatus', 'studentscanmark', 'notchecked');
             $mform->addElement('duration', 'studentsearlyopentime', get_string('studentsearlyopentime', 'attendance'));
             $mform->addHelpButton('studentsearlyopentime', 'studentsearlyopentime', 'attendance');
             $mform->hideif('studentsearlyopentime', 'studentscanmark', 'notchecked');
         } else {
             $mform->addElement('hidden', 'studentscanmark', '0');
             $mform->settype('studentscanmark', PARAM_INT);
+            $mform->addElement('hidden', 'allowupdatestatus', '0');
+            $mform->settype('allowupdatestatus', PARAM_INT);
             $mform->addElement('hidden', 'studentsearlyopentime', '0');
             $mform->settype('studentsearlyopentime', PARAM_INT);
         }
@@ -161,7 +166,7 @@ class updatesession extends \moodleform {
             $mform->setType('automarkcmid', PARAM_INT);
             $mform->hideif('automarkcmid', 'automark', 'neq', '3');
             if (!empty($sess->automarkcompleted)) {
-                $mform->hardFreeze('automarkcmid,automark,studentscanmark');
+                $mform->hardFreeze('automarkcmid,automark,studentscanmark,allowupdatestatus');
             }
         }
         if (!empty($studentscanmark)) {
