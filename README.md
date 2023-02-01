@@ -18,7 +18,8 @@ The git branches here support the following versions.
 | Moodle 3.8 - 3.10     | MOODLE_38_STABLE  |
 | Moodle 3.11           | MOODLE_311_STABLE |
 | Moodle 4.0            | MOODLE_400_STABLE |
-| Moodle 4.1 and higher | MOODLE_401_STABLE |
+| Moodle 4.1            | MOODLE_401_STABLE |
+| Moodle 4.2            | MOODLE_402_STABLE |
 # PURPOSE
 The Attendance module allows teachers to maintain a record of attendance, replacing or supplementing a paper-based attendance register.
 It is primarily used in blended-learning environments where students are required to attend classes, lectures and tutorials and allows

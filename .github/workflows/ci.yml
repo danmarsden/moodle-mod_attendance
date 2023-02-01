@@ -4,11 +4,11 @@ on: [push, pull_request]
 
 jobs:
   test:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
     services:
       postgres:
-        image: postgres:12
+        image: postgres:13
         env:
           POSTGRES_USER: 'postgres'
           POSTGRES_HOST_AUTH_METHOD: 'trust'
@@ -31,12 +31,12 @@ jobs:
       fail-fast: false
       matrix:
         php: ['7.4', '8.0']
-        moodle-branch: ['master']
+        moodle-branch: ['MOODLE_401_STABLE']
         database: [pgsql, mariadb]
 
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: plugin
 

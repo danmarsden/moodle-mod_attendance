@@ -94,6 +94,7 @@
         <FIELD NAME="description" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="grade" TYPE="number" LENGTH="5" NOTNULL="true" DEFAULT="0" SEQUENCE="false" DECIMALS="2"/>
         <FIELD NAME="studentavailability" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="How many minutes this status is available when self marking is enabled."/>
+        <FIELD NAME="availablebeforesession" TYPE="int" LENGTH="2" NOTNULL="false" SEQUENCE="false" COMMENT="Show this status before the start of a session."/>
         <FIELD NAME="setunmarked" TYPE="int" LENGTH="2" NOTNULL="false" SEQUENCE="false" COMMENT="Set this status if unmarked at end of session."/>
         <FIELD NAME="visible" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false"/>
         <FIELD NAME="deleted" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
