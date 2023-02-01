@@ -228,7 +228,7 @@ class marksessions {
             }
             $sesslog[$userid] = new stdClass();
             $sesslog[$userid]->studentid = $userid;
-            $sesslog[$userid]->statusset = json_encode($statuses); //to work on mysql
+            $sesslog[$userid]->statusset = implode(",",$statusmap);
             $sesslog[$userid]->remarks = '';
             $sesslog[$userid]->sessionid = $this->att->pageparams->sessionid;
             $sesslog[$userid]->timetaken = time();
