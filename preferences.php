@@ -55,7 +55,7 @@ $PAGE->set_heading($course->fullname);
 $PAGE->force_settings_menu(true);
 $PAGE->set_cacheable(true);
 $PAGE->navbar->add(get_string('settings', 'attendance'));
-
+$PAGE->requires->js_call_amd('mod_attendance/statusset', 'init');
 $errors = array();
 
 // Check sesskey if we are performing an action.

@@ -46,7 +46,7 @@ Feature: Teachers and Students can record session attendance
     And I am on the "Attendance" "mod_attendance > View" page logged in as "teacher1"
     And I click on "More" "link" in the ".secondary-navigation" "css_element"
     And I select "Status set" from secondary navigation
-    And I set the field with xpath "//*[@id='statusrow3']/td[5]/input" to "0"
+    And I set the field with xpath "//*[@id='statusrow3']/td[5]/select" to "0"
     And I press "Update"
     And I log out
     And I am on the "Attendance" "mod_attendance > View" page logged in as "student1"

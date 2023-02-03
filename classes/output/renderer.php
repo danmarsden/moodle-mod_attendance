@@ -2659,8 +2659,8 @@ class renderer extends plugin_renderer_base {
                              get_string('points', 'attendance'));
         $table->align = array('center', 'center', 'center', 'center', 'center', 'center');
 
-        $table->head[] = get_string('studentavailability', 'attendance').
-            $this->output->help_icon('studentavailability', 'attendance');
+        $table->head[] = get_string('availability', 'attendance').
+            $this->output->help_icon('availability', 'attendance');
         $table->align[] = 'center';
 
         $table->head[] = get_string('availablebeforesession', 'attendance').
@@ -2714,7 +2714,6 @@ class renderer extends plugin_renderer_base {
         $cells[] = $this->construct_text_input('newacronym', 2, 2);
         $cells[] = $this->construct_text_input('newdescription', 30, 30);
         $cells[] = $this->construct_text_input('newgrade', 4, 4);
-        $cells[] = $this->construct_text_input('newstudentavailability', 4, 5);
 
         $cells[] = $this->construct_preferences_button(get_string('add', 'attendance'),
             mod_attendance_preferences_page_params::ACTION_ADD);
@@ -2763,16 +2762,17 @@ class renderer extends plugin_renderer_base {
      * @param integer $size
      * @param integer $maxlength
      * @param string $value
+     * @param string $classname
      * @return string
      */
-    private function construct_text_input($name, $size, $maxlength, $value='') {
+    private function construct_text_input($name, $size, $maxlength, $value='', $classname='') {
         $attributes = array(
                 'type'      => 'text',
                 'name'      => $name,
                 'size'      => $size,
                 'maxlength' => $maxlength,
                 'value'     => $value,
-                'class' => 'form-control');
+                'class' => "form-control {$classname}");
         return html_writer::empty_tag('input', $attributes);
     }
 
@@ -2839,11 +2839,26 @@ class renderer extends plugin_renderer_base {
 
     /**
      * Construct studentavailablity form element.
+     * This creates a select dropdown for the availability option and a textbox to enter values for one of the options.
      * @param stdClass $st
      * @return string;
      */
     protected function construct_studentavailability($st) {
-        return $this->construct_text_input('studentavailability['.$st->id.']', 4, 5, $st->studentavailability);
+        $default = '';
+        if ($st->studentavailability) {
+            $default = $st->studentavailability;
+            if ($st->studentavailability > 1) {
+                $default = 1;
+            }
+        }
+
+        $options = array(0 => get_string('availabilityno', 'mod_attendance'),
+                         1 => get_string('availabilitylimitedtime', 'mod_attendance'));
+        $result = html_writer::select($options, 'availability['.$st->id.']', $default,
+        array('' => get_string('availabilityalways', 'mod_attendance')));
+        $result .= $this->construct_text_input('studentavailability['.$st->id.']', 4, 5, $st->studentavailability,
+                                                'studentavailability');
+        return $result;
     }
 
     /**
