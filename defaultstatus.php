@@ -37,7 +37,7 @@ $url = new moodle_url('/mod/attendance/defaultstatus.php', array('statusid' => $
 if (!empty($action)) {
     require_sesskey();
 }
-
+$PAGE->requires->js_call_amd('mod_attendance/statusset', 'init');
 $output = $PAGE->get_renderer('mod_attendance');
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('defaultstatus', 'mod_attendance'));
