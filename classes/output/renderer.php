@@ -2845,7 +2845,9 @@ class renderer extends plugin_renderer_base {
      */
     protected function construct_studentavailability($st) {
         $default = '';
-        if ($st->studentavailability) {
+        if ($st->studentavailability === '0') {
+            $default = '0';
+        } else if ($st->studentavailability) {
             $default = $st->studentavailability;
             if ($st->studentavailability > 1) {
                 $default = 1;
