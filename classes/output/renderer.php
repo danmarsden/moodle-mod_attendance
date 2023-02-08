@@ -1385,7 +1385,11 @@ class renderer extends plugin_renderer_base {
                         // URL to the page that lets the student modify their attendance.
                         $url = new moodle_url('/mod/attendance/attendance.php',
                                 array('sessid' => $sess->id, 'sesskey' => sesskey()));
-                        $cell = new html_table_cell(html_writer::link($url, get_string('submitattendance', 'attendance')));
+                        if (attendance_session_open_for_students($sess)) {
+                            $cell = new html_table_cell(html_writer::link($url, get_string('submitattendance', 'attendance')));
+                        } else {
+                            $cell = new html_table_cell(html_writer::link($url, get_string('submitattendancefuture', 'attendance')));
+                        }
                     }
                     $cell->colspan = 3;
                     $row->cells[] = $cell;
@@ -2017,7 +2021,11 @@ class renderer extends plugin_renderer_base {
 
                             $url = new moodle_url('/mod/attendance/attendance.php',
                             array('sessid' => $sess->id, 'sesskey' => sesskey()));
-                            $cell = new html_table_cell(html_writer::link($url, get_string('submitattendance', 'attendance')));
+                            if (attendance_session_open_for_students($sess)) {
+                                $cell = new html_table_cell(html_writer::link($url, get_string('submitattendance', 'attendance')));
+                            } else {
+                                $cell = new html_table_cell(html_writer::link($url, get_string('submitattendancefuture', 'attendance')));
+                            }
                             $cell->colspan = 3;
                             $row->cells[] = $cell;
                         } else { // Student cannot mark their own attendace.

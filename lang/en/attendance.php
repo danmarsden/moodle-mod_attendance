@@ -586,6 +586,7 @@ $string['studentscanmarksessiontimeend'] = 'Session end (minutes)';
 $string['studentscanmarksessiontimeend_desc'] = 'If the session does not have an end time, how many minutes should the session be available for students to record their attendance.';
 $string['submit'] = 'Submit';
 $string['submitattendance'] = 'Submit attendance';
+$string['submitattendancefuture'] = 'Report future absence';
 $string['submitpassword'] = 'Submit password';
 $string['subnet'] = 'Subnet';
 $string['subnetactivitylevel'] = 'Allow subnet config at activity level';
