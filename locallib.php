@@ -576,6 +576,21 @@ function attendance_random_string($length=6) {
 }
 
 /**
+ * This functions checks if this session is open for students.
+ *
+ * @param stdclass $sess the session record from attendance_sessions.
+ * @return boolean
+ */
+function attendance_session_open_for_students($sess) {
+    $sessionopens = empty($sess->studentsearlyopentime) ? $sess->sessdate : $sess->sessdate - $sess->studentsearlyopentime;
+    if (time() > $sessionopens) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+/**
  * Does this session have a status with availablebeforesession enabled.
  *
  * @param int $sessionid the id in attendance_sessions.
