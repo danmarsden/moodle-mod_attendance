@@ -685,6 +685,16 @@ class mod_attendance_renderer extends plugin_renderer_base {
             $controls .= $this->output->render($select);
         }
 
+        $controls .= html_writer::empty_tag('br');
+        $select = new single_select(
+            $takedata->url(array(), array('enrolstatus')),
+            'enrolstatus',
+            ['0' => get_string('no'), '1' => get_string('yes')],
+            $takedata->pageparams->enrolstatus);
+        $select->set_label(get_string('showsuspended', 'attendance'));
+        $select->class = 'singleselect inline';
+        $controls .= $this->output->render($select);
+
         return $controls;
     }
 

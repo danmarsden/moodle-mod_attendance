@@ -120,6 +120,7 @@ $string['confirmcolumnmappings'] = 'Confirm column mappings';
 $string['confirmdeletehiddensessions'] = 'Are you sure you want to delete {$a->count} sessions scheduled before the course start date ({$a->date})?';
 $string['confirmdeleteuser'] = 'Are you sure you want to delete user \'{$a->fullname}\' ({$a->email})?<br/>All of their attendance records will be permanently deleted.';
 $string['copyfrom'] = 'Copy attendance data from';
+$string['showsuspended'] = 'Show suspended enrollments';
 $string['countofselected'] = 'Count of selected';
 $string['course'] = 'Course';
 $string['coursemessage'] = 'Message course users';

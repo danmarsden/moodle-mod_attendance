@@ -898,6 +898,16 @@ class mod_attendance_structure {
             }
         }
 
+        // Apply filter for enrol status.
+        // We're only implementing a binary at the moment: if 1 is NOT passed,
+        // don't include suspended enrollments, otherwise we DO.
+        if ('1' != $this->pageparams->enrolstatus) {
+            // Filter suspended enrollments
+            $users = array_filter($users, function (object $user) {
+                return ($user->enrolmentstatus == 0);
+            });
+        }
+
         // Add the 'temporary' users to this list.
         $tempusers = $DB->get_records('attendance_tempusers', array('courseid' => $this->course->id));
         foreach ($tempusers as $tempuser) {
