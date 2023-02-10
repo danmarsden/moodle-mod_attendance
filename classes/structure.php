@@ -536,6 +536,9 @@ class mod_attendance_structure {
         if (!isset($sess->studentscanmark)) {
             $sess->studentscanmark = 0;
         }
+        if (!isset($sess->allowupdatestatus)) {
+            $sess->allowupdatestatus = 0;
+        }
         if (!isset($sess->studentsearlyopentime)) {
             $sess->studentsearlyopentime = 0;
         }
@@ -599,6 +602,7 @@ class mod_attendance_structure {
         $sess->calendarevent = empty($formdata->calendarevent) ? 0 : $formdata->calendarevent;
 
         $sess->studentscanmark = 0;
+        $sess->allowupdatestatus = 0;
         $sess->autoassignstatus = 0;
         $sess->studentpassword = '';
         $sess->subnet = '';
@@ -622,6 +626,7 @@ class mod_attendance_structure {
         if (!empty($studentscanmark) &&
             !empty($formdata->studentscanmark)) {
             $sess->studentscanmark = $formdata->studentscanmark;
+            $sess->allowupdatestatus = $formdata->allowupdatestatus;
             $sess->studentpassword = $formdata->studentpassword;
             $sess->autoassignstatus = $formdata->autoassignstatus;
             if (!empty($formdata->includeqrcode)) {
@@ -699,16 +704,19 @@ class mod_attendance_structure {
         $record->takenby = $USER->id;
         $record->ipaddress = getremoteaddr(null);
 
-        $existingattendance = $DB->record_exists('attendance_log',
-            array('sessionid' => $mformdata->sessid, 'studentid' => $USER->id));
+        $existingattendance = $DB->get_field('attendance_log', 'id',
+                            array('sessionid' => $mformdata->sessid, 'studentid' => $USER->id));
 
-        if ($existingattendance) {
+        if ($existingattendance && !attendance_check_allow_update($mformdata->sessid)) {
             // Already recorded do not save.
             return false;
+        } else if (attendance_check_allow_update($mformdata->sessid)) {
+            $record->id = $existingattendance;
+            $logid = $DB->update_record('attendance_log', $record, false);
+        } else {
+            $logid = $DB->insert_record('attendance_log', $record, false);
+            $record->id = $logid;
         }
-
-        $logid = $DB->insert_record('attendance_log', $record, false);
-        $record->id = $logid;
 
         // Update the session to show that a register has been taken, or staff may overwrite records.
         $session = $this->get_session_info($mformdata->sessid);
@@ -1182,7 +1190,7 @@ class mod_attendance_structure {
         $id = $DB->sql_concat(':value', 'ats.id');
         if ($this->get_group_mode()) {
             $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description,
-                           al.statusid, al.remarks, ats.studentscanmark, ats.autoassignstatus,
+                           al.statusid, al.remarks, ats.studentscanmark, ats.allowupdatestatus, ats.autoassignstatus,
                            ats.preventsharedip, ats.preventsharediptime, ats.rotateqrcode,
                            ats.studentsearlyopentime
                       FROM {attendance_sessions} ats
@@ -1193,7 +1201,7 @@ class mod_attendance_structure {
                   ORDER BY ats.sessdate ASC";
         } else {
             $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, ats.statusset,
-                           al.statusid, al.remarks, ats.studentscanmark, ats.autoassignstatus,
+                           al.statusid, al.remarks, ats.studentscanmark, ats.allowupdatestatus, ats.autoassignstatus,
                            ats.preventsharedip, ats.preventsharediptime, ats.rotateqrcode,
                            ats.studentsearlyopentime
                       FROM {attendance_sessions} ats
@@ -1225,7 +1233,7 @@ class mod_attendance_structure {
             $where = "ats.attendanceid = :aid AND ats.sessdate >= :csdate AND ats.groupid $gsql";
         }
         $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, ats.statusset,
-                       al.statusid, al.remarks, ats.studentscanmark, ats.autoassignstatus,
+                       al.statusid, al.remarks, ats.studentscanmark, ats.allowupdatestatus, ats.autoassignstatus,
                        ats.preventsharedip, ats.preventsharediptime, ats.rotateqrcode,
                        ats.studentsearlyopentime
                   FROM {attendance_sessions} ats

@@ -1351,8 +1351,15 @@ class renderer extends plugin_renderer_base {
             }
 
             if (!empty($sess->statusid)) {
+                $updatelink = '';
                 $status = $userdata->statuses[$sess->statusid];
-                $row->cells[] = $status->description;
+                list($canmark, $reason) = attendance_can_student_mark($sess, false);
+                if (attendance_check_allow_update($sess->id) && $canmark) {
+                    $url = new moodle_url('/mod/attendance/attendance.php',
+                                array('sessid' => $sess->id, 'sesskey' => sesskey()));
+                    $updatelink = "<br>".html_writer::link($url, get_string('updateattendance', 'attendance'));
+                }
+                $row->cells[] = $status->description.$updatelink;
                 $row->cells[] = format_float($status->grade, 1, true, true) . ' / ' .
                                     format_float($statussetmaxpoints[$status->setnumber], 1, true, true);
                 $row->cells[] = $sess->remarks;

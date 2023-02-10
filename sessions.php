@@ -102,6 +102,9 @@ switch ($att->pageparams->action) {
             if (empty($formdata->autoassignstatus)) {
                 $formdata->autoassignstatus = 0;
             }
+            if (empty($formdata->allowupdatestatus)) {
+                $formdata->allowupdatestatus = 0;
+            }
             $att->update_session_from_form_data($formdata, $sessionid);
 
             mod_attendance_notifyqueue::notify_success(get_string('sessionupdated', 'attendance'));
