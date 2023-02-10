@@ -108,6 +108,7 @@ class sessions {
         $headers[] = get_string('repeatevery', 'attendance');
         $headers[] = get_string('repeatuntil', 'attendance');
         $headers[] = get_string('studentscanmark', 'attendance');
+        $headers[] = get_string('allowupdatestatus', 'attendance');
         $headers[] = get_string('passwordgrp', 'attendance');
         $headers[] = get_string('randompassword', 'attendance');
         $headers[] = get_string('subnet', 'attendance');
@@ -155,6 +156,7 @@ class sessions {
         $headerkeys[] = 'repeatevery';
         $headerkeys[] = 'repeatuntil';
         $headerkeys[] = 'studentscanmark';
+        $headerkeys[] = 'allowupdatestatus';
         $headerkeys[] = 'passwordgrp';
         $headerkeys[] = 'randompassword';
         $headerkeys[] = 'subnet';
@@ -322,6 +324,13 @@ class sessions {
                 $session->studentscanmark = $pluginconfig->studentscanmark_default;
             } else {
                 $session->studentscanmark = $studentscanmark;
+            }
+
+            $allowupdatestatus = $this->get_column_data($row, $mapping['allowupdatestatus']);
+            if ($allowupdatestatus == -1) {
+                $session->allowupdatestatus = $pluginconfig->allowupdatestatus_default;
+            } else {
+                $session->allowupdatestatus = $allowupdatestatus;
             }
 
             $randompassword = $this->get_column_data($row, $mapping['randompassword']);

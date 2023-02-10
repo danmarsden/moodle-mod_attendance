@@ -245,6 +245,7 @@ class mod_attendance_external extends external_api {
         $sess->calendarevent = (int) $params['addcalendarevent'];
         $sess->timemodified = time();
         $sess->studentscanmark = 0;
+        $sess->allowupdatestatus = 0;
         $sess->autoassignstatus = 0;
         $sess->subnet = '';
         $sess->studentpassword = '';
