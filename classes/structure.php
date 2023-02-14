@@ -1053,6 +1053,38 @@ class mod_attendance_structure {
     }
 
     /**
+     * Helper function to return status values that a user can currently use in this session.
+     *
+     * @param stdclass $session
+     * @return array
+     */
+    public function get_student_statuses($session) {
+        $statuses = $this->get_statuses();
+        $disabledduetotime = false;
+        $sessionstarttime = empty($session->studentsearlyopentime) ?
+            $session->sessdate : $session->sessdate - $session->studentsearlyopentime;
+
+        if (time() < $sessionstarttime) {
+            foreach ($statuses as $status) {
+                if ($status->availablebeforesession == 0) {
+                    unset($statuses[$status->id]);
+                }
+            }
+        } else if (time() > $sessionstarttime) {
+            foreach ($statuses as $status) {
+                if ($status->studentavailability === '0') {
+                    unset($statuses[$status->id]);
+                } else if (!empty($status->studentavailability
+                    && time() > $session->sessdate + ($status->studentavailability * 60))) {
+                    unset($statuses[$status->id]);
+                    $disabledduetotime = true;
+                }
+            }
+        }
+        return [$statuses, $disabledduetotime];
+    }
+
+    /**
      * Get session info.
      * @param int $sessionid
      * @return mixed

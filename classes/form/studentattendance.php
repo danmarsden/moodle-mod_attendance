@@ -44,29 +44,7 @@ class studentattendance extends \moodleform {
         $attblock = $this->_customdata['attendance'];
         $password = $this->_customdata['password'];
 
-        $statuses = $attblock->get_statuses();
-        // Check if user has access to all statuses.
-        $disabledduetotime = false;
-        $sessionstarttime = empty($attforsession->studentsearlyopentime) ?
-            $attforsession->sessdate : $attforsession->sessdate - $attforsession->studentsearlyopentime;
-
-        if (time() < $sessionstarttime) {
-            foreach ($statuses as $status) {
-                if ($status->availablebeforesession == 0) {
-                    unset($statuses[$status->id]);
-                }
-            }
-        } else if (time() > $sessionstarttime) {
-            foreach ($statuses as $status) {
-                if ($status->studentavailability === '0') {
-                    unset($statuses[$status->id]);
-                } else if (!empty($status->studentavailability
-                    && time() > $attforsession->sessdate + ($status->studentavailability * 60))) {
-                    unset($statuses[$status->id]);
-                    $disabledduetotime = true;
-                }
-            }
-        }
+        [$statuses, $disabledduetotime] = $attblock->get_student_statuses($attforsession);
 
         $mform->addElement('hidden', 'sessid', null);
         $mform->setType('sessid', PARAM_INT);

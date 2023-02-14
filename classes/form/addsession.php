@@ -253,9 +253,6 @@ class addsession extends moodleform {
             $mform->hideif('passwordgrp', 'studentscanmark', 'notchecked');
             $mform->hideif('studentpassword', 'randompassword', 'checked');
             $mform->hideif('passwordgrp', 'automark', 'eq', ATTENDANCE_AUTOMARK_ALL);
-
-            $mform->addElement('checkbox', 'allowupdatestatus', '', get_string('allowupdatestatus', 'attendance'));
-            $mform->addHelpButton('allowupdatestatus', 'allowupdatestatus', 'attendance');
             $mform->hideif('allowupdatestatus', 'studentscanmark', 'notchecked');
 
             $mform->addElement('checkbox', 'autoassignstatus', '', get_string('autoassignstatus', 'attendance'));
