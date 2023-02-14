@@ -208,6 +208,10 @@ if ($mform->is_cancelled()) {
     }
 
     if (!empty($fromform->status)) {
+        [$statuses, $unused] = $att->get_student_statuses($attforsession);
+        if (!isset($statuses[$fromform->status])) {
+            throw new moodle_exception('attendance_status_not_allowed', 'mod_attendance', $url);
+        }
         $success = $att->take_from_student($fromform);
 
         $url = new moodle_url('/mod/attendance/view.php', array('id' => $cm->id));
