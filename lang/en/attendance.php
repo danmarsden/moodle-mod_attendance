@@ -679,4 +679,4 @@ $string['cannottakethisgroup'] = 'You are not a member of the course group that 
 $string['customfields'] = 'Custom session fields';
 $string['manualtriggerauto'] = 'Manually trigger automatic marking';
 $string['updateattendance'] = 'Update attendance';
-$string['userexistingstatus'] = 'You already have marked your attendance as: <strong>{$a}</strong>, use the form below to change this if required.';
+$string['userexistingstatus'] = 'Your attendance has already been marked as: <strong>{$a}</strong>, use the form below to change this if required.';
