@@ -36,13 +36,14 @@ class studentattendance extends \moodleform {
      * @return void
      */
     public function definition() {
-        global $USER;
+        global $USER, $DB;
 
         $mform  =& $this->_form;
 
         $attforsession = $this->_customdata['session'];
         $attblock = $this->_customdata['attendance'];
         $password = $this->_customdata['password'];
+        $existingstatus = null;
 
         [$statuses, $disabledduetotime] = $attblock->get_student_statuses($attforsession);
 
@@ -71,6 +72,17 @@ class studentattendance extends \moodleform {
             $mform->setDefault('studentpassword', $password);
         }
         if (!$attforsession->autoassignstatus) {
+            // Display current status:
+            if (attendance_check_allow_update($attforsession->id)) {
+                // Check if an existing status is set, and show it.
+                $existingstatusid = $DB->get_field('attendance_log', 'statusid',
+                    ['sessionid' => $attforsession->id, 'studentid' => $USER->id]);
+                $existingstatus = $attblock->get_statuses(false)[$existingstatusid];
+                if (!empty($existingstatus)) {
+                    $mform->addElement('static', '', '', get_string("userexistingstatus", 'mod_attendance', $existingstatus->description));
+                }
+
+            }
 
             // Create radio buttons for setting the attendance status.
             $radioarray = array();
@@ -86,6 +98,9 @@ class studentattendance extends \moodleform {
             $radiogroup = $mform->addGroup($radioarray, 'statusarray', fullname($USER).':', array(''), false);
             $radiogroup->setAttributes(array('class' => 'statusgroup'));
             $mform->addRule('statusarray', get_string('attendancenotset', 'attendance'), 'required', '', 'client', false, false);
+            if (!empty($existingstatus) && !empty($statuses[$existingstatus->id])) {
+                $mform->setDefault('status', $existingstatus->id);
+            }
         }
         $this->add_action_buttons();
     }
