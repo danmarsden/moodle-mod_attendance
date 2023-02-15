@@ -64,6 +64,38 @@ Feature: Teachers and Students can record session attendance
     Then "Attendance taken by student" "link" should exist
 
   @javascript
+  Scenario: If allowed, students can mark their own attendance before the session starts and teacher can choose which statuses are available.
+    Given I am on the "Attendance" "mod_attendance > View" page logged in as "teacher1"
+    And I click on "Add session" "button"
+    And I set the field "Allow students to record own attendance" to "1"
+    And I set the following fields to these values:
+      | id_sessiondate       | ##tomorrow## |
+      | id_sestime_starthour | 00 |
+      | id_sestime_endhour   | 23 |
+      | id_sestime_endminute | 55 |
+    And I click on "id_submitbutton" "button"
+    And I click on "More" "link" in the ".secondary-navigation" "css_element"
+    And I select "Status set" from secondary navigation
+    And I set the field with xpath "//*[@id='statusrow2']/td[6]/input" to "1"
+    And I set the field with xpath "//*[@id='statusrow4']/td[6]/input" to "1"
+    And I press "Update"
+    And I log out
+    And I am on the "Attendance" "mod_attendance > View" page logged in as "student1"
+    And I follow "Report future absence"
+    And I should see "Absent"
+    And I should not see "Excused"
+    And I set the field "Late" to "1"
+    And I press "Save changes"
+    And I should see "Self-recorded"
+    And I log out
+    When I log in as "admin"
+    And I am on "Course 1" course homepage
+    And I navigate to "Reports" in current page administration
+    And I click on "Logs" "link"
+    And I click on "Get these logs" "button"
+    Then "Attendance taken by student" "link" should exist
+
+  @javascript
   Scenario: Teachers can view below % report and send a message
     Given I am on the "Attendance" "mod_attendance > View" page logged in as "teacher1"
     And I click on "Add session" "button"
