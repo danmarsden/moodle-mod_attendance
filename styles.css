@@ -323,6 +323,18 @@
 #page-mod-attendance-index .table-responsive {
     overflow-x: initial;
 }
+#page-mod-attendance-report .attendancereporttable tbody tr,
+#page-mod-attendance-manage .attsessions_manage_table tbody tr,
+#page-mod-attendance-preferences #preferencesform tbody tr,
+#page-mod-attendance-index tbody tr {
+    background-color: white;
+}
+#page-mod-attendance-report .attendancereporttable tbody tr:nth-of-type(odd),
+#page-mod-attendance-manage .attsessions_manage_table tbody tr:nth-of-type(odd),
+#page-mod-attendance-preferences #preferencesform tbody tr:nth-of-type(odd),
+#page-mod-attendance-index tbody tr:nth-of-type(odd) {
+    background-color: #f7f7f7;
+}
 
 #page-mod-attendance-preferences .form-control.studentavailability,
 .form-control.studentavailability {
