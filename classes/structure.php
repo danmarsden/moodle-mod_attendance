@@ -714,7 +714,7 @@ class mod_attendance_structure {
             $record->id = $existingattendance;
             $logid = $DB->update_record('attendance_log', $record, false);
         } else {
-            $logid = $DB->insert_record('attendance_log', $record, false);
+            $logid = $DB->insert_record('attendance_log', $record);
             $record->id = $logid;
         }
 
