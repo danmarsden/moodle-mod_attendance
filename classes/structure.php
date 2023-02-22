@@ -712,7 +712,7 @@ class mod_attendance_structure {
             return false;
         } else if ($existingattendance && attendance_check_allow_update($mformdata->sessid)) {
             $record->id = $existingattendance;
-            $DB->update_record('attendance_log', $record, false);
+            $DB->update_record('attendance_log', $record);
         } else {
             $logid = $DB->insert_record('attendance_log', $record, false);
             $record->id = $logid;
