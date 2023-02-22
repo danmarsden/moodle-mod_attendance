@@ -707,14 +707,16 @@ class mod_attendance_structure {
         $existingattendance = $DB->get_field('attendance_log', 'id',
                             array('sessionid' => $mformdata->sessid, 'studentid' => $USER->id));
 
-        if ($existingattendance && !attendance_check_allow_update($mformdata->sessid)) {
-            // Already recorded do not save.
-            return false;
-        } else if (attendance_check_allow_update($mformdata->sessid)) {
-            $record->id = $existingattendance;
-            $logid = $DB->update_record('attendance_log', $record, false);
+        if (!empty($existingattendance)) {
+            if (!attendance_check_allow_update($mformdata->sessid)) {
+                // Already recorded do not save.
+                return false;
+            } else {
+                $record->id = $existingattendance;
+                $DB->update_record('attendance_log', $record);
+            }
         } else {
-            $logid = $DB->insert_record('attendance_log', $record, false);
+            $logid = $DB->insert_record('attendance_log', $record);
             $record->id = $logid;
         }
 
