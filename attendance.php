@@ -193,7 +193,9 @@ if ($mform->is_cancelled()) {
     redirect($url);
 } else if ($fromform = $mform->get_data()) {
     // Check if password required and if set correctly.
-    if (!empty($attforsession->studentpassword) &&
+    if (!attendance_session_open_for_students($attforsession) && attendance_is_status_availablebeforesession($attforsession->id, $fromform->status)) {
+        // Session is not currently open, but this status is allowed to be set before the session.
+    } else if (!empty($attforsession->studentpassword) &&
         $attforsession->studentpassword !== $fromform->studentpassword) {
 
         $url = new moodle_url('/mod/attendance/attendance.php', array('sessid' => $id, 'sesskey' => sesskey()));
