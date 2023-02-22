@@ -592,7 +592,7 @@ function attendance_session_open_for_students($sess) {
 }
 
 /**
- * Does this session have a status with availablebeforesession enabled.
+ * Is the allowupdatestatus setting enabled for this session?
  *
  * @param int $sessionid the id in attendance_sessions.
  * @return boolean
