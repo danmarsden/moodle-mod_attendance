@@ -88,7 +88,7 @@ if (($formdata = data_submitted()) && confirm_sesskey()) {
     redirect($att->url_manage(), get_string('attendancesuccess', 'attendance'));
 }
 
-$PAGE->set_url($att->url_take());
+$PAGE->set_url($att->url_take((array)$pageparams));
 $PAGE->set_title($course->shortname. ": ".$att->name);
 $PAGE->set_heading($course->fullname);
 $PAGE->set_cacheable(true);
