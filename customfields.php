@@ -24,14 +24,17 @@
 
 require_once('../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
+require_once($CFG->dirroot.'/mod/attendance/lib.php');
 
 admin_externalpage_setup('managemodules');
 
 $output = $PAGE->get_renderer('core_customfield');
 $handler = mod_attendance\customfield\session_handler::create();
 $outputpage = new \core_customfield\output\management($handler);
+$tabmenu = attendance_print_settings_tabs('customfields');
 
 echo $output->header(),
      $output->heading(new lang_string('customfields', 'attendance')),
+     $tabmenu,
      $output->render($outputpage),
      $output->footer();
