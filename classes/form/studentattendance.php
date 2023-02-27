@@ -78,11 +78,12 @@ class studentattendance extends \moodleform {
                 // Check if an existing status is set, and show it.
                 $existingstatusid = $DB->get_field('attendance_log', 'statusid',
                     ['sessionid' => $attforsession->id, 'studentid' => $USER->id]);
-                $existingstatus = $attblock->get_statuses(false)[$existingstatusid];
-                if (!empty($existingstatus)) {
-                    $mform->addElement('static', '', '', get_string("userexistingstatus", 'mod_attendance', $existingstatus->description));
+                if (!empty($existingstatusid)) {
+                    $existingstatus = $attblock->get_statuses(false)[$existingstatusid];
+                    if (!empty($existingstatus)) {
+                        $mform->addElement('static', '', '', get_string("userexistingstatus", 'mod_attendance', $existingstatus->description));
+                    }
                 }
-
             }
 
             // Create radio buttons for setting the attendance status.
