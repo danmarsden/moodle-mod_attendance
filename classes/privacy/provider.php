@@ -211,9 +211,10 @@ final class provider implements
             $sessionids = array_keys(
                 $DB->get_records('attendance_sessions', ['attendanceid' => $attendanceid])
             );
-
-            self::delete_user_from_session_attendance_log($userid, $sessionids);
-            self::delete_user_from_sessions($userid, $sessionids);
+            if (!empty($sessionids)) {
+                self::delete_user_from_session_attendance_log($userid, $sessionids);
+                self::delete_user_from_sessions($userid, $sessionids);
+            }
             self::delete_user_from_attendance_warnings_log($userid, $attendanceid);
         }
     }
