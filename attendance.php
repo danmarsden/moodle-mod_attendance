@@ -174,7 +174,7 @@ if (!empty($qrpass) && !empty($attforsession->autoassignstatus)) {
     }
 }
 
-$PAGE->set_url($att->url_sessions());
+$PAGE->set_url($att->url_sessions((array)$pageparams));
 
 // Create the form.
 if ($attforsession->rotateqrcode == 1) {
