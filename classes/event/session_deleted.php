@@ -77,16 +77,6 @@ class session_deleted extends \core\event\base {
     }
 
     /**
-     * Replace add_to_log() statement.
-     *
-     * @return array of parameters to be passed to legacy add_to_log() function.
-     */
-    protected function get_legacy_logdata() {
-        return array($this->courseid, 'attendance', 'sessions deleted', $this->get_url(),
-            $this->other['info'], $this->contextinstanceid);
-    }
-
-    /**
      * Get objectid mapping
      *
      * @return array of parameters for object mapping.

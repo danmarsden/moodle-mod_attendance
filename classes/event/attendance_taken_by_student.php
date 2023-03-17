@@ -79,16 +79,6 @@ class attendance_taken_by_student extends \core\event\base {
     }
 
     /**
-     * Replace add_to_log() statement.
-     *
-     * @return array of parameters to be passed to legacy add_to_log() function.
-     */
-    protected function get_legacy_logdata() {
-        return array($this->courseid, 'attendance', 'taken', $this->get_url(),
-            '', $this->contextinstanceid);
-    }
-
-    /**
      * Get objectid mapping
      *
      * @return array of parameters for object mapping.
