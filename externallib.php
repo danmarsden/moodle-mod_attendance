@@ -593,7 +593,6 @@ class mod_attendance_external extends external_api {
             throw new invalid_parameter_exception('Invalid session id or no permissions.');
         }
 
-
         return attendance_handler::get_sessions($params['attendanceid']);
     }
 }
