@@ -52,9 +52,10 @@ if ($DB->record_exists('attendance_log', ['sessionid' => $id, 'studentid' => $US
 }
 
 $qrpassflag = false;
+list($canmark, $reason) = attendance_can_student_mark($attforsession);
 
 // If the randomised code is on grab it.
-if ($attforsession->rotateqrcode == 1) {
+if ($canmark && attendance_session_open_for_students($attforsession) && $attforsession->rotateqrcode == 1) {
     $cookiename = 'attendance_'.$attforsession->id;
     $secrethash = md5($USER->id.$attforsession->rotateqrcodesecret);
     $url = new moodle_url('/mod/attendance/view.php', array('id' => $cm->id));
@@ -100,7 +101,7 @@ if ($attforsession->rotateqrcode == 1) {
     }
 }
 
-list($canmark, $reason) = attendance_can_student_mark($attforsession);
+
 if (!$canmark) {
     redirect(new moodle_url('/mod/attendance/view.php', array('id' => $cm->id)), get_string($reason, 'attendance'));
     exit;

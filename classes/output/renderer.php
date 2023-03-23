@@ -1376,27 +1376,27 @@ class renderer extends plugin_renderer_base {
             } else {
                 list($canmark, $reason) = attendance_can_student_mark($sess, false);
                 if ($canmark) {
-                    if ($sess->rotateqrcode == 1) {
-                        $url = new moodle_url('/mod/attendance/attendance.php');
-                        $output = html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'sessid',
-                                'value' => $sess->id));
-                        $output .= html_writer::empty_tag('input', array('type' => 'text', 'name' => 'qrpass',
-                                'placeholder' => "Enter password"));
-                        $output .= html_writer::empty_tag('input', array('type' => 'submit',
-                                'value' => get_string('submit'),
-                                'class' => 'btn btn-secondary'));
-                        $cell = new html_table_cell(html_writer::tag('form', $output,
-                            array('action' => $url->out(), 'method' => 'get')));
-                    } else {
-                        // Student can mark their own attendance.
-                        // URL to the page that lets the student modify their attendance.
-                        $url = new moodle_url('/mod/attendance/attendance.php',
-                                array('sessid' => $sess->id, 'sesskey' => sesskey()));
-                        if (attendance_session_open_for_students($sess)) {
-                            $cell = new html_table_cell(html_writer::link($url, get_string('submitattendance', 'attendance')));
+                    // Student can mark their own attendance.
+                    // URL to the page that lets the student modify their attendance.
+                    $url = new moodle_url('/mod/attendance/attendance.php',
+                            array('sessid' => $sess->id, 'sesskey' => sesskey()));
+                    if (attendance_session_open_for_students($sess)) {
+                        if ($sess->rotateqrcode == 1) {
+                            $url = new moodle_url('/mod/attendance/attendance.php');
+                            $output = html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sessid',
+                                                                       'value' => $sess->id]);
+                            $output .= html_writer::empty_tag('input', ['type' => 'text', 'name' => 'qrpass',
+                                                                        'placeholder' => "Enter password"]);
+                            $output .= html_writer::empty_tag('input', ['type' => 'submit',
+                                                                        'value' => get_string('submit'),
+                                                                        'class' => 'btn btn-secondary']);
+                            $cell = new html_table_cell(html_writer::tag('form', $output,
+                                                                         ['action' => $url->out(), 'method' => 'get']));
                         } else {
-                            $cell = new html_table_cell(html_writer::link($url, get_string('submitattendancefuture', 'attendance')));
+                            $cell = new html_table_cell(html_writer::link($url, get_string('submitattendance', 'attendance')));
                         }
+                    } else {
+                        $cell = new html_table_cell(html_writer::link($url, get_string('submitattendancefuture', 'attendance')));
                     }
                     $cell->colspan = 3;
                     $row->cells[] = $cell;
