@@ -788,5 +788,23 @@ function xmldb_attendance_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2023020102, 'attendance');
     }
 
+    if ($oldversion < 2023020106) {
+        // Update any records with null values and set to 0;
+        $sql = 'UPDATE {attendance_sessions} set allowupdatestatus = 0 WHERE allowupdatestatus is null';
+        $DB->execute($sql);
+
+        // Changing precision of field allowupdatestatus on table attendance_sessions to (1).
+        $table = new xmldb_table('attendance_sessions');
+        $field = new xmldb_field('allowupdatestatus', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'studentscanmark');
+
+        // Launch change of precision for field allowupdatestatus.
+        $dbman->change_field_precision($table, $field);
+        $dbman->change_field_default($table, $field);
+        $dbman->change_field_notnull($table, $field);
+
+        // Attendance savepoint reached.
+        upgrade_mod_savepoint(true, 2023020106, 'attendance');
+    }
+
     return true;
 }
