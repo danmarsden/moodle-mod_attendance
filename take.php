@@ -36,6 +36,7 @@ $pageparams->viewmode   = optional_param('viewmode', null, PARAM_INT);
 $pageparams->gridcols   = optional_param('gridcols', null, PARAM_INT);
 $pageparams->page       = optional_param('page', 1, PARAM_INT);
 $pageparams->perpage    = optional_param('perpage', get_config('attendance', 'resultsperpage'), PARAM_INT);
+$pageparams->enrolstatus = optional_param('enrolstatus', '0', PARAM_INT);
 
 $cm             = get_coursemodule_from_id('attendance', $id, 0, false, MUST_EXIST);
 $course         = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
