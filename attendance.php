@@ -122,7 +122,7 @@ if (empty($attforsession->includeqrcode)) {
 }
 
 // Check to see if autoassignstatus is in use and no password required or Qrpass given and passed.
-if ($attforsession->autoassignstatus && (empty($attforsession->studentpassword)) || $qrpassflag) {
+if ($attforsession->autoassignstatus && attendance_session_open_for_students($attforsession) && (empty($attforsession->studentpassword)) || $qrpassflag) {
     $statusid = attendance_session_get_highest_status($att, $attforsession);
     $url = new moodle_url('/mod/attendance/view.php', array('id' => $cm->id));
     if (empty($statusid)) {
@@ -141,7 +141,7 @@ if ($attforsession->autoassignstatus && (empty($attforsession->studentpassword))
     }
 }
 
-if (!empty($qrpass) && !empty($attforsession->autoassignstatus)) {
+if (!empty($qrpass) && !empty($attforsession->autoassignstatus) && attendance_session_open_for_students($attforsession)) {
     $fromform = new stdClass();
 
     // Check if password required and if set correctly.
@@ -203,7 +203,7 @@ if ($mform->is_cancelled()) {
         $url = new moodle_url('/mod/attendance/attendance.php', array('sessid' => $id, 'sesskey' => sesskey()));
         redirect($url, get_string('incorrectpassword', 'mod_attendance'), null, \core\output\notification::NOTIFY_ERROR);
     }
-    if ($attforsession->autoassignstatus) {
+    if (attendance_session_open_for_students($attforsession) && $attforsession->autoassignstatus) {
         $fromform->status = attendance_session_get_highest_status($att, $attforsession);
         if (empty($fromform->status)) {
             $url = new moodle_url('/mod/attendance/view.php', array('id' => $cm->id));
