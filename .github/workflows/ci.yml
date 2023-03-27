@@ -9,6 +9,5 @@ jobs:
     # Required if you plan to publish (uncomment the below)
     secrets:
       moodle_org_token: ${{ secrets.MOODLE_ORG_TOKEN }}
-    with:
-        env:
-          MUSTACHE_IGNORE_NAMES: 'mobile_teacher_form.mustache'
+    env:
+      MUSTACHE_IGNORE_NAMES: 'mobile_teacher_form.mustache'
