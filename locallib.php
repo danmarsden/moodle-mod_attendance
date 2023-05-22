@@ -914,13 +914,7 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
         }
     } else {
         $sess = new stdClass();
-        $sess->sessdate = make_timestamp(
-            date("Y", $formdata->sessiondate),
-            date("m", $formdata->sessiondate),
-            date("d", $formdata->sessiondate),
-            $formdata->sestime['starthour'],
-            $formdata->sestime['startminute']
-        );
+        $sess->sessdate =  $sessiondate;
         $sess->duration = $duration;
         $sess->descriptionitemid = $formdata->sdescription['itemid'];
         $sess->description = $formdata->sdescription['text'];
