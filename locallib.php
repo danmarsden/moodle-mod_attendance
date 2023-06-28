@@ -156,7 +156,7 @@ function attendance_get_user_sessions_log_full($userid, $pageparams) {
     // ats.groupid 0 => get all sessions that are for all students enrolled in course
     // al.id not null => get all marked sessions whether or not user currently still in group.
     $sql = "SELECT ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, ats.statusset,
-                   al.statusid, al.remarks, ats.studentscanmark, ats.allowupdatestatus, ats.autoassignstatus,
+                   al.statusid, al.remarks, ats.studentscanmark, COALESCE(ats.allowupdatestatus, 0) AS allowupdatestatus, ats.autoassignstatus,
                    ats.preventsharedip, ats.preventsharediptime, ats.studentsearlyopentime,
                    ats.attendanceid, att.name AS attname, att.course AS courseid, c.fullname AS cname
               FROM {attendance_sessions} ats
