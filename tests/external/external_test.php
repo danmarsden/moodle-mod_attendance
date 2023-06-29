@@ -40,7 +40,6 @@ global $CFG;
 require_once($CFG->dirroot . '/webservice/tests/helpers.php');
 require_once($CFG->dirroot . '/mod/attendance/classes/attendance_webservices_handler.php');
 require_once($CFG->dirroot . '/mod/attendance/classes/structure.php');
-require_once($CFG->dirroot . '/mod/attendance/externallib.php');
 
 /**
  * This class contains the test cases for webservices.
@@ -50,6 +49,7 @@ require_once($CFG->dirroot . '/mod/attendance/externallib.php');
  * @copyright  2015 Caio Bressan Doneda
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @group      mod_attendance
+ * @runTestsInSeparateProcesses
  */
 class external_test extends externallib_advanced_testcase {
     /** @var core_course_category */
@@ -69,7 +69,8 @@ class external_test extends externallib_advanced_testcase {
      * Setup class.
      */
     public function setUp(): void {
-        global $DB;
+        global $CFG, $DB;
+        require_once($CFG->dirroot . '/mod/attendance/externallib.php');
         $this->category = $this->getDataGenerator()->create_category();
         $this->course = $this->getDataGenerator()->create_course(array('category' => $this->category->id));
         $att = $this->getDataGenerator()->create_module('attendance', array('course' => $this->course->id));
