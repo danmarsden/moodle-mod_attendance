@@ -175,7 +175,7 @@ function attendance_delete_calendar_events($sessionsids) {
  */
 function attendance_existing_calendar_events_ids($sessionsids) {
     global $DB;
-    $caleventsids = array_keys($DB->get_records_list('attendance_sessions', 'id', $sessionsids, '', 'caleventid'));
+    $caleventsids = array_keys($DB->get_records_list('attendance_sessions', 'id', $sessionsids, '', 'DISTINCT caleventid'));
     $existingcaleventsids = array_filter($caleventsids);
     if (! empty($existingcaleventsids)) {
         return $existingcaleventsids;
