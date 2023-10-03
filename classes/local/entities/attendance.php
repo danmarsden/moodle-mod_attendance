@@ -328,7 +328,7 @@ class attendance extends base {
                 AND $fieldname.statusid = $attendancestatusalias.id
                 AND $fieldname.studentid = $attendancelogalias.studentid")
                 ->set_is_sortable(true)
-                ->add_field("$fieldname.count");
+                ->add_field("$fieldname.count", 'totalcount');
 
             // Status total count in the current week column.
             $columns[] = (new column(
@@ -349,7 +349,7 @@ class attendance extends base {
                 AND $fieldnamecw.statusid = $attendancestatusalias.id
                 AND $fieldnamecw.studentid = $attendancelogalias.studentid")
                 ->set_is_sortable(true)
-                ->add_field("{$fieldnamecw}.count");
+                ->add_field("{$fieldnamecw}.count", 'totalcountcw');
 
             // Status total count in the previous week column.
             $columns[] = (new column(
@@ -371,7 +371,7 @@ class attendance extends base {
                 AND $fieldnamepw.statusid = $attendancestatusalias.id
                 AND $fieldnamepw.studentid = $attendancelogalias.studentid")
                 ->set_is_sortable(true)
-                ->add_field("{$fieldnamepw}.count");
+                ->add_field("{$fieldnamepw}.count", 'totalcountprev');
         }
 
         return $columns;
