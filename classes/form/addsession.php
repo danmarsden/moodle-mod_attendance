@@ -309,6 +309,7 @@ class addsession extends moodleform {
         $mform->setAdvanced('preventsharedgroup');
         $mform->setType('preventsharedip', PARAM_INT);
         $mform->setType('preventsharediptime', PARAM_INT);
+        $mform->hideif('preventsharediptime', 'preventsharedip', 'noteq', ATTENDANCE_SHAREDIP_MINUTES);
 
         if (isset($pluginconfig->preventsharedip)) {
             $mform->setDefault('preventsharedip', $pluginconfig->preventsharedip);
@@ -383,7 +384,7 @@ class addsession extends moodleform {
             }
         }
 
-        if (!empty($data['studentscanmark']) && !empty($data['preventsharedip']) &&
+        if (!empty($data['studentscanmark']) && $data['preventsharedip'] == ATTENDANCE_SHAREDIP_MINUTES &&
                 empty($data['preventsharediptime'])) {
             $errors['preventsharedgroup'] = get_string('iptimemissing', 'attendance');
 

@@ -213,6 +213,7 @@ class updatesession extends \moodleform {
         $mform->addHelpButton('preventsharedgroup', 'preventsharedip', 'attendance');
         $mform->setAdvanced('preventsharedgroup');
         $mform->setType('preventsharediptime', PARAM_INT);
+        $mform->hideif('preventsharediptime', 'preventsharedip', 'noteq', ATTENDANCE_SHAREDIP_MINUTES);
 
         // Add custom field data to form.
         $handler = \mod_attendance\customfield\session_handler::create();
@@ -253,8 +254,7 @@ class updatesession extends \moodleform {
                 $errors['automark'] = get_string('noabsentstatusset', 'attendance');
             }
         }
-
-        if (!empty($data['studentscanmark']) && !empty($data['preventsharedip']) &&
+        if (!empty($data['studentscanmark']) && $data['preventsharedip'] == ATTENDANCE_SHAREDIP_MINUTES &&
                 empty($data['preventsharediptime'])) {
             $errors['preventsharedgroup'] = get_string('iptimemissing', 'attendance');
 
