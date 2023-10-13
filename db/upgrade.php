@@ -729,11 +729,29 @@ function xmldb_attendance_upgrade($oldversion=0) {
     }
     if ($oldversion < 2022090900) {
         if (!empty($CFG->dbfamily) && $CFG->dbfamily == 'postgres') {
-            $sql = 'DELETE FROM {attendance_log}
-            WHERE id NOT IN (SELECT max(id)
-                               FROM {attendance_log}
-                           GROUP BY sessionid, studentid, statusid)';
+            // Start a new database transaction
+            $transaction = $DB->start_delegated_transaction();
+
+            // Create new table with latest unique records.
+            $sql = 'CREATE TABLE {attendance_log}_2022090900_temp AS
+                        SELECT max(id)
+                        FROM {attendance_log}
+                        GROUP BY sessionid, studentid, statusid';
             $DB->execute($sql);
+            // Truncate the old table (faster than delete)
+            $sql = 'TRUNCATE {attendance_log}';
+            $DB->execute($sql);
+            // Reinsert the old records
+            $sql = 'INSERT INTO {attendance_log} 
+                        SELECT * FROM {attendance_log}_2022090900_temp';
+            $DB->execute($sql);
+            // Drop the "temporary" table.
+            $sql = 'DROP TABLE {attendance_log}_2022090900_temp';
+            $DB->execute($sql);
+
+            // Commit the transaction.
+            $transaction->allow_commit();
+
         } else if (!empty($CFG->dbfamily) && $CFG->dbfamily == 'mysql') {
             // There is probably a faster way to do this for mysql, but it works.
             $sql = "SELECT id
