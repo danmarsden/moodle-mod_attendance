@@ -640,8 +640,11 @@ function xmldb_attendance_upgrade($oldversion=0) {
 
     if ($oldversion < 2021050700) {
         // Restore process sometimes creates orphan attendance calendar events - clean them up.
-        $sql = "modulename = 'attendance' AND id NOT IN (SELECT caleventid
-                                                           FROM {attendance_sessions})";
+        $sql = "modulename = 'attendance' AND NOT EXISTS (
+                    SELECT 1
+                    FROM {attendance_sessions} a
+                    WHERE mdl_event.id = a.caleventid
+                )";
         $DB->delete_records_select('event', $sql);
 
         // Attendance savepoint reached.
@@ -729,10 +732,15 @@ function xmldb_attendance_upgrade($oldversion=0) {
     }
     if ($oldversion < 2022090900) {
         if (!empty($CFG->dbfamily) && $CFG->dbfamily == 'postgres') {
-            $sql = 'DELETE FROM {attendance_log}
-            WHERE id NOT IN (SELECT max(id)
-                               FROM {attendance_log}
-                           GROUP BY sessionid, studentid, statusid)';
+            $sql = 'DELETE FROM {attendance_log} a
+                        WHERE a.id NOT IN (
+                        SELECT MAX(id)
+                        FROM {attendance_log} b
+                        WHERE a.sessionid = b.sessionid
+                        AND a.studentid = b.studentid
+                        AND a.statusid = b.statusid
+                        GROUP BY b.sessionid, b.studentid, b.statusid
+                    )';
             $DB->execute($sql);
         } else if (!empty($CFG->dbfamily) && $CFG->dbfamily == 'mysql') {
             // There is probably a faster way to do this for mysql, but it works.
