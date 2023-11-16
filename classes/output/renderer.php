@@ -503,8 +503,6 @@ class renderer extends plugin_renderer_base {
      * @return string
      */
     protected function render_take_data(take_data $takedata) {
-        user_preference_allow_ajax_update('mod_attendance_statusdropdown', PARAM_TEXT);
-
         $controls = $this->render_attendance_take_controls($takedata);
         $table = html_writer::start_div('no-overflow');
         if ($takedata->pageparams->viewmode == mod_attendance_take_page_params::SORTED_LIST) {
