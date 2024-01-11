@@ -54,6 +54,7 @@ class restore_attendance_activity_task extends restore_activity_task {
     public static function define_decode_contents() {
         $contents = array();
 
+        $contents[] = new restore_decode_content('attendance', array('intro'), 'attendance');
         $contents[] = new restore_decode_content('attendance_sessions',
                           array('description'), 'attendance_session');
 
