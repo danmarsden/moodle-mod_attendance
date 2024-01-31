@@ -62,6 +62,9 @@ class mod_attendance_page_with_filter_controls {
     /** @var int type. */
     public $selectortype        = self::SELECTOR_NONE;
 
+    /** @var int number of items per page */
+    public $perpage;
+
     /** @var int default view. */
     protected $defaultview;
 
