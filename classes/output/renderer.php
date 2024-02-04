@@ -503,8 +503,6 @@ class renderer extends plugin_renderer_base {
      * @return string
      */
     protected function render_take_data(take_data $takedata) {
-        user_preference_allow_ajax_update('mod_attendance_statusdropdown', PARAM_TEXT);
-
         $controls = $this->render_attendance_take_controls($takedata);
         $table = html_writer::start_div('no-overflow');
         if ($takedata->pageparams->viewmode == mod_attendance_take_page_params::SORTED_LIST) {
@@ -761,15 +759,15 @@ class renderer extends plugin_renderer_base {
             $table->size[] = '20px';
             // JS to select all radios of this status and prevent default behaviour of # link.
             $this->page->requires->js_amd_inline("
-                require(['jquery'], function($) {
+                require(['jquery', 'core_user/repository'], function($, UserRepository) {
                     $('#checkstatus".$st->id."').click(function(e) {
                      if ($('select[name=\"setallstatus-select\"] option:selected').val() == 'all') {
                             $('#attendancetakeform').find('.st".$st->id."').prop('checked', true);
-                            M.util.set_user_preference('mod_attendance_statusdropdown','all');
+                            UserRepository.setUserPreference('mod_attendance_statusdropdown','all');
                         }
                         else {
                             $('#attendancetakeform').find('input:indeterminate.st".$st->id."').prop('checked', true);
-                            M.util.set_user_preference('mod_attendance_statusdropdown','unselected');
+                            UserRepository.setUserPreference('mod_attendance_statusdropdown','unselected');
                         }
                         e.preventDefault();
                     });
@@ -802,15 +800,15 @@ class renderer extends plugin_renderer_base {
             $row->cells[] = html_writer::empty_tag('input', $attribs);
             // Select all radio buttons of the same status.
             $this->page->requires->js_amd_inline("
-                require(['jquery'], function($) {
+                require(['jquery', 'core_user/repository], function($, UserRepository) {
                     $('#radiocheckstatus".$st->id."').click(function(e) {
                         if ($('select[name=\"setallstatus-select\"] option:selected').val() == 'all') {
                             $('#attendancetakeform').find('.st".$st->id."').prop('checked', true);
-                            M.util.set_user_preference('mod_attendance_statusdropdown','all');
+                            UserRepository.setUserPreference('mod_attendance_statusdropdown','all');
                         }
                         else {
                             $('#attendancetakeform').find('input:indeterminate.st".$st->id."').prop('checked', true);
-                            M.util.set_user_preference('mod_attendance_statusdropdown','unselected');
+                            UserRepository.setUserPreference('mod_attendance_statusdropdown','unselected');
                         }
                     });
                 });");
@@ -875,15 +873,15 @@ class renderer extends plugin_renderer_base {
                                               'title' => get_string('setallstatusesto', 'attendance', $st->description)));
             // JS to select all radios of this status and prevent default behaviour of # link.
             $this->page->requires->js_amd_inline("
-                 require(['jquery'], function($) {
+                 require(['jquery', 'core_user/repository], function($, UserRepository) {
                      $('#checkstatus".$st->id."').click(function(e) {
                          if ($('select[name=\"setallstatus-select\"] option:selected').val() == 'unselected') {
                              $('#attendancetakeform').find('input:indeterminate.st".$st->id."').prop('checked', true);
-                             M.util.set_user_preference('mod_attendance_statusdropdown','unselected');
+                             UserRepository.setUserPreference('mod_attendance_statusdropdown','unselected');
                          }
                          else {
                              $('#attendancetakeform').find('.st".$st->id."').prop('checked', true);
-                             M.util.set_user_preference('mod_attendance_statusdropdown','all');
+                             UserRepository.setUserPreference('mod_attendance_statusdropdown','all');
                          }
                          e.preventDefault();
                      });
