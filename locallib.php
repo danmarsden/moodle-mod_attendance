@@ -1377,7 +1377,7 @@ function attendance_renderqrcoderotate($session) {
     <script type="text/javascript">
         let qrCodeRotate = new attendance_QRCodeRotate();
         qrCodeRotate.start(' . $session->id . ', document.getElementById("qrcode"), document.getElementById("text-password"),
-        document.getElementById("rotate-time"));
+        document.getElementById("rotate-time"), '. time() .');
     </script>';
 }
 
