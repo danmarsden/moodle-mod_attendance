@@ -240,13 +240,15 @@ class addsession extends moodleform {
             $mform->disabledif('studentpassword', 'rotateqrcode', 'checked');
             $mgroup[] = & $mform->createElement('checkbox', 'randompassword', '', get_string('randompassword', 'attendance'));
             $mform->disabledif('randompassword', 'rotateqrcode', 'checked');
-            $mgroup[] = & $mform->createElement('checkbox', 'includeqrcode', '', get_string('includeqrcode', 'attendance'));
-            $mform->disabledif('includeqrcode', 'rotateqrcode', 'checked');
 
             $mform->addGroup($mgroup, 'passwordgrp', get_string('passwordgrp', 'attendance'), array(' '), false);
 
             $mform->setType('studentpassword', PARAM_TEXT);
             $mform->addHelpButton('passwordgrp', 'passwordgrp', 'attendance');
+
+            $mform->addElement('checkbox', 'includeqrcode', '', get_string('includeqrcode', 'attendance'));
+            $mform->hideif('includeqrcode', 'studentscanmark', 'notchecked');
+            $mform->disabledif('includeqrcode', 'rotateqrcode', 'checked');
 
             $mform->addElement('checkbox', 'rotateqrcode', '', get_string('rotateqrcode', 'attendance'));
             $mform->hideif('rotateqrcode', 'studentscanmark', 'notchecked');
