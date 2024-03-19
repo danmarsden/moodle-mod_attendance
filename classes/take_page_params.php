@@ -54,6 +54,12 @@ class mod_attendance_take_page_params {
     /** @var int */
     public $gridcols;
 
+    /** @var int */
+    public $page;
+
+    /** @var int */
+    public $perpage;
+
     /**
      * Initialize params.
      */
