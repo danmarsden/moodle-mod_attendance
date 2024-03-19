@@ -476,19 +476,16 @@ class mod_attendance_structure {
     }
 
     /**
-     * Undocumented function
+     * Save customfields
      *
-     * @param array $sessions
+     * @param int $sessions
      * @param object $formdata
      * @return void
      */
-    public function save_customfields($sessions, $formdata) {
-        foreach ($sessions as $session) {
-            $handler = mod_attendance\customfield\session_handler::create();
-            $formdata->id = $session->id;
-            $handler->instance_form_save($formdata, true);
-        }
-
+    public function save_customfields(int $sessionid, $formdata) {
+        $handler = mod_attendance\customfield\session_handler::create();
+        $formdata->id = $sessionid;
+        $handler->instance_form_save($formdata, true);
     }
 
     /**

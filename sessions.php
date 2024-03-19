@@ -73,7 +73,10 @@ switch ($att->pageparams->action) {
         if ($formdata = $mform->get_data()) {
             $sessions = attendance_construct_sessions_data_for_add($formdata, $att);
             $att->add_sessions($sessions);
-            $att->save_customfields($sessions, $formdata);
+            // Save custom fields.
+            foreach ($sessions as $session) {
+                $att->save_customfields($session->id, $formdata);
+            }
 
             if (count($sessions) == 1) {
                 $message = get_string('sessiongenerated', 'attendance');
@@ -106,6 +109,8 @@ switch ($att->pageparams->action) {
                 $formdata->allowupdatestatus = 0;
             }
             $att->update_session_from_form_data($formdata, $sessionid);
+            // Save customfields data.
+            $att->save_customfields($sessionid, $formdata);
 
             mod_attendance_notifyqueue::notify_success(get_string('sessionupdated', 'attendance'));
             redirect($att->url_manage());
