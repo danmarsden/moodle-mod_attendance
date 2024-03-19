@@ -87,12 +87,13 @@ class session_handler extends \core_customfield\handler {
      * @return bool true if the current can edit custom fields, false otherwise
      */
     public function can_edit(field_controller $field, int $instanceid = 0) : bool {
+        global $PAGE;
         if ($instanceid) {
             $context = $this->get_instance_context($instanceid);
             return (!$field->get_configdata_property('locked') ||
                     has_capability('moodle/course:changelockedcustomfields', $context));
         } else {
-            $context = \context_system::instance();
+            $context = $PAGE->context->get_course_context();
             return (!$field->get_configdata_property('locked') ||
                 guess_if_creator_will_have_course_capability('moodle/course:changelockedcustomfields', $context));
         }
