@@ -62,4 +62,7 @@ class mod_attendance_sessions_page_params {
 
     /** @var int view mode of taking attendance page*/
     public $action;
+
+    /** @var int - sessionid of session */
+    public $sessionid;
 }
