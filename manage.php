@@ -76,7 +76,6 @@ $PAGE->set_title($course->shortname. ": ".$att->name);
 $PAGE->set_heading($course->fullname);
 $PAGE->set_cacheable(true);
 $PAGE->force_settings_menu(true);
-$PAGE->navbar->add($att->name);
 
 $output = $PAGE->get_renderer('mod_attendance');
 $filtercontrols = new mod_attendance\output\filter_controls($att);
