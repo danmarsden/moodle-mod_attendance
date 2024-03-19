@@ -478,7 +478,7 @@ class mod_attendance_structure {
     /**
      * Save customfields
      *
-     * @param int $sessions
+     * @param int $sessionid
      * @param object $formdata
      * @return void
      */
