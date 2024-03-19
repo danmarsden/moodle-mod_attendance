@@ -1149,10 +1149,13 @@ class renderer extends plugin_renderer_base {
      * @return string
      */
     private function construct_user_data(user_data $userdata) {
-        global $USER;
+        global $USER, $COURSE;
         $o = '';
         if ($USER->id <> $userdata->user->id) {
-            $o = html_writer::tag('h2', fullname($userdata->user));
+            $userlink = html_writer::link(new \moodle_url('/user/view.php',
+                ['id' => $userdata->user->id, 'course' => $COURSE->id]), fullname($userdata->user));
+
+            $o = html_writer::tag('h2', $userlink);
         }
 
         if ($userdata->pageparams->mode == mod_attendance_view_page_params::MODE_THIS_COURSE) {
