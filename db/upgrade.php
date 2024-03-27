@@ -803,12 +803,11 @@ function xmldb_attendance_upgrade($oldversion=0) {
 
         // Changing precision of field allowupdatestatus on table attendance_sessions to (1).
         $table = new xmldb_table('attendance_sessions');
-        $field = new xmldb_field('allowupdatestatus', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'studentscanmark');
+        $field = new xmldb_field('allowupdatestatus', XMLDB_TYPE_INTEGER, '1', null, null, null, '0', 'studentscanmark');
 
         // Launch change of precision for field allowupdatestatus.
         $dbman->change_field_precision($table, $field);
         $dbman->change_field_default($table, $field);
-        $dbman->change_field_notnull($table, $field);
 
         // Attendance savepoint reached.
         upgrade_mod_savepoint(true, 2023032800, 'attendance');
