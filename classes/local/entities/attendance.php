@@ -739,7 +739,7 @@ class attendance extends base {
      * @return array
      */
     private function acronymfieldnames(string $acronym): array {
-        $fieldname = 'status_' . strtolower($acronym) . '_total_count';
+        $fieldname = 'status_' . rtrim(base64_encode($acronym), '=') . '_total_count';
         return [
             $fieldname,
             $fieldname . '_current_week',
