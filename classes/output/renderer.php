@@ -1394,7 +1394,7 @@ class renderer extends plugin_renderer_base {
                             $cell = new html_table_cell(html_writer::tag('form', $output,
                                                                          ['action' => $url->out(), 'method' => 'get']));
                         } else {
-                            $cell = new html_table_cell(html_writer::link($url, get_string('submitattendance', 'attendance')));
+                            $cell = new html_table_cell(html_writer::link($url, get_string('submitattendance', 'attendance'), array('class' => 'btn btn-primary')));
                         }
                     } else {
                         $cell = new html_table_cell(html_writer::link($url, get_string('submitattendancefuture', 'attendance')));
@@ -2030,7 +2030,7 @@ class renderer extends plugin_renderer_base {
                             $url = new moodle_url('/mod/attendance/attendance.php',
                             ['sessid' => $sess->id, 'sesskey' => sesskey()]);
                             if (attendance_session_open_for_students($sess)) {
-                                $cell = new html_table_cell(html_writer::link($url, get_string('submitattendance', 'attendance')));
+                                $cell = new html_table_cell(html_writer::link($url, get_string('submitattendance', 'attendance'), array('class' => 'btn btn-primary')));
                             } else {
                                 $cell = new html_table_cell(html_writer::link($url, get_string('submitattendancefuture',
                                     'attendance')));
