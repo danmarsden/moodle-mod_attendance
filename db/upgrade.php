@@ -643,7 +643,7 @@ function xmldb_attendance_upgrade($oldversion=0) {
         $sql = "modulename = 'attendance' AND NOT EXISTS (
                     SELECT 1
                     FROM {attendance_sessions} a
-                    WHERE mdl_event.id = a.caleventid
+                    WHERE {event}.id = a.caleventid
                 )";
         $DB->delete_records_select('event', $sql);
 
