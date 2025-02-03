@@ -54,7 +54,8 @@ $pageparams->init($course->id);
 $att = new mod_attendance_structure($att, $cm, $course, $PAGE->context, $pageparams);
 
 $allowedgroups = groups_get_activity_allowed_groups($cm);
-if (!empty($pageparams->grouptype) && !array_key_exists($pageparams->grouptype, $allowedgroups)) {
+$accessallgroups = has_capability('moodle/site:accessallgroups', $context);
+if (!$accessallgroups && !empty($pageparams->grouptype) && !array_key_exists($pageparams->grouptype, $allowedgroups)) {
      $group = groups_get_group($pageparams->grouptype);
      throw new moodle_exception('cannottakeforgroup', 'attendance', '', $group->name);
 }
