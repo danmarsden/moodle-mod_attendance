@@ -71,6 +71,10 @@ class studentattendance extends \moodleform {
             $mform->setType('studentpassword', PARAM_TEXT);
             $mform->addRule('studentpassword', get_string('passwordrequired', 'attendance'), 'required');
             $mform->setDefault('studentpassword', $password);
+            $mform->addElement('hidden', 'passwordholder', null);
+            $mform->setType('passwordholder', PARAM_TEXT);
+            $mform->setConstant('passwordholder', $password);
+            $mform->disabledIf('studentpassword', 'passwordholder', 'neq', '');
         }
 
         // Display current status:
@@ -88,9 +92,15 @@ class studentattendance extends \moodleform {
 
         // Create radio buttons for setting the attendance status.
         $radioarray = array();
+        $firstStatus = true;
         foreach ($statuses as $status) {
             $name = \html_writer::span($status->description, 'statusdesc');
             $radioarray[] =& $mform->createElement('radio', 'status', '', $name, $status->id, array());
+            // Set the first status as default if no existing status
+            if ($firstStatus && empty($existingstatus)) {
+                $mform->setDefault('status', $status->id);
+                $firstStatus = false;
+            }
         }
         if ($disabledduetotime) {
             $warning = \html_writer::span(get_string('somedisabledstatus', 'attendance'), 'somedisabledstatus');
