@@ -67,13 +67,16 @@ class studentattendance extends \moodleform {
         }
         if (!empty($attforsession->studentpassword) &&
             !(attendance_is_status_availablebeforesession($attforsession->id) && !attendance_session_open_for_students($attforsession))) {
+            
+            $mform->addElement('hidden', 'passwordholder', null);
+            $mform->setType('passwordholder', PARAM_TEXT);
+            $mform->setConstant('passwordholder', $password);
+            
             $mform->addElement('text', 'studentpassword', get_string('password', 'attendance'));
             $mform->setType('studentpassword', PARAM_TEXT);
             $mform->addRule('studentpassword', get_string('passwordrequired', 'attendance'), 'required');
             $mform->setDefault('studentpassword', $password);
-            $mform->addElement('hidden', 'passwordholder', null);
-            $mform->setType('passwordholder', PARAM_TEXT);
-            $mform->setConstant('passwordholder', $password);
+            
             $mform->disabledIf('studentpassword', 'passwordholder', 'neq', '');
         }
 
