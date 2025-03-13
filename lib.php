@@ -166,9 +166,10 @@ function attendance_delete_instance($id) {
 
     $DB->delete_records('attendance_warning', ['idnumber' => $id]);
 
-    $DB->delete_records('attendance', ['id' => $id]);
-
+    // Grades must be deleted before the main attendance record.
     attendance_grade_item_delete($attendance);
+
+    $DB->delete_records('attendance', ['id' => $id]);
 
     return true;
 }
