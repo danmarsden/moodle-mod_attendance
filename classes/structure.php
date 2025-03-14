@@ -525,7 +525,7 @@ class mod_attendance_structure {
         $event = \mod_attendance\event\session_added::create([
             'objectid' => $this->id,
             'context' => $this->context,
-            'other' => ['info' => implode(',', $infoarray)],
+            'other' => ['info' => implode(',', $infoarray), 'sessionid' => $sess->id],
         ]);
         $event->add_record_snapshot('course_modules', $this->cm);
         $sess->description = $description;
