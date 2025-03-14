@@ -312,6 +312,15 @@
 .attendancereporttable img.icon {
     padding-left: 5px;
 }
+#page-mod-attendance-password #page {
+    text-align: center;
+}
+
+#page-mod-attendance-password #page #qrcode img {
+    display: inline !important;
+    margin: 40px;
+}
+
 #page-mod-attendance-password .qrcodevalid,
 #page-mod-attendance-password .qrcodeheader {
     font-size: larger;
