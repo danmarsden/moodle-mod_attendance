@@ -149,7 +149,7 @@ if (!empty($qrpass) && !empty($attforsession->autoassignstatus) && attendance_se
     if (!empty($attforsession->studentpassword) &&
         $attforsession->studentpassword !== $qrpass) {
 
-        $url = new moodle_url('/mod/attendance/attendance.php', ['sessid' => $id, 'sesskey' => sesskey()]);
+        $url = new moodle_url('/mod/attendance/attendance.php', ['sessid' => $id]);
         redirect($url, get_string('incorrectpassword', 'mod_attendance'), null, \core\output\notification::NOTIFY_ERROR);
     }
 
@@ -202,7 +202,7 @@ if ($mform->is_cancelled()) {
         // Check if password being passed is valid.
         && $attforsession->studentpassword !== $fromform->studentpassword) {
 
-        $url = new moodle_url('/mod/attendance/attendance.php', ['sessid' => $id, 'sesskey' => sesskey()]);
+        $url = new moodle_url('/mod/attendance/attendance.php', ['sessid' => $id]);
         redirect($url, get_string('incorrectpassword', 'mod_attendance'), null, \core\output\notification::NOTIFY_ERROR);
     }
     if (attendance_session_open_for_students($attforsession) && $attforsession->autoassignstatus) {
