@@ -71,6 +71,7 @@ Feature: Test the various new features in the attendance module
   @javascript
   Scenario: A teacher can take attendance for temporary users
     Given I am on the "Test attendance" "mod_attendance > View" page logged in as "teacher1"
+    And I change viewport size to "large"
     And I click on "More" "link" in the ".secondary-navigation" "css_element"
     And I select "Temporary users" from secondary navigation
     And I set the following fields to these values:
