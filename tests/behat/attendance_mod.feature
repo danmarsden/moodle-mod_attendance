@@ -64,6 +64,34 @@ Feature: Teachers and Students can record session attendance
     Then "Attendance taken by student" "link" should exist
 
   @javascript
+  Scenario: Students can be required to enter a password when recording own attendance
+    Given I am on the "Attendance" "mod_attendance > View" page logged in as "teacher1"
+    And I click on "Add session" "button"
+    And I set the field "Allow students to record own attendance" to "1"
+    And I set the field "studentpassword" to "1234"
+    And I set the following fields to these values:
+      | id_sestime_starthour | 00 |
+      | id_sestime_endhour   | 23 |
+      | id_sestime_endminute | 55 |
+    And I click on "id_submitbutton" "button"
+    And I log out
+    And I am on the "Attendance" "mod_attendance > View" page logged in as "student1"
+    And I follow "Submit attendance"
+    When I set the field "Present" to "1"
+    And I press "Save changes"
+    And I should see "You must enter the session password"
+    And I should not see "Self-recorded"
+    And I set the field "Password" to "1235"
+    And I set the field "Present" to "1"
+    And I press "Save changes"
+    And I should see "You have entered an incorrect password"
+    And I should not see "Self-recorded"
+    And I set the field "Password" to "1234"
+    And I set the field "Present" to "1"
+    And I press "Save changes"
+    Then I should see "Self-recorded"
+
+  @javascript
   Scenario: If allowed, students can mark their own attendance before the session starts and teacher can choose which statuses are available.
     Given I am on the "Attendance" "mod_attendance > View" page logged in as "teacher1"
     And I click on "Add session" "button"
