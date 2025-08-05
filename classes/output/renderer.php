@@ -2887,7 +2887,7 @@ class renderer extends plugin_renderer_base {
      * @param array $opts
      * @return string
      */
-    protected function user_picture($user, array $opts = null) {
+    protected function user_picture($user, ?array $opts = null) {
         if ($user->type == 'temporary') {
             $attrib = [
                 'width' => '35',
