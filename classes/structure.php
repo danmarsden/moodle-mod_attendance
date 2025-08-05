@@ -112,13 +112,15 @@ class mod_attendance_structure {
      * Makes deep copy of all passed records properties. Replaces integer $course attribute
      * with a full database record (course should not be stored in instances table anyway).
      *
-     * @param stdClass $dbrecord Attandance instance data from {attendance} table
-     * @param stdClass $cm       Course module record as returned by {@see get_coursemodule_from_id()}
-     * @param stdClass $course   Course record from {course} table
-     * @param stdClass $context  The context of the attendance instance
-     * @param stdClass $pageparams
+     * @param stdClass      $dbrecord Attandance instance data from {attendance} table
+     * @param stdClass      $cm       Course module record as returned by {@see get_coursemodule_from_id()}
+     * @param stdClass      $course   Course record from {course} table
+     * @param stdClass|null $context  The context of the attendance instance
+     * @param mixed $pageparams
+     * $pageparams
      */
-    public function __construct(stdClass $dbrecord, stdClass $cm, stdClass $course, stdClass $context=null, $pageparams=null) {
+    public function __construct(stdClass $dbrecord, stdClass $cm, stdClass $course, stdClass|null $context=null,
+        mixed $pageparams=null) {
         global $DB;
 
         foreach ($dbrecord as $field => $value) {

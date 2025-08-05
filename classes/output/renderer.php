@@ -1394,7 +1394,8 @@ class renderer extends plugin_renderer_base {
                             $cell = new html_table_cell(html_writer::tag('form', $output,
                                                                          ['action' => $url->out(), 'method' => 'get']));
                         } else {
-                            $cell = new html_table_cell(html_writer::link($url, get_string('submitattendance', 'attendance'), array('class' => 'btn btn-primary')));
+                            $cell = new html_table_cell(html_writer::link($url, get_string('submitattendance', 'attendance'),
+                            ['class' => 'btn btn-primary']));
                         }
                     } else {
                         $cell = new html_table_cell(html_writer::link($url, get_string('submitattendancefuture', 'attendance')));
@@ -2030,7 +2031,8 @@ class renderer extends plugin_renderer_base {
                             $url = new moodle_url('/mod/attendance/attendance.php',
                             ['sessid' => $sess->id, 'sesskey' => sesskey()]);
                             if (attendance_session_open_for_students($sess)) {
-                                $cell = new html_table_cell(html_writer::link($url, get_string('submitattendance', 'attendance'), array('class' => 'btn btn-primary')));
+                                $cell = new html_table_cell(html_writer::link($url, get_string('submitattendance', 'attendance'),
+                                ['class' => 'btn btn-primary']));
                             } else {
                                 $cell = new html_table_cell(html_writer::link($url, get_string('submitattendancefuture',
                                     'attendance')));
@@ -2874,7 +2876,8 @@ class renderer extends plugin_renderer_base {
         $options = [0 => get_string('availabilityno', 'mod_attendance'),
                          1 => get_string('availabilitylimitedtime', 'mod_attendance'), ];
         $result = html_writer::select($options, 'availability['.$st->id.']', $default,
-        ['' => get_string('availabilityalways', 'mod_attendance')], ['class' => 'attendanceavailabilityselect menuavailability'.$st->id]);
+        ['' => get_string('availabilityalways', 'mod_attendance')],
+        ['class' => 'attendanceavailabilityselect menuavailability'.$st->id]);
         $result .= $this->construct_text_input('studentavailability['.$st->id.']', 4, 5, $st->studentavailability,
                                                 'studentavailability');
         return $result;
@@ -2884,7 +2887,7 @@ class renderer extends plugin_renderer_base {
      * Show different picture if it is a temporary user.
      *
      * @param stdClass $user
-     * @param array $opts
+     * @param array|null $opts
      * @return string
      */
     protected function user_picture($user, ?array $opts = null) {
