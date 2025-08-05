@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd"
+  bootstrap="../../../lib/phpunit/bootstrap.php"
+  processIsolation="false"
+  backupGlobals="false"
+  cacheResult="false"
+  stopOnError="false"
+  stopOnFailure="false"
+  stopOnIncomplete="false"
+  stopOnSkipped="false"
+  beStrictAboutTestsThatDoNotTestAnything="false"
+  beStrictAboutOutputDuringTests="true"
+  cacheDirectory=".phpunit.cache"
+  backupStaticProperties="false"
+>
+
+  <php>
+    <!--<const name="PHPUNIT_LONGTEST" value="1"/> uncomment to execute also slow or otherwise expensive tests-->
+    <const name="PHPUNIT_SEQUENCE_START" value="185000"/>
+
+    <!--Following constants instruct tests to fetch external test files from alternative location
+        or skip tests if empty, clone https://github.com/moodlehq/moodle-exttests to local web server-->
+    <!--<const name="TEST_EXTERNAL_FILES_HTTP_URL" value="http://download.moodle.org/unittest"/>
+        uncomment and alter to fetch external test files from alternative location-->
+    <!--<const name="TEST_EXTERNAL_FILES_HTTPS_URL" value="https://download.moodle.org/unittest"/>
+        uncomment and alter to fetch external test files from alternative location-->
+  </php>
+
+  <testsuites>
+    <testsuite name="mod_attendance_tests_testsuite">
+      <directory suffix="_test.php">tests</directory>
+      <exclude>tests/classes</exclude>
+      <exclude>tests/fixtures</exclude>
+    </testsuite>
+  </testsuites>
+
+  <source>
+    <include>
+      <directory suffix=".php">classes</directory>
+      <directory suffix=".php">tests/generator</directory>
+      <file>externallib.php</file>
+      <file>lib.php</file>
+      <file>locallib.php</file>
+      <file>renderer.php</file>
+      <file>rsslib.php</file>
+    </include>
+  </source>
+
+</phpunit>
