@@ -41,10 +41,10 @@ class mod_attendance_generator extends testing_module_generator {
      * Create new attendance module instance
      *
      * @param array|stdClass $record
-     * @param null|array $options
+     * @param array|null $options
      * @return stdClass mod_attendance_structure
      */
-    public function create_instance($record = null, array $options = null) {
+    public function create_instance($record = null, array|null $options = null) {
         global $CFG, $DB;
         require_once($CFG->dirroot.'/mod/attendance/lib.php');
 

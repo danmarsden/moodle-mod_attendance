@@ -317,7 +317,7 @@
 }
 
 #page-mod-attendance-password #page #qrcode img {
-    display: inline !important;
+    display: inline !important; /* stylelint-disable-line declaration-no-important */
     margin: 40px;
 }
 

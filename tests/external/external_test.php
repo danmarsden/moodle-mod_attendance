@@ -71,6 +71,7 @@ final class external_test extends externallib_advanced_testcase {
     public function setUp(): void {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/mod/attendance/externallib.php');
+        parent::setUp();
         $this->category = $this->getDataGenerator()->create_category();
         $this->course = $this->getDataGenerator()->create_course(['category' => $this->category->id]);
         $att = $this->getDataGenerator()->create_module('attendance', ['course' => $this->course->id]);
