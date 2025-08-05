@@ -2874,7 +2874,7 @@ class renderer extends plugin_renderer_base {
         $options = [0 => get_string('availabilityno', 'mod_attendance'),
                          1 => get_string('availabilitylimitedtime', 'mod_attendance'), ];
         $result = html_writer::select($options, 'availability['.$st->id.']', $default,
-        ['' => get_string('availabilityalways', 'mod_attendance')]);
+        ['' => get_string('availabilityalways', 'mod_attendance')], ['class' => 'attendanceavailabilityselect menuavailability'.$st->id]);
         $result .= $this->construct_text_input('studentavailability['.$st->id.']', 4, 5, $st->studentavailability,
                                                 'studentavailability');
         return $result;

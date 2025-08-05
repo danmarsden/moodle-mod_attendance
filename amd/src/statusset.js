@@ -25,7 +25,7 @@
 define([], function() {
     return {
         init: function() {
-         const selectboxes = document.querySelectorAll('.custom-select');
+         const selectboxes = document.querySelectorAll('.attendanceavailabilityselect');
          selectboxes.forEach(box => {
             var studentbox = 'student' + box.name;
             if (box.value == 1) {
