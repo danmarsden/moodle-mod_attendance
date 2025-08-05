@@ -48,6 +48,9 @@ require_capability('mod/attendance:view', $context);
 $pageparams->init($cm);
 $att = new mod_attendance_structure($attendance, $cm, $course, $context, $pageparams);
 
+$url = $att->url_view($pageparams->get_significant_params());
+$PAGE->set_url($url);
+
 // Not specified studentid for displaying attendance?
 // Redirect to appropriate page if can.
 if (!$pageparams->studentid) {
@@ -71,9 +74,6 @@ if (isset($pageparams->studentid) && $USER->id != $pageparams->studentid) {
     // A valid request to see another users report has not been sent, show the user's own.
     $userid = $USER->id;
 }
-
-$url = $att->url_view($pageparams->get_significant_params());
-$PAGE->set_url($url);
 
 $buttons = '';
 $capabilities = ['mod/attendance:takeattendances', 'mod/attendance:changeattendances'];
