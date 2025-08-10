@@ -28,6 +28,12 @@ require_once($CFG->libdir . '/externallib.php');
 require_once($CFG->libdir . '/filelib.php');
 require_once(dirname(__FILE__) . '/classes/attendance_webservices_handler.php');
 
+use core_external\external_api;
+use core_external\external_function_parameters;
+use core_external\external_multiple_structure;
+use core_external\external_single_structure;
+use core_external\external_value;
+
 /**
  * Class mod_attendance_external
  * @copyright  2015 Caio Bressan Doneda
