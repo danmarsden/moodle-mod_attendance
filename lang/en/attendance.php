@@ -682,3 +682,7 @@ $string['week'] = 'week(s)';
 $string['weekcommencing'] = 'Week commencing';
 $string['weeks'] = 'Weeks';
 $string['youcantdo'] = 'You can\'t do anything';
+$string['randomizepasscodesonrestore'] = 'Randomize passcodes on restore';
+$string['randomizepasscodesonrestore_desc'] = 'When restoring/copying a course, replace existing session passcodes with new random codes.';
+$string['randompasscodelength'] = 'Passcode length';
+$string['randompasscodelength_desc'] = 'Number of characters to generate for each session passcode.';
