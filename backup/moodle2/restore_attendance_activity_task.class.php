@@ -152,4 +152,5 @@ class restore_attendance_activity_task extends restore_activity_task {
             $DB->set_field('attendance_sessions', 'studentpassword', attendance_random_string($len), ['id' => $s->id]);
         }
         }
+    }
 }
