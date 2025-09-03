@@ -131,14 +131,6 @@ if ($ADMIN->fulltree) {
         0
     ));
 
-    $settings->add(new admin_setting_configtext(
-        'attendance/randompasscodelength',
-        get_string('randompasscodelength', 'mod_attendance'),
-        get_string('randompasscodelength_desc', 'mod_attendance'),
-        6,
-        PARAM_INT
-    ));
-
     $name = new lang_string('mobilesettings', 'mod_attendance');
     $description = new lang_string('mobilesettings_help', 'mod_attendance');
     $settings->add(new admin_setting_heading('mobilesettings', $name, $description));
