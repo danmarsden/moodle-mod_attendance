@@ -138,8 +138,6 @@ class restore_attendance_activity_task extends restore_activity_task {
             $DB->delete_records_select('event', $sql, $params);
         }
         if (!empty(get_config('attendance', 'randomizepasscodesonrestore'))) {
-            $len = (int)get_config('attendance', 'randompasscodelength') ?: 6;
-
             // Only touch sessions that already had a passcode set.
             $sessions = $DB->get_records_select('attendance_sessions',
                 'attendanceid = :aid AND studentpassword IS NOT NULL AND studentpassword <> :empty',
@@ -148,9 +146,9 @@ class restore_attendance_activity_task extends restore_activity_task {
                 'id'
             );
 
-        foreach ($sessions as $s) {
-            $DB->set_field('attendance_sessions', 'studentpassword', attendance_random_string($len), ['id' => $s->id]);
-        }
+            foreach ($sessions as $s) {
+                $DB->set_field('attendance_sessions', 'studentpassword', attendance_random_string(), ['id' => $s->id]);
+            }
         }
     }
 }
