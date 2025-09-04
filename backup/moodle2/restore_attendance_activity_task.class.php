@@ -25,6 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/mod/attendance/backup/moodle2/restore_attendance_stepslib.php');
+require_once($CFG->dirroot . '/mod/attendance/locallib.php');
 
 /**
  * Attendance restore task that provides all the settings and steps to perform one complete restore of the activity
@@ -135,6 +136,19 @@ class restore_attendance_activity_task extends restore_activity_task {
                                                                                        WHERE a.course = :courseid2)";
             $params = ['courseid' => $courseid, 'courseid2' => $courseid];
             $DB->delete_records_select('event', $sql, $params);
+        }
+        if (!empty(get_config('attendance', 'randomizepasscodesonrestore'))) {
+            // Only touch sessions that already had a passcode set.
+            $sessions = $DB->get_records_select('attendance_sessions',
+                'attendanceid = :aid AND studentpassword IS NOT NULL AND studentpassword <> :empty',
+                ['aid' => $attendanceid, 'empty' => ''],
+                '',
+                'id'
+            );
+
+            foreach ($sessions as $s) {
+                $DB->set_field('attendance_sessions', 'studentpassword', attendance_random_string(), ['id' => $s->id]);
+            }
         }
     }
 }

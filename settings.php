@@ -124,6 +124,12 @@ if ($ADMIN->fulltree) {
             new lang_string('customexportfields_help', 'attendance'),
             ['id'], $fields)
     );
+    $settings->add(new admin_setting_configcheckbox(
+        'attendance/randomizepasscodesonrestore',
+        get_string('randomizepasscodesonrestore', 'mod_attendance'),
+        get_string('randomizepasscodesonrestore_desc', 'mod_attendance'),
+        0
+    ));
 
     $name = new lang_string('mobilesettings', 'mod_attendance');
     $description = new lang_string('mobilesettings_help', 'mod_attendance');
