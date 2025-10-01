@@ -69,7 +69,7 @@ class mod_attendance_structure {
     /** @var int format of the intro (see above) */
     public $introformat;
 
-    /** @var mod_attendance_view_page_params current page parameters */
+    /** @var array current page parameters */
     public $pageparams;
 
     /** @var string subnets (IP range) for student self selection. */
