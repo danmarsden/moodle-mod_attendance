@@ -321,7 +321,7 @@ class user_sessions_cells_text_generator extends user_sessions_cells_generator {
  */
 function construct_user_data_stat($usersummary, $view) {
     $stattable = new html_table();
-    $stattable->attributes['class'] = 'attlist';
+    $stattable->attributes['class'] = 'attlist table-reboot';
     $row = new html_table_row();
     $row->attributes['class'] = 'normal';
     $row->cells[] = get_string('sessionscompleted', 'attendance') . ':';

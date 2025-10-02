@@ -461,7 +461,7 @@ class renderer extends plugin_renderer_base {
      */
     protected function render_sess_manage_control(manage_data $sessdata) {
         $table = new html_table();
-        $table->attributes['class'] = ' ';
+        $table->attributes['class'] = 'table-reboot generaltable';
         $table->width = '100%';
         $table->align = ['left', 'right'];
 
@@ -570,7 +570,7 @@ class renderer extends plugin_renderer_base {
         }
 
         $table = new html_table();
-        $table->attributes['class'] = ' ';
+        $table->attributes['class'] = 'table-reboot';
 
         $table->data[0][] = $this->construct_take_session_info($takedata);
         $table->data[0][] = $this->construct_take_controls($takedata);
@@ -778,7 +778,7 @@ class renderer extends plugin_renderer_base {
         $table->head[] = get_string('remarks', 'attendance');
         $table->align[] = 'center';
         $table->size[] = '20px';
-        $table->attributes['class'] = 'generaltable takelist';
+        $table->attributes['class'] = 'generaltable takelist table-reboot';
 
         // Show a 'select all' row of radio buttons.
         $row = new html_table_row();
@@ -1275,7 +1275,7 @@ class renderer extends plugin_renderer_base {
         }
 
         $table = new html_table();
-        $table->attributes['class'] = 'generaltable attwidth boxaligncenter';
+        $table->attributes['class'] = 'generaltable attwidth boxaligncenter table-reboot';
         $table->head = [];
         $table->align = [];
         $table->size = [];
@@ -1444,7 +1444,7 @@ class renderer extends plugin_renderer_base {
         $groupby = $userdata->pageparams->groupby;
 
         $table = new html_table();
-        $table->attributes['class'] = 'generaltable attwidth boxaligncenter allsessions';
+        $table->attributes['class'] = 'generaltable attwidth boxaligncenter allsessions table-reboot';
         $table->head = [];
         $table->align = [];
         $table->size = [];
@@ -2105,7 +2105,7 @@ class renderer extends plugin_renderer_base {
         $this->page->requires->js_init_call('M.mod_attendance.init_manage');
 
         $table = new html_table();
-        $table->attributes['class'] = 'generaltable attwidth attreport';
+        $table->attributes['class'] = 'generaltable attwidth attreport table-reboot';
 
         $userrows = $this->get_user_rows($reportdata);
 
