@@ -248,8 +248,8 @@ class user_sessions_cells_html_generator extends user_sessions_cells_generator {
 
         // Format the remark.
         $icon = $OUTPUT->pix_icon('i/info', '');
-        $remark = html_writer::span($text, 'remarkcontent');
-        $remark = html_writer::span($icon.$remark, 'remarkholder');
+        $remark = html_writer::span(s($text), 'remarkcontent');
+        $remark = html_writer::span($icon . $remark, 'remarkholder');
 
         // Add it into the previous cell.
         $markcell = array_pop($this->cells);
