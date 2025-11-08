@@ -1435,7 +1435,7 @@ class renderer extends plugin_renderer_base {
                 $row->cells[] = $status->description . $updatelink;
                 $row->cells[] = format_float($status->grade, 1, true, true) . ' / ' .
                                     format_float($statussetmaxpoints[$status->setnumber], 1, true, true);
-                $row->cells[] = $sess->remarks;
+                $row->cells[] = s($sess->remarks);
             } else if (($sess->sessdate + $sess->duration) < $userdata->user->enrolmentstart) {
                 $cell = new html_table_cell(get_string(
                     'enrolmentstart',
@@ -2078,14 +2078,14 @@ class renderer extends plugin_renderer_base {
                         $cell = new html_table_cell($celltext);
                         $row->cells[] = $cell;
 
-                        $celltext = empty($ucdata['remarks']) ? '' : $ucdata['remarks'];
+                        $celltext = empty($ucdata['remarks']) ? '' : s($ucdata['remarks']);
                         $cell = new html_table_cell($celltext);
                         $row->cells[] = $cell;
                     } else {
                         if (!empty($sess->statusid)) {
                             $status = $userdata->statuses[$sess->attendanceid][$sess->statusid];
                             $row->cells[] = $status->description;
-                            $row->cells[] = $sess->remarks;
+                            $row->cells[] = s($sess->remarks);
                         }
                     }
                 } else {
@@ -2094,7 +2094,7 @@ class renderer extends plugin_renderer_base {
                         $row->cells[] = $status->description;
                         $row->cells[] = format_float($status->grade, 1, true, true) . ' / ' .
                             format_float($statussetmaxpoints[$status->setnumber], 1, true, true);
-                        $row->cells[] = $sess->remarks;
+                        $row->cells[] = s($sess->remarks);
                     } else if (($sess->sessdate + $sess->duration) < $userdata->user->enrolmentstart) {
                         $cell = new html_table_cell(get_string(
                             'enrolmentstart',
