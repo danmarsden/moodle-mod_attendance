@@ -248,7 +248,7 @@ class user_sessions_cells_html_generator extends user_sessions_cells_generator {
 
         // Format the remark.
         $icon = $OUTPUT->pix_icon('i/info', '');
-        $remark = html_writer::span($text, 'remarkcontent');
+        $remark = html_writer::span(s($text), 'remarkcontent'); // Protect against XSS https://moodledev.io/general/development/policies/security/crosssite-scripting#escaping-output
         $remark = html_writer::span($icon.$remark, 'remarkholder');
 
         // Add it into the previous cell.
