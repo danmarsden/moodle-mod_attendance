@@ -30,7 +30,6 @@ namespace mod_attendance\form;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class tempuseredit extends \moodleform {
-
     /**
      * Called to define this moodle form
      *

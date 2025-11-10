@@ -33,7 +33,6 @@ require_once($CFG->dirroot . '/mod/attendance/locallib.php');
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mod_attendance_summary {
-
     /** @var int attendance instance identifier */
     private $attendanceid;
 
@@ -60,7 +59,7 @@ class mod_attendance_summary {
      * @param int $startdate Attendance sessions startdate
      * @param int $enddate Attendance sessions enddate
      */
-    public function __construct($attendanceid, $userids=[], $startdate = '', $enddate = '') {
+    public function __construct($attendanceid, $userids = [], $startdate = '', $enddate = '') {
         $this->attendanceid = $attendanceid;
 
         $this->compute_users_points($userids, $startdate, $enddate);
@@ -129,8 +128,10 @@ class mod_attendance_summary {
             $usersummary->takensessionspoints = 0;
             $usersummary->takensessionsmaxpoints = 0;
         }
-        $usersummary->takensessionspercentage = attendance_calc_fraction($usersummary->takensessionspoints,
-                                                                         $usersummary->takensessionsmaxpoints);
+        $usersummary->takensessionspercentage = attendance_calc_fraction(
+            $usersummary->takensessionspoints,
+            $usersummary->takensessionsmaxpoints
+        );
         if (isset($this->userstakensessionsbyacronym[$userid])) {
             $usersummary->userstakensessionsbyacronym = $this->userstakensessionsbyacronym[$userid];
         } else {
@@ -171,8 +172,10 @@ class mod_attendance_summary {
                 }
             }
         }
-        $usersummary->allsessionspercentage = attendance_calc_fraction($usersummary->takensessionspoints,
-                                                                       $usersummary->allsessionsmaxpoints);
+        $usersummary->allsessionspercentage = attendance_calc_fraction(
+            $usersummary->takensessionspoints,
+            $usersummary->allsessionsmaxpoints
+        );
         $usersummary->allsessionspercentage = format_float($usersummary->allsessionspercentage * 100) . '%';
 
         $deltapoints = $usersummary->allsessionsmaxpoints - $usersummary->takensessionsmaxpoints;
@@ -181,8 +184,10 @@ class mod_attendance_summary {
         $usersummary->maxpossiblepoints = format_float($usersummary->maxpossiblepoints, 1, true, true) . ' / ' .
             format_float($usersummary->allsessionsmaxpoints, 1, true, true);
 
-        $usersummary->maxpossiblepercentage = attendance_calc_fraction(($usersummary->takensessionspoints + $deltapoints),
-                                                                       $usersummary->allsessionsmaxpoints);
+        $usersummary->maxpossiblepercentage = attendance_calc_fraction(
+            ($usersummary->takensessionspoints + $deltapoints),
+            $usersummary->allsessionsmaxpoints
+        );
         $usersummary->maxpossiblepercentage = format_float($usersummary->maxpossiblepercentage * 100) . '%';
 
         $usersummary->pointssessionscompleted = format_float($usersummary->takensessionspoints, 1, true, true) . ' / ' .
@@ -204,10 +209,10 @@ class mod_attendance_summary {
      * @param int $enddate Attendance sessions enddate
      * @return  (userid, numtakensessions, points, maxpoints)
      */
-    private function compute_users_points($userids=[], $startdate = '', $enddate = '') {
+    private function compute_users_points($userids = [], $startdate = '', $enddate = '') {
         global $DB;
 
-        list($this->course, $cm) = get_course_and_cm_from_instance($this->attendanceid, 'attendance');
+        [$this->course, $cm] = get_course_and_cm_from_instance($this->attendanceid, 'attendance');
         $this->groupmode = $cm->effectivegroupmode;
 
         $params = [
@@ -218,7 +223,7 @@ class mod_attendance_summary {
 
         $where = '';
         if (!empty($userids)) {
-            list($insql, $inparams) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
+            [$insql, $inparams] = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
             $where .= ' AND atl.studentid ' . $insql;
             $params = array_merge($params, $inparams);
         }
@@ -268,10 +273,10 @@ class mod_attendance_summary {
      * @param int $enddate Attendance sessions enddate
      * @return  null
      */
-    private function compute_users_taken_sessions_by_acronym($userids=[], $startdate = '', $enddate = '') {
+    private function compute_users_taken_sessions_by_acronym($userids = [], $startdate = '', $enddate = '') {
         global $DB;
 
-        list($this->course, $cm) = get_course_and_cm_from_instance($this->attendanceid, 'attendance');
+        [$this->course, $cm] = get_course_and_cm_from_instance($this->attendanceid, 'attendance');
         $this->groupmode = $cm->effectivegroupmode;
 
         $params = [
@@ -281,7 +286,7 @@ class mod_attendance_summary {
 
         $where = '';
         if (!empty($userids)) {
-            list($insql, $inparams) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
+            [$insql, $inparams] = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
             $where .= ' AND atl.studentid ' . $insql;
             $params = array_merge($params, $inparams);
         }

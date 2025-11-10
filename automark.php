@@ -22,8 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(__FILE__).'/../../config.php');
-require_once(dirname(__FILE__).'/locallib.php');
+require_once(dirname(__FILE__) . '/../../config.php');
+require_once(dirname(__FILE__) . '/locallib.php');
 
 $id         = required_param('id', PARAM_INT);
 $sessionid  = required_param('sessionid', PARAM_INT);
@@ -32,8 +32,12 @@ $grouptype  = required_param('grouptype', PARAM_INT);
 $cm             = get_coursemodule_from_id('attendance', $id, 0, false, MUST_EXIST);
 $course         = $DB->get_record('course', ['id' => $cm->course], '*', MUST_EXIST);
 $att            = $DB->get_record('attendance', ['id' => $cm->instance], '*', MUST_EXIST);
-$session        = $DB->get_record('attendance_sessions', ['id' => $sessionid, 'attendanceid' => $att->id],
-                                  '*', MUST_EXIST);
+$session        = $DB->get_record(
+    'attendance_sessions',
+    ['id' => $sessionid, 'attendanceid' => $att->id],
+    '*',
+    MUST_EXIST
+);
 
 require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
@@ -42,7 +46,7 @@ require_capability('mod/attendance:manualautomark', $context);
 if (empty($session->automark)) {
     throw new moodle_exception('automarkingnotenabled', 'attendance');
 }
-if ($session->automark == ATTENDANCE_AUTOMARK_CLOSE && ($session->sessdate + $session->duration) > time() ) {
+if ($session->automark == ATTENDANCE_AUTOMARK_CLOSE && ($session->sessdate + $session->duration) > time()) {
     throw new moodle_exception('automarkingnotavailableyet', 'attendance');
 }
 // phpcs:disable moodle.Commenting.TodoComment

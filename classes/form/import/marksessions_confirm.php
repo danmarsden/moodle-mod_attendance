@@ -26,7 +26,7 @@ defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
 
 use core_text;
 use moodleform;
-require_once($CFG->libdir.'/formslib.php');
+require_once($CFG->libdir . '/formslib.php');
 
 /**
  * Mark attendance sessions confirm csv upload.
@@ -36,7 +36,6 @@ require_once($CFG->libdir.'/formslib.php');
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class marksessions_confirm extends moodleform {
-
     /**
      * Called to define this moodle form
      *
@@ -107,7 +106,6 @@ class marksessions_confirm extends moodleform {
                 $mform->setDefault('status', -1);
                 $mform->setDefault('scantime', -1);
             }
-
         }
         foreach (array_keys($useroptions) as $o) {
             if (in_array($o, $foundheaders)) {

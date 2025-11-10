@@ -22,9 +22,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(__FILE__).'/../../config.php');
-require_once($CFG->libdir.'/formslib.php');
-require_once($CFG->dirroot.'/mod/attendance/locallib.php');
+require_once(dirname(__FILE__) . '/../../config.php');
+require_once($CFG->libdir . '/formslib.php');
+require_once($CFG->dirroot . '/mod/attendance/locallib.php');
 
 $id = required_param('id', PARAM_INT);
 $userid = required_param('userid', PARAM_INT);
@@ -40,7 +40,7 @@ $PAGE->set_url($att->url_tempmerge($params));
 
 require_login($course, true, $cm);
 
-$PAGE->set_title($course->shortname.": ".$att->name.' - '.get_string('tempusermerge', 'attendance'));
+$PAGE->set_title($course->shortname . ": " . $att->name . ' - ' . get_string('tempusermerge', 'attendance'));
 $PAGE->set_heading($course->fullname);
 $PAGE->set_cacheable(true);
 $PAGE->navbar->add(get_string('tempusermerge', 'attendance'));
@@ -51,16 +51,14 @@ $formdata = (object)[
 ];
 
 $custom = [
-    'description' => format_string($tempuser->fullname).' ('.format_string($tempuser->email).')',
+    'description' => format_string($tempuser->fullname) . ' (' . format_string($tempuser->email) . ')',
 ];
 $mform = new mod_attendance\form\tempmerge(null, $custom);
 $mform->set_data($formdata);
 
 if ($mform->is_cancelled()) {
     redirect($att->url_managetemp());
-
 } else if ($data = $mform->get_data()) {
-
     $sql = "SELECT s.id, lr.id AS reallogid, lt.id AS templogid
               FROM {attendance_sessions} s
               LEFT JOIN {attendance_log} lr ON lr.sessionid = s.id AND lr.studentid = :realuserid
@@ -94,6 +92,6 @@ if ($mform->is_cancelled()) {
 $output = $PAGE->get_renderer('mod_attendance');
 
 echo $output->header();
-echo $output->heading(get_string('tempusermerge', 'attendance').' : '.format_string($course->fullname));
+echo $output->heading(get_string('tempusermerge', 'attendance') . ' : ' . format_string($course->fullname));
 $mform->display();
 echo $output->footer($course);

@@ -23,10 +23,10 @@
  */
 
 require_once('../../config.php');
-require_once($CFG->libdir.'/adminlib.php');
-require_once($CFG->dirroot.'/mod/attendance/lib.php');
-require_once($CFG->dirroot.'/mod/attendance/locallib.php');
-require_once($CFG->libdir.'/tablelib.php');
+require_once($CFG->libdir . '/adminlib.php');
+require_once($CFG->dirroot . '/mod/attendance/lib.php');
+require_once($CFG->dirroot . '/mod/attendance/locallib.php');
+require_once($CFG->libdir . '/tablelib.php');
 
 $category = optional_param('category', 0, PARAM_INT);
 $download = optional_param('download', '', PARAM_ALPHA);
@@ -65,7 +65,7 @@ if (!$table->is_downloading($download, $exportfilename)) {
     echo $OUTPUT->header();
     $heading = get_string('coursesummary', 'mod_attendance');
     if (!empty($category)) {
-        $heading .= " (".$coursecat->name.")";
+        $heading .= " (" . $coursecat->name . ")";
     }
     echo $OUTPUT->heading($heading);
     if ($admin) {
@@ -79,7 +79,6 @@ if (!$table->is_downloading($download, $exportfilename)) {
         $options = core_course_category::make_categories_list('mod/attendance:viewsummaryreports');
         echo $OUTPUT->single_select($url, 'category', $options, $category);
     }
-
 }
 
 $table->define_columns(['course', 'percentage']);
@@ -109,7 +108,6 @@ if (!empty($sort)) {
         $direction = ' ASC';
     }
     $orderby = " ORDER BY $sort $direction";
-
 }
 
 $records = attendance_course_users_points($courses, $orderby);
@@ -120,7 +118,7 @@ foreach ($records as $record) {
     } else {
         $name = $record->coursename;
     }
-    $table->add_data([$name, round($record->percentage * 100)."%"]);
+    $table->add_data([$name, round($record->percentage * 100) . "%"]);
 }
 $table->finish_output();
 

@@ -33,7 +33,7 @@ require_once(dirname(__FILE__) . '/classes/calendar_helpers.php');
  * @return mixed true if the feature is supported, null if unknown
  */
 function attendance_supports($feature) {
-    switch($feature) {
+    switch ($feature) {
         case FEATURE_GRADE_HAS_GRADE:
             return true;
         case FEATURE_GROUPS:
@@ -80,10 +80,13 @@ function att_add_default_statuses($attid) {
  */
 function attendance_add_default_warnings($id) {
     global $DB, $CFG;
-    require_once($CFG->dirroot.'/mod/attendance/locallib.php');
+    require_once($CFG->dirroot . '/mod/attendance/locallib.php');
 
-    $warnings = $DB->get_recordset('attendance_warning',
-        ['idnumber' => 0], 'id');
+    $warnings = $DB->get_recordset(
+        'attendance_warning',
+        ['idnumber' => 0],
+        'id'
+    );
     foreach ($warnings as $n) {
         $rec = $n;
         $rec->idnumber = $id;
@@ -149,7 +152,7 @@ function attendance_update_instance($attendance) {
  */
 function attendance_delete_instance($id) {
     global $DB, $CFG;
-    require_once($CFG->dirroot.'/mod/attendance/locallib.php');
+    require_once($CFG->dirroot . '/mod/attendance/locallib.php');
 
     if (! $attendance = $DB->get_record('attendance', ['id' => $id])) {
         return false;
@@ -181,8 +184,12 @@ function attendance_delete_instance($id) {
 function attendance_reset_course_form_definition(&$mform) {
     $mform->addElement('header', 'attendanceheader', get_string('modulename', 'attendance'));
 
-    $mform->addElement('static', 'description', get_string('description', 'attendance'),
-                                get_string('resetdescription', 'attendance'));
+    $mform->addElement(
+        'static',
+        'description',
+        get_string('description', 'attendance'),
+        get_string('resetdescription', 'attendance')
+    );
     $mform->addElement('checkbox', 'reset_attendance_log', get_string('deletelogs', 'attendance'));
 
     $mform->addElement('checkbox', 'reset_attendance_sessions', get_string('deletesessions', 'attendance'));
@@ -219,9 +226,9 @@ function attendance_reset_userdata($data) {
     if (!empty($data->reset_attendance_log)) {
         $sess = $DB->get_records_list('attendance_sessions', 'attendanceid', $attids, '', 'id');
         if (!empty($sess)) {
-            list($sql, $params) = $DB->get_in_or_equal(array_keys($sess));
+            [$sql, $params] = $DB->get_in_or_equal(array_keys($sess));
             $DB->delete_records_select('attendance_log', "sessionid $sql", $params);
-            list($sql, $params) = $DB->get_in_or_equal($attids);
+            [$sql, $params] = $DB->get_in_or_equal($attids);
             $DB->set_field_select('attendance_sessions', 'lasttaken', 0, "attendanceid $sql", $params);
             if (empty($data->reset_attendance_sessions)) {
                 // If sessions are being retained, clear automarkcompleted value.
@@ -280,8 +287,8 @@ function attendance_reset_userdata($data) {
  */
 function attendance_user_outline($course, $user, $mod, $attendance) {
     global $CFG;
-    require_once(dirname(__FILE__).'/locallib.php');
-    require_once($CFG->libdir.'/gradelib.php');
+    require_once(dirname(__FILE__) . '/locallib.php');
+    require_once($CFG->libdir . '/gradelib.php');
 
     $grades = grade_get_grades($course->id, 'mod', 'attendance', $attendance->id, $user->id);
 
@@ -313,8 +320,8 @@ function attendance_user_outline($course, $user, $mod, $attendance) {
 function attendance_user_complete($course, $user, $mod, $attendance) {
     global $CFG;
 
-    require_once(dirname(__FILE__).'/renderhelpers.php');
-    require_once($CFG->libdir.'/gradelib.php');
+    require_once(dirname(__FILE__) . '/renderhelpers.php');
+    require_once($CFG->libdir . '/gradelib.php');
 
     if (has_capability('mod/attendance:canbelisted', $mod->context, $user->id)) {
         echo construct_full_user_stat_html_table($attendance, $user);
@@ -328,7 +335,7 @@ function attendance_user_complete($course, $user, $mod, $attendance) {
  * @param int $userid
  * @param bool $nullifnone
  */
-function attendance_update_grades($attendance, $userid=0, $nullifnone=true) {
+function attendance_update_grades($attendance, $userid = 0, $nullifnone = true) {
     // We need this function to exist so that quick editing of module name is passed to gradebook.
 }
 /**
@@ -338,13 +345,13 @@ function attendance_update_grades($attendance, $userid=0, $nullifnone=true) {
  * @param mixed $grades optional array/object of grade(s); 'reset' means reset grades in gradebook
  * @return int 0 if ok, error code otherwise
  */
-function attendance_grade_item_update($attendance, $grades=null) {
+function attendance_grade_item_update($attendance, $grades = null) {
     global $CFG, $DB;
 
     require_once('locallib.php');
 
     if (!function_exists('grade_update')) { // Workaround for buggy PHP versions.
-        require_once($CFG->libdir.'/gradelib.php');
+        require_once($CFG->libdir . '/gradelib.php');
     }
 
     if (!isset($attendance->courseid)) {
@@ -365,7 +372,6 @@ function attendance_grade_item_update($attendance, $grades=null) {
     } else if ($attendance->grade < 0) {
         $params['gradetype'] = GRADE_TYPE_SCALE;
         $params['scaleid']   = -$attendance->grade;
-
     } else {
         $params['gradetype'] = GRADE_TYPE_NONE;
     }
@@ -386,14 +392,22 @@ function attendance_grade_item_update($attendance, $grades=null) {
  */
 function attendance_grade_item_delete($attendance) {
     global $CFG;
-    require_once($CFG->libdir.'/gradelib.php');
+    require_once($CFG->libdir . '/gradelib.php');
 
     if (!isset($attendance->courseid)) {
         $attendance->courseid = $attendance->course;
     }
 
-    return grade_update('mod/attendance', $attendance->courseid, 'mod', 'attendance',
-                        $attendance->id, 0, null, ['deleted' => 1]);
+    return grade_update(
+        'mod/attendance',
+        $attendance->courseid,
+        'mod',
+        'attendance',
+        $attendance->id,
+        0,
+        null,
+        ['deleted' => 1]
+    );
 }
 
 /**
@@ -406,7 +420,7 @@ function attendance_grade_item_delete($attendance) {
  * @param int $scaleid
  * @return boolean True if the scale is used by any attendance
  */
-function attendance_scale_used ($attendanceid, $scaleid) {
+function attendance_scale_used($attendanceid, $scaleid) {
     return false;
 }
 
@@ -475,33 +489,73 @@ function attendance_print_settings_tabs($selected = 'settings') {
     global $CFG;
     // Print tabs for different settings pages.
     $tabs = [];
-    $tabs[] = new tabobject('settings', "{$CFG->wwwroot}/{$CFG->admin}/settings.php?section=modsettingattendance",
-        get_string('settings', 'attendance'), get_string('settings'), false);
+    $tabs[] = new tabobject(
+        'settings',
+        "{$CFG->wwwroot}/{$CFG->admin}/settings.php?section=modsettingattendance",
+        get_string('settings', 'attendance'),
+        get_string('settings'),
+        false
+    );
 
-    $tabs[] = new tabobject('defaultstatus', $CFG->wwwroot.'/mod/attendance/defaultstatus.php',
-        get_string('defaultstatus', 'attendance'), get_string('defaultstatus', 'attendance'), false);
+    $tabs[] = new tabobject(
+        'defaultstatus',
+        $CFG->wwwroot . '/mod/attendance/defaultstatus.php',
+        get_string('defaultstatus', 'attendance'),
+        get_string('defaultstatus', 'attendance'),
+        false
+    );
 
     if (get_config('attendance', 'enablewarnings')) {
-        $tabs[] = new tabobject('defaultwarnings', $CFG->wwwroot . '/mod/attendance/warnings.php',
-            get_string('defaultwarnings', 'attendance'), get_string('defaultwarnings', 'attendance'), false);
+        $tabs[] = new tabobject(
+            'defaultwarnings',
+            $CFG->wwwroot . '/mod/attendance/warnings.php',
+            get_string('defaultwarnings', 'attendance'),
+            get_string('defaultwarnings', 'attendance'),
+            false
+        );
     }
 
-    $tabs[] = new tabobject('customfields', $CFG->wwwroot . '/mod/attendance/customfields.php',
-        get_string('customfields', 'attendance'), get_string('customfields', 'attendance'), false);
+    $tabs[] = new tabobject(
+        'customfields',
+        $CFG->wwwroot . '/mod/attendance/customfields.php',
+        get_string('customfields', 'attendance'),
+        get_string('customfields', 'attendance'),
+        false
+    );
 
-    $tabs[] = new tabobject('coursesummary', $CFG->wwwroot.'/mod/attendance/coursesummary.php',
-        get_string('coursesummary', 'attendance'), get_string('coursesummary', 'attendance'), false);
+    $tabs[] = new tabobject(
+        'coursesummary',
+        $CFG->wwwroot . '/mod/attendance/coursesummary.php',
+        get_string('coursesummary', 'attendance'),
+        get_string('coursesummary', 'attendance'),
+        false
+    );
 
     if (get_config('attendance', 'enablewarnings')) {
-        $tabs[] = new tabobject('absentee', $CFG->wwwroot . '/mod/attendance/absentee.php',
-            get_string('absenteereport', 'attendance'), get_string('absenteereport', 'attendance'), false);
+        $tabs[] = new tabobject(
+            'absentee',
+            $CFG->wwwroot . '/mod/attendance/absentee.php',
+            get_string('absenteereport', 'attendance'),
+            get_string('absenteereport', 'attendance'),
+            false
+        );
     }
 
-    $tabs[] = new tabobject('resetcalendar', $CFG->wwwroot.'/mod/attendance/resetcalendar.php',
-        get_string('resetcalendar', 'attendance'), get_string('resetcalendar', 'attendance'), false);
+    $tabs[] = new tabobject(
+        'resetcalendar',
+        $CFG->wwwroot . '/mod/attendance/resetcalendar.php',
+        get_string('resetcalendar', 'attendance'),
+        get_string('resetcalendar', 'attendance'),
+        false
+    );
 
-    $tabs[] = new tabobject('importsessions', $CFG->wwwroot . '/mod/attendance/import/sessions.php',
-        get_string('importsessions', 'attendance'), get_string('importsessions', 'attendance'), false);
+    $tabs[] = new tabobject(
+        'importsessions',
+        $CFG->wwwroot . '/mod/attendance/import/sessions.php',
+        get_string('importsessions', 'attendance'),
+        get_string('importsessions', 'attendance'),
+        false
+    );
 
     ob_start();
     print_tabs([$tabs], $selected);
@@ -522,7 +576,7 @@ function attendance_remove_user_from_thirdpartyemails($warnings, $userid) {
 
     // Update the third party emails list for all the relevant warnings.
     $updatedwarnings = array_map(
-        function(stdClass $warning) use ($userid): stdClass {
+        function (stdClass $warning) use ($userid): stdClass {
             $warning->thirdpartyemails = implode(',', array_diff(explode(',', $warning->thirdpartyemails), [$userid]));
             return $warning;
         },
@@ -564,9 +618,13 @@ function mod_attendance_myprofile_navigation(core_user\output\myprofile\tree $tr
                                                            'mode' => mod_attendance_view_page_params::MODE_THIS_COURSE,
                                                            'studentid' => $user->id]);
 
-        $node = new core_user\output\myprofile\node('reports', 'attendanceuserreport',
-                                                    get_string('attendanceuserreport', 'attendance'),
-                                                    null, $url);
+        $node = new core_user\output\myprofile\node(
+            'reports',
+            'attendanceuserreport',
+            get_string('attendanceuserreport', 'attendance'),
+            null,
+            $url
+        );
         $tree->add_node($node);
     }
 }
@@ -615,9 +673,11 @@ function attendance_extend_settings_navigation(settings_navigation $settingsnav,
     }
 
     foreach ($nodes as $node) {
-        $settingsnode = navigation_node::create($node['title'],
-                                                $node['url'],
-                                                navigation_node::TYPE_SETTING);
+        $settingsnode = navigation_node::create(
+            $node['title'],
+            $node['url'],
+            navigation_node::TYPE_SETTING
+        );
         if (isset($settingsnode)) {
             if (!empty($node->more)) {
                 $settingsnode->set_force_into_more_menu(true);

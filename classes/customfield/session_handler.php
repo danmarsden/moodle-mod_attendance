@@ -36,7 +36,7 @@ use core_customfield\field_controller;
  */
 class session_handler extends \core_customfield\handler {
     /** @var session_handler  */
-    static protected $singleton;
+    protected static $singleton;
     /** @var \context */
     protected $parentcontext;
     /** @var int Field is visible to everybody */
@@ -169,8 +169,12 @@ class session_handler extends \core_customfield\handler {
         $visibilityoptions = [self::VISIBLETOALL => get_string('customfield_visibletoall', 'core_course'),
             self::VISIBLETOTEACHERS => get_string('customfield_visibletoteachers', 'core_course'),
             self::NOTVISIBLE => get_string('customfield_notvisible', 'core_course'), ];
-        $mform->addElement('select', 'configdata[visibility]', get_string('customfield_visibility', 'core_course'),
-            $visibilityoptions);
+        $mform->addElement(
+            'select',
+            'configdata[visibility]',
+            get_string('customfield_visibility', 'core_course'),
+            $visibilityoptions
+        );
         $mform->addHelpButton('configdata[visibility]', 'customfield_visibility', 'core_course');
     }
 
@@ -278,4 +282,3 @@ class session_handler extends \core_customfield\handler {
         }
     }
 }
-

@@ -23,10 +23,10 @@
  */
 
 require_once('../../config.php');
-require_once($CFG->libdir.'/adminlib.php');
-require_once($CFG->dirroot.'/mod/attendance/lib.php');
-require_once($CFG->dirroot.'/mod/attendance/locallib.php');
-require_once($CFG->libdir.'/tablelib.php');
+require_once($CFG->libdir . '/adminlib.php');
+require_once($CFG->dirroot . '/mod/attendance/lib.php');
+require_once($CFG->dirroot . '/mod/attendance/locallib.php');
+require_once($CFG->libdir . '/tablelib.php');
 
 $category = optional_param('category', 0, PARAM_INT);
 $attendancecm = optional_param('id', 0, PARAM_INT);
@@ -78,7 +78,6 @@ if (!$table->is_downloading($download, $exportfilename)) {
             echo $tabmenu;
         }
     }
-
 }
 $columns = ['coursename', 'aname', 'userid'];
 $headers = [get_string('course'),
@@ -127,7 +126,6 @@ if (!empty($sort)) {
         $direction = ' ASC';
     }
     $orderby = " ORDER BY $sort $direction";
-
 }
 
 $records = attendance_get_users_to_notify($courses, $orderby);
@@ -155,7 +153,7 @@ foreach ($records as $record) {
         }
     }
     $row[] = $record->numtakensessions;
-    $row[] = round($record->percent * 100)."%";
+    $row[] = round($record->percent * 100) . "%";
     $timesent = "-";
     if (!empty($record->timesent)) {
         $timesent = userdate($record->timesent);

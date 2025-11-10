@@ -62,7 +62,7 @@ $strname  = get_string("name");
 $table = new html_table();
 
 if ($usesections) {
-    $strsectionname = get_string('sectionname', 'format_'.$course->format);
+    $strsectionname = get_string('sectionname', 'format_' . $course->format);
     $table->head = [$strsectionname, $strname];
     $table->align = ["center", "left"];
 } else {
@@ -75,7 +75,7 @@ foreach ($atts as $att) {
     $viewurl = new moodle_url('/mod/attendance/view.php', ['id' => $att->coursemodule]);
 
     $dimmedclass = $att->visible ? '' : 'class="dimmed"';
-    $link = '<a '.$dimmedclass.' href="'.$viewurl->out().'">'.$att->name.'</a>';
+    $link = '<a ' . $dimmedclass . ' href="' . $viewurl->out() . '">' . $att->name . '</a>';
 
     if ($usesections) {
         $tabledata = [get_section_name($course, $att->section), $link];

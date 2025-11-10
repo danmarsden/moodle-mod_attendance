@@ -29,7 +29,6 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mod_attendance_notifyqueue {
-
     /**
      * Show (print) the pending messages and clear them
      */
@@ -38,7 +37,7 @@ class mod_attendance_notifyqueue {
 
         if (isset($SESSION->mod_attendance_notifyqueue)) {
             foreach ($SESSION->mod_attendance_notifyqueue as $message) {
-                echo $OUTPUT->notification($message->message, 'notify'.$message->type);
+                echo $OUTPUT->notification($message->message, 'notify' . $message->type);
             }
             unset($SESSION->mod_attendance_notifyqueue);
         }
@@ -77,7 +76,7 @@ class mod_attendance_notifyqueue {
      * @param string $message a text with a message
      * @param string $messagetype one of the \core\output\notification messages ('message', 'suceess' or 'problem')
      */
-    private static function queue_message($message, $messagetype=\core\output\notification::NOTIFY_INFO) {
+    private static function queue_message($message, $messagetype = \core\output\notification::NOTIFY_INFO) {
         global $SESSION;
 
         if (!isset($SESSION->mod_attendance_notifyqueue)) {

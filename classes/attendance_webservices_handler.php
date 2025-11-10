@@ -24,10 +24,10 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once(dirname(__FILE__).'/../locallib.php');
-require_once(dirname(__FILE__).'/structure.php');
-require_once(dirname(__FILE__).'/../../../lib/sessionlib.php');
-require_once(dirname(__FILE__).'/../../../lib/datalib.php');
+require_once(dirname(__FILE__) . '/../locallib.php');
+require_once(dirname(__FILE__) . '/structure.php');
+require_once(dirname(__FILE__) . '/../../../lib/sessionlib.php');
+require_once(dirname(__FILE__) . '/../../../lib/datalib.php');
 
 /**
  * Class attendance_handler
@@ -111,12 +111,22 @@ class attendance_handler {
         $session->courseid = $DB->get_field('attendance', 'course', ['id' => $session->attendanceid]);
         $session->statuses = attendance_get_statuses($session->attendanceid, true, $session->statusset);
         $coursecontext = context_course::instance($session->courseid);
-        $session->users = get_enrolled_users($coursecontext, 'mod/attendance:canbelisted',
-                                             $session->groupid, 'u.id, u.firstname, u.lastname');
+        $session->users = get_enrolled_users(
+            $coursecontext,
+            'mod/attendance:canbelisted',
+            $session->groupid,
+            'u.id, u.firstname, u.lastname'
+        );
         $session->attendance_log = [];
 
-        if ($attendancelog = $DB->get_records('attendance_log', ['sessionid' => $sessionid],
-                                              '', 'studentid, statusid, remarks, id')) {
+        if (
+            $attendancelog = $DB->get_records(
+                'attendance_log',
+                ['sessionid' => $sessionid],
+                '',
+                'studentid, statusid, remarks, id'
+            )
+        ) {
             $session->attendance_log = $attendancelog;
         }
 

@@ -89,8 +89,12 @@ class addwarning extends moodleform {
             $options[$user->id] = fullname($user);
         }
 
-        $select = $mform->addElement('searchableselector', 'thirdpartyemails',
-            get_string('thirdpartyemails', 'mod_attendance'), $options);
+        $select = $mform->addElement(
+            'searchableselector',
+            'thirdpartyemails',
+            get_string('thirdpartyemails', 'mod_attendance'),
+            $options
+        );
         $mform->setType('thirdpartyemails', PARAM_TEXT);
         $mform->addHelpButton('thirdpartyemails', 'thirdpartyemails', 'mod_attendance');
         $select->setMultiple(true);
@@ -111,6 +115,5 @@ class addwarning extends moodleform {
             $btnstring = get_string('add', 'attendance');
         }
         $this->add_action_buttons(true, $btnstring);
-
     }
 }
