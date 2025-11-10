@@ -22,9 +22,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(__FILE__).'/../../config.php');
-require_once(dirname(__FILE__).'/locallib.php');
-require_once($CFG->libdir.'/formslib.php');
+require_once(dirname(__FILE__) . '/../../config.php');
+require_once(dirname(__FILE__) . '/locallib.php');
+require_once($CFG->libdir . '/formslib.php');
 
 $pageparams = new mod_attendance_sessions_page_params();
 
@@ -52,12 +52,12 @@ if ($DB->record_exists('attendance_log', ['sessionid' => $id, 'studentid' => $US
 }
 
 $qrpassflag = false;
-list($canmark, $reason) = attendance_can_student_mark($attforsession);
+[$canmark, $reason] = attendance_can_student_mark($attforsession);
 
 // If the randomised code is on grab it.
 if ($canmark && attendance_session_open_for_students($attforsession) && $attforsession->rotateqrcode == 1) {
-    $cookiename = 'attendance_'.$attforsession->id;
-    $secrethash = md5($USER->id.$attforsession->rotateqrcodesecret);
+    $cookiename = 'attendance_' . $attforsession->id;
+    $secrethash = md5($USER->id . $attforsession->rotateqrcodesecret);
     $url = new moodle_url('/mod/attendance/view.php', ['id' => $cm->id]);
 
     // Check if cookie is set and verify.
@@ -69,7 +69,7 @@ if ($canmark && attendance_session_open_for_students($attforsession) && $attfors
         }
     } else {
         // Check password.
-        $sql = 'SELECT * FROM {attendance_rotate_passwords}'.
+        $sql = 'SELECT * FROM {attendance_rotate_passwords}' .
             ' WHERE attendanceid = ? AND expirytime > ? ORDER BY expirytime ASC';
         $qrpassdatabase = $DB->get_records_sql($sql, ['attendanceid' => $id, time() - $attconfig->rotateqrcodeexpirymargin], 0, 2);
 
@@ -91,7 +91,7 @@ if ($canmark && attendance_session_open_for_students($attforsession) && $attfors
                      debugging('QR password not found');
                 } else {
                     $format = get_string('strftimedatetimeaccurate', 'core_langconfig');
-                    $message = "The current server time is: " . userdate(time(), $format). " and this QR Code expired at: ".
+                    $message = "The current server time is: " . userdate(time(), $format) . " and this QR Code expired at: " .
                                userdate($rec->expirytime + $attconfig->rotateqrcodeexpirymargin, $format);
                     debugging($message);
                 }
@@ -122,8 +122,11 @@ if (empty($attforsession->includeqrcode)) {
 }
 
 // Check to see if autoassignstatus is in use and no password required or Qrpass given and passed.
-if ($attforsession->autoassignstatus && attendance_session_open_for_students($attforsession) &&
-    (empty($attforsession->studentpassword)) || $qrpassflag) {
+if (
+    $attforsession->autoassignstatus &&
+    attendance_session_open_for_students($attforsession) &&
+    (empty($attforsession->studentpassword)) || $qrpassflag
+) {
     $statusid = attendance_session_get_highest_status($att, $attforsession);
     $url = new moodle_url('/mod/attendance/view.php', ['id' => $cm->id]);
     if (empty($statusid)) {
@@ -146,9 +149,10 @@ if (!empty($qrpass) && !empty($attforsession->autoassignstatus) && attendance_se
     $fromform = new stdClass();
 
     // Check if password required and if set correctly.
-    if (!empty($attforsession->studentpassword) &&
-        $attforsession->studentpassword !== $qrpass) {
-
+    if (
+        !empty($attforsession->studentpassword) &&
+        $attforsession->studentpassword !== $qrpass
+    ) {
         $url = new moodle_url('/mod/attendance/attendance.php', ['sessid' => $id]);
         redirect($url, get_string('incorrectpassword', 'mod_attendance'), null, \core\output\notification::NOTIFY_ERROR);
     }
@@ -180,13 +184,17 @@ $PAGE->set_url($att->url_sessions((array)$pageparams));
 
 // Create the form.
 if ($attforsession->rotateqrcode == 1) {
-    $mform = new mod_attendance\form\studentattendance(null,
+    $mform = new mod_attendance\form\studentattendance(
+        null,
         ['course' => $course, 'cm' => $cm, 'modcontext' => $PAGE->context, 'session' => $attforsession,
-            'attendance' => $att, 'password' => $attforsession->studentpassword]);
+            'attendance' => $att, 'password' => $attforsession->studentpassword]
+    );
 } else {
-    $mform = new mod_attendance\form\studentattendance(null,
+    $mform = new mod_attendance\form\studentattendance(
+        null,
         ['course' => $course, 'cm' => $cm, 'modcontext' => $PAGE->context, 'session' => $attforsession,
-            'attendance' => $att, 'password' => $qrpass]);
+            'attendance' => $att, 'password' => $qrpass]
+    );
 }
 
 if ($mform->is_cancelled()) {
@@ -195,13 +203,16 @@ if ($mform->is_cancelled()) {
     redirect($url);
 } else if ($fromform = $mform->get_data()) {
     // Check if password required and if set correctly.
-    if (!empty($attforsession->studentpassword) &&
+    if (
+        !empty($attforsession->studentpassword)
         // Session is not currently open, but this status is allowed to be set before the session, don't require password.
-        !(!attendance_session_open_for_students($attforsession) &&
-            attendance_is_status_availablebeforesession($attforsession->id, $fromform->status))
+        && !(
+            !attendance_session_open_for_students($attforsession)
+            && attendance_is_status_availablebeforesession($attforsession->id, $fromform->status)
+            )
         // Check if password being passed is valid.
-        && $attforsession->studentpassword !== $fromform->studentpassword) {
-
+        && $attforsession->studentpassword !== $fromform->studentpassword
+    ) {
         $url = new moodle_url('/mod/attendance/attendance.php', ['sessid' => $id]);
         redirect($url, get_string('incorrectpassword', 'mod_attendance'), null, \core\output\notification::NOTIFY_ERROR);
     }
@@ -233,7 +244,7 @@ if ($mform->is_cancelled()) {
     $mform->set_data($fromform);
 }
 
-$PAGE->set_title($course->shortname. ": ".$att->name);
+$PAGE->set_title($course->shortname . ": " . $att->name);
 $PAGE->set_heading($course->fullname);
 $PAGE->set_cacheable(true);
 $PAGE->navbar->add($att->name);

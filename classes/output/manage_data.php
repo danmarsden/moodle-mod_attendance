@@ -80,7 +80,7 @@ class manage_data implements renderable {
      * @param null $action
      * @return mixed
      */
-    public function url_sessions($sessionid=null, $action=null) {
+    public function url_sessions($sessionid = null, $action = null) {
         return url_helpers::url_sessions($this->att, $sessionid, $action);
     }
 }

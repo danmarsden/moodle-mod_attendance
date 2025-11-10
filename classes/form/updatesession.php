@@ -31,7 +31,6 @@ namespace mod_attendance\form;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class updatesession extends \moodleform {
-
     /**
      * Called to define this moodle form
      *
@@ -105,14 +104,23 @@ class updatesession extends \moodleform {
         // Show which status set is in use.
         $maxstatusset = attendance_get_max_statusset($this->_customdata['att']->id);
         if ($maxstatusset > 0) {
-            $mform->addElement('static', 'statussetstring', get_string('usestatusset', 'mod_attendance'),
-                attendance_get_setname($this->_customdata['att']->id, $sess->statusset));
+            $mform->addElement(
+                'static',
+                'statussetstring',
+                get_string('usestatusset', 'mod_attendance'),
+                attendance_get_setname($this->_customdata['att']->id, $sess->statusset)
+            );
         }
         $mform->addElement('hidden', 'statusset', $sess->statusset);
         $mform->setType('statusset', PARAM_INT);
 
-        $mform->addElement('editor', 'sdescription', get_string('description', 'attendance'),
-                           ['rows' => 1, 'columns' => 80], $defopts);
+        $mform->addElement(
+            'editor',
+            'sdescription',
+            get_string('description', 'attendance'),
+            ['rows' => 1, 'columns' => 80],
+            $defopts
+        );
         $mform->setType('sdescription', PARAM_RAW);
 
         if (!empty(get_config('attendance', 'enablecalendar'))) {
@@ -203,12 +211,26 @@ class updatesession extends \moodleform {
 
         $mgroup3 = [];
         $options = attendance_get_sharedipoptions();
-        $mgroup3[] = & $mform->createElement('select', 'preventsharedip',
-            get_string('preventsharedip', 'attendance'), $options);
-        $mgroup3[] = & $mform->createElement('text', 'preventsharediptime',
-            get_string('preventsharediptime', 'attendance'), '', 'test');
-        $mform->addGroup($mgroup3, 'preventsharedgroup',
-            get_string('preventsharedip', 'attendance'), [' '], false);
+        $mgroup3[] = & $mform->createElement(
+            'select',
+            'preventsharedip',
+            get_string('preventsharedip', 'attendance'),
+            $options
+        );
+        $mgroup3[] = & $mform->createElement(
+            'text',
+            'preventsharediptime',
+            get_string('preventsharediptime', 'attendance'),
+            '',
+            'test'
+        );
+        $mform->addGroup(
+            $mgroup3,
+            'preventsharedgroup',
+            get_string('preventsharedip', 'attendance'),
+            [' '],
+            false
+        );
         $mform->addHelpButton('preventsharedgroup', 'preventsharedip', 'attendance');
         $mform->setAdvanced('preventsharedgroup');
         $mform->setType('preventsharediptime', PARAM_INT);
@@ -239,9 +261,10 @@ class updatesession extends \moodleform {
             $errors['sestime'] = get_string('invalidsessionendtime', 'attendance');
         }
 
-        if (!empty($data['studentscanmark']) && isset($data['automark'])
-            && $data['automark'] == ATTENDANCE_AUTOMARK_CLOSE) {
-
+        if (
+            !empty($data['studentscanmark']) && isset($data['automark'])
+            && $data['automark'] == ATTENDANCE_AUTOMARK_CLOSE
+        ) {
             $cm            = $this->_customdata['cm'];
             // Check that the selected statusset has a status to use when unmarked.
             $sql = 'SELECT id
@@ -253,10 +276,11 @@ class updatesession extends \moodleform {
                 $errors['automark'] = get_string('noabsentstatusset', 'attendance');
             }
         }
-        if (!empty($data['studentscanmark']) && $data['preventsharedip'] == ATTENDANCE_SHAREDIP_MINUTES &&
-                empty($data['preventsharediptime'])) {
+        if (
+            !empty($data['studentscanmark']) && $data['preventsharedip'] == ATTENDANCE_SHAREDIP_MINUTES &&
+                empty($data['preventsharediptime'])
+        ) {
             $errors['preventsharedgroup'] = get_string('iptimemissing', 'attendance');
-
         }
         return $errors;
     }

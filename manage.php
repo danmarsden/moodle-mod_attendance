@@ -22,8 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(__FILE__).'/../../config.php');
-require_once(dirname(__FILE__).'/locallib.php');
+require_once(dirname(__FILE__) . '/../../config.php');
+require_once(dirname(__FILE__) . '/locallib.php');
 
 $pageparams = new mod_attendance_manage_page_params();
 
@@ -72,7 +72,7 @@ if ($from === 'block') {
 }
 
 $PAGE->set_url($att->url_manage());
-$PAGE->set_title($course->shortname. ": ".$att->name);
+$PAGE->set_title($course->shortname . ": " . $att->name);
 $PAGE->set_heading($course->fullname);
 $PAGE->set_cacheable(true);
 $PAGE->force_settings_menu(true);

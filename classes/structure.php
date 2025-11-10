@@ -25,7 +25,7 @@ defined('MOODLE_INTERNAL') || die();
 
 global $CFG; // This class is included inside existing functions.
 require_once(dirname(__FILE__) . '/calendar_helpers.php');
-require_once($CFG->libdir .'/filelib.php');
+require_once($CFG->libdir . '/filelib.php');
 
 /**
  * Main class with all Attendance related info.
@@ -119,8 +119,13 @@ class mod_attendance_structure {
      * @param mixed $pageparams
      * $pageparams
      */
-    public function __construct(stdClass $dbrecord, stdClass $cm, stdClass $course, stdClass|null $context=null,
-        mixed $pageparams=null) {
+    public function __construct(
+        stdClass $dbrecord,
+        stdClass $cm,
+        stdClass $course,
+        stdClass|null $context = null,
+        mixed $pageparams = null
+    ) {
         global $DB;
 
         foreach ($dbrecord as $field => $value) {
@@ -307,8 +312,14 @@ class mod_attendance_structure {
             if (empty($sess->description)) {
                 $sess->description = get_string('nodescription', 'attendance');
             } else {
-                $sess->description = file_rewrite_pluginfile_urls($sess->description,
-                    'pluginfile.php', $this->context->id, 'mod_attendance', 'session', $sess->id);
+                $sess->description = file_rewrite_pluginfile_urls(
+                    $sess->description,
+                    'pluginfile.php',
+                    $this->context->id,
+                    'mod_attendance',
+                    'session',
+                    $sess->id
+                );
             }
             $sess->maxpoints = $statussetmaxpoints[$sess->statusset];
         }
@@ -321,7 +332,7 @@ class mod_attendance_structure {
      * @param array $params
      * @return moodle_url of manage.php for attendance instance
      */
-    public function url_manage($params=[]): moodle_url {
+    public function url_manage($params = []): moodle_url {
         $params = array_merge(['id' => $this->cm->id], $params);
         return new moodle_url('/mod/attendance/manage.php', $params);
     }
@@ -331,7 +342,7 @@ class mod_attendance_structure {
      * @param array $params optional
      * @return moodle_url of tempusers.php for attendance instance
      */
-    public function url_managetemp($params=[]): moodle_url {
+    public function url_managetemp($params = []): moodle_url {
         $params = array_merge(['id' => $this->cm->id], $params);
         return new moodle_url('/mod/attendance/tempusers.php', $params);
     }
@@ -342,7 +353,7 @@ class mod_attendance_structure {
      * @param array $params optional
      * @return moodle_url of tempdelete.php for attendance instance
      */
-    public function url_tempdelete($params=[]): moodle_url {
+    public function url_tempdelete($params = []): moodle_url {
         $params = array_merge(['id' => $this->cm->id, 'action' => 'delete'], $params);
         return new moodle_url('/mod/attendance/tempedit.php', $params);
     }
@@ -353,7 +364,7 @@ class mod_attendance_structure {
      * @param array $params optional
      * @return moodle_url of tempedit.php for attendance instance
      */
-    public function url_tempedit($params=[]): moodle_url {
+    public function url_tempedit($params = []): moodle_url {
         $params = array_merge(['id' => $this->cm->id], $params);
         return new moodle_url('/mod/attendance/tempedit.php', $params);
     }
@@ -364,7 +375,7 @@ class mod_attendance_structure {
      * @param array $params optional
      * @return moodle_url of tempedit.php for attendance instance
      */
-    public function url_tempmerge($params=[]): moodle_url {
+    public function url_tempmerge($params = []): moodle_url {
         $params = array_merge(['id' => $this->cm->id], $params);
         return new moodle_url('/mod/attendance/tempmerge.php', $params);
     }
@@ -374,7 +385,7 @@ class mod_attendance_structure {
      * @param array $params
      * @return moodle_url of sessions.php for attendance instance
      */
-    public function url_sessions($params=[]): moodle_url {
+    public function url_sessions($params = []): moodle_url {
         $params = array_merge(['id' => $this->cm->id], $params);
         return new moodle_url('/mod/attendance/sessions.php', $params);
     }
@@ -384,7 +395,7 @@ class mod_attendance_structure {
      * @param array $params
      * @return moodle_url of report.php for attendance instance
      */
-    public function url_report($params=[]): moodle_url {
+    public function url_report($params = []): moodle_url {
         $params = array_merge(['id' => $this->cm->id], $params);
         return new moodle_url('/mod/attendance/report.php', $params);
     }
@@ -394,7 +405,7 @@ class mod_attendance_structure {
      * @param array $params
      * @return moodle_url of report.php for attendance instance
      */
-    public function url_absentee($params=[]): moodle_url {
+    public function url_absentee($params = []): moodle_url {
         $params = array_merge(['id' => $this->cm->id], $params);
         return new moodle_url('/mod/attendance/absentee.php', $params);
     }
@@ -424,7 +435,7 @@ class mod_attendance_structure {
      * @param array $params
      * @return moodle_url of attsettings.php for attendance instance
      */
-    public function url_preferences($params=[]): moodle_url {
+    public function url_preferences($params = []): moodle_url {
         // Add the statusset params.
         if (isset($this->pageparams->statusset) && !isset($params['statusset'])) {
             $params['statusset'] = $this->pageparams->statusset;
@@ -438,7 +449,7 @@ class mod_attendance_structure {
      * @param array $params
      * @return moodle_url of attsettings.php for attendance instance
      */
-    public function url_warnings($params=[]): moodle_url {
+    public function url_warnings($params = []): moodle_url {
         // Add the statusset params.
         if (isset($this->pageparams->statusset) && !isset($params['statusset'])) {
             $params['statusset'] = $this->pageparams->statusset;
@@ -452,7 +463,7 @@ class mod_attendance_structure {
      * @param array $params
      * @return moodle_url of attendances.php for attendance instance
      */
-    public function url_take($params=[]): moodle_url {
+    public function url_take($params = []): moodle_url {
         $params = array_merge(['id' => $this->cm->id], $params);
         return new moodle_url('/mod/attendance/take.php', $params);
     }
@@ -462,7 +473,7 @@ class mod_attendance_structure {
      * @param array $params
      * @return moodle_url
      */
-    public function url_view($params=[]): moodle_url {
+    public function url_view($params = []): moodle_url {
         $params = array_merge(['id' => $this->cm->id], $params);
         return new moodle_url('/mod/attendance/view.php', $params);
     }
@@ -511,10 +522,15 @@ class mod_attendance_structure {
             $sess->calendarevent = 0;
         }
         $sess->id = $DB->insert_record('attendance_sessions', $sess);
-        $description = file_save_draft_area_files($sess->descriptionitemid,
-            $this->context->id, 'mod_attendance', 'session', $sess->id,
+        $description = file_save_draft_area_files(
+            $sess->descriptionitemid,
+            $this->context->id,
+            'mod_attendance',
+            'session',
+            $sess->id,
             ['subdirs' => false, 'maxfiles' => -1, 'maxbytes' => 0],
-            $sess->description);
+            $sess->description
+        );
         $DB->set_field('attendance_sessions', 'description', $description, ['id' => $sess->id]);
 
         $sess->caleventid = 0;
@@ -584,7 +600,7 @@ class mod_attendance_structure {
     public function update_session_from_form_data($formdata, $sessionid) {
         global $DB;
 
-        if (!$sess = $DB->get_record('attendance_sessions', ['id' => $sessionid] )) {
+        if (!$sess = $DB->get_record('attendance_sessions', ['id' => $sessionid])) {
             throw new moodle_exception('No such session in this course');
         }
 
@@ -594,9 +610,15 @@ class mod_attendance_structure {
         $sess->sessdate = $formdata->sessiondate + $sesstarttime;
         $sess->duration = $sesendtime - $sesstarttime;
 
-        $description = file_save_draft_area_files($formdata->sdescription['itemid'],
-            $this->context->id, 'mod_attendance', 'session', $sessionid,
-            ['subdirs' => false, 'maxfiles' => -1, 'maxbytes' => 0], $formdata->sdescription['text']);
+        $description = file_save_draft_area_files(
+            $formdata->sdescription['itemid'],
+            $this->context->id,
+            'mod_attendance',
+            'session',
+            $sessionid,
+            ['subdirs' => false, 'maxfiles' => -1, 'maxbytes' => 0],
+            $formdata->sdescription['text']
+        );
         $sess->description = $description;
         $sess->descriptionformat = $formdata->sdescription['format'];
         $sess->calendarevent = empty($formdata->calendarevent) ? 0 : $formdata->calendarevent;
@@ -623,8 +645,10 @@ class mod_attendance_structure {
         }
         $studentscanmark = get_config('attendance', 'studentscanmark');
 
-        if (!empty($studentscanmark) &&
-            !empty($formdata->studentscanmark)) {
+        if (
+            !empty($studentscanmark) &&
+            !empty($formdata->studentscanmark)
+        ) {
             $sess->studentscanmark = $formdata->studentscanmark;
             $sess->allowupdatestatus = $formdata->allowupdatestatus;
             $sess->studentpassword = $formdata->studentpassword;
@@ -691,7 +715,7 @@ class mod_attendance_structure {
     public function take_from_student($mformdata): bool {
         global $DB, $USER;
 
-        $statuses = implode(',', array_keys( (array)$this->get_statuses() ));
+        $statuses = implode(',', array_keys((array)$this->get_statuses()));
         $now = time();
 
         $record = new stdClass();
@@ -704,8 +728,11 @@ class mod_attendance_structure {
         $record->takenby = $USER->id;
         $record->ipaddress = getremoteaddr(null);
 
-        $existingattendance = $DB->get_field('attendance_log', 'id',
-                            ['sessionid' => $mformdata->sessid, 'studentid' => $USER->id]);
+        $existingattendance = $DB->get_field(
+            'attendance_log',
+            'id',
+            ['sessionid' => $mformdata->sessid, 'studentid' => $USER->id]
+        );
 
         if (!empty($existingattendance)) {
             if (!attendance_check_allow_update($mformdata->sessid)) {
@@ -759,7 +786,7 @@ class mod_attendance_structure {
         global $USER;
         // WARNING - $data is unclean - comes from direct $_POST - ideally needs a rewrite but we do some cleaning below.
 
-        $statuses = implode(',', array_keys( (array)$this->get_statuses() ));
+        $statuses = implode(',', array_keys((array)$this->get_statuses()));
         $now = time();
         $sesslog = [];
 
@@ -805,10 +832,11 @@ class mod_attendance_structure {
                 if (array_key_exists($log->studentid, $dbsesslog)) {
                     // Check if anything important has changed before updating record.
                     // Don't update timetaken/takenby records if nothing has changed.
-                    if ($dbsesslog[$log->studentid]->remarks <> $log->remarks ||
+                    if (
+                        $dbsesslog[$log->studentid]->remarks <> $log->remarks ||
                         $dbsesslog[$log->studentid]->statusid <> $log->statusid ||
-                        $dbsesslog[$log->studentid]->statusset <> $log->statusset) {
-
+                        $dbsesslog[$log->studentid]->statusset <> $log->statusset
+                    ) {
                         $log->id = $dbsesslog[$log->studentid]->id;
                         $DB->update_record('attendance_log', $log);
                     }
@@ -852,7 +880,7 @@ class mod_attendance_structure {
         global $DB, $CFG;
         require_once($CFG->dirroot . '/user/profile/lib.php'); // For profile_load_data function.
 
-        $fields = ['username' , 'idnumber' , 'institution' , 'department', 'city', 'country'];
+        $fields = ['username', 'idnumber', 'institution', 'department', 'city', 'country'];
         $userf = \core_user\fields::for_identity($this->context, false)->with_userpic()->including(...$fields);
         $userfields = $userf->get_sql('u', false, '', 'id', false)->selects;
 
@@ -864,7 +892,7 @@ class mod_attendance_structure {
         } else if ($this->pageparams->sort == ATT_SORT_LASTNAME) {
             $orderby = 'u.lastname, u.firstname, u.id';
         } else {
-            list($orderby, $sortparams) = users_order_by_sql('u');
+            [$orderby, $sortparams] = users_order_by_sql('u');
         }
 
         if ($page) {
@@ -876,14 +904,29 @@ class mod_attendance_structure {
                 } else {
                     $groups = $groupid;
                 }
-                $users = get_users_by_capability($this->context, 'mod/attendance:canbelisted',
+                $users = get_users_by_capability(
+                    $this->context,
+                    'mod/attendance:canbelisted',
                     $userfields,
-                    $orderby, $startusers, $usersperpage, $groups,
-                    '', false, true);
+                    $orderby,
+                    $startusers,
+                    $usersperpage,
+                    $groups,
+                    '',
+                    false,
+                    true
+                );
             } else {
                 $startusers = ($page - 1) * $usersperpage;
-                $users = get_enrolled_users($this->context, 'mod/attendance:canbelisted', $groupid, $userfields,
-                    $orderby, $startusers, $usersperpage);
+                $users = get_enrolled_users(
+                    $this->context,
+                    'mod/attendance:canbelisted',
+                    $groupid,
+                    $userfields,
+                    $orderby,
+                    $startusers,
+                    $usersperpage
+                );
             }
         } else {
             if (!empty($this->cm->groupingid)) {
@@ -892,10 +935,18 @@ class mod_attendance_structure {
                 } else {
                     $groups = $groupid;
                 }
-                $users = get_users_by_capability($this->context, 'mod/attendance:canbelisted',
+                $users = get_users_by_capability(
+                    $this->context,
+                    'mod/attendance:canbelisted',
                     $userfields,
-                    $orderby, '', '', $groups,
-                    '', false, true);
+                    $orderby,
+                    '',
+                    '',
+                    $groups,
+                    '',
+                    false,
+                    true
+                );
             } else {
                 $users = get_enrolled_users($this->context, 'mod/attendance:canbelisted', $groupid, $userfields, $orderby);
             }
@@ -903,7 +954,7 @@ class mod_attendance_structure {
 
         // Add a flag to each user indicating whether their enrolment is active.
         if (!empty($users)) {
-            list($sql, $params) = $DB->get_in_or_equal(array_keys($users), SQL_PARAMS_NAMED, 'usid0');
+            [$sql, $params] = $DB->get_in_or_equal(array_keys($users), SQL_PARAMS_NAMED, 'usid0');
 
             // See CONTRIB-4868.
             $mintime = 'MIN(CASE WHEN (ue.timestart > :zerotime) THEN ue.timestart ELSE ue.timecreated END)';
@@ -1076,8 +1127,10 @@ class mod_attendance_structure {
             foreach ($statuses as $status) {
                 if ($status->studentavailability === '0') {
                     unset($statuses[$status->id]);
-                } else if (!empty($status->studentavailability
-                    && time() > $session->sessdate + ($status->studentavailability * 60))) {
+                } else if (
+                    !empty($status->studentavailability
+                    && time() > $session->sessdate + ($status->studentavailability * 60))
+                ) {
                     unset($statuses[$status->id]);
                     $disabledduetotime = true;
                 }
@@ -1100,8 +1153,14 @@ class mod_attendance_structure {
         if (empty($this->sessioninfo[$sessionid]->description)) {
             $this->sessioninfo[$sessionid]->description = get_string('nodescription', 'attendance');
         } else {
-            $this->sessioninfo[$sessionid]->description = file_rewrite_pluginfile_urls($this->sessioninfo[$sessionid]->description,
-                'pluginfile.php', $this->context->id, 'mod_attendance', 'session', $this->sessioninfo[$sessionid]->id);
+            $this->sessioninfo[$sessionid]->description = file_rewrite_pluginfile_urls(
+                $this->sessioninfo[$sessionid]->description,
+                'pluginfile.php',
+                $this->context->id,
+                'mod_attendance',
+                'session',
+                $this->sessioninfo[$sessionid]->id
+            );
         }
         return $this->sessioninfo[$sessionid];
     }
@@ -1115,15 +1174,21 @@ class mod_attendance_structure {
     public function get_sessions_info($sessionids): array {
         global $DB;
 
-        list($sql, $params) = $DB->get_in_or_equal($sessionids);
+        [$sql, $params] = $DB->get_in_or_equal($sessionids);
         $sessions = $DB->get_records_select('attendance_sessions', "id $sql", $params, 'sessdate asc');
 
         foreach ($sessions as $sess) {
             if (empty($sess->description)) {
                 $sess->description = get_string('nodescription', 'attendance');
             } else {
-                $sess->description = file_rewrite_pluginfile_urls($sess->description,
-                    'pluginfile.php', $this->context->id, 'mod_attendance', 'session', $sess->id);
+                $sess->description = file_rewrite_pluginfile_urls(
+                    $sess->description,
+                    'pluginfile.php',
+                    $this->context->id,
+                    'mod_attendance',
+                    'session',
+                    $sess->id
+                );
             }
         }
 
@@ -1179,7 +1244,6 @@ class mod_attendance_structure {
                 'csdate'    => $this->course->startdate,
                 'sdate'     => $this->pageparams->startdate,
                 'edate'     => $this->pageparams->enddate, ];
-
         } else {
             $sql = "SELECT ats.id, ats.sessdate, ats.groupid, al.statusid, al.remarks,
                            ats.preventsharediptime, ats.preventsharedip
@@ -1258,7 +1322,7 @@ class mod_attendance_structure {
 
         $groups = array_keys(groups_get_all_groups($this->course->id, $userid));
         $groups[] = 0;
-        list($gsql, $gparams) = $DB->get_in_or_equal($groups, SQL_PARAMS_NAMED, 'gid0');
+        [$gsql, $gparams] = $DB->get_in_or_equal($groups, SQL_PARAMS_NAMED, 'gid0');
 
         if ($this->pageparams->startdate && $this->pageparams->enddate) {
             $where = "ats.attendanceid = :aid AND ats.sessdate >= :csdate AND
@@ -1283,8 +1347,14 @@ class mod_attendance_structure {
             if (empty($sess->description)) {
                 $sess->description = get_string('nodescription', 'attendance');
             } else {
-                $sess->description = file_rewrite_pluginfile_urls($sess->description,
-                    'pluginfile.php', $this->context->id, 'mod_attendance', 'session', $sess->id);
+                $sess->description = file_rewrite_pluginfile_urls(
+                    $sess->description,
+                    'pluginfile.php',
+                    $this->context->id,
+                    'mod_attendance',
+                    'session',
+                    $sess->id
+                );
             }
         }
 
@@ -1301,7 +1371,7 @@ class mod_attendance_structure {
             attendance_delete_calendar_events($sessionsids);
         }
 
-        list($sql, $params) = $DB->get_in_or_equal($sessionsids);
+        [$sql, $params] = $DB->get_in_or_equal($sessionsids);
         $DB->delete_records_select('attendance_log', "sessionid $sql", $params);
         $DB->delete_records_list('attendance_sessions', 'id', $sessionsids);
         $event = \mod_attendance\event\session_deleted::create([
@@ -1397,8 +1467,10 @@ class mod_attendance_structure {
                     // This status not available to students.
                     continue;
                 }
-                if (empty($status->studentavailability) && ($session->sessdate + $duration >= $time) &&
-                    !empty(get_config('attendance', 'automark_useempty'))) {
+                if (
+                    empty($status->studentavailability) && ($session->sessdate + $duration >= $time) &&
+                    !empty(get_config('attendance', 'automark_useempty'))
+                ) {
                     // This is set to null - always available to students until end of session..
                     return $status->id;
                 }

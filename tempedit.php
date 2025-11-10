@@ -22,9 +22,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(__FILE__).'/../../config.php');
-require_once($CFG->libdir.'/formslib.php');
-require_once($CFG->dirroot.'/mod/attendance/locallib.php');
+require_once(dirname(__FILE__) . '/../../config.php');
+require_once($CFG->libdir . '/formslib.php');
+require_once($CFG->dirroot . '/mod/attendance/locallib.php');
 
 $id = required_param('id', PARAM_INT);
 $userid = required_param('userid', PARAM_INT);
@@ -47,7 +47,7 @@ require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
 require_capability('mod/attendance:managetemporaryusers', $context);
 
-$PAGE->set_title($course->shortname.": ".$att->name.' - '.get_string('tempusersedit', 'attendance'));
+$PAGE->set_title($course->shortname . ": " . $att->name . ' - ' . get_string('tempusersedit', 'attendance'));
 $PAGE->set_heading($course->fullname);
 $PAGE->set_cacheable(true);
 $PAGE->navbar->add(get_string('tempusersedit', 'attendance'));
@@ -66,7 +66,6 @@ if ($action == 'delete') {
 
         redirect($att->url_managetemp());
     } else {
-
         $info = (object)[
             'fullname' => $tempuser->fullname,
             'email' => $tempuser->email,
@@ -104,7 +103,6 @@ if ($mform->is_cancelled()) {
 }
 
 echo $output->header();
-echo $output->heading(get_string('tempusersedit', 'attendance').' : '.format_string($course->fullname));
+echo $output->heading(get_string('tempusersedit', 'attendance') . ' : ' . format_string($course->fullname));
 $mform->display();
 echo $output->footer($course);
-

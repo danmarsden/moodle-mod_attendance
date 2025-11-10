@@ -31,7 +31,6 @@ namespace mod_attendance\output;
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mobile {
-
     /**
      * Subnet warning. - constants used to prevent warnings from showing multiple times.
      */
@@ -51,7 +50,7 @@ class mobile {
     public static function mobile_view_activity($args) {
         global $OUTPUT, $DB, $USER, $USER, $CFG;
 
-        require_once($CFG->dirroot.'/mod/attendance/locallib.php');
+        require_once($CFG->dirroot . '/mod/attendance/locallib.php');
 
         $cmid = $args['cmid'];
         $courseid = $args['courseid'];
@@ -62,7 +61,7 @@ class mobile {
         // Capabilities check.
         $cm = get_coursemodule_from_id('attendance', $cmid);
 
-        require_login($courseid, false , $cm, true, true);
+        require_login($courseid, false, $cm, true, true);
 
         $context = \context_module::instance($cm->id);
         require_capability('mod/attendance:view', $context);
@@ -117,8 +116,8 @@ class mobile {
                 foreach ($userkeys as $uk) {
                     $userid = str_replace('status', '', $uk);
                     $status = $args[$uk];
-                    $formdata->{'remarks'.$userid} = '';
-                    $formdata->{'user'.$userid} = $status;
+                    $formdata->{'remarks' . $userid} = '';
+                    $formdata->{'user' . $userid} = $status;
                 }
                 $att->take_from_form_data($formdata);
                 $data['showmessage'] = true;
@@ -132,14 +131,16 @@ class mobile {
 
         $data['sessions'] = [];
 
-        $sessions = $DB->get_records_select('attendance_sessions',
+        $sessions = $DB->get_records_select(
+            'attendance_sessions',
             'attendanceid = ? AND sessdate > ? AND sessdate < ? ORDER BY sessdate',
-            [$attendance->id, $timefrom, $timeto]);
+            [$attendance->id, $timefrom, $timeto]
+        );
 
         if (!empty($sessions)) {
             $userdata = new user_data($att, $USER->id, true);
             foreach ($sessions as $sess) {
-                if (!$isteacher && empty($userdata->sessionslog['c'.$sess->id])) {
+                if (!$isteacher && empty($userdata->sessionslog['c' . $sess->id])) {
                     // This session isn't viewable to this student - probably a group session.
                     continue;
                 }
@@ -151,7 +152,7 @@ class mobile {
                         continue;
                     }
                 }
-                list($canmark, $reason) = attendance_can_student_mark($sess);
+                [$canmark, $reason] = attendance_can_student_mark($sess);
                 if (!$isteacher && $reason == 'preventsharederror') {
                     $data['showmessage'] = true;
                     // Lang string to show as a message.
@@ -168,8 +169,8 @@ class mobile {
                     }
 
                     // Check if Status already recorded.
-                    if (!$isteacher && !empty($userdata->sessionslog['c'.$sess->id]->statusid)) {
-                        $html['currentstatus'] = $userdata->statuses[$userdata->sessionslog['c'.$sess->id]->statusid]->description;
+                    if (!$isteacher && !empty($userdata->sessionslog['c' . $sess->id]->statusid)) {
+                        $html['currentstatus'] = $userdata->statuses[$userdata->sessionslog['c' . $sess->id]->statusid]->description;
                     } else {
                         // Status has not been recorded - If student, check auto-assign and form data.
                         $html['sessid'] = $sess->id;
@@ -208,8 +209,10 @@ class mobile {
                                             unset($statuses[$status->id]);
                                             continue;
                                         }
-                                        if (!empty($status->studentavailability) &&
-                                            time() > $sess->sessdate + ($status->studentavailability * 60)) {
+                                        if (
+                                            !empty($status->studentavailability) &&
+                                            time() > $sess->sessdate + ($status->studentavailability * 60)
+                                        ) {
                                             unset($statuses[$status->id]);
                                             continue;
                                         }
@@ -244,8 +247,12 @@ class mobile {
             }
         }
 
-        $summary = new \mod_attendance_summary($att->id, [$USER->id], $att->pageparams->startdate,
-            $att->pageparams->enddate);
+        $summary = new \mod_attendance_summary(
+            $att->id,
+            [$USER->id],
+            $att->pageparams->startdate,
+            $att->pageparams->enddate
+        );
         $data['summary'] = $summary->get_all_sessions_summary_for($USER->id);
 
         return [
@@ -269,7 +276,7 @@ class mobile {
     public static function mobile_user_form($args) {
         global $OUTPUT, $DB, $CFG;
 
-        require_once($CFG->dirroot.'/mod/attendance/locallib.php');
+        require_once($CFG->dirroot . '/mod/attendance/locallib.php');
 
         $args = (object) $args;
         $versionname = $args->appversioncode >= 44000 ? 'latest' : 'ionic5';
@@ -280,7 +287,7 @@ class mobile {
         // Capabilities check.
         $cm = get_coursemodule_from_id('attendance', $cmid);
 
-        require_login($courseid, false , $cm, true, true);
+        require_login($courseid, false, $cm, true, true);
 
         $context = \context_module::instance($cm->id);
         require_capability('mod/attendance:view', $context);
@@ -305,7 +312,7 @@ class mobile {
         $data['statuses'] = [];
         $data['disabledduetotime'] = false;
 
-        list($canmark, $reason) = attendance_can_student_mark($attforsession, false);
+        [$canmark, $reason] = attendance_can_student_mark($attforsession, false);
         // Check if subnet is set and if the user is in the allowed range.
         if (!$canmark) {
             $data['messages'][]['string'] = $reason; // Lang string to show as a message.
@@ -326,8 +333,10 @@ class mobile {
                     unset($statuses[$status->id]);
                     continue;
                 }
-                if (!empty($status->studentavailability) &&
-                    time() > $attforsession->sessdate + ($status->studentavailability * 60)) {
+                if (
+                    !empty($status->studentavailability) &&
+                    time() > $attforsession->sessdate + ($status->studentavailability * 60)
+                ) {
                     unset($statuses[$status->id]);
                     $data['disabledduetotime'] = true;
                     continue;
@@ -371,7 +380,7 @@ class mobile {
     public static function mobile_teacher_form($args) {
         global $OUTPUT, $DB, $CFG, $PAGE;
 
-        require_once($CFG->dirroot.'/mod/attendance/locallib.php');
+        require_once($CFG->dirroot . '/mod/attendance/locallib.php');
 
         $args = (object) $args;
         $versionname = $args->appversioncode >= 44000 ? 'latest' : 'ionic5';
@@ -382,7 +391,7 @@ class mobile {
         // Capabilities check.
         $cm = get_coursemodule_from_id('attendance', $cmid);
 
-        require_login($courseid, false , $cm, true, true);
+        require_login($courseid, false, $cm, true, true);
 
         $context = \context_module::instance($cm->id);
         require_capability('mod/attendance:takeattendances', $context);
@@ -406,11 +415,15 @@ class mobile {
 
         $statuses = $att->get_statuses();
         $otherdata = [];
-        $existinglog = $DB->get_records('attendance_log',
-            ['sessionid' => $sessid], '', 'studentid,statusid');
+        $existinglog = $DB->get_records(
+            'attendance_log',
+            ['sessionid' => $sessid],
+            '',
+            'studentid,statusid'
+        );
         foreach ($existinglog as $log) {
             if (!empty($log->statusid)) {
-                $otherdata['status'.$log->studentid] = $log->statusid;
+                $otherdata['status' . $log->studentid] = $log->statusid;
             }
         }
 
@@ -428,9 +441,9 @@ class mobile {
             $profileimageurl = $userpicture->get_url($PAGE)->out(false);
             $data['users'][] = ['userid' => $user->id, 'fullname' => $user->fullname, 'profileimageurl' => $profileimageurl];
             // Generate args to use in submission button here.
-            $data['btnargs'] .= ', status'. $user->id. ': CONTENT_OTHERDATA.status'. $user->id;
+            $data['btnargs'] .= ', status' . $user->id . ': CONTENT_OTHERDATA.status' . $user->id;
             // Really Hacky way to do a select-all. This really needs to be moved into a JS function within the app.
-            $data['selectall'] .= "CONTENT_OTHERDATA.status".$user->id."=CONTENT_OTHERDATA.statusall;";
+            $data['selectall'] .= "CONTENT_OTHERDATA.status" . $user->id . "=CONTENT_OTHERDATA.statusall;";
         }
         if (!empty($data['messages'])) {
             $data['showmessage'] = true;
@@ -448,5 +461,4 @@ class mobile {
             'otherdata' => $otherdata,
         ];
     }
-
 }

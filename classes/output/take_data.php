@@ -108,7 +108,7 @@ class take_data implements renderable {
      * @param array $excludeparams
      * @return moodle_url
      */
-    public function url($params=[], $excludeparams=[]) {
+    public function url($params = [], $excludeparams = []) {
         $params = array_merge($this->urlparams, $params);
 
         foreach ($excludeparams as $paramkey) {
@@ -123,7 +123,7 @@ class take_data implements renderable {
      * @param array $params
      * @return mixed
      */
-    public function url_view($params=[]) {
+    public function url_view($params = []) {
         return url_helpers::url_view($this->att, $params);
     }
 

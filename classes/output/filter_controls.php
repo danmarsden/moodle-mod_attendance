@@ -89,8 +89,8 @@ class filter_controls implements renderable {
                 $format = get_string('strftimedm', 'attendance');
                 $this->prevcur = $att->pageparams->startdate - WEEKSECS;
                 $this->nextcur = $att->pageparams->startdate + WEEKSECS;
-                $this->curdatetxt = userdate($att->pageparams->startdate, $format).
-                                    " - ".userdate($att->pageparams->enddate, $format);
+                $this->curdatetxt = userdate($att->pageparams->startdate, $format) .
+                                    " - " . userdate($att->pageparams->enddate, $format);
                 break;
             case ATT_VIEW_MONTHS:
                 $format = '%B';
@@ -114,7 +114,7 @@ class filter_controls implements renderable {
      * @param array $params
      * @return moodle_url
      */
-    public function url($params=[]) {
+    public function url($params = []) {
         $params = array_merge($this->urlparams, $params);
 
         return new moodle_url($this->urlpath, $params);
@@ -133,7 +133,7 @@ class filter_controls implements renderable {
      * @param array $params
      * @return array
      */
-    public function url_params($params=[]) {
+    public function url_params($params = []) {
         $params = array_merge($this->urlparams, $params);
 
         return $params;

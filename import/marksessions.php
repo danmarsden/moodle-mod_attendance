@@ -42,8 +42,12 @@ $course                 = $DB->get_record('course', ['id' => $cm->course], '*', 
 $att                    = $DB->get_record('attendance', ['id' => $cm->instance], '*', MUST_EXIST);
 
 // Check this is a valid session for this attendance.
-$session                = $DB->get_record('attendance_sessions', ['id' => $pageparams->sessionid, 'attendanceid' => $att->id],
-                                  '*', MUST_EXIST);
+$session                = $DB->get_record(
+    'attendance_sessions',
+    ['id' => $pageparams->sessionid, 'attendanceid' => $att->id],
+    '*',
+    MUST_EXIST
+);
 
 require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
@@ -54,7 +58,7 @@ $pageparams->init($course->id);
 $PAGE->set_context($context);
 $url = new moodle_url('/mod/attendance/import/marksessions.php', ['id' => $id, 'sessionid' => $pageparams->sessionid]);
 $PAGE->set_url($url);
-$PAGE->set_title($course->shortname. ": ".$att->name);
+$PAGE->set_title($course->shortname . ": " . $att->name);
 $PAGE->set_heading($course->fullname);
 $PAGE->set_cacheable(true);
 $PAGE->navbar->add($att->name);
@@ -79,10 +83,13 @@ if (optional_param('needsconfirm', 0, PARAM_BOOL)) {
 }
 
 if ($form->is_cancelled()) {
-    redirect(new moodle_url('/mod/attendance/take.php',
-             ['id' => $cm->id,
+    redirect(new moodle_url(
+        '/mod/attendance/take.php',
+        ['id' => $cm->id,
              'sessionid' => $pageparams->sessionid,
-             'grouptype' => $pageparams->grouptype, ]));
+        'grouptype' => $pageparams->grouptype,
+        ]
+    ));
     return;
 } else if ($data = $form->get_data()) {
     if ($data->confirm) {

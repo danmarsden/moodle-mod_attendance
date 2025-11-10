@@ -56,7 +56,7 @@ class url_helpers {
      * @param null $action
      * @return mixed
      */
-    public static function url_sessions($att, $sessionid=null, $action=null) {
+    public static function url_sessions($att, $sessionid = null, $action = null) {
         if (isset($sessionid) && isset($action)) {
             $params = ['sessionid' => $sessionid, 'action' => $action];
         } else {
@@ -72,7 +72,7 @@ class url_helpers {
      * @param array $params
      * @return mixed
      */
-    public static function url_view($att, $params=[]) {
+    public static function url_view($att, $params = []) {
         return $att->url_view($params);
     }
 }

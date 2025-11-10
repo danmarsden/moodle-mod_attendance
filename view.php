@@ -23,8 +23,8 @@
  */
 
 
-require_once(dirname(__FILE__).'/../../config.php');
-require_once(dirname(__FILE__).'/locallib.php');
+require_once(dirname(__FILE__) . '/../../config.php');
+require_once(dirname(__FILE__) . '/locallib.php');
 
 $pageparams = new mod_attendance_view_page_params();
 
@@ -77,9 +77,10 @@ if (isset($pageparams->studentid) && $USER->id != $pageparams->studentid) {
 
 $buttons = '';
 $capabilities = ['mod/attendance:takeattendances', 'mod/attendance:changeattendances'];
-if (has_any_capability($capabilities, $context) &&
-    $pageparams->mode == mod_attendance_view_page_params::MODE_ALL_SESSIONS) {
-
+if (
+    has_any_capability($capabilities, $context) &&
+    $pageparams->mode == mod_attendance_view_page_params::MODE_ALL_SESSIONS
+) {
     if (!isset($USER->attendanceediting)) {
         $USER->attendanceediting = false;
     }
@@ -142,7 +143,7 @@ if (($formdata = data_submitted()) && !empty($formdata->sesskey) && confirm_sess
     $event->trigger();
 }
 
-$PAGE->set_title($course->shortname. ": ".$att->name);
+$PAGE->set_title($course->shortname . ": " . $att->name);
 $PAGE->set_heading($course->fullname);
 $PAGE->set_cacheable(true);
 $PAGE->navbar->add(get_string('attendancereport', 'attendance'));

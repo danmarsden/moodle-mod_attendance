@@ -25,7 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/gradelib.php');
-require_once(dirname(__FILE__).'/renderhelpers.php');
+require_once(dirname(__FILE__) . '/renderhelpers.php');
 
 define('ATT_VIEW_DAYS', 1);
 define('ATT_VIEW_WEEKS', 2);
@@ -60,7 +60,7 @@ define('ATTENDANCE_MAXWARNAFTER', 100);
  * @param int $statusset
  * @return array
  */
-function attendance_get_statuses($attid, $onlyvisible=true, $statusset = -1) {
+function attendance_get_statuses($attid, $onlyvisible = true, $statusset = -1) {
     global $DB;
 
     // Set selector.
@@ -72,11 +72,19 @@ function attendance_get_statuses($attid, $onlyvisible=true, $statusset = -1) {
     }
 
     if ($onlyvisible) {
-        $statuses = $DB->get_records_select('attendance_statuses', "attendanceid = :aid AND visible = 1 AND deleted = 0 $setsql",
-                                            $params, 'setnumber ASC, grade DESC');
+        $statuses = $DB->get_records_select(
+            'attendance_statuses',
+            "attendanceid = :aid AND visible = 1 AND deleted = 0 $setsql",
+            $params,
+            'setnumber ASC, grade DESC'
+        );
     } else {
-        $statuses = $DB->get_records_select('attendance_statuses', "attendanceid = :aid AND deleted = 0 $setsql",
-                                            $params, 'setnumber ASC, grade DESC');
+        $statuses = $DB->get_records_select(
+            'attendance_statuses',
+            "attendanceid = :aid AND deleted = 0 $setsql",
+            $params,
+            'setnumber ASC, grade DESC'
+        );
     }
 
     return $statuses;
@@ -104,7 +112,7 @@ function attendance_get_setname($attid, $statusset, $includevalues = true) {
                 $statusesout[] = '...';
             }
             $statusesout = implode(' ', $statusesout);
-            $statusname .= ' ('.$statusesout.')';
+            $statusname .= ' (' . $statusesout . ')';
         }
     }
 
@@ -122,7 +130,7 @@ function attendance_get_user_sessions_log_full($userid, $pageparams) {
     // All taken sessions (including previous groups).
 
     $usercourses = enrol_get_users_courses($userid);
-    list($usql, $uparams) = $DB->get_in_or_equal(array_keys($usercourses), SQL_PARAMS_NAMED, 'cid0');
+    [$usql, $uparams] = $DB->get_in_or_equal(array_keys($usercourses), SQL_PARAMS_NAMED, 'cid0');
 
     $coursesql = "(1 = 1)";
     $courseparams = [];
@@ -190,8 +198,14 @@ function attendance_get_user_sessions_log_full($userid, $pageparams) {
             $modinfo = get_fast_modinfo($sess->courseid);
             $cmid = $modinfo->instances['attendance'][$sess->attendanceid]->get_course_module_record()->id;
             $ctx = context_module::instance($cmid);
-            $sess->description = format_text(file_rewrite_pluginfile_urls($sess->description,
-            'pluginfile.php', $ctx->id, 'mod_attendance', 'session', $sess->id));
+            $sess->description = format_text(file_rewrite_pluginfile_urls(
+                $sess->description,
+                'pluginfile.php',
+                $ctx->id,
+                'mod_attendance',
+                'session',
+                $sess->id
+            ));
         }
     }
 
@@ -209,7 +223,7 @@ function attendance_get_user_courses_attendances($userid) {
 
     $usercourses = enrol_get_users_courses($userid);
 
-    list($usql, $uparams) = $DB->get_in_or_equal(array_keys($usercourses), SQL_PARAMS_NAMED, 'cid0');
+    [$usql, $uparams] = $DB->get_in_or_equal(array_keys($usercourses), SQL_PARAMS_NAMED, 'cid0');
 
     $sql = "SELECT att.id as attid, att.course as courseid, course.fullname as coursefullname,
                    course.startdate as coursestartdate, att.name as attname, att.grade as attgrade
@@ -254,7 +268,7 @@ function attendance_has_logs_for_status($statusid) {
  *
  * @param MoodleQuickForm $mform
  */
-function attendance_form_sessiondate_selector (MoodleQuickForm $mform) {
+function attendance_form_sessiondate_selector(MoodleQuickForm $mform) {
 
     $mform->addElement('date_selector', 'sessiondate', get_string('sessiondate', 'attendance'));
 
@@ -293,8 +307,10 @@ function attendance_form_sessiondate_selector (MoodleQuickForm $mform) {
 function attendance_get_max_statusset($attendanceid) {
     global $DB;
 
-    $max = $DB->get_field_sql('SELECT MAX(setnumber) FROM {attendance_statuses} WHERE attendanceid = ? AND deleted = 0',
-        [$attendanceid]);
+    $max = $DB->get_field_sql(
+        'SELECT MAX(setnumber) FROM {attendance_statuses} WHERE attendanceid = ? AND deleted = 0',
+        [$attendanceid]
+    );
     if ($max) {
         return $max;
     }
@@ -323,14 +339,14 @@ function attendance_get_statusset_maxpoints($statuses) {
  * @param mod_attendance_structure|stdClass $attendance
  * @param array $userids
  */
-function attendance_update_users_grade($attendance, $userids=[]) {
+function attendance_update_users_grade($attendance, $userids = []) {
     global $DB;
 
     if (empty($attendance->grade)) {
         return false;
     }
 
-    list($course, $cm) = get_course_and_cm_from_instance($attendance->id, 'attendance');
+    [$course, $cm] = get_course_and_cm_from_instance($attendance->id, 'attendance');
 
     $summary = new mod_attendance_summary($attendance->id, $userids);
 
@@ -378,7 +394,7 @@ function attendance_update_users_grades_by_id($attendanceid, $grade, $userids) {
         return false;
     }
 
-    list($course, $cm) = get_course_and_cm_from_instance($attendanceid, 'attendance');
+    [$course, $cm] = get_course_and_cm_from_instance($attendanceid, 'attendance');
 
     $summary = new mod_attendance_summary($attendanceid, $userids);
 
@@ -492,9 +508,18 @@ function attendance_remove_status($status, $context = null, $cm = null) {
  * @param bool $setunmarked
  * @return array
  */
-function attendance_update_status($status, $acronym, $description, $grade, $visible,
-                                  $context = null, $cm = null, $studentavailability = null,
-                                  $availablebeforesession = false, $setunmarked = false) {
+function attendance_update_status(
+    $status,
+    $acronym,
+    $description,
+    $grade,
+    $visible,
+    $context = null,
+    $cm = null,
+    $studentavailability = null,
+    $availablebeforesession = false,
+    $setunmarked = false
+) {
     global $DB;
 
     if (empty($context)) {
@@ -563,7 +588,7 @@ function attendance_update_status($status, $acronym, $description, $grade, $visi
  * @param int $length The length of the string to be created.
  * @return string
  */
-function attendance_random_string($length=6) {
+function attendance_random_string($length = 6) {
     $randombytes = random_bytes($length);
     $pool = 'abcdefghijklmnopqrstuvwxyz';
     $pool .= '0123456789';
@@ -635,8 +660,10 @@ function attendance_can_student_mark($sess, $log = true) {
     $attconfig = get_config('attendance');
 
     if (!empty($attconfig->studentscanmark) && !empty($sess->studentscanmark)) {
-        if (empty($attconfig->studentscanmarksessiontime) ||
-            (attendance_is_status_availablebeforesession($sess->id)) && time() < $sess->sessdate) {
+        if (
+            empty($attconfig->studentscanmarksessiontime) ||
+            (attendance_is_status_availablebeforesession($sess->id)) && time() < $sess->sessdate
+        ) {
             $canmark = true;
             $reason = '';
         } else {
@@ -763,12 +790,12 @@ function attendance_exporttocsv($data, $filename) {
     header("Cache-Control: must-revalidate,post-check=0,pre-check=0");
     header("Pragma: public");
 
-    echo get_string('course')."\t".$data->course."\n";
-    echo get_string('group')."\t".$data->group."\n\n";
+    echo get_string('course') . "\t" . $data->course . "\n";
+    echo get_string('group') . "\t" . $data->group . "\n\n";
 
-    echo implode("\t", $data->tabhead)."\n";
+    echo implode("\t", $data->tabhead) . "\n";
     foreach ($data->table as $row) {
-        echo implode("\t", $row)."\n";
+        echo implode("\t", $row) . "\n";
     }
 }
 
@@ -832,8 +859,13 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
                 $dinfo = usergetdate($sdate);
                 if (isset($formdata->sdays) && array_key_exists($wdaydesc[$dinfo['wday']], $formdata->sdays)) {
                     $sess = new stdClass();
-                    $sess->sessdate = make_timestamp($dinfo['year'], $dinfo['mon'], $dinfo['mday'],
-                        $formdata->sestime['starthour'], $formdata->sestime['startminute']);
+                    $sess->sessdate = make_timestamp(
+                        $dinfo['year'],
+                        $dinfo['mon'],
+                        $dinfo['mday'],
+                        $formdata->sestime['starthour'],
+                        $formdata->sestime['startminute']
+                    );
                     $sess->duration = $duration;
                     $sess->descriptionitemid = $formdata->sdescription['itemid'];
                     $sess->description = $formdata->sdescription['text'];
@@ -908,7 +940,7 @@ function attendance_construct_sessions_data_for_add($formdata, mod_attendance_st
 
                 $sdate = strtotime("+1 day", $sdate); // Set start to tomorrow.
             } else {
-                $startweek = strtotime("+".$formdata->period.' weeks', $startweek);
+                $startweek = strtotime("+" . $formdata->period . ' weeks', $startweek);
                 $sdate = $startweek;
             }
         }
@@ -1047,7 +1079,7 @@ function attendance_course_users_points($courseids = [], $orderby = '') {
     $where .= ' AND (ats.groupid = 0 or gm.id is NOT NULL)';
 
     if (!empty($courseids)) {
-        list($insql, $inparams) = $DB->get_in_or_equal($courseids, SQL_PARAMS_NAMED);
+        [$insql, $inparams] = $DB->get_in_or_equal($courseids, SQL_PARAMS_NAMED);
         $where .= ' AND c.id ' . $insql;
         $params = array_merge($params, $inparams);
     }
@@ -1094,7 +1126,7 @@ function attendance_get_users_to_notify($courseids = [], $orderby = '', $allforn
     $params = [];
 
     if (!empty($courseids)) {
-        list($insql, $inparams) = $DB->get_in_or_equal($courseids, SQL_PARAMS_NAMED);
+        [$insql, $inparams] = $DB->get_in_or_equal($courseids, SQL_PARAMS_NAMED);
         $where .= ' AND c.id ' . $insql;
         $params = array_merge($params, $inparams);
     }
@@ -1103,8 +1135,8 @@ function attendance_get_users_to_notify($courseids = [], $orderby = '', $allforn
         $having .= ' AND n.maxwarn > COUNT(DISTINCT ns.id) ';
     }
     $userfieldsapi = \core_user\fields::for_name();
-    $unames = $userfieldsapi->get_sql('', false, '', '', false)->selects.',';
-    $unames2 = $userfieldsapi->get_sql('u', false, '', '', false)->selects.',';
+    $unames = $userfieldsapi->get_sql('', false, '', '', false)->selects . ',';
+    $unames2 = $userfieldsapi->get_sql('u', false, '', '', false)->selects . ',';
 
     if (!empty($CFG->showuseridentity)) {
         $extrafields = explode(',', $CFG->showuseridentity);
@@ -1163,7 +1195,6 @@ function attendance_get_users_to_notify($courseids = [], $orderby = '', $allforn
     }
 
     return $DB->get_records_sql($sql, $params);
-
 }
 
 /**
@@ -1189,7 +1220,7 @@ function attendance_template_variables($record) {
     ];
     $extrauserfields = \core_user\fields::get_name_fields();
     foreach ($extrauserfields as $extra) {
-        $templatevars['/%'.$extra.'%/'] = $record->$extra;
+        $templatevars['/%' . $extra . '%/'] = $record->$extra;
     }
     $patterns = array_keys($templatevars); // The placeholders which are to be replaced.
     $replacements = array_values($templatevars); // The values which are to be templated in for the placeholders.
@@ -1281,7 +1312,7 @@ function attendance_get_coursemodulenames($id) {
             if (empty($cm->completion)) {
                 continue;
             }
-            $automarkcmoptions[$cm->id] = shorten_text($cm->get_formatted_name()). ' ';
+            $automarkcmoptions[$cm->id] = shorten_text($cm->get_formatted_name()) . ' ';
         }
     }
     return $automarkcmoptions;
@@ -1373,7 +1404,7 @@ function attendance_construct_session_time($datetime, $duration) {
  */
 function construct_session_full_date_time($datetime, $duration) {
     $sessinfo = userdate($datetime, get_string('strftimedmyw', 'attendance'));
-    $sessinfo .= ' '.attendance_construct_session_time($datetime, $duration);
+    $sessinfo .= ' ' . attendance_construct_session_time($datetime, $duration);
 
     return $sessinfo;
 }
@@ -1423,28 +1454,32 @@ function attendance_generate_passwords($session) {
  */
 function attendance_renderqrcoderotate($session) {
     // Load required js.
-    echo html_writer::tag('script', '',
+    echo html_writer::tag(
+        'script',
+        '',
         [
             'src' => 'js/qrcode/qrcode.min.js',
             'type' => 'text/javascript',
         ]
     );
-    echo html_writer::tag('script', '',
+    echo html_writer::tag(
+        'script',
+        '',
         [
             'src' => 'js/password/attendance_QRCodeRotate.js',
             'type' => 'text/javascript',
         ]
     );
     echo html_writer::div('', '', ['id' => 'qrcode']); // Div to display qr code.
-    echo html_writer::div(get_string('qrcodevalidbefore', 'attendance').' '.
-                          html_writer::span('0', '', ['id' => 'rotate-time']).' '
-                          .get_string('qrcodevalidafter', 'attendance'), 'qrcodevalid'); // Div to display timer.
+    echo html_writer::div(get_string('qrcodevalidbefore', 'attendance') . ' ' .
+                          html_writer::span('0', '', ['id' => 'rotate-time']) . ' '
+                          . get_string('qrcodevalidafter', 'attendance'), 'qrcodevalid'); // Div to display timer.
     // Js to start the password manager.
     echo '
     <script type="text/javascript">
         let qrCodeRotate = new attendance_QRCodeRotate();
-        qrCodeRotate.start(' . $session->id . ', document.getElementById("qrcode"), document.getElementById("rotate-time"), '.
-        time() .');
+        qrCodeRotate.start(' . $session->id . ', document.getElementById("qrcode"), document.getElementById("rotate-time"), ' .
+        time() . ');
     </script>';
 }
 

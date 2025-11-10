@@ -36,7 +36,6 @@ use DatePeriod;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class addsession extends moodleform {
-
     /**
      * Called to define this moodle form
      *
@@ -58,25 +57,43 @@ class addsession extends moodleform {
         $groupmode = groups_get_activity_groupmode($cm);
         switch ($groupmode) {
             case NOGROUPS:
-                $mform->addElement('static', 'sessiontypedescription', get_string('sessiontype', 'attendance'),
-                                  get_string('commonsession', 'attendance'));
+                $mform->addElement(
+                    'static',
+                    'sessiontypedescription',
+                    get_string('sessiontype', 'attendance'),
+                    get_string('commonsession', 'attendance')
+                );
                 $mform->addHelpButton('sessiontypedescription', 'sessiontype', 'attendance');
                 $mform->addElement('hidden', 'sessiontype', mod_attendance_structure::SESSION_COMMON);
                 $mform->setType('sessiontype', PARAM_INT);
                 break;
             case SEPARATEGROUPS:
-                $mform->addElement('static', 'sessiontypedescription', get_string('sessiontype', 'attendance'),
-                                  get_string('groupsession', 'attendance'));
+                $mform->addElement(
+                    'static',
+                    'sessiontypedescription',
+                    get_string('sessiontype', 'attendance'),
+                    get_string('groupsession', 'attendance')
+                );
                 $mform->addHelpButton('sessiontypedescription', 'sessiontype', 'attendance');
                 $mform->addElement('hidden', 'sessiontype', mod_attendance_structure::SESSION_GROUP);
                 $mform->setType('sessiontype', PARAM_INT);
                 break;
             case VISIBLEGROUPS:
                 $radio = [];
-                $radio[] = &$mform->createElement('radio', 'sessiontype', '', get_string('commonsession', 'attendance'),
-                                                  mod_attendance_structure::SESSION_COMMON);
-                $radio[] = &$mform->createElement('radio', 'sessiontype', '', get_string('groupsession', 'attendance'),
-                                                  mod_attendance_structure::SESSION_GROUP);
+                $radio[] = &$mform->createElement(
+                    'radio',
+                    'sessiontype',
+                    '',
+                    get_string('commonsession', 'attendance'),
+                    mod_attendance_structure::SESSION_COMMON
+                );
+                $radio[] = &$mform->createElement(
+                    'radio',
+                    'sessiontype',
+                    '',
+                    get_string('groupsession', 'attendance'),
+                    mod_attendance_structure::SESSION_GROUP
+                );
                 $mform->addGroup($radio, 'sessiontype', get_string('sessiontype', 'attendance'), ' ', false);
                 $mform->setType('sessiontype', PARAM_INT);
                 $mform->addHelpButton('sessiontype', 'sessiontype', 'attendance');
@@ -85,7 +102,7 @@ class addsession extends moodleform {
         }
         if ($groupmode == SEPARATEGROUPS || $groupmode == VISIBLEGROUPS) {
             if ($groupmode == SEPARATEGROUPS && !has_capability('moodle/site:accessallgroups', $modcontext)) {
-                $groups = groups_get_all_groups ($course->id, $USER->id, $cm->groupingid);
+                $groups = groups_get_all_groups($course->id, $USER->id, $cm->groupingid);
             } else {
                 $groups = groups_get_all_groups($course->id, 0, $cm->groupingid);
             }
@@ -101,8 +118,12 @@ class addsession extends moodleform {
                 if ($groupmode == VISIBLEGROUPS) {
                     $mform->updateElementAttr($radio, ['disabled' => 'disabled']);
                 }
-                $mform->addElement('static', 'groups', get_string('groups', 'group'),
-                                  get_string('nogroups', 'attendance'));
+                $mform->addElement(
+                    'static',
+                    'groups',
+                    get_string('groups', 'group'),
+                    get_string('nogroups', 'attendance')
+                );
                 if ($groupmode == SEPARATEGROUPS) {
                     return;
                 }
@@ -124,8 +145,13 @@ class addsession extends moodleform {
             $mform->setType('statusset', PARAM_INT);
         }
 
-        $mform->addElement('editor', 'sdescription', get_string('description', 'attendance'), ['rows' => 1, 'columns' => 80],
-                            ['maxfiles' => EDITOR_UNLIMITED_FILES, 'noclean' => true, 'context' => $modcontext]);
+        $mform->addElement(
+            'editor',
+            'sdescription',
+            get_string('description', 'attendance'),
+            ['rows' => 1, 'columns' => 80],
+            ['maxfiles' => EDITOR_UNLIMITED_FILES, 'noclean' => true, 'context' => $modcontext]
+        );
         $mform->setType('sdescription', PARAM_RAW);
 
         if (!empty($pluginconfig->enablecalendar)) {
@@ -302,10 +328,19 @@ class addsession extends moodleform {
 
         $mgroup3 = [];
         $options = attendance_get_sharedipoptions();
-        $mgroup3[] = & $mform->createElement('select', 'preventsharedip',
-            get_string('preventsharedip', 'attendance'), $options);
-        $mgroup3[] = & $mform->createElement('text', 'preventsharediptime',
-            get_string('preventsharediptime', 'attendance'), '', 'test');
+        $mgroup3[] = & $mform->createElement(
+            'select',
+            'preventsharedip',
+            get_string('preventsharedip', 'attendance'),
+            $options
+        );
+        $mgroup3[] = & $mform->createElement(
+            'text',
+            'preventsharediptime',
+            get_string('preventsharediptime', 'attendance'),
+            '',
+            'test'
+        );
         $mform->addGroup($mgroup3, 'preventsharedgroup', get_string('preventsharedip', 'attendance'), [' '], false);
         $mform->addHelpButton('preventsharedgroup', 'preventsharedip', 'attendance');
         $mform->setAdvanced('preventsharedgroup');
@@ -342,8 +377,10 @@ class addsession extends moodleform {
             $errors['sestime'] = get_string('invalidsessionendtime', 'attendance');
         }
 
-        if (!empty($data['addmultiply']) && $data['sessiondate'] != 0 && $data['sessionenddate'] != 0 &&
-                $data['sessionenddate'] < $data['sessiondate']) {
+        if (
+            !empty($data['addmultiply']) && $data['sessiondate'] != 0 && $data['sessionenddate'] != 0 &&
+                $data['sessionenddate'] < $data['sessiondate']
+        ) {
             $errors['sessionenddate'] = get_string('invalidsessionenddate', 'attendance');
         }
 
@@ -357,7 +394,7 @@ class addsession extends moodleform {
             $errors['sdays'] = get_string('required', 'attendance');
         }
         if (isset($data['sdays'])) {
-            if (!$this->checkweekdays($data['sessiondate'], $data['sessionenddate'], $data['sdays']) ) {
+            if (!$this->checkweekdays($data['sessiondate'], $data['sessionenddate'], $data['sdays'])) {
                 $errors['sdays'] = get_string('checkweekdays', 'attendance');
             }
         }
@@ -366,14 +403,18 @@ class addsession extends moodleform {
         }
         $sessstart = $data['sessiondate'] + $sesstarttime;
         if ($sessstart < $data['coursestartdate'] && $sessstart != $data['previoussessiondate']) {
-            $errors['sessiondate'] = get_string('priorto', 'attendance',
-                userdate($data['coursestartdate'], get_string('strftimedmyhm', 'attendance')));
+            $errors['sessiondate'] = get_string(
+                'priorto',
+                'attendance',
+                userdate($data['coursestartdate'], get_string('strftimedmyhm', 'attendance'))
+            );
             $this->_form->setConstant('previoussessiondate', $sessstart);
         }
 
-        if (!empty($data['studentscanmark']) && isset($data['automark'])
-            && $data['automark'] == ATTENDANCE_AUTOMARK_CLOSE) {
-
+        if (
+            !empty($data['studentscanmark']) && isset($data['automark'])
+            && $data['automark'] == ATTENDANCE_AUTOMARK_CLOSE
+        ) {
             $cm            = $this->_customdata['cm'];
             // Check that the selected statusset has a status to use when unmarked.
             $sql = 'SELECT id
@@ -386,10 +427,11 @@ class addsession extends moodleform {
             }
         }
 
-        if (!empty($data['studentscanmark']) && $data['preventsharedip'] == ATTENDANCE_SHAREDIP_MINUTES &&
-                empty($data['preventsharediptime'])) {
+        if (
+            !empty($data['studentscanmark']) && $data['preventsharedip'] == ATTENDANCE_SHAREDIP_MINUTES &&
+                empty($data['preventsharediptime'])
+        ) {
             $errors['preventsharedgroup'] = get_string('iptimemissing', 'attendance');
-
         }
         return $errors;
     }
@@ -406,10 +448,10 @@ class addsession extends moodleform {
         $found = false;
 
         $daysofweek = [0 => "Sun", 1 => "Mon", 2 => "Tue", 3 => "Wed", 4 => "Thu", 5 => "Fri", 6 => "Sat"];
-        $start = new DateTime( date("Y-m-d", $sessiondate) );
+        $start = new DateTime(date("Y-m-d", $sessiondate));
         $interval = new DateInterval('P1D');
-        $end = new DateTime( date("Y-m-d", $sessionenddate) );
-        $end->add( new DateInterval('P1D') );
+        $end = new DateTime(date("Y-m-d", $sessionenddate));
+        $end->add(new DateInterval('P1D'));
 
         $period = new DatePeriod($start, $interval, $end);
         foreach ($period as $date) {

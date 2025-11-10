@@ -23,8 +23,8 @@
  */
 
 require_once('../../config.php');
-require_once($CFG->libdir.'/adminlib.php');
-require_once($CFG->dirroot.'/mod/attendance/lib.php');
+require_once($CFG->libdir . '/adminlib.php');
+require_once($CFG->dirroot . '/mod/attendance/lib.php');
 
 admin_externalpage_setup('managemodules');
 

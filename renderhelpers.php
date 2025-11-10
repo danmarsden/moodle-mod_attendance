@@ -56,8 +56,10 @@ class user_sessions_cells_generator {
      */
     public function get_cells($remarks = false) {
         foreach ($this->reportdata->sessions as $sess) {
-            if (array_key_exists($sess->id, $this->reportdata->sessionslog[$this->user->id]) &&
-            !empty($this->reportdata->sessionslog[$this->user->id][$sess->id]->statusid)) {
+            if (
+                array_key_exists($sess->id, $this->reportdata->sessionslog[$this->user->id]) &&
+                !empty($this->reportdata->sessionslog[$this->user->id][$sess->id]->statusid)
+            ) {
                 $statusid = $this->reportdata->sessionslog[$this->user->id][$sess->id]->statusid;
                 if (array_key_exists($statusid, $this->reportdata->statuses)) {
                     $points = format_float($this->reportdata->statuses[$statusid]->grade, 1, true, true);
@@ -65,8 +67,10 @@ class user_sessions_cells_generator {
                     $this->construct_existing_status_cell($this->reportdata->statuses[$statusid]->acronym .
                                 " ({$points}/{$maxpoints})");
                 } else {
-                    if (!empty($this->reportdata->allstatuses[$statusid] &&
-                        isset($this->reportdata->allstatuses[$statusid]->acronym))) {
+                    if (
+                        !empty($this->reportdata->allstatuses[$statusid] &&
+                        isset($this->reportdata->allstatuses[$statusid]->acronym))
+                    ) {
                         $statusac = $this->reportdata->allstatuses[$statusid]->acronym;
                     } else {
                         $statusac = get_string('unknownstatus', 'mod_attendance', $statusid);
@@ -182,7 +186,7 @@ class user_sessions_cells_html_generator extends user_sessions_cells_generator {
      */
     protected function construct_existing_status_cell($text) {
         $this->close_open_cell_if_needed();
-        $this->cells[] = html_writer::span($text, 'attendancestatus-'.$text);
+        $this->cells[] = html_writer::span($text, 'attendancestatus-' . $text);
     }
 
     /**
@@ -248,12 +252,12 @@ class user_sessions_cells_html_generator extends user_sessions_cells_generator {
 
         // Format the remark.
         $icon = $OUTPUT->pix_icon('i/info', '');
-        $remark = html_writer::span($text, 'remarkcontent');
-        $remark = html_writer::span($icon.$remark, 'remarkholder');
+        $remark = html_writer::span(s($text), 'remarkcontent');
+        $remark = html_writer::span($icon . $remark, 'remarkholder');
 
         // Add it into the previous cell.
         $markcell = array_pop($this->cells);
-        $markcell .= ' '.$remark;
+        $markcell .= ' ' . $remark;
         $this->cells[] = $markcell;
     }
 
@@ -294,7 +298,7 @@ class user_sessions_cells_text_generator extends user_sessions_cells_generator {
      * @param string $text - text for the cell.
      */
     protected function construct_hidden_status_cell($text) {
-        $this->cells[] = '-'.$text;
+        $this->cells[] = '-' . $text;
     }
 
     /**

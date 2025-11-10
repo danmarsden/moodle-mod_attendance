@@ -32,7 +32,6 @@ use core_reportbuilder\local\helpers\database;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class attendance extends datasource {
-
     /**
      * Return user friendly name of the datasource
      *
@@ -47,7 +46,7 @@ class attendance extends datasource {
      */
     protected function initialise(): void {
         global $CFG;
-        require_once($CFG->dirroot.'/mod/attendance/locallib.php');
+        require_once($CFG->dirroot . '/mod/attendance/locallib.php');
 
         $attendanceentity = new \mod_attendance\local\entities\attendance();
         $attendancealias = $attendanceentity->get_table_alias('attendance');

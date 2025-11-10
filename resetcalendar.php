@@ -23,9 +23,9 @@
  */
 
 require_once('../../config.php');
-require_once($CFG->libdir.'/adminlib.php');
-require_once($CFG->dirroot.'/mod/attendance/lib.php');
-require_once($CFG->dirroot.'/mod/attendance/locallib.php');
+require_once($CFG->libdir . '/adminlib.php');
+require_once($CFG->dirroot . '/mod/attendance/lib.php');
+require_once($CFG->dirroot . '/mod/attendance/locallib.php');
 
 $action = optional_param('action', '', PARAM_ALPHA);
 
@@ -49,7 +49,7 @@ echo $tabmenu;
 if (get_config('attendance', 'enablecalendar')) {
     // Check to see if all sessions that need them have calendar events.
     if ($action == 'create' && confirm_sesskey()) {
-        $sessions = $DB->get_recordset('attendance_sessions',  ['caleventid' => 0, 'calendarevent' => 1]);
+        $sessions = $DB->get_recordset('attendance_sessions', ['caleventid' => 0, 'calendarevent' => 1]);
         foreach ($sessions as $session) {
             attendance_create_calendar_event($session);
             if ($session->caleventid) {
@@ -84,7 +84,6 @@ if (get_config('attendance', 'enablecalendar')) {
             echo $OUTPUT->box(get_string("noeventstoreset", "mod_attendance"));
         }
     }
-
 }
 
 echo $OUTPUT->footer();

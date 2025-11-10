@@ -31,7 +31,6 @@ namespace mod_attendance\form;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class export extends \moodleform {
-
     /**
      * Called to define this moodle form
      *
@@ -62,7 +61,7 @@ class export extends \moodleform {
         $userfieldsapi = \core_user\fields::for_name();
         $namefields = $userfieldsapi->get_sql('u', false, '', '', false)->selects;
 
-        $allusers = get_enrolled_users($modcontext, 'mod/attendance:canbelisted', 0, 'u.id,'.$namefields);
+        $allusers = get_enrolled_users($modcontext, 'mod/attendance:canbelisted', 0, 'u.id,' . $namefields);
         $userlist = [];
         foreach ($allusers as $user) {
             $userlist[$user->id] = fullname($user);
@@ -79,11 +78,16 @@ class export extends \moodleform {
 
         $groupmembers = [];
         if (!empty($grouplist)) {
-            list($gsql, $gparams) = $DB->get_in_or_equal(array_keys($grouplist), SQL_PARAMS_NAMED);
-            list($usql, $uparams) = $DB->get_in_or_equal(array_keys($userlist), SQL_PARAMS_NAMED);
+            [$gsql, $gparams] = $DB->get_in_or_equal(array_keys($grouplist), SQL_PARAMS_NAMED);
+            [$usql, $uparams] = $DB->get_in_or_equal(array_keys($userlist), SQL_PARAMS_NAMED);
             $params = array_merge($gparams, $uparams);
-            $groupmembers = $DB->get_recordset_select('groups_members', "groupid {$gsql} AND userid {$usql}", $params,
-                                                      '', 'groupid, userid');
+            $groupmembers = $DB->get_recordset_select(
+                'groups_members',
+                "groupid {$gsql} AND userid {$usql}",
+                $params,
+                '',
+                'groupid, userid'
+            );
         }
         $groupmappings = [];
         foreach ($groupmembers as $groupmember) {
@@ -117,20 +121,26 @@ class export extends \moodleform {
 
         $extrafields = \core_user\fields::for_identity($modcontext, false)->get_required_fields();
         foreach ($extrafields as $field) {
-            $ident[] =& $mform->createElement('checkbox',  $field, '', get_string( $field));
+            $ident[] =& $mform->createElement('checkbox', $field, '', get_string($field));
             $mform->setType($field, PARAM_NOTAGS);
-            $checkedfields['ident['. $field .']'] = true;
+            $checkedfields['ident[' . $field . ']'] = true;
         }
 
         require_once($CFG->dirroot . '/user/profile/lib.php');
         $customfields = profile_get_custom_fields();
         foreach ($customfields as $field) {
-            if ((is_siteadmin($USER) || $field->visible == PROFILE_VISIBLE_ALL || $field->visible == PROFILE_VISIBLE_TEACHERS)
-            && in_array($field->shortname, explode(',', $adminsetfields))) {
-                $ident[] =& $mform->createElement('checkbox', $field->shortname, '',
-                    format_string($field->name, true, ['context' => $modcontext]));
+            if (
+                (is_siteadmin($USER) || $field->visible == PROFILE_VISIBLE_ALL || $field->visible == PROFILE_VISIBLE_TEACHERS)
+                && in_array($field->shortname, explode(',', $adminsetfields))
+            ) {
+                $ident[] =& $mform->createElement(
+                    'checkbox',
+                    $field->shortname,
+                    '',
+                    format_string($field->name, true, ['context' => $modcontext])
+                );
                 $mform->setType($field->shortname, PARAM_NOTAGS);
-                $checkedfields['ident['. $field->shortname .']'] = true;
+                $checkedfields['ident[' . $field->shortname . ']'] = true;
             }
         }
 
@@ -179,4 +189,3 @@ class export extends \moodleform {
         return $errors;
     }
 }
-

@@ -30,8 +30,12 @@ function attendance_upgrade_create_calendar_events() {
 
     $attendances = $DB->get_records('attendance', null, null, 'id, name, course');
     foreach ($attendances as $att) {
-        $sessionsdata = $DB->get_records('attendance_sessions', ['attendanceid' => $att->id], null,
-            'id, groupid, sessdate, duration, description, descriptionformat');
+        $sessionsdata = $DB->get_records(
+            'attendance_sessions',
+            ['attendanceid' => $att->id],
+            null,
+            'id, groupid, sessdate, duration, description, descriptionformat'
+        );
         foreach ($sessionsdata as $session) {
             $calevent = new stdClass();
             $calevent->name           = $att->name;

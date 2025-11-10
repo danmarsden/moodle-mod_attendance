@@ -38,7 +38,6 @@ use stdClass;
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class marksessions {
-
     /** @var string $error The errors message from reading the xml */
     protected $error = '';
 
@@ -140,8 +139,15 @@ class marksessions {
      * @param stdClass $mappingdata The mapping data from the import form.
      * @param bool $useprogressbar Whether progress bar should be displayed, to avoid html output on CLI.
      */
-    public function __construct($att, $text = null, $encoding = null, $delimiter = null, $importid = 0,
-                                $mappingdata = null, $useprogressbar = false) {
+    public function __construct(
+        $att,
+        $text = null,
+        $encoding = null,
+        $delimiter = null,
+        $importid = 0,
+        $mappingdata = null,
+        $useprogressbar = false
+    ) {
         global $CFG, $USER;
 
         require_once($CFG->libdir . '/csvlib.class.php');

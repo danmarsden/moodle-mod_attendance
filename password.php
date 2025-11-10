@@ -25,9 +25,9 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(__FILE__).'/../../config.php');
-require_once(dirname(__FILE__).'/locallib.php');
-require_once($CFG->libdir.'/tcpdf/tcpdf_barcodes_2d.php'); // Used for generating qrcode.
+require_once(dirname(__FILE__) . '/../../config.php');
+require_once(dirname(__FILE__) . '/locallib.php');
+require_once($CFG->libdir . '/tcpdf/tcpdf_barcodes_2d.php'); // Used for generating qrcode.
 
 $session = required_param('session', PARAM_INT);
 $session = $DB->get_record('attendance_sessions', ['id' => $session], '*', MUST_EXIST);
@@ -65,9 +65,9 @@ if ($rotateqr) {
 
 if ($showpassword) {
     if ($showqr) {
-        echo html_writer::div("<h2>".get_string('qrcodeandpasswordheader', 'attendance'), 'qrcodeheader')."</h2>";
+        echo html_writer::div("<h2>" . get_string('qrcodeandpasswordheader', 'attendance'), 'qrcodeheader') . "</h2>";
     } else {
-        echo html_writer::div("<h2>".get_string('passwordheader', 'attendance'), 'qrcodeheader')."</h2>";
+        echo html_writer::div("<h2>" . get_string('passwordheader', 'attendance'), 'qrcodeheader') . "</h2>";
     }
     echo html_writer::span($session->studentpassword, 'student-password');
     echo html_writer::div('&nbsp;');

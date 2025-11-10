@@ -23,7 +23,7 @@
  */
 
 require_once('../../config.php');
-require_once($CFG->dirroot.'/message/lib.php');
+require_once($CFG->dirroot . '/message/lib.php');
 $id = required_param('id', PARAM_INT);
 $messagebody = optional_param_array('messagebody', '', PARAM_CLEANHTML);
 
@@ -87,9 +87,11 @@ if ($data = data_submitted()) {
     foreach ($data as $k => $v) {
         if (preg_match('/^(user|teacher)(\d+)$/', $k, $m)) {
             if (!array_key_exists($m[2], $SESSION->emailto[$id])) {
-                if ($user = $DB->get_record_select('user', "id = ?", [$m[2]], 'id, '.
-                    $namefields . ', idnumber, email, mailformat, lastaccess, lang, '.
-                    'maildisplay, auth, suspended, deleted, emailstop, username')) {
+                if (
+                    $user = $DB->get_record_select('user', "id = ?", [$m[2]], 'id, ' .
+                    $namefields . ', idnumber, email, mailformat, lastaccess, lang, ' .
+                    'maildisplay, auth, suspended, deleted, emailstop, username')
+                ) {
                     $SESSION->emailto[$id][$m[2]] = $user;
                     $count++;
                 }
@@ -105,8 +107,10 @@ if ($course->id == SITEID) {
     $PAGE->set_pagelayout('incourse');
 }
 $link = null;
-if (has_capability('moodle/course:viewparticipants', $coursecontext) ||
-    has_capability('moodle/site:viewparticipants', $systemcontext)) {
+if (
+    has_capability('moodle/course:viewparticipants', $coursecontext) ||
+    has_capability('moodle/site:viewparticipants', $systemcontext)
+) {
     $link = new moodle_url("/user/index.php", ['id' => $course->id]);
 }
 $PAGE->navbar->add(get_string('participants'), $link);
@@ -128,15 +132,15 @@ if (!empty($messagebody) && !$edit && !$deluser && ($preview || $send)) {
     if (count($SESSION->emailto[$id])) {
         if (!empty($preview)) {
             echo '<form method="post" action="messageselect.php" style="margin: 0 20px;">
-<input type="hidden" name="returnto" value="'.s($returnto).'" />
-<input type="hidden" name="id" value="'.$id.'" />
-<input type="hidden" name="format" value="'.$format.'" />
+<input type="hidden" name="returnto" value="' . s($returnto) . '" />
+<input type="hidden" name="id" value="' . $id . '" />
+<input type="hidden" name="format" value="' . $format . '" />
 <input type="hidden" name="sesskey" value="' . sesskey() . '" />
 ';
-            echo "<h3>".get_string('previewhtml', 'mod_attendance')."</h3>";
-            echo "<div class=\"messagepreview\">\n".format_text($messagebody, $format)."\n</div>\n";
-            echo '<p align="center"><input type="submit" name="send" value="'.get_string('sendmessage', 'message').'" />'."\n";
-            echo '<input type="submit" name="edit" value="'.get_string('update').'" /></p>';
+            echo "<h3>" . get_string('previewhtml', 'mod_attendance') . "</h3>";
+            echo "<div class=\"messagepreview\">\n" . format_text($messagebody, $format) . "\n</div>\n";
+            echo '<p align="center"><input type="submit" name="send" value="' . get_string('sendmessage', 'message') . '" />' . "\n";
+            echo '<input type="submit" name="edit" value="' . get_string('update') . '" /></p>';
             echo "\n</form>";
         } else if (!empty($send)) {
             $fails = [];
@@ -158,7 +162,7 @@ if (!empty($messagebody) && !$edit && !$deluser && ($preview || $send)) {
                 }
                 echo '</ul>';
             }
-            echo '<p align="center"><a href="index.php?id='.$id.'">'.get_string('backtoparticipants', 'mod_attendance').'</a></p>';
+            echo '<p align="center"><a href="index.php?id=' . $id . '">' . get_string('backtoparticipants', 'mod_attendance') . '</a></p>';
         }
         echo $OUTPUT->footer();
         exit;
@@ -166,8 +170,8 @@ if (!empty($messagebody) && !$edit && !$deluser && ($preview || $send)) {
         echo $OUTPUT->notification(get_string('nousersyet'));
     }
 }
-echo '<p align="center"><a href="'.$returnto.'">'.get_string("keepsearching", 'mod_attendance').'</a>'.
-    ((count($SESSION->emailto[$id])) ? ', '.get_string('usemessageform', 'mod_attendance') : '').'</p>';
+echo '<p align="center"><a href="' . $returnto . '">' . get_string("keepsearching", 'mod_attendance') . '</a>' .
+    ((count($SESSION->emailto[$id])) ? ', ' . get_string('usemessageform', 'mod_attendance') : '') . '</p>';
 if ((!empty($send) || !empty($preview) || !empty($edit)) && (empty($messagebody))) {
     echo $OUTPUT->notification(get_string('allfieldsrequired'));
 }
@@ -175,7 +179,8 @@ if (count($SESSION->emailto[$id])) {
     require_sesskey();
     require("message.html");
 }
-$PAGE->requires->yui_module('moodle-core-formchangechecker',
+$PAGE->requires->yui_module(
+    'moodle-core-formchangechecker',
     'M.core_formchangechecker.init',
     [[
         'formid' => 'theform',

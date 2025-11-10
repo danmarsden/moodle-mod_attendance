@@ -22,8 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(__FILE__).'/../../config.php');
-require_once(dirname(__FILE__).'/locallib.php');
+require_once(dirname(__FILE__) . '/../../config.php');
+require_once(dirname(__FILE__) . '/locallib.php');
 
 $pageparams = new mod_attendance_take_page_params();
 
@@ -41,8 +41,12 @@ $cm             = get_coursemodule_from_id('attendance', $id, 0, false, MUST_EXI
 $course         = $DB->get_record('course', ['id' => $cm->course], '*', MUST_EXIST);
 $att            = $DB->get_record('attendance', ['id' => $cm->instance], '*', MUST_EXIST);
 // Check this is a valid session for this attendance.
-$session        = $DB->get_record('attendance_sessions', ['id' => $pageparams->sessionid, 'attendanceid' => $att->id],
-                                  '*', MUST_EXIST);
+$session        = $DB->get_record(
+    'attendance_sessions',
+    ['id' => $pageparams->sessionid, 'attendanceid' => $att->id],
+    '*',
+    MUST_EXIST
+);
 
 require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
@@ -90,7 +94,7 @@ if (($formdata = data_submitted()) && confirm_sesskey()) {
 }
 
 $PAGE->set_url($att->url_take((array)$pageparams));
-$PAGE->set_title($course->shortname. ": ".$att->name);
+$PAGE->set_title($course->shortname . ": " . $att->name);
 $PAGE->set_heading($course->fullname);
 $PAGE->set_cacheable(true);
 $PAGE->navbar->add($att->name);

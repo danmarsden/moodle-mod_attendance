@@ -22,9 +22,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(__FILE__).'/../../config.php');
-require_once(dirname(__FILE__).'/locallib.php');
-require_once($CFG->dirroot.'/lib/formslib.php');
+require_once(dirname(__FILE__) . '/../../config.php');
+require_once(dirname(__FILE__) . '/locallib.php');
+require_once($CFG->dirroot . '/lib/formslib.php');
 
 $pageparams = new mod_attendance_sessions_page_params();
 
@@ -54,7 +54,7 @@ require_capability('mod/attendance:manageattendances', $context);
 $att = new mod_attendance_structure($att, $cm, $course, $context, $pageparams);
 
 $PAGE->set_url($att->url_sessions(['action' => $pageparams->action]));
-$PAGE->set_title($course->shortname. ": ".$att->name);
+$PAGE->set_title($course->shortname . ": " . $att->name);
 $PAGE->set_heading($course->fullname);
 $PAGE->force_settings_menu(true);
 $PAGE->set_cacheable(true);
