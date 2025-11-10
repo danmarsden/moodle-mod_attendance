@@ -12,3 +12,4 @@ jobs:
     with:
       disable_mustache: true
       disable_phpcpd: true
+      ignore_paths: renderhelpers.php

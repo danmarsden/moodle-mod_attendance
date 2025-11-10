@@ -38,7 +38,6 @@ use stdClass;
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class password_icon implements renderable, templatable {
-
     /**
      * @var string text to show
      */

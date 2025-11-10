@@ -26,9 +26,9 @@
 
 require_once(__DIR__ . '/../../../../lib/behat/behat_base.php');
 
-use Behat\Gherkin\Node\TableNode as TableNode;
+use Behat\Gherkin\Node\TableNode;
 
-use Behat\Mink\Exception\ExpectationException as ExpectationException;
+use Behat\Mink\Exception\ExpectationException;
 
 /**
  * Steps definitions related to mod_attendance.
@@ -52,11 +52,15 @@ class behat_mod_attendance extends behat_question_base {
     protected function resolve_page_instance_url(string $type, string $identifier): moodle_url {
         switch (strtolower($type)) {
             case 'view':
-                return new moodle_url('/mod/attendance/view.php',
-                        ['id' => $this->get_cm_by_attendance_name($identifier)->id]);
+                return new moodle_url(
+                    '/mod/attendance/view.php',
+                    ['id' => $this->get_cm_by_attendance_name($identifier)->id]
+                );
             case 'report':
-                return new moodle_url('/mod/attendance/report.php',
-                       ['id' => $this->get_cm_by_attendance_name($identifier)->id]);
+                return new moodle_url(
+                    '/mod/attendance/report.php',
+                    ['id' => $this->get_cm_by_attendance_name($identifier)->id]
+                );
             default:
                 throw new Exception('Unrecognised attendance page type "' . $type . '."');
         }

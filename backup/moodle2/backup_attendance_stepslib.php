@@ -29,7 +29,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class backup_attendance_activity_structure_step extends backup_activity_structure_step {
-
     /**
      * Define the structure of the backup workflow.
      *
@@ -92,8 +91,10 @@ class backup_attendance_activity_structure_step extends backup_activity_structur
 
         $status->set_source_table('attendance_statuses', ['attendanceid' => backup::VAR_PARENTID]);
 
-        $warning->set_source_table('attendance_warning',
-            ['idnumber' => backup::VAR_PARENTID]);
+        $warning->set_source_table(
+            'attendance_warning',
+            ['idnumber' => backup::VAR_PARENTID]
+        );
 
         $session->set_source_table('attendance_sessions', ['attendanceid' => backup::VAR_PARENTID]);
 

@@ -24,7 +24,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once(dirname(__FILE__).'/../../../calendar/lib.php');
+require_once(dirname(__FILE__) . '/../../../calendar/lib.php');
 
 /**
  * Create single calendar event bases on session data.
@@ -60,7 +60,7 @@ function attendance_create_calendar_event(&$session) {
     $caleventdata->modulename     = 'attendance';
 
     if (!empty($session->groupid)) {
-        $caleventdata->name .= " (". get_string('group', 'group') ." ". groups_get_group_name($session->groupid) .")";
+        $caleventdata->name .= " (" . get_string('group', 'group') . " " . groups_get_group_name($session->groupid) . ")";
     }
 
     $calevent = new stdClass();

@@ -56,8 +56,8 @@ class studentattendance extends \moodleform {
         $mform->setConstant('sesskey', sesskey());
 
         // Set a title as the date and time of the session.
-        $sesstiontitle = userdate($attforsession->sessdate, get_string('strftimedate')).' '
-                .attendance_strftimehm($attforsession->sessdate);
+        $sesstiontitle = userdate($attforsession->sessdate, get_string('strftimedate')) . ' '
+                . attendance_strftimehm($attforsession->sessdate);
 
         $mform->addElement('header', 'session', $sesstiontitle);
 
@@ -65,9 +65,11 @@ class studentattendance extends \moodleform {
         if (!empty($attforsession->description)) {
             $mform->addElement('html', $attforsession->description);
         }
-        if (!empty($attforsession->studentpassword) &&
+        if (
+            !empty($attforsession->studentpassword) &&
             !(attendance_is_status_availablebeforesession($attforsession->id) &&
-                !attendance_session_open_for_students($attforsession))) {
+                !attendance_session_open_for_students($attforsession))
+        ) {
             $mform->addElement('text', 'studentpassword', get_string('password', 'attendance'));
             $mform->setType('studentpassword', PARAM_TEXT);
             $mform->addRule('studentpassword', get_string('passwordrequired', 'attendance'), 'required');
@@ -77,13 +79,19 @@ class studentattendance extends \moodleform {
         // Display current status.
         if (attendance_check_allow_update($attforsession->id)) {
             // Check if an existing status is set, and show it.
-            $existingstatusid = $DB->get_field('attendance_log', 'statusid',
-                ['sessionid' => $attforsession->id, 'studentid' => $USER->id]);
+            $existingstatusid = $DB->get_field(
+                'attendance_log',
+                'statusid',
+                ['sessionid' => $attforsession->id, 'studentid' => $USER->id]
+            );
             if (!empty($existingstatusid)) {
                 $existingstatus = $attblock->get_statuses(false)[$existingstatusid];
                 if (!empty($existingstatus)) {
-                    $mform->addElement('static', '', '', get_string("userexistingstatus", 'mod_attendance',
-                        $existingstatus->description));
+                    $mform->addElement('static', '', '', get_string(
+                        "userexistingstatus",
+                        'mod_attendance',
+                        $existingstatus->description
+                    ));
                 }
             }
         }
@@ -99,7 +107,7 @@ class studentattendance extends \moodleform {
             $radioarray[] =& $mform->createElement('static', '', '', $warning);
         }
         // Add the radio buttons as a control with the user's name in front.
-        $radiogroup = $mform->addGroup($radioarray, 'statusarray', fullname($USER).':', [''], false);
+        $radiogroup = $mform->addGroup($radioarray, 'statusarray', fullname($USER) . ':', [''], false);
         $radiogroup->setAttributes(['class' => 'statusgroup']);
         $mform->addRule('statusarray', get_string('attendancenotset', 'attendance'), 'required', '', 'client', false, false);
         if (!empty($existingstatus) && !empty($statuses[$existingstatus->id])) {

@@ -71,6 +71,7 @@ final class external_test extends externallib_advanced_testcase {
     public function setUp(): void {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/mod/attendance/externallib.php');
+        parent::setUp();
         $this->category = $this->getDataGenerator()->create_category();
         $this->course = $this->getDataGenerator()->create_course(['category' => $this->category->id]);
         $att = $this->getDataGenerator()->create_module('attendance', ['course' => $this->course->id]);
@@ -127,8 +128,10 @@ final class external_test extends externallib_advanced_testcase {
         $this->attendance->add_sessions($this->sessions);
 
         $courseswithsessions = attendance_handler::get_courses_with_today_sessions($this->teacher->id);
-        $courseswithsessions = external_api::clean_returnvalue(mod_attendance_external::get_courses_with_today_sessions_returns(),
-            $courseswithsessions);
+        $courseswithsessions = external_api::clean_returnvalue(
+            mod_attendance_external::get_courses_with_today_sessions_returns(),
+            $courseswithsessions
+        );
 
         $this->assertTrue(is_array($courseswithsessions));
         $this->assertEquals(count($courseswithsessions), 1);
@@ -163,8 +166,10 @@ final class external_test extends externallib_advanced_testcase {
         $second->add_sessions([$secondsession]);
 
         $courseswithsessions = attendance_handler::get_courses_with_today_sessions($this->teacher->id);
-        $courseswithsessions = external_api::clean_returnvalue(mod_attendance_external::get_courses_with_today_sessions_returns(),
-            $courseswithsessions);
+        $courseswithsessions = external_api::clean_returnvalue(
+            mod_attendance_external::get_courses_with_today_sessions_returns(),
+            $courseswithsessions
+        );
 
         $this->assertTrue(is_array($courseswithsessions));
         $this->assertEquals(count($courseswithsessions), 1);
@@ -183,16 +188,20 @@ final class external_test extends externallib_advanced_testcase {
         $this->resetAfterTest(true);
 
         $courseswithsessions = attendance_handler::get_courses_with_today_sessions($this->teacher->id);
-        $courseswithsessions = external_api::clean_returnvalue(mod_attendance_external::get_courses_with_today_sessions_returns(),
-            $courseswithsessions);
+        $courseswithsessions = external_api::clean_returnvalue(
+            mod_attendance_external::get_courses_with_today_sessions_returns(),
+            $courseswithsessions
+        );
 
         $course = array_pop($courseswithsessions);
         $attendanceinstance = array_pop($course['attendance_instances']);
         $session = array_pop($attendanceinstance['today_sessions']);
 
         $sessioninfo = attendance_handler::get_session($session['id']);
-        $sessioninfo = external_api::clean_returnvalue(mod_attendance_external::get_session_returns(),
-            $sessioninfo);
+        $sessioninfo = external_api::clean_returnvalue(
+            mod_attendance_external::get_session_returns(),
+            $sessioninfo
+        );
 
         $this->assertEquals($this->attendance->id, $sessioninfo['attendanceid']);
         $this->assertEquals($session['id'], $sessioninfo['id']);
@@ -216,7 +225,7 @@ final class external_test extends externallib_advanced_testcase {
         $group = $this->getDataGenerator()->create_group($group);
 
         for ($i = 0; $i < 5; $i++) {
-            $member = new stdClass;
+            $member = new stdClass();
             $member->groupid = $group->id;
             $member->userid = $this->students[$i]->id;
             $this->getDataGenerator()->create_group_member($member);
@@ -237,16 +246,20 @@ final class external_test extends externallib_advanced_testcase {
             $this->attendance->add_sessions([$session]);
             $courseswithsessions = attendance_handler::get_courses_with_today_sessions($this->teacher->id);
         }
-        $courseswithsessions = external_api::clean_returnvalue(mod_attendance_external::get_courses_with_today_sessions_returns(),
-            $courseswithsessions);
+        $courseswithsessions = external_api::clean_returnvalue(
+            mod_attendance_external::get_courses_with_today_sessions_returns(),
+            $courseswithsessions
+        );
 
         $course = array_pop($courseswithsessions);
         $attendanceinstance = array_pop($course['attendance_instances']);
         $session = array_pop($attendanceinstance['today_sessions']);
 
         $sessioninfo = attendance_handler::get_session($session['id']);
-        $sessioninfo = external_api::clean_returnvalue(mod_attendance_external::get_session_returns(),
-            $sessioninfo);
+        $sessioninfo = external_api::clean_returnvalue(
+            mod_attendance_external::get_session_returns(),
+            $sessioninfo
+        );
 
         $this->assertEquals($session['id'], $sessioninfo['id']);
         $this->assertEquals($group->id, $sessioninfo['groupid']);
@@ -265,28 +278,39 @@ final class external_test extends externallib_advanced_testcase {
         $this->resetAfterTest(true);
 
         $courseswithsessions = attendance_handler::get_courses_with_today_sessions($this->teacher->id);
-        $courseswithsessions = external_api::clean_returnvalue(mod_attendance_external::get_courses_with_today_sessions_returns(),
-            $courseswithsessions);
+        $courseswithsessions = external_api::clean_returnvalue(
+            mod_attendance_external::get_courses_with_today_sessions_returns(),
+            $courseswithsessions
+        );
 
         $course = array_pop($courseswithsessions);
         $attendanceinstance = array_pop($course['attendance_instances']);
         $session = array_pop($attendanceinstance['today_sessions']);
 
         $sessioninfo = attendance_handler::get_session($session['id']);
-        $sessioninfo = external_api::clean_returnvalue(mod_attendance_external::get_session_returns(),
-            $sessioninfo);
+        $sessioninfo = external_api::clean_returnvalue(
+            mod_attendance_external::get_session_returns(),
+            $sessioninfo
+        );
 
         $student = array_pop($sessioninfo['users']);
         $status = array_pop($sessioninfo['statuses']);
         $statusset = $sessioninfo['statusset'];
 
-        $result = mod_attendance_external::update_user_status($session['id'], $student['id'], $this->teacher->id,
-            $status['id'], $statusset);
+        $result = mod_attendance_external::update_user_status(
+            $session['id'],
+            $student['id'],
+            $this->teacher->id,
+            $status['id'],
+            $statusset
+        );
         $result = external_api::clean_returnvalue(mod_attendance_external::update_user_status_returns(), $result);
 
         $sessioninfo = attendance_handler::get_session($session['id']);
-        $sessioninfo = external_api::clean_returnvalue(mod_attendance_external::get_session_returns(),
-            $sessioninfo);
+        $sessioninfo = external_api::clean_returnvalue(
+            mod_attendance_external::get_session_returns(),
+            $sessioninfo
+        );
 
         $log = array_pop($sessioninfo['attendance_log']);
         $this->assertEquals($student['id'], $log['studentid']);
@@ -407,8 +431,10 @@ final class external_test extends externallib_advanced_testcase {
 
         // Create attendance with separate groups mode.
         $attendancesepgroups = mod_attendance_external::add_attendance($course->id, 'sepgroups', 'test', SEPARATEGROUPS);
-        $attendancesepgroups = external_api::clean_returnvalue(mod_attendance_external::add_attendance_returns(),
-                                                               $attendancesepgroups);
+        $attendancesepgroups = external_api::clean_returnvalue(
+            mod_attendance_external::add_attendance_returns(),
+            $attendancesepgroups
+        );
 
         // Check attendance exist.
         $this->assertCount(1, $DB->get_records('attendance', ['course' => $course->id]));
@@ -416,8 +442,14 @@ final class external_test extends externallib_advanced_testcase {
         // Create session and validate record.
         $time = time();
         $duration = 3600;
-        $result = mod_attendance_external::add_session($attendancesepgroups['attendanceid'],
-            'testsession', $time, $duration, $group->id, true);
+        $result = mod_attendance_external::add_session(
+            $attendancesepgroups['attendanceid'],
+            'testsession',
+            $time,
+            $duration,
+            $group->id,
+            true
+        );
         $result = external_api::clean_returnvalue(mod_attendance_external::add_session_returns(), $result);
 
         $this->assertCount(1, $DB->get_records('attendance_sessions', ['id' => $result['sessionid']]));
@@ -458,10 +490,16 @@ final class external_test extends externallib_advanced_testcase {
         $this->setUser($teacher);
 
         // Create attendance with no groups mode.
-        $attendancenogroups = mod_attendance_external::add_attendance($course->id, 'nogroups',
-                                                                 'test', NOGROUPS);
-        $attendancenogroups = external_api::clean_returnvalue(mod_attendance_external::add_attendance_returns(),
-            $attendancenogroups);
+        $attendancenogroups = mod_attendance_external::add_attendance(
+            $course->id,
+            'nogroups',
+            'test',
+            NOGROUPS
+        );
+        $attendancenogroups = external_api::clean_returnvalue(
+            mod_attendance_external::add_attendance_returns(),
+            $attendancenogroups
+        );
 
         // Check attendance exist.
         $this->assertCount(1, $DB->get_records('attendance', ['course' => $course->id]));
@@ -496,8 +534,10 @@ final class external_test extends externallib_advanced_testcase {
 
         // Create attendance with visible groups mode.
         $attendancevisgroups = mod_attendance_external::add_attendance($course->id, 'visgroups', 'test', VISIBLEGROUPS);
-        $attendancevisgroups = external_api::clean_returnvalue(mod_attendance_external::add_attendance_returns(),
-                                                               $attendancevisgroups);
+        $attendancevisgroups = external_api::clean_returnvalue(
+            mod_attendance_external::add_attendance_returns(),
+            $attendancevisgroups
+        );
 
         // Check attendance exist.
         $this->assertCount(1, $DB->get_records('attendance', ['course' => $course->id]));
@@ -599,27 +639,30 @@ final class external_test extends externallib_advanced_testcase {
         $this->resetAfterTest(true);
 
         $courseswithsessions = attendance_handler::get_courses_with_today_sessions($this->teacher->id);
-        $courseswithsessions = external_api::clean_returnvalue(mod_attendance_external::get_courses_with_today_sessions_returns(),
-            $courseswithsessions);
+        $courseswithsessions = external_api::clean_returnvalue(
+            mod_attendance_external::get_courses_with_today_sessions_returns(),
+            $courseswithsessions
+        );
 
         foreach ($courseswithsessions as $course) {
-
             $attendanceinstances = $course['attendance_instances'];
 
             foreach ($attendanceinstances as $attendanceinstance) {
-
                 $sessionsinfo = $attendanceinstance['today_sessions'];
 
                 foreach ($sessionsinfo as $sessioninfo) {
-
                     $sessions = attendance_handler::get_sessions($sessioninfo['attendanceid']);
-                    $sessions = external_api::clean_returnvalue(mod_attendance_external::get_sessions_returns(),
-                        $sessions);
+                    $sessions = external_api::clean_returnvalue(
+                        mod_attendance_external::get_sessions_returns(),
+                        $sessions
+                    );
 
                     foreach ($sessions as $session) {
                         $sessiontocompareagainst = attendance_handler::get_session($session['id']);
-                        $sessiontocompareagainst = external_api::clean_returnvalue(mod_attendance_external::get_session_returns(),
-                            $sessiontocompareagainst);
+                        $sessiontocompareagainst = external_api::clean_returnvalue(
+                            mod_attendance_external::get_session_returns(),
+                            $sessiontocompareagainst
+                        );
 
                         $this->assertEquals($this->attendance->id, $session['attendanceid']);
                         $this->assertEquals($sessiontocompareagainst['id'], $session['id']);

@@ -30,7 +30,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mod_attendance_observer {
-
     /**
      * Observer for the event course_content_deleted - delete all attendance stuff.
      *

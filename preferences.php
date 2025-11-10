@@ -22,8 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(__FILE__).'/../../config.php');
-require_once(dirname(__FILE__).'/locallib.php');
+require_once(dirname(__FILE__) . '/../../config.php');
+require_once(dirname(__FILE__) . '/locallib.php');
 
 $pageparams = new mod_attendance_preferences_page_params();
 
@@ -50,7 +50,7 @@ if ($pageparams->statusset > $maxstatusset + 1) {
 $att = new mod_attendance_structure($att, $cm, $course, $context, $pageparams);
 
 $PAGE->set_url($att->url_preferences());
-$PAGE->set_title($course->shortname. ": ".$att->name.' - '.get_string('settings', 'attendance'));
+$PAGE->set_title($course->shortname . ": " . $att->name . ' - ' . get_string('settings', 'attendance'));
 $PAGE->set_heading($course->fullname);
 $PAGE->force_settings_menu(true);
 $PAGE->set_cacheable(true);
@@ -108,7 +108,7 @@ switch ($att->pageparams->action) {
 
         $message = get_string('deletecheckfull', 'attendance', get_string('variable', 'attendance'));
         $message .= str_repeat(html_writer::empty_tag('br'), 2);
-        $message .= $status->acronym.': '.
+        $message .= $status->acronym . ': ' .
                     ($status->description ? $status->description : get_string('nodescription', 'attendance'));
         $params = array_merge($att->pageparams->get_significant_params(), ['confirm' => 1]);
         echo $OUTPUT->header();
@@ -157,9 +157,18 @@ switch ($att->pageparams->action) {
             } else if (empty($availability[$id])) {
                 $studentavailability[$id] = '';
             }
-            $errors[$id] = attendance_update_status($status, $acronym[$id], $description[$id], $grade[$id],
-                                                    null, $att->context, $att->cm, $studentavailability[$id],
-                                                    $availablebeforesession[$id], $setunmarked);
+            $errors[$id] = attendance_update_status(
+                $status,
+                $acronym[$id],
+                $description[$id],
+                $grade[$id],
+                null,
+                $att->context,
+                $att->cm,
+                $studentavailability[$id],
+                $availablebeforesession[$id],
+                $setunmarked
+            );
         }
         attendance_update_users_grade($att);
         break;

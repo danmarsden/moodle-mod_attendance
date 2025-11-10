@@ -45,10 +45,11 @@ class automark {
     public static function session($session, $course, $cm, $attendance, $returnerrors = false) {
         global $CFG, $DB;
         $now = time(); // Store current time to use in queries so they all match nicely.
-        if ($session->sessdate + $session->duration < $now || // If session is over.
+        if (
+            $session->sessdate + $session->duration < $now || // If session is over.
             // OR if session is currently open and automark is set to do all.
-            ($session->sessdate < $now && $session->automark == ATTENDANCE_AUTOMARK_ALL)) {
-
+            ($session->sessdate < $now && $session->automark == ATTENDANCE_AUTOMARK_ALL)
+        ) {
             $userfirstaccess = [];
             $donesomething = false; // Only trigger grades/events when an update actually occurs.
             $sessionover = false; // Is this session over?
@@ -57,15 +58,19 @@ class automark {
             }
             if (!isset($session->setunmarked)) {
                 // Setunmarked not included in $session var, lets look it up.
-                $session->setunmarked = $DB->get_field('attendance_statuses', 'id',
-                 ['attendanceid' => $attendance->id, 'setunmarked' => 1, 'deleted' => 0, 'setnumber' => $session->statusset]);
+                $session->setunmarked = $DB->get_field(
+                    'attendance_statuses',
+                    'id',
+                    ['attendanceid' => $attendance->id, 'setunmarked' => 1, 'deleted' => 0, 'setnumber' => $session->statusset]
+                );
             }
 
             if (empty($session->setunmarked)) {
                 $coursemodule = get_coursemodule_from_instance('attendance', $session->attendanceid, $course->id);
-                $a = new stdClass;
+                $a = new stdClass();
                 $a->sessionid = $session->id;
-                $a->url = $CFG->wwwroot.'/mod/attendance/preferences.php?id='.$coursemodule->id;;
+                $a->url = $CFG->wwwroot . '/mod/attendance/preferences.php?id=' . $coursemodule->id;
+                ;
                 if (!$returnerrors) {
                     mtrace(get_string('nounmarkedstatusset', 'attendance', $a));
                     return;
@@ -114,23 +119,31 @@ class automark {
                         // This record isn't in the right subnet.
                         continue;
                     }
-                    if (empty($userfirstaccess[$loguser->userid]) ||
-                        $userfirstaccess[$loguser->userid] > $loguser->timecreated) {
+                    if (
+                        empty($userfirstaccess[$loguser->userid]) ||
+                        $userfirstaccess[$loguser->userid] > $loguser->timecreated
+                    ) {
                         // Users may have accessed from mulitple ip addresses, find the earliest access.
                         $userfirstaccess[$loguser->userid] = $loguser->timecreated;
                     }
                 }
                 $logusers->close();
-
             } else if ($session->automark == ATTENDANCE_AUTOMARK_ACTIVITYCOMPLETION) {
-                $existinglog = $DB->get_records_menu('attendance_log',
-                    ['sessionid' => $session->id], '', 'studentid, statusid');
+                $existinglog = $DB->get_records_menu(
+                    'attendance_log',
+                    ['sessionid' => $session->id],
+                    '',
+                    'studentid, statusid'
+                );
 
                 $newlogs = [];
 
                 // Get users who have completed the course in this session.
-                $completedusers = $DB->get_records_select('course_modules_completion',
-                    'coursemoduleid = ? AND completionstate > 0', [$session->automarkcmid]);
+                $completedusers = $DB->get_records_select(
+                    'course_modules_completion',
+                    'coursemoduleid = ? AND completionstate > 0',
+                    [$session->automarkcmid]
+                );
 
                 // Get automark status the users and update the attendance log.
                 foreach ($completedusers as $completionuser) {
@@ -155,7 +168,7 @@ class automark {
                     $newlog->takenby = 0;
                     $newlog->sessionid = $session->id;
                     $newlog->remarks = get_string('autorecorded', 'attendance');
-                    $newlog->statusset = implode(',', array_keys( (array)$att->get_statuses()));
+                    $newlog->statusset = implode(',', array_keys((array)$att->get_statuses()));
                     $newlog->studentid = $completionuser->userid;
                     $newlog->statusid = $att->get_automark_status($completionuser->timemodified, $session->id);
                     if (!empty($newlog->statusid)) {
@@ -211,7 +224,7 @@ class automark {
                     $newlog->takenby = 0;
                     $newlog->sessionid = $session->id;
                     $newlog->remarks = get_string('autorecorded', 'attendance');
-                    $newlog->statusset = implode(',', array_keys( (array)$att->get_statuses()));
+                    $newlog->statusset = implode(',', array_keys((array)$att->get_statuses()));
                     if (!empty($userfirstaccess[$user->id])) {
                         $newlog->statusid = $att->get_automark_status($userfirstaccess[$user->id], $session->id);
                     } else if ($sessionover) {

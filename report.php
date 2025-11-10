@@ -22,8 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(__FILE__).'/../../config.php');
-require_once(dirname(__FILE__).'/locallib.php');
+require_once(dirname(__FILE__) . '/../../config.php');
+require_once(dirname(__FILE__) . '/locallib.php');
 
 $pageparams = new mod_attendance_report_page_params();
 
@@ -66,7 +66,7 @@ $att = new mod_attendance_structure($attrecord, $cm, $course, $context, $pagepar
 
 $PAGE->set_url($att->url_report());
 $PAGE->set_pagelayout('report');
-$PAGE->set_title($course->shortname. ": ".$att->name.' - '.get_string('report', 'attendance'));
+$PAGE->set_title($course->shortname . ": " . $att->name . ' - ' . get_string('report', 'attendance'));
 $PAGE->set_heading($course->fullname);
 $PAGE->force_settings_menu(true);
 $PAGE->set_cacheable(true);
@@ -91,4 +91,3 @@ echo $output->header();
 echo $output->render($filtercontrols);
 echo $output->render($reportdata);
 echo $output->footer();
-

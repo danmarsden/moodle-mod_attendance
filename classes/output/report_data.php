@@ -84,16 +84,21 @@ class report_data implements renderable {
         if ($att->pageparams->view == ATT_VIEW_SUMMARY) {
             $this->summary = new mod_attendance_summary($att->id);
         } else {
-            $this->summary = new mod_attendance_summary($att->id, array_keys($this->users),
-                                                        $att->pageparams->startdate, $att->pageparams->enddate);
+            $this->summary = new mod_attendance_summary(
+                $att->id,
+                array_keys($this->users),
+                $att->pageparams->startdate,
+                $att->pageparams->enddate
+            );
         }
 
         foreach ($this->users as $key => $user) {
             $usersummary = $this->summary->get_taken_sessions_summary_for($user->id);
-            if ($att->pageparams->view != ATT_VIEW_NOTPRESENT ||
+            if (
+                $att->pageparams->view != ATT_VIEW_NOTPRESENT ||
                 attendance_calc_fraction($usersummary->takensessionspoints, $usersummary->takensessionsmaxpoints) <
-                $att->get_lowgrade_threshold()) {
-
+                $att->get_lowgrade_threshold()
+            ) {
                 $this->usersgroups[$user->id] = groups_get_all_groups($att->course->id, $user->id);
 
                 $this->sessionslog[$user->id] = $att->get_user_filtered_sessions_log($user->id);
@@ -120,7 +125,7 @@ class report_data implements renderable {
      * @param array $params
      * @return mixed
      */
-    public function url_view($params=[]) {
+    public function url_view($params = []) {
         return url_helpers::url_view($this->att, $params);
     }
 
@@ -129,10 +134,9 @@ class report_data implements renderable {
      * @param array $params
      * @return moodle_url
      */
-    public function url($params=[]) {
+    public function url($params = []) {
         $params = array_merge($params, $this->pageparams->get_significant_params());
 
         return $this->att->url_report($params);
     }
-
 }

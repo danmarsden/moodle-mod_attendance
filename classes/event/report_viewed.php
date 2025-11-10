@@ -38,7 +38,6 @@ namespace mod_attendance\event;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class report_viewed extends \core\event\base {
-
     /**
      * Init method.
      */
@@ -84,5 +83,4 @@ class report_viewed extends \core\event\base {
     public static function get_objectid_mapping() {
         return ['db' => 'attendance', 'restore' => 'attendance'];
     }
-
 }

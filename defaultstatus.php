@@ -23,10 +23,10 @@
  */
 
 
-require_once(__DIR__.'/../../config.php');
-require_once($CFG->libdir.'/adminlib.php');
-require_once($CFG->dirroot.'/mod/attendance/lib.php');
-require_once($CFG->dirroot.'/mod/attendance/locallib.php');
+require_once(__DIR__ . '/../../config.php');
+require_once($CFG->libdir . '/adminlib.php');
+require_once($CFG->dirroot . '/mod/attendance/lib.php');
+require_once($CFG->dirroot . '/mod/attendance/locallib.php');
 
 $action         = optional_param('action', null, PARAM_INT);
 $statusid       = optional_param('statusid', null, PARAM_INT);
@@ -79,7 +79,7 @@ switch ($action) {
 
         $message = get_string('deletecheckfull', 'attendance', get_string('variable', 'attendance'));
         $message .= str_repeat(html_writer::empty_tag('br'), 2);
-        $message .= $status->acronym.': '.
+        $message .= $status->acronym . ': ' .
             ($status->description ? $status->description : get_string('nodescription', 'attendance'));
         $cancelurl = new moodle_url('/mod/attendance/defaultstatus.php');
         $confirmurl = $url;
@@ -122,9 +122,18 @@ switch ($action) {
             if (!isset($availablebeforesession[$id])) {
                 $availablebeforesession[$id] = 0;
             }
-            $errors[$id] = attendance_update_status($status, $acronym[$id], $description[$id], $grade[$id],
-                                             null, null, null, $studentavailability[$id], $availablebeforesession[$id],
-                                             $setunmarked);
+            $errors[$id] = attendance_update_status(
+                $status,
+                $acronym[$id],
+                $description[$id],
+                $grade[$id],
+                null,
+                null,
+                null,
+                $studentavailability[$id],
+                $availablebeforesession[$id],
+                $setunmarked
+            );
         }
         echo $OUTPUT->notification(get_string('eventstatusupdated', 'attendance'), 'success');
 

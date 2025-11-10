@@ -29,7 +29,6 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class restore_attendance_activity_structure_step extends restore_activity_structure_step {
-
     /**
      * Define the structure of the restore workflow.
      *
@@ -44,17 +43,25 @@ class restore_attendance_activity_structure_step extends restore_activity_struct
         // XML interesting paths - non-user data.
         $paths[] = new restore_path_element('attendance', '/activity/attendance');
 
-        $paths[] = new restore_path_element('attendance_status',
-                       '/activity/attendance/statuses/status');
+        $paths[] = new restore_path_element(
+            'attendance_status',
+            '/activity/attendance/statuses/status'
+        );
 
-        $paths[] = new restore_path_element('attendance_warning',
-            '/activity/attendance/warnings/warning');
+        $paths[] = new restore_path_element(
+            'attendance_warning',
+            '/activity/attendance/warnings/warning'
+        );
 
-        $paths[] = new restore_path_element('attendance_session',
-                       '/activity/attendance/sessions/session');
+        $paths[] = new restore_path_element(
+            'attendance_session',
+            '/activity/attendance/sessions/session'
+        );
 
-        $paths[] = new restore_path_element('customfield',
-                       '/activity/attendance/customfields/customfield');
+        $paths[] = new restore_path_element(
+            'customfield',
+            '/activity/attendance/customfields/customfield'
+        );
 
         // End here if no-user data has been selected.
         if (!$userinfo) {
@@ -62,8 +69,10 @@ class restore_attendance_activity_structure_step extends restore_activity_struct
         }
 
         // XML interesting paths - user data.
-        $paths[] = new restore_path_element('attendance_log',
-                       '/activity/attendance/sessions/session/logs/log');
+        $paths[] = new restore_path_element(
+            'attendance_log',
+            '/activity/attendance/sessions/session/logs/log'
+        );
 
         // Return the paths wrapped into standard activity structure.
         return $this->prepare_activity_structure($paths);

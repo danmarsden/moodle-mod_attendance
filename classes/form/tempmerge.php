@@ -43,11 +43,19 @@ class tempmerge extends \moodleform {
         $context = \context_course::instance($COURSE->id);
         $userfieldsapi = \core_user\fields::for_name();
         $namefields = $userfieldsapi->get_sql('u', false, '', '', false)->selects;
-        $students = get_enrolled_users($context, 'mod/attendance:canbelisted', 0, 'u.id,'.$namefields.',u.email',
-                                       'u.lastname, u.firstname', 0, 0, true);
+        $students = get_enrolled_users(
+            $context,
+            'mod/attendance:canbelisted',
+            0,
+            'u.id,' . $namefields . ',u.email',
+            'u.lastname, u.firstname',
+            0,
+            0,
+            true
+        );
         $partarray = [];
         foreach ($students as $student) {
-            $partarray[$student->id] = fullname($student).' ('.$student->email.')';
+            $partarray[$student->id] = fullname($student) . ' (' . $student->email . ')';
         }
 
         $mform = $this->_form;

@@ -25,7 +25,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 define('AJAX_SCRIPT', true);
-require_once(dirname(__FILE__).'/../../config.php');
+require_once(dirname(__FILE__) . '/../../config.php');
 
 $session = required_param('session', PARAM_INT);
 $session = $DB->get_record('attendance_sessions', ['id' => $session], '*', MUST_EXIST);
@@ -47,8 +47,10 @@ $PAGE->set_context(context_system::instance());
 $data->heading = get_string('passwordgrp', 'attendance');
 if (isset($session->includeqrcode) && $session->includeqrcode == 1) {
     $studentattendancepage = '/mod/attendance/password.php?session=' . $session->id;
-    $data->text = html_writer::tag('p', html_writer::link($CFG->wwwroot . $studentattendancepage,
-                                   get_string('showqrcode', 'attendance')));
+    $data->text = html_writer::tag('p', html_writer::link(
+        $CFG->wwwroot . $studentattendancepage,
+        get_string('showqrcode', 'attendance')
+    ));
 } else {
     $data->text = html_writer::span($session->studentpassword, 'student-password');
 }

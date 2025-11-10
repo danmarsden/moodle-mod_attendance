@@ -41,7 +41,6 @@ require_once($CFG->libdir . '/csvlib.class.php');
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class sessions extends moodleform {
-
     /**
      * Define the form - called by parent constructor
      */

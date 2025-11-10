@@ -35,7 +35,6 @@ require_once($CFG->libdir . '/grouplib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class auto_mark extends \core\task\scheduled_task {
-
     /**
      * Returns localised general event name.
      *
@@ -68,16 +67,22 @@ class auto_mark extends \core\task\scheduled_task {
                 $cacheatt[$session->attendanceid] = $DB->get_record('attendance', ['id' => $session->attendanceid]);
             }
             if (empty($cachecm[$session->attendanceid])) {
-                $cachecm[$session->attendanceid] = get_coursemodule_from_instance('attendance',
-                    $session->attendanceid, $cacheatt[$session->attendanceid]->course);
+                $cachecm[$session->attendanceid] = get_coursemodule_from_instance(
+                    'attendance',
+                    $session->attendanceid,
+                    $cacheatt[$session->attendanceid]->course
+                );
             }
             $courseid = $cacheatt[$session->attendanceid]->course;
             if (empty($cachecourse[$courseid])) {
                 $cachecourse[$courseid] = $DB->get_record('course', ['id' => $courseid]);
             }
-            \mod_attendance\local\automark::session($session, $cachecourse[$courseid], $cachecm[$session->attendanceid],
-                                                    $cacheatt[$session->attendanceid]);
-
+            \mod_attendance\local\automark::session(
+                $session,
+                $cachecourse[$courseid],
+                $cachecm[$session->attendanceid],
+                $cacheatt[$session->attendanceid]
+            );
         }
     }
 }

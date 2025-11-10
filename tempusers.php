@@ -22,9 +22,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(__FILE__).'/../../config.php');
-require_once($CFG->libdir.'/formslib.php');
-require_once($CFG->dirroot.'/mod/attendance/locallib.php');
+require_once(dirname(__FILE__) . '/../../config.php');
+require_once($CFG->libdir . '/formslib.php');
+require_once($CFG->dirroot . '/mod/attendance/locallib.php');
 
 $id = required_param('id', PARAM_INT);
 
@@ -39,7 +39,7 @@ require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
 require_capability('mod/attendance:managetemporaryusers', $context);
 
-$PAGE->set_title($course->shortname.": ".$att->name.' - '.get_string('tempusers', 'attendance'));
+$PAGE->set_title($course->shortname . ": " . $att->name . ' - ' . get_string('tempusers', 'attendance'));
 $PAGE->set_heading($course->fullname);
 $PAGE->force_settings_menu(true);
 $PAGE->set_cacheable(true);
@@ -59,8 +59,8 @@ if ($data = $mform->get_data()) {
     $user->auth = 'manual';
     $user->confirmed = 1;
     $user->deleted = 1;
-    $user->email = time().'@attendance.danmarsden.com';
-    $user->username = time().'@attendance.danmarsden.com';
+    $user->email = time() . '@attendance.danmarsden.com';
+    $user->username = time() . '@attendance.danmarsden.com';
     $user->idnumber = 'tempghost';
     $user->mnethostid = $CFG->mnet_localhost_id;
     $studentid = $DB->insert_record('user', $user);
@@ -84,7 +84,7 @@ $mform->display();
 $tempusers = $DB->get_records('attendance_tempusers', ['courseid' => $course->id], 'fullname, email');
 
 echo '<div>';
-echo '<p style="margin-left:10%;">'.get_string('tempuserslist', 'attendance').'</p>';
+echo '<p style="margin-left:10%;">' . get_string('tempuserslist', 'attendance') . '</p>';
 if ($tempusers) {
     attendance_print_tempusers($tempusers, $att);
 }
@@ -99,12 +99,12 @@ echo $output->footer($course);
  */
 function attendance_print_tempusers($tempusers, mod_attendance_structure $att) {
     echo '<p></p>';
-    echo '<table border="1" bordercolor="#EEEEEE" style="background-color:#fff" cellpadding="2" align="center"'.
-          'width="80%" summary="'.get_string('temptable', 'attendance').'"><tr>';
-    echo '<th class="header">'.get_string('tusername', 'attendance').'</th>';
-    echo '<th class="header">'.get_string('tuseremail', 'attendance').'</th>';
-    echo '<th class="header">'.get_string('tcreated', 'attendance').'</th>';
-    echo '<th class="header">'.get_string('tactions', 'attendance').'</th>';
+    echo '<table border="1" bordercolor="#EEEEEE" style="background-color:#fff" cellpadding="2" align="center"' .
+          'width="80%" summary="' . get_string('temptable', 'attendance') . '"><tr>';
+    echo '<th class="header">' . get_string('tusername', 'attendance') . '</th>';
+    echo '<th class="header">' . get_string('tuseremail', 'attendance') . '</th>';
+    echo '<th class="header">' . get_string('tcreated', 'attendance') . '</th>';
+    echo '<th class="header">' . get_string('tactions', 'attendance') . '</th>';
     echo '</tr>';
 
     $even = false; // Used to colour rows.
@@ -115,17 +115,15 @@ function attendance_print_tempusers($tempusers, mod_attendance_structure $att) {
             echo '<tr>';
         }
         $even = !$even;
-        echo '<td>'.format_string($tempuser->fullname).'</td>';
-        echo '<td>'.format_string($tempuser->email).'</td>';
-        echo '<td>'.userdate($tempuser->created, get_string('strftimedatetime')).'</td>';
+        echo '<td>' . format_string($tempuser->fullname) . '</td>';
+        echo '<td>' . format_string($tempuser->email) . '</td>';
+        echo '<td>' . userdate($tempuser->created, get_string('strftimedatetime')) . '</td>';
         $params = ['userid' => $tempuser->id];
         $editlink = html_writer::link($att->url_tempedit($params), get_string('edituser', 'attendance'));
         $deletelink = html_writer::link($att->url_tempdelete($params), get_string('deleteuser', 'attendance'));
         $mergelink = html_writer::link($att->url_tempmerge($params), get_string('mergeuser', 'attendance'));
-        echo '<td>'.$editlink.' | '.$deletelink.' | '.$mergelink.'</td>';
+        echo '<td>' . $editlink . ' | ' . $deletelink . ' | ' . $mergelink . '</td>';
         echo '</tr>';
     }
     echo '</table>';
 }
-
-

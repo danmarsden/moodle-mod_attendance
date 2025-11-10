@@ -34,7 +34,6 @@ namespace mod_attendance\analytics\indicator;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class social_breadth extends activity_base {
-
     /**
      * Returns the name.
      *
