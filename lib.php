@@ -320,11 +320,11 @@ function attendance_user_outline($course, $user, $mod, $attendance) {
 function attendance_user_complete($course, $user, $mod, $attendance) {
     global $CFG;
 
-    require_once(dirname(__FILE__) . '/renderhelpers.php');
     require_once($CFG->libdir . '/gradelib.php');
 
     if (has_capability('mod/attendance:canbelisted', $mod->context, $user->id)) {
-        echo construct_full_user_stat_html_table($attendance, $user);
+            $summary = new mod_attendance_summary($attendance->id, $user->id);
+            echo attendance_construct_user_data_stat($summary->get_all_sessions_summary_for($user->id), ATT_VIEW_ALL);
     }
 }
 

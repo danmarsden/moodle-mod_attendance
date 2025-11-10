@@ -25,7 +25,6 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/gradelib.php');
-require_once(dirname(__FILE__) . '/renderhelpers.php');
 
 define('ATT_VIEW_DAYS', 1);
 define('ATT_VIEW_WEEKS', 2);
@@ -1493,4 +1492,82 @@ function attendance_return_passwords($session) {
 
     $sql = 'SELECT * FROM {attendance_rotate_passwords} WHERE attendanceid = ? AND expirytime > ? ORDER BY expirytime ASC';
     return json_encode($DB->get_records_sql($sql, ['attendanceid' => $session->id, time()], $strictness = IGNORE_MISSING));
+}
+
+/**
+ * Used to construct user summary.
+ *
+ * @param stdclass $usersummary - data for summary.
+ * @param int $view - ATT_VIEW_ALL|ATT_VIEW_
+ * @return string.
+ */
+function attendance_construct_user_data_stat($usersummary, $view) {
+    $stattable = new html_table();
+    $stattable->attributes['class'] = 'attlist table-reboot';
+    $row = new html_table_row();
+    $row->attributes['class'] = 'normal';
+    $row->cells[] = get_string('sessionscompleted', 'attendance') . ':';
+    $row->cells[] = $usersummary->numtakensessions;
+    $stattable->data[] = $row;
+
+    $row = new html_table_row();
+    $row->attributes['class'] = 'normal';
+    $row->cells[] = get_string('pointssessionscompleted', 'attendance') . ':';
+    $row->cells[] = $usersummary->pointssessionscompleted;
+    $stattable->data[] = $row;
+
+    $row = new html_table_row();
+    $row->attributes['class'] = 'normal';
+    $row->cells[] = get_string('percentagesessionscompleted', 'attendance') . ':';
+    $row->cells[] = $usersummary->percentagesessionscompleted;
+    $stattable->data[] = $row;
+
+    if ($view == ATT_VIEW_ALL) {
+        $row = new html_table_row();
+        $row->attributes['class'] = 'highlight';
+        $row->cells[] = get_string('sessionstotal', 'attendance') . ':';
+        $row->cells[] = $usersummary->numallsessions;
+        $stattable->data[] = $row;
+
+        $row = new html_table_row();
+        $row->attributes['class'] = 'highlight';
+        $row->cells[] = get_string('pointsallsessions', 'attendance') . ':';
+        $row->cells[] = $usersummary->pointsallsessions;
+        $stattable->data[] = $row;
+
+        $row = new html_table_row();
+        $row->attributes['class'] = 'highlight';
+        $row->cells[] = get_string('percentageallsessions', 'attendance') . ':';
+        $row->cells[] = $usersummary->allsessionspercentage;
+        $stattable->data[] = $row;
+
+        $row = new html_table_row();
+        $row->attributes['class'] = 'normal';
+        $row->cells[] = get_string('maxpossiblepoints', 'attendance') . ':';
+        $row->cells[] = $usersummary->maxpossiblepoints;
+        $stattable->data[] = $row;
+
+        $row = new html_table_row();
+        $row->attributes['class'] = 'normal';
+        $row->cells[] = get_string('maxpossiblepercentage', 'attendance') . ':';
+        $row->cells[] = $usersummary->maxpossiblepercentage;
+        $stattable->data[] = $row;
+    }
+
+    return html_writer::table($stattable);
+}
+
+/**
+ * Returns html user summary
+ *
+ * @param stdclass $attendance - attendance record.
+ * @param stdclass $user - user record
+ * @deprecated since 5.0
+ * @return string.
+ *
+ */
+function construct_full_user_stat_html_table($attendance, $user) {
+    debugging('function construct_full_user_stat_html_table is deprecated, please make sure you are using the latest Attendance block.', DEBUG_DEVELOPER);
+    $summary = new mod_attendance_summary($attendance->id, $user->id);
+    return attendance_construct_user_data_stat($summary->get_all_sessions_summary_for($user->id), ATT_VIEW_ALL);
 }

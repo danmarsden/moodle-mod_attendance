@@ -26,7 +26,6 @@ define('NO_OUTPUT_BUFFERING', true);
 
 require_once(dirname(__FILE__) . '/../../config.php');
 require_once(dirname(__FILE__) . '/locallib.php');
-require_once(dirname(__FILE__) . '/renderhelpers.php');
 require_once($CFG->libdir . '/formslib.php');
 
 $id             = required_param('id', PARAM_INT);
@@ -183,7 +182,7 @@ if ($formdata = $mform->get_data()) {
                 }
             }
 
-            $cellsgenerator = new user_sessions_cells_text_generator($reportdata, $user);
+            $cellsgenerator = new \mod_attendance\output\user_sessions_cells_text($reportdata, $user);
             $data->table[$i] = array_merge($data->table[$i], $cellsgenerator->get_cells(isset($formdata->includeremarks)));
 
             $usersummary = $reportdata->summary->get_taken_sessions_summary_for($user->id);

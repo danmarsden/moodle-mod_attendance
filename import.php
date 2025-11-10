@@ -28,7 +28,6 @@ define('NO_OUTPUT_BUFFERING', true);
 require_once(dirname(__FILE__) . '/../../config.php');
 require_once(dirname(__FILE__) . '/locallib.php');
 require_once(dirname(__FILE__) . '/renderables.php');
-require_once(dirname(__FILE__) . '/renderhelpers.php');
 require_once($CFG->libdir . '/formslib.php');
 
 $id = required_param('id', PARAM_INT);

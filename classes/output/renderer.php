@@ -31,7 +31,6 @@ use mod_attendance_page_with_filter_controls;
 use mod_attendance_preferences_page_params;
 use mod_attendance_structure;
 use mod_attendance_sessions_page_params;
-use user_sessions_cells_html_generator;
 use html_table;
 use html_table_row;
 use html_table_cell;
@@ -1229,7 +1228,7 @@ class renderer extends plugin_renderer_base {
             $o .= $this->render_filter_controls($userdata->filtercontrols);
             $o .= $this->construct_user_sessions_log($userdata);
             $o .= html_writer::empty_tag('hr');
-            $o .= construct_user_data_stat(
+            $o .= attendance_construct_user_data_stat(
                 $userdata->summary->get_all_sessions_summary_for($userdata->user->id),
                 $userdata->pageparams->view
             );
@@ -2622,7 +2621,7 @@ class renderer extends plugin_renderer_base {
         foreach ($reportdata->users as $user) {
             $row = new html_table_row();
             if ($showsessiondetails && !empty($reportdata->sessions)) {
-                $cellsgenerator = new user_sessions_cells_html_generator($reportdata, $user);
+                $cellsgenerator = new user_sessions_cells_html($reportdata, $user);
                 foreach ($cellsgenerator->get_cells(true) as $cell) {
                     if ($cell instanceof html_table_cell) {
                         $cell->attributes['class'] .= ' center';
