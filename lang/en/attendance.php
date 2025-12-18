@@ -44,6 +44,7 @@ $string['allcourses'] = 'All courses';
 $string['allowupdatestatus'] = 'Allow students to update own attendance';
 $string['allowupdatestatus_desc'] = 'If checked, students will be able to update their attendance for a session after they have already self-reported it. ';
 $string['allowupdatestatus_help'] = 'If checked students will be able to update their attendance for a session after they have already self-reported it. ';
+$string['allfieldsrequired'] = 'The message cannot be empty.';
 $string['allpast'] = 'All past';
 $string['allsessions'] = 'All sessions';
 $string['allsessionstotals'] = 'Totals for selected sessions';
