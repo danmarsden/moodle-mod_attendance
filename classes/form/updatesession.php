@@ -60,6 +60,7 @@ class updatesession extends \moodleform {
         $endminute = floor(($endtime - $endhour * HOURSECS) / MINSECS);
 
         $data = [
+            'id' => $sess->id,
             'sessiondate' => $sess->sessdate,
             'sestime' => ['starthour' => $starthour, 'startminute' => $startminute,
             'endhour' => $endhour, 'endminute' => $endminute, ],
@@ -239,9 +240,10 @@ class updatesession extends \moodleform {
         // Add custom field data to form.
         $handler = \mod_attendance\customfield\session_handler::create();
         $handler->instance_form_definition($mform, $sess->id);
-        $data['id'] = $sess->id;
-        $data = $handler->instance_form_before_set_data_array($data);
-
+        $instance = new \stdClass();
+        $instance->id = $sess->id;
+        $handler->instance_form_before_set_data($instance);
+        $data = array_merge($data, (array) $instance);
         $mform->setDefaults($data);
         $this->add_action_buttons(true);
     }

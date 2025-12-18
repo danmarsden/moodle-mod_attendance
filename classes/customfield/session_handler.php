@@ -179,30 +179,6 @@ class session_handler extends \core_customfield\handler {
     }
 
     /**
-     * Attendance session form a bit non-standard, use custom function to populate array of existing data.
-     *
-     * Example:
-     *   $instance = $DB->get_record(...);
-     *   // .... prepare editor, filemanager, add tags, etc.
-     *   $handler->instance_form_before_set_data($instance);
-     *   $form->set_data($instance);
-     *
-     * @param array $instance the instance that has custom fields, if 'id' attribute is present the custom
-     *    fields for this instance will be added, otherwise the default values will be added.
-     * @return array
-     */
-    public function instance_form_before_set_data_array(array $instance) {
-        $instanceid = !empty($instance['id']) ? $instance['id'] : 0;
-        $fields = api::get_instance_fields_data($this->get_editable_fields($instanceid), $instanceid);
-
-        foreach ($fields as $formfield) {
-            foreach ($fields as $formfield) {
-                $instance[$formfield->get_form_element_name()] = $formfield->get_value();
-            }
-        }
-        return $instance;
-    }
-    /**
      * Get list of custom fields that contain data in this attendance activity (hides fields that do not store anything)
      *
      * @param int $instanceid id of the record to get the context for
