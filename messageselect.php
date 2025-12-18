@@ -78,6 +78,11 @@ if (empty($SESSION->emailselect[$id]) || $messagebody) {
     $SESSION->emailselect[$id] = ['messagebody' => $messagebody];
 }
 $messagebody = $SESSION->emailselect[$id]['messagebody'];
+
+if (isset($messagebody['text'])) {
+    $messagebody = $messagebody['text'];
+}
+
 $count = 0;
 if ($data = data_submitted()) {
     require_sesskey();
