@@ -2681,7 +2681,14 @@ class renderer extends plugin_renderer_base {
      * @param boolean $nowrap true means the cell text must be shown with nowrap option
      * @return html_table_cell a html table cell
      */
-    protected function build_header_cell($cell, $contrast = false, $center = true, $colspan = null, $rowspan = null, $nowrap = true) {
+    protected function build_header_cell(
+        $cell,
+        $contrast = false,
+        $center = true,
+        $colspan = null,
+        $rowspan = null,
+        $nowrap = true
+    ) {
         $classes = ['header', 'bottom'];
         if ($center) {
             $classes[] = 'center';
