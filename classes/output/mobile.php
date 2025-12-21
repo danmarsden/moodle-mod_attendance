@@ -170,7 +170,8 @@ class mobile {
 
                     // Check if Status already recorded.
                     if (!$isteacher && !empty($userdata->sessionslog['c' . $sess->id]->statusid)) {
-                        $html['currentstatus'] = $userdata->statuses[$userdata->sessionslog['c' . $sess->id]->statusid]->description;
+                        $html['currentstatus'] = $userdata->statuses[$userdata->sessionslog['c' .
+                        $sess->id]->statusid]->description;
                     } else {
                         // Status has not been recorded - If student, check auto-assign and form data.
                         $html['sessid'] = $sess->id;

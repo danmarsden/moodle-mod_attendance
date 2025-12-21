@@ -36,7 +36,10 @@ use stdClass;
  * @copyright 2018 Cameron Ball <cameron@cameron1729.xyz>
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-final class provider implements \core_privacy\local\request\core_userlist_provider, \core_privacy\local\request\plugin\provider, \core_privacy\local\metadata\provider {
+final class provider implements
+    \core_privacy\local\request\core_userlist_provider,
+    \core_privacy\local\request\plugin\provider,
+    \core_privacy\local\metadata\provider {
     /**
      * Returns meta data about this system.
      *

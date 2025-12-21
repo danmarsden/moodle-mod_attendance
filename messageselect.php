@@ -144,7 +144,8 @@ if (!empty($messagebody) && !$edit && !$deluser && ($preview || $send)) {
 ';
             echo "<h3>" . get_string('previewhtml', 'mod_attendance') . "</h3>";
             echo "<div class=\"messagepreview\">\n" . format_text($messagebody, $format) . "\n</div>\n";
-            echo '<p align="center"><input type="submit" name="send" value="' . get_string('sendmessage', 'message') . '" />' . "\n";
+            echo '<p align="center"><input type="submit" name="send" value="' .
+            get_string('sendmessage', 'message') . '" />' . "\n";
             echo '<input type="submit" name="edit" value="' . get_string('update') . '" /></p>';
             echo "\n</form>";
         } else if (!empty($send)) {
@@ -167,7 +168,8 @@ if (!empty($messagebody) && !$edit && !$deluser && ($preview || $send)) {
                 }
                 echo '</ul>';
             }
-            echo '<p align="center"><a href="index.php?id=' . $id . '">' . get_string('backtoparticipants', 'mod_attendance') . '</a></p>';
+            echo '<p align="center"><a href="index.php?id=' . $id . '">' . get_string('backtoparticipants', 'mod_attendance') .
+            '</a></p>';
         }
         echo $OUTPUT->footer();
         exit;
