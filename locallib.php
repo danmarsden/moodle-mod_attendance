@@ -1567,7 +1567,8 @@ function attendance_construct_user_data_stat($usersummary, $view) {
  *
  */
 function construct_full_user_stat_html_table($attendance, $user) {
-    debugging('function construct_full_user_stat_html_table is deprecated, please make sure you are using the latest Attendance block.', DEBUG_DEVELOPER);
+    debugging('function construct_full_user_stat_html_table is deprecated, please make sure you are using the ' .
+    'latest Attendance block.', DEBUG_DEVELOPER);
     $summary = new mod_attendance_summary($attendance->id, $user->id);
     return attendance_construct_user_data_stat($summary->get_all_sessions_summary_for($user->id), ATT_VIEW_ALL);
 }
