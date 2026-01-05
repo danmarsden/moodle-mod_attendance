@@ -256,6 +256,11 @@ class addsession extends moodleform {
 
             $mform->addElement('select', 'automarkcmid', get_string('selectactivity', 'attendance'), $automarkcmoptions);
             $mform->setType('automarkcmid', PARAM_INT);
+            $PAGE->requires->css_code('
+                #fitem_id_automarkcmid {
+                    display: none;
+                }
+            ');
             $mform->hideif('automarkcmid', 'automark', 'neq', '3');
         }
 
