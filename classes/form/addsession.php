@@ -252,16 +252,14 @@ class addsession extends moodleform {
             $mform->addHelpButton('automark', 'automark', 'attendance');
             $mform->setDefault('automark', $this->_customdata['att']->automark);
 
-            $automarkcmoptions = attendance_get_coursemodulenames($course->id);
+            // A validation has been added to prevent the Select activity field from appearing briefly during page load, 
+            // ensuring correct visibility behaviour.
+            if ($this->_customdata['att']->automark === ATTENDANCE_AUTOMARK_ACTIVITYCOMPLETION) {
+                $automarkcmoptions = attendance_get_coursemodulenames($course->id);
 
-            $mform->addElement('select', 'automarkcmid', get_string('selectactivity', 'attendance'), $automarkcmoptions);
-            $mform->setType('automarkcmid', PARAM_INT);
-            $PAGE->requires->css_code('
-                #fitem_id_automarkcmid {
-                    display: none;
-                }
-            ');
-            $mform->hideif('automarkcmid', 'automark', 'neq', '3');
+                $mform->addElement('select', 'automarkcmid', get_string('selectactivity', 'attendance'), $automarkcmoptions);
+                $mform->setType('automarkcmid', PARAM_INT);
+            }
         }
 
         if (!empty($studentscanmark)) {
