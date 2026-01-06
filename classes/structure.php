@@ -75,6 +75,9 @@ class mod_attendance_structure {
     /** @var string subnets (IP range) for student self selection. */
     public $subnet;
 
+    /** @var bool flag set when students can mark after session time. */
+    public $studentscanmarkaftersessiontime;
+
     /** @var string subnets (IP range) for student self selection. */
     public $automark;
 

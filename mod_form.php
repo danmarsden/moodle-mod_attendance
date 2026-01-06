@@ -70,6 +70,10 @@ class mod_attendance_mod_form extends moodleform_mod {
             $mform->setType('subnet', PARAM_TEXT);
         }
 
+        $mform->addElement('header', 'otheroptions', get_string('otheroptions', 'attendance'));
+        $mform->addElement('checkbox', 'studentscanmarkaftersessiontime', get_string('studentscanmarkaftersessiontime', 'attendance'));
+        $mform->addHelpButton('studentscanmarkaftersessiontime', 'studentscanmarkaftersessiontime', 'attendance');
+
         $this->add_action_buttons();
     }
 }

@@ -659,8 +659,12 @@ function attendance_can_student_mark($sess, $log = true) {
     $attconfig = get_config('attendance');
 
     if (!empty($attconfig->studentscanmark) && !empty($sess->studentscanmark)) {
+        $attendanceid = $DB->get_field('attendance_sessions', 'attendanceid', ['id' => $sess->id]);
+        $attendance = $DB->get_record('attendance', ['id' => $attendanceid]);
+
         if (
             empty($attconfig->studentscanmarksessiontime) ||
+            ! empty( $attendance->studentscanmarkaftersessiontime ) ||
             (attendance_is_status_availablebeforesession($sess->id)) && time() < $sess->sessdate
         ) {
             $canmark = true;

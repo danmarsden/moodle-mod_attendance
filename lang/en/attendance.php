@@ -383,6 +383,7 @@ $string['numsessionstaken'] = 'Number of sessions taken';
 $string['olddate'] = 'Old date';
 $string['onactivitycompletion'] = 'On activity completion';
 $string['onlyselectedusers'] = 'Export specific users';
+$string['otheroptions'] = 'Other options';
 $string['overallsessions'] = 'Over all sessions';
 $string['overallsessions_help'] = 'Shows statistics for all sessions including those not yet taken (past and future):
 <ul>
@@ -605,6 +606,8 @@ $string['studentscanmarksessiontime'] = 'Students record attendance during sessi
 $string['studentscanmarksessiontime_desc'] = 'If checked students can only record their attendance during the session.';
 $string['studentscanmarksessiontimeend'] = 'Session end (minutes)';
 $string['studentscanmarksessiontimeend_desc'] = 'If the session does not have an end time, how many minutes should the session be available for students to record their attendance.';
+$string['studentscanmarkaftersessiontime'] = 'Students record attendance after session time';
+$string['studentscanmarkaftersessiontime_help'] = 'If checked students can record their attendance after the session has ended.';
 $string['studentsearlyopentime'] = 'Open session early for marking';
 $string['studentsearlyopentime_help'] = 'This allows teachers to open the session early, alowing for attendance to be taken before the real start time.';
 $string['submit'] = 'Submit';

@@ -112,6 +112,8 @@ function attendance_add_instance($attendance) {
         $attendance->grade = 100;
     }
 
+    $attendance->studentscanmarkaftersessiontime = !isset($attendance->studentscanmarkaftersessiontime) ? null : 1;
+
     $attendance->id = $DB->insert_record('attendance', $attendance);
 
     att_add_default_statuses($attendance->id);
@@ -133,7 +135,8 @@ function attendance_update_instance($attendance) {
     global $DB;
 
     $attendance->timemodified = time();
-    $attendance->id = $attendance->instance;
+    $attendance->id = $attendance->instance;    
+    $attendance->studentscanmarkaftersessiontime = !isset($attendance->studentscanmarkaftersessiontime) ? null : 1;
 
     if (! $DB->update_record('attendance', $attendance)) {
         return false;

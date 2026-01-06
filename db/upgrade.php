@@ -860,5 +860,19 @@ function xmldb_attendance_upgrade($oldversion = 0) {
         upgrade_mod_savepoint(true, 2023032800, 'attendance');
     }
 
+    if ($oldversion < 2026010600) {
+        // Define field studentscanmarkaftersessiontime to be added to attendance.
+        $table = new xmldb_table('attendance');
+        $field = new xmldb_field('studentscanmarkaftersessiontime', XMLDB_TYPE_INTEGER, '1', null, null, null, null, 'subnet');
+
+        // Conditionally launch add field studentavailability.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Attendance savepoint reached.
+        upgrade_mod_savepoint(true, 2026010600, 'attendance');
+    }
+
     return true;
 }
