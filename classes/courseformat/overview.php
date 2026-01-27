@@ -55,7 +55,7 @@ class overview extends \core_courseformat\activityoverviewbase {
         $content = new action_link(
             url: $url,
             text: $text,
-            attributes: ['class' => button::BODY_OUTLINE->classes()],
+            attributes: ['class' => "btn btn-outline-secondary"],
         );
 
         return new overviewitem(
