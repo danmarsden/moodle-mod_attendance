@@ -13,7 +13,8 @@ The following git branches are supported:
 | Moodle version        | Branch            |
 |-----------------------|-------------------|
 | Moodle 4.5            | MOODLE_405_STABLE |
-| Moodle 5.0 - 5.1      | MOODLE_500_STABLE |
+| Moodle 5.0            | MOODLE_500_STABLE |
+| Moodle 5.1            | MOODLE_501_STABLE |
 
 # PURPOSE
 The Attendance module allows teachers to maintain a record of attendance, replacing or supplementing a paper-based attendance register.
