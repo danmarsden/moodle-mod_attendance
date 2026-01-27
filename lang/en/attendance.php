@@ -338,12 +338,21 @@ $string['mobilesessionto_help'] = 'Allows the list of sessions to be restricted 
 $string['mobilesettings'] = 'Mobile app settings';
 $string['mobilesettings_help'] = 'These settings control Moodle mobile app behaviour';
 $string['modulename'] = 'Attendance';
-$string['modulename_help'] = 'The attendance activity module enables a teacher to take attendance during class and students to view their own attendance record.
+$string['modulename_help'] = '###### Key features
+- Enables teachers to take attendance during class sessions
+- Allows creation of multiple sessions for flexible scheduling
+- Customizable attendance statuses (e.g., Present, Absent, Late, Excused)
+- Students can view their own attendance records
+- Provides detailed reports for individual students or the entire class
 
-The teacher can create multiple sessions and can mark the attendance status as "Present", "Absent", "Late", or "Excused" or modify the statuses to suit their needs.
-
-Reports are available for the entire class or individual students.';
+###### Ways to use it
+- Track attendance for in-person or online classes
+- Monitor student participation and punctuality
+- Generate attendance reports for grading or compliance purposes
+- Customize statuses to fit specific course requirements
+- Share attendance data transparently with students';
 $string['modulenameplural'] = 'Attendances';
+$string['modulename_summary'] = 'Record and manage student attendance across sessions, while providing students access to their own attendance reports.';
 $string['months'] = 'Months';
 $string['moreattendance'] = 'Attendance has been successfully taken for this page';
 $string['moveleft'] = 'Move left';
