@@ -154,6 +154,7 @@ $string['currentlyselectedusers'] = 'Currently selected users';
 $string['customexportfields'] = 'Export custom user profile fields';
 $string['customexportfields_help'] = 'Extra custom user profile fields to expose in the export report.';
 $string['customfields'] = 'Custom session fields';
+$string['dailytotal'] = 'Daily Total';
 $string['date'] = 'Date';
 $string['days'] = 'Days';
 $string['defaultdisplaymode'] = 'Default display mode';

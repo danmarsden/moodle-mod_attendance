@@ -2187,29 +2187,170 @@ class renderer extends plugin_renderer_base {
         return $time;
     }
 
-    /**
-     * Render report data.
-     *
-     * @param report_data $reportdata
-     * @return string
+            /**
+     * Build AM and PM total rows (two separate rows)
      */
+    protected function get_daily_totals_rows(report_data $reportdata) {
+        if ($reportdata->pageparams->view !== ATT_VIEW_DAYS || empty($reportdata->sessions)) {
+            return [];
+        }
+
+        $amTotals = [];
+        $pmTotals = [];
+        $amPossible = 0;
+        $pmPossible = 0;
+
+        // Initialize counters for each status
+        foreach ($reportdata->statuses as $status) {
+            $amTotals[$status->acronym] = 0;
+            $pmTotals[$status->acronym] = 0;
+        }
+
+        // Count attendances per session and separate AM/PM
+        foreach ($reportdata->sessions as $sess) {
+            $isAM = (date('H', $sess->sessdate) < 12); // Before 12:00 = AM
+            $sessionStudentCount = 0;
+
+            foreach ($reportdata->users as $user) {
+                if (!empty($reportdata->sessionslog[$user->id][$sess->id])) {
+                    $statusid = $reportdata->sessionslog[$user->id][$sess->id]->statusid;
+                    if (isset($reportdata->statuses[$statusid])) {
+                        $acro = $reportdata->statuses[$statusid]->acronym;
+                        if ($isAM) {
+                            $amTotals[$acro]++;
+                        } else {
+                            $pmTotals[$acro]++;
+                        }
+                        $sessionStudentCount++;
+                    }
+                }
+            }
+
+            if ($isAM) {
+                $amPossible += $sessionStudentCount;
+            } else {
+                $pmPossible += $sessionStudentCount;
+            }
+        }
+
+        // Build AM summary text – single line
+        $amParts = [];
+        foreach ($reportdata->statuses as $status) {
+            $count = $amTotals[$status->acronym];
+            if ($count > 0) {
+                $perc = $amPossible > 0 ? round(($count / $amPossible) * 100) : 0;
+                $amParts[] = "{$status->description}: {$count}/{$amPossible} ({$perc}%)";
+            }
+        }
+        $amText = $amParts ? implode(' • ', $amParts) : 'No AM attendance recorded';
+
+        // Build PM summary text – single line
+        $pmParts = [];
+        foreach ($reportdata->statuses as $status) {
+            $count = $pmTotals[$status->acronym];
+            if ($count > 0) {
+                $perc = $pmPossible > 0 ? round(($count / $pmPossible) * 100) : 0;
+                $pmParts[] = "{$status->description}: {$count}/{$pmPossible} ({$perc}%)";
+            }
+        }
+        $pmText = $pmParts ? implode(' • ', $pmParts) : 'No PM attendance recorded';
+
+        $rows = [];
+
+        // Calculate correct colspan
+        $extrafields_count = 0;
+        if (!empty($reportdata->pageparams->showextrauserdetails)) {
+            $extrafields = \core_user\fields::for_identity($reportdata->att->context, true)->get_required_fields();
+            $extrafields_count = count($extrafields);
+        }
+
+        $colspan = 
+            $extrafields_count +
+            count($reportdata->statuses) +
+            3 +  // Sessions / Points / Percentage
+            ($reportdata->pageparams->showsessiondetails ? count($reportdata->sessions) : 1);
+
+        // Strong no-wrap style
+        $noWrapStyle = 'white-space: nowrap !important; word-break: keep-all !important; overflow: hidden !important; text-overflow: ellipsis !important;';
+
+        // ─────────────────────────────────────────────
+        //              AM TOTAL ROW
+        // ─────────────────────────────────────────────
+        if ($amPossible > 0) {
+            $amRow = new html_table_row();
+            $amRow->attributes['class'] = 'daily-total-row am-total-row';
+
+            $label = new html_table_cell('Session (AM) Total');
+            $label->header = true;
+            $amRow->cells[] = $label;
+
+            // Extra user fields columns (if enabled)
+            if (!empty($reportdata->pageparams->showextrauserdetails)) {
+                $extrafields = \core_user\fields::for_identity($reportdata->att->context, true)->get_required_fields();
+                foreach ($extrafields as $_) {
+                    $amRow->cells[] = new html_table_cell('');
+                }
+            }
+
+            // Summary cell
+            $amCell = new html_table_cell($amText);
+            $amCell->colspan = $colspan;
+            $amCell->attributes['class'] = 'daily-total-cell font-weight-bold';
+            $amCell->attributes['style'] = $noWrapStyle . ' padding: 12px 16px; text-align: left; background-color: #f8f9fa;';
+            $amRow->cells[] = $amCell;
+
+            $rows[] = $amRow;
+        }
+
+        // ─────────────────────────────────────────────
+        //              PM TOTAL ROW
+        // ─────────────────────────────────────────────
+        if ($pmPossible > 0) {
+            $pmRow = new html_table_row();
+            $pmRow->attributes['class'] = 'daily-total-row pm-total-row';
+
+            $label = new html_table_cell('Session (PM) Total');
+            $label->header = true;
+            $pmRow->cells[] = $label;
+
+            // Extra user fields columns (if enabled)
+            if (!empty($reportdata->pageparams->showextrauserdetails)) {
+                $extrafields = \core_user\fields::for_identity($reportdata->att->context, true)->get_required_fields();
+                foreach ($extrafields as $_) {
+                    $pmRow->cells[] = new html_table_cell('');
+                }
+            }
+
+            // Summary cell
+            $pmCell = new html_table_cell($pmText);
+            $pmCell->colspan = $colspan;
+            $pmCell->attributes['class'] = 'daily-total-cell font-weight-bold';
+            $pmCell->attributes['style'] = $noWrapStyle . ' padding: 12px 16px; text-align: left; background-color: #f8f9fa;';
+            $pmRow->cells[] = $pmCell;
+
+            $rows[] = $pmRow;
+        }
+
+        return $rows;
+    }
+    
+
     protected function render_report_data(report_data $reportdata) {
         global $COURSE;
-
-        // Initilise Javascript used to (un)check all checkboxes.
+    
+        // Initialise Javascript used to (un)check all checkboxes.
         $this->page->requires->js_init_call('M.mod_attendance.init_manage');
-
+    
         $table = new html_table();
-        $table->attributes['class'] = 'generaltable attwidth attreport table-reboot';
-
+        $table->attributes['class'] = 'generaltable attwidth attreport';
+    
         $userrows = $this->get_user_rows($reportdata);
-
         if ($reportdata->pageparams->view == ATT_VIEW_SUMMARY) {
             $sessionrows = [];
         } else {
             $sessionrows = $this->get_session_rows($reportdata);
         }
-
+    
         $setnumber = -1;
         $statusetcount = 0;
         foreach ($reportdata->statuses as $sts) {
@@ -2218,16 +2359,24 @@ class renderer extends plugin_renderer_base {
                 $setnumber = $sts->setnumber;
             }
         }
-
+    
         $acronymrows = $this->get_acronym_rows($reportdata, true);
         $startwithcontrast = $statusetcount % 2 == 0;
         $summaryrows = $this->get_summary_rows($reportdata, $startwithcontrast);
-
+    
         // Check if the user should be able to bulk send messages to other users on the course.
         $bulkmessagecapability = has_capability('moodle/course:bulkmessaging', $this->page->context);
-
+    
         // Extract rows from each part and collate them into one row each.
         $sessiondetailsleft = $reportdata->pageparams->sessiondetailspos == 'left';
+    
+        // Insert both AM and PM rows at the top
+        $dailyRows = $this->get_daily_totals_rows($reportdata);
+        foreach ($dailyRows as $row) {
+            $table->data[] = $row;
+        }
+    
+        // Add all student rows
         foreach ($userrows as $index => $row) {
             $summaryrow = isset($summaryrows[$index]->cells) ? $summaryrows[$index]->cells : [];
             $sessionrow = isset($sessionrows[$index]->cells) ? $sessionrows[$index]->cells : [];
@@ -2238,8 +2387,8 @@ class renderer extends plugin_renderer_base {
             }
             $table->data[] = $row;
         }
-
-        if ($bulkmessagecapability) { // Require that the user can bulk message users.
+    
+        if ($bulkmessagecapability) {
             // Display check boxes that will allow the user to send a message to the students that have been checked.
             $output = html_writer::empty_tag('input', ['name' => 'sesskey', 'type' => 'hidden', 'value' => sesskey()]);
             $output .= html_writer::empty_tag('input', ['name' => 'id', 'type' => 'hidden', 'value' => $COURSE->id]);
@@ -2250,8 +2399,8 @@ class renderer extends plugin_renderer_base {
             $output .= html_writer::tag(
                 'div',
                 html_writer::empty_tag('input', ['type' => 'submit',
-                                                                   'value' => get_string('messageselectadd'),
-                                                                   'class' => 'btn btn-secondary', ]),
+                    'value' => get_string('messageselectadd'),
+                    'class' => 'btn btn-secondary', ]),
                 ['class' => 'buttons']
             );
             $url = new moodle_url('/mod/attendance/messageselect.php');
