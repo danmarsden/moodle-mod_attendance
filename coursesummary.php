@@ -51,8 +51,8 @@ if (empty($category)) {
 }
 // Check permissions.
 require_capability('mod/attendance:viewsummaryreports', $context);
-
-$exportfilename = 'attendancecoursesummary.csv';
+//fix : suppression of the .csv at the end because it is added automatically so when dowload we have a file attendancecoursesummary.csv.csv 
+$exportfilename = 'attendancecoursesummary';
 
 $PAGE->set_url('/mod/attendance/coursesummary.php', ['category' => $category]);
 
@@ -60,7 +60,10 @@ $PAGE->set_heading($SITE->fullname);
 
 $table = new flexible_table('attendancecoursesummary');
 $table->define_baseurl($PAGE->url);
-
+//fix : clear the output buffer to ensure no content prevents the file dowload header from being sent 
+if ($download) {
+    ob_clean();
+}
 if (!$table->is_downloading($download, $exportfilename)) {
     echo $OUTPUT->header();
     $heading = get_string('coursesummary', 'mod_attendance');
