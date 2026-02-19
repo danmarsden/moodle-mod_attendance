@@ -52,7 +52,7 @@ if (empty($category)) {
 // Check permissions.
 require_capability('mod/attendance:viewsummaryreports', $context);
 
-$exportfilename = 'attendancecoursesummary.csv';
+$exportfilename = 'attendancecoursesummary';
 
 $PAGE->set_url('/mod/attendance/coursesummary.php', ['category' => $category]);
 
