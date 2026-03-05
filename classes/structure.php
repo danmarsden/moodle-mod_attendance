@@ -90,6 +90,15 @@ class mod_attendance_structure {
     /** @var int Position for the session detail columns related to summary columns.*/
     public $sessiondetailspos;
 
+    /** @var int|null Planned total sessions for this activity (for warning basis) */
+    public $plannedtotalsessions;
+
+    /** @var float|null Planned total hours for this activity (for warning basis) */
+    public $plannedtotalhours;
+
+    /** @var string Warning basis mode: current_sessions, planned_sessions, planned_hours */
+    public $warningbasismode;
+
     /** @var int groupmode  */
     private $groupmode;
 

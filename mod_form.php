@@ -70,6 +70,52 @@ class mod_attendance_mod_form extends moodleform_mod {
             $mform->setType('subnet', PARAM_TEXT);
         }
 
+        // Planned course size for warning basis.
+        $mform->addElement('header', 'warningbasis', get_string('warningbasis', 'mod_attendance'));
+        $mform->addElement('text', 'plannedtotalsessions', get_string('plannedtotalsessions', 'mod_attendance'), ['size' => '6']);
+        $mform->setType('plannedtotalsessions', PARAM_INT);
+        $mform->addHelpButton('plannedtotalsessions', 'plannedtotalsessions', 'mod_attendance');
+        $mform->setDefault('plannedtotalsessions', '');
+
+        $mform->addElement('text', 'plannedtotalhours', get_string('plannedtotalhours', 'mod_attendance'), ['size' => '6']);
+        $mform->setType('plannedtotalhours', PARAM_FLOAT);
+        $mform->addHelpButton('plannedtotalhours', 'plannedtotalhours', 'mod_attendance');
+        $mform->setDefault('plannedtotalhours', '');
+
+        $basismodeoptions = [
+            'current_sessions' => get_string('warningbasismode_current', 'mod_attendance'),
+            'planned_sessions' => get_string('warningbasismode_planned_sessions', 'mod_attendance'),
+            'planned_hours' => get_string('warningbasismode_planned_hours', 'mod_attendance'),
+        ];
+        $mform->addElement('select', 'warningbasismode', get_string('warningbasismode', 'mod_attendance'), $basismodeoptions);
+        $mform->addHelpButton('warningbasismode', 'warningbasismode', 'mod_attendance');
+        $mform->setDefault('warningbasismode', 'current_sessions');
+
         $this->add_action_buttons();
+    }
+
+    /**
+     * Form validation.
+     *
+     * @param array $data form data
+     * @param array $files uploaded files
+     * @return array errors
+     */
+    public function validation($data, $files) {
+        $errors = parent::validation($data, $files);
+        if (!empty($data['warningbasismode'])) {
+            if ($data['warningbasismode'] === 'planned_sessions') {
+                if (empty($data['plannedtotalsessions']) || (int)$data['plannedtotalsessions'] < 1) {
+                    $errors['plannedtotalsessions'] = get_string('plannedtotalsessions_required', 'mod_attendance');
+                }
+            }
+            if ($data['warningbasismode'] === 'planned_hours') {
+                if (!isset($data['plannedtotalhours']) || $data['plannedtotalhours'] === '' ||
+                        (float)$data['plannedtotalhours'] <= 0) {
+                    $errors['plannedtotalhours'] = get_string('plannedtotalhours_required', 'mod_attendance');
+                }
+            }
+        }
+        return $errors;
     }
 }

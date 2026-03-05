@@ -860,5 +860,22 @@ function xmldb_attendance_upgrade($oldversion = 0) {
         upgrade_mod_savepoint(true, 2023032800, 'attendance');
     }
 
+    if ($oldversion < 2026012701) {
+        $table = new xmldb_table('attendance');
+        $field1 = new xmldb_field('plannedtotalsessions', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'showextrauserdetails');
+        if (!$dbman->field_exists($table, $field1)) {
+            $dbman->add_field($table, $field1);
+        }
+        $field2 = new xmldb_field('plannedtotalhours', XMLDB_TYPE_NUMBER, '10', null, null, null, null, 'plannedtotalsessions');
+        if (!$dbman->field_exists($table, $field2)) {
+            $dbman->add_field($table, $field2);
+        }
+        $field3 = new xmldb_field('warningbasismode', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, 'current_sessions', 'plannedtotalhours');
+        if (!$dbman->field_exists($table, $field3)) {
+            $dbman->add_field($table, $field3);
+        }
+        upgrade_mod_savepoint(true, 2026012701, 'attendance');
+    }
+
     return true;
 }

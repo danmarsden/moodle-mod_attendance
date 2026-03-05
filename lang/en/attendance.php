@@ -210,6 +210,9 @@ $string['emailcontent_help'] = 'When a warning is sent to a student, it takes th
     <li>%points%</li>
     <li>%maxpoints%</li>
     <li>%percent%</li>
+    <li>%plannedtotalsessions%</li>
+    <li>%plannedtotalhours%</li>
+    <li>%warningbasismode%</li>
 </ul>';
 $string['emailsubject'] = 'Email subject';
 $string['emailsubject_default'] = 'Attendance warning';
@@ -382,6 +385,16 @@ $string['nosessionexists'] = 'No Session exists for this course';
 $string['nosessionsselected'] = 'No sessions selected';
 $string['notfound'] = 'Attendance activity not found in this course!';
 $string['notifytask'] = 'Send warnings to users';
+$string['notifytaskruncomplete'] = 'Send warnings task completed. If no emails were sent, check: (1) At least one session in the last 7 days with "Include in absentee report" enabled, (2) Warning threshold and "Warn after" sessions, (3) For planned sessions/hours: enough sessions or hours taken (see warning basis summary).';
+$string['errortasknotfound'] = 'Scheduled task not found: {$a}';
+$string['errortaskrun'] = 'Task failed';
+$string['run_notify_task_help'] = 'Use this page to run the "Send warnings to users" task when you cannot use the Scheduled tasks "Run now" button (e.g. when running via URL only). You must be logged in as an administrator.';
+$string['runnotifynow'] = 'Run now';
+$string['clearsentwarnings'] = 'Clear sent warnings log';
+$string['clearsentwarnings_help'] = 'Remove all records of warnings that have been sent. After clearing, the next run of the notify task will treat users as not yet notified (subject to max warnings and other rules). Use this to retry with a new warning basis (e.g. after switching to planned sessions/hours).';
+$string['clearsentwarningsconfirm'] = 'Clear all sent-warning records for the whole site? Users may receive warning emails again on the next task run.';
+$string['clearsentwarningsbutton'] = 'Clear sent warnings';
+$string['clearsentwarningsdone'] = 'Sent warnings log cleared. You can run the notify task again to try the new warning basis.';
 $string['notmember'] = 'not&nbsp;member';
 $string['notset'] = 'not set';
 $string['nounmarkedstatusset'] = 'No unmarked status is configured for this session (id:{$a->sessionid}), to fix this update the <a href="{$a->url}">Status set</a>';
@@ -690,6 +703,21 @@ $string['warningpercent_help'] = 'A warning will be triggered when the overall p
 $string['warnings'] = 'Warnings set';
 $string['warningthreshold'] = 'Warning threshold';
 $string['warningupdated'] = 'Updated warnings';
+$string['warningbasis'] = 'Warning basis';
+$string['warningbasis_summary_current'] = 'Warning basis: current sessions only (default behaviour).';
+$string['warningbasis_summary_planned_sessions'] = 'Warning basis: planned sessions (%s planned). Warnings are gated until a minimum number of sessions are taken.';
+$string['warningbasis_summary_planned_hours'] = 'Warning basis: planned hours (%s hours planned). In this mode, points are treated as hours (1 point = 1 hour).';
+$string['plannedtotalsessions'] = 'Planned total sessions';
+$string['plannedtotalsessions_help'] = 'Planned number of sessions for this attendance activity. Used for warning calculations if selected as the basis below. You can still create individual sessions later.';
+$string['plannedtotalsessions_required'] = 'Required when warning basis is planned sessions.';
+$string['plannedtotalhours'] = 'Planned total hours';
+$string['plannedtotalhours_help'] = 'Planned total hours for this attendance activity. In planned-hours mode, points are treated as hours (1 point = 1 hour) and warnings use missing hours (max points - earned points) against this total.';
+$string['plannedtotalhours_required'] = 'Required when warning basis is planned hours.';
+$string['warningbasismode'] = 'Warning basis mode';
+$string['warningbasismode_help'] = 'How warning percentages are calculated: current sessions only, planned total sessions, or planned total hours. Planned-hours mode uses points as hours (1 point = 1 hour) and missing hours are calculated as max points - earned points.';
+$string['warningbasismode_current'] = 'Current sessions only (default)';
+$string['warningbasismode_planned_sessions'] = 'Planned total sessions';
+$string['warningbasismode_planned_hours'] = 'Planned total hours';
 $string['week'] = 'week(s)';
 $string['weekcommencing'] = 'Week commencing';
 $string['weeks'] = 'Weeks';

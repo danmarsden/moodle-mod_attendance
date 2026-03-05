@@ -1121,7 +1121,8 @@ function attendance_get_users_to_notify($courseids = [], $orderby = '', $allforn
 
     $joingroup = 'LEFT JOIN {groups_members} gm ON (gm.userid = atl.studentid AND gm.groupid = ats.groupid)';
     $where = ' AND (ats.groupid = 0 or gm.id is NOT NULL)';
-    $having = '';
+    $thresholdhaving = '';
+    $notifywhere = '';
     $params = [];
 
     if (!empty($courseids)) {
@@ -1131,7 +1132,11 @@ function attendance_get_users_to_notify($courseids = [], $orderby = '', $allforn
     }
     if ($allfornotify) {
         // Exclude warnings that have already sent the max num.
-        $having .= ' AND n.maxwarn > COUNT(DISTINCT ns.id) ';
+        $notifywhere = ' AND (ns.nscount IS NULL OR n.maxwarn > ns.nscount) ';
+    } else {
+        // For report screens keep filtering by current taken-session percent.
+        $thresholdhaving = ' AND n.warningpercent > (CASE WHEN SUM(stm.maxgrade) > 0 ' .
+            'THEN ((SUM(stg.grade) / SUM(stm.maxgrade)) * 100) ELSE 0 END) ';
     }
     $userfieldsapi = \core_user\fields::for_name();
     $unames = $userfieldsapi->get_sql('', false, '', '', false)->selects . ',';
@@ -1148,39 +1153,67 @@ function attendance_get_users_to_notify($courseids = [], $orderby = '', $allforn
     }
 
     $idfield = $DB->sql_concat('cm.id', 'atl.studentid', 'n.id');
-    $params['yesterday'] = time() - DAYSECS;
+    // For the scheduled notify task, use a 7-day window so attendances with sessions in the last week
+    // are considered (otherwise the 24-hour window often returns no rows and no emails are sent).
+    $recentsecs = $allfornotify ? (7 * DAYSECS) : DAYSECS;
+    $params['recentcutoff'] = time() - $recentsecs;
+    $latestlogsjoin = "JOIN (
+                           SELECT l.id, l.sessionid, l.studentid, l.statusid, l.timetaken
+                             FROM {attendance_log} l
+                             JOIN (
+                                   SELECT sessionid, studentid, MAX(id) AS maxid
+                                     FROM {attendance_log}
+                                 GROUP BY sessionid, studentid
+                                  ) latest
+                               ON latest.maxid = l.id
+                       ) atl ON (atl.sessionid = ats.id)";
+    $warningsdonejoin = "LEFT JOIN (
+                             SELECT notifyid, userid, COUNT(*) AS nscount, MAX(timesent) AS timesent
+                               FROM {attendance_warning_done}
+                           GROUP BY notifyid, userid
+                         ) ns ON ns.notifyid = n.id AND ns.userid = atl.studentid";
+
     $sql = "SELECT {$idfield} as uniqueid, a.id as aid, {$unames2} a.name as aname, cm.id as cmid, c.id as courseid,
                     c.fullname as coursename, atl.studentid AS userid, n.id as notifyid, n.warningpercent, n.emailsubject,
                     n.emailcontent, n.emailcontentformat, n.emailuser, n.thirdpartyemails, n.warnafter, n.maxwarn,
                      COUNT(DISTINCT ats.id) AS numtakensessions, SUM(stg.grade) AS points, SUM(stm.maxgrade) AS maxpoints,
-                      COUNT(DISTINCT ns.id) as nscount, MAX(ns.timesent) as timesent,
-                      SUM(stg.grade) / SUM(stm.maxgrade) AS percent
+                      COALESCE(ns.nscount, 0) AS nscount, ns.timesent as timesent,
+                      CASE WHEN SUM(stm.maxgrade) > 0 THEN SUM(stg.grade) / SUM(stm.maxgrade) ELSE 0 END AS percent,
+                      a.plannedtotalsessions, a.plannedtotalhours, a.warningbasismode,
+                      SUM(ats.duration) AS completedseconds,
+                      SUM(CASE WHEN stg.grade = 0 THEN 1 ELSE 0 END) AS num_absent_sessions,
+                      SUM(CASE WHEN stg.grade = 0 THEN ats.duration ELSE 0 END) AS absentseconds,
+                      SUM(CASE WHEN stg.grade = 0 THEN stm.maxgrade ELSE 0 END) AS absentpoints,
+                      SUM(CASE WHEN stm.maxgrade > stg.grade THEN stm.maxgrade - stg.grade ELSE 0 END) AS missingpoints
                    FROM {attendance_sessions} ats
                    JOIN {attendance} a ON a.id = ats.attendanceid
                    JOIN {course_modules} cm ON cm.instance = a.id
                    JOIN {course} c on c.id = cm.course
                    JOIN {modules} md ON md.id = cm.module AND md.name = 'attendance'
-                   JOIN {attendance_log} atl ON (atl.sessionid = ats.id)
+                   {$latestlogsjoin}
                    JOIN {user} u ON (u.id = atl.studentid)
                    JOIN {attendance_statuses} stg ON (stg.id = atl.statusid AND stg.deleted = 0 AND stg.visible = 1)
                    JOIN {attendance_warning} n ON n.idnumber = a.id
-                   LEFT JOIN {attendance_warning_done} ns ON ns.notifyid = n.id AND ns.userid = atl.studentid
+                   {$warningsdonejoin}
                    JOIN (SELECT attendanceid, setnumber, MAX(grade) AS maxgrade
                            FROM {attendance_statuses}
                           WHERE deleted = 0
                             AND visible = 1
                          GROUP BY attendanceid, setnumber) stm
-                     ON (stm.setnumber = ats.statusset AND stm.attendanceid = ats.attendanceid)
+                     ON (stm.setnumber = stg.setnumber AND stm.attendanceid = stg.attendanceid)
                   {$joingroup}
                   WHERE ats.absenteereport = 1 AND ats.attendanceid IN (SELECT distinct attendanceid
                                                                           FROM {attendance_sessions}
-                                                                         WHERE sessdate > :yesterday)
+                                                                         WHERE sessdate > :recentcutoff)
+                    AND ats.lasttaken != 0
+                  {$notifywhere}
                   {$where}
                 GROUP BY uniqueid, a.id, a.name, a.course, c.fullname, atl.studentid, n.id, n.warningpercent,
                          n.emailsubject, n.emailcontent, n.emailcontentformat, n.warnafter, n.maxwarn,
-                         n.emailuser, n.thirdpartyemails, cm.id, c.id, {$unames2} ns.userid
-                HAVING n.warnafter <= COUNT(DISTINCT ats.id) AND n.warningpercent > ((SUM(stg.grade) / SUM(stm.maxgrade)) * 100)
-                {$having}
+                         n.emailuser, n.thirdpartyemails, cm.id, c.id, {$unames2} ns.nscount, ns.timesent,
+                         a.plannedtotalsessions, a.plannedtotalhours, a.warningbasismode
+                HAVING 1=1
+                {$thresholdhaving}
                       {$orderby}";
 
     if (!$allfornotify) {
@@ -1197,12 +1230,188 @@ function attendance_get_users_to_notify($courseids = [], $orderby = '', $allforn
 }
 
 /**
+ * Compute warning-related context for a user in an attendance activity.
+ *
+ * @param mod_attendance_structure $att attendance structure
+ * @param int $userid user id
+ * @return stdClass properties: percent (0-100), points, maxpoints, numtakensessions,
+ *         num_absent_sessions, absent_hours, basismode, plannedtotalsessions, plannedtotalhours, completedhours
+ */
+function attendance_get_warning_context(mod_attendance_structure $att, int $userid): stdClass {
+    global $DB;
+
+    $joingroup = 'LEFT JOIN {groups_members} gm ON (gm.userid = atl.studentid AND gm.groupid = ats.groupid)';
+    $where = ' AND (ats.groupid = 0 OR gm.id IS NOT NULL)';
+    $params = [
+        'attid' => $att->id,
+        'userid' => $userid,
+        'userid2' => $userid,
+        'cstartdate' => $att->course->startdate,
+    ];
+    $sql = "SELECT COUNT(DISTINCT ats.id) AS numtakensessions,
+                   SUM(stg.grade) AS points,
+                   SUM(stm.maxgrade) AS maxpoints,
+                   SUM(ats.duration) AS completedseconds,
+                   SUM(CASE WHEN stg.grade = 0 THEN 1 ELSE 0 END) AS num_absent_sessions,
+                   SUM(CASE WHEN stg.grade = 0 THEN ats.duration ELSE 0 END) AS absentseconds
+              FROM {attendance_sessions} ats
+              JOIN {attendance_log} atl ON (atl.sessionid = ats.id AND atl.studentid = :userid)
+                                    AND atl.id = (
+                                        SELECT MAX(l2.id)
+                                          FROM {attendance_log} l2
+                                         WHERE l2.sessionid = ats.id
+                                           AND l2.studentid = :userid2
+                                    )
+              JOIN {attendance_statuses} stg ON (stg.id = atl.statusid AND stg.deleted = 0 AND stg.visible = 1)
+              JOIN (SELECT setnumber, MAX(grade) AS maxgrade
+                      FROM {attendance_statuses}
+                     WHERE attendanceid = :attid AND deleted = 0 AND visible = 1
+                     GROUP BY setnumber) stm ON (stm.setnumber = stg.setnumber)
+              {$joingroup}
+             WHERE ats.attendanceid = :attid
+               AND ats.sessdate >= :cstartdate
+               AND ats.lasttaken != 0
+               {$where}";
+    $row = $DB->get_record_sql($sql, $params);
+    $ctx = new stdClass();
+    $ctx->numtakensessions = $row ? (int)$row->numtakensessions : 0;
+    $ctx->points = $row ? (float)$row->points : 0;
+    $ctx->maxpoints = $row && $row->maxpoints > 0 ? (float)$row->maxpoints : 0;
+    $ctx->percent = $ctx->maxpoints > 0 ? ($ctx->points / $ctx->maxpoints) * 100 : 0;
+    $ctx->completedhours = $row && isset($row->completedseconds) ? (float)$row->completedseconds / 3600 : 0;
+    $ctx->num_absent_sessions = $row && isset($row->num_absent_sessions) ? (int)$row->num_absent_sessions : 0;
+    $ctx->absent_hours = $row && isset($row->absentseconds) ? (float)$row->absentseconds / 3600 : 0;
+    $ctx->basismode = isset($att->warningbasismode) && $att->warningbasismode !== ''
+        ? $att->warningbasismode : 'current_sessions';
+    $ctx->plannedtotalsessions = isset($att->plannedtotalsessions) ? (int)$att->plannedtotalsessions : null;
+    $ctx->plannedtotalhours = isset($att->plannedtotalhours) ? (float)$att->plannedtotalhours : null;
+    return $ctx;
+}
+
+/**
+ * Check if we allow triggering a warning in planned_sessions mode.
+ * Only require that at least "Warn after" sessions have been taken (so the percentage is meaningful).
+ * Planned total is used for display/context; we do not require 25% of planned to be taken.
+ *
+ * @param mod_attendance_structure $att attendance structure
+ * @param stdClass $ctx from attendance_get_warning_context
+ * @param stdClass $warning attendance_warning record
+ * @return bool
+ */
+function attendance_warning_allows_trigger_sessions(
+    mod_attendance_structure $att,
+    stdClass $ctx,
+    stdClass $warning
+): bool {
+    $planned = (int)($ctx->plannedtotalsessions ?? 0);
+    if ($planned <= 0) {
+        return true;
+    }
+    return $ctx->numtakensessions >= (int)$warning->warnafter;
+}
+
+/**
+ * Check if we allow triggering a warning in planned_hours mode.
+ * Only require that at least "Warn after" sessions have been taken.
+ * Planned total hours is used for display/context; we do not require 25% of planned hours completed.
+ *
+ * @param mod_attendance_structure $att attendance structure
+ * @param stdClass $ctx from attendance_get_warning_context
+ * @param stdClass $warning attendance_warning record
+ * @return bool
+ */
+function attendance_warning_allows_trigger_hours(
+    mod_attendance_structure $att,
+    stdClass $ctx,
+    stdClass $warning
+): bool {
+    $planned = (float)($ctx->plannedtotalhours ?? 0);
+    if ($planned <= 0) {
+        return true;
+    }
+    return $ctx->numtakensessions >= (int)$warning->warnafter;
+}
+
+/**
+ * Check if the warning basismode allows triggering this warning for this user.
+ *
+ * @param mod_attendance_structure $att attendance structure
+ * @param stdClass $ctx from attendance_get_warning_context
+ * @param stdClass $warning attendance_warning record
+ * @return bool
+ */
+function attendance_warning_basismode_allows_trigger(
+    mod_attendance_structure $att,
+    stdClass $ctx,
+    stdClass $warning
+): bool {
+    switch ($ctx->basismode) {
+        case 'planned_sessions':
+            return attendance_warning_allows_trigger_sessions($att, $ctx, $warning);
+        case 'planned_hours':
+            return attendance_warning_allows_trigger_hours($att, $ctx, $warning);
+        case 'current_sessions':
+        default:
+            return $ctx->numtakensessions >= (int)$warning->warnafter;
+    }
+}
+
+/**
+ * Get the percentage to use for warning decisions and display when in planned_sessions or planned_hours mode.
+ * In planned mode: percent = (planned total - absent) / planned total * 100 (e.g. 100h planned, 20h absent = 80%).
+ * Otherwise returns the given ctx percent (from taken sessions only).
+ *
+ * @param stdClass $ctx context with basismode, plannedtotalsessions, plannedtotalhours, num_absent_sessions, absent_hours, percent
+ * @return float percentage 0-100
+ */
+function attendance_warning_effective_percent(stdClass $ctx): float {
+    $mode = $ctx->basismode ?? 'current_sessions';
+    if ($mode === 'planned_sessions' && isset($ctx->plannedtotalsessions) && (int)$ctx->plannedtotalsessions > 0) {
+        $planned = (int)$ctx->plannedtotalsessions;
+        $absent = (int)($ctx->num_absent_sessions ?? 0);
+        $attended = $planned - $absent;
+        return $planned > 0 ? min(100, max(0, ($attended / $planned) * 100)) : (float)$ctx->percent;
+    }
+    if ($mode === 'planned_hours' && isset($ctx->plannedtotalhours) && (float)$ctx->plannedtotalhours > 0) {
+        $planned = (float)$ctx->plannedtotalhours;
+        $absenth = (float)($ctx->absent_hours ?? 0);
+        $attendedh = $planned - $absenth;
+        return $planned > 0 ? min(100, max(0, ($attendedh / $planned) * 100)) : (float)$ctx->percent;
+    }
+    return (float)$ctx->percent;
+}
+
+/**
+ * Get a short read-only summary of the current warning basis for an attendance activity.
+ *
+ * @param mod_attendance_structure $att attendance structure
+ * @return string plain text summary
+ */
+function attendance_get_warning_basis_summary(mod_attendance_structure $att): string {
+    $mode = isset($att->warningbasismode) && $att->warningbasismode !== ''
+        ? $att->warningbasismode : 'current_sessions';
+    if ($mode === 'current_sessions') {
+        return get_string('warningbasis_summary_current', 'mod_attendance');
+    }
+    if ($mode === 'planned_sessions' && !empty($att->plannedtotalsessions)) {
+        return get_string('warningbasis_summary_planned_sessions', 'mod_attendance', (int)$att->plannedtotalsessions);
+    }
+    if ($mode === 'planned_hours' && isset($att->plannedtotalhours) && (float)$att->plannedtotalhours > 0) {
+        return get_string('warningbasis_summary_planned_hours', 'mod_attendance', format_float((float)$att->plannedtotalhours, 1));
+    }
+    return get_string('warningbasis_summary_current', 'mod_attendance');
+}
+
+/**
  * Template variables into place in supplied email content.
  *
  * @param object $record db record of details
  * @return array - the content of the fields after templating.
  */
 function attendance_template_variables($record) {
+    $percentforreplacement = isset($record->effectivepercent)
+        ? (float)$record->effectivepercent
+        : round((float)$record->percent * 100, 2);
     $templatevars = [
         '/%coursename%/' => $record->coursename,
         '/%courseid%/' => $record->courseid,
@@ -1215,8 +1424,17 @@ function attendance_template_variables($record) {
         '/%numtakensessions%/' => $record->numtakensessions,
         '/%points%/' => $record->points,
         '/%maxpoints%/' => $record->maxpoints,
-        '/%percent%/' => round($record->percent * 100),
+        '/%percent%/' => format_float($percentforreplacement, 1),
     ];
+    if (isset($record->plannedtotalsessions)) {
+        $templatevars['/%plannedtotalsessions%/'] = $record->plannedtotalsessions !== null ? $record->plannedtotalsessions : '';
+    }
+    if (isset($record->plannedtotalhours)) {
+        $templatevars['/%plannedtotalhours%/'] = $record->plannedtotalhours !== null ? format_float($record->plannedtotalhours, 1) : '';
+    }
+    if (isset($record->warningbasismode)) {
+        $templatevars['/%warningbasismode%/'] = $record->warningbasismode;
+    }
     $extrauserfields = \core_user\fields::get_name_fields();
     foreach ($extrauserfields as $extra) {
         $templatevars['/%' . $extra . '%/'] = $record->$extra;
