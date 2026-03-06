@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/attendance/db" VERSION="20220831" COMMENT="XMLDB file for Moodle mod/attendance"
+<XMLDB PATH="mod/attendance/db" VERSION="20260306" COMMENT="XMLDB file for Moodle mod/attendance"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -18,7 +18,7 @@
         <FIELD NAME="showsessiondetails" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="Define if session details should be shown in reports."/>
         <FIELD NAME="showextrauserdetails" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="Define if extra user details should be shown in reports."/>
         <FIELD NAME="plannedtotalsessions" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Planned total sessions for warning basis (optional)."/>
-        <FIELD NAME="plannedtotalhours" TYPE="number" LENGTH="10" DECIMALS="2" NOTNULL="false" SEQUENCE="false" COMMENT="Planned total hours for warning basis (optional)."/>
+        <FIELD NAME="plannedtotalhours" TYPE="number" LENGTH="10" NOTNULL="false" SEQUENCE="false" DECIMALS="2" COMMENT="Planned total hours for warning basis (optional)."/>
         <FIELD NAME="warningbasismode" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="current_sessions" SEQUENCE="false" COMMENT="Basis for warning gating: current_sessions, planned_sessions, planned_hours."/>
       </FIELDS>
       <KEYS>
