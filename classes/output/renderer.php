@@ -492,8 +492,6 @@ class renderer extends plugin_renderer_base {
     protected function render_sess_manage_control(manage_data $sessdata) {
         $table = new html_table();
         $table->attributes['class'] = 'table-reboot generaltable';
-        $table->width = '100%';
-        $table->align = ['left', 'right'];
 
         $table->data[0][] = $this->output->help_icon(
             'hiddensessions',
@@ -519,12 +517,18 @@ class renderer extends plugin_renderer_base {
                     'type'  => 'submit',
                     'name'  => 'ok',
                     'value' => get_string('ok'),
-                    'class' => 'btn btn-secondary', ];
+                    'class' => 'btn btn-secondary ms-1', ];
             $controls .= html_writer::empty_tag('input', $attributes);
         } else {
             $controls = get_string('youcantdo', 'attendance'); // You can't do anything.
         }
-        $table->data[0][] = $controls;
+
+        $cell = new html_table_cell(
+            html_writer::div($controls, 'd-flex justify-content-end align-items-center')
+        );
+        $cell->attributes['class'] = 'text-end w-100';
+
+        $table->data[0][] = $cell;
 
         return html_writer::table($table);
     }
