@@ -66,10 +66,87 @@ class notify extends \core\task\scheduled_task {
         $thirdpartynotifications = [];
         $numsentusers = 0;
         $numsentthird = 0;
+        $skippedbasismode = 0;
+        $skippedemailuseroff = 0;
+        $skippedtimesent = 0;
+        $skippedplannedpercent = 0;
+        if (empty($records)) {
+            mtrace('Attendance notify: no users below warning threshold in attendances with at least one session in the last 7 days (and Include in absentee report).');
+        }
         foreach ($records as $record) {
+            // Build attendance structure and warning context for basismode gating.
+            $attrecord = $DB->get_record('attendance', ['id' => $record->aid]);
+            if (!$attrecord) {
+                continue;
+            }
+            $cm = get_coursemodule_from_id('attendance', $record->cmid, $record->courseid, false, MUST_EXIST);
+            $course = $DB->get_record('course', ['id' => $record->courseid], '*', MUST_EXIST);
+            $att = new \mod_attendance_structure($attrecord, $cm, $course, \context_module::instance($record->cmid));
+            $warning = $DB->get_record('attendance_warning', ['id' => $record->notifyid]);
+            if (!$warning) {
+                continue;
+            }
+            $ctx = new \stdClass();
+            $ctx->numtakensessions = (int)$record->numtakensessions;
+            $ctx->percent = (float)$record->percent * 100;
+            $ctx->points = (float)$record->points;
+            $ctx->maxpoints = (float)$record->maxpoints;
+            $ctx->completedhours = isset($record->completedseconds) ? (float)$record->completedseconds / 3600 : 0;
+            $ctx->num_absent_sessions = isset($record->num_absent_sessions) ? (int)$record->num_absent_sessions : 0;
+            $ctx->absent_hours = isset($record->absentseconds) ? (float)$record->absentseconds / 3600 : 0;
+            // In planned_hours mode, support any status-point scale:
+            // convert missing points proportionally to taken session hours when duration is available.
+            if (($record->warningbasismode ?? '') === 'planned_hours' && isset($record->plannedtotalhours) && (float)$record->plannedtotalhours > 0) {
+                $maxpts = (float)($record->maxpoints ?? 0);
+                $pts = (float)($record->points ?? 0);
+                $missingpts = isset($record->missingpoints) && (float)$record->missingpoints >= 0
+                    ? (float)$record->missingpoints
+                    : ($maxpts > $pts ? $maxpts - $pts : 0);
+                $takenhours = isset($record->completedseconds) ? (float)$record->completedseconds / 3600 : 0;
+                if ($takenhours > 0 && $maxpts > 0) {
+                    // Example: 275/500 points over 50 taken hours => 22.5 absent hours.
+                    $ctx->absent_hours = $takenhours * ($missingpts / $maxpts);
+                    $ctx->completedhours = max(0, $takenhours - $ctx->absent_hours);
+                } else {
+                    // Fallback for setups without duration: assume 1 point = 1 hour.
+                    $ctx->absent_hours = $missingpts;
+                    $ctx->completedhours = (float)($record->points ?? 0);
+                }
+            }
+            $ctx->basismode = $record->warningbasismode ?? 'current_sessions';
+            $ctx->plannedtotalsessions = isset($record->plannedtotalsessions) ? (int)$record->plannedtotalsessions : null;
+            $ctx->plannedtotalhours = isset($record->plannedtotalhours) ? (float)$record->plannedtotalhours : null;
+            if (!attendance_warning_basismode_allows_trigger($att, $ctx, $warning)) {
+                $skippedbasismode++;
+                continue;
+            }
+
+            // In planned_sessions/planned_hours mode, use percent vs planned total (e.g. 100h - 20h absent = 80%).
+            // Only send when that effective percent is below the threshold; avoid false positives from "taken sessions only" percent.
+            $effectivepercent = attendance_warning_effective_percent($ctx);
+            if ($ctx->basismode === 'planned_hours') {
+                mtrace('Attendance notify debug: aid=' . $record->aid .
+                    ', uid=' . $record->userid .
+                    ', plannedhours=' . format_float((float)($ctx->plannedtotalhours ?? 0), 1) .
+                    ', points=' . format_float((float)$ctx->points, 1) .
+                    ', maxpoints=' . format_float((float)$ctx->maxpoints, 1) .
+                    ', missinghours=' . format_float((float)$ctx->absent_hours, 1) .
+                    ', takensessions=' . (int)$ctx->numtakensessions .
+                    ', effectivepercent=' . format_float((float)$effectivepercent, 1));
+            }
+            if ($effectivepercent >= (float)$warning->warningpercent) {
+                $skippedplannedpercent++;
+                continue;
+            }
+
+            // Use planned-based percent for email and display so the student sees the correct figure (e.g. 80% not 50%).
+            $record->effectivepercent = $effectivepercent;
+            $record->percent = $effectivepercent / 100;
+
             if (empty($sentnotifications[$record->userid])) {
                 $sentnotifications[$record->userid] = [];
             }
+            $didsendrecord = false;
 
             if (!empty($record->emailuser)) {
                 // Only send one warning to this user from each attendance in this run.
@@ -83,6 +160,7 @@ class notify extends \core\task\scheduled_task {
                               JOIN {attendance_sessions} s ON s.id = l.sessionid
                              WHERE s.attendanceid = ? AND studentid = ? AND timetaken > ?";
                         if (!$DB->record_exists_sql($sql, [$record->aid, $record->userid, $record->timesent])) {
+                            $skippedtimesent++;
                             continue; // Skip this record and move to the next user.
                         }
                     }
@@ -100,7 +178,10 @@ class notify extends \core\task\scheduled_task {
                     force_current_language($oldforcelang);
                     $sentnotifications[$record->userid][] = $record->aid;
                     $numsentusers++;
+                    $didsendrecord = true;
                 }
+            } else {
+                $skippedemailuseroff++;
             }
             // Only send one warning to this user from each attendance in this run. - flag any higher percent notifications as sent.
             $thirdpartyusers = [];
@@ -124,17 +205,20 @@ class notify extends \core\task\scheduled_task {
                         if (!isset($thirdpartynotifications[$senduser][$record->aid . '_' . $record->userid])) {
                             $thirdpartynotifications[$senduser][$record->aid . '_' . $record->userid]
                                 = get_string('thirdpartyemailtext', 'attendance', $record);
+                            $didsendrecord = true;
                         }
                     } else {
                         mtrace("user" . $senduser . "does not have capablity in cm" . $record->cmid);
                     }
                 }
             }
-            $notify = new \stdClass();
-            $notify->userid = $record->userid;
-            $notify->notifyid = $record->notifyid;
-            $notify->timesent = $now;
-            $DB->insert_record('attendance_warning_done', $notify);
+            if ($didsendrecord) {
+                $notify = new \stdClass();
+                $notify->userid = $record->userid;
+                $notify->notifyid = $record->notifyid;
+                $notify->timesent = $now;
+                $DB->insert_record('attendance_warning_done', $notify);
+            }
         }
         if (!empty($numsentusers)) {
             mtrace($numsentusers . " user emails sent");
@@ -167,6 +251,23 @@ class notify extends \core\task\scheduled_task {
             if (!empty($numsentthird)) {
                 mtrace($numsentthird . " thirdparty emails sent");
             }
+        }
+        if (!empty($records) && $numsentusers === 0 && $numsentthird === 0) {
+            $reasons = [];
+            if ($skippedbasismode > 0) {
+                $reasons[] = $skippedbasismode . ' skipped by warning basis (need more sessions/hours taken for planned basis)';
+            }
+            if ($skippedplannedpercent > 0) {
+                $reasons[] = $skippedplannedpercent . ' skipped (planned basis: percent not below threshold)';
+            }
+            if ($skippedemailuseroff > 0) {
+                $reasons[] = $skippedemailuseroff . ' skipped (Email user not enabled for this warning rule)';
+            }
+            if ($skippedtimesent > 0) {
+                $reasons[] = $skippedtimesent . ' skipped (already notified, no new attendance since)';
+            }
+            mtrace('Attendance notify: had ' . count($records) . ' record(s) but no emails sent. ' .
+                (empty($reasons) ? 'Check thirdparty settings.' : implode('; ', $reasons)));
         }
     }
 }

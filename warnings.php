@@ -44,6 +44,11 @@ if (empty($id)) {
     echo $OUTPUT->heading(get_string('defaultwarnings', 'mod_attendance'));
     $tabmenu = attendance_print_settings_tabs('defaultwarnings');
     echo $tabmenu;
+    if (has_capability('moodle/site:config', context_system::instance())) {
+        $runurl = new moodle_url('/mod/attendance/run_notify_task.php');
+        echo html_writer::link($runurl, get_string('notifytask', 'mod_attendance') . ' – ' . get_string('runnotifynow', 'mod_attendance'),
+            ['class' => 'btn btn-secondary mb-3']) . '<br>';
+    }
 } else {
     // This is an attendance level config.
     $cm             = get_coursemodule_from_id('attendance', $id, 0, false, MUST_EXIST);
@@ -167,6 +172,9 @@ if ($action == 'update' && !empty($notid)) {
         $idnumber = $att->id;
     }
     echo $OUTPUT->box($warningdesc, 'generalbox attendancedesc', 'notice');
+    if (!empty($id) && isset($att)) {
+        echo $OUTPUT->box(attendance_get_warning_basis_summary($att), 'generalbox warningbasissummary');
+    }
     $existingnotifications = $DB->get_records(
         'attendance_warning',
         ['idnumber' => $idnumber],

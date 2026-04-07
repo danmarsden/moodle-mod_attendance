@@ -96,6 +96,26 @@ function attendance_add_default_warnings($id) {
 }
 
 /**
+ * Normalise warning basis fields before save: nulls and default basismode.
+ *
+ * @param stdClass $attendance attendance record (modified in place)
+ */
+function attendance_normalise_warning_basis_fields($attendance) {
+    if (empty($attendance->warningbasismode) || !in_array($attendance->warningbasismode,
+            ['current_sessions', 'planned_sessions', 'planned_hours'], true)) {
+        $attendance->warningbasismode = 'current_sessions';
+    }
+    if (!isset($attendance->plannedtotalsessions) || $attendance->plannedtotalsessions === '' ||
+            (int)$attendance->plannedtotalsessions < 1) {
+        $attendance->plannedtotalsessions = null;
+    }
+    if (!isset($attendance->plannedtotalhours) || $attendance->plannedtotalhours === '' ||
+            (float)$attendance->plannedtotalhours <= 0) {
+        $attendance->plannedtotalhours = null;
+    }
+}
+
+/**
  * Add new attendance instance.
  *
  * @param stdClass $attendance
@@ -111,6 +131,8 @@ function attendance_add_instance($attendance) {
     if (!isset($attendance->grade)) {
         $attendance->grade = 100;
     }
+
+    attendance_normalise_warning_basis_fields($attendance);
 
     $attendance->id = $DB->insert_record('attendance', $attendance);
 
@@ -134,6 +156,8 @@ function attendance_update_instance($attendance) {
 
     $attendance->timemodified = time();
     $attendance->id = $attendance->instance;
+
+    attendance_normalise_warning_basis_fields($attendance);
 
     if (! $DB->update_record('attendance', $attendance)) {
         return false;
