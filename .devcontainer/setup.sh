@@ -38,7 +38,7 @@ step() { echo; echo "==> $*"; }
 # ---------------------------------------------------------------------------
 step "Waiting for the database at $DB_HOST ..."
 until mysql -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" \
-      -e "SELECT 1" &>/dev/null 2>&1; do
+      -e "SELECT 1" &>/dev/null; do
     echo "  database not ready yet — retrying in 3 s"
     sleep 3
 done

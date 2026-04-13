@@ -31,7 +31,7 @@ Feature: Teachers can display QR code or password pages showing course and sessi
       | id_sestime_starthour | 09 |
       | id_sestime_endhour   | 10 |
     And I click on "id_submitbutton" "button"
-    When I click on "a.btn" "css_element"
+    When I click on "Password" "link"
     Then I should see "Science Class 1"
     And I should see "SCI101"
 
@@ -45,6 +45,6 @@ Feature: Teachers can display QR code or password pages showing course and sessi
       | id_sestime_starthour | 09 |
       | id_sestime_endhour   | 10 |
     And I click on "id_submitbutton" "button"
-    When I click on "a.btn" "css_element"
+    When I click on "Password" "link"
     Then I should see "Science Class 1"
     And I should see "SCI101"
