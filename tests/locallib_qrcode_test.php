@@ -101,14 +101,20 @@ final class locallib_qrcode_test extends advanced_testcase {
     }
 
     /**
-     * Test that attendance_generate_passwords creates exactly 30 password records.
+     * Test that attendance_generate_passwords pre-generates exactly 30 password records in one call.
+     *
+     * The function creates a batch of 30 passwords upfront — one per rotation interval — so the
+     * JS rotating QR code can fetch the next valid password via the AJAX endpoint without needing
+     * another server-side generation call mid-session.  The rotateqrcodeinterval setting controls
+     * how many *seconds* each password is valid for, not how many passwords to create.
      *
      * @covers ::attendance_generate_passwords
      */
     public function test_attendance_generate_passwords_creates_30_records(): void {
         global $DB;
 
-        // Set the rotate QR code interval config.
+        // rotateqrcodeinterval = 30 means each password is valid for 30 seconds.
+        // The function always creates exactly 30 passwords regardless of the interval value.
         set_config('rotateqrcodeinterval', 30, 'attendance');
 
         attendance_generate_passwords($this->session);
@@ -118,13 +124,17 @@ final class locallib_qrcode_test extends advanced_testcase {
     }
 
     /**
-     * Test that attendance_generate_passwords sets future expiry times.
+     * Test that attendance_generate_passwords sets expiry times spaced by rotateqrcodeinterval seconds.
+     *
+     * The i-th password (0-indexed) expires at time() + (rotateqrcodeinterval * i), so the last
+     * password (i=29) expires well into the future, covering the entire pre-generated window.
      *
      * @covers ::attendance_generate_passwords
      */
     public function test_attendance_generate_passwords_sets_future_expiry(): void {
         global $DB;
 
+        // Each of the 30 passwords is valid for 30 seconds; the last expires at now + 30*29 = now + 870s.
         set_config('rotateqrcodeinterval', 30, 'attendance');
 
         $before = time();
@@ -136,7 +146,7 @@ final class locallib_qrcode_test extends advanced_testcase {
             $this->assertGreaterThanOrEqual($before, $pw->expirytime);
         }
 
-        // Last password (i=29) should expire at roughly before + 30*29 = before + 870s.
+        // The last password (i=29) should expire at roughly $before + 30 * 29 = $before + 870s.
         $expirytimes = array_column((array)$passwords, 'expirytime');
         $maxexpiry = max($expirytimes);
         $this->assertGreaterThan($after, $maxexpiry);
