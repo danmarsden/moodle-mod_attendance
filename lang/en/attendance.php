@@ -447,6 +447,7 @@ $string['qr_pass_wrong'] = 'The QR code has expired, please scan the QR code aga
 $string['qrcode'] = 'QR code';
 $string['qrcodeandpasswordheader'] = 'Scan the QR code below or use the password listed below to take your attendance';
 $string['qrcodeheader'] = 'Scan the QR code below to take your attendance';
+$string['qrcodesessioninfo'] = 'Course: {$a->fullname} ({$a->shortname}), Session: {$a->sessiondate}';
 $string['qrcodevalidafter'] = 'seconds';
 $string['qrcodevalidbefore'] = 'QR code valid for:';
 $string['randomizepasscodesonrestore'] = 'Randomize passcodes on restore';

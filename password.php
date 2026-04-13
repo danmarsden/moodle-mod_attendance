@@ -56,6 +56,18 @@ $PAGE->set_title(get_string('password', 'attendance'));
 
 echo $OUTPUT->header();
 
+// Display course and session information to help teachers identify the active session.
+$course = get_course($cm->course);
+$sessioninfodata = (object)[
+    'fullname'    => $course->fullname,
+    'shortname'   => $course->shortname,
+    'sessiondate' => userdate($session->sessdate),
+];
+echo html_writer::div(
+    get_string('qrcodesessioninfo', 'attendance', $sessioninfodata),
+    'qrcode-session-info'
+);
+
 $showpassword = (isset($session->studentpassword) && strlen($session->studentpassword) > 0);
 $showqr = (isset($session->includeqrcode) && $session->includeqrcode == 1);
 $rotateqr = (isset($session->rotateqrcode) && $session->rotateqrcode == 1);

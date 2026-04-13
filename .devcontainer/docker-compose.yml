@@ -1,0 +1,58 @@
+version: "3.9"
+
+services:
+  webserver:
+    image: moodlehq/moodle-php-apache:8.3
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:80"
+    volumes:
+      # Mount the plugin source into the workspace folder used by VS Code.
+      - ..:/workspaces/moodle-mod_attendance:cached
+      # Use a named volume for Moodle core so it persists across container rebuilds
+      # and avoids the performance penalty of bind-mounting a large directory on macOS.
+      - moodle_www:/var/www/html
+      - moodle_data:/var/www/moodledata
+    environment:
+      MOODLE_DOCKER_DBTYPE: "mariadb"
+      MOODLE_DOCKER_DBNAME: "moodle"
+      MOODLE_DOCKER_DBUSER: "moodle"
+      MOODLE_DOCKER_DBPASS: "moodle"
+      MOODLE_DOCKER_DBHOST: "db"
+      MOODLE_DOCKER_WWWROOT: "http://localhost:8080"
+      # Xdebug — set XDEBUG_MODE to "debug" to enable step-debugging.
+      XDEBUG_MODE: "off"
+      XDEBUG_CONFIG: "client_host=host.docker.internal client_port=9003"
+    # Keep the container running so VS Code can attach to it.
+    command: apache2-foreground
+    extra_hosts:
+      # Allow Xdebug inside the container to reach the VS Code debugger on the host.
+      - "host.docker.internal:host-gateway"
+
+  db:
+    image: mariadb:10.11
+    volumes:
+      - db_data:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: "moodle"
+      MYSQL_USER: "moodle"
+      MYSQL_PASSWORD: "moodle"
+      MYSQL_ROOT_PASSWORD: "root"
+      MYSQL_CHARACTER_SET_SERVER: "utf8mb4"
+      MYSQL_COLLATION_SERVER: "utf8mb4_unicode_ci"
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --innodb-file-per-table=1
+    healthcheck:
+      test: ["CMD", "mariadb", "-umoodle", "-pmoodle", "-e", "SELECT 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  moodle_www:
+  moodle_data:
+  db_data:
