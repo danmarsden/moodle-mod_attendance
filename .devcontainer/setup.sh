@@ -139,6 +139,8 @@ php "$MOODLE_DIR/admin/cli/cfg.php" --name=debug --set=32767 2>/dev/null || true
 php "$MOODLE_DIR/admin/cli/cfg.php" --name=cachejs --set=0 2>/dev/null || true
 php "$MOODLE_DIR/admin/cli/cfg.php" --name=themedesignermode --set=1 2>/dev/null || true
 
+step "Setting up permissions..."
+chown -R www-data:www-data "$MOODLE_DIR"
 # ---------------------------------------------------------------------------
 # Done
 # ---------------------------------------------------------------------------

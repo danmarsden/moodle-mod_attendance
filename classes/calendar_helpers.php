@@ -24,7 +24,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once(dirname(__FILE__) . '/../../../calendar/lib.php');
+require_once(dirname(__FILE__) . '/../lib.php');
 
 /**
  * Create single calendar event bases on session data.
