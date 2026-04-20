@@ -14,6 +14,10 @@ services:
       # and avoids the performance penalty of bind-mounting a large directory on macOS.
       - moodle_www:/var/www/html
       - moodle_data:/var/www/moodledata
+      # Bind-mount the plugin directly into Moodle's mod directory so that PHP's
+      # __FILE__ resolves to a path inside /var/www/html rather than the workspace
+      # path, keeping dirname(__FILE__).'/../../config.php' correct.
+      - ..:/var/www/html/mod/attendance:cached
     environment:
       MOODLE_DOCKER_DBTYPE: "mariadb"
       MOODLE_DOCKER_DBNAME: "moodle"
