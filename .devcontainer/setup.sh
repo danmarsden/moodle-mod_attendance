@@ -61,20 +61,26 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 3. Symlink the plugin into Moodle's mod directory
+# 3. Verify the plugin is available inside Moodle's mod directory.
+#    The docker-compose bind-mount places the plugin source directly at
+#    $MOODLE_DIR/mod/attendance, so PHP's __FILE__ resolves to a path under
+#    /var/www/html and dirname(__FILE__).'/../../config.php' works correctly.
+#    No symlink is needed (or desired — symlinks cause __FILE__ to resolve to
+#    the symlink target path, breaking the relative config.php lookup).
 # ---------------------------------------------------------------------------
-step "Linking plugin into Moodle ..."
+step "Verifying plugin is available in Moodle ..."
 PLUGIN_TARGET="$MOODLE_DIR/mod/attendance"
 
 if [ -L "$PLUGIN_TARGET" ]; then
-    echo "  Symlink already exists — skipping."
+    echo "  WARNING: $PLUGIN_TARGET is a symlink; removing it in favour of the bind-mount."
+    rm "$PLUGIN_TARGET"
+    echo "  Removed stale symlink. The bind-mount should already provide the directory."
 elif [ -d "$PLUGIN_TARGET" ]; then
-    echo "  WARNING: $PLUGIN_TARGET is a real directory; replacing with symlink."
-    rm -rf "$PLUGIN_TARGET"
-    ln -s "$PLUGIN_DIR" "$PLUGIN_TARGET"
+    echo "  Plugin directory present at $PLUGIN_TARGET — OK."
 else
-    ln -s "$PLUGIN_DIR" "$PLUGIN_TARGET"
-    echo "  Symlinked $PLUGIN_DIR -> $PLUGIN_TARGET"
+    echo "  ERROR: $PLUGIN_TARGET does not exist." >&2
+    echo "  Ensure the docker-compose.yml bind-mount for the plugin is configured." >&2
+    exit 1
 fi
 
 # ---------------------------------------------------------------------------
