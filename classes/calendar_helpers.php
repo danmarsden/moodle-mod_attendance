@@ -24,6 +24,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once($CFG->dirroot . '/calendar/lib.php');
 require_once(dirname(__FILE__) . '/../lib.php');
 
 /**
