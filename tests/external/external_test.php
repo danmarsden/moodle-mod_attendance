@@ -318,6 +318,52 @@ final class external_test extends externallib_advanced_testcase {
     }
 
     /**
+     * Test students cannot update attendance for another user via ws.
+     *
+     * @covers \mod_attendance\external::update_user_status
+     * @return void
+     * @throws \invalid_parameter_exception
+     */
+    public function test_update_user_status_disallows_other_students(): void {
+        global $DB;
+
+        $this->resetAfterTest(true);
+        set_config('studentscanmark', 1, 'attendance');
+
+        $courseswithsessions = attendance_handler::get_courses_with_today_sessions($this->teacher->id);
+        $courseswithsessions = external_api::clean_returnvalue(
+            mod_attendance_external::get_courses_with_today_sessions_returns(),
+            $courseswithsessions
+        );
+
+        $course = array_pop($courseswithsessions);
+        $attendanceinstance = array_pop($course['attendance_instances']);
+        $session = array_pop($attendanceinstance['today_sessions']);
+        $DB->set_field('attendance_sessions', 'studentscanmark', 1, ['id' => $session['id']]);
+
+        $sessioninfo = attendance_handler::get_session($session['id']);
+        $sessioninfo = external_api::clean_returnvalue(
+            mod_attendance_external::get_session_returns(),
+            $sessioninfo
+        );
+
+        $status = array_pop($sessioninfo['statuses']);
+        $statusset = $sessioninfo['statusset'];
+        $attacker = $this->students[0];
+        $victim = $this->students[1];
+
+        $this->setUser($attacker);
+        $this->expectException('invalid_parameter_exception');
+        mod_attendance_external::update_user_status(
+            $session['id'],
+            $victim->id,
+            $victim->id,
+            $status['id'],
+            $statusset
+        );
+    }
+
+    /**
      * Test adding new attendance record via ws.
      *
      * @covers \mod_attendance\external::add_attendance
