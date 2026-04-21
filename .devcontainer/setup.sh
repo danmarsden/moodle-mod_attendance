@@ -49,13 +49,15 @@ echo "  database is ready."
 # ---------------------------------------------------------------------------
 step "Checking for Moodle core in $MOODLE_DIR ..."
 if [ ! -f "$MOODLE_DIR/version.php" ]; then
-    echo "  Cloning Moodle branch $MOODLE_BRANCH (this may take a few minutes) ..."
-    git clone \
-        --depth=1 \
-        --branch="$MOODLE_BRANCH" \
-        https://github.com/moodle/moodle.git \
-        "$MOODLE_DIR"
-    echo "  Clone complete."
+    echo "  Pulling Moodle core into $MOODLE_DIR ..."
+    cd "$MOODLE_DIR"
+    git init
+    git config --global --add safe.directory /var/www/html
+    git remote add origin https://github.com/moodle/moodle.git
+    git fetch --depth=1 origin "$MOODLE_BRANCH"
+    git checkout "$MOODLE_BRANCH"
+
+    echo "  Checkout complete."
 else
     echo "  Moodle core already present — skipping clone."
 fi
@@ -146,7 +148,9 @@ php "$MOODLE_DIR/admin/cli/cfg.php" --name=cachejs --set=0 2>/dev/null || true
 php "$MOODLE_DIR/admin/cli/cfg.php" --name=themedesignermode --set=1 2>/dev/null || true
 
 step "Setting up permissions..."
-chown -R www-data:www-data "$MOODLE_DIR"
+find /var/www/html -path \
+    /var/www/html/mod/attendance -prune \
+    -o -exec chown www-data:www-data {} +
 # ---------------------------------------------------------------------------
 # Done
 # ---------------------------------------------------------------------------
