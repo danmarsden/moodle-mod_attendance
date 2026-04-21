@@ -529,7 +529,7 @@ class mod_attendance_external extends external_api {
      * @param int $statusset
      */
     public static function update_user_status($sessionid, $studentid, $takenbyid, $statusid, $statusset) {
-        global $DB;
+        global $DB, $USER;
 
         $params = self::validate_parameters(self::update_user_status_parameters(), [
             'sessionid' => $sessionid,
@@ -549,6 +549,10 @@ class mod_attendance_external extends external_api {
 
         // If not a teacher, make sure session is open for self-marking.
         if (!has_capability('mod/attendance:takeattendances', $context)) {
+            if ($params['studentid'] != $USER->id || $params['takenbyid'] != $USER->id) {
+                throw new invalid_parameter_exception('Invalid user id or no permissions.');
+            }
+
             [$canmark, $reason] = attendance_can_student_mark($session);
             if (!$canmark) {
                 throw new invalid_parameter_exception($reason);
