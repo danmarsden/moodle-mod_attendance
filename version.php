@@ -23,8 +23,8 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version  = 2024082401;
-$plugin->release = 2024082401;
+$plugin->version  = 2024082402;
+$plugin->release = 2024082402;
 $plugin->requires = 2024092700; // Requires 4.5.
 $plugin->maturity  = MATURITY_STABLE;
 $plugin->cron     = 0;
