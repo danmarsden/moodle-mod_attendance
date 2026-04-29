@@ -1,0 +1,6 @@
+{
+    "better-phpunit.phpunitBinary": "vendor/bin/phpunit",
+    "better-phpunit.xmlConfigFilepath": "/var/www/html/phpunit.xml",
+    "better-phpunit.phpBinary": "/usr/local/bin/php",
+    "better-phpunit.workingDirectory": "/var/www/html"
+}

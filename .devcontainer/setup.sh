@@ -139,8 +139,30 @@ php "$MOODLE_DIR/admin/cli/cfg.php" --name=debug --set=32767 2>/dev/null || true
 php "$MOODLE_DIR/admin/cli/cfg.php" --name=cachejs --set=0 2>/dev/null || true
 php "$MOODLE_DIR/admin/cli/cfg.php" --name=themedesignermode --set=1 2>/dev/null || true
 
+# ---------------------------------------------------------------------------
+# 8. Configure PHPUnit
+# ---------------------------------------------------------------------------
+PHPUNIT_DATA=/var/www/phpunit_moodledata
+
+step "Configuring PHPUnit ..."
+mkdir -p "$PHPUNIT_DATA"
+
+# Inject phpunit settings into config.php before the require_once line if not already present.
+if ! grep -q 'phpunit_dataroot' "$MOODLE_DIR/config.php"; then
+    sed -i "s|require_once(__DIR__ . '/lib/setup.php');|\$CFG->phpunit_dataroot = '$PHPUNIT_DATA';\n\$CFG->phpunit_prefix   = 'phpu_';\n\nrequire_once(__DIR__ . '/lib/setup.php');|" \
+        "$MOODLE_DIR/config.php"
+    echo "  Added phpunit settings to config.php."
+else
+    echo "  phpunit settings already present — skipping."
+fi
+
+# Initialise the PHPUnit test database tables and dataroot (safe to re-run).
+php "$MOODLE_DIR/admin/tool/phpunit/cli/init.php"
+echo "  PHPUnit initialised."
+
 step "Setting up permissions..."
 chown -R www-data:www-data "$MOODLE_DIR"
+chown -R www-data:www-data "$PHPUNIT_DATA"
 # ---------------------------------------------------------------------------
 # Done
 # ---------------------------------------------------------------------------
