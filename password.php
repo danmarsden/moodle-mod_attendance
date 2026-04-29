@@ -63,9 +63,10 @@ $sessioninfodata = (object)[
     'shortname'   => $course->shortname,
     'sessiondate' => userdate($session->sessdate),
 ];
-echo html_writer::div(
-    get_string('qrcodesessioninfo', 'attendance', $sessioninfodata),
-    'qrcode-session-info'
+echo html_writer::div( "<h2>" .
+    get_string('qrcodecourseinfo', 'attendance', $sessioninfodata) . "</h2>" .
+    "<h3>" .  get_string('qrcodesessioninfo', 'attendance', $sessioninfodata),
+    'qrcode-session-info' . "</h3>"
 );
 
 $showpassword = (isset($session->studentpassword) && strlen($session->studentpassword) > 0);
@@ -77,9 +78,9 @@ if ($rotateqr) {
 
 if ($showpassword) {
     if ($showqr) {
-        echo html_writer::div("<h2>" . get_string('qrcodeandpasswordheader', 'attendance'), 'qrcodeheader') . "</h2>";
+        echo html_writer::div( get_string('qrcodeandpasswordheader', 'attendance'), 'qrcodeheader') ;
     } else {
-        echo html_writer::div("<h2>" . get_string('passwordheader', 'attendance'), 'qrcodeheader') . "</h2>";
+        echo html_writer::div( get_string('passwordheader', 'attendance'), 'qrcodeheader') ;
     }
     echo html_writer::span($session->studentpassword, 'student-password');
     echo html_writer::div('&nbsp;');

@@ -1,2 +1,3 @@
 *.code-workspace
 vendor/**
+.DS_Store

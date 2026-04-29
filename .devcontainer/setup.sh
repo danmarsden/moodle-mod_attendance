@@ -49,32 +49,40 @@ echo "  database is ready."
 # ---------------------------------------------------------------------------
 step "Checking for Moodle core in $MOODLE_DIR ..."
 if [ ! -f "$MOODLE_DIR/version.php" ]; then
-    echo "  Cloning Moodle branch $MOODLE_BRANCH (this may take a few minutes) ..."
-    git clone \
-        --depth=1 \
-        --branch="$MOODLE_BRANCH" \
-        https://github.com/moodle/moodle.git \
-        "$MOODLE_DIR"
-    echo "  Clone complete."
+    echo "  Pulling Moodle core into $MOODLE_DIR ..."
+    cd "$MOODLE_DIR"
+    git init
+    git config --global --add safe.directory /var/www/html
+    git remote add origin https://github.com/moodle/moodle.git
+    git fetch --depth=1 origin "$MOODLE_BRANCH"
+    git checkout "$MOODLE_BRANCH"
+
+    echo "  Checkout complete."
 else
     echo "  Moodle core already present — skipping clone."
 fi
 
 # ---------------------------------------------------------------------------
-# 3. Symlink the plugin into Moodle's mod directory
+# 3. Verify the plugin is available inside Moodle's mod directory.
+#    The docker-compose bind-mount places the plugin source directly at
+#    $MOODLE_DIR/mod/attendance, so PHP's __FILE__ resolves to a path under
+#    /var/www/html and dirname(__FILE__).'/../../config.php' works correctly.
+#    No symlink is needed (or desired — symlinks cause __FILE__ to resolve to
+#    the symlink target path, breaking the relative config.php lookup).
 # ---------------------------------------------------------------------------
-step "Linking plugin into Moodle ..."
+step "Verifying plugin is available in Moodle ..."
 PLUGIN_TARGET="$MOODLE_DIR/mod/attendance"
 
 if [ -L "$PLUGIN_TARGET" ]; then
-    echo "  Symlink already exists — skipping."
+    echo "  WARNING: $PLUGIN_TARGET is a symlink; removing it in favour of the bind-mount."
+    rm "$PLUGIN_TARGET"
+    echo "  Removed stale symlink. The bind-mount should already provide the directory."
 elif [ -d "$PLUGIN_TARGET" ]; then
-    echo "  WARNING: $PLUGIN_TARGET is a real directory; replacing with symlink."
-    rm -rf "$PLUGIN_TARGET"
-    ln -s "$PLUGIN_DIR" "$PLUGIN_TARGET"
+    echo "  Plugin directory present at $PLUGIN_TARGET — OK."
 else
-    ln -s "$PLUGIN_DIR" "$PLUGIN_TARGET"
-    echo "  Symlinked $PLUGIN_DIR -> $PLUGIN_TARGET"
+    echo "  ERROR: $PLUGIN_TARGET does not exist." >&2
+    echo "  Ensure the docker-compose.yml bind-mount for the plugin is configured." >&2
+    exit 1
 fi
 
 # ---------------------------------------------------------------------------
@@ -161,8 +169,9 @@ php "$MOODLE_DIR/admin/tool/phpunit/cli/init.php"
 echo "  PHPUnit initialised."
 
 step "Setting up permissions..."
-chown -R www-data:www-data "$MOODLE_DIR"
-chown -R www-data:www-data "$PHPUNIT_DATA"
+find /var/www/html -path \
+    /var/www/html/mod/attendance -prune \
+    -o -exec chown www-data:www-data {} +
 # ---------------------------------------------------------------------------
 # Done
 # ---------------------------------------------------------------------------
