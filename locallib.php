@@ -1130,14 +1130,39 @@ function attendance_get_users_to_notify($courseids = [], $orderby = '', $allforn
         $where .= ' AND c.id ' . $insql;
         $params = array_merge($params, $inparams);
     }
+    // 0..1 effective attendance fraction (matches attendance_warning_effective_percent for SQL filtering).
+    $sqlmissingpts = 'SUM(CASE WHEN stm.maxgrade > stg.grade THEN stm.maxgrade - stg.grade ELSE 0 END)';
+    $effectiveattendance01 = '(LEAST(1.0, GREATEST(0.0, (
+        CASE
+            WHEN COALESCE(a.warningbasismode, \'current_sessions\') = \'planned_hours\'
+                AND a.plannedtotalhours IS NOT NULL AND a.plannedtotalhours > 0
+            THEN (a.plannedtotalhours - (
+                CASE
+                    WHEN SUM(ats.duration) > 0 AND SUM(stm.maxgrade) > 0
+                    THEN (SUM(ats.duration) / 3600.0) * (' . $sqlmissingpts . ' / SUM(stm.maxgrade))
+                    ELSE ' . $sqlmissingpts . '
+                END
+            )) / a.plannedtotalhours
+            WHEN COALESCE(a.warningbasismode, \'current_sessions\') = \'planned_sessions\'
+                AND a.plannedtotalsessions IS NOT NULL AND a.plannedtotalsessions > 0
+            THEN ((a.plannedtotalsessions - SUM(CASE WHEN stg.grade = 0 THEN 1 ELSE 0 END)) * 1.0
+                / a.plannedtotalsessions)
+            ELSE CASE WHEN SUM(stm.maxgrade) > 0 THEN SUM(stg.grade) / SUM(stm.maxgrade) ELSE 0 END
+        END
+    ))))';
+
     if ($allfornotify) {
         // Exclude warnings that have already sent the max num.
         $notifywhere = ' AND (ns.nscount IS NULL OR n.maxwarn > ns.nscount) ';
     } else {
-        // For report screens keep filtering by current taken-session percent.
-        $thresholdhaving = ' AND n.warningpercent > (CASE WHEN SUM(stm.maxgrade) > 0 ' .
-            'THEN ((SUM(stg.grade) / SUM(stm.maxgrade)) * 100) ELSE 0 END) ';
+        // For report screens: same attendance % as warnings (planned hours/sessions vs taken-only).
+        $thresholdhaving = ' AND n.warnafter <= COUNT(DISTINCT ats.id) AND n.warningpercent > (' .
+            $effectiveattendance01 . ' * 100) ';
     }
+
+    $percentexpr = $allfornotify
+        ? 'CASE WHEN SUM(stm.maxgrade) > 0 THEN SUM(stg.grade) / SUM(stm.maxgrade) ELSE 0 END'
+        : $effectiveattendance01;
     $userfieldsapi = \core_user\fields::for_name();
     $unames = $userfieldsapi->get_sql('', false, '', '', false)->selects . ',';
     $unames2 = $userfieldsapi->get_sql('u', false, '', '', false)->selects . ',';
@@ -1178,7 +1203,7 @@ function attendance_get_users_to_notify($courseids = [], $orderby = '', $allforn
                     n.emailcontent, n.emailcontentformat, n.emailuser, n.thirdpartyemails, n.warnafter, n.maxwarn,
                      COUNT(DISTINCT ats.id) AS numtakensessions, SUM(stg.grade) AS points, SUM(stm.maxgrade) AS maxpoints,
                       COALESCE(ns.nscount, 0) AS nscount, ns.timesent as timesent,
-                      CASE WHEN SUM(stm.maxgrade) > 0 THEN SUM(stg.grade) / SUM(stm.maxgrade) ELSE 0 END AS percent,
+                      {$percentexpr} AS percent,
                       a.plannedtotalsessions, a.plannedtotalhours, a.warningbasismode,
                       SUM(ats.duration) AS completedseconds,
                       SUM(CASE WHEN stg.grade = 0 THEN 1 ELSE 0 END) AS num_absent_sessions,
@@ -1220,7 +1245,16 @@ function attendance_get_users_to_notify($courseids = [], $orderby = '', $allforn
         $idfield = $DB->sql_concat('cmid', 'userid');
         // Only show one record per attendance for teacher reports.
         $sql = "SELECT DISTINCT {$idfield} as id, {$unames} aid, cmid, courseid, aname, coursename, userid,
-                        numtakensessions, percent, MAX(timesent) as timesent
+                        numtakensessions, percent, MAX(timesent) as timesent,
+                        MAX(plannedtotalhours) AS plannedtotalhours,
+                        MAX(plannedtotalsessions) AS plannedtotalsessions,
+                        MAX(warningbasismode) AS warningbasismode,
+                        MAX(points) AS points,
+                        MAX(maxpoints) AS maxpoints,
+                        MAX(completedseconds) AS completedseconds,
+                        MAX(num_absent_sessions) AS num_absent_sessions,
+                        MAX(absentseconds) AS absentseconds,
+                        MAX(missingpoints) AS missingpoints
               FROM ({$sql}) as m
          GROUP BY id, aid, cmid, courseid, aname, userid, numtakensessions,
                   percent, {$unames} coursename {$orderby}";
@@ -1253,7 +1287,8 @@ function attendance_get_warning_context(mod_attendance_structure $att, int $user
                    SUM(stm.maxgrade) AS maxpoints,
                    SUM(ats.duration) AS completedseconds,
                    SUM(CASE WHEN stg.grade = 0 THEN 1 ELSE 0 END) AS num_absent_sessions,
-                   SUM(CASE WHEN stg.grade = 0 THEN ats.duration ELSE 0 END) AS absentseconds
+                   SUM(CASE WHEN stg.grade = 0 THEN ats.duration ELSE 0 END) AS absentseconds,
+                   SUM(CASE WHEN stm.maxgrade > stg.grade THEN stm.maxgrade - stg.grade ELSE 0 END) AS missingpoints
               FROM {attendance_sessions} ats
               JOIN {attendance_log} atl ON (atl.sessionid = ats.id AND atl.studentid = :userid)
                                     AND atl.id = (
@@ -1285,6 +1320,23 @@ function attendance_get_warning_context(mod_attendance_structure $att, int $user
         ? $att->warningbasismode : 'current_sessions';
     $ctx->plannedtotalsessions = isset($att->plannedtotalsessions) ? (int)$att->plannedtotalsessions : null;
     $ctx->plannedtotalhours = isset($att->plannedtotalhours) ? (float)$att->plannedtotalhours : null;
+    if ($ctx->basismode === 'planned_hours' && $row) {
+        $partial = (object) [
+            'numtakensessions' => $ctx->numtakensessions,
+            'points' => $ctx->points,
+            'maxpoints' => $ctx->maxpoints,
+            'completedseconds' => (float)($row->completedseconds ?? 0),
+            'absentseconds' => (float)($row->absentseconds ?? 0),
+            'num_absent_sessions' => $ctx->num_absent_sessions,
+            'missingpoints' => isset($row->missingpoints) ? (float)$row->missingpoints : null,
+            'warningbasismode' => 'planned_hours',
+            'plannedtotalhours' => $ctx->plannedtotalhours,
+            'plannedtotalsessions' => $ctx->plannedtotalsessions,
+        ];
+        $adj = attendance_warning_context_from_notify_aggregate($partial);
+        $ctx->absent_hours = $adj->absent_hours;
+        $ctx->completedhours = $adj->completedhours;
+    }
     return $ctx;
 }
 
@@ -1354,6 +1406,66 @@ function attendance_warning_basismode_allows_trigger(
         default:
             return $ctx->numtakensessions >= (int)$warning->warnafter;
     }
+}
+
+/**
+ * Build warning context from an aggregate row (same shape as the inner query in attendance_get_users_to_notify).
+ * Used by the notify task and for absentee report display so planned-hours absence matches
+ * attendance_warning_effective_percent().
+ *
+ * @param stdClass $record must include: numtakensessions, points, maxpoints, completedseconds (optional),
+ *        absentseconds (optional), num_absent_sessions (optional), missingpoints (optional),
+ *        warningbasismode, plannedtotalsessions (optional), plannedtotalhours (optional)
+ * @return stdClass context for attendance_warning_effective_percent / basismode gating
+ */
+function attendance_warning_context_from_notify_aggregate(stdClass $record): stdClass {
+    $ctx = new stdClass();
+    $ctx->numtakensessions = (int)($record->numtakensessions ?? 0);
+    $maxpts = (float)($record->maxpoints ?? 0);
+    $pts = (float)($record->points ?? 0);
+    $ctx->points = $pts;
+    $ctx->maxpoints = $maxpts;
+    $ctx->percent = ($maxpts > 0) ? ($pts / $maxpts) * 100 : 0;
+    $ctx->completedhours = isset($record->completedseconds) ? (float)$record->completedseconds / 3600 : 0;
+    $ctx->num_absent_sessions = isset($record->num_absent_sessions) ? (int)$record->num_absent_sessions : 0;
+    $ctx->absent_hours = isset($record->absentseconds) ? (float)$record->absentseconds / 3600 : 0;
+    if (($record->warningbasismode ?? '') === 'planned_hours' && isset($record->plannedtotalhours)
+            && (float)$record->plannedtotalhours > 0) {
+        $missingpts = isset($record->missingpoints) && (float)$record->missingpoints >= 0
+            ? (float)$record->missingpoints
+            : (($maxpts > $pts) ? $maxpts - $pts : 0);
+        $takenhours = isset($record->completedseconds) ? (float)$record->completedseconds / 3600 : 0;
+        if ($takenhours > 0 && $maxpts > 0) {
+            $ctx->absent_hours = $takenhours * ($missingpts / $maxpts);
+            $ctx->completedhours = max(0, $takenhours - $ctx->absent_hours);
+        } else {
+            $ctx->absent_hours = $missingpts;
+            $ctx->completedhours = $pts;
+        }
+    }
+    $ctx->basismode = $record->warningbasismode ?? 'current_sessions';
+    $ctx->plannedtotalsessions = isset($record->plannedtotalsessions) ? (int)$record->plannedtotalsessions : null;
+    $ctx->plannedtotalhours = isset($record->plannedtotalhours) ? (float)$record->plannedtotalhours : null;
+    return $ctx;
+}
+
+/**
+ * Absence percentage (0–100) for third-party / display, aligned with warning basis.
+ * For planned_hours uses scaled absent hours / planned total hours (e.g. 24/92).
+ *
+ * @param stdClass $record aggregate row with warningbasismode, planned totals, points, etc.
+ * @return float
+ */
+function attendance_warning_absence_percent_for_display(stdClass $record): float {
+    if (($record->warningbasismode ?? '') === 'planned_hours'
+            && isset($record->plannedtotalhours) && (float)$record->plannedtotalhours > 0) {
+        $ctx = attendance_warning_context_from_notify_aggregate($record);
+        $planned = (float)$record->plannedtotalhours;
+        return min(100.0, max(0.0, ((float)$ctx->absent_hours / $planned) * 100.0));
+    }
+    $attendance = isset($record->effectivepercent) ? (float)$record->effectivepercent
+        : (float)($record->percent ?? 0) * 100.0;
+    return min(100.0, max(0.0, 100.0 - $attendance));
 }
 
 /**
@@ -1434,6 +1546,12 @@ function attendance_template_variables($record) {
     }
     if (isset($record->warningbasismode)) {
         $templatevars['/%warningbasismode%/'] = $record->warningbasismode;
+    }
+    if (isset($record->attendancepercent)) {
+        $templatevars['/%attendancepercent%/'] = $record->attendancepercent;
+    }
+    if (isset($record->absencepercent)) {
+        $templatevars['/%absencepercent%/'] = $record->absencepercent;
     }
     $extrauserfields = \core_user\fields::get_name_fields();
     foreach ($extrauserfields as $extra) {

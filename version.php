@@ -23,10 +23,13 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version  = 2026012701;
-$plugin->release = 2026012700;
-$plugin->requires = 2025100600; // Requires 5.1.
+$plugin->version  = 2026030501;
+$plugin->release = 2026030501;
+// Minimum Moodle core (YYYYMMDD). Use a 4.5-era floor so Moodle Workplace 4.5 builds
+// that report a slightly lower core version than standard 4.5.0 still pass the check.
+$plugin->requires = 2024092700;
 $plugin->maturity  = MATURITY_STABLE;
 $plugin->cron     = 0;
 $plugin->component = 'mod_attendance';
-$plugin->supported = [501, 501];
+// Omit $plugin->supported: a tight [405, 405] range often blocks install on Moodle Workplace
+// and other distributions even when the core branch is 4.5-compatible.

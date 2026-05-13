@@ -153,7 +153,18 @@ foreach ($records as $record) {
         }
     }
     $row[] = $record->numtakensessions;
-    $row[] = round($record->percent * 100) . "%";
+    $pctvalue = format_float((float)$record->percent * 100, 2);
+    if (($record->warningbasismode ?? '') === 'planned_hours' && isset($record->plannedtotalhours)
+            && (float)$record->plannedtotalhours > 0) {
+        $wctx = attendance_warning_context_from_notify_aggregate($record);
+        $row[] = get_string('absenteereportpercentplanned', 'mod_attendance', [
+            'percent' => $pctvalue,
+            'absent' => format_float((float)$wctx->absent_hours, 2),
+            'planned' => format_float((float)$record->plannedtotalhours, 1),
+        ]);
+    } else {
+        $row[] = $pctvalue . '%';
+    }
     $timesent = "-";
     if (!empty($record->timesent)) {
         $timesent = userdate($record->timesent);

@@ -41,6 +41,8 @@ require_once($CFG->dirroot . '/mod/attendance/locallib.php');
  * @covers ::attendance_normalise_warning_basis_fields
  * @covers ::attendance_warning_effective_percent
  * @covers ::attendance_warning_basismode_allows_trigger
+ * @covers ::attendance_warning_context_from_notify_aggregate
+ * @covers ::attendance_warning_absence_percent_for_display
  * @covers ::attendance_template_variables
  */
 final class locallib_test extends \advanced_testcase {
@@ -176,6 +178,45 @@ final class locallib_test extends \advanced_testcase {
         $result = \attendance_warning_effective_percent($ctx);
 
         $this->assertEquals(77.5, $result, 'Planned hours effective percent should be (planned-absent)/planned.');
+    }
+
+    /**
+     * Planned-hours aggregate context: missing points scaled by taken session hours.
+     */
+    public function test_warning_context_from_notify_aggregate_planned_hours_scaled(): void {
+        $record = (object) [
+            'warningbasismode' => 'planned_hours',
+            'plannedtotalhours' => 92.0,
+            'points' => 20.0,
+            'maxpoints' => 40.0,
+            'completedseconds' => 40 * HOURSECS,
+            'missingpoints' => 20.0,
+            'numtakensessions' => 8,
+            'num_absent_sessions' => 0,
+            'absentseconds' => 0,
+        ];
+        $ctx = \attendance_warning_context_from_notify_aggregate($record);
+        $this->assertEqualsWithDelta(20.0, $ctx->absent_hours, 0.001, 'Half of 40 taken hours missing => 20 absent hours.');
+        $eff = \attendance_warning_effective_percent($ctx);
+        $this->assertEqualsWithDelta((72 / 92) * 100, $eff, 0.02, 'Attendance vs 92 planned hours.');
+    }
+
+    /**
+     * Third-party / display: absence % for planned_hours is absent hours / planned hours.
+     */
+    public function test_warning_absence_percent_for_display_planned_hours(): void {
+        $record = (object) [
+            'warningbasismode' => 'planned_hours',
+            'plannedtotalhours' => 92.0,
+            'points' => 68.0,
+            'maxpoints' => 92.0,
+            'completedseconds' => 92 * HOURSECS,
+            'missingpoints' => 24.0,
+            'numtakensessions' => 10,
+            'effectivepercent' => (68 / 92) * 100,
+        ];
+        $abs = \attendance_warning_absence_percent_for_display($record);
+        $this->assertEqualsWithDelta((24 / 92) * 100, $abs, 0.02, '24h absent of 92 planned => 26.09% absence.');
     }
 
     /**

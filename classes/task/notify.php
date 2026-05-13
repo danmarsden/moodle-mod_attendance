@@ -86,36 +86,7 @@ class notify extends \core\task\scheduled_task {
             if (!$warning) {
                 continue;
             }
-            $ctx = new \stdClass();
-            $ctx->numtakensessions = (int)$record->numtakensessions;
-            $ctx->percent = (float)$record->percent * 100;
-            $ctx->points = (float)$record->points;
-            $ctx->maxpoints = (float)$record->maxpoints;
-            $ctx->completedhours = isset($record->completedseconds) ? (float)$record->completedseconds / 3600 : 0;
-            $ctx->num_absent_sessions = isset($record->num_absent_sessions) ? (int)$record->num_absent_sessions : 0;
-            $ctx->absent_hours = isset($record->absentseconds) ? (float)$record->absentseconds / 3600 : 0;
-            // In planned_hours mode, support any status-point scale:
-            // convert missing points proportionally to taken session hours when duration is available.
-            if (($record->warningbasismode ?? '') === 'planned_hours' && isset($record->plannedtotalhours) && (float)$record->plannedtotalhours > 0) {
-                $maxpts = (float)($record->maxpoints ?? 0);
-                $pts = (float)($record->points ?? 0);
-                $missingpts = isset($record->missingpoints) && (float)$record->missingpoints >= 0
-                    ? (float)$record->missingpoints
-                    : ($maxpts > $pts ? $maxpts - $pts : 0);
-                $takenhours = isset($record->completedseconds) ? (float)$record->completedseconds / 3600 : 0;
-                if ($takenhours > 0 && $maxpts > 0) {
-                    // Example: 275/500 points over 50 taken hours => 22.5 absent hours.
-                    $ctx->absent_hours = $takenhours * ($missingpts / $maxpts);
-                    $ctx->completedhours = max(0, $takenhours - $ctx->absent_hours);
-                } else {
-                    // Fallback for setups without duration: assume 1 point = 1 hour.
-                    $ctx->absent_hours = $missingpts;
-                    $ctx->completedhours = (float)($record->points ?? 0);
-                }
-            }
-            $ctx->basismode = $record->warningbasismode ?? 'current_sessions';
-            $ctx->plannedtotalsessions = isset($record->plannedtotalsessions) ? (int)$record->plannedtotalsessions : null;
-            $ctx->plannedtotalhours = isset($record->plannedtotalhours) ? (float)$record->plannedtotalhours : null;
+            $ctx = attendance_warning_context_from_notify_aggregate($record);
             if (!attendance_warning_basismode_allows_trigger($att, $ctx, $warning)) {
                 $skippedbasismode++;
                 continue;
@@ -142,6 +113,8 @@ class notify extends \core\task\scheduled_task {
             // Use planned-based percent for email and display so the student sees the correct figure (e.g. 80% not 50%).
             $record->effectivepercent = $effectivepercent;
             $record->percent = $effectivepercent / 100;
+            $record->attendancepercent = format_float((float)$effectivepercent, 2);
+            $record->absencepercent = format_float(attendance_warning_absence_percent_for_display($record), 2);
 
             if (empty($sentnotifications[$record->userid])) {
                 $sentnotifications[$record->userid] = [];
@@ -187,7 +160,8 @@ class notify extends \core\task\scheduled_task {
             $thirdpartyusers = [];
             if (!empty($record->thirdpartyemails)) {
                 $sendto = explode(',', $record->thirdpartyemails);
-                $record->percent = round($record->percent * 100) . "%";
+                // Legacy {$a->percent}: attendance (same basis as warnings). Prefer attendancepercent / absencepercent in lang.
+                $record->percent = $record->attendancepercent . '%';
                 $context = \context_module::instance($record->cmid);
                 foreach ($sendto as $senduser) {
                     if (empty($senduser)) {
