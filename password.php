@@ -56,6 +56,15 @@ $PAGE->set_title(get_string('password', 'attendance'));
 
 echo $OUTPUT->header();
 
+// Display course and session information to help teachers identify the active session.
+$course = get_course($cm->course);
+echo html_writer::tag('h2', 
+    html_writer::tag( 'strong', format_string($course->fullname, true, array('context' => $context)))
+);
+echo html_writer::tag('h3', 
+    html_writer::tag( 'strong', userdate($session->sessdate))
+);
+
 $showpassword = (isset($session->studentpassword) && strlen($session->studentpassword) > 0);
 $showqr = (isset($session->includeqrcode) && $session->includeqrcode == 1);
 $rotateqr = (isset($session->rotateqrcode) && $session->rotateqrcode == 1);
@@ -65,9 +74,9 @@ if ($rotateqr) {
 
 if ($showpassword) {
     if ($showqr) {
-        echo html_writer::div("<h2>" . get_string('qrcodeandpasswordheader', 'attendance'), 'qrcodeheader') . "</h2>";
+        echo html_writer::div( get_string('qrcodeandpasswordheader', 'attendance'), 'qrcodeheader') ;
     } else {
-        echo html_writer::div("<h2>" . get_string('passwordheader', 'attendance'), 'qrcodeheader') . "</h2>";
+        echo html_writer::div( get_string('passwordheader', 'attendance'), 'qrcodeheader') ;
     }
     echo html_writer::span($session->studentpassword, 'student-password');
     echo html_writer::div('&nbsp;');
