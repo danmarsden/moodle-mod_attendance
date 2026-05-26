@@ -1,0 +1,77 @@
+{
+  "$schema": "https://raw.githubusercontent.com/ateeducacion/moodle-playground/refs/heads/main/assets/blueprints/blueprint-schema.json",
+  "preferredVersions": {
+    "php": "8.3",
+    "moodle": "5.1"
+  },
+  "landingPage": "/course/view.php?id=2",
+  "constants": {
+    "ADMIN_USER": "admin",
+    "ADMIN_PASS": "test",
+    "ADMIN_EMAIL": "admin@example.com"
+  },
+  "steps": [
+    {
+      "step": "installMoodle",
+      "options": {
+        "adminUser": "{{ADMIN_USER}}",
+        "adminPass": "{{ADMIN_PASS}}",
+        "adminEmail": "{{ADMIN_EMAIL}}",
+        "siteName": "Attendance Activity Demo",
+        "locale": "en",
+        "timezone": "Europe/Madrid"
+      }
+    },
+    {
+      "step": "login",
+      "username": "{{ADMIN_USER}}"
+    },
+    {
+      "step": "installMoodlePlugin",
+      "pluginType": "mod",
+      "pluginName": "attendance",
+      "url": "https://github.com/danmarsden/moodle-mod_attendance/archive/refs/heads/MOODLE_501_STABLE.zip"
+    },
+    {
+      "step": "createCategory",
+      "name": "Test Courses"
+    },
+    {
+      "step": "createCourse",
+      "fullname": "Attendance Activity Demo Course",
+      "shortname": "ATTDEMO01",
+      "category": "Test Courses",
+      "summary": "Demo course for the mod_attendance activity module. A sample attendance instance is preloaded so you can immediately add sessions and try the attendance taking workflow.",
+      "format": "topics",
+      "numsections": 3
+    },
+    {
+      "step": "createUser",
+      "username": "student",
+      "password": "test",
+      "email": "student@example.com",
+      "firstname": "Demo",
+      "lastname": "Student"
+    },
+    {
+      "step": "enrolUser",
+      "username": "{{ADMIN_USER}}",
+      "course": "ATTDEMO01",
+      "role": "editingteacher"
+    },
+    {
+      "step": "enrolUser",
+      "username": "student",
+      "course": "ATTDEMO01",
+      "role": "student"
+    },
+    {
+      "step": "runPhpCode",
+      "code": "if (!defined('CLI_SCRIPT')) { define('CLI_SCRIPT', true); }\nrequire('/www/moodle/config.php');\nrequire_once($CFG->dirroot . '/course/lib.php');\nrequire_once($CFG->dirroot . '/mod/attendance/lib.php');\ntry {\n    $course = $DB->get_record('course', ['shortname' => 'ATTDEMO01'], '*', MUST_EXIST);\n    $module = $DB->get_record('modules', ['name' => 'attendance'], '*', MUST_EXIST);\n    $admin = get_admin();\n    \\core\\session\\manager::set_user($admin);\n    $now = time();\n    $cm = (object)[\n        'course'       => $course->id,\n        'module'       => $module->id,\n        'instance'     => 0,\n        'section'      => 1,\n        'idnumber'     => '',\n        'added'        => $now,\n        'score'        => 0,\n        'indent'       => 0,\n        'visible'      => 1,\n        'visibleold'   => 1,\n        'groupmode'    => 0,\n        'groupingid'   => 0,\n        'completion'   => 0,\n        'showdescription' => 0,\n    ];\n    $cmid = add_course_module($cm);\n    $attendance = (object)[\n        'course'       => $course->id,\n        'coursemodule' => $cmid,\n        'name'         => 'Sample attendance register',\n        'intro'        => '<p>Open this attendance activity to try the <strong>mod_attendance</strong> workflow: add sessions, take attendance for the demo student, and explore the reports tab.</p>',\n        'introformat'  => FORMAT_HTML,\n        'grade'        => 100,\n        'subnet'       => '',\n        'sessiondetailspos' => 'left',\n        'showsessiondescriptiononreport' => 0,\n    ];\n    $instanceid = attendance_add_instance($attendance);\n    $DB->set_field('course_modules', 'instance', $instanceid, ['id' => $cmid]);\n    course_add_cm_to_section($course->id, $cmid, 1);\n    rebuild_course_cache($course->id, true);\n    echo \"Created mod_attendance instance id={$instanceid} cmid={$cmid} in course {$course->shortname}\\n\";\n} catch (\\Throwable $e) {\n    echo 'ERROR: ' . $e->getMessage() . \"\\n\";\n}"
+    },
+    {
+      "step": "setLandingPage",
+      "path": "/course/view.php?id=2"
+    }
+  ]
+}
