@@ -600,7 +600,7 @@ class mod_attendance_structure {
     public function update_session_from_form_data($formdata, $sessionid) {
         global $DB;
 
-        if (!$sess = $DB->get_record('attendance_sessions', ['id' => $sessionid])) {
+        if (!$sess = $DB->get_record('attendance_sessions', ['id' => $sessionid, 'attendanceid' => $this->id])) {
             throw new moodle_exception('No such session in this course');
         }
 
@@ -1148,7 +1148,12 @@ class mod_attendance_structure {
         global $DB;
 
         if (!array_key_exists($sessionid, $this->sessioninfo)) {
-            $this->sessioninfo[$sessionid] = $DB->get_record('attendance_sessions', ['id' => $sessionid]);
+            $this->sessioninfo[$sessionid] = $DB->get_record(
+                'attendance_sessions',
+                ['id' => $sessionid, 'attendanceid' => $this->id],
+                '*',
+                MUST_EXIST
+            );
         }
         if (empty($this->sessioninfo[$sessionid]->description)) {
             $this->sessioninfo[$sessionid]->description = get_string('nodescription', 'attendance');
@@ -1174,8 +1179,19 @@ class mod_attendance_structure {
     public function get_sessions_info($sessionids): array {
         global $DB;
 
-        [$sql, $params] = $DB->get_in_or_equal($sessionids);
-        $sessions = $DB->get_records_select('attendance_sessions', "id $sql", $params, 'sessdate asc');
+        [$sql, $params] = $DB->get_in_or_equal($sessionids, SQL_PARAMS_NAMED);
+        $params['attendanceid'] = $this->id;
+        $sessions = $DB->get_records_select(
+            'attendance_sessions',
+            "id $sql AND attendanceid = :attendanceid",
+            $params,
+            'sessdate asc'
+        );
+
+        if (count($sessions) != count(array_unique($sessionids))) {
+            // At least one requested session id does not belong to this attendance instance.
+            throw new moodle_exception('No such session in this course');
+        }
 
         foreach ($sessions as $sess) {
             if (empty($sess->description)) {
@@ -1367,6 +1383,14 @@ class mod_attendance_structure {
      */
     public function delete_sessions($sessionsids) {
         global $DB;
+
+        // Ensure every session id actually belongs to this attendance instance before
+        // touching anything, so a caller cannot delete another instance's sessions/logs.
+        $sessionsids = $this->filter_own_session_ids($sessionsids);
+        if (empty($sessionsids)) {
+            return;
+        }
+
         if (attendance_existing_calendar_events_ids($sessionsids)) {
             attendance_delete_calendar_events($sessionsids);
         }
@@ -1383,6 +1407,29 @@ class mod_attendance_structure {
     }
 
     /**
+     * Filter the given session ids down to only those that belong to this attendance instance.
+     *
+     * @param array $sessionsids
+     * @return array
+     */
+    protected function filter_own_session_ids(array $sessionsids): array {
+        global $DB;
+
+        if (empty($sessionsids)) {
+            return [];
+        }
+
+        [$sql, $params] = $DB->get_in_or_equal($sessionsids, SQL_PARAMS_NAMED);
+        $params['attendanceid'] = $this->id;
+        return $DB->get_fieldset_select(
+            'attendance_sessions',
+            'id',
+            "id $sql AND attendanceid = :attendanceid",
+            $params
+        );
+    }
+
+    /**
      * Update duration.
      *
      * @param array $sessionsids
@@ -1390,6 +1437,13 @@ class mod_attendance_structure {
      */
     public function update_sessions_duration($sessionsids, $duration) {
         global $DB;
+
+        // Ensure every session id actually belongs to this attendance instance before
+        // updating anything, so a caller cannot modify another instance's sessions.
+        $sessionsids = $this->filter_own_session_ids($sessionsids);
+        if (empty($sessionsids)) {
+            return;
+        }
 
         $now = time();
         $sessions = $DB->get_recordset_list('attendance_sessions', 'id', $sessionsids);

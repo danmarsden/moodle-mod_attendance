@@ -63,7 +63,12 @@ class studentattendance extends \moodleform {
 
         // If a session description is set display it.
         if (!empty($attforsession->description)) {
-            $mform->addElement('html', $attforsession->description);
+            $descriptionformat = $attforsession->descriptionformat ?? FORMAT_HTML;
+            $mform->addElement('html', format_text(
+                $attforsession->description,
+                $descriptionformat,
+                ['context' => $attblock->context, 'para' => false]
+            ));
         }
         if (
             !empty($attforsession->studentpassword) &&

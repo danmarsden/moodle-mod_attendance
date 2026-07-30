@@ -563,15 +563,30 @@ class mod_attendance_external extends external_api {
         $student = $DB->get_record('user', ['id' => $params['studentid']], '*', MUST_EXIST);
         $takenby = $DB->get_record('user', ['id' => $params['takenbyid']], '*', MUST_EXIST);
 
-        // phpcs:disable moodle.Commenting.TodoComment
-        // TODO: Verify statusset and statusid.
+        $attrecord = $DB->get_record('attendance', ['id' => $session->attendanceid], '*', MUST_EXIST);
+        $course = get_course($cm->course);
+        $att = new mod_attendance_structure($attrecord, $cm, $course, $context);
+
+        if ((int)$params['statusset'] !== (int)$session->statusset) {
+            throw new invalid_parameter_exception(get_string('invalidstatus', 'mod_attendance'));
+        }
+
+        if (!has_capability('mod/attendance:takeattendances', $context)) {
+            [$allowedstatuses, $unused] = $att->get_student_statuses($session);
+        } else {
+            $allowedstatuses = attendance_get_statuses($session->attendanceid, true, (int)$session->statusset);
+        }
+
+        if (!isset($allowedstatuses[(int)$params['statusid']])) {
+            throw new invalid_parameter_exception(get_string('invalidstatus', 'mod_attendance'));
+        }
 
         return attendance_handler::update_user_status(
             $params['sessionid'],
             $params['studentid'],
             $params['takenbyid'],
             $params['statusid'],
-            $params['statusset']
+            (int)$session->statusset
         );
     }
 

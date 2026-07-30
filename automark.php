@@ -42,6 +42,7 @@ $session        = $DB->get_record(
 require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
 require_capability('mod/attendance:manualautomark', $context);
+require_sesskey();
 
 if (empty($session->automark)) {
     throw new moodle_exception('automarkingnotenabled', 'attendance');
