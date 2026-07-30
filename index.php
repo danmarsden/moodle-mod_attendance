@@ -74,8 +74,12 @@ foreach ($atts as $att) {
     // Get the responses of each attendance.
     $viewurl = new moodle_url('/mod/attendance/view.php', ['id' => $att->coursemodule]);
 
-    $dimmedclass = $att->visible ? '' : 'class="dimmed"';
-    $link = '<a ' . $dimmedclass . ' href="' . $viewurl->out() . '">' . $att->name . '</a>';
+    $linkattributes = [];
+    if (!$att->visible) {
+        $linkattributes['class'] = 'dimmed';
+    }
+    $attname = format_string($att->name, true, ['context' => context_module::instance($att->coursemodule)]);
+    $link = html_writer::link($viewurl, $attname, $linkattributes);
 
     if ($usesections) {
         $tabledata = [get_section_name($course, $att->section), $link];

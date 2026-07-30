@@ -32,13 +32,15 @@ $userid = required_param('userid', PARAM_INT);
 $cm = get_coursemodule_from_id('attendance', $id, 0, false, MUST_EXIST);
 $course = $DB->get_record('course', ['id' => $cm->course], '*', MUST_EXIST);
 $att = $DB->get_record('attendance', ['id' => $cm->instance], '*', MUST_EXIST);
-$tempuser = $DB->get_record('attendance_tempusers', ['id' => $userid], '*', MUST_EXIST);
+$tempuser = $DB->get_record('attendance_tempusers', ['id' => $userid, 'courseid' => $cm->course], '*', MUST_EXIST);
 
 $att = new mod_attendance_structure($att, $cm, $course);
 $params = ['userid' => $tempuser->id];
 $PAGE->set_url($att->url_tempmerge($params));
 
 require_login($course, true, $cm);
+$context = context_module::instance($cm->id);
+require_capability('mod/attendance:managetemporaryusers', $context);
 
 $PAGE->set_title($course->shortname . ": " . $att->name . ' - ' . get_string('tempusermerge', 'attendance'));
 $PAGE->set_heading($course->fullname);

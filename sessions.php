@@ -120,13 +120,14 @@ switch ($att->pageparams->action) {
         $sessionid = required_param('sessionid', PARAM_INT);
         $confirm   = optional_param('confirm', null, PARAM_INT);
 
+        // Validate the session belongs to this attendance instance.
+        $sessinfo = $att->get_session_info($sessionid);
+
         if (isset($confirm) && confirm_sesskey()) {
             $att->delete_sessions([$sessionid]);
             attendance_update_users_grade($att);
             redirect($att->url_manage(), get_string('sessiondeleted', 'attendance'));
         }
-
-        $sessinfo = $att->get_session_info($sessionid);
 
         $message = get_string('deletecheckfull', 'attendance', get_string('session', 'attendance'));
         $message .= str_repeat(html_writer::empty_tag('br'), 2);
@@ -147,6 +148,8 @@ switch ($att->pageparams->action) {
         if (isset($confirm) && confirm_sesskey()) {
             $sessionsids = required_param('sessionsids', PARAM_ALPHANUMEXT);
             $sessionsids = explode('_', $sessionsids);
+            // Validate every session belongs to this attendance instance before deleting.
+            $att->get_sessions_info($sessionsids);
             if ($att->pageparams->action == mod_attendance_sessions_page_params::ACTION_DELETE_SELECTED) {
                 $att->delete_sessions($sessionsids);
                 attendance_update_users_grade($att);
@@ -191,6 +194,8 @@ switch ($att->pageparams->action) {
 
         if ($formdata = $mform->get_data()) {
             $sessionsids = explode('_', $ids);
+            // Validate every session belongs to this attendance instance before updating.
+            $att->get_sessions_info($sessionsids);
             $duration = $formdata->durtime['hours'] * HOURSECS + $formdata->durtime['minutes'] * MINSECS;
             $att->update_sessions_duration($sessionsids, $duration);
             redirect($att->url_manage(), get_string('sessionupdated', 'attendance'));
