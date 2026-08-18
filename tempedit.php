@@ -33,7 +33,7 @@ $action = optional_param('action', null, PARAM_ALPHA);
 $cm = get_coursemodule_from_id('attendance', $id, 0, false, MUST_EXIST);
 $course = $DB->get_record('course', ['id' => $cm->course], '*', MUST_EXIST);
 $att = $DB->get_record('attendance', ['id' => $cm->instance], '*', MUST_EXIST);
-$tempuser = $DB->get_record('attendance_tempusers', ['id' => $userid], '*', MUST_EXIST);
+$tempuser = $DB->get_record('attendance_tempusers', ['id' => $userid, 'courseid' => $cm->course], '*', MUST_EXIST);
 
 $att = new mod_attendance_structure($att, $cm, $course);
 
