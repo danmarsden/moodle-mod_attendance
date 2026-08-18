@@ -68,6 +68,7 @@ class attendance extends datasource {
         $coursentity = new course();
         $coursealias = $coursentity->get_table_alias('course');
         $coursejoin = "JOIN {course} {$coursealias} ON {$coursealias}.id = {$attendancealias}.course";
+        $this->add_join($coursejoin);
         $this->add_entity($coursentity->add_join($coursejoin));
 
         // Join the course category entity.
