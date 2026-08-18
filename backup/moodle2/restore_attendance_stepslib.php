@@ -179,11 +179,20 @@ class restore_attendance_activity_structure_step extends restore_activity_struct
         $data->sessionid = $this->get_mappingid('attendance_session', $data->sessionid);
         $data->studentid = $this->get_mappingid('user', $data->studentid);
         $data->statusid = $this->get_mappingid('attendance_status', $data->statusid);
-        $statusset = explode(',', $data->statusset);
-        foreach ($statusset as $st) {
-            $st = $this->get_mappingid('attendance_status', $st);
+        $statusset = explode(',', (string) $data->statusset);
+        $mappedstatusset = [];
+        foreach ($statusset as $statusid) {
+            $statusid = trim($statusid);
+            if ($statusid === '') {
+                continue;
+            }
+
+            $mappedstatusid = (int) $this->get_mappingid('attendance_status', (int) $statusid);
+            if ($mappedstatusid > 0) {
+                $mappedstatusset[] = (string) $mappedstatusid;
+            }
         }
-        $data->statusset = implode(',', $statusset);
+        $data->statusset = implode(',', $mappedstatusset);
         $data->timetaken = $this->apply_date_offset($data->timetaken);
         $data->takenby = $this->get_mappingid('user', $data->takenby);
 
