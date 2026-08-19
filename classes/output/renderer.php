@@ -79,6 +79,13 @@ class renderer extends plugin_renderer_base {
              ['class' => 'addsession', 'type' => 'primary']);
         }
 
+        if (empty($fcontrols->pageparams->studentid) &&
+            has_capability('mod/attendance:takeattendances', $fcontrols->att->context) && !$fcontrols->reportcontrol) {
+            $url = $fcontrols->att->url_bulkmarksessions();
+            $context->bulkmarksessions = $this->output->single_button($url, get_string('bulkuploadattendance', 'attendance'), 'get',
+             ['class' => 'bulkmarksessions', 'type' => 'secondary']);
+        }
+
         $context->curdatecontrols = $this->render_curdate_controls($fcontrols);
         $context->pagingcontrols = $this->render_paging_controls($fcontrols);
         $context->viewcontrols = $this->render_view_controls($fcontrols);

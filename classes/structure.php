@@ -408,6 +408,17 @@ class mod_attendance_structure {
     }
 
     /**
+     * Get url for bulk marking sessions.
+     *
+     * @param array $params
+     * @return moodle_url
+     */
+    public function url_bulkmarksessions($params = []): moodle_url {
+        $params = array_merge(['id' => $this->cm->id], $params);
+        return new moodle_url('/mod/attendance/import/bulkmarksessions.php', $params);
+    }
+
+    /**
      * Get url for export.
      *
      * @return moodle_url of export.php for attendance instance
@@ -854,6 +865,9 @@ class mod_attendance_structure {
         $userf = \core_user\fields::for_identity($this->context, false)->with_userpic()->including(...$fields);
         $userfields = $userf->get_sql('u', false, '', 'id', false)->selects;
 
+        if (empty($this->pageparams)) {
+            $this->pageparams = new stdClass();
+        }
         if (empty($this->pageparams->sort)) {
             $this->pageparams->sort = ATT_SORT_DEFAULT;
         }

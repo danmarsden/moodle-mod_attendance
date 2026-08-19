@@ -617,6 +617,12 @@ function attendance_extend_settings_navigation(settings_navigation $settingsnav,
         'more' => true, ];
     }
 
+    if (has_capability('mod/attendance:takeattendances', $context)) {
+        $nodes[] = ['url' => new moodle_url('/mod/attendance/import/bulkmarksessions.php', ['id' => $cm->id]),
+        'title' => get_string('bulkuploadattendance', 'attendance'),
+        'more' => true, ];
+    }
+
     foreach ($nodes as $node) {
         $settingsnode = navigation_node::create($node['title'],
                                                 $node['url'],

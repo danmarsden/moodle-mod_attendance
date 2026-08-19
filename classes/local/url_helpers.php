@@ -75,4 +75,14 @@ class url_helpers {
     public static function url_view($att, $params=[]) {
         return $att->url_view($params);
     }
+
+    /**
+     * Url bulk mark sessions helper.
+     * @param mod_attendance_structure $att
+     * @param array $params
+     * @return mixed
+     */
+    public static function url_bulkmarksessions($att, $params = []) {
+        return $att->url_bulkmarksessions($params);
+    }
 }
