@@ -408,6 +408,17 @@ class mod_attendance_structure {
     }
 
     /**
+     * Get url for bulk marking sessions.
+     *
+     * @param array $params
+     * @return moodle_url
+     */
+    public function url_bulkmarksessions($params = []): moodle_url {
+        $params = array_merge(['id' => $this->cm->id], $params);
+        return new moodle_url('/mod/attendance/import/bulkmarksessions.php', $params);
+    }
+
+    /**
      * Get url for export.
      *
      * @return moodle_url of export.php for attendance instance
