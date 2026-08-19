@@ -48,7 +48,10 @@ $PAGE->set_cacheable(true);
 $PAGE->navbar->add($att->name, new moodle_url('/mod/attendance/view.php', ['id' => $cm->id]));
 $PAGE->navbar->add(get_string('bulkuploadattendance', 'attendance'));
 
-$att = new mod_attendance_structure($att, $cm, $course, $PAGE->context);
+$pageparams = new mod_attendance_take_page_params();
+$pageparams->init($course->id);
+
+$att = new mod_attendance_structure($att, $cm, $course, $PAGE->context, $pageparams);
 
 $output = $PAGE->get_renderer('mod_attendance');
 

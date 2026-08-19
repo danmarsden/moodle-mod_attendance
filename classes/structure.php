@@ -865,6 +865,9 @@ class mod_attendance_structure {
         $userf = \core_user\fields::for_identity($this->context, false)->with_userpic()->including(...$fields);
         $userfields = $userf->get_sql('u', false, '', 'id', false)->selects;
 
+        if (empty($this->pageparams)) {
+            $this->pageparams = new stdClass();
+        }
         if (empty($this->pageparams->sort)) {
             $this->pageparams->sort = ATT_SORT_DEFAULT;
         }
