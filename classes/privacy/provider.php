@@ -39,7 +39,8 @@ use stdClass;
 final class provider implements
     \core_privacy\local\metadata\provider,
     \core_privacy\local\request\core_userlist_provider,
-    \core_privacy\local\request\plugin\provider {
+    \core_privacy\local\request\plugin\provider,
+    \core_privacy\local\request\user_preference_provider {
     /**
      * Returns meta data about this system.
      *
@@ -47,6 +48,21 @@ final class provider implements
      * @return collection A listing of user data stored through this system.
      */
     public static function get_metadata(collection $collection): collection {
+        $collection->add_user_preference(
+            'attendance_take_view_mode',
+            'privacy:metadata:preference:attendance_take_view_mode'
+        );
+
+        $collection->add_user_preference(
+            'attendance_gridcolumns',
+            'privacy:metadata:preference:attendance_gridcolumns'
+        );
+
+        $collection->add_user_preference(
+            'mod_attendance_statusdropdown',
+            'privacy:metadata:preference:mod_attendance_statusdropdown'
+        );
+
         $collection->add_database_table(
             'attendance_log',
             [
@@ -86,6 +102,26 @@ final class provider implements
         );
 
         return $collection;
+    }
+
+    /**
+     * Export user preferences.
+     *
+     * @param int $userid The user whose preferences should be exported.
+     */
+    public static function export_user_preferences(int $userid) {
+        $preferences = [
+            'attendance_take_view_mode' => 'privacy:metadata:preference:attendance_take_view_mode',
+            'attendance_gridcolumns' => 'privacy:metadata:preference:attendance_gridcolumns',
+            'mod_attendance_statusdropdown' => 'privacy:metadata:preference:mod_attendance_statusdropdown',
+        ];
+
+        foreach ($preferences as $key => $description) {
+            $value = get_user_preferences($key, null, $userid);
+            if ($value !== null) {
+                writer::export_user_preference('mod_attendance', $key, $value, get_string($description, 'attendance'));
+            }
+        }
     }
 
     /**
