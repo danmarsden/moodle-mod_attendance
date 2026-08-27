@@ -127,7 +127,12 @@ final class restore_test extends advanced_testcase {
             $this->assertEquals($newattendance->id, $statusrecord->attendanceid);
         }
 
-        $restoredstatusrecord = $DB->get_record('attendance_statuses', ['id' => $restoredlog->statusid], 'id, attendanceid', MUST_EXIST);
+        $restoredstatusrecord = $DB->get_record(
+            'attendance_statuses',
+            ['id' => $restoredlog->statusid],
+            'id, attendanceid',
+            MUST_EXIST
+        );
         $this->assertEquals($newattendance->id, $restoredstatusrecord->attendanceid);
     }
 
