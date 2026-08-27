@@ -1542,13 +1542,17 @@ class mod_attendance_structure {
      *
      */
     public function get_lowgrade_threshold() {
+        global $CFG;
+
+        require_once($CFG->libdir . '/gradelib.php');
+
         if (!isset($this->lowgradethreshold)) {
             $this->lowgradethreshold = 1;
 
             if ($this->grade > 0) {
                 $gradeitem = grade_item::fetch(['courseid' => $this->course->id, 'itemtype' => 'mod',
                     'itemmodule' => 'attendance', 'iteminstance' => $this->id, 'itemnumber' => 0]);
-                if ($gradeitem->gradepass > 0 && $gradeitem->grademax != $gradeitem->grademin) {
+                if ($gradeitem && $gradeitem->gradepass > 0 && $gradeitem->grademax != $gradeitem->grademin) {
                     $this->lowgradethreshold = ($gradeitem->gradepass - $gradeitem->grademin) /
                         ($gradeitem->grademax - $gradeitem->grademin);
                 }

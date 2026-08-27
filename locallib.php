@@ -24,8 +24,6 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->libdir . '/gradelib.php');
-
 define('ATT_VIEW_DAYS', 1);
 define('ATT_VIEW_WEEKS', 2);
 define('ATT_VIEW_MONTHS', 3);
@@ -339,7 +337,8 @@ function attendance_get_statusset_maxpoints($statuses) {
  * @param array $userids
  */
 function attendance_update_users_grade($attendance, $userids = []) {
-    global $DB;
+    global $DB, $CFG;
+    require_once($CFG->libdir . '/gradelib.php');
 
     if (empty($attendance->grade)) {
         return false;
@@ -387,7 +386,8 @@ function attendance_update_users_grade($attendance, $userids = []) {
  * @param array $userids - the userids of the users to be updated
  */
 function attendance_update_users_grades_by_id($attendanceid, $grade, $userids) {
-    global $DB;
+    global $DB, $CFG;
+    require_once($CFG->libdir . '/gradelib.php');
 
     if (empty($grade)) {
         return false;
