@@ -151,6 +151,12 @@ if (!empty($messagebody) && !$edit && !$deluser && ($preview || $send)) {
         } else if (!empty($send)) {
             $fails = [];
             foreach ($SESSION->emailto[$id] as $user) {
+                // Check $user is enrolled in this course.
+                if (!is_enrolled($coursecontext, $user)) {
+                    $user->fullname = fullname($user);
+                    $fails[] = get_string('messagedselecteduserfailed', 'moodle', $user);
+                    continue;
+                }
                 if (!message_post_message($USER, $user, $messagebody, $format)) {
                     $user->fullname = fullname($user);
                     $fails[] = get_string('messagedselecteduserfailed', 'moodle', $user);
