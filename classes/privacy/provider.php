@@ -170,7 +170,7 @@ final class provider implements \core_privacy\local\request\core_userlist_provid
         // Delete all information recorded against sessions associated with this module.
         $DB->delete_records_select(
             'attendance_log',
-            "sessionid IN (SELECT id FROM {attendance_sessions} WHERE attendanceid = :attendanceid",
+            "sessionid IN (SELECT id FROM {attendance_sessions} WHERE attendanceid = :attendanceid)",
             [
                 'attendanceid' => $cm->instance,
             ]
