@@ -49,7 +49,7 @@ class attendance_handler {
 
         foreach ($attendanceinstance as $attendance) {
             $context = context_course::instance($attendance->course);
-            if (has_capability('mod/attendance:takeattendances', $context, $userid)) {
+            if (has_capability('mod/attendance:takeattendances', $context)) {
                 $course = $usercourses[$attendance->course];
                 if (!isset($course->attendance_instance)) {
                     $course->attendance_instance = [];
