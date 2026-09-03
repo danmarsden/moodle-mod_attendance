@@ -22,7 +22,6 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
 
 define('ATT_VIEW_DAYS', 1);
 define('ATT_VIEW_WEEKS', 2);

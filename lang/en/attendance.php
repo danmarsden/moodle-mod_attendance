@@ -351,8 +351,8 @@ $string['modulename_help'] = '###### Key features
 - Generate attendance reports for grading or compliance purposes
 - Customize statuses to fit specific course requirements
 - Share attendance data transparently with students';
-$string['modulenameplural'] = 'Attendances';
 $string['modulename_summary'] = 'Record and manage student attendance across sessions, while providing students access to their own attendance reports.';
+$string['modulenameplural'] = 'Attendances';
 $string['months'] = 'Months';
 $string['moreattendance'] = 'Attendance has been successfully taken for this page';
 $string['moveleft'] = 'Move left';
@@ -433,10 +433,10 @@ $string['priorto'] = 'The session date is prior to the course start date ({$a}) 
 $string['privacy:metadata:attendancelog'] = 'Log of user attendances recorded.';
 $string['privacy:metadata:attendancesessions'] = 'Sessions to which attendance will be recorded.';
 $string['privacy:metadata:attendancewarningdone'] = 'Log of warnings sent to users over their attendance record.';
+$string['privacy:metadata:duration'] = 'Session duration in seconds';
 $string['privacy:metadata:preference:attendance_gridcolumns'] = 'Number of columns to display when taking attendance in grid view.';
 $string['privacy:metadata:preference:attendance_take_view_mode'] = 'Preferred take-attendance view mode (list or grid).';
 $string['privacy:metadata:preference:mod_attendance_statusdropdown'] = 'Preferred scope for applying a status to all students (all or unselected only).';
-$string['privacy:metadata:duration'] = 'Session duration in seconds';
 $string['privacy:metadata:groupid'] = 'Group ID associated with session.';
 $string['privacy:metadata:ipaddress'] = 'IP address attendance was marked from.';
 $string['privacy:metadata:lasttaken'] = 'Timestamp of when session attendance was last taken.';
