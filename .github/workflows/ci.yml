@@ -7,4 +7,5 @@ jobs:
   ci:
     uses: catalyst/catalyst-moodle-workflows/.github/workflows/ci.yml@main
     with:
+      moodle_branches: main
       disable_mustache: true
