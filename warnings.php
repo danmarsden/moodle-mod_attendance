@@ -57,9 +57,9 @@ if (empty($id)) {
     $att = new mod_attendance_structure($att, $cm, $course, $PAGE->context);
 
     $PAGE->set_url($url);
-    $PAGE->set_title($course->shortname . ": " . $att->name);
+    $PAGE->set_title($course->shortname . ": " . format_string($att->name, true, ['context' => $context]));
     $PAGE->set_heading($course->fullname);
-    $PAGE->navbar->add($att->name);
+    $PAGE->navbar->add(format_string($att->name, true, ['context' => $context]));
 
     $output = $PAGE->get_renderer('mod_attendance');
     echo $output->header();

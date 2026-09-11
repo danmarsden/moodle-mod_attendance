@@ -94,10 +94,10 @@ if (($formdata = data_submitted()) && confirm_sesskey()) {
 }
 
 $PAGE->set_url($att->url_take((array)$pageparams));
-$PAGE->set_title($course->shortname . ": " . $att->name);
+$PAGE->set_title($course->shortname . ": " . format_string($att->name, true, ['context' => $context]));
 $PAGE->set_heading($course->fullname);
 $PAGE->set_cacheable(true);
-$PAGE->navbar->add($att->name);
+$PAGE->navbar->add(format_string($att->name, true, ['context' => $context]));
 
 $output = $PAGE->get_renderer('mod_attendance');
 $sesstable = new mod_attendance\output\take_data($att);

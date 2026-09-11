@@ -72,7 +72,7 @@ if ($from === 'block') {
 }
 
 $PAGE->set_url($att->url_manage());
-$PAGE->set_title($course->shortname . ": " . $att->name);
+$PAGE->set_title($course->shortname . ": " . format_string($att->name, true, ['context' => $context]));
 $PAGE->set_heading($course->fullname);
 $PAGE->set_cacheable(true);
 $PAGE->force_settings_menu(true);

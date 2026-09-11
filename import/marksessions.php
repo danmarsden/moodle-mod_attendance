@@ -58,10 +58,10 @@ $pageparams->init($course->id);
 $PAGE->set_context($context);
 $url = new moodle_url('/mod/attendance/import/marksessions.php', ['id' => $id, 'sessionid' => $pageparams->sessionid]);
 $PAGE->set_url($url);
-$PAGE->set_title($course->shortname . ": " . $att->name);
+$PAGE->set_title($course->shortname . ": " . format_string($att->name, true, ['context' => $context]));
 $PAGE->set_heading($course->fullname);
 $PAGE->set_cacheable(true);
-$PAGE->navbar->add($att->name);
+$PAGE->navbar->add(format_string($att->name, true, ['context' => $context]));
 
 $att = new mod_attendance_structure($att, $cm, $course, $PAGE->context, $pageparams);
 

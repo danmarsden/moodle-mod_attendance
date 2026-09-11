@@ -43,7 +43,7 @@ require_capability('mod/attendance:import', $context);
 $att = new mod_attendance_structure($att, $cm, $course, $context);
 
 $PAGE->set_url($att->url_import());
-$PAGE->set_title($course->shortname . ": " . $att->name);
+$PAGE->set_title($course->shortname . ": " . format_string($att->name, true, ['context' => $context]));
 $PAGE->set_heading($course->fullname);
 $PAGE->force_settings_menu(true);
 $PAGE->set_cacheable(true);
