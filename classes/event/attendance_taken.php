@@ -87,6 +87,18 @@ class attendance_taken extends \core\event\base {
     }
 
     /**
+     * Get other mapping
+     *
+     * @return array of parameters for object mapping for objects referenced in 'other' property.
+     */
+    public static function get_other_mapping() {
+        return [
+            'sessionid' => ['db' => 'attendance_sessions', 'restore' => 'attendance_session'],
+            'grouptype' => ['db' => 'groups', 'restore' => 'group'],
+        ];
+    }
+
+    /**
      * Custom validation.
      *
      * @throws \coding_exception
