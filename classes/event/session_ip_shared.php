@@ -86,4 +86,16 @@ class session_ip_shared extends \core\event\base {
             'restore' => 'attendance',
         ];
     }
+
+    /**
+     * Get other mapping
+     *
+     * @return array of parameters for object mapping for objects referenced in 'other' property.
+     */
+    public static function get_other_mapping() {
+        return [
+            'sessionid' => ['db' => 'attendance_sessions', 'restore' => 'attendance_session'],
+            'otheruser' => ['db' => 'user', 'restore' => 'user'],
+        ];
+    }
 }
