@@ -56,10 +56,11 @@ $mform->set_data($formdata);
 if ($data = $mform->get_data()) {
     // Create temp user in main user table.
     $user = new stdClass();
-    $user->auth = 'manual';
+    $user->auth = 'nologin';
     $user->confirmed = 1;
     $user->deleted = 1;
     $user->email = time() . '@attendance.danmarsden.com';
+    $user->emailstop = 1;
     $user->username = time() . '@attendance.danmarsden.com';
     $user->idnumber = 'tempghost';
     $user->mnethostid = $CFG->mnet_localhost_id;
