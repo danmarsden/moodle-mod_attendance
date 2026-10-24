@@ -860,5 +860,19 @@ function xmldb_attendance_upgrade($oldversion = 0) {
         upgrade_mod_savepoint(true, 2023032800, 'attendance');
     }
 
+    if ($oldversion < 2024082405) {
+        // Group session events must use eventtype 'group' to be shown in the calendar for all users.
+        $DB->set_field_select(
+            'event',
+            'eventtype',
+            'group',
+            'modulename = :modulename AND groupid <> 0 AND eventtype = :eventtype',
+            ['modulename' => 'attendance', 'eventtype' => 'attendance']
+        );
+
+        // Attendance savepoint reached.
+        upgrade_mod_savepoint(true, 2024082405, 'attendance');
+    }
+
     return true;
 }
