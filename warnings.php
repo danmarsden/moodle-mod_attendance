@@ -55,7 +55,13 @@ if (empty($id)) {
     require_capability('mod/attendance:changepreferences', $context);
 
     $att = new mod_attendance_structure($att, $cm, $course, $PAGE->context);
-
+    if (!empty($notid)) {
+        $notification = $DB->get_record('attendance_warning', ['id' => $notid], '*', MUST_EXIST);
+        if (!empty($notification) && $notification->idnumber != $att->id) {
+            // Someone is trying to update a record for a different attendance.
+            throw new moodle_exception('invalidcoursemodule');
+        }
+    }
     $PAGE->set_url($url);
     $PAGE->set_title($course->shortname . ": " . $att->name);
     $PAGE->set_heading($course->fullname);
