@@ -184,19 +184,9 @@ class renderer extends plugin_renderer_base {
      * @return string
      */
     protected function render_curdate_controls(filter_controls $fcontrols) {
-        global $CFG;
-
         $curdatecontrols = '';
         if ($fcontrols->curdatetxt) {
-            $this->page->requires->strings_for_js(['calclose'], 'attendance');
-            $jsvals = [
-                    'cal_months'    => explode(',', get_string('calmonths', 'attendance')),
-                    'cal_week_days' => explode(',', get_string('calweekdays', 'attendance')),
-                    'cal_start_weekday' => $CFG->calendar_startwday,
-                    'cal_cur_date'  => $fcontrols->curdate, ];
-            $curdatecontrols = html_writer::script(js_writer::set_variable('M.attendance', $jsvals));
-
-            $this->page->requires->js('/mod/attendance/calendar.js');
+            $this->page->requires->js_call_amd('mod_attendance/datepicker', 'init');
 
             $curdatecontrols .= html_writer::link(
                 $fcontrols->url(['curdate' => $fcontrols->prevcur]),
@@ -208,6 +198,15 @@ class renderer extends plugin_renderer_base {
                     'class' => 'btn btn-secondary',
                     'type'  => 'button', ];
             $buttonform = html_writer::tag('button', $fcontrols->curdatetxt, $params);
+            // The browser's own date picker, opened by the button.
+            $date = usergetdate($fcontrols->curdate);
+            $params = [
+                    'type'        => 'date',
+                    'class'       => 'attcurdatepicker',
+                    'value'       => sprintf('%04d-%02d-%02d', $date['year'], $date['mon'], $date['mday']),
+                    'tabindex'    => '-1',
+                    'aria-hidden' => 'true', ];
+            $buttonform .= html_writer::empty_tag('input', $params);
             foreach ($fcontrols->url_params(['curdate' => '']) as $name => $value) {
                 $params = [
                         'type'  => 'hidden',

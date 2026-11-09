@@ -105,15 +105,12 @@ $string['averageattendance'] = 'Average attendance';
 $string['averageattendancegraded'] = 'Average attendance';
 $string['backtoparticipants'] = 'Back to participants list';
 $string['below'] = 'Below {$a}%';
-$string['calclose'] = 'Close';
 $string['calendarevent'] = 'Create calendar event for session';
 $string['calendarevent_help'] = 'If enabled, a calendar event will be created for this session.
 If disabled, any existing calendar event for this session will be deleted.';
 $string['caleventcreated'] = 'Calendar event for session successfully created';
 $string['caleventdeleted'] = 'Calendar event for session successfully deleted';
-$string['calmonths'] = 'January,February,March,April,May,June,July,August,September,October,November,December';
 $string['calshow'] = 'Choose date';
-$string['calweekdays'] = 'Su,Mo,Tu,We,Th,Fr,Sa';
 $string['cannottakeforgroup'] = 'You can\'t take attendance for group "{$a}"';
 $string['cannottakethisgroup'] = 'You are not a member of the course group that this attendance session relates to, your attendance has not been recorded.';
 $string['cantaddstatus'] = 'You must set an acronym and description when adding a new status.';
