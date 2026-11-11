@@ -35,14 +35,10 @@ export const init = () => {
 
     button.addEventListener('click', () => picker.showPicker());
 
+    // The form posts the chosen day as it is (yyyy-mm-dd), and the server reads it in the user's timezone.
     picker.addEventListener('change', () => {
-        if (!picker.value) {
-            return;
+        if (picker.value) {
+            form.submit();
         }
-        const [year, month, day] = picker.value.split('-').map(Number);
-        // Midday of the chosen day, so that it is still that day if the browser and the user's
-        // timezone in Moodle are not the same.
-        form.elements.curdate.value = Math.floor(new Date(year, month - 1, day, 12).getTime() / 1000);
-        form.submit();
     });
 };

@@ -122,6 +122,15 @@ class mod_attendance_page_with_filter_controls {
     private function init_curdate() {
         global $SESSION;
 
+        // A day chosen in the date picker comes as yyyy-mm-dd: take midday of that day in the user's timezone.
+        $pickeddate = optional_param('pickeddate', '', PARAM_ALPHANUMEXT);
+        if (preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $pickeddate, $parts)) {
+            [, $year, $month, $day] = array_map('intval', $parts);
+            if (checkdate($month, $day, $year)) {
+                $this->curdate = make_timestamp($year, $month, $day, 12);
+            }
+        }
+
         if (isset($this->curdate)) {
             $SESSION->attcurrentattdate[$this->cm->course] = $this->curdate;
         } else if (isset($SESSION->attcurrentattdate[$this->cm->course])) {

@@ -198,16 +198,18 @@ class renderer extends plugin_renderer_base {
                     'class' => 'btn btn-secondary',
                     'type'  => 'button', ];
             $buttonform = html_writer::tag('button', $fcontrols->curdatetxt, $params);
-            // The browser's own date picker, opened by the button.
-            $date = usergetdate($fcontrols->curdate);
+            // The browser's own date picker, opened by the button. It posts the chosen day as pickeddate.
+            // HOURSECS as in page_with_filter_controls::init_start_end_date(), so that it opens on a day of the period shown.
+            $date = usergetdate($fcontrols->curdate + HOURSECS);
             $params = [
                     'type'        => 'date',
+                    'name'        => 'pickeddate',
                     'class'       => 'attcurdatepicker',
                     'value'       => sprintf('%04d-%02d-%02d', $date['year'], $date['mon'], $date['mday']),
                     'tabindex'    => '-1',
                     'aria-hidden' => 'true', ];
             $buttonform .= html_writer::empty_tag('input', $params);
-            foreach ($fcontrols->url_params(['curdate' => '']) as $name => $value) {
+            foreach ($fcontrols->url_params() as $name => $value) {
                 $params = [
                         'type'  => 'hidden',
                         'id'    => $name,
