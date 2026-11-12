@@ -202,5 +202,20 @@ Feature: Teachers and Students can record session attendance
     And I follow "Export"
     Then the field "id_ident_superfield" matches value "1"
 
+  @javascript
+  Scenario: Support multilang Attendance names in breadcrumbs
+    Given the "multilang" filter is "on"
+    And the "multilang" filter applies to "content and headings"
+    And I log in as "admin"
+    And I am on the "Attendance" "mod_attendance > Edit" page logged in as "teacher1"
+    And I set the following fields to these values:
+      | name | <span class="multilang" lang="en">Attendance</span><span class="multilang" lang="de">Anwesenheit</span> |
+    And I click on "id_submitbutton" "button"
+    And I am on "Course 1" course homepage
+    And I follow "Attendance"
+    And I click on "Add session" "button"
+    Then I should see "Attendance"
+    But I should not see "Anwesenheit"
+
   # Removed dependency on behat_download to allow automated Travis CI tests to pass.
   # It would be good to add these back at some point.
