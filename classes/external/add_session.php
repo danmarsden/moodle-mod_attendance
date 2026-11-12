@@ -240,12 +240,15 @@ class add_session extends external_api {
             }
         }
 
+        // Self-marking options are only used when self-marking is enabled for the site and the session.
+        $config = get_config('attendance');
+        $selfmarking = $params['studentscanmark'] && !empty($config->studentscanmark);
+
         // Validate session options.
-        self::validate_session_options($params, $cm);
+        self::validate_session_options($params, $cm, $course, $selfmarking);
 
         // Get attendance.
         $attendance = new \mod_attendance_structure($attendance, $cm, $course, $context);
-        $config = get_config('attendance');
 
         // Create session.
         $sess = new stdClass();
@@ -284,8 +287,8 @@ class add_session extends external_api {
             $sess->absenteereport = get_config('attendance', 'absenteereport_default');
         }
 
-        // Self-marking options are only used when self-marking is enabled for the site and the session.
-        if ($params['studentscanmark'] && !empty($config->studentscanmark)) {
+        // Self-marking options.
+        if ($selfmarking) {
             $sess->studentscanmark = 1;
             if ($params['allowupdatestatus'] && !empty($config->allowupdatestatus)) {
                 $sess->allowupdatestatus = 1;
@@ -319,12 +322,14 @@ class add_session extends external_api {
      *
      * @param array $params validated parameters of execute()
      * @param stdClass $cm course module of the attendance activity
+     * @param stdClass $course course of the attendance activity
+     * @param bool $selfmarking whether the self-marking options are used (requested and enabled for the site)
      */
-    private static function validate_session_options(array $params, stdClass $cm): void {
+    private static function validate_session_options(array $params, stdClass $cm, stdClass $course, bool $selfmarking): void {
         global $DB;
 
-        // The available automark options depend on the course, which validate_context() has set up.
-        if (!array_key_exists($params['automark'], attendance_get_automarkoptions())) {
+        // The available automark options depend on the course: on activity completion needs completion tracking.
+        if (!array_key_exists($params['automark'], attendance_get_automarkoptions($course))) {
             throw new \invalid_parameter_exception('Invalid automark value: ' . $params['automark']);
         }
         if ($params['automark'] != ATTENDANCE_AUTOMARK_DISABLED) {
@@ -336,7 +341,7 @@ class add_session extends external_api {
         }
         if (
             $params['automark'] == ATTENDANCE_AUTOMARK_ACTIVITYCOMPLETION &&
-            !array_key_exists($params['automarkcmid'], attendance_get_coursemodulenames($cm->course))
+            !array_key_exists($params['automarkcmid'], attendance_get_coursemodulenames($course->id))
         ) {
             throw new \invalid_parameter_exception('automarkcmid must be an activity with completion tracking in this course');
         }
@@ -356,16 +361,17 @@ class add_session extends external_api {
             throw new \invalid_parameter_exception('subnet must not be longer than 255 characters');
         }
 
-        if (!$params['studentscanmark']) {
-            // Same check as the CSV session import.
-            if ($params['includeqrcode']) {
-                throw new \invalid_parameter_exception('includeqrcode needs studentscanmark');
-            }
-            return;
+        // Same check as the CSV session import, which looks at the requested value, not at the site setting.
+        if (!$params['studentscanmark'] && $params['includeqrcode']) {
+            throw new \invalid_parameter_exception('includeqrcode needs studentscanmark');
         }
 
-        // Same check as the add session form.
-        if ($params['preventsharedip'] == ATTENDANCE_SHAREDIP_MINUTES && empty($params['preventsharediptime'])) {
+        // Same check as the add session form, which only offers self-marking when it is enabled for the site.
+        if (
+            $selfmarking &&
+            $params['preventsharedip'] == ATTENDANCE_SHAREDIP_MINUTES &&
+            empty($params['preventsharediptime'])
+        ) {
             throw new \invalid_parameter_exception('preventsharediptime is required when preventsharedip is 1');
         }
     }

@@ -239,14 +239,19 @@ final class add_session_test extends base_external_testcase {
         $this->assertEquals(1, $session->studentscanmark);
         $this->assertEquals(0, $session->allowupdatestatus);
 
-        // Self-marking is off for the site.
+        // Self-marking is off for the site, so the self-marking options are neither used nor checked against each other.
         set_config('studentscanmark', 0, 'attendance');
         $session = $this->add_session_with_options($attendanceid, [
             'studentscanmark' => true,
             'randompassword' => true,
+            'includeqrcode' => true,
+            'preventsharedip' => ATTENDANCE_SHAREDIP_MINUTES,
         ]);
         $this->assertEquals(0, $session->studentscanmark);
         $this->assertEmpty($session->studentpassword);
+        $this->assertEquals(0, $session->includeqrcode);
+        $this->assertEquals(ATTENDANCE_SHAREDIP_DISABLED, $session->preventsharedip);
+        $this->assertEmpty($session->preventsharediptime);
     }
 
     /**
@@ -302,36 +307,87 @@ final class add_session_test extends base_external_testcase {
     }
 
     /**
+     * Tests that automatic marking on activity completion needs completion tracking in the course of the attendance.
+     *
+     * @covers \mod_attendance\external\add_session::execute
+     */
+    public function test_execute_automark_activity_completion_needs_course_completion(): void {
+        global $DB;
+
+        $this->resetAfterTest(true);
+        $course = $this->getDataGenerator()->create_course(['enablecompletion' => COMPLETION_DISABLED]);
+        $teacher = $this->getDataGenerator()->create_and_enrol($course, 'editingteacher');
+        $attendance = $this->getDataGenerator()->create_module('attendance', ['course' => $course->id]);
+        // Automatic marking needs a status to set for unmarked students.
+        $DB->set_field('attendance_statuses', 'setunmarked', 1, ['attendanceid' => $attendance->id, 'acronym' => 'A']);
+        $this->setUser($teacher);
+
+        // On activity completion is not offered, because the course of the attendance has no completion tracking.
+        try {
+            $this->add_session_with_options($attendance->id, ['automark' => ATTENDANCE_AUTOMARK_ACTIVITYCOMPLETION]);
+            $this->fail('No exception for automatic marking on activity completion without completion tracking');
+        } catch (\invalid_parameter_exception $e) {
+            $this->assertStringContainsString('Invalid automark value', $e->debuginfo);
+        }
+    }
+
+    /**
+     * Tests that the automark options are those of the given course instead of the current course.
+     *
+     * @covers ::attendance_get_automarkoptions
+     */
+    public function test_get_automarkoptions_for_course(): void {
+        global $COURSE;
+
+        $this->resetAfterTest(true);
+        $nocompletion = $this->getDataGenerator()->create_course(['enablecompletion' => COMPLETION_DISABLED]);
+        $completion = $this->getDataGenerator()->create_course(['enablecompletion' => COMPLETION_ENABLED]);
+
+        // The current course is the site, which offers all options (for the admin settings).
+        $this->assertEquals(SITEID, $COURSE->id);
+        $this->assertArrayHasKey(ATTENDANCE_AUTOMARK_ACTIVITYCOMPLETION, attendance_get_automarkoptions());
+
+        $this->assertArrayNotHasKey(ATTENDANCE_AUTOMARK_ACTIVITYCOMPLETION, attendance_get_automarkoptions($nocompletion));
+        $this->assertArrayHasKey(ATTENDANCE_AUTOMARK_ACTIVITYCOMPLETION, attendance_get_automarkoptions($completion));
+    }
+
+    /**
      * Tests that invalid options are rejected.
      *
      * @covers \mod_attendance\external\add_session::execute
      */
     public function test_execute_invalid_options(): void {
         $this->resetAfterTest(true);
+        set_config('studentscanmark', 1, 'attendance');
         $context = $this->create_attendance_context();
         $this->setUser($context['teacher']);
 
+        // Each case has the options and a part of the expected error.
         $invalidoptions = [
-            'unknown automark value' => ['automark' => 99],
-            'automark without a status for unmarked students' => ['automark' => ATTENDANCE_AUTOMARK_CLOSE],
-            'unknown preventsharedip value' => ['preventsharedip' => 5],
-            'preventsharedip for some minutes without minutes' => [
-                'studentscanmark' => true,
-                'preventsharedip' => ATTENDANCE_SHAREDIP_MINUTES,
+            'unknown automark value' => [['automark' => 99], 'Invalid automark value'],
+            'automark without a status for unmarked students' => [
+                ['automark' => ATTENDANCE_AUTOMARK_CLOSE],
+                'automark needs a status set',
             ],
-            'QR code without self-marking' => ['includeqrcode' => true],
-            'negative early open time' => ['studentsearlyopentime' => -1],
+            'unknown preventsharedip value' => [['preventsharedip' => 5], 'Invalid preventsharedip value'],
+            'preventsharedip for some minutes without minutes' => [
+                ['studentscanmark' => true, 'preventsharedip' => ATTENDANCE_SHAREDIP_MINUTES],
+                'preventsharediptime is required',
+            ],
+            'negative minutes' => [['preventsharediptime' => -1], 'preventsharediptime must not be negative'],
+            'QR code without self-marking' => [['includeqrcode' => true], 'includeqrcode needs studentscanmark'],
+            'negative early open time' => [['studentsearlyopentime' => -1], 'studentsearlyopentime must not be negative'],
             'password longer than 50 characters' => [
-                'studentscanmark' => true,
-                'studentpassword' => str_repeat('x', 51),
+                ['studentscanmark' => true, 'studentpassword' => str_repeat('x', 51)],
+                'studentpassword must not be longer than 50 characters',
             ],
         ];
-        foreach ($invalidoptions as $case => $options) {
+        foreach ($invalidoptions as $case => [$options, $message]) {
             try {
                 $this->add_session_with_options($context['attendance']->id, $options);
                 $this->fail('No exception for ' . $case);
             } catch (\invalid_parameter_exception $e) {
-                $this->assertInstanceOf(\invalid_parameter_exception::class, $e, $case);
+                $this->assertStringContainsString($message, $e->debuginfo, $case);
             }
         }
     }

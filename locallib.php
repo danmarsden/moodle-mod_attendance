@@ -1274,10 +1274,15 @@ function attendance_session_get_highest_status(mod_attendance_structure $att, $a
 /**
  * Get available automark options.
  *
+ * @param stdClass|null $course the course the options are for, the current course ($COURSE) if not given
  * @return array
  */
-function attendance_get_automarkoptions() {
+function attendance_get_automarkoptions(?stdClass $course = null) {
     global $COURSE;
+
+    if ($course === null) {
+        $course = $COURSE;
+    }
 
     $options = [];
 
@@ -1286,7 +1291,7 @@ function attendance_get_automarkoptions() {
         $options[ATTENDANCE_AUTOMARK_ALL] = get_string('automarkall', 'attendance');
     }
     $options[ATTENDANCE_AUTOMARK_CLOSE] = get_string('automarkclose', 'attendance');
-    if ($COURSE->id == SITEID || $COURSE->enablecompletion == COMPLETION_ENABLED) {
+    if ($course->id == SITEID || $course->enablecompletion == COMPLETION_ENABLED) {
         $options[ATTENDANCE_AUTOMARK_ACTIVITYCOMPLETION] = get_string('onactivitycompletion', 'attendance');
     }
 
