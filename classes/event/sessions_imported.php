@@ -86,4 +86,14 @@ class sessions_imported extends \core\event\base {
             'restore' => 'attendance',
         ];
     }
+
+    /**
+     * Get other mapping
+     *
+     * @return array of parameters for object mapping for objects referenced in 'other' property.
+     */
+    public static function get_other_mapping() {
+        // 'count' is just a number of imported sessions, not an id. Nothing to map.
+        return [];
+    }
 }

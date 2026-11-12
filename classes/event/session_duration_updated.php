@@ -85,6 +85,17 @@ class session_duration_updated extends \core\event\base {
     }
 
     /**
+     * Get other mapping
+     *
+     * @return array of parameters for object mapping for objects referenced in 'other' property.
+     */
+    public static function get_other_mapping() {
+        // 'info' is a comma-separated list of session ids kept only for the log description,
+        // the single-id restore mapping API can't translate it, so nothing to map here.
+        return [];
+    }
+
+    /**
      * Custom validation.
      *
      * @throws \coding_exception
