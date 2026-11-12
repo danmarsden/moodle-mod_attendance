@@ -47,7 +47,7 @@ require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
 require_capability('mod/attendance:managetemporaryusers', $context);
 
-$PAGE->set_title($course->shortname . ": " . $att->name . ' - ' . get_string('tempusersedit', 'attendance'));
+$PAGE->set_title($course->shortname . ": " . format_string($att->name, true, ['context' => $context]) . ' - ' . get_string('tempusersedit', 'attendance'));
 $PAGE->set_heading($course->fullname);
 $PAGE->set_cacheable(true);
 $PAGE->navbar->add(get_string('tempusersedit', 'attendance'));

@@ -244,10 +244,10 @@ if ($mform->is_cancelled()) {
     $mform->set_data($fromform);
 }
 
-$PAGE->set_title($course->shortname . ": " . $att->name);
+$PAGE->set_title($course->shortname . ": " . format_string($att->name, true, ['context' => $PAGE->context]));
 $PAGE->set_heading($course->fullname);
 $PAGE->set_cacheable(true);
-$PAGE->navbar->add($att->name);
+$PAGE->navbar->add(format_string($att->name, true, ['context' => $PAGE->context]));
 
 $output = $PAGE->get_renderer('mod_attendance');
 echo $output->header();

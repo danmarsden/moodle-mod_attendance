@@ -56,6 +56,11 @@ class behat_mod_attendance extends behat_question_base {
                     '/mod/attendance/view.php',
                     ['id' => $this->get_cm_by_attendance_name($identifier)->id]
                 );
+            case 'edit':
+                return new moodle_url(
+                    '/course/modedit.php',
+                    ['update' => $this->get_cm_by_attendance_name($identifier)->id]
+                );
             case 'report':
                 return new moodle_url(
                     '/mod/attendance/report.php',

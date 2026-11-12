@@ -58,7 +58,7 @@ $PAGE->set_title($course->shortname . ": " . $att->name);
 $PAGE->set_heading($course->fullname);
 $PAGE->force_settings_menu(true);
 $PAGE->set_cacheable(true);
-$PAGE->navbar->add($att->name);
+$PAGE->navbar->add(format_string($att->name, true, ['context' => $context]));
 
 $formparams = ['course' => $course, 'cm' => $cm, 'modcontext' => $context, 'att' => $att];
 switch ($att->pageparams->action) {
