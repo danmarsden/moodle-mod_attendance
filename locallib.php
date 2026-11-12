@@ -653,10 +653,20 @@ function attendance_is_status_availablebeforesession($sessionid, $statusid = nul
  * @return array (boolean, string reason for failure)
  */
 function attendance_can_student_mark($sess, $log = true) {
-    global $DB, $USER, $OUTPUT;
+    global $DB, $USER;
     $canmark = false;
     $reason = 'closed';
     $attconfig = get_config('attendance');
+
+    if (empty($attconfig->studentscanmark) || empty($sess->studentscanmark)) {
+        return [$canmark, $reason];
+    }
+
+    $cm = get_coursemodule_from_instance('attendance', $sess->attendanceid);
+    $context = \context_module::instance($cm->id);
+    if (!has_capability('mod/attendance:canbelisted', $context)) {
+        return [$canmark, $reason];
+    }
 
     if (!empty($attconfig->studentscanmark) && !empty($sess->studentscanmark)) {
         if (
