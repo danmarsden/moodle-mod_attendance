@@ -45,6 +45,10 @@ require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
 require_capability('mod/attendance:viewreports', $context);
 
+if (!empty($pageparams->group) && !groups_group_visible($pageparams->group, $course, $cm)) {
+    throw new moodle_exception('notingroup');
+}
+
 // If separate groups and user does not have accessallgroups force a group to be selected - don't show "all users" view.
 if (empty($pageparams->group) && !has_capability('moodle/site:accessallgroups', $PAGE->context)) {
     $groupmode = groups_get_activity_groupmode($cm, $course);
