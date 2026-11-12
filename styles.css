@@ -18,6 +18,20 @@
 
 .path-mod-attendance .attfiltercontrols #currentdate {
     display: inline;
+    position: relative;
+}
+
+/* The browser's date picker opens below the date button, which stands for the field. */
+.path-mod-attendance .attfiltercontrols .attcurdatepicker {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    border: 0;
+    opacity: 0;
+    pointer-events: none;
 }
 
 .path-mod-attendance .attwidth {
