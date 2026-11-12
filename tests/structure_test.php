@@ -30,6 +30,7 @@ use advanced_testcase;
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
+require_once($CFG->dirroot . '/mod/attendance/locallib.php');
 require_once($CFG->dirroot . '/mod/attendance/classes/structure.php');
 
 /**
@@ -92,6 +93,48 @@ final class structure_test extends advanced_testcase {
         ]);
 
         $this->assertSame(1, $attendance->get_lowgrade_threshold());
+    }
+
+    /**
+     * Student self-marking must require the attendance roster capability.
+     *
+     * @covers \attendance_can_student_mark
+     */
+    public function test_attendance_can_student_mark_requires_canbelisted_capability(): void {
+        global $DB;
+
+        $this->resetAfterTest(true);
+        $this->setAdminUser();
+
+        $course = $this->getDataGenerator()->create_course();
+        $attendance = $this->getDataGenerator()->create_module('attendance', ['course' => $course->id]);
+        $cm = $DB->get_record('course_modules', ['id' => $attendance->cmid], '*', MUST_EXIST);
+        $context = \context_module::instance($cm->id);
+
+        $student = $this->getDataGenerator()->create_and_enrol($course, 'student');
+        $this->setUser($student);
+
+        $studentrole = $DB->get_record('role', ['shortname' => 'student'], '*', MUST_EXIST);
+        set_config('studentscanmark', 1, 'attendance');
+        set_config('studentscanmarksessiontime', 0, 'attendance');
+        assign_capability('mod/attendance:canbelisted', CAP_ALLOW, $studentrole->id, $context->id, true);
+
+        $session = (object) [
+            'id' => 999,
+            'attendanceid' => $attendance->id,
+            'studentscanmark' => 1,
+            'sessdate' => time() - 60,
+            'duration' => 3600,
+            'preventsharedip' => 0,
+        ];
+
+        $this->assertSame([true, ''], \attendance_can_student_mark($session, false));
+
+        assign_capability('mod/attendance:canbelisted', CAP_PROHIBIT, $studentrole->id, $context->id, true);
+        [$canmark, $reason] = \attendance_can_student_mark($session, false);
+
+        $this->assertFalse($canmark);
+        $this->assertSame('closed', $reason);
     }
 
     /**

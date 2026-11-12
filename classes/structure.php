@@ -1303,7 +1303,7 @@ class mod_attendance_structure {
         // DISTINCT on a the description field.
         $id = $DB->sql_concat(':value', 'ats.id');
         if ($this->get_group_mode()) {
-            $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description,
+            $sql = "SELECT $id, ats.id, ats.attendanceid, ats.groupid, ats.sessdate, ats.duration, ats.description,
                            al.statusid, al.remarks, ats.studentscanmark, ats.allowupdatestatus, ats.autoassignstatus,
                            ats.preventsharedip, ats.preventsharediptime, ats.rotateqrcode,
                            ats.studentsearlyopentime
@@ -1314,7 +1314,7 @@ class mod_attendance_structure {
                      WHERE $where AND (ats.groupid = 0 or gm.id is NOT NULL)
                   ORDER BY ats.sessdate ASC";
         } else {
-            $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, ats.statusset,
+            $sql = "SELECT $id, ats.id, ats.attendanceid, ats.groupid, ats.sessdate, ats.duration, ats.description, ats.statusset,
                            al.statusid, al.remarks, ats.studentscanmark, ats.allowupdatestatus, ats.autoassignstatus,
                            ats.preventsharedip, ats.preventsharediptime, ats.rotateqrcode,
                            ats.studentsearlyopentime
@@ -1346,7 +1346,7 @@ class mod_attendance_structure {
         } else {
             $where = "ats.attendanceid = :aid AND ats.sessdate >= :csdate AND ats.groupid $gsql";
         }
-        $sql = "SELECT $id, ats.id, ats.groupid, ats.sessdate, ats.duration, ats.description, ats.statusset,
+        $sql = "SELECT $id, ats.id, ats.attendanceid, ats.groupid, ats.sessdate, ats.duration, ats.description, ats.statusset,
                        al.statusid, al.remarks, ats.studentscanmark, ats.allowupdatestatus, ats.autoassignstatus,
                        ats.preventsharedip, ats.preventsharediptime, ats.rotateqrcode,
                        ats.studentsearlyopentime
