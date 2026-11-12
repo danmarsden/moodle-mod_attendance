@@ -69,15 +69,17 @@ if ($canmark && attendance_session_open_for_students($attforsession) && $attfors
         }
     } else {
         // Check password.
-        $sql = 'SELECT * FROM {attendance_rotate_passwords}' .
-            ' WHERE attendanceid = ? AND expirytime > ? ORDER BY expirytime ASC';
-        $qrpassdatabase = $DB->get_records_sql($sql, ['attendanceid' => $id, time() - $attconfig->rotateqrcodeexpirymargin], 0, 2);
+        $sql = 'SELECT 1
+          FROM {attendance_rotate_passwords}
+         WHERE attendanceid = :attendanceid
+           AND password = :password
+           AND expirytime > :minexpiry';
 
-        foreach ($qrpassdatabase as $qrpasselement) {
-            if ($qrpass == $qrpasselement->password) {
-                $qrpassflag = true;
-            }
-        }
+        $qrpassflag = $DB->record_exists_sql($sql, [
+                'attendanceid' => $id,
+                'password' => $qrpass,
+                'minexpiry' => time() - $attconfig->rotateqrcodeexpirymargin,
+        ]);
 
         if ($qrpassflag) {
             // Create and store the token.
