@@ -140,6 +140,8 @@ class restore_attendance_activity_task extends restore_activity_task {
         if (empty(get_config('attendance', 'enablecalendar'))) {
             // Attendance isn't using Calendar - delete anything that was created.
             $DB->delete_records('event', ['modulename' => 'attendance', 'instance' => $attendanceid, 'courseid' => $courseid]);
+            // Group events restored by the course calendar step have no instance.
+            $DB->delete_records('event', ['modulename' => 'attendance', 'instance' => 0, 'courseid' => $courseid]);
         } else {
             // Clean up any orphaned events.
             $sql = "modulename = 'attendance' AND courseid = :courseid AND id NOT IN (SELECT s.caleventid

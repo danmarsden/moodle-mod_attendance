@@ -55,7 +55,9 @@ function attendance_create_calendar_event(&$session) {
     $caleventdata->timeduration   = $session->duration;
     $caleventdata->description    = $session->description;
     $caleventdata->format         = $session->descriptionformat;
-    $caleventdata->eventtype      = 'attendance';
+    // Core calendar only treats events with a groupid as group events when eventtype is 'group'.
+    // Other events with a groupid are handled as group overrides and hidden from some users (e.g. teachers).
+    $caleventdata->eventtype      = empty($session->groupid) ? 'attendance' : 'group';
     $caleventdata->timemodified   = time();
     $caleventdata->modulename     = 'attendance';
 

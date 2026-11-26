@@ -145,7 +145,10 @@ class restore_attendance_activity_structure_step extends restore_activity_struct
         $data->groupid = $this->get_mappingid('group', $data->groupid);
         $data->sessdate = $this->apply_date_offset($data->sessdate);
         $data->timemodified = $this->apply_date_offset($data->timemodified);
-        $data->caleventid = $this->get_mappingid('event', $data->caleventid);
+        // Always create a new calendar event for the session below. Group events (eventtype 'group') are also
+        // restored by the course calendar step without an instance, so the event mapping cannot be trusted.
+        // Events that are not linked to a session are removed in after_restore().
+        $data->caleventid = 0;
 
         if ($userinfo) {
             $data->lasttaken = $this->apply_date_offset($data->lasttaken);
