@@ -92,11 +92,11 @@ if ($data = data_submitted()) {
     foreach ($data as $k => $v) {
         if (preg_match('/^(user|teacher)(\d+)$/', $k, $m)) {
             if (!array_key_exists($m[2], $SESSION->emailto[$id])) {
-                if (
-                    $user = $DB->get_record_select('user', "id = ?", [$m[2]], 'id, ' .
-                    $namefields . ', idnumber, email, mailformat, lastaccess, lang, ' .
-                    'maildisplay, auth, suspended, deleted, emailstop, username')
-                ) {
+                $user = $DB->get_record('user', ['id' => $m[2]], 'id, maildisplay, email,' . $namefields);
+                if (!is_enrolled($coursecontext, $user)) {
+                    continue;
+                }
+                if (!empty($user)) {
                     $SESSION->emailto[$id][$m[2]] = $user;
                     $count++;
                 }
@@ -157,6 +157,7 @@ if (!empty($messagebody) && !$edit && !$deluser && ($preview || $send)) {
                     $fails[] = get_string('messagedselecteduserfailed', 'moodle', $user);
                     continue;
                 }
+                $user = core_user::get_user($user->id, '*', MUST_EXIST);
                 if (!message_post_message($USER, $user, $messagebody, $format)) {
                     $user->fullname = fullname($user);
                     $fails[] = get_string('messagedselecteduserfailed', 'moodle', $user);
