@@ -86,6 +86,9 @@ class mod_attendance_page_with_filter_controls {
     /** @var int */
     public $sort;
 
+    /** @var array of user ids to filter by. */
+    public $userids;
+
     /**
      * initialise stuff.
      *
