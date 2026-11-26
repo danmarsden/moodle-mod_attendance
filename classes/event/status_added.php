@@ -83,4 +83,14 @@ class status_added extends \core\event\base {
     public static function get_objectid_mapping() {
         return ['db' => 'attendance', 'restore' => 'attendance'];
     }
+
+    /**
+     * Get other mapping
+     *
+     * @return array of parameters for object mapping for objects referenced in 'other' property.
+     */
+    public static function get_other_mapping() {
+        // Acronym, description and grade are plain status values, not ids. Nothing to map.
+        return [];
+    }
 }
